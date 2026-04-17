@@ -20,8 +20,8 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
   return (
     <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
       {/* 緑の高さだけ変えれば境界線が動く。h-36 がコンテンツのスペーサーと対応 */}
-      <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-600">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
+      <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-r from-emerald-600 to-emerald-600">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
         <button
           type="button"
           aria-label="カバー画像を変更"
