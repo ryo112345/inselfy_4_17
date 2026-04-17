@@ -72,7 +72,7 @@ export function SkillsCard({ username, skills }: Props) {
             }}
             placeholder="スキルを入力"
             maxLength={100}
-            className="h-10 w-44 rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
+            className="h-10 w-56 rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
             style={{ "--tw-ring-color": pc } as React.CSSProperties}
           />
           <button
