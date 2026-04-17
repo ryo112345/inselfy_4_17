@@ -18,8 +18,9 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
-      <div className="relative h-36 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-600">
+    <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+      {/* 緑の高さだけ変えれば境界線が動く。h-36 がコンテンツのスペーサーと対応 */}
+      <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-600">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
         <button
           type="button"
@@ -31,7 +32,9 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
       </div>
 
       <div className="relative px-7 pb-6">
-        <div className="absolute -top-16 left-6">
+        {/* h-36 スペーサー: アバター・編集ボタン・名前の位置を固定 */}
+        <div className="h-36" />
+        <div className="absolute top-20 left-6">
           <div className="relative">
             <div className="group flex h-36 w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
               <FaceIcon className="h-20 w-20 text-emerald-700" />
@@ -46,18 +49,16 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4">
-          <button
-            type="button"
-            aria-label="プロフィールを編集"
-            onClick={() => setOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-emerald-700 bg-white text-emerald-700 transition hover:bg-emerald-50"
-          >
-            <PencilIcon className="h-[18px] w-[18px]" />
-          </button>
-        </div>
+        <button
+          type="button"
+          aria-label="プロフィールを編集"
+          onClick={() => setOpen(true)}
+          className="absolute right-4 top-[188px] flex h-10 w-10 items-center justify-center rounded-full border-2 border-emerald-700 bg-white text-emerald-700 transition hover:bg-emerald-50"
+        >
+          <PencilIcon className="h-[18px] w-[18px]" />
+        </button>
 
-        <div className="mt-6 flex items-end justify-between gap-4">
+        <div className="mt-24 flex items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
               {user.displayName || user.name}
