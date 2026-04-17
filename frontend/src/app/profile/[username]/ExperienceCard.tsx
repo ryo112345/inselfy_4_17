@@ -92,9 +92,9 @@ export function ExperienceCard({ username, experiences }: Props) {
             return (
               <li
                 key={group.items[0].id}
-                className="relative pt-4 pb-7 pl-6"
+                className="relative pt-4 pb-3 pl-6"
               >
-                {!isLast ? <TimelineRail /> : null}
+                <TimelineRail isLast={isLast} />
                 {group.items.length === 1 ? (
                   <SingleExperience
                     experience={group.items[0]}
@@ -157,15 +157,15 @@ function groupConsecutive(items: ModelsExperienceResponse[]): ExpGroup[] {
 // the next. Wraps the SVG in a div so the CSS top/bottom pair reliably sizes
 // the container (some browsers don't auto-size bare <svg> elements via
 // top+bottom). The div starts at y=64 (pt-4 + 48px logo) and ends at bottom:
-// -44px so it spans pb-7 (28px) + pt-4 (16px) = the full 44px gap between
+// -28px so it spans pb-3 (12px) + pt-4 (16px) = the full 28px gap between
 // this li and the next logo's top edge. Left:48 centers on the 48px-wide
 // badge sitting inside the li's pl-6 padding.
-function TimelineRail() {
+function TimelineRail({ isLast = false }: { isLast?: boolean }) {
   return (
     <div
       aria-hidden
       className="pointer-events-none absolute left-[48px] top-[64px] w-[2px] -translate-x-1/2"
-      style={{ bottom: "-44px" }}
+      style={{ bottom: isLast ? "0px" : "-28px" }}
     >
       <svg
         preserveAspectRatio="none"

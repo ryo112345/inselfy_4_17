@@ -79,6 +79,11 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
                   {user.industry}
                 </span>
               ) : null}
+              {user.jobType ? (
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+                  {user.jobType}
+                </span>
+              ) : null}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-5 pb-2 text-base text-gray-500">
@@ -86,7 +91,7 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
               <span className="text-lg font-bold text-gray-900">
                 {experienceCount}
               </span>
-              職歴
+              フォロー
             </span>
             <span className="inline-flex items-baseline gap-1.5">
               <span className="text-lg font-bold text-gray-900">0</span>
@@ -120,6 +125,7 @@ function HeaderEditDialog({
   const [headline, setHeadline] = useState(user.headline ?? "");
   const [location, setLocation] = useState(user.location ?? "");
   const [industry, setIndustry] = useState(user.industry ?? "");
+  const [jobType, setJobType] = useState(user.jobType ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -131,6 +137,7 @@ function HeaderEditDialog({
       headline: nullIfEmpty(headline),
       location: nullIfEmpty(location),
       industry: nullIfEmpty(industry),
+      jobType: nullIfEmpty(jobType),
     };
     // Nothing to submit if all fields are untouched.
     if (Object.values(body).every((v) => v === undefined)) {
@@ -199,13 +206,74 @@ function HeaderEditDialog({
         />
       </Field>
       <Field label="業界">
-        <input
-          type="text"
+        <select
           value={industry}
           onChange={(e) => setIndustry(e.target.value)}
-          maxLength={100}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
-        />
+        >
+          <option value="">選択してください</option>
+          <option>EC・小売テック</option>
+          <option>IT・通信</option>
+          <option>エネルギー・環境</option>
+          <option>ゲーム・エンタメ</option>
+          <option>スポーツ・ウェルネス</option>
+          <option>セキュリティ・サイバーセキュリティ</option>
+          <option>デザイン・広告</option>
+          <option>ファッション・アパレルテック</option>
+          <option>ペット・動物関連</option>
+          <option>メディア・出版</option>
+          <option>モビリティ・自動車</option>
+          <option>人材・HR</option>
+          <option>介護・福祉テック</option>
+          <option>保険・インシュアテック</option>
+          <option>医療・ヘルスケア</option>
+          <option>地方創生・まちづくり</option>
+          <option>宇宙・航空</option>
+          <option>建設・不動産テック</option>
+          <option>教育・EdTech</option>
+          <option>旅行・観光テック</option>
+          <option>法律・リーガルテック</option>
+          <option>物流・ロジスティクス</option>
+          <option>製造業・ものづくり</option>
+          <option>農業・食品</option>
+          <option>農業機械・アグリテック</option>
+          <option>金融・フィンテック</option>
+          <option>防災・災害対策テック</option>
+          <option>音楽・クリエイティブテック</option>
+          <option>食品・フードテック</option>
+        </select>
+      </Field>
+      <Field label="職種">
+        <select
+          value={jobType}
+          onChange={(e) => setJobType(e.target.value)}
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
+        >
+          <option value="">選択してください</option>
+          <option>バックエンドエンジニア</option>
+          <option>フロントエンドエンジニア</option>
+          <option>フルスタックエンジニア</option>
+          <option>インフラエンジニア / SRE</option>
+          <option>データサイエンティスト / MLエンジニア</option>
+          <option>モバイルエンジニア</option>
+          <option>セキュリティエンジニア</option>
+          <option>QAエンジニア</option>
+          <option>その他エンジニア</option>
+          <option>UI / UXデザイナー</option>
+          <option>グラフィックデザイナー</option>
+          <option>プロダクトマネージャー</option>
+          <option>プロジェクトマネージャー</option>
+          <option>営業 / セールス</option>
+          <option>マーケティング</option>
+          <option>カスタマーサクセス</option>
+          <option>事業開発 / 戦略</option>
+          <option>コンサルタント</option>
+          <option>人事 / 採用</option>
+          <option>法務 / コンプライアンス</option>
+          <option>経営 / マネジメント</option>
+          <option>研究 / R&D</option>
+          <option>その他</option>
+        </select>
       </Field>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
     </Modal>
