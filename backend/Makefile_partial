@@ -1,0 +1,22 @@
+# ⚠️ 部分的（70-90行目のみ）。1-69行目は欠落。
+
+oapi:
+	@test -f $(OPENAPI_SPEC) || (echo "OpenAPI spec not found at $(OPENAPI_SPEC). Run api-schema/scripts/generate-openapi.sh first."; exit 1)
+	$(OAPI_CODEGEN) --config $(OAPI_CONFIG) $(OPENAPI_SPEC)
+
+# Seed data
+.PHONY: seed
+seed:
+	@mkdir -p uploads/job-images
+	@for i in 1 2 3; do cp -n scripts/seed-assets/placeholder.svg uploads/job-images/seed_placeholder_$$i.svg 2>/dev/null || true; done
+	@PGPASSWORD=$(DB_PASSWORD) psql -h $(DB_HOST) -U $(DB_USER) -d $(DB_NAME) -f scripts/seed.sql
+
+.PHONY: reset-db
+reset-db:
+	@bash -c 'set -a; if [ -f $(ENV_FILE) ]; then source $(ENV_FILE); fi; set +a; \
+	"$(MIGRATE)" -path "$(MIGRATIONS_DIR)" -database "$$MIGRATION_DATABASE_URL" drop -f && \
+	"$(MIGRATE)" -path "$(MIGRATIONS_DIR)" -database "$$MIGRATION_DATABASE_URL" up'
+	@$(MAKE) seed
+
+# sqlc code generation
+.PHONY: sqlc
