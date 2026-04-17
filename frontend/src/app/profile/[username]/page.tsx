@@ -4,7 +4,6 @@ import {
   type ModelsUserResponse,
   usersGetUserByUsername,
 } from "@/external/client/api/generated";
-
 export default async function ProfilePage({
   params,
 }: {
@@ -32,7 +31,7 @@ export default async function ProfilePage({
 function ProfileHeaderCard({ name }: { name: string }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
-      <div className="relative h-44 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-600">
+      <div className="relative h-36 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-600">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
         <button
           type="button"
@@ -43,10 +42,10 @@ function ProfileHeaderCard({ name }: { name: string }) {
         </button>
       </div>
 
-      <div className="relative px-7 pb-7">
-        <div className="absolute -top-20 left-6">
+      <div className="relative px-7 pb-6">
+        <div className="absolute -top-16 left-6">
           <div className="relative">
-            <div className="group flex h-36 w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-emerald-50 to-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
+            <div className="group flex h-36 w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
               <FaceIcon className="h-20 w-20 text-emerald-700" />
             </div>
             <button
@@ -69,7 +68,7 @@ function ProfileHeaderCard({ name }: { name: string }) {
           </button>
         </div>
 
-        <div className="mt-10 flex items-end justify-between gap-4">
+        <div className="mt-6 flex items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
               {name}
@@ -101,7 +100,7 @@ function AiReportCard() {
   const allDone = steps.every((s) => s.done);
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-[#fae9b2] px-8 pt-14 pb-8 shadow-[0_1px_2px_rgba(120,80,20,0.05),0_10px_24px_-14px_rgba(160,110,20,0.3)]">
+    <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-[#fae9b2] px-8 pt-11 pb-6 shadow-[0_1px_2px_rgba(120,80,20,0.05),0_10px_24px_-14px_rgba(160,110,20,0.3)]">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[url('/ai-report-wave.png')] bg-[length:100%_100%] bg-no-repeat opacity-45"
@@ -120,7 +119,7 @@ function AiReportCard() {
           診断結果と経歴をAIが分析し、あなた自身も気づいていない特性を言語化します。
         </p>
 
-        <ul className="mt-6 flex items-center justify-center gap-6 text-[15px] font-medium text-gray-500/70">
+        <ul className="mt-5 flex items-center justify-center gap-6 text-[15px] font-medium text-gray-500/70">
           {steps.map((step) => (
             <li key={step.label} className="flex items-center gap-1.5">
               <span
@@ -138,7 +137,7 @@ function AiReportCard() {
         <button
           type="button"
           disabled={!allDone}
-          className={`mt-6 inline-flex w-full max-w-[260px] items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition ${
+          className={`mt-5 inline-flex w-full max-w-[260px] items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition ${
             allDone
               ? "bg-gradient-to-r from-amber-700 via-amber-600 to-amber-500 text-white shadow-[0_4px_14px_-4px_rgba(180,120,40,0.55)] hover:shadow-[0_6px_18px_-4px_rgba(180,120,40,0.65)]"
               : "bg-white/40 text-gray-500/70"
@@ -153,28 +152,42 @@ function AiReportCard() {
 
 function ResumeUploadCard() {
   return (
-    <section
-      className="rounded-2xl bg-white/60 px-6 py-12 text-center backdrop-blur-sm"
-      style={{
-        backgroundImage:
-          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%23c4c8cd' stroke-width='2' stroke-dasharray='8 6' stroke-linecap='round'/%3E%3C/svg%3E\")",
-      }}
-    >
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e5ede7] text-emerald-700">
+    <section className="relative rounded-2xl bg-white/60 px-6 py-6 text-center backdrop-blur-sm">
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        preserveAspectRatio="none"
+      >
+        <rect
+          x={1}
+          y={1}
+          width="calc(100% - 2px)"
+          height="calc(100% - 2px)"
+          rx={16}
+          ry={16}
+          fill="none"
+          stroke="#d6d9de"
+          strokeWidth={2}
+          strokeDasharray="5 6"
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e5ede7] text-emerald-700">
         <DocumentIcon className="h-8 w-8" />
       </div>
-      <h2 className="mt-5 text-xl font-bold leading-snug tracking-tight text-gray-900">
+      <h2 className="relative mt-4 text-xl font-bold leading-snug tracking-tight text-gray-900">
         職務経歴書をアップロードするだけで、
         <br />
         プロフィールが完成します
       </h2>
-      <p className="mx-auto mt-3 max-w-lg text-base leading-relaxed text-gray-500">
-        PDF形式の職務経歴書をお持ちなら、アップロードするだけ。<br />
+      <p className="relative mx-auto mt-3 max-w-lg text-base leading-relaxed text-gray-500">
+        PDF形式の職務経歴書をお持ちなら、アップロードするだけ。
+        <br />
         職歴・スキル・自己紹介を自動で反映します。
       </p>
       <button
         type="button"
-        className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-6 py-3 text-base font-semibold text-white shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] transition hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)]"
+        className="relative mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-6 py-3 text-base font-semibold text-white shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] transition hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)]"
       >
         <PlusIcon className="h-[18px] w-[18px]" />
         職務経歴書をアップロード
@@ -244,24 +257,24 @@ function FaceIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 64 64" fill="none">
       {/* Left eye */}
-      <circle cx="20" cy="26" r="6.5" fill="currentColor" />
-      <circle cx="22" cy="23.8" r="2" fill="white" />
+      <circle cx="16" cy="23" r="5.8" fill="currentColor" />
+      <circle cx="18" cy="21" r="1.8" fill="white" />
       {/* Right eye */}
-      <circle cx="44" cy="26" r="6.5" fill="currentColor" />
-      <circle cx="46" cy="23.8" r="2" fill="white" />
+      <circle cx="48" cy="23" r="5.8" fill="currentColor" />
+      <circle cx="50" cy="21" r="1.8" fill="white" />
 
       {/* Mouth: D-shape (flat top, rounded bottom) */}
       <path
-        d="M17 41 A 15 12 0 0 0 47 41 Z"
+        d="M19 42 A 13 13 0 0 0 45 42 Z"
         fill="currentColor"
       />
 
       {/* Hover: tongue slides down out of the mouth */}
       <g
-        className="origin-[32px_42px] translate-y-0 scale-y-0 transition-transform duration-300 ease-out group-hover:translate-y-[4px] group-hover:scale-y-100"
+        className="origin-[32px_43px] translate-y-0 scale-y-0 transition-transform duration-300 ease-out group-hover:translate-y-[4px] group-hover:scale-y-100"
       >
         <path
-          d="M25 42 Q 25 54 32 54 Q 39 54 39 42 Z"
+          d="M26 43 Q 26 55 32 55 Q 38 55 38 43 Z"
           fill="#ff8a9a"
         />
       </g>
