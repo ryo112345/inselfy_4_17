@@ -59,7 +59,7 @@ export default async function ProfilePage({
 
   return (
     <ProfileColorContext value={profileColor}>
-    <main className="min-h-screen bg-[#f6f7f5] px-4 py-8">
+    <main className="min-h-screen bg-[#f6f7f5] px-4 pt-2 pb-8">
       <div className="mx-auto flex max-w-2xl flex-col gap-3">
         <ProfileHeaderCard user={user} experienceCount={experiences.length} />
         <AiReportCard

@@ -244,8 +244,8 @@ function CompanyBadge({ name }: { name: string }) {
   return (
     <span
       aria-hidden
-      className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-xl font-bold"
-      style={{ backgroundColor: `${pc}18`, color: pc }}
+      className="relative z-10 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white text-xl font-bold"
+      style={{ color: pc, border: `1px solid ${pc}40` }}
     >
       {initial}
     </span>
