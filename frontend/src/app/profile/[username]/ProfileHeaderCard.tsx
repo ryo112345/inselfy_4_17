@@ -25,7 +25,7 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
         <button
           type="button"
           aria-label="カバー画像を変更"
-          className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-sm backdrop-blur hover:bg-white"
+          className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur hover:bg-black/30"
         >
           <CameraIcon className="h-[18px] w-[18px]" />
         </button>
@@ -60,7 +60,7 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
 
         <div className="mt-24 flex items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
               {user.displayName || user.name}
             </h1>
             {user.headline ? (
