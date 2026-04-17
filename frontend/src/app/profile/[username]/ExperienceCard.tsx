@@ -12,7 +12,8 @@ import {
   type ApiError,
 } from "./api";
 import { BriefcaseIcon, PencilIcon, PlusIcon, TrashIcon } from "./Icons";
-import { Field, Modal, PrimaryButton, SecondaryButton } from "./Modal";
+import { Field, PrimaryButton, SecondaryButton } from "./Modal";
+import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
   username: string;
@@ -20,14 +21,15 @@ type Props = {
 };
 
 export function ExperienceCard({ username, experiences }: Props) {
-  const [dialogState, setDialogState] = useState<
+  const pc = useProfileColor();
+  const [formState, setFormState] = useState<
     | { mode: "closed" }
     | { mode: "create" }
     | { mode: "edit"; experience: ModelsExperienceResponse }
   >({ mode: "closed" });
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const groups = useMemo(() => {
@@ -47,13 +49,13 @@ export function ExperienceCard({ username, experiences }: Props) {
   const handleDelete = (id: string) => {
     if (!confirm("この職歴を削除しますか?")) return;
     setDeletingId(id);
-    setError(null);
+    setDeleteError(null);
     startTransition(async () => {
       try {
         await deleteExperience(username, id);
         router.refresh();
       } catch (e) {
-        setError((e as ApiError).message);
+        setDeleteError((e as ApiError).message);
       } finally {
         setDeletingId(null);
       }
@@ -67,21 +69,34 @@ export function ExperienceCard({ username, experiences }: Props) {
           <BriefcaseIcon className="h-6 w-6 text-gray-900" />
           職歴
         </h2>
-        <button
-          type="button"
-          aria-label="職歴を追加"
-          onClick={() => setDialogState({ mode: "create" })}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 text-white shadow-sm transition hover:bg-emerald-800"
-        >
-          <PlusIcon className="h-6 w-6" />
-        </button>
+        {formState.mode === "closed" && (
+          <button
+            type="button"
+            aria-label="職歴を追加"
+            onClick={() => setFormState({ mode: "create" })}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm transition hover:opacity-80"
+            style={{ backgroundColor: pc }}
+          >
+            <PlusIcon className="h-6 w-6" />
+          </button>
+        )}
       </div>
 
-      {experiences.length === 0 ? (
+      {formState.mode !== "closed" && (
+        <ExperienceForm
+          username={username}
+          mode={formState.mode}
+          experience={formState.mode === "edit" ? formState.experience : null}
+          onClose={() => setFormState({ mode: "closed" })}
+        />
+      )}
+
+      {experiences.length === 0 && formState.mode === "closed" ? (
         <button
           type="button"
-          onClick={() => setDialogState({ mode: "create" })}
-          className="mt-4 block w-full rounded-xl border-2 border-dashed border-[#d6d9de] bg-white bg-clip-padding py-5 text-center text-lg font-semibold leading-relaxed text-emerald-700 transition hover:border-emerald-700 hover:bg-emerald-50"
+          onClick={() => setFormState({ mode: "create" })}
+          className="mt-4 block w-full rounded-xl border-2 border-dashed border-[#d6d9de] bg-white bg-clip-padding py-5 text-center text-lg font-semibold leading-relaxed transition hover:opacity-80"
+          style={{ color: pc }}
         >
           + 職歴を追加して、キャリアをアピールしましょう。
         </button>
@@ -99,8 +114,9 @@ export function ExperienceCard({ username, experiences }: Props) {
                   <SingleExperience
                     experience={group.items[0]}
                     pending={pending && deletingId === group.items[0].id}
+                    showActions={formState.mode === "closed"}
                     onEdit={() =>
-                      setDialogState({ mode: "edit", experience: group.items[0] })
+                      setFormState({ mode: "edit", experience: group.items[0] })
                     }
                     onDelete={() => handleDelete(group.items[0].id)}
                   />
@@ -109,8 +125,9 @@ export function ExperienceCard({ username, experiences }: Props) {
                     group={group}
                     deletingId={deletingId}
                     pending={pending}
+                    showActions={formState.mode === "closed"}
                     onEdit={(e) =>
-                      setDialogState({ mode: "edit", experience: e })
+                      setFormState({ mode: "edit", experience: e })
                     }
                     onDelete={handleDelete}
                   />
@@ -121,16 +138,7 @@ export function ExperienceCard({ username, experiences }: Props) {
         </ul>
       )}
 
-      {error ? <p className="mt-3 text-sm text-rose-600">{error}</p> : null}
-
-      {dialogState.mode !== "closed" ? (
-        <ExperienceDialog
-          username={username}
-          mode={dialogState.mode}
-          experience={dialogState.mode === "edit" ? dialogState.experience : null}
-          onClose={() => setDialogState({ mode: "closed" })}
-        />
-      ) : null}
+      {deleteError ? <p className="mt-3 text-sm text-rose-600">{deleteError}</p> : null}
     </section>
   );
 }
@@ -153,13 +161,6 @@ function groupConsecutive(items: ModelsExperienceResponse[]): ExpGroup[] {
   return groups;
 }
 
-// Dashed rail connecting the center-bottom of one company logo to the top of
-// the next. Wraps the SVG in a div so the CSS top/bottom pair reliably sizes
-// the container (some browsers don't auto-size bare <svg> elements via
-// top+bottom). The div starts at y=64 (pt-4 + 48px logo) and ends at bottom:
-// -28px so it spans pb-3 (12px) + pt-4 (16px) = the full 28px gap between
-// this li and the next logo's top edge. Left:48 centers on the 48px-wide
-// badge sitting inside the li's pl-6 padding.
 function TimelineRail({ isLast = false }: { isLast?: boolean }) {
   return (
     <div
@@ -188,12 +189,6 @@ function TimelineRail({ isLast = false }: { isLast?: boolean }) {
   );
 }
 
-// Dashed rail connecting the bottom of one role dot to the top of the next
-// role dot within a grouped experience. Dot is 10px tall, inline-centered in
-// a text-base h4 (24px line-height), so its bottom edge sits at y=17 and its
-// top sits at y=7. Between consecutive role li's, space-y-5 adds 20px of
-// margin-top. So bottom: -30px extends from y=17 in li_i past the 20px gap
-// and a few px into the next dot (covered by the solid dot fill).
 function RoleRail({ isLast = false }: { isLast?: boolean }) {
   return (
     <div
@@ -222,38 +217,35 @@ function RoleRail({ isLast = false }: { isLast?: boolean }) {
   );
 }
 
-// Solid green dot placed to the left of every role title. Same 10px size as
-// the legacy timeline-rail marker, repurposed as a per-role bullet.
 function RoleDot() {
+  const pc = useProfileColor();
   return (
     <span
       aria-hidden
-      className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-600"
+      className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+      style={{ backgroundColor: pc }}
     />
   );
 }
 
-// Small dot-and-label marker shown next to the job title whose isCurrent
-// flag is true. Sits inline with the title so the viewer sees it on the role
-// row rather than the company row.
 function CurrentBadge() {
+  const pc = useProfileColor();
   return (
-    <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+    <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: pc }}>
+      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: pc }} />
       現職
     </span>
   );
 }
 
-// Inline company badge placed between the ・ and the company name. Uses the
-// first character of the company name as a placeholder until real logo URLs
-// exist in the data model.
 function CompanyBadge({ name }: { name: string }) {
+  const pc = useProfileColor();
   const initial = name.trim().charAt(0).toUpperCase() || "?";
   return (
     <span
       aria-hidden
-      className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100 text-xl font-bold text-emerald-800"
+      className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-xl font-bold"
+      style={{ backgroundColor: `${pc}18`, color: pc }}
     >
       {initial}
     </span>
@@ -319,11 +311,13 @@ function PeriodLine({ experience }: { experience: ModelsExperienceResponse }) {
 function SingleExperience({
   experience,
   pending,
+  showActions,
   onEdit,
   onDelete,
 }: {
   experience: ModelsExperienceResponse;
   pending: boolean;
+  showActions: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -352,7 +346,9 @@ function SingleExperience({
               ) : null}
             </div>
           </div>
-          <RowActions onEdit={onEdit} onDelete={onDelete} disabled={pending} />
+          {showActions && (
+            <RowActions onEdit={onEdit} onDelete={onDelete} disabled={pending} />
+          )}
         </div>
       </div>
     </div>
@@ -363,12 +359,14 @@ function GroupedExperience({
   group,
   deletingId,
   pending,
+  showActions,
   onEdit,
   onDelete,
 }: {
   group: ExpGroup;
   deletingId: string | null;
   pending: boolean;
+  showActions: boolean;
   onEdit: (e: ModelsExperienceResponse) => void;
   onDelete: (id: string) => void;
 }) {
@@ -427,11 +425,13 @@ function GroupedExperience({
                     </h4>
                     <PeriodLine experience={e} />
                   </div>
-                  <RowActions
-                    onEdit={() => onEdit(e)}
-                    onDelete={() => onDelete(e.id)}
-                    disabled={pending && deletingId === e.id}
-                  />
+                  {showActions && (
+                    <RowActions
+                      onEdit={() => onEdit(e)}
+                      onDelete={() => onDelete(e.id)}
+                      disabled={pending && deletingId === e.id}
+                    />
+                  )}
                 </div>
                 {e.description ? (
                   <p className="mt-2 whitespace-pre-wrap pl-5 text-base leading-relaxed text-gray-800">
@@ -447,14 +447,14 @@ function GroupedExperience({
   );
 }
 
-type DialogProps = {
+type FormProps = {
   username: string;
   mode: "create" | "edit";
   experience: ModelsExperienceResponse | null;
   onClose: () => void;
 };
 
-function ExperienceDialog({ username, mode, experience, onClose }: DialogProps) {
+function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
   const router = useRouter();
   const [company, setCompany] = useState(experience?.companyName ?? "");
   const [title, setTitle] = useState(experience?.title ?? "");
@@ -512,19 +512,10 @@ function ExperienceDialog({ username, mode, experience, onClose }: DialogProps) 
   };
 
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title={mode === "create" ? "職歴を追加" : "職歴を編集"}
-      footer={
-        <>
-          <SecondaryButton onClick={onClose}>キャンセル</SecondaryButton>
-          <PrimaryButton loading={pending} onClick={handleSave}>
-            保存
-          </PrimaryButton>
-        </>
-      }
-    >
+    <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/40 px-4 py-4">
+      <h3 className="mb-3 text-sm font-semibold text-gray-700">
+        {mode === "create" ? "職歴を追加" : "職歴を編集"}
+      </h3>
       <Field label="会社名" required>
         <input
           type="text"
@@ -592,7 +583,13 @@ function ExperienceDialog({ username, mode, experience, onClose }: DialogProps) 
         />
       </Field>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-    </Modal>
+      <div className="mt-4 flex justify-end gap-2">
+        <SecondaryButton onClick={onClose}>キャンセル</SecondaryButton>
+        <PrimaryButton loading={pending} onClick={handleSave}>
+          保存
+        </PrimaryButton>
+      </div>
+    </div>
   );
 }
 

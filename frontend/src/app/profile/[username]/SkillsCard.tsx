@@ -7,6 +7,7 @@ import type { ModelsSkillResponse } from "@/external/client/api/generated";
 
 import { attachSkill, detachSkill, type ApiError } from "./api";
 import { AwardIcon, XIcon } from "./Icons";
+import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
   username: string;
@@ -15,6 +16,7 @@ type Props = {
 
 export function SkillsCard({ username, skills }: Props) {
   const router = useRouter();
+  const pc = useProfileColor();
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -70,13 +72,15 @@ export function SkillsCard({ username, skills }: Props) {
             }}
             placeholder="スキルを入力"
             maxLength={100}
-            className="h-10 w-44 rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 placeholder:text-gray-400 focus:border-emerald-600 focus:outline-none"
+            className="h-10 w-44 rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
+            style={{ "--tw-ring-color": pc } as React.CSSProperties}
           />
           <button
             type="button"
             disabled={pending || input.trim() === ""}
             onClick={handleAdd}
-            className="inline-flex h-10 items-center justify-center rounded-full bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+            style={{ backgroundColor: pc }}
           >
             追加
           </button>
@@ -92,7 +96,8 @@ export function SkillsCard({ username, skills }: Props) {
           {skills.map((s) => (
             <li
               key={s.id}
-              className="group inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 py-2 pl-4 pr-2.5 text-base font-medium text-emerald-800"
+              className="group inline-flex items-center gap-1.5 rounded-full border py-2 pl-4 pr-2.5 text-base font-medium"
+              style={{ borderColor: `${pc}40`, backgroundColor: `${pc}12`, color: pc }}
             >
               <span>{s.name}</span>
               <button
@@ -100,7 +105,8 @@ export function SkillsCard({ username, skills }: Props) {
                 aria-label={`${s.name} を削除`}
                 disabled={pending && removing === s.name}
                 onClick={() => handleRemove(s.name)}
-                className="flex h-5 w-5 items-center justify-center rounded-full text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                className="flex h-5 w-5 items-center justify-center rounded-full transition disabled:opacity-50"
+                style={{ color: pc }}
               >
                 <XIcon className="h-3.5 w-3.5" />
               </button>

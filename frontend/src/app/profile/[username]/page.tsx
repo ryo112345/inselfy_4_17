@@ -17,6 +17,7 @@ import { AiReportCard } from "./AiReportCard";
 import { EducationCard } from "./EducationCard";
 import { ExperienceCard } from "./ExperienceCard";
 import { PostsTabs } from "./PostsTabs";
+import { ProfileColorContext } from "./ProfileColorContext";
 import { ProfileHeaderCard } from "./ProfileHeaderCard";
 import { ResumeUploadCard } from "./ResumeUploadCard";
 import { SkillsCard } from "./SkillsCard";
@@ -54,7 +55,10 @@ export default async function ProfilePage({
   const skills: ModelsSkillResponse[] =
     (skillsRes.data as unknown as { items?: ModelsSkillResponse[] } | undefined)?.items ?? [];
 
+  const profileColor = user.profileColor ?? "#3D8B6E";
+
   return (
+    <ProfileColorContext value={profileColor}>
     <main className="min-h-screen bg-[#f6f7f5] px-4 py-8">
       <div className="mx-auto flex max-w-2xl flex-col gap-3">
         <ProfileHeaderCard user={user} experienceCount={experiences.length} />
@@ -71,5 +75,6 @@ export default async function ProfilePage({
         <PostsTabs />
       </div>
     </main>
+    </ProfileColorContext>
   );
 }

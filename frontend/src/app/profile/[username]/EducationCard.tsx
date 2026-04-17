@@ -12,7 +12,8 @@ import {
   type ApiError,
 } from "./api";
 import { CapIcon, PencilIcon, PlusIcon, TrashIcon } from "./Icons";
-import { Field, Modal, PrimaryButton, SecondaryButton } from "./Modal";
+import { Field, PrimaryButton, SecondaryButton } from "./Modal";
+import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
   username: string;
@@ -21,25 +22,26 @@ type Props = {
 
 export function EducationCard({ username, educations }: Props) {
   const router = useRouter();
-  const [dialogState, setDialogState] = useState<
+  const pc = useProfileColor();
+  const [formState, setFormState] = useState<
     | { mode: "closed" }
     | { mode: "create" }
     | { mode: "edit"; education: ModelsEducationResponse }
   >({ mode: "closed" });
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const handleDelete = (id: string) => {
     if (!confirm("この学歴を削除しますか?")) return;
     setDeletingId(id);
-    setError(null);
+    setDeleteError(null);
     startTransition(async () => {
       try {
         await deleteEducation(username, id);
         router.refresh();
       } catch (e) {
-        setError((e as ApiError).message);
+        setDeleteError((e as ApiError).message);
       } finally {
         setDeletingId(null);
       }
@@ -53,21 +55,34 @@ export function EducationCard({ username, educations }: Props) {
           <CapIcon className="h-6 w-6 text-gray-900" />
           学歴
         </h2>
-        <button
-          type="button"
-          aria-label="学歴を追加"
-          onClick={() => setDialogState({ mode: "create" })}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 text-white shadow-sm transition hover:bg-emerald-800"
-        >
-          <PlusIcon className="h-6 w-6" />
-        </button>
+        {formState.mode === "closed" && (
+          <button
+            type="button"
+            aria-label="学歴を追加"
+            onClick={() => setFormState({ mode: "create" })}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm transition hover:opacity-80"
+            style={{ backgroundColor: pc }}
+          >
+            <PlusIcon className="h-6 w-6" />
+          </button>
+        )}
       </div>
 
-      {educations.length === 0 ? (
+      {formState.mode !== "closed" && (
+        <EducationForm
+          username={username}
+          mode={formState.mode}
+          education={formState.mode === "edit" ? formState.education : null}
+          onClose={() => setFormState({ mode: "closed" })}
+        />
+      )}
+
+      {educations.length === 0 && formState.mode === "closed" ? (
         <button
           type="button"
-          onClick={() => setDialogState({ mode: "create" })}
-          className="mt-4 block w-full rounded-xl border-2 border-dashed border-[#d6d9de] bg-white bg-clip-padding py-5 text-center text-lg font-semibold leading-relaxed text-emerald-700 transition hover:border-emerald-700 hover:bg-emerald-50"
+          onClick={() => setFormState({ mode: "create" })}
+          className="mt-4 block w-full rounded-xl border-2 border-dashed border-[#d6d9de] bg-white bg-clip-padding py-5 text-center text-lg font-semibold leading-relaxed transition hover:opacity-80"
+          style={{ color: pc }}
         >
           + 学歴を追加しましょう。
         </button>
@@ -89,25 +104,27 @@ export function EducationCard({ username, educations }: Props) {
                       {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
-                    <button
-                      type="button"
-                      aria-label="編集"
-                      onClick={() => setDialogState({ mode: "edit", education: e })}
-                      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-emerald-600 hover:text-emerald-700"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="削除"
-                      disabled={pending && deletingId === e.id}
-                      onClick={() => handleDelete(e.id)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-rose-500 hover:text-rose-600 disabled:opacity-50"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
+                  {formState.mode === "closed" && (
+                    <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                      <button
+                        type="button"
+                        aria-label="編集"
+                        onClick={() => setFormState({ mode: "edit", education: e })}
+                        className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-emerald-600 hover:text-emerald-700"
+                      >
+                        <PencilIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="削除"
+                        disabled={pending && deletingId === e.id}
+                        onClick={() => handleDelete(e.id)}
+                        className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-rose-500 hover:text-rose-600 disabled:opacity-50"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </li>
@@ -115,28 +132,19 @@ export function EducationCard({ username, educations }: Props) {
         </ul>
       )}
 
-      {error ? <p className="mt-3 text-sm text-rose-600">{error}</p> : null}
-
-      {dialogState.mode !== "closed" ? (
-        <EducationDialog
-          username={username}
-          mode={dialogState.mode}
-          education={dialogState.mode === "edit" ? dialogState.education : null}
-          onClose={() => setDialogState({ mode: "closed" })}
-        />
-      ) : null}
+      {deleteError ? <p className="mt-3 text-sm text-rose-600">{deleteError}</p> : null}
     </section>
   );
 }
 
-type DialogProps = {
+type FormProps = {
   username: string;
   mode: "create" | "edit";
   education: ModelsEducationResponse | null;
   onClose: () => void;
 };
 
-function EducationDialog({ username, mode, education, onClose }: DialogProps) {
+function EducationForm({ username, mode, education, onClose }: FormProps) {
   const router = useRouter();
   const [school, setSchool] = useState(education?.school ?? "");
   const [degree, setDegree] = useState(education?.degree ?? "");
@@ -186,19 +194,10 @@ function EducationDialog({ username, mode, education, onClose }: DialogProps) {
   };
 
   return (
-    <Modal
-      open
-      onClose={onClose}
-      title={mode === "create" ? "学歴を追加" : "学歴を編集"}
-      footer={
-        <>
-          <SecondaryButton onClick={onClose}>キャンセル</SecondaryButton>
-          <PrimaryButton loading={pending} onClick={handleSave}>
-            保存
-          </PrimaryButton>
-        </>
-      }
-    >
+    <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/40 px-4 py-4">
+      <h3 className="mb-3 text-sm font-semibold text-gray-700">
+        {mode === "create" ? "学歴を追加" : "学歴を編集"}
+      </h3>
       <Field label="学校名" required>
         <input
           type="text"
@@ -244,16 +243,24 @@ function EducationDialog({ username, mode, education, onClose }: DialogProps) {
         </div>
       </div>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-    </Modal>
+      <div className="mt-4 flex justify-end gap-2">
+        <SecondaryButton onClick={onClose}>キャンセル</SecondaryButton>
+        <PrimaryButton loading={pending} onClick={handleSave}>
+          保存
+        </PrimaryButton>
+      </div>
+    </div>
   );
 }
 
 function SchoolBadge({ name }: { name: string }) {
+  const pc = useProfileColor();
   const initial = name.trim().charAt(0).toUpperCase() || "?";
   return (
     <span
       aria-hidden
-      className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100 text-xl font-bold text-emerald-800"
+      className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-xl font-bold"
+      style={{ backgroundColor: `${pc}18`, color: pc }}
     >
       {initial}
     </span>
