@@ -72,37 +72,42 @@ export function EducationCard({ username, educations }: Props) {
           + 学歴を追加しましょう。
         </button>
       ) : (
-        <ul className="mt-4 divide-y divide-gray-100">
+        <ul className="mt-2 divide-y divide-gray-100">
           {educations.map((e) => (
-            <li key={e.id} className="group relative py-4 first:pt-0 last:pb-0">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <p className="text-lg font-semibold text-gray-900">{e.school}</p>
-                  {e.degree ? (
-                    <p className="mt-1 text-base text-gray-700">{e.degree}</p>
-                  ) : null}
-                  <p className="mt-1 text-sm text-gray-500">
-                    {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
-                  <button
-                    type="button"
-                    aria-label="編集"
-                    onClick={() => setDialogState({ mode: "edit", education: e })}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-emerald-600 hover:text-emerald-700"
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="削除"
-                    disabled={pending && deletingId === e.id}
-                    onClick={() => handleDelete(e.id)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-rose-500 hover:text-rose-600 disabled:opacity-50"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                  </button>
+            <li key={e.id} className="group flex items-start gap-3 py-4 first:pt-2">
+              <SchoolBadge name={e.school} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-bold tracking-tight text-gray-900">
+                      {e.school}
+                    </h3>
+                    {e.degree ? (
+                      <p className="mt-0.5 text-base text-gray-700">{e.degree}</p>
+                    ) : null}
+                    <p className="mt-0.5 text-sm text-gray-500">
+                      {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                    <button
+                      type="button"
+                      aria-label="編集"
+                      onClick={() => setDialogState({ mode: "edit", education: e })}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-emerald-600 hover:text-emerald-700"
+                    >
+                      <PencilIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="削除"
+                      disabled={pending && deletingId === e.id}
+                      onClick={() => handleDelete(e.id)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-rose-500 hover:text-rose-600 disabled:opacity-50"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </li>
@@ -240,6 +245,18 @@ function EducationDialog({ username, mode, education, onClose }: DialogProps) {
       </div>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
     </Modal>
+  );
+}
+
+function SchoolBadge({ name }: { name: string }) {
+  const initial = name.trim().charAt(0).toUpperCase() || "?";
+  return (
+    <span
+      aria-hidden
+      className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100 text-xl font-bold text-emerald-800"
+    >
+      {initial}
+    </span>
   );
 }
 

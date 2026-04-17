@@ -92,7 +92,7 @@ export function ExperienceCard({ username, experiences }: Props) {
             return (
               <li
                 key={group.items[0].id}
-                className="relative pt-4 pb-3 pl-6"
+                className="relative pt-4 pb-3"
               >
                 <TimelineRail isLast={isLast} />
                 {group.items.length === 1 ? (
@@ -164,7 +164,7 @@ function TimelineRail({ isLast = false }: { isLast?: boolean }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute left-[48px] top-[64px] w-[2px] -translate-x-1/2"
+      className="pointer-events-none absolute left-[24px] top-[64px] w-[2px] -translate-x-1/2"
       style={{ bottom: isLast ? "0px" : "-28px" }}
     >
       <svg
