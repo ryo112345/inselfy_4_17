@@ -4,6 +4,7 @@ import {
   type ModelsUserResponse,
   usersGetUserByUsername,
 } from "@/external/client/api/generated";
+import { PostsTabs } from "./PostsTabs";
 export default async function ProfilePage({
   params,
 }: {
@@ -23,8 +24,114 @@ export default async function ProfilePage({
         <ProfileHeaderCard name={user.name} />
         <AiReportCard />
         <ResumeUploadCard />
+        <SkillsCard />
+        <ExperienceCard />
+        <EducationCard />
+        <AboutCard />
+        <PostsTabs />
       </div>
     </main>
+  );
+}
+
+function SkillsCard() {
+  return (
+    <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+          <AwardIcon className="h-5 w-5 text-gray-900" />
+          スキル
+        </h2>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="スキルを入力"
+            className="h-10 w-44 rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 placeholder:text-gray-400 focus:border-emerald-600 focus:outline-none"
+          />
+          <button
+            type="button"
+            className="inline-flex h-10 items-center justify-center rounded-full bg-emerald-700 px-5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+          >
+            追加
+          </button>
+        </div>
+      </div>
+      <p className="mt-4 text-base leading-relaxed text-gray-500">
+        スキルを追加して、あなたの強みをアピールしましょう。
+      </p>
+    </section>
+  );
+}
+
+function ExperienceCard() {
+  return (
+    <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+      <div className="flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+          <BriefcaseIcon className="h-5 w-5 text-gray-900" />
+          職歴
+        </h2>
+        <button
+          type="button"
+          aria-label="職歴を追加"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 text-white shadow-sm transition hover:bg-emerald-800"
+        >
+          <PlusIcon className="h-6 w-6" />
+        </button>
+      </div>
+      <button
+        type="button"
+        className="mt-4 block w-full rounded-xl border-2 border-dashed border-[#d6d9de] bg-white bg-clip-padding py-4 text-center text-base font-semibold leading-relaxed text-emerald-700 transition hover:border-emerald-700 hover:bg-emerald-50"
+      >
+        + 職歴を追加して、キャリアをアピールしましょう。
+      </button>
+    </section>
+  );
+}
+
+function EducationCard() {
+  return (
+    <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+      <div className="flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+          <CapIcon className="h-5 w-5 text-gray-900" />
+          学歴
+        </h2>
+        <button
+          type="button"
+          aria-label="学歴を追加"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 text-white shadow-sm transition hover:bg-emerald-800"
+        >
+          <PlusIcon className="h-6 w-6" />
+        </button>
+      </div>
+      <button
+        type="button"
+        className="mt-4 block w-full rounded-xl border-2 border-dashed border-[#d6d9de] bg-white bg-clip-padding py-4 text-center text-base font-semibold leading-relaxed text-emerald-700 transition hover:border-emerald-700 hover:bg-emerald-50"
+      >
+        + 学歴を追加しましょう。
+      </button>
+    </section>
+  );
+}
+
+function AboutCard() {
+  return (
+    <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-gray-900">自己紹介</h2>
+        <button
+          type="button"
+          aria-label="自己紹介を編集"
+          className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-emerald-700 bg-white text-emerald-700 transition hover:bg-emerald-50"
+        >
+          <PencilIcon className="h-[18px] w-[18px]" />
+        </button>
+      </div>
+      <p className="mt-3 text-base leading-relaxed text-gray-500">
+        自己紹介を追加して、あなたのことを教えてください。
+      </p>
+    </section>
   );
 }
 
@@ -62,7 +169,7 @@ function ProfileHeaderCard({ name }: { name: string }) {
           <button
             type="button"
             aria-label="プロフィールを編集"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-600/30 text-emerald-700 transition hover:bg-emerald-50"
+            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-emerald-700 bg-white text-emerald-700 transition hover:bg-emerald-50"
           >
             <PencilIcon className="h-[18px] w-[18px]" />
           </button>
@@ -210,8 +317,7 @@ function CameraIcon({ className }: { className?: string }) {
 function PencilIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z" />
+      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
     </svg>
   );
 }
@@ -249,6 +355,34 @@ function SparkleIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z" />
       <path d="M19 14l.9 2.6L22.5 17.5l-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z" opacity="0.6" />
+    </svg>
+  );
+}
+
+function AwardIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="9" r="5.5" />
+      <path d="M8 13.5 6.5 21l5.5-3 5.5 3L16 13.5" />
+    </svg>
+  );
+}
+
+function BriefcaseIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M3 12h18" />
+    </svg>
+  );
+}
+
+function CapIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 10l10-5 10 5-10 5z" />
+      <path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5" />
     </svg>
   );
 }
