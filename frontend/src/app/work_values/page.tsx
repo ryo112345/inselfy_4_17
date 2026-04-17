@@ -19,7 +19,7 @@ export default function WorkValuesPage() {
     <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12 relative">
 <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
-        <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2 mb-8">
+        <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-5 py-2 mb-8">
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
           <span className="text-xs font-semibold tracking-[0.25em] text-emerald-400">
             SELF-ASSESSMENT SYSTEM
@@ -40,7 +40,7 @@ export default function WorkValuesPage() {
         </p>
 
         <div className="relative z-10 flex justify-center gap-8 mb-10">
-          <Stat value="50-70" label="PAIRS" />
+          <Stat value="70" label="PAIRS" />
           <Stat value="21" label="NEEDS" />
           <Stat value="10" label="MIN" />
         </div>
