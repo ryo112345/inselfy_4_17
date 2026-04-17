@@ -1,3 +1,4 @@
+// Package main starts the API server.
 package main
 
 import (
@@ -5,29 +6,20 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/akiyama/inselfy/backend/internal/driver/config"
-	"github.com/akiyama/inselfy/backend/internal/driver/db"
-	"github.com/akiyama/inselfy/backend/internal/driver/initializer/api"
+	initializer "github.com/akiyama/inselfy/backend/internal/driver/initializer/api"
 )
 
 func main() {
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
-	}
-
 	ctx := context.Background()
-	pool, err := db.NewPool(ctx, cfg.DatabaseURL())
+	e, cfg, cleanup, err := initializer.BuildServer(ctx)
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		log.Fatalf("failed to initialize server: %v", err)
 	}
-	defer pool.Close()
-
-	e := api.BuildServer(pool, cfg)
+	defer cleanup()
 
 	addr := fmt.Sprintf(":%d", cfg.APIPort)
-	log.Printf("starting server on %s", addr)
+	log.Printf("starting HTTP server on %s", addr)
 	if err := e.Start(addr); err != nil {
-		log.Fatalf("failed to start server: %v", err)
+		log.Fatalf("server exited: %v", err)
 	}
 }

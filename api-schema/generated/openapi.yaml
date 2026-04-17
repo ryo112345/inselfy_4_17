@@ -1,0 +1,168 @@
+openapi: 3.0.0
+info:
+  title: inselfy API
+  version: 0.0.0
+tags:
+  - name: Users
+paths:
+  /api/users:
+    post:
+      operationId: Users_createUser
+      summary: Create a new user
+      description: ユーザー作成
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UserResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreateUserRequest'
+  /api/users/{username}:
+    get:
+      operationId: Users_getUserByUsername
+      summary: Get a user by username
+      description: ユーザー名でユーザー取得
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UserResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Users
+components:
+  schemas:
+    Models.BadRequestError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - BAD_REQUEST
+        message:
+          type: string
+        details: {}
+      description: Bad Request エラー
+    Models.ConflictError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - CONFLICT
+        message:
+          type: string
+      description: Conflict エラー
+    Models.CreateUserRequest:
+      type: object
+      required:
+        - name
+        - username
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 表示名（1-100文字）
+        username:
+          type: string
+          pattern: ^[a-zA-Z0-9_]{3,20}$
+          description: ユーザー名（3-20文字、半角英数字とアンダースコア）
+      description: ユーザー作成リクエスト
+    Models.ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: エラーコード
+        message:
+          type: string
+          description: エラーメッセージ
+        details:
+          description: 詳細情報（オプション）
+      description: 共通エラーレスポンス
+    Models.NotFoundError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - NOT_FOUND
+        message:
+          type: string
+      description: Not Found エラー
+    Models.UserResponse:
+      type: object
+      required:
+        - id
+        - username
+        - name
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+      description: ユーザー情報
+servers:
+  - url: http://localhost:8081
+    description: Development server
+    variables: {}

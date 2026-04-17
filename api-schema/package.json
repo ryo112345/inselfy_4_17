@@ -1,0 +1,17 @@
+{
+  "name": "@inselfy/api-schema",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TypeSpec-based API schema for inselfy",
+  "scripts": {
+    "generate": "npm run generate:openapi && npm run generate:ts",
+    "generate:openapi": "./scripts/generate-openapi.sh",
+    "generate:ts": "./scripts/generate-ts.sh"
+  },
+  "devDependencies": {
+    "@typespec/compiler": "^0.60.0",
+    "@typespec/http": "^0.60.0",
+    "@typespec/openapi3": "^0.60.0",
+    "@hey-api/openapi-ts": "^0.64.0"
+  }
+}

@@ -1,0 +1,270 @@
+import { notFound } from "next/navigation";
+import "@/external/client/api/client";
+import {
+  type ModelsUserResponse,
+  usersGetUserByUsername,
+} from "@/external/client/api/generated";
+
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
+  const { username } = await params;
+  const { data, error } = await usersGetUserByUsername({
+    path: { username },
+  });
+
+  if (error || !data) notFound();
+  const user = data as unknown as ModelsUserResponse;
+
+  return (
+    <main className="min-h-screen bg-[#f6f7f5] px-4 py-8">
+      <div className="mx-auto flex max-w-2xl flex-col gap-5">
+        <ProfileHeaderCard name={user.name} />
+        <AiReportCard />
+        <ResumeUploadCard />
+      </div>
+    </main>
+  );
+}
+
+function ProfileHeaderCard({ name }: { name: string }) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+      <div className="relative h-44 bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-600">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
+        <button
+          type="button"
+          aria-label="カバー画像を変更"
+          className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-sm backdrop-blur hover:bg-white"
+        >
+          <CameraIcon className="h-[18px] w-[18px]" />
+        </button>
+      </div>
+
+      <div className="relative px-7 pb-7">
+        <div className="absolute -top-20 left-6">
+          <div className="relative">
+            <div className="group flex h-36 w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-emerald-50 to-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
+              <FaceIcon className="h-20 w-20 text-emerald-700" />
+            </div>
+            <button
+              type="button"
+              aria-label="アバターを追加"
+              className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full border-2 border-emerald-700 bg-white text-emerald-700 shadow-sm transition hover:bg-emerald-50"
+            >
+              <PlusIcon className="h-[22px] w-[22px]" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <button
+            type="button"
+            aria-label="プロフィールを編集"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-600/30 text-emerald-700 transition hover:bg-emerald-50"
+          >
+            <PencilIcon className="h-[18px] w-[18px]" />
+          </button>
+        </div>
+
+        <div className="mt-10 flex items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              {name}
+            </h1>
+            <p className="mt-2 text-base text-gray-400">ヘッドラインを追加</p>
+          </div>
+          <div className="flex items-center gap-5 pb-2 text-sm text-gray-500">
+            <span className="inline-flex items-baseline gap-1.5">
+              <span className="text-base font-bold text-gray-900">0</span>
+              フォロワー
+            </span>
+            <span className="inline-flex items-baseline gap-1.5">
+              <span className="text-base font-bold text-gray-900">0</span>
+              フォロー中
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AiReportCard() {
+  const steps = [
+    { label: "職歴を入力", done: false },
+    { label: "スキルを入力", done: false },
+    { label: "学歴を入力", done: false },
+  ];
+  const allDone = steps.every((s) => s.done);
+
+  return (
+    <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-[#fae9b2] px-8 pt-14 pb-8 shadow-[0_1px_2px_rgba(120,80,20,0.05),0_10px_24px_-14px_rgba(160,110,20,0.3)]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[url('/ai-report-wave.png')] bg-[length:100%_100%] bg-no-repeat opacity-45"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,243,200,0.2)_0%,rgba(255,243,200,0)_50%,rgba(255,243,200,0.2)_100%)]" />
+
+      <span className="absolute right-4 top-4 inline-flex items-center rounded-full border border-amber-300/60 bg-white/80 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.12em] text-amber-800 shadow-sm backdrop-blur">
+        AI Report
+      </span>
+
+      <div className="relative mx-auto max-w-md text-center">
+        <h2 className="text-xl font-bold leading-snug tracking-tight text-gray-900">
+          自分の強みと価値観を、<wbr />プロの視点で整理します
+        </h2>
+        <p className="mx-auto mt-3 max-w-sm text-base leading-relaxed text-gray-800">
+          診断結果と経歴をAIが分析し、あなた自身も気づいていない特性を言語化します。
+        </p>
+
+        <ul className="mt-6 flex items-center justify-center gap-6 text-[15px] font-medium text-gray-500/70">
+          {steps.map((step) => (
+            <li key={step.label} className="flex items-center gap-1.5">
+              <span
+                className={`flex h-[18px] w-[18px] items-center justify-center rounded-full border border-gray-400/40 bg-white/40 ${
+                  step.done ? "border-emerald-600 bg-emerald-600 text-white" : ""
+                }`}
+              >
+                {step.done ? <CheckIcon className="h-2.5 w-2.5" /> : null}
+              </span>
+              {step.label}
+            </li>
+          ))}
+        </ul>
+
+        <button
+          type="button"
+          disabled={!allDone}
+          className={`mt-6 inline-flex w-full max-w-[260px] items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition ${
+            allDone
+              ? "bg-gradient-to-r from-amber-700 via-amber-600 to-amber-500 text-white shadow-[0_4px_14px_-4px_rgba(180,120,40,0.55)] hover:shadow-[0_6px_18px_-4px_rgba(180,120,40,0.65)]"
+              : "bg-white/40 text-gray-500/70"
+          }`}
+        >
+          レポートを生成する
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function ResumeUploadCard() {
+  return (
+    <section
+      className="rounded-2xl bg-white/60 px-6 py-12 text-center backdrop-blur-sm"
+      style={{
+        backgroundImage:
+          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' fill='none' rx='16' ry='16' stroke='%23c4c8cd' stroke-width='2' stroke-dasharray='8 6' stroke-linecap='round'/%3E%3C/svg%3E\")",
+      }}
+    >
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e5ede7] text-emerald-700">
+        <DocumentIcon className="h-8 w-8" />
+      </div>
+      <h2 className="mt-5 text-xl font-bold leading-snug tracking-tight text-gray-900">
+        職務経歴書をアップロードするだけで、
+        <br />
+        プロフィールが完成します
+      </h2>
+      <p className="mx-auto mt-3 max-w-lg text-base leading-relaxed text-gray-500">
+        PDF形式の職務経歴書をお持ちなら、アップロードするだけ。<br />
+        職歴・スキル・自己紹介を自動で反映します。
+      </p>
+      <button
+        type="button"
+        className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-6 py-3 text-base font-semibold text-white shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] transition hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)]"
+      >
+        <PlusIcon className="h-[18px] w-[18px]" />
+        職務経歴書をアップロード
+      </button>
+    </section>
+  );
+}
+
+/* ---------- icons (inline SVG) ---------- */
+
+function CameraIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  );
+}
+
+function PencilIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z" />
+    </svg>
+  );
+}
+
+function PlusIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+function DocumentIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 2.5H7a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
+      <path d="M14.5 2.5V7.5H19.5" />
+      <path d="M9 12.5h6" />
+      <path d="M9 15.5h6" />
+      <path d="M9 9.5h2.5" />
+    </svg>
+  );
+}
+
+function SparkleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z" />
+      <path d="M19 14l.9 2.6L22.5 17.5l-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z" opacity="0.6" />
+    </svg>
+  );
+}
+
+function FaceIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 64 64" fill="none">
+      {/* Left eye */}
+      <circle cx="20" cy="26" r="6.5" fill="currentColor" />
+      <circle cx="22" cy="23.8" r="2" fill="white" />
+      {/* Right eye */}
+      <circle cx="44" cy="26" r="6.5" fill="currentColor" />
+      <circle cx="46" cy="23.8" r="2" fill="white" />
+
+      {/* Mouth: D-shape (flat top, rounded bottom) */}
+      <path
+        d="M17 41 A 15 12 0 0 0 47 41 Z"
+        fill="currentColor"
+      />
+
+      {/* Hover: tongue slides down out of the mouth */}
+      <g
+        className="origin-[32px_42px] translate-y-0 scale-y-0 transition-transform duration-300 ease-out group-hover:translate-y-[4px] group-hover:scale-y-100"
+      >
+        <path
+          d="M25 42 Q 25 54 32 54 Q 39 54 39 42 Z"
+          fill="#ff8a9a"
+        />
+      </g>
+    </svg>
+  );
+}

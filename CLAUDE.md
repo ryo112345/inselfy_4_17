@@ -5,9 +5,9 @@
 - 説明: (TODO: アプリの目的・概要を記載)
 
 ## 技術スタック
-- フロントエンド: React
+- フロントエンド: Next.js 16 (App Router) + React 19 + TypeScript + Tailwind 4
 - バックエンド: Go
-- データベース: (TODO)
+- データベース: PostgreSQL
 
 ## 開発ルール
 - (TODO: コーディング規約、ブランチ戦略など)
@@ -17,7 +17,7 @@
 
 ## 参考プロジェクト
 - サンプルプロジェクト: `~/practice/yuki/immortal-architecture-deploy`
-- このプロジェクトはサンプルプロジェクトを参考にするが、**フロントエンドは React で書く**（サンプル側の構成をそのまま流用しない）。
+- このプロジェクトはサンプルプロジェクトを参考に Next.js で構築する。サンプルの `frontend/src/app/` レイアウト・Tailwind 設定・コンポーネントスタイルをベースにし、必要に応じて簡略化する。
 
 ---
 
