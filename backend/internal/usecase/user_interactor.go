@@ -55,3 +55,28 @@ func (u *UserInteractor) GetByUsername(ctx context.Context, raw string) error {
 	}
 	return u.output.PresentUser(ctx, usr)
 }
+
+// UpdateProfile patches a user's profile. The update is scoped to a single row
+// so no transaction boundary is required.
+func (u *UserInteractor) UpdateProfile(ctx context.Context, rawUsername string, input user.UpdateProfileInput) error {
+	username, err := user.ParseUsername(rawUsername)
+	if err != nil {
+		return err
+	}
+	if input.Name != nil {
+		trimmed := strings.TrimSpace(*input.Name)
+		input.Name = &trimmed
+	}
+	if err := user.ValidateUpdateProfile(input); err != nil {
+		return err
+	}
+	existing, err := u.repo.GetByUsername(ctx, username)
+	if err != nil {
+		return err
+	}
+	updated, err := u.repo.UpdateProfile(ctx, existing.ID, input)
+	if err != nil {
+		return err
+	}
+	return u.output.PresentUser(ctx, updated)
+}

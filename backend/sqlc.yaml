@@ -1,0 +1,13 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    schema: "migrations"
+    queries: "internal/adapter/gateway/db/sqlc/queries"
+    gen:
+      go:
+        package: "generated"
+        out: "internal/adapter/gateway/db/sqlc/generated"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_result_struct_pointers: true
+        emit_params_struct_pointers: true

@@ -24,11 +24,20 @@ func NewUserPresenter() *UserPresenter {
 // PresentUser stores the converted user response.
 func (p *UserPresenter) PresentUser(_ context.Context, u *user.User) error {
 	p.response = &openapi.ModelsUserResponse{
-		Id:        u.ID,
-		Username:  u.Username.String(),
-		Name:      u.Name,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
+		Id:               u.ID,
+		Username:         u.Username.String(),
+		Name:             u.Name,
+		DisplayName:      u.DisplayName,
+		Headline:         u.Headline,
+		Location:         u.Location,
+		About:            u.About,
+		Industry:         u.Industry,
+		JobType:          u.JobType,
+		JobSeekingStatus: u.JobSeekingStatus,
+		ProfileColor:     u.ProfileColor,
+		IsPublic:         u.IsPublic,
+		CreatedAt:        u.CreatedAt,
+		UpdatedAt:        u.UpdatedAt,
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 MIGRATE ?= migrate
 MIGRATIONS_DIR ?= migrations
 OAPI_CODEGEN ?= $(shell go env GOPATH)/bin/oapi-codegen
+SQLC ?= $(shell go env GOPATH)/bin/sqlc
 OPENAPI_SPEC ?= ../api-schema/generated/openapi.yaml
 OAPI_CONFIG ?= oapi-codegen.yaml
 ENV_FILE ?= ../.env
@@ -44,6 +45,10 @@ oapi:
 	@test -f $(OPENAPI_SPEC) || (echo "OpenAPI spec not found at $(OPENAPI_SPEC). Run api-schema/scripts/generate-openapi.sh first."; exit 1)
 	@mkdir -p internal/adapter/http/generated/openapi
 	$(OAPI_CODEGEN) --config $(OAPI_CONFIG) $(OPENAPI_SPEC)
+
+.PHONY: sqlc
+sqlc:
+	$(SQLC) generate
 
 .PHONY: run
 run:

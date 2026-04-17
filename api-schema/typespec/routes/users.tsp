@@ -28,4 +28,13 @@ interface Users {
   getUserByUsername(
     @path username: string,
   ): UserResponse | NotFoundError | BadRequestError;
+
+  /** プロフィール更新（PATCH） */
+  @patch
+  @route("/{username}")
+  @summary("Update a user profile")
+  updateUserProfile(
+    @path username: string,
+    @body request: UpdateUserProfileRequest,
+  ): UserResponse | NotFoundError | BadRequestError;
 }

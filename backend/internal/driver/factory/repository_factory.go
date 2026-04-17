@@ -4,13 +4,34 @@ package factory
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	gatewaydb "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db"
+	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 // NewUserRepoFactory returns a factory function that produces UserRepository instances.
 func NewUserRepoFactory(pool *pgxpool.Pool) func() port.UserRepository {
 	return func() port.UserRepository {
-		return gatewaydb.NewUserRepository(pool)
+		return sqlcgw.NewUserRepository(pool)
+	}
+}
+
+// NewExperienceRepoFactory returns a factory function that produces ExperienceRepository instances.
+func NewExperienceRepoFactory(pool *pgxpool.Pool) func() port.ExperienceRepository {
+	return func() port.ExperienceRepository {
+		return sqlcgw.NewExperienceRepository(pool)
+	}
+}
+
+// NewEducationRepoFactory returns a factory function that produces EducationRepository instances.
+func NewEducationRepoFactory(pool *pgxpool.Pool) func() port.EducationRepository {
+	return func() port.EducationRepository {
+		return sqlcgw.NewEducationRepository(pool)
+	}
+}
+
+// NewSkillRepoFactory returns a factory function that produces SkillRepository instances.
+func NewSkillRepoFactory(pool *pgxpool.Pool) func() port.SkillRepository {
+	return func() port.SkillRepository {
+		return sqlcgw.NewSkillRepository(pool)
 	}
 }

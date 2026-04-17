@@ -42,6 +42,21 @@ func (e ModelsConflictErrorCode) Valid() bool {
 	}
 }
 
+// Defines values for ModelsForbiddenErrorCode.
+const (
+	ModelsForbiddenErrorCodeFORBIDDEN ModelsForbiddenErrorCode = "FORBIDDEN"
+)
+
+// Valid indicates whether the value is a known member of the ModelsForbiddenErrorCode enum.
+func (e ModelsForbiddenErrorCode) Valid() bool {
+	switch e {
+	case ModelsForbiddenErrorCodeFORBIDDEN:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ModelsNotFoundErrorCode.
 const (
 	ModelsNotFoundErrorCodeNOTFOUND ModelsNotFoundErrorCode = "NOT_FOUND"
@@ -55,6 +70,12 @@ func (e ModelsNotFoundErrorCode) Valid() bool {
 	default:
 		return false
 	}
+}
+
+// ModelsAttachSkillRequest スキル追加リクエスト
+type ModelsAttachSkillRequest struct {
+	// Name スキル名（1-100文字）
+	Name string `json:"name"`
 }
 
 // ModelsBadRequestError Bad Request エラー
@@ -76,6 +97,48 @@ type ModelsConflictError struct {
 // ModelsConflictErrorCode defines model for ModelsConflictError.Code.
 type ModelsConflictErrorCode string
 
+// ModelsCreateEducationRequest 学歴作成リクエスト
+type ModelsCreateEducationRequest struct {
+	// Degree 学部・学科・学位
+	Degree *string `json:"degree,omitempty"`
+
+	// EndYear 卒業年
+	EndYear *int32 `json:"endYear,omitempty"`
+
+	// School 学校名
+	School string `json:"school"`
+
+	// StartYear 入学年
+	StartYear *int32 `json:"startYear,omitempty"`
+}
+
+// ModelsCreateExperienceRequest 職歴作成リクエスト
+type ModelsCreateExperienceRequest struct {
+	// CompanyName 会社名
+	CompanyName string `json:"companyName"`
+
+	// Description 業務内容（自然文、5000文字以内）
+	Description *string `json:"description,omitempty"`
+
+	// EndMonth 終了月（現職の場合は null）
+	EndMonth *int32 `json:"endMonth,omitempty"`
+
+	// EndYear 終了年（現職の場合は null）
+	EndYear *int32 `json:"endYear,omitempty"`
+
+	// IsCurrent 現職フラグ
+	IsCurrent bool `json:"isCurrent"`
+
+	// StartMonth 開始月（1-12）
+	StartMonth int32 `json:"startMonth"`
+
+	// StartYear 開始年
+	StartYear int32 `json:"startYear"`
+
+	// Title 役職・タイトル
+	Title string `json:"title"`
+}
+
 // ModelsCreateUserRequest ユーザー作成リクエスト
 type ModelsCreateUserRequest struct {
 	// Name 表示名（1-100文字）
@@ -83,6 +146,39 @@ type ModelsCreateUserRequest struct {
 
 	// Username ユーザー名（3-20文字、半角英数字とアンダースコア）
 	Username string `json:"username"`
+}
+
+// ModelsEducationListResponse 学歴一覧
+type ModelsEducationListResponse struct {
+	// Items 学歴
+	Items []ModelsEducationResponse `json:"items"`
+}
+
+// ModelsEducationResponse 学歴
+type ModelsEducationResponse struct {
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Degree 学部・学科
+	Degree *string `json:"degree,omitempty"`
+
+	// EndYear 卒業年
+	EndYear *int32 `json:"endYear,omitempty"`
+
+	// Id ID
+	Id string `json:"id"`
+
+	// School 学校名
+	School string `json:"school"`
+
+	// StartYear 入学年
+	StartYear *int32 `json:"startYear,omitempty"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// UserId ユーザーID
+	UserId string `json:"userId"`
 }
 
 // ModelsErrorResponse 共通エラーレスポンス
@@ -97,6 +193,60 @@ type ModelsErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// ModelsExperienceListResponse 職歴一覧
+type ModelsExperienceListResponse struct {
+	// Items 職歴
+	Items []ModelsExperienceResponse `json:"items"`
+}
+
+// ModelsExperienceResponse 職歴
+type ModelsExperienceResponse struct {
+	// CompanyName 会社名
+	CompanyName string `json:"companyName"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Description 業務内容
+	Description string `json:"description"`
+
+	// EndMonth 終了月
+	EndMonth *int32 `json:"endMonth,omitempty"`
+
+	// EndYear 終了年
+	EndYear *int32 `json:"endYear,omitempty"`
+
+	// Id ID
+	Id string `json:"id"`
+
+	// IsCurrent 現職フラグ
+	IsCurrent bool `json:"isCurrent"`
+
+	// StartMonth 開始月
+	StartMonth int32 `json:"startMonth"`
+
+	// StartYear 開始年
+	StartYear int32 `json:"startYear"`
+
+	// Title タイトル
+	Title string `json:"title"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// UserId ユーザーID
+	UserId string `json:"userId"`
+}
+
+// ModelsForbiddenError Forbidden エラー
+type ModelsForbiddenError struct {
+	Code    ModelsForbiddenErrorCode `json:"code"`
+	Message string                   `json:"message"`
+}
+
+// ModelsForbiddenErrorCode defines model for ModelsForbiddenError.Code.
+type ModelsForbiddenErrorCode string
+
 // ModelsNotFoundError Not Found エラー
 type ModelsNotFoundError struct {
 	Code    ModelsNotFoundErrorCode `json:"code"`
@@ -106,16 +256,136 @@ type ModelsNotFoundError struct {
 // ModelsNotFoundErrorCode defines model for ModelsNotFoundError.Code.
 type ModelsNotFoundErrorCode string
 
+// ModelsSkillListResponse スキル一覧
+type ModelsSkillListResponse struct {
+	// Items スキル
+	Items []ModelsSkillResponse `json:"items"`
+}
+
+// ModelsSkillResponse スキル
+type ModelsSkillResponse struct {
+	// AttachedAt 追加日時（user_skills.created_at）
+	AttachedAt time.Time `json:"attachedAt"`
+
+	// Id スキルID
+	Id string `json:"id"`
+
+	// Name スキル名
+	Name string `json:"name"`
+}
+
+// ModelsUpdateEducationRequest 学歴更新リクエスト
+type ModelsUpdateEducationRequest struct {
+	// Degree 学部・学科・学位
+	Degree *string `json:"degree,omitempty"`
+
+	// EndYear 卒業年
+	EndYear *int32 `json:"endYear,omitempty"`
+
+	// School 学校名
+	School string `json:"school"`
+
+	// StartYear 入学年
+	StartYear *int32 `json:"startYear,omitempty"`
+}
+
+// ModelsUpdateExperienceRequest 職歴更新リクエスト（全項目置換）
+type ModelsUpdateExperienceRequest struct {
+	// CompanyName 会社名
+	CompanyName string `json:"companyName"`
+
+	// Description 業務内容（自然文、5000文字以内）
+	Description *string `json:"description,omitempty"`
+
+	// EndMonth 終了月（現職の場合は null）
+	EndMonth *int32 `json:"endMonth,omitempty"`
+
+	// EndYear 終了年（現職の場合は null）
+	EndYear *int32 `json:"endYear,omitempty"`
+
+	// IsCurrent 現職フラグ
+	IsCurrent bool `json:"isCurrent"`
+
+	// StartMonth 開始月（1-12）
+	StartMonth int32 `json:"startMonth"`
+
+	// StartYear 開始年
+	StartYear int32 `json:"startYear"`
+
+	// Title 役職・タイトル
+	Title string `json:"title"`
+}
+
+// ModelsUpdateUserProfileRequest プロフィール更新リクエスト（PATCH。指定したキーのみ差分適用）。値に null を渡すとフィールドをクリア。
+type ModelsUpdateUserProfileRequest struct {
+	// About 自己紹介
+	About *string `json:"about,omitempty"`
+
+	// DisplayName 表記名（日本語などのフル表示名）
+	DisplayName *string `json:"displayName,omitempty"`
+
+	// Headline ヘッドライン（肩書き・一言）
+	Headline *string `json:"headline,omitempty"`
+
+	// Industry 業界
+	Industry *string `json:"industry,omitempty"`
+
+	// IsPublic プロフィール公開フラグ
+	IsPublic *bool `json:"isPublic,omitempty"`
+
+	// JobSeekingStatus 求職ステータス
+	JobSeekingStatus *string `json:"jobSeekingStatus,omitempty"`
+
+	// JobType 職種タグ
+	JobType *string `json:"jobType,omitempty"`
+
+	// Location 居住地
+	Location *string `json:"location,omitempty"`
+
+	// Name 表示名
+	Name *string `json:"name,omitempty"`
+
+	// ProfileColor プロフィールカラー（`#RRGGBB`）
+	ProfileColor *string `json:"profileColor,omitempty"`
+}
+
 // ModelsUserResponse ユーザー情報
 type ModelsUserResponse struct {
+	// About 自己紹介
+	About *string `json:"about,omitempty"`
+
 	// CreatedAt 作成日時
 	CreatedAt time.Time `json:"createdAt"`
+
+	// DisplayName フル表示名
+	DisplayName *string `json:"displayName,omitempty"`
+
+	// Headline ヘッドライン
+	Headline *string `json:"headline,omitempty"`
 
 	// Id ユーザーID
 	Id string `json:"id"`
 
+	// Industry 業界
+	Industry *string `json:"industry,omitempty"`
+
+	// IsPublic 公開フラグ
+	IsPublic bool `json:"isPublic"`
+
+	// JobSeekingStatus 求職ステータス
+	JobSeekingStatus *string `json:"jobSeekingStatus,omitempty"`
+
+	// JobType 職種
+	JobType *string `json:"jobType,omitempty"`
+
+	// Location 居住地
+	Location *string `json:"location,omitempty"`
+
 	// Name 表示名
 	Name string `json:"name"`
+
+	// ProfileColor プロフィールカラー
+	ProfileColor *string `json:"profileColor,omitempty"`
 
 	// UpdatedAt 更新日時
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -127,6 +397,24 @@ type ModelsUserResponse struct {
 // UsersCreateUserJSONRequestBody defines body for UsersCreateUser for application/json ContentType.
 type UsersCreateUserJSONRequestBody = ModelsCreateUserRequest
 
+// UsersUpdateUserProfileJSONRequestBody defines body for UsersUpdateUserProfile for application/json ContentType.
+type UsersUpdateUserProfileJSONRequestBody = ModelsUpdateUserProfileRequest
+
+// EducationsCreateEducationJSONRequestBody defines body for EducationsCreateEducation for application/json ContentType.
+type EducationsCreateEducationJSONRequestBody = ModelsCreateEducationRequest
+
+// EducationsUpdateEducationJSONRequestBody defines body for EducationsUpdateEducation for application/json ContentType.
+type EducationsUpdateEducationJSONRequestBody = ModelsUpdateEducationRequest
+
+// ExperiencesCreateExperienceJSONRequestBody defines body for ExperiencesCreateExperience for application/json ContentType.
+type ExperiencesCreateExperienceJSONRequestBody = ModelsCreateExperienceRequest
+
+// ExperiencesUpdateExperienceJSONRequestBody defines body for ExperiencesUpdateExperience for application/json ContentType.
+type ExperiencesUpdateExperienceJSONRequestBody = ModelsUpdateExperienceRequest
+
+// SkillsAttachSkillJSONRequestBody defines body for SkillsAttachSkill for application/json ContentType.
+type SkillsAttachSkillJSONRequestBody = ModelsAttachSkillRequest
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Create a new user
@@ -135,6 +423,42 @@ type ServerInterface interface {
 	// Get a user by username
 	// (GET /api/users/{username})
 	UsersGetUserByUsername(ctx echo.Context, username string) error
+	// Update a user profile
+	// (PATCH /api/users/{username})
+	UsersUpdateUserProfile(ctx echo.Context, username string) error
+	// List educations for a user
+	// (GET /api/users/{username}/educations)
+	EducationsListEducations(ctx echo.Context, username string) error
+	// Create a new education
+	// (POST /api/users/{username}/educations)
+	EducationsCreateEducation(ctx echo.Context, username string) error
+	// Delete an education
+	// (DELETE /api/users/{username}/educations/{educationId})
+	EducationsDeleteEducation(ctx echo.Context, username string, educationId string) error
+	// Update an education
+	// (PUT /api/users/{username}/educations/{educationId})
+	EducationsUpdateEducation(ctx echo.Context, username string, educationId string) error
+	// List experiences for a user
+	// (GET /api/users/{username}/experiences)
+	ExperiencesListExperiences(ctx echo.Context, username string) error
+	// Create a new experience
+	// (POST /api/users/{username}/experiences)
+	ExperiencesCreateExperience(ctx echo.Context, username string) error
+	// Delete an experience
+	// (DELETE /api/users/{username}/experiences/{experienceId})
+	ExperiencesDeleteExperience(ctx echo.Context, username string, experienceId string) error
+	// Update an experience
+	// (PUT /api/users/{username}/experiences/{experienceId})
+	ExperiencesUpdateExperience(ctx echo.Context, username string, experienceId string) error
+	// List skills for a user
+	// (GET /api/users/{username}/skills)
+	SkillsListSkills(ctx echo.Context, username string) error
+	// Attach a skill to a user
+	// (POST /api/users/{username}/skills)
+	SkillsAttachSkill(ctx echo.Context, username string) error
+	// Detach a skill by name
+	// (DELETE /api/users/{username}/skills/{name})
+	SkillsDetachSkill(ctx echo.Context, username string, name string) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -164,6 +488,238 @@ func (w *ServerInterfaceWrapper) UsersGetUserByUsername(ctx echo.Context) error 
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UsersGetUserByUsername(ctx, username)
+	return err
+}
+
+// UsersUpdateUserProfile converts echo context to params.
+func (w *ServerInterfaceWrapper) UsersUpdateUserProfile(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UsersUpdateUserProfile(ctx, username)
+	return err
+}
+
+// EducationsListEducations converts echo context to params.
+func (w *ServerInterfaceWrapper) EducationsListEducations(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.EducationsListEducations(ctx, username)
+	return err
+}
+
+// EducationsCreateEducation converts echo context to params.
+func (w *ServerInterfaceWrapper) EducationsCreateEducation(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.EducationsCreateEducation(ctx, username)
+	return err
+}
+
+// EducationsDeleteEducation converts echo context to params.
+func (w *ServerInterfaceWrapper) EducationsDeleteEducation(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// ------------- Path parameter "educationId" -------------
+	var educationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "educationId", ctx.Param("educationId"), &educationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter educationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.EducationsDeleteEducation(ctx, username, educationId)
+	return err
+}
+
+// EducationsUpdateEducation converts echo context to params.
+func (w *ServerInterfaceWrapper) EducationsUpdateEducation(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// ------------- Path parameter "educationId" -------------
+	var educationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "educationId", ctx.Param("educationId"), &educationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter educationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.EducationsUpdateEducation(ctx, username, educationId)
+	return err
+}
+
+// ExperiencesListExperiences converts echo context to params.
+func (w *ServerInterfaceWrapper) ExperiencesListExperiences(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ExperiencesListExperiences(ctx, username)
+	return err
+}
+
+// ExperiencesCreateExperience converts echo context to params.
+func (w *ServerInterfaceWrapper) ExperiencesCreateExperience(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ExperiencesCreateExperience(ctx, username)
+	return err
+}
+
+// ExperiencesDeleteExperience converts echo context to params.
+func (w *ServerInterfaceWrapper) ExperiencesDeleteExperience(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// ------------- Path parameter "experienceId" -------------
+	var experienceId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "experienceId", ctx.Param("experienceId"), &experienceId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter experienceId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ExperiencesDeleteExperience(ctx, username, experienceId)
+	return err
+}
+
+// ExperiencesUpdateExperience converts echo context to params.
+func (w *ServerInterfaceWrapper) ExperiencesUpdateExperience(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// ------------- Path parameter "experienceId" -------------
+	var experienceId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "experienceId", ctx.Param("experienceId"), &experienceId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter experienceId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ExperiencesUpdateExperience(ctx, username, experienceId)
+	return err
+}
+
+// SkillsListSkills converts echo context to params.
+func (w *ServerInterfaceWrapper) SkillsListSkills(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SkillsListSkills(ctx, username)
+	return err
+}
+
+// SkillsAttachSkill converts echo context to params.
+func (w *ServerInterfaceWrapper) SkillsAttachSkill(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SkillsAttachSkill(ctx, username)
+	return err
+}
+
+// SkillsDetachSkill converts echo context to params.
+func (w *ServerInterfaceWrapper) SkillsDetachSkill(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// ------------- Path parameter "name" -------------
+	var name string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "name", ctx.Param("name"), &name, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter name: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SkillsDetachSkill(ctx, username, name)
 	return err
 }
 
@@ -197,5 +753,17 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.POST(baseURL+"/api/users", wrapper.UsersCreateUser)
 	router.GET(baseURL+"/api/users/:username", wrapper.UsersGetUserByUsername)
+	router.PATCH(baseURL+"/api/users/:username", wrapper.UsersUpdateUserProfile)
+	router.GET(baseURL+"/api/users/:username/educations", wrapper.EducationsListEducations)
+	router.POST(baseURL+"/api/users/:username/educations", wrapper.EducationsCreateEducation)
+	router.DELETE(baseURL+"/api/users/:username/educations/:educationId", wrapper.EducationsDeleteEducation)
+	router.PUT(baseURL+"/api/users/:username/educations/:educationId", wrapper.EducationsUpdateEducation)
+	router.GET(baseURL+"/api/users/:username/experiences", wrapper.ExperiencesListExperiences)
+	router.POST(baseURL+"/api/users/:username/experiences", wrapper.ExperiencesCreateExperience)
+	router.DELETE(baseURL+"/api/users/:username/experiences/:experienceId", wrapper.ExperiencesDeleteExperience)
+	router.PUT(baseURL+"/api/users/:username/experiences/:experienceId", wrapper.ExperiencesUpdateExperience)
+	router.GET(baseURL+"/api/users/:username/skills", wrapper.SkillsListSkills)
+	router.POST(baseURL+"/api/users/:username/skills", wrapper.SkillsAttachSkill)
+	router.DELETE(baseURL+"/api/users/:username/skills/:name", wrapper.SkillsDetachSkill)
 
 }

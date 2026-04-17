@@ -11,6 +11,7 @@ import (
 type UserInputPort interface {
 	Create(ctx context.Context, input user.CreateUserInput) error
 	GetByUsername(ctx context.Context, username string) error
+	UpdateProfile(ctx context.Context, username string, input user.UpdateProfileInput) error
 }
 
 // UserOutputPort defines presenter for users.
@@ -22,4 +23,5 @@ type UserOutputPort interface {
 type UserRepository interface {
 	Create(ctx context.Context, u *user.User) (*user.User, error)
 	GetByUsername(ctx context.Context, username user.Username) (*user.User, error)
+	UpdateProfile(ctx context.Context, id string, input user.UpdateProfileInput) (*user.User, error)
 }

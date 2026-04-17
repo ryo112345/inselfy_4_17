@@ -39,3 +39,10 @@ model ConflictError {
   code: "CONFLICT";
   message: string;
 }
+
+/** Forbidden エラー */
+@error
+model ForbiddenError {
+  code: "FORBIDDEN";
+  message: string;
+}

@@ -27,13 +27,29 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return nil, nil, func() {}, err
 	}
 	cleanup := func() { pool.Close() }
+	tx := driverdb.NewTxManager(pool)
 
 	userRepoFactory := factory.NewUserRepoFactory(pool)
+	experienceRepoFactory := factory.NewExperienceRepoFactory(pool)
+	educationRepoFactory := factory.NewEducationRepoFactory(pool)
+	skillRepoFactory := factory.NewSkillRepoFactory(pool)
+
 	userInputFactory := factory.NewUserInputFactory()
+	experienceInputFactory := factory.NewExperienceInputFactory()
+	educationInputFactory := factory.NewEducationInputFactory()
+	skillInputFactory := factory.NewSkillInputFactory()
+
 	userOutputFactory := httpfactory.NewUserOutputFactory()
+	experienceOutputFactory := httpfactory.NewExperienceOutputFactory()
+	educationOutputFactory := httpfactory.NewEducationOutputFactory()
+	skillOutputFactory := httpfactory.NewSkillOutputFactory()
+
+	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
+	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
+	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationOutputFactory, educationRepoFactory, userRepoFactory)
+	skillCtrl := httpcontroller.NewSkillController(skillInputFactory, skillOutputFactory, skillRepoFactory, userRepoFactory, tx)
 
 	e := echo.New()
-	e.HideBanner = true
 	e.Use(echomw.Recover())
 	e.Use(echomw.Logger())
 	e.Use(echomw.CORSWithConfig(echomw.CORSConfig{
@@ -42,8 +58,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 	}))
 
-	uc := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
-	server := httpcontroller.NewServer(uc)
+	server := httpcontroller.NewServer(userCtrl, experienceCtrl, educationCtrl, skillCtrl)
 	openapi.RegisterHandlers(e, server)
 
 	return e, cfg, cleanup, nil
