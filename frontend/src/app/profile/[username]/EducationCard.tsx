@@ -20,6 +20,12 @@ type Props = {
   educations: ModelsEducationResponse[];
 };
 
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: currentYear - 1969 }, (_, i) => currentYear - i);
+
+const selectClass =
+  "w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none";
+
 export function EducationCard({ username, educations }: Props) {
   const router = useRouter();
   const pc = useProfileColor();
@@ -48,6 +54,8 @@ export function EducationCard({ username, educations }: Props) {
     });
   };
 
+  const editingId = formState.mode === "edit" ? formState.education.id : null;
+
   return (
     <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
       <div className="flex items-center justify-between">
@@ -68,11 +76,11 @@ export function EducationCard({ username, educations }: Props) {
         )}
       </div>
 
-      {formState.mode !== "closed" && (
+      {formState.mode === "create" && (
         <EducationForm
           username={username}
-          mode={formState.mode}
-          education={formState.mode === "edit" ? formState.education : null}
+          mode="create"
+          education={null}
           onClose={() => setFormState({ mode: "closed" })}
         />
       )}
@@ -89,44 +97,55 @@ export function EducationCard({ username, educations }: Props) {
       ) : (
         <ul className="mt-2 divide-y divide-gray-100">
           {educations.map((e) => (
-            <li key={e.id} className="group flex items-start gap-3 py-4 first:pt-2">
-              <SchoolBadge name={e.school} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-3">
+            <li key={e.id} className="py-4 first:pt-2">
+              {editingId === e.id ? (
+                <EducationForm
+                  username={username}
+                  mode="edit"
+                  education={e}
+                  onClose={() => setFormState({ mode: "closed" })}
+                />
+              ) : (
+                <div className="group flex items-start gap-3">
+                  <SchoolBadge name={e.school} />
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-lg font-bold tracking-tight text-gray-900">
-                      {e.school}
-                    </h3>
-                    {e.degree ? (
-                      <p className="mt-0.5 text-base text-gray-700">{e.degree}</p>
-                    ) : null}
-                    <p className="mt-0.5 text-sm text-gray-500">
-                      {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
-                    </p>
-                  </div>
-                  {formState.mode === "closed" && (
-                    <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
-                      <button
-                        type="button"
-                        aria-label="編集"
-                        onClick={() => setFormState({ mode: "edit", education: e })}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-emerald-600 hover:text-emerald-700"
-                      >
-                        <PencilIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="削除"
-                        disabled={pending && deletingId === e.id}
-                        onClick={() => handleDelete(e.id)}
-                        className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-rose-500 hover:text-rose-600 disabled:opacity-50"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-lg font-bold tracking-tight text-gray-900">
+                          {e.school}
+                        </h3>
+                        {e.degree ? (
+                          <p className="mt-0.5 text-base text-gray-700">{e.degree}</p>
+                        ) : null}
+                        <p className="mt-0.5 text-sm text-gray-500">
+                          {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
+                        </p>
+                      </div>
+                      {formState.mode === "closed" && (
+                        <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                          <button
+                            type="button"
+                            aria-label="編集"
+                            onClick={() => setFormState({ mode: "edit", education: e })}
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-emerald-600 hover:text-emerald-700"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="削除"
+                            disabled={pending && deletingId === e.id}
+                            onClick={() => handleDelete(e.id)}
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-rose-500 hover:text-rose-600 disabled:opacity-50"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
             </li>
           ))}
         </ul>
@@ -148,12 +167,8 @@ function EducationForm({ username, mode, education, onClose }: FormProps) {
   const router = useRouter();
   const [school, setSchool] = useState(education?.school ?? "");
   const [degree, setDegree] = useState(education?.degree ?? "");
-  const [startYear, setStartYear] = useState(
-    education?.startYear != null ? String(education.startYear) : "",
-  );
-  const [endYear, setEndYear] = useState(
-    education?.endYear != null ? String(education.endYear) : "",
-  );
+  const [startYear, setStartYear] = useState<number | null>(education?.startYear ?? null);
+  const [endYear, setEndYear] = useState<number | null>(education?.endYear ?? null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -162,19 +177,11 @@ function EducationForm({ username, mode, education, onClose }: FormProps) {
     const body = {
       school: school.trim(),
       degree: degree.trim() === "" ? null : degree.trim(),
-      startYear: startYear === "" ? null : Number(startYear),
-      endYear: endYear === "" ? null : Number(endYear),
+      startYear: startYear,
+      endYear: endYear,
     };
     if (body.school === "") {
       setError("学校名を入力してください");
-      return;
-    }
-    if (body.startYear != null && Number.isNaN(body.startYear)) {
-      setError("入学年は数値で入力してください");
-      return;
-    }
-    if (body.endYear != null && Number.isNaN(body.endYear)) {
-      setError("卒業年は数値で入力してください");
       return;
     }
 
@@ -194,17 +201,14 @@ function EducationForm({ username, mode, education, onClose }: FormProps) {
   };
 
   return (
-    <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/40 px-4 py-4">
-      <h3 className="mb-3 text-sm font-semibold text-gray-700">
-        {mode === "create" ? "学歴を追加" : "学歴を編集"}
-      </h3>
+    <div className="mt-4">
       <Field label="学校名" required>
         <input
           type="text"
           value={school}
           onChange={(e) => setSchool(e.target.value)}
           maxLength={200}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
         />
       </Field>
       <Field label="学部・学科・学位" hint="例: 工学部情報工学科 / B.Eng">
@@ -213,32 +217,36 @@ function EducationForm({ username, mode, education, onClose }: FormProps) {
           value={degree}
           onChange={(e) => setDegree(e.target.value)}
           maxLength={200}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
         />
       </Field>
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[140px]">
           <Field label="入学年">
-            <input
-              type="number"
-              value={startYear}
-              min={1950}
-              max={2100}
-              onChange={(e) => setStartYear(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
-            />
+            <select
+              value={startYear ?? ""}
+              onChange={(e) => setStartYear(e.target.value ? Number(e.target.value) : null)}
+              className={selectClass}
+            >
+              <option value="">年</option>
+              {YEARS.map((y) => (
+                <option key={y} value={y}>{y}年</option>
+              ))}
+            </select>
           </Field>
         </div>
         <div className="flex-1 min-w-[140px]">
           <Field label="卒業年">
-            <input
-              type="number"
-              value={endYear}
-              min={1950}
-              max={2100}
-              onChange={(e) => setEndYear(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
-            />
+            <select
+              value={endYear ?? ""}
+              onChange={(e) => setEndYear(e.target.value ? Number(e.target.value) : null)}
+              className={selectClass}
+            >
+              <option value="">年</option>
+              {YEARS.map((y) => (
+                <option key={y} value={y}>{y}年</option>
+              ))}
+            </select>
           </Field>
         </div>
       </div>

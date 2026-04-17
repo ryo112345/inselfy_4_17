@@ -82,11 +82,11 @@ export function ExperienceCard({ username, experiences }: Props) {
         )}
       </div>
 
-      {formState.mode !== "closed" && (
+      {formState.mode === "create" && (
         <ExperienceForm
           username={username}
-          mode={formState.mode}
-          experience={formState.mode === "edit" ? formState.experience : null}
+          mode="create"
+          experience={null}
           onClose={() => setFormState({ mode: "closed" })}
         />
       )}
@@ -104,6 +104,7 @@ export function ExperienceCard({ username, experiences }: Props) {
         <ul className="mt-2">
           {groups.map((group, idx) => {
             const isLast = idx === groups.length - 1;
+            const editingId = formState.mode === "edit" ? formState.experience.id : null;
             return (
               <li
                 key={group.items[0].id}
@@ -111,18 +112,28 @@ export function ExperienceCard({ username, experiences }: Props) {
               >
                 <TimelineRail isLast={isLast} />
                 {group.items.length === 1 ? (
-                  <SingleExperience
-                    experience={group.items[0]}
-                    pending={pending && deletingId === group.items[0].id}
-                    showActions={formState.mode === "closed"}
-                    onEdit={() =>
-                      setFormState({ mode: "edit", experience: group.items[0] })
-                    }
-                    onDelete={() => handleDelete(group.items[0].id)}
-                  />
+                  editingId === group.items[0].id ? (
+                    <ExperienceForm
+                      username={username}
+                      mode="edit"
+                      experience={group.items[0]}
+                      onClose={() => setFormState({ mode: "closed" })}
+                    />
+                  ) : (
+                    <SingleExperience
+                      experience={group.items[0]}
+                      pending={pending && deletingId === group.items[0].id}
+                      showActions={formState.mode === "closed"}
+                      onEdit={() =>
+                        setFormState({ mode: "edit", experience: group.items[0] })
+                      }
+                      onDelete={() => handleDelete(group.items[0].id)}
+                    />
+                  )
                 ) : (
                   <GroupedExperience
                     group={group}
+                    editingId={editingId}
                     deletingId={deletingId}
                     pending={pending}
                     showActions={formState.mode === "closed"}
@@ -130,6 +141,8 @@ export function ExperienceCard({ username, experiences }: Props) {
                       setFormState({ mode: "edit", experience: e })
                     }
                     onDelete={handleDelete}
+                    username={username}
+                    onCloseEdit={() => setFormState({ mode: "closed" })}
                   />
                 )}
               </li>
@@ -357,18 +370,24 @@ function SingleExperience({
 
 function GroupedExperience({
   group,
+  editingId,
   deletingId,
   pending,
   showActions,
   onEdit,
   onDelete,
+  username,
+  onCloseEdit,
 }: {
   group: ExpGroup;
+  editingId: string | null;
   deletingId: string | null;
   pending: boolean;
   showActions: boolean;
   onEdit: (e: ModelsExperienceResponse) => void;
   onDelete: (id: string) => void;
+  username: string;
+  onCloseEdit: () => void;
 }) {
   const earliest = group.items.reduce(
     (acc, it) => {
@@ -413,6 +432,18 @@ function GroupedExperience({
         <ul className="mt-4 space-y-5">
           {group.items.map((e, i) => {
             const isLastRole = i === group.items.length - 1;
+            if (editingId === e.id) {
+              return (
+                <li key={e.id} className="relative">
+                  <ExperienceForm
+                    username={username}
+                    mode="edit"
+                    experience={e}
+                    onClose={onCloseEdit}
+                  />
+                </li>
+              );
+            }
             return (
               <li key={e.id} className="group relative">
                 <RoleRail isLast={isLastRole} />
@@ -454,18 +485,62 @@ type FormProps = {
   onClose: () => void;
 };
 
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: currentYear - 1969 }, (_, i) => currentYear - i);
+const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+const selectClass =
+  "w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none";
+
+function YearMonthSelect({
+  year,
+  month,
+  onChangeYear,
+  onChangeMonth,
+  disabled,
+}: {
+  year: number | null;
+  month: number | null;
+  onChangeYear: (v: number | null) => void;
+  onChangeMonth: (v: number | null) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex gap-2">
+      <select
+        value={year ?? ""}
+        disabled={disabled}
+        onChange={(e) => onChangeYear(e.target.value ? Number(e.target.value) : null)}
+        className={`${selectClass} disabled:bg-gray-100 disabled:text-gray-400`}
+      >
+        <option value="">年</option>
+        {YEARS.map((y) => (
+          <option key={y} value={y}>{y}年</option>
+        ))}
+      </select>
+      <select
+        value={month ?? ""}
+        disabled={disabled}
+        onChange={(e) => onChangeMonth(e.target.value ? Number(e.target.value) : null)}
+        className={`${selectClass} disabled:bg-gray-100 disabled:text-gray-400`}
+      >
+        <option value="">月</option>
+        {MONTHS.map((m) => (
+          <option key={m} value={m}>{m}月</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
   const router = useRouter();
   const [company, setCompany] = useState(experience?.companyName ?? "");
   const [title, setTitle] = useState(experience?.title ?? "");
-  const [startStr, setStartStr] = useState(
-    experience ? formatYearMonth(experience.startYear, experience.startMonth) : "",
-  );
-  const [endStr, setEndStr] = useState(
-    experience && experience.endYear != null && experience.endMonth != null
-      ? formatYearMonth(experience.endYear, experience.endMonth)
-      : "",
-  );
+  const [startYear, setStartYear] = useState<number | null>(experience?.startYear ?? null);
+  const [startMonth, setStartMonth] = useState<number | null>(experience?.startMonth ?? null);
+  const [endYear, setEndYear] = useState<number | null>(experience?.endYear ?? null);
+  const [endMonth, setEndMonth] = useState<number | null>(experience?.endMonth ?? null);
   const [isCurrent, setIsCurrent] = useState(experience?.isCurrent ?? false);
   const [description, setDescription] = useState(experience?.description ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -473,25 +548,21 @@ function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
 
   const handleSave = () => {
     setError(null);
-    const startParsed = parseYearMonth(startStr);
-    if (!startParsed) {
+    if (!startYear || !startMonth) {
       setError("開始年月を入力してください");
       return;
     }
-    if (!isCurrent) {
-      const endParsed = parseYearMonth(endStr);
-      if (!endParsed) {
-        setError("終了年月を入力してください (現職の場合はチェックを入れてください)");
-        return;
-      }
+    if (!isCurrent && (!endYear || !endMonth)) {
+      setError("終了年月を入力してください (現職の場合はチェックを入れてください)");
+      return;
     }
     const body = {
       companyName: company.trim(),
       title: title.trim(),
-      startYear: startParsed.year,
-      startMonth: startParsed.month,
-      endYear: isCurrent ? null : parseYearMonth(endStr)?.year ?? null,
-      endMonth: isCurrent ? null : parseYearMonth(endStr)?.month ?? null,
+      startYear,
+      startMonth,
+      endYear: isCurrent ? null : endYear,
+      endMonth: isCurrent ? null : endMonth,
       isCurrent,
       description: description.trim(),
     };
@@ -512,17 +583,14 @@ function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
   };
 
   return (
-    <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/40 px-4 py-4">
-      <h3 className="mb-3 text-sm font-semibold text-gray-700">
-        {mode === "create" ? "職歴を追加" : "職歴を編集"}
-      </h3>
+    <div className="mt-4">
       <Field label="会社名" required>
         <input
           type="text"
           value={company}
           onChange={(e) => setCompany(e.target.value)}
           maxLength={200}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
         />
       </Field>
       <Field label="役職・タイトル" required>
@@ -531,39 +599,42 @@ function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={200}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
         />
       </Field>
       <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[140px]">
+        <div className="flex-1 min-w-[200px]">
           <Field label="開始年月" required>
-            <input
-              type="month"
-              value={startStr}
-              onChange={(e) => setStartStr(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
+            <YearMonthSelect
+              year={startYear}
+              month={startMonth}
+              onChangeYear={setStartYear}
+              onChangeMonth={setStartMonth}
             />
           </Field>
         </div>
-        <div className="flex-1 min-w-[140px]">
+        <div className="flex-1 min-w-[200px]">
           <Field label="終了年月">
-            <input
-              type="month"
-              value={endStr}
+            <YearMonthSelect
+              year={endYear}
+              month={endMonth}
+              onChangeYear={setEndYear}
+              onChangeMonth={setEndMonth}
               disabled={isCurrent}
-              onChange={(e) => setEndStr(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
             />
           </Field>
         </div>
       </div>
-      <label className="mb-4 flex items-center gap-2 text-sm text-gray-700">
+      <label className="mt-1 mb-4 ml-2 flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
         <input
           type="checkbox"
           checked={isCurrent}
           onChange={(e) => {
             setIsCurrent(e.target.checked);
-            if (e.target.checked) setEndStr("");
+            if (e.target.checked) {
+              setEndYear(null);
+              setEndMonth(null);
+            }
           }}
           className="h-4 w-4 rounded border-gray-300 text-emerald-700 focus:ring-emerald-600"
         />
@@ -571,7 +642,7 @@ function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
       </label>
       <Field
         label="業務内容"
-        hint={`自然な文章で記述してください (${description.length} / 5000)`}
+        hint={`${description.length} / 5000`}
       >
         <textarea
           value={description}
@@ -579,7 +650,7 @@ function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
           maxLength={5000}
           rows={6}
           placeholder="役割、成果、使用した技術などを自由に記述してください。"
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm leading-relaxed text-gray-900 focus:border-emerald-600 focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm leading-relaxed text-gray-900 focus:border-emerald-600 focus:outline-none"
         />
       </Field>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
@@ -628,18 +699,3 @@ function formatDuration(
   return rem > 0 ? `${years}年${rem}ヶ月` : `${years}年`;
 }
 
-function formatYearMonth(year: number, month: number): string {
-  return `${year}-${String(month).padStart(2, "0")}`;
-}
-
-function parseYearMonth(
-  s: string,
-): { year: number; month: number } | null {
-  const m = /^(\d{4})-(\d{1,2})$/.exec(s);
-  if (!m) return null;
-  const year = Number(m[1]);
-  const month = Number(m[2]);
-  if (Number.isNaN(year) || Number.isNaN(month)) return null;
-  if (month < 1 || month > 12) return null;
-  return { year, month };
-}

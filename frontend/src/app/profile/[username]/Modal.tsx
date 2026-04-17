@@ -78,7 +78,7 @@ export function Field({ label, hint, error, required, children }: FieldProps) {
         {required ? <span className="ml-1 text-rose-600">*</span> : null}
       </span>
       {children}
-      {hint ? <span className="text-xs text-gray-500">{hint}</span> : null}
+      {hint ? <span className="self-end text-xs text-gray-500">{hint}</span> : null}
       {error ? <span className="text-xs text-rose-600">{error}</span> : null}
     </label>
   );
