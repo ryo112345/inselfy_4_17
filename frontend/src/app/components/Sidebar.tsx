@@ -81,7 +81,7 @@ export function Sidebar({ username, displayName, diagnostics = [], debug }: Prop
                   <li key={item.label}>
                     <Link
                       href={href}
-                      className="sb-item flex items-center rounded-md py-2 px-2 text-sm text-gray-700 transition-colors gap-3"
+                      className={`sb-item flex items-center rounded-md py-2 px-2 text-sm text-gray-700 transition-colors gap-3 ${open ? "" : "w-9"}`}
                     >
                       <span className="shrink-0 w-5 h-5">
                         <item.icon />
@@ -100,7 +100,7 @@ export function Sidebar({ username, displayName, diagnostics = [], debug }: Prop
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="sb-item flex items-center rounded-md py-2 px-2 text-sm text-gray-700 transition-colors gap-3"
+                    className={`sb-item flex items-center rounded-md py-2 px-2 text-sm text-gray-700 transition-colors gap-3 ${open ? "" : "w-9"}`}
                   >
                     <span className="shrink-0 w-5 h-5">
                       <item.icon />
@@ -140,7 +140,7 @@ export function Sidebar({ username, displayName, diagnostics = [], debug }: Prop
           <div className="shrink-0 px-1 py-2 space-y-0.5">
 <Link
               href={profileHref}
-              className="sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3"
+              className={`sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3 ${open ? "" : "w-11"}`}
             >
               <span className="flex shrink-0 w-9 h-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white leading-none">
                 {initial}
