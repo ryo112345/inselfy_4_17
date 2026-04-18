@@ -74,6 +74,7 @@ func (p *WorkValuesPresenter) PresentResult(_ context.Context, r *workvalues.Res
 		UserID:    r.UserID,
 		Needs:     needs,
 		Values:    values,
+		CreatedAt: r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 	return nil
 }
@@ -105,6 +106,7 @@ type ResultResponse struct {
 	UserID    string               `json:"user_id"`
 	Needs     []NeedScore          `json:"needs"`
 	Values    []ValueScoreResponse `json:"values"`
+	CreatedAt string               `json:"created_at"`
 }
 
 type NeedScore struct {

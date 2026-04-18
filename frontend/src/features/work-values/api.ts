@@ -49,6 +49,7 @@ export interface ResultDTO {
   user_id: string;
   needs: NeedScoreDTO[];
   values: ValueScoreDTO[];
+  created_at: string;
 }
 
 export async function startSession(userId: string): Promise<SessionDTO> {

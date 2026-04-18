@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
+import { Sidebar } from "@/app/components/Sidebar";
 
 import { PanelNavigator } from "./PanelNavigator";
 import { ProfileColorContext } from "./ProfileColorContext";
@@ -21,7 +22,12 @@ export default async function ProfilePage({
 
   return (
     <ProfileColorContext value={profileColor}>
-      <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8">
+      <Sidebar
+        username={data.username}
+        displayName={data.user.displayName}
+        diagnostics={data.diagnostics}
+      />
+      <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 ml-[50px]">
         <PanelNavigator
           username={data.username}
           wvSessionId={data.wvSessionId}

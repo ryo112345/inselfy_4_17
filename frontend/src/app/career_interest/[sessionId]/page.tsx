@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 import { getResultBySessionId } from "@/features/career-interest/api";
+import { Sidebar } from "@/app/components/Sidebar";
 import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
@@ -30,7 +31,12 @@ export default async function CareerInterestResultPage({
 
   return (
     <ProfileColorContext value={profileColor}>
-      <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8">
+      <Sidebar
+        username={data.username}
+        displayName={data.user.displayName}
+        diagnostics={data.diagnostics}
+      />
+      <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 ml-[50px]">
         <PanelNavigator
           username={data.username}
           wvSessionId={data.wvSessionId}

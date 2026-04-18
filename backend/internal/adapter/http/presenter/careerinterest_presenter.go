@@ -63,6 +63,7 @@ func (p *CareerInterestPresenter) PresentResult(_ context.Context, r *careerinte
 		UserID:      r.UserID,
 		BasicScores: basicScores,
 		TypeScores:  typeScores,
+		CreatedAt:   r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 	return nil
 }
@@ -91,6 +92,7 @@ type CIResultResponse struct {
 	UserID      string                 `json:"user_id"`
 	BasicScores []CIBasicScoreResponse `json:"basic_scores"`
 	TypeScores  []CITypeScoreResponse  `json:"type_scores"`
+	CreatedAt   string                 `json:"created_at"`
 }
 
 type CIBasicScoreResponse struct {

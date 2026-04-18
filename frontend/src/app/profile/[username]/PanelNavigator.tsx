@@ -32,7 +32,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, i
   const panelPx = 672;
   const gapPx = 12;
 
-  const focusedTransform = `calc(50vw - ${panelPx / 2}px - ${activeIndex * (panelPx + gapPx)}px)`;
+  const focusedTransform = `calc(50% - ${panelPx / 2}px - ${activeIndex * (panelPx + gapPx)}px)`;
   const expandedTransform = `-${activeIndex * (panelPx + gapPx)}px`;
 
   return (

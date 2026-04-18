@@ -43,6 +43,7 @@ export interface ResultDTO {
   user_id: string;
   basic_scores: BasicScoreDTO[];
   type_scores: TypeScoreDTO[];
+  created_at: string;
 }
 
 export async function startSession(userId: string): Promise<SessionDTO> {

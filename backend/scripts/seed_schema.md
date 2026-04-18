@@ -101,6 +101,7 @@ user_skills(user_id, skill_id)      -- 中間テーブル
 |--------|--------|------|
 | `id` | uuid | PK |
 | `user_id` | uuid | FK → users |
+| `team_member_id` | uuid | nullable、FK → team_members。チームメンバーの診断時に紐付け |
 | `circular_triads` | int | 循環三つ組の数 d |
 | `consistency_coefficient` | numeric | ζ = 1 - d/d_max |
 | `consistency_level` | text | `high`/`medium`/`low`/`very_low` |
