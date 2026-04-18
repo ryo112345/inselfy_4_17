@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
@@ -15,6 +16,8 @@ export default async function ProfilePage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
+  const cookieStore = await cookies();
+  const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
   const data = await fetchPanelDataByUsername(username);
   if (!data) notFound();
 
@@ -26,6 +29,7 @@ export default async function ProfilePage({
         username={data.username}
         displayName={data.user.displayName}
         diagnostics={data.diagnostics}
+        defaultOpen={sidebarOpen}
       />
       <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 ml-[50px]">
         <PanelNavigator

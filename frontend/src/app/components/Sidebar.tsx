@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { DiagnosticSummary } from "@/features/profile/fetchPanelData";
 
@@ -8,6 +8,7 @@ type Props = {
   username: string;
   displayName?: string | null;
   diagnostics?: DiagnosticSummary[];
+  defaultOpen?: boolean;
   debug?: boolean;
 };
 
@@ -26,8 +27,17 @@ const navItems2 = [
   { label: "スカウト", href: "/scout", icon: SendIcon },
 ];
 
-export function Sidebar({ username, displayName, diagnostics = [], debug }: Props) {
-  const [open, setOpen] = useState(false);
+export function Sidebar({ username, displayName, diagnostics = [], defaultOpen = false, debug }: Props) {
+  const [open, setOpen] = useState(defaultOpen);
+  const initialRender = useRef(true);
+
+  useEffect(() => {
+    initialRender.current = false;
+  }, []);
+
+  useEffect(() => {
+    document.cookie = `sidebar-open=${open}; path=/; max-age=31536000; SameSite=Lax`;
+  }, [open]);
 
   const profileHref = `/profile/${username}`;
   const initial = displayName ? displayName.charAt(0) : username.charAt(0);
@@ -53,7 +63,7 @@ export function Sidebar({ username, displayName, diagnostics = [], debug }: Prop
       )}
       <div
         data-sidebar
-        className={`fixed top-0 left-0 z-50 h-screen overflow-hidden transition-[width] duration-200 ease-in-out ${open ? "w-72" : "w-[50px] cursor-pointer"}`}
+        className={`fixed top-0 left-0 z-50 h-screen overflow-hidden ${initialRender.current ? "" : "transition-[width] duration-200 ease-in-out"} ${open ? "w-72" : "w-[50px] cursor-pointer"}`}
         onClick={open ? undefined : () => setOpen(true)}
       >
         <button
