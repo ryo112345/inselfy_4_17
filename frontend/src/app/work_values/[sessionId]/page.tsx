@@ -19,10 +19,28 @@ import {
   type ValueId,
 } from "@/features/work-values/lib/needs";
 
+const SCORE_COLORS = {
+  tier1: "#149470",
+  tier2: "#10b77f",
+  tier3: "#8aa3d6",
+  tier4: "#cfd0cd",
+};
+
+const DEFAULT_BADGE = {
+  border: "#149470",
+  text: "#149470",
+  bg: "#ffffff",
+};
+
+type BadgeColors = typeof DEFAULT_BADGE;
+
 export default function WorkValuesResultPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [result, setResult] = useState<ResultDTO | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const colors = SCORE_COLORS;
+  const [badge, setBadge] = useState(DEFAULT_BADGE);
+  const [showDebug, setShowDebug] = useState(true);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -52,9 +70,20 @@ export default function WorkValuesResultPage() {
 
   return (
     <main className="min-h-screen bg-[#f6f7f5] px-4 pt-6 pb-12">
+      {showDebug && (
+        <BadgeDebugPanel badge={badge} onChange={setBadge} onClose={() => setShowDebug(false)} />
+      )}
+      {!showDebug && (
+        <button
+          onClick={() => setShowDebug(true)}
+          className="fixed top-4 right-4 z-50 bg-gray-800 text-white text-xs px-3 py-1.5 rounded-full shadow"
+        >
+          🎨 バッジ設定
+        </button>
+      )}
       <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 py-8">
-        <ValuesSection values={sortedValues} />
-        <NeedsSection values={sortedValues} needScoreMap={needScoreMap} />
+        <ValuesSection values={sortedValues} colors={colors} badge={badge} />
+        <NeedsSection values={sortedValues} needScoreMap={needScoreMap} colors={colors} badge={badge} />
       </div>
     </main>
   );
@@ -64,7 +93,9 @@ export default function WorkValuesResultPage() {
 /*  WORK VALUES スコア                                                  */
 /* ------------------------------------------------------------------ */
 
-function ValuesSection({ values }: { values: ResultDTO["values"] }) {
+type ScoreColors = typeof SCORE_COLORS;
+
+function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"]; colors: ScoreColors; badge: BadgeColors }) {
   const maxScore = Math.max(...values.map((v) => v.display_score));
 
   return (
@@ -78,14 +109,13 @@ function ValuesSection({ values }: { values: ResultDTO["values"] }) {
         {values.map((v, i) => {
           const vid = v.value_id as ValueId;
           const barPct = (v.display_score / maxScore) * 100;
-          const isHighlight = i < 2;
-          const barColor = isHighlight ? "bg-emerald-600" : "bg-[#b0b5a9]";
+          const barColor = scoreColor(v.display_score, colors);
 
           return (
             <div key={vid} className="py-2 first:pt-0">
               {/* top row */}
               <div className="flex items-start gap-3">
-                <ValueBadge valueId={vid} variant="outline" />
+                <ValueBadge valueId={vid} variant="outline" badge={badge} />
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-1.5">
@@ -102,7 +132,7 @@ function ValuesSection({ values }: { values: ResultDTO["values"] }) {
                   {VALUE_DESCRIPTIONS[vid]}
                 </p>
 
-                <span className="text-[22px] font-bold text-gray-700 tabular-nums ml-1 w-14 text-right shrink-0">
+                <span className="text-[22px] font-bold tabular-nums ml-1 w-14 text-right shrink-0" style={{ color: barColor }}>
                   {v.display_score.toFixed(1)}
                 </span>
 
@@ -112,10 +142,10 @@ function ValuesSection({ values }: { values: ResultDTO["values"] }) {
               </div>
 
               {/* score bar */}
-              <div className="mt-2 h-[6px] rounded-full bg-gray-200 overflow-hidden">
+              <div className="mt-2 h-[10px] rounded-full bg-gray-200 overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${barColor}`}
-                  style={{ width: `${barPct}%` }}
+                  className="h-full rounded-full"
+                  style={{ width: `${barPct}%`, backgroundColor: barColor }}
                 />
               </div>
             </div>
@@ -133,9 +163,13 @@ function ValuesSection({ values }: { values: ResultDTO["values"] }) {
 function NeedsSection({
   values,
   needScoreMap,
+  colors,
+  badge,
 }: {
   values: ResultDTO["values"];
   needScoreMap: Map<string, NeedScoreDTO>;
+  colors: ScoreColors;
+  badge: BadgeColors;
 }) {
   return (
     <section>
@@ -157,7 +191,7 @@ function NeedsSection({
             <div key={vid}>
               {/* group header */}
               <div className="flex items-center gap-2 mb-2">
-                <ValueBadge valueId={vid} variant="filled" size="sm" />
+                <ValueBadge valueId={vid} variant="filled" size="sm" badge={badge} />
                 <span className="text-[14px] font-bold text-gray-700">
                   {VALUE_LABELS[vid]}
                 </span>
@@ -166,7 +200,7 @@ function NeedsSection({
               {/* needs list */}
               <div className="flex flex-col gap-0.5">
                 {needsWithScores.map(({ nid, score }) => (
-                  <NeedRow key={nid} needId={nid} score={score} />
+                  <NeedRow key={nid} needId={nid} score={score} colors={colors} />
                 ))}
               </div>
             </div>
@@ -183,11 +217,11 @@ function NeedsSection({
 
 const MEDAL = ["🥇", "🥈", "🥉"] as const;
 
-function NeedRow({ needId, score }: { needId: NeedId; score: NeedScoreDTO }) {
+function NeedRow({ needId, score, colors }: { needId: NeedId; score: NeedScoreDTO; colors: ScoreColors }) {
   const medal = score.rank <= 3 ? MEDAL[score.rank - 1] : null;
   const isTop = score.rank <= 3;
   const rankColor = isTop ? "text-emerald-700" : "text-gray-400";
-  const barColor = score.display_score >= 50 ? "bg-emerald-600" : "bg-[#b0b5a9]";
+  const barColor = scoreColor(score.display_score, colors);
 
   return (
     <div className="flex items-center gap-2 py-2.5 px-1">
@@ -213,14 +247,14 @@ function NeedRow({ needId, score }: { needId: NeedId; score: NeedScoreDTO }) {
       <div className="w-[72px] shrink-0">
         <div className="h-[5px] rounded-full bg-gray-200 overflow-hidden">
           <div
-            className={`h-full rounded-full ${barColor}`}
-            style={{ width: `${score.display_score}%` }}
+            className="h-full rounded-full"
+            style={{ width: `${score.display_score}%`, backgroundColor: barColor }}
           />
         </div>
       </div>
 
       {/* score */}
-      <span className="text-[14px] font-bold text-gray-700 tabular-nums w-10 text-right shrink-0">
+      <span className="text-[14px] font-bold tabular-nums w-10 text-right shrink-0" style={{ color: barColor }}>
         {score.display_score.toFixed(1)}
       </span>
 
@@ -240,17 +274,20 @@ function ValueBadge({
   valueId,
   variant,
   size = "md",
+  badge,
 }: {
   valueId: ValueId;
   variant: "outline" | "filled";
   size?: "sm" | "md";
+  badge: BadgeColors;
 }) {
   const dim = size === "sm" ? "w-7 h-7 text-[11px]" : "w-9 h-9 text-[13px]";
 
   if (variant === "outline") {
     return (
       <span
-        className={`${dim} rounded-full border-2 border-emerald-700 text-emerald-700 font-bold flex items-center justify-center shrink-0`}
+        className={`${dim} rounded-full font-semibold flex items-center justify-center shrink-0`}
+        style={{ border: `1px solid ${badge.border}`, color: badge.text, backgroundColor: badge.bg }}
       >
         {VALUE_ABBREVIATIONS[valueId]}
       </span>
@@ -259,10 +296,72 @@ function ValueBadge({
 
   return (
     <span
-      className={`${dim} rounded-full bg-emerald-700 text-white font-bold flex items-center justify-center shrink-0`}
+      className={`${dim} rounded-full font-bold flex items-center justify-center shrink-0`}
+      style={{ backgroundColor: badge.text, color: badge.bg }}
     >
       {VALUE_ABBREVIATIONS[valueId]}
     </span>
+  );
+}
+
+function scoreColor(score: number, colors: ScoreColors): string {
+  if (score >= 90) return colors.tier1;
+  if (score >= 55) return colors.tier2;
+  if (score >= 30) return colors.tier3;
+  return colors.tier4;
+}
+
+
+function BadgeDebugPanel({
+  badge,
+  onChange,
+  onClose,
+}: {
+  badge: BadgeColors;
+  onChange: (b: BadgeColors) => void;
+  onClose: () => void;
+}) {
+  const fields = [
+    { key: "border" as const, label: "枠線" },
+    { key: "text" as const, label: "文字" },
+    { key: "bg" as const, label: "背景" },
+  ];
+
+  return (
+    <div className="fixed top-4 right-4 z-50 bg-white rounded-xl shadow-lg border border-gray-200 p-4 w-64">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm font-bold text-gray-700">🎨 バッジ色設定</span>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+      </div>
+      {fields.map(({ key, label }) => (
+        <div key={key} className="flex items-center gap-2 mb-2">
+          <input
+            type="color"
+            value={badge[key]}
+            onChange={(e) => onChange({ ...badge, [key]: e.target.value })}
+            className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+          />
+          <div className="flex-1">
+            <div className="text-xs font-semibold text-gray-700">{label}</div>
+            <div className="text-[10px] text-gray-400 font-mono">{badge[key]}</div>
+          </div>
+        </div>
+      ))}
+      <div className="mt-3 flex items-center justify-center gap-3">
+        <span
+          className="w-9 h-9 text-[13px] rounded-full font-semibold flex items-center justify-center"
+          style={{ border: `1px solid ${badge.border}`, color: badge.text, backgroundColor: badge.bg }}
+        >
+          Id
+        </span>
+        <span
+          className="w-7 h-7 text-[11px] rounded-full font-bold flex items-center justify-center"
+          style={{ backgroundColor: badge.text, color: badge.bg }}
+        >
+          Id
+        </span>
+      </div>
+    </div>
   );
 }
 
