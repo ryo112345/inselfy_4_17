@@ -53,7 +53,7 @@ export function Sidebar({ username, displayName, diagnostics = [], debug }: Prop
       )}
       <div
         data-sidebar
-        className={`fixed top-0 left-0 z-50 h-screen overflow-hidden transition-all duration-200 ease-in-out ${open ? "w-72" : "w-[50px] cursor-pointer"}`}
+        className={`fixed top-0 left-0 z-50 h-screen overflow-hidden transition-[width] duration-200 ease-in-out ${open ? "w-72" : "w-[50px] cursor-pointer"}`}
         onClick={open ? undefined : () => setOpen(true)}
       >
         <button
