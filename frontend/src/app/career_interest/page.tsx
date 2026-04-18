@@ -100,7 +100,7 @@ function FloatingShapes() {
         {SHAPES.map((s, i) => (
           <div
             key={i}
-            className="absolute"
+            className="absolute blur-[3px]"
             style={{
               width: s.size,
               height: s.size,

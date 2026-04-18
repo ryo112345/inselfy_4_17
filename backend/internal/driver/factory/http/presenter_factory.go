@@ -37,3 +37,10 @@ func NewWorkValuesOutputFactory() func() *presenter.WorkValuesPresenter {
 		return presenter.NewWorkValuesPresenter()
 	}
 }
+
+// NewCareerInterestOutputFactory returns a factory function that creates CareerInterestPresenter instances.
+func NewCareerInterestOutputFactory() func() *presenter.CareerInterestPresenter {
+	return func() *presenter.CareerInterestPresenter {
+		return presenter.NewCareerInterestPresenter()
+	}
+}

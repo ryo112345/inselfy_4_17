@@ -56,3 +56,31 @@ func NewWVScoreRepoFactory(pool *pgxpool.Pool) func() port.WorkValuesScoreReposi
 		return sqlcgw.NewWorkValuesScoreRepository(pool)
 	}
 }
+
+// NewCISessionRepoFactory returns a factory function that produces CareerInterestSessionRepository instances.
+func NewCISessionRepoFactory(pool *pgxpool.Pool) func() port.CareerInterestSessionRepository {
+	return func() port.CareerInterestSessionRepository {
+		return sqlcgw.NewCareerInterestSessionRepository(pool)
+	}
+}
+
+// NewCIResultRepoFactory returns a factory function that produces CareerInterestResultRepository instances.
+func NewCIResultRepoFactory(pool *pgxpool.Pool) func() port.CareerInterestResultRepository {
+	return func() port.CareerInterestResultRepository {
+		return sqlcgw.NewCareerInterestResultRepository(pool)
+	}
+}
+
+// NewCIBasicScoreRepoFactory returns a factory function that produces CareerInterestBasicScoreRepository instances.
+func NewCIBasicScoreRepoFactory(pool *pgxpool.Pool) func() port.CareerInterestBasicScoreRepository {
+	return func() port.CareerInterestBasicScoreRepository {
+		return sqlcgw.NewCareerInterestBasicScoreRepository(pool)
+	}
+}
+
+// NewCITypeScoreRepoFactory returns a factory function that produces CareerInterestTypeScoreRepository instances.
+func NewCITypeScoreRepoFactory(pool *pgxpool.Pool) func() port.CareerInterestTypeScoreRepository {
+	return func() port.CareerInterestTypeScoreRepository {
+		return sqlcgw.NewCareerInterestTypeScoreRepository(pool)
+	}
+}

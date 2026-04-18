@@ -36,24 +36,31 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	wvSessionRepoFactory := factory.NewWVSessionRepoFactory(pool)
 	wvResultRepoFactory := factory.NewWVResultRepoFactory(pool)
 	wvScoreRepoFactory := factory.NewWVScoreRepoFactory(pool)
+	ciSessionRepoFactory := factory.NewCISessionRepoFactory(pool)
+	ciResultRepoFactory := factory.NewCIResultRepoFactory(pool)
+	ciBasicScoreRepoFactory := factory.NewCIBasicScoreRepoFactory(pool)
+	ciTypeScoreRepoFactory := factory.NewCITypeScoreRepoFactory(pool)
 
 	userInputFactory := factory.NewUserInputFactory()
 	experienceInputFactory := factory.NewExperienceInputFactory()
 	educationInputFactory := factory.NewEducationInputFactory()
 	skillInputFactory := factory.NewSkillInputFactory()
 	wvInputFactory := factory.NewWorkValuesInputFactory()
+	ciInputFactory := factory.NewCareerInterestInputFactory()
 
 	userOutputFactory := httpfactory.NewUserOutputFactory()
 	experienceOutputFactory := httpfactory.NewExperienceOutputFactory()
 	educationOutputFactory := httpfactory.NewEducationOutputFactory()
 	skillOutputFactory := httpfactory.NewSkillOutputFactory()
 	wvOutputFactory := httpfactory.NewWorkValuesOutputFactory()
+	ciOutputFactory := httpfactory.NewCareerInterestOutputFactory()
 
 	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
 	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
 	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationOutputFactory, educationRepoFactory, userRepoFactory)
 	skillCtrl := httpcontroller.NewSkillController(skillInputFactory, skillOutputFactory, skillRepoFactory, userRepoFactory, tx)
 	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvOutputFactory, wvSessionRepoFactory, wvResultRepoFactory, wvScoreRepoFactory)
+	ciCtrl := httpcontroller.NewCareerInterestController(ciInputFactory, ciOutputFactory, ciSessionRepoFactory, ciResultRepoFactory, ciBasicScoreRepoFactory, ciTypeScoreRepoFactory)
 
 	e := echo.New()
 	e.Use(echomw.Recover())
@@ -77,6 +84,18 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 	wvGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
 		return wvCtrl.GetResultBySessionID(c, c.Param("sessionId"))
+	})
+
+	ciGroup := e.Group("/api/career-interest")
+	ciGroup.POST("/sessions", ciCtrl.StartSession)
+	ciGroup.POST("/sessions/:sessionId/results", func(c echo.Context) error {
+		return ciCtrl.SubmitResult(c, c.Param("sessionId"))
+	})
+	ciGroup.GET("/users/:userId/results/latest", func(c echo.Context) error {
+		return ciCtrl.GetLatestResult(c, c.Param("userId"))
+	})
+	ciGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
+		return ciCtrl.GetResultBySessionID(c, c.Param("sessionId"))
 	})
 
 	return e, cfg, cleanup, nil

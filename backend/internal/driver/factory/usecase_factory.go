@@ -59,6 +59,25 @@ func NewWorkValuesInputFactory() func(
 	}
 }
 
+// NewCareerInterestInputFactory returns a factory function that builds a CareerInterestInputPort.
+func NewCareerInterestInputFactory() func(
+	sessionRepo port.CareerInterestSessionRepository,
+	resultRepo port.CareerInterestResultRepository,
+	basicScoreRepo port.CareerInterestBasicScoreRepository,
+	typeScoreRepo port.CareerInterestTypeScoreRepository,
+	output port.CareerInterestOutputPort,
+) port.CareerInterestInputPort {
+	return func(
+		sessionRepo port.CareerInterestSessionRepository,
+		resultRepo port.CareerInterestResultRepository,
+		basicScoreRepo port.CareerInterestBasicScoreRepository,
+		typeScoreRepo port.CareerInterestTypeScoreRepository,
+		output port.CareerInterestOutputPort,
+	) port.CareerInterestInputPort {
+		return usecase.NewCareerInterestInteractor(sessionRepo, resultRepo, basicScoreRepo, typeScoreRepo, output)
+	}
+}
+
 // NewSkillInputFactory returns a factory function that builds a SkillInputPort.
 func NewSkillInputFactory() func(
 	repo port.SkillRepository,
