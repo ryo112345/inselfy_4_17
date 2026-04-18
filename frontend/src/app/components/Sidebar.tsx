@@ -55,18 +55,18 @@ export function Sidebar({ username, displayName, diagnostics = [], debug }: Prop
         data-sidebar
         className={`fixed top-0 left-0 z-50 flex h-screen flex-col transition-all duration-200 ease-in-out ${open ? "w-72" : "w-[50px]"}`}
       >
-        <div className={`flex items-center h-14 shrink-0 ${open ? "justify-between px-3" : "justify-center"}`}>
-          {open && (
-            <span className="text-lg font-semibold text-gray-900 truncate">
-              Inselfy
-            </span>
-          )}
+        <div className="flex items-center h-14 shrink-0" style={{ padding: open ? "0 8px" : "0 6px" }}>
           <button
             onClick={() => setOpen(!open)}
             className="sb-item flex h-8 w-8 items-center justify-center rounded-md text-gray-500 cursor-pointer transition-colors"
           >
             {open ? <PanelCloseIcon /> : <MenuIcon />}
           </button>
+          {open && (
+            <span className="text-lg font-semibold text-gray-900 truncate ml-1.5">
+              Inselfy
+            </span>
+          )}
         </div>
 
         <nav className="flex-1 overflow-y-auto py-1" style={{ padding: open ? "4px 8px" : "4px 6px" }}>
