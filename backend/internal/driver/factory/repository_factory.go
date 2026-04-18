@@ -35,3 +35,17 @@ func NewSkillRepoFactory(pool *pgxpool.Pool) func() port.SkillRepository {
 		return sqlcgw.NewSkillRepository(pool)
 	}
 }
+
+// NewWVSessionRepoFactory returns a factory function that produces WorkValuesSessionRepository instances.
+func NewWVSessionRepoFactory(pool *pgxpool.Pool) func() port.WorkValuesSessionRepository {
+	return func() port.WorkValuesSessionRepository {
+		return sqlcgw.NewWorkValuesSessionRepository(pool)
+	}
+}
+
+// NewWVResultRepoFactory returns a factory function that produces WorkValuesResultRepository instances.
+func NewWVResultRepoFactory(pool *pgxpool.Pool) func() port.WorkValuesResultRepository {
+	return func() port.WorkValuesResultRepository {
+		return sqlcgw.NewWorkValuesResultRepository(pool)
+	}
+}

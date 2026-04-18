@@ -42,6 +42,21 @@ func NewEducationInputFactory() func(
 	}
 }
 
+// NewWorkValuesInputFactory returns a factory function that builds a WorkValuesInputPort.
+func NewWorkValuesInputFactory() func(
+	sessionRepo port.WorkValuesSessionRepository,
+	resultRepo port.WorkValuesResultRepository,
+	output port.WorkValuesOutputPort,
+) port.WorkValuesInputPort {
+	return func(
+		sessionRepo port.WorkValuesSessionRepository,
+		resultRepo port.WorkValuesResultRepository,
+		output port.WorkValuesOutputPort,
+	) port.WorkValuesInputPort {
+		return usecase.NewWorkValuesInteractor(sessionRepo, resultRepo, output)
+	}
+}
+
 // NewSkillInputFactory returns a factory function that builds a SkillInputPort.
 func NewSkillInputFactory() func(
 	repo port.SkillRepository,

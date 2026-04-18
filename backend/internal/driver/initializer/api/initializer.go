@@ -33,21 +33,26 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	experienceRepoFactory := factory.NewExperienceRepoFactory(pool)
 	educationRepoFactory := factory.NewEducationRepoFactory(pool)
 	skillRepoFactory := factory.NewSkillRepoFactory(pool)
+	wvSessionRepoFactory := factory.NewWVSessionRepoFactory(pool)
+	wvResultRepoFactory := factory.NewWVResultRepoFactory(pool)
 
 	userInputFactory := factory.NewUserInputFactory()
 	experienceInputFactory := factory.NewExperienceInputFactory()
 	educationInputFactory := factory.NewEducationInputFactory()
 	skillInputFactory := factory.NewSkillInputFactory()
+	wvInputFactory := factory.NewWorkValuesInputFactory()
 
 	userOutputFactory := httpfactory.NewUserOutputFactory()
 	experienceOutputFactory := httpfactory.NewExperienceOutputFactory()
 	educationOutputFactory := httpfactory.NewEducationOutputFactory()
 	skillOutputFactory := httpfactory.NewSkillOutputFactory()
+	wvOutputFactory := httpfactory.NewWorkValuesOutputFactory()
 
 	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
 	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
 	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationOutputFactory, educationRepoFactory, userRepoFactory)
 	skillCtrl := httpcontroller.NewSkillController(skillInputFactory, skillOutputFactory, skillRepoFactory, userRepoFactory, tx)
+	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvOutputFactory, wvSessionRepoFactory, wvResultRepoFactory)
 
 	e := echo.New()
 	e.Use(echomw.Recover())
@@ -60,6 +65,15 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	server := httpcontroller.NewServer(userCtrl, experienceCtrl, educationCtrl, skillCtrl)
 	openapi.RegisterHandlers(e, server)
+
+	wvGroup := e.Group("/api/work-values")
+	wvGroup.POST("/sessions", wvCtrl.StartSession)
+	wvGroup.POST("/sessions/:sessionId/results", func(c echo.Context) error {
+		return wvCtrl.SubmitResult(c, c.Param("sessionId"))
+	})
+	wvGroup.GET("/users/:userId/results/latest", func(c echo.Context) error {
+		return wvCtrl.GetLatestResult(c, c.Param("userId"))
+	})
 
 	return e, cfg, cleanup, nil
 }

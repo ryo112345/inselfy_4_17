@@ -1,0 +1,51 @@
+export const NEED_IDS = [
+  "ability_utilization",
+  "achievement",
+  "activity",
+  "advancement",
+  "authority",
+  "autonomy",
+  "company_policies",
+  "compensation",
+  "co_workers",
+  "creativity",
+  "independence",
+  "moral_values",
+  "recognition",
+  "responsibility",
+  "security",
+  "social_service",
+  "social_status",
+  "supervision_hr",
+  "supervision_technical",
+  "variety",
+  "working_conditions",
+] as const;
+
+export type NeedId = (typeof NEED_IDS)[number];
+
+export const N = NEED_IDS.length; // 21
+
+export const NEED_LABELS: Record<NeedId, string> = {
+  ability_utilization: "自分の能力を発揮できる",
+  achievement: "仕事で達成感を得られる",
+  activity: "常に忙しくしていられる",
+  advancement: "昇進の機会がある",
+  authority: "他の人に指示を出せる",
+  autonomy: "自分のやり方で仕事を進められる",
+  company_policies: "公正な方針で運営されている",
+  compensation: "他の仕事と比べて給与が良い",
+  co_workers: "同僚と良い関係を築ける",
+  creativity: "新しいアイデアを試せる",
+  independence: "一人で仕事ができる",
+  moral_values: "自分の良心に反しない仕事ができる",
+  recognition: "仕事の成果が認められる",
+  responsibility: "自分の判断で意思決定できる",
+  security: "安定した雇用がある",
+  social_service: "他の人のために何かできる",
+  social_status: "地域社会で一目置かれる",
+  supervision_hr: "上司が部下をうまくサポートする",
+  supervision_technical: "上司が適切に訓練・指導する",
+  variety: "毎日違うことができる",
+  working_conditions: "良い労働環境がある",
+};

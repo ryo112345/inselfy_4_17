@@ -30,3 +30,10 @@ func NewSkillOutputFactory() func() *presenter.SkillPresenter {
 		return presenter.NewSkillPresenter()
 	}
 }
+
+// NewWorkValuesOutputFactory returns a factory function that creates WorkValuesPresenter instances.
+func NewWorkValuesOutputFactory() func() *presenter.WorkValuesPresenter {
+	return func() *presenter.WorkValuesPresenter {
+		return presenter.NewWorkValuesPresenter()
+	}
+}

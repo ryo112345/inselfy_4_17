@@ -209,9 +209,9 @@ export function MapPinIcon({ className }: IconProps) {
   );
 }
 
-export function FaceIcon({ className }: IconProps) {
+export function FaceIcon({ className, style }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 64 64" fill="none">
+    <svg className={className} style={style} viewBox="0 0 64 64" fill="none">
       <circle cx="16" cy="23" r="5.8" fill="currentColor" />
       <circle cx="18" cy="21" r="1.8" fill="white" />
       <circle cx="48" cy="23" r="5.8" fill="currentColor" />
