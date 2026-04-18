@@ -64,8 +64,8 @@ export default function WorkValuesStartPage() {
 
 function StartScreen({ onStart }: { onStart: () => void }) {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12 relative">
-      <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+    <main className="min-h-screen flex justify-center bg-[#f6f7f5] px-4 pt-[15vh] pb-12 relative">
+      <div className="relative w-full max-w-lg h-fit text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
 
         <div className="relative z-10 mb-10">
@@ -92,8 +92,8 @@ function StartScreen({ onStart }: { onStart: () => void }) {
 
 function LoadingScreen() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
-      <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-20 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+    <main className="min-h-screen flex justify-center bg-[#f6f7f5] px-4 pt-[15vh] pb-12">
+      <div className="relative w-full max-w-lg h-fit text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-20 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
         <div className="relative z-10">
           <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
@@ -120,7 +120,7 @@ function QuizScreen({
   const progress = (questionNumber / maxQuestions) * 100;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-[#f6f7f5] px-4 py-8">
+    <main className="min-h-screen flex flex-col items-center bg-[#f6f7f5] px-4 pt-[15vh] pb-8">
       <div className="relative w-full max-w-lg rounded-3xl bg-[#0a1628] border border-gray-700 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
 
@@ -205,8 +205,8 @@ function ChoiceButton({
 
 function SubmittingScreen() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
-      <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-20 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+    <main className="min-h-screen flex justify-center bg-[#f6f7f5] px-4 pt-[15vh] pb-12">
+      <div className="relative w-full max-w-lg h-fit text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-20 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
         <div className="relative z-10">
           <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
@@ -322,8 +322,8 @@ function ErrorScreen({
   onRetry: () => void;
 }) {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
-      <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+    <main className="min-h-screen flex justify-center bg-[#f6f7f5] px-4 pt-[15vh] pb-12">
+      <div className="relative w-full max-w-lg h-fit text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
         <div className="relative z-10">
           <div className="w-12 h-12 rounded-full border-2 border-red-400/60 flex items-center justify-center mx-auto mb-6">

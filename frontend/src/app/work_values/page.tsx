@@ -16,7 +16,7 @@ const inter = Inter({
 export default function WorkValuesPage() {
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12 relative">
+    <main className="min-h-screen flex justify-center bg-[#f6f7f5] px-4 pt-[15vh] pb-12 relative">
 <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
         <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-5 py-2 mb-8">
