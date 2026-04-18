@@ -10,6 +10,7 @@ import {
 import {
   TYPE_LABELS,
   TYPE_DESCRIPTIONS,
+  TYPE_PERSONALITIES,
   TYPE_ENGLISH_NAMES,
   TYPE_ABBREVIATIONS,
   TYPE_BASIC_INTERESTS,
@@ -147,6 +148,10 @@ function TypesSection({ types, colors, badge }: { types: ResultDTO["type_scores"
                     </span>
                   </div>
                 </div>
+
+                <p className="text-[14px] font-medium leading-relaxed max-w-[280px] text-left" style={{ color: badge.descColor }}>
+                  {TYPE_PERSONALITIES[tid]}
+                </p>
 
                 <span className="text-[22px] font-bold tabular-nums ml-1 w-16 text-right shrink-0" style={{ color: barColor }}>
                   {t.score.toFixed(1)}
@@ -294,7 +299,7 @@ function TypeBadge({
   size?: "sm" | "md";
   badge: BadgeColors;
 }) {
-  const dim = size === "sm" ? "w-7 h-7 text-[11px]" : "w-9 h-9 text-[13px]";
+  const dim = size === "sm" ? "w-7 h-7 text-[14px]" : "w-9 h-9 text-[16px]";
 
   if (variant === "outline") {
     return (

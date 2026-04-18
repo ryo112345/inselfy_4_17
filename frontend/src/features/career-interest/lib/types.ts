@@ -28,6 +28,15 @@ export const TYPE_DESCRIPTIONS: Record<TypeId, string> = {
   C: "データや書類を正確に処理し、ルールに基づいて業務を効率的に管理する仕事に興味がある",
 };
 
+export const TYPE_PERSONALITIES: Record<TypeId, string> = {
+  R: "実際に手を動かして形にするのが好きで、理屈より実践を重視するタイプ",
+  I: "「なぜ？」を突き詰めるのが好きで、じっくり考えて答えを見つけるタイプ",
+  A: "自分なりの表現やアイデアを大切にし、型にはまらないやり方を好むタイプ",
+  S: "人の気持ちに寄り添うのが自然にでき、誰かの役に立つことにやりがいを感じるタイプ",
+  E: "目標に向けて人を巻き込むのが得意で、決断力と行動力があるタイプ",
+  C: "正確さや段取りを大事にし、ルールに沿って着実に仕事を進めるタイプ",
+};
+
 export const TYPE_ABBREVIATIONS: Record<TypeId, string> = {
   R: "R",
   I: "I",

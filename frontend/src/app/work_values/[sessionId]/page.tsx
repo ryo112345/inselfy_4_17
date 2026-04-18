@@ -339,7 +339,7 @@ function ValueBadge({
   size?: "sm" | "md";
   badge: BadgeColors;
 }) {
-  const dim = size === "sm" ? "w-7 h-7 text-[11px]" : "w-9 h-9 text-[13px]";
+  const dim = size === "sm" ? "w-7 h-7 text-[14px]" : "w-9 h-9 text-[16px]";
 
   if (variant === "outline") {
     return (
