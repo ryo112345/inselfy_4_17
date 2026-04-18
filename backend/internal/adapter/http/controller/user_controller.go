@@ -58,6 +58,15 @@ func (c *UserController) GetByUsername(ctx echo.Context, username string) error 
 	return ctx.JSON(http.StatusOK, p.Response())
 }
 
+// GetByID handles GET /api/users/id/:id.
+func (c *UserController) GetByID(ctx echo.Context, id string) error {
+	input, p := c.newIO()
+	if err := input.GetByID(ctx.Request().Context(), id); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.JSON(http.StatusOK, p.Response())
+}
+
 // UpdateProfile handles PATCH /api/users/:username.
 //
 // We read the request body into map[string]json.RawMessage so we can

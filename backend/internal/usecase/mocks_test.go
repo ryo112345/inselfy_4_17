@@ -11,6 +11,7 @@ import (
 
 type userRepoStub struct {
 	getByUsername func(ctx context.Context, u user.Username) (*user.User, error)
+	getByIDFn     func(ctx context.Context, id string) (*user.User, error)
 	createFn      func(ctx context.Context, u *user.User) (*user.User, error)
 	updateProfile func(ctx context.Context, id string, in user.UpdateProfileInput) (*user.User, error)
 }
@@ -20,6 +21,12 @@ func (s *userRepoStub) Create(ctx context.Context, u *user.User) (*user.User, er
 }
 func (s *userRepoStub) GetByUsername(ctx context.Context, u user.Username) (*user.User, error) {
 	return s.getByUsername(ctx, u)
+}
+func (s *userRepoStub) GetByID(ctx context.Context, id string) (*user.User, error) {
+	if s.getByIDFn != nil {
+		return s.getByIDFn(ctx, id)
+	}
+	return nil, nil
 }
 func (s *userRepoStub) UpdateProfile(ctx context.Context, id string, in user.UpdateProfileInput) (*user.User, error) {
 	return s.updateProfile(ctx, id, in)

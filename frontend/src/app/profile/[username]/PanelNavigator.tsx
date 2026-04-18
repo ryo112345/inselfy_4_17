@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/page";
-import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/page";
+import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/WorkValuesContent";
+import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/CareerInterestContent";
 
 type Props = {
   children: ReactNode;
   username: string;
   wvSessionId: string | null;
   ciSessionId: string | null;
+  initialPanel?: number;
 };
 
-export function PanelNavigator({ children, username, wvSessionId, ciSessionId }: Props) {
+export function PanelNavigator({ children, username, wvSessionId, ciSessionId, initialPanel = 0 }: Props) {
   const urls = [
     `/profile/${username}`,
     ...(wvSessionId ? [`/work_values/${wvSessionId}`] : []),
@@ -19,8 +20,8 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId }:
   ];
   const panelCount = urls.length;
 
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [expanded, setExpanded] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(initialPanel);
+  const [expanded, setExpanded] = useState(false);
 
   const goTo = (index: number) => {
     if (index < 0 || index >= panelCount) return;

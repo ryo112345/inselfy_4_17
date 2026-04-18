@@ -46,6 +46,7 @@ export interface ValueScoreDTO {
 export interface ResultDTO {
   id: string;
   session_id: string;
+  user_id: string;
   needs: NeedScoreDTO[];
   values: ValueScoreDTO[];
 }
@@ -76,7 +77,8 @@ export async function submitResult(
 }
 
 export async function getResultBySessionId(sessionId: string): Promise<ResultDTO> {
-  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/results`);
+  const base = typeof window === "undefined" ? INTERNAL_BASE : BASE_URL;
+  const res = await fetch(`${base}/sessions/${sessionId}/results`);
   if (!res.ok) throw new Error(`Failed to fetch result: ${res.status}`);
   return res.json();
 }

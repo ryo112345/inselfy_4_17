@@ -29,6 +29,7 @@ func (s *stubInput) Create(ctx context.Context, in user.CreateUserInput) error {
 	return s.createFn(ctx, in)
 }
 func (s *stubInput) GetByUsername(ctx context.Context, u string) error { return s.getFn(ctx, u) }
+func (s *stubInput) GetByID(_ context.Context, _ string) error        { return nil }
 func (s *stubInput) UpdateProfile(ctx context.Context, u string, in user.UpdateProfileInput) error {
 	return s.updateFn(ctx, u, in)
 }
@@ -37,6 +38,7 @@ type stubRepo struct{}
 
 func (stubRepo) Create(context.Context, *user.User) (*user.User, error)                { return nil, nil }
 func (stubRepo) GetByUsername(context.Context, user.Username) (*user.User, error)      { return nil, nil }
+func (stubRepo) GetByID(context.Context, string) (*user.User, error)                  { return nil, nil }
 func (stubRepo) UpdateProfile(context.Context, string, user.UpdateProfileInput) (*user.User, error) {
 	return nil, nil
 }

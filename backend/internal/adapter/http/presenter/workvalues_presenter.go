@@ -71,6 +71,7 @@ func (p *WorkValuesPresenter) PresentResult(_ context.Context, r *workvalues.Res
 	p.result = &ResultResponse{
 		ID:        r.ID,
 		SessionID: r.SessionID,
+		UserID:    r.UserID,
 		Needs:     needs,
 		Values:    values,
 	}
@@ -101,6 +102,7 @@ type PairResponse struct {
 type ResultResponse struct {
 	ID        string               `json:"id"`
 	SessionID string               `json:"session_id"`
+	UserID    string               `json:"user_id"`
 	Needs     []NeedScore          `json:"needs"`
 	Values    []ValueScoreResponse `json:"values"`
 }

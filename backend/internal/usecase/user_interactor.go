@@ -56,6 +56,15 @@ func (u *UserInteractor) GetByUsername(ctx context.Context, raw string) error {
 	return u.output.PresentUser(ctx, usr)
 }
 
+// GetByID fetches a user by ID.
+func (u *UserInteractor) GetByID(ctx context.Context, id string) error {
+	usr, err := u.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	return u.output.PresentUser(ctx, usr)
+}
+
 // UpdateProfile patches a user's profile. The update is scoped to a single row
 // so no transaction boundary is required.
 func (u *UserInteractor) UpdateProfile(ctx context.Context, rawUsername string, input user.UpdateProfileInput) error {

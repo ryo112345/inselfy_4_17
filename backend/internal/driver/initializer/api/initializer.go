@@ -74,6 +74,10 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	server := httpcontroller.NewServer(userCtrl, experienceCtrl, educationCtrl, skillCtrl)
 	openapi.RegisterHandlers(e, server)
 
+	e.GET("/api/users/id/:id", func(c echo.Context) error {
+		return userCtrl.GetByID(c, c.Param("id"))
+	})
+
 	wvGroup := e.Group("/api/work-values")
 	wvGroup.POST("/sessions", wvCtrl.StartSession)
 	wvGroup.POST("/sessions/:sessionId/results", func(c echo.Context) error {

@@ -57,6 +57,23 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username user.Userna
 	return toDomainUser(row)
 }
 
+// GetByID fetches a user by ID.
+func (r *UserRepository) GetByID(ctx context.Context, id string) (*user.User, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(id)
+	if err != nil {
+		return nil, domainerr.ErrNotFound
+	}
+	row, err := q.GetUserByID(ctx, pgID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domainerr.ErrNotFound
+		}
+		return nil, err
+	}
+	return toDomainUser(row)
+}
+
 // UpdateProfile applies a partial profile update. Unset pointer fields on the
 // input are skipped; explicit-clear semantics use **string where **string points
 // to a nil *string.

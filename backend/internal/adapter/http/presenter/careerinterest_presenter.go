@@ -60,6 +60,7 @@ func (p *CareerInterestPresenter) PresentResult(_ context.Context, r *careerinte
 	p.result = &CIResultResponse{
 		ID:          r.ID,
 		SessionID:   r.SessionID,
+		UserID:      r.UserID,
 		BasicScores: basicScores,
 		TypeScores:  typeScores,
 	}
@@ -87,6 +88,7 @@ type CIItemResponse struct {
 type CIResultResponse struct {
 	ID          string                 `json:"id"`
 	SessionID   string                 `json:"session_id"`
+	UserID      string                 `json:"user_id"`
 	BasicScores []CIBasicScoreResponse `json:"basic_scores"`
 	TypeScores  []CITypeScoreResponse  `json:"type_scores"`
 }
