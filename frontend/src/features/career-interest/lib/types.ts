@@ -51,7 +51,7 @@ export type BasicInterestId = (typeof BASIC_INTEREST_IDS)[number];
 export const BASIC_INTEREST_LABELS: Record<BasicInterestId, string> = {
   A1: "デザイン",
   A2: "コンテンツ制作",
-  A3: "パフォーミングアーツ",
+  A3: "デジタルマーケティング・PR",
   C1: "会計・財務",
   C2: "事務・管理",
   C3: "IT・システム",
@@ -64,7 +64,7 @@ export const BASIC_INTEREST_LABELS: Record<BasicInterestId, string> = {
   I4: "社会調査・政策分析",
   R1: "機械・製造",
   R2: "建設・土木",
-  R3: "農林水産・食品",
+  R3: "ロボティクス・自動化",
   S1: "教育・研修",
   S2: "カウンセリング・福祉",
   S3: "医療・介護",
