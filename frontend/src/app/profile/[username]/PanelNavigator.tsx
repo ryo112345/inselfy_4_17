@@ -33,7 +33,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId }:
   return (
     <div className="relative px-4">
       <div
-        className="flex transition-transform duration-300 ease-in-out"
+        className="flex items-start transition-transform duration-300 ease-in-out"
         style={{
           gap: `${gapPx}px`,
           transform: `translateX(-${activeIndex * (panelPx + gapPx)}px)`,
@@ -42,13 +42,13 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId }:
         <div className="shrink-0" style={{ width: `${panelPx}px` }}>{children}</div>
 
         {wvSessionId && (
-          <div className="shrink-0 pt-6 pb-12" style={{ width: `${panelPx}px` }}>
+          <div className="shrink-0" style={{ width: `${panelPx}px` }}>
             <WorkValuesResultContent sessionId={wvSessionId} />
           </div>
         )}
 
         {ciSessionId && (
-          <div className="shrink-0 pt-6 pb-12" style={{ width: `${panelPx}px` }}>
+          <div className="shrink-0" style={{ width: `${panelPx}px` }}>
             <CareerInterestResultContent sessionId={ciSessionId} />
           </div>
         )}
