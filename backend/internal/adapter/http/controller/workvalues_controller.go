@@ -91,6 +91,14 @@ func (c *WorkValuesController) GetLatestResult(ctx echo.Context, userID string) 
 	return ctx.JSON(http.StatusOK, p.Result())
 }
 
+func (c *WorkValuesController) GetResultBySessionID(ctx echo.Context, sessionID string) error {
+	in, p := c.newIO()
+	if err := in.GetResultBySessionID(ctx.Request().Context(), sessionID); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.JSON(http.StatusOK, p.Result())
+}
+
 func (c *WorkValuesController) newIO() (port.WorkValuesInputPort, *presenter.WorkValuesPresenter) {
 	output := c.outputFactory()
 	input := c.inputFactory(c.sessionRepoFactory(), c.resultRepoFactory(), output)

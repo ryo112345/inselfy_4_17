@@ -78,3 +78,11 @@ func (i *WorkValuesInteractor) GetLatestResult(ctx context.Context, userID strin
 	}
 	return i.output.PresentResult(ctx, result)
 }
+
+func (i *WorkValuesInteractor) GetResultBySessionID(ctx context.Context, sessionID string) error {
+	result, err := i.resultRepo.GetBySessionID(ctx, sessionID)
+	if err != nil {
+		return err
+	}
+	return i.output.PresentResult(ctx, result)
+}

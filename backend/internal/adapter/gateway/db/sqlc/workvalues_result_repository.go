@@ -114,3 +114,51 @@ func (r *WorkValuesResultRepository) GetLatestByUserID(ctx context.Context, user
 
 	return &result, nil
 }
+
+func (r *WorkValuesResultRepository) GetBySessionID(ctx context.Context, sessionID string) (*workvalues.Result, error) {
+	sid, err := parseUUID(sessionID)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+
+	var result workvalues.Result
+	var responsesJSON, muJSON, seJSON []byte
+	var cc *float32
+	var qc int16
+
+	err = r.pool.QueryRow(ctx,
+		`SELECT id, session_id, user_id, responses, mu, se,
+		        consistency_coefficient, consistency_level, question_count, created_at
+		 FROM wv_results
+		 WHERE session_id = $1
+		 LIMIT 1`,
+		sid,
+	).Scan(
+		&result.ID, &result.SessionID, &result.UserID,
+		&responsesJSON, &muJSON, &seJSON,
+		&cc, &result.ConsistencyLevel, &qc, &result.CreatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domainerr.ErrNotFound
+		}
+		return nil, err
+	}
+
+	if err := json.Unmarshal(responsesJSON, &result.Responses); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(muJSON, &result.Mu); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(seJSON, &result.SE); err != nil {
+		return nil, err
+	}
+	if cc != nil {
+		v := float64(*cc)
+		result.ConsistencyCoefficient = &v
+	}
+	result.QuestionCount = int(qc)
+
+	return &result, nil
+}

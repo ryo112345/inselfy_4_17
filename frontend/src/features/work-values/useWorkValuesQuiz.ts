@@ -142,7 +142,7 @@ export function useWorkValuesQuiz(userId: string) {
     }));
   }, [state.currentPair]);
 
-  return { state, start, answer };
+  return { state, start, answer, sessionId: sessionRef.current?.id ?? null };
 }
 
 function buildDebugInfo(selector: AdaptiveSelector): DebugInfo {

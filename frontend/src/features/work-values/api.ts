@@ -57,3 +57,9 @@ export async function submitResult(
   if (!res.ok) throw new Error(`Failed to submit result: ${res.status}`);
   return res.json();
 }
+
+export async function getResultBySessionId(sessionId: string): Promise<ResultDTO> {
+  const res = await fetch(`${BASE_URL}/sessions/${sessionId}/results`);
+  if (!res.ok) throw new Error(`Failed to fetch result: ${res.status}`);
+  return res.json();
+}

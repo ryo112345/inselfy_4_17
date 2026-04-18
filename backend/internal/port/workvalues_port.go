@@ -10,6 +10,7 @@ type WorkValuesInputPort interface {
 	StartSession(ctx context.Context, userID string) error
 	SubmitResult(ctx context.Context, sessionID string, input workvalues.SubmitInput) error
 	GetLatestResult(ctx context.Context, userID string) error
+	GetResultBySessionID(ctx context.Context, sessionID string) error
 }
 
 type WorkValuesOutputPort interface {
@@ -26,4 +27,5 @@ type WorkValuesSessionRepository interface {
 type WorkValuesResultRepository interface {
 	Create(ctx context.Context, r *workvalues.Result) (*workvalues.Result, error)
 	GetLatestByUserID(ctx context.Context, userID string) (*workvalues.Result, error)
+	GetBySessionID(ctx context.Context, sessionID string) (*workvalues.Result, error)
 }

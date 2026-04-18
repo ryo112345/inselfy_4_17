@@ -74,6 +74,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	wvGroup.GET("/users/:userId/results/latest", func(c echo.Context) error {
 		return wvCtrl.GetLatestResult(c, c.Param("userId"))
 	})
+	wvGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
+		return wvCtrl.GetResultBySessionID(c, c.Param("sessionId"))
+	})
 
 	return e, cfg, cleanup, nil
 }
