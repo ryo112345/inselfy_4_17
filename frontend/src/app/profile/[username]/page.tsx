@@ -11,19 +11,20 @@ import {
   type ModelsSkillResponse,
   type ModelsUserResponse,
 } from "@/external/client/api/generated";
+import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
+import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 
 import { AboutCard } from "./AboutCard";
 import { AiReportCard } from "./AiReportCard";
 import { EducationCard } from "./EducationCard";
 import { ExperienceCard } from "./ExperienceCard";
+import { PanelNavigator } from "./PanelNavigator";
 import { PostsTabs } from "./PostsTabs";
 import { ProfileColorContext } from "./ProfileColorContext";
 import { ProfileHeaderCard } from "./ProfileHeaderCard";
 import { ResumeUploadCard } from "./ResumeUploadCard";
 import { SkillsCard } from "./SkillsCard";
 
-// Fetched fresh on every visit so the view reflects edits immediately after
-// a mutation triggers router.refresh().
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage({
@@ -35,15 +36,14 @@ export default async function ProfilePage({
 
   const userRes = await usersGetUserByUsername({ path: { username } });
   if (userRes.error || !userRes.data) notFound();
-  // @hey-api/client-fetch's response generic over-unwraps our typed
-  // ModelsUserResponse, so cast via unknown. Same pattern applies to all list
-  // responses below.
   const user = userRes.data as unknown as ModelsUserResponse;
 
-  const [experiencesRes, educationsRes, skillsRes] = await Promise.all([
+  const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult] = await Promise.all([
     experiencesListExperiences({ path: { username } }),
     educationsListEducations({ path: { username } }),
     skillsListSkills({ path: { username } }),
+    getLatestWvResult(user.id).catch(() => null),
+    getLatestCiResult(user.id).catch(() => null),
   ]);
 
   const experiences: ModelsExperienceResponse[] =
@@ -59,22 +59,28 @@ export default async function ProfilePage({
 
   return (
     <ProfileColorContext value={profileColor}>
-    <main className="min-h-screen bg-[#f6f7f5] px-4 pt-2 pb-8">
-      <div className="mx-auto flex max-w-2xl flex-col gap-3">
-        <ProfileHeaderCard user={user} experienceCount={experiences.length} />
-        <AiReportCard
-          hasExperience={experiences.length > 0}
-          hasSkills={skills.length > 0}
-          hasEducation={educations.length > 0}
-        />
-        <ResumeUploadCard />
-        <SkillsCard username={username} skills={skills} />
-        <ExperienceCard username={username} experiences={experiences} />
-        <EducationCard username={username} educations={educations} />
-        <AboutCard user={user} />
-        <PostsTabs />
-      </div>
-    </main>
+      <main className="min-h-screen overflow-x-clip bg-[#f6f7f5] pt-2 pb-8">
+        <PanelNavigator
+          username={username}
+          wvSessionId={wvResult?.session_id ?? null}
+          ciSessionId={ciResult?.session_id ?? null}
+        >
+          <div className="mx-auto flex max-w-2xl flex-col gap-3">
+            <ProfileHeaderCard user={user} experienceCount={experiences.length} />
+            <AiReportCard
+              hasExperience={experiences.length > 0}
+              hasSkills={skills.length > 0}
+              hasEducation={educations.length > 0}
+            />
+            <ResumeUploadCard />
+            <SkillsCard username={username} skills={skills} />
+            <ExperienceCard username={username} experiences={experiences} />
+            <EducationCard username={username} educations={educations} />
+            <AboutCard user={user} />
+            <PostsTabs />
+          </div>
+        </PanelNavigator>
+      </main>
     </ProfileColorContext>
   );
 }

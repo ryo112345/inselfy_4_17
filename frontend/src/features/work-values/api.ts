@@ -1,3 +1,7 @@
+const INTERNAL_BASE =
+  typeof window === "undefined"
+    ? (process.env.INTERNAL_API_URL ?? "http://localhost:8081") + "/api/work-values"
+    : "/api/work-values";
 const BASE_URL = "/api/work-values";
 
 export interface PairDTO {
@@ -74,5 +78,12 @@ export async function submitResult(
 export async function getResultBySessionId(sessionId: string): Promise<ResultDTO> {
   const res = await fetch(`${BASE_URL}/sessions/${sessionId}/results`);
   if (!res.ok) throw new Error(`Failed to fetch result: ${res.status}`);
+  return res.json();
+}
+
+export async function getLatestResult(userId: string): Promise<ResultDTO | null> {
+  const res = await fetch(`${INTERNAL_BASE}/users/${userId}/results/latest`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to fetch latest result: ${res.status}`);
   return res.json();
 }
