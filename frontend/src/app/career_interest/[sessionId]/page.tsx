@@ -82,6 +82,30 @@ export default function CareerInterestResultPage() {
         <RIASECCodeSection code={riasecCode} badge={badge} />
         <TypesSection types={sortedTypes} colors={colors} badge={badge} />
         <BasicInterestsSection types={sortedTypes} basicScoreMap={basicScoreMap} colors={colors} badge={badge} />
+
+        <div className="relative mt-10">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+            <span
+              className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
+              style={{
+                background: "linear-gradient(180deg, #4a8c6f 0%, #2d6b4e 50%, #1f5c3f 100%)",
+                boxShadow: "0 4px 10px rgba(30,80,55,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
+              }}
+            >
+              inselfy.ai
+            </span>
+          </div>
+          <div className="rounded-md border border-gray-200 bg-[#fbfdfb] px-8 pt-8 pb-7">
+            <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>AI キャリアレポート</h3>
+            <div className="border-t border-gray-200 mb-3" />
+            <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
+              AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
+            </p>
+            <button className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer">
+              レポートを生成する
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   );
