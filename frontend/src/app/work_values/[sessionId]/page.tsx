@@ -94,6 +94,30 @@ export default function WorkValuesResultPage() {
       <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 pt-5 pb-8">
         <ValuesSection values={sortedValues} colors={colors} badge={badge} />
         <NeedsSection values={sortedValues} needScoreMap={needScoreMap} colors={colors} badge={badge} />
+
+        <div className="relative mt-10">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+            <span
+              className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
+              style={{
+                background: "linear-gradient(180deg, #4a8c6f 0%, #2d6b4e 50%, #1f5c3f 100%)",
+                boxShadow: "0 4px 10px rgba(30,80,55,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
+              }}
+            >
+              inselfy.ai
+            </span>
+          </div>
+          <div className="rounded-md border border-gray-200 bg-[#fbfdfb] px-8 pt-8 pb-7">
+            <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>AI キャリアレポート</h3>
+            <div className="border-t border-gray-200 mb-3" />
+            <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
+              AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
+            </p>
+            <button className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer">
+              レポートを生成する
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   );
@@ -220,9 +244,9 @@ function NeedsSection({
               </div>
 
               {/* needs list */}
-              <div className="flex flex-col gap-0.5">
-                {needsWithScores.map(({ nid, score }) => (
-                  <NeedRow key={nid} needId={nid} score={score} colors={colors} badge={badge} />
+              <div className="flex flex-col">
+                {needsWithScores.map(({ nid, score }, i) => (
+                  <NeedRow key={nid} needId={nid} score={score} colors={colors} badge={badge} showDivider={i > 0} />
                 ))}
               </div>
             </div>
@@ -239,7 +263,8 @@ function NeedsSection({
 
 const MEDAL = ["🥇", "🥈", "🥉"] as const;
 
-function NeedRow({ needId, score, colors, badge }: { needId: NeedId; score: NeedScoreDTO; colors: ScoreColors; badge: BadgeColors }) {
+function NeedRow({ needId, score, colors, badge, showDivider = false }: { needId: NeedId; score: NeedScoreDTO; colors: ScoreColors; badge: BadgeColors; showDivider?: boolean }) {
+  const [isOpen, setIsOpen] = useState(false);
   const medal = score.rank <= 3 ? MEDAL[score.rank - 1] : null;
   const isTop = score.rank <= 3;
   const RANK_COLORS = ["#FFB800", "#C0C0C0", "#C06A2B"] as const;
@@ -251,7 +276,9 @@ function NeedRow({ needId, score, colors, badge }: { needId: NeedId; score: Need
   const barColor = scoreColor(score.display_score, colors);
 
   return (
-    <div className="flex items-center gap-2 py-1 px-1">
+    <div>
+      {showDivider && <div className="border-t border-gray-200 ml-3 mt-1" />}
+      <div className="flex items-center gap-2 py-1 overflow-hidden">
       {/* rank */}
       <span className="text-[13px] font-semibold w-10 text-right tabular-nums shrink-0 whitespace-nowrap" style={rankStyle}>
         {score.rank}位
@@ -286,9 +313,15 @@ function NeedRow({ needId, score, colors, badge }: { needId: NeedId; score: Need
       </span>
 
       {/* chevron */}
-      <button className="text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1">
-        <ChevronIcon size={14} />
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
+      >
+        <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+          <ChevronIcon size={14} />
+        </span>
       </button>
+      </div>
     </div>
   );
 }
