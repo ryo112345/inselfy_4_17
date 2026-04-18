@@ -29,3 +29,8 @@ type WorkValuesResultRepository interface {
 	GetLatestByUserID(ctx context.Context, userID string) (*workvalues.Result, error)
 	GetBySessionID(ctx context.Context, sessionID string) (*workvalues.Result, error)
 }
+
+type WorkValuesScoreRepository interface {
+	Save(ctx context.Context, sessionID string, scores []workvalues.ValueScore) error
+	GetBySessionID(ctx context.Context, sessionID string) ([]workvalues.ValueScore, error)
+}

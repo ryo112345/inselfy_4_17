@@ -1,2 +1,3 @@
-DROP TABLE IF EXISTS wv_results;
-DROP TABLE IF EXISTS wv_sessions;
+DROP TABLE IF EXISTS work_values_scores;
+DROP TABLE IF EXISTS work_needs_scores;
+DROP TABLE IF EXISTS work_values_sessions;

@@ -53,7 +53,7 @@ func (r *WorkValuesResultRepository) Create(ctx context.Context, result *workval
 	}
 
 	err = r.pool.QueryRow(ctx,
-		`INSERT INTO wv_results (session_id, user_id, responses, mu, se, consistency_coefficient, consistency_level, question_count)
+		`INSERT INTO work_needs_scores (session_id, user_id, responses, mu, se, consistency_coefficient, consistency_level, question_count)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		 RETURNING id, created_at`,
 		sessionID, userID, responsesJSON, muJSON, seJSON,
@@ -80,7 +80,7 @@ func (r *WorkValuesResultRepository) GetLatestByUserID(ctx context.Context, user
 	err = r.pool.QueryRow(ctx,
 		`SELECT id, session_id, user_id, responses, mu, se,
 		        consistency_coefficient, consistency_level, question_count, created_at
-		 FROM wv_results
+		 FROM work_needs_scores
 		 WHERE user_id = $1
 		 ORDER BY created_at DESC
 		 LIMIT 1`,
@@ -129,7 +129,7 @@ func (r *WorkValuesResultRepository) GetBySessionID(ctx context.Context, session
 	err = r.pool.QueryRow(ctx,
 		`SELECT id, session_id, user_id, responses, mu, se,
 		        consistency_coefficient, consistency_level, question_count, created_at
-		 FROM wv_results
+		 FROM work_needs_scores
 		 WHERE session_id = $1
 		 LIMIT 1`,
 		sid,

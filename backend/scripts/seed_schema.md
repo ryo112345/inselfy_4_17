@@ -12,8 +12,8 @@
 
 - 認証: `admin_users`, `users`
 - プロフィール: `experiences`, `educations`, `skills`, `user_skills`
-- Work Values 診断: `sessions`, `results`
-- Career Interest 診断: `career_sessions`, `career_results`, `career_riasec_results`
+- Work Values 診断: `work_values_sessions`, `work_needs_scores`, `work_values_scores`
+- Career Interest 診断: `career_interest_sessions`, `career_interest_scores`, `career_riasec_scores`
 - 企業: `companies`, `company_users`
 - チーム: `teams`, `team_invitations`, `team_members`
 - 求人: `job_postings`
@@ -95,7 +95,7 @@ user_skills(user_id, skill_id)      -- 中間テーブル
 
 ## 3. Work Values 診断系
 
-### `sessions` — 診断セッション
+### `work_values_sessions` — 診断セッション
 
 | カラム | 推定型 | 備考 |
 |--------|--------|------|
@@ -106,11 +106,11 @@ user_skills(user_id, skill_id)      -- 中間テーブル
 | `consistency_level` | text | `high`/`medium`/`low`/`very_low` |
 | `purpose` | text | 診断の目的区分 |
 
-### `results` — 21 ニーズごとのスコア
+### `work_needs_scores` — 21 ニーズごとのスコア
 
 | カラム | 推定型 | 備考 |
 |--------|--------|------|
-| `session_id` | uuid | FK → sessions |
+| `session_id` | uuid | FK → work_values_sessions |
 | `need_id` | text | 例: `creativity`, `autonomy` |
 | `mu` | numeric | Bradley-Terry 強度 |
 | `se` | numeric | 標準誤差 |
@@ -119,13 +119,25 @@ user_skills(user_id, skill_id)      -- 中間テーブル
 
 PK は `(session_id, need_id)` が妥当。
 
+### `work_values_scores` — 6 Values 集約スコア
+
+| カラム | 推定型 | 備考 |
+|--------|--------|------|
+| `session_id` | uuid | FK → work_values_sessions、複合PK |
+| `value_id` | text | `achievement`/`comfort`/`status`/`altruism`/`safety`/`autonomy` |
+| `mu` | real | 所属 Needs の μ 平均 |
+| `display_score` | real | 0–100 表示用（シグモイド変換） |
+| `rank` | int2 | 1–6 |
+
+PK は `(session_id, value_id)`。
+
 ## 4. Career Interest 診断系
 
-### `career_sessions`
+### `career_interest_sessions`
 
 `(id, user_id)` のみ。Work Values と違い整合性指標は持たない設計。
 
-### `career_results` — 基本興味領域
+### `career_interest_scores` — 基本興味領域
 
 | カラム | 備考 |
 |--------|------|
@@ -134,7 +146,7 @@ PK は `(session_id, need_id)` が妥当。
 | `score` | スコア |
 | `rank` | 順位 |
 
-### `career_riasec_results` — RIASEC 6 タイプ集約
+### `career_riasec_scores` — RIASEC 6 タイプ集約
 
 | カラム | 備考 |
 |--------|------|

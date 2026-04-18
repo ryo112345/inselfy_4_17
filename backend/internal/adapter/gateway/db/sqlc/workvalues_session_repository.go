@@ -39,7 +39,7 @@ func (r *WorkValuesSessionRepository) Create(ctx context.Context, s *workvalues.
 	var id, status string
 	var createdAt time.Time
 	err = conn.QueryRow(ctx,
-		`INSERT INTO wv_sessions (user_id, status, initial_pairs)
+		`INSERT INTO work_values_sessions (user_id, status, initial_pairs)
 		 VALUES ($1, $2, $3)
 		 RETURNING id, status, created_at`,
 		userID, workvalues.StatusInProgress, pairsJSON,
@@ -69,7 +69,7 @@ func (r *WorkValuesSessionRepository) GetByID(ctx context.Context, id string) (*
 	var completedAt *time.Time
 	err = conn.QueryRow(ctx,
 		`SELECT id, user_id, status, initial_pairs, created_at, completed_at
-		 FROM wv_sessions WHERE id = $1`,
+		 FROM work_values_sessions WHERE id = $1`,
 		uuid,
 	).Scan(&s.ID, &s.UserID, &s.Status, &pairsJSON, &s.CreatedAt, &completedAt)
 	if err != nil {
@@ -95,9 +95,9 @@ func (r *WorkValuesSessionRepository) UpdateStatus(ctx context.Context, id, stat
 	conn := r.connForContext(ctx)
 	var query string
 	if status == workvalues.StatusCompleted {
-		query = `UPDATE wv_sessions SET status = $2, completed_at = NOW() WHERE id = $1`
+		query = `UPDATE work_values_sessions SET status = $2, completed_at = NOW() WHERE id = $1`
 	} else {
-		query = `UPDATE wv_sessions SET status = $2 WHERE id = $1`
+		query = `UPDATE work_values_sessions SET status = $2 WHERE id = $1`
 	}
 
 	tag, err := conn.Exec(ctx, query, uuid, status)

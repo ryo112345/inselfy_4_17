@@ -35,6 +35,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	skillRepoFactory := factory.NewSkillRepoFactory(pool)
 	wvSessionRepoFactory := factory.NewWVSessionRepoFactory(pool)
 	wvResultRepoFactory := factory.NewWVResultRepoFactory(pool)
+	wvScoreRepoFactory := factory.NewWVScoreRepoFactory(pool)
 
 	userInputFactory := factory.NewUserInputFactory()
 	experienceInputFactory := factory.NewExperienceInputFactory()
@@ -52,7 +53,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
 	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationOutputFactory, educationRepoFactory, userRepoFactory)
 	skillCtrl := httpcontroller.NewSkillController(skillInputFactory, skillOutputFactory, skillRepoFactory, userRepoFactory, tx)
-	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvOutputFactory, wvSessionRepoFactory, wvResultRepoFactory)
+	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvOutputFactory, wvSessionRepoFactory, wvResultRepoFactory, wvScoreRepoFactory)
 
 	e := echo.New()
 	e.Use(echomw.Recover())

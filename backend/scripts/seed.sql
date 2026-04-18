@@ -85,12 +85,12 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 -- 3. Work Values 診断データ（山田太郎）
 -- ============================================================
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', 28, 0.927, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
 -- 21 results (mu values designed to show clear preferences)
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30000000-0000-0000-0000-000000000001', 1,  2.1, 0.35, 89.1,  1),  -- ability_utilization
   ('30000000-0000-0000-0000-000000000001', 2,  1.8, 0.33, 85.8,  2),  -- achievement
   ('30000000-0000-0000-0000-000000000001', 3, -0.5, 0.30, 37.8, 14),  -- activity
@@ -114,6 +114,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30000000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30000000-0000-0000-0000-000000000001', 'achievement', 1.95, 87.5, 1),
+  ('30000000-0000-0000-0000-000000000001', 'autonomy', 1.27, 78.0, 2),
+  ('30000000-0000-0000-0000-000000000001', 'altruism', 0.17, 54.2, 3),
+  ('30000000-0000-0000-0000-000000000001', 'status', -0.57, 36.0, 4),
+  ('30000000-0000-0000-0000-000000000001', 'safety', -0.63, 34.7, 5),
+  ('30000000-0000-0000-0000-000000000001', 'comfort', -0.73, 32.4, 6)
+ON CONFLICT DO NOTHING;
+
 -- Update user wv_vector
 UPDATE users SET wv_vector = '[2.1,1.8,-0.5,0.8,-1.2,1.5,-0.3,0.2,0.6,1.3,0.5,-0.1,-0.4,1.0,-0.8,0.0,-1.5,-0.6,-1.0,-1.8,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000001';
@@ -121,12 +130,12 @@ WHERE id = '10000000-0000-0000-0000-000000000001';
 -- ============================================================
 -- 4. Career Interest 診断データ（山田太郎）
 -- ============================================================
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001')
 ON CONFLICT DO NOTHING;
 
 -- 20 basic interest results
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31000000-0000-0000-0000-000000000001', 'A1', 4.2, 2),
   ('31000000-0000-0000-0000-000000000001', 'A2', 3.8, 5),
   ('31000000-0000-0000-0000-000000000001', 'A3', 3.5, 8),
@@ -150,7 +159,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- 6 RIASEC results
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31000000-0000-0000-0000-000000000001', 'I', 4.03, 1),
   ('31000000-0000-0000-0000-000000000001', 'A', 3.83, 2),
   ('31000000-0000-0000-0000-000000000001', 'R', 3.20, 3),
@@ -166,11 +175,11 @@ WHERE id = '10000000-0000-0000-0000-000000000001';
 -- ============================================================
 -- 5. Work Values 診断データ（佐藤花子）
 -- ============================================================
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', 35, 0.909, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30000000-0000-0000-0000-000000000002', 1,  1.0, 0.32, 73.1,  5),
   ('30000000-0000-0000-0000-000000000002', 2,  0.8, 0.31, 69.0,  7),
   ('30000000-0000-0000-0000-000000000002', 3, -0.8, 0.32, 31.0, 16),
@@ -192,6 +201,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30000000-0000-0000-0000-000000000002', 19,-1.0, 0.33, 26.9, 17),
   ('30000000-0000-0000-0000-000000000002', 20,-1.2, 0.34, 23.1, 18),
   ('30000000-0000-0000-0000-000000000002', 21,-1.3, 0.34, 21.4, 19)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30000000-0000-0000-0000-000000000002', 'altruism', 1.4, 80.2, 1),
+  ('30000000-0000-0000-0000-000000000002', 'autonomy', 1.2, 76.9, 2),
+  ('30000000-0000-0000-0000-000000000002', 'achievement', 0.9, 71.1, 3),
+  ('30000000-0000-0000-0000-000000000002', 'safety', -0.53, 37.0, 4),
+  ('30000000-0000-0000-0000-000000000002', 'status', -0.62, 34.9, 5),
+  ('30000000-0000-0000-0000-000000000002', 'comfort', -0.72, 32.8, 6)
 ON CONFLICT DO NOTHING;
 
 UPDATE users SET wv_vector = '[1.0,0.8,-0.8,0.3,-1.5,1.2,0.0,-0.2,1.8,2.0,-0.3,0.9,0.5,0.4,-0.5,1.5,-1.8,-0.6,-1.0,-1.2,-1.3]'
@@ -408,10 +426,10 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 
 -- User04: 技術志向フロントエンジニア（creativity, ability_utilization高め / authority, social_status低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30004000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000004', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30004000-0000-0000-0000-000000000001', 1,  1.9, 0.34, 87.0,  2),  -- ability_utilization
   ('30004000-0000-0000-0000-000000000001', 2,  1.2, 0.32, 76.9,  5),  -- achievement
   ('30004000-0000-0000-0000-000000000001', 3, -0.3, 0.29, 42.6, 12),  -- activity
@@ -434,14 +452,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30004000-0000-0000-0000-000000000001', 20,-1.5, 0.35, 18.2, 19),  -- variety
   ('30004000-0000-0000-0000-000000000001', 21,-0.4, 0.30, 40.1, 13)   -- working_conditions
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30004000-0000-0000-0000-000000000001', 'autonomy', 1.73, 85.0, 1),
+  ('30004000-0000-0000-0000-000000000001', 'achievement', 1.55, 82.5, 2),
+  ('30004000-0000-0000-0000-000000000001', 'altruism', 0.0, 50.0, 3),
+  ('30004000-0000-0000-0000-000000000001', 'comfort', -0.35, 41.3, 4),
+  ('30004000-0000-0000-0000-000000000001', 'status', -0.85, 29.9, 5),
+  ('30004000-0000-0000-0000-000000000001', 'safety', -0.9, 28.9, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[1.9,1.2,-0.3,0.6,-1.8,1.6,-0.5,0.3,0.8,2.2,0.5,0.0,-0.2,1.4,-0.7,-0.8,-2.0,-1.0,-1.2,-1.5,-0.4]'
 WHERE id = '10000000-0000-0000-0000-000000000004';
 
 -- User05: 安定志向インフラエンジニア（security, working_conditions高め / creativity, variety低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30005000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000005', 38, 0.901, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30005000-0000-0000-0000-000000000001', 1,  0.8, 0.31, 69.0,  6),  -- ability_utilization
   ('30005000-0000-0000-0000-000000000001', 2,  0.5, 0.30, 62.2,  8),  -- achievement
   ('30005000-0000-0000-0000-000000000001', 3,  0.3, 0.30, 57.4,  9),  -- activity
@@ -464,14 +491,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30005000-0000-0000-0000-000000000001', 20,-1.8, 0.36, 14.2, 20),  -- variety
   ('30005000-0000-0000-0000-000000000001', 21, 1.8, 0.33, 85.8,  2)   -- working_conditions
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30005000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 1),
+  ('30005000-0000-0000-0000-000000000001', 'comfort', 0.62, 64.9, 2),
+  ('30005000-0000-0000-0000-000000000001', 'altruism', 0.03, 50.8, 3),
+  ('30005000-0000-0000-0000-000000000001', 'safety', -0.23, 44.2, 4),
+  ('30005000-0000-0000-0000-000000000001', 'autonomy', -0.3, 42.6, 5),
+  ('30005000-0000-0000-0000-000000000001', 'status', -0.88, 29.4, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[0.8,0.5,0.3,-0.4,-1.3,0.6,1.5,1.2,0.9,-1.0,0.2,0.0,-0.3,-0.5,2.0,-0.8,-1.5,-1.0,-1.2,-1.8,1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000005';
 
 -- User06: 探求志向データサイエンティスト（achievement, independence高め / supervision, social_status低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30006000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000006', 25, 0.935, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30006000-0000-0000-0000-000000000001', 1,  1.5, 0.33, 81.8,  3),  -- ability_utilization
   ('30006000-0000-0000-0000-000000000001', 2,  2.3, 0.35, 90.9,  1),  -- achievement
   ('30006000-0000-0000-0000-000000000001', 3,  0.4, 0.30, 59.9,  9),  -- activity
@@ -494,14 +530,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30006000-0000-0000-0000-000000000001', 20,-0.8, 0.32, 31.0, 15),  -- variety
   ('30006000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30006000-0000-0000-0000-000000000001', 'achievement', 1.9, 87.0, 1),
+  ('30006000-0000-0000-0000-000000000001', 'autonomy', 0.9, 71.1, 2),
+  ('30006000-0000-0000-0000-000000000001', 'altruism', -0.1, 47.5, 3),
+  ('30006000-0000-0000-0000-000000000001', 'comfort', -0.13, 46.7, 4),
+  ('30006000-0000-0000-0000-000000000001', 'status', -0.53, 37.2, 5),
+  ('30006000-0000-0000-0000-000000000001', 'safety', -1.17, 23.7, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[1.5,2.3,0.4,0.8,-1.0,1.0,-0.2,0.3,-0.1,1.2,1.8,0.5,0.2,0.5,-0.5,-0.7,-2.1,-1.5,-1.8,-0.8,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000006';
 
 -- User07: チーム志向バックエンドエンジニア（co_workers, responsibility高め / independence, working_conditions低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30007000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000007', 32, 0.917, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30007000-0000-0000-0000-000000000001', 1,  1.0, 0.32, 73.1,  5),  -- ability_utilization
   ('30007000-0000-0000-0000-000000000001', 2,  1.3, 0.32, 78.6,  4),  -- achievement
   ('30007000-0000-0000-0000-000000000001', 3,  0.6, 0.31, 64.6,  7),  -- activity
@@ -524,14 +569,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30007000-0000-0000-0000-000000000001', 20,-1.2, 0.34, 23.1, 17),  -- variety
   ('30007000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions  (note: low despite infra role)
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30007000-0000-0000-0000-000000000001', 'altruism', 1.17, 76.3, 1),
+  ('30007000-0000-0000-0000-000000000001', 'achievement', 1.15, 76.0, 2),
+  ('30007000-0000-0000-0000-000000000001', 'autonomy', 0.9, 71.1, 3),
+  ('30007000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 4),
+  ('30007000-0000-0000-0000-000000000001', 'status', -0.53, 37.2, 5),
+  ('30007000-0000-0000-0000-000000000001', 'comfort', -0.75, 32.1, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[1.0,1.3,0.6,0.5,-0.3,0.2,0.3,0.0,2.0,0.8,-1.5,1.5,-0.5,1.7,-0.4,0.0,-1.8,-0.8,-1.0,-1.2,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000007';
 
 -- User08: 社会貢献志向UXデザイナー（social_service, moral_values高め / compensation, advancement低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30008000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000008', 40, 0.896, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30008000-0000-0000-0000-000000000001', 1,  0.9, 0.31, 71.1,  5),  -- ability_utilization
   ('30008000-0000-0000-0000-000000000001', 2,  0.5, 0.30, 62.2,  8),  -- achievement
   ('30008000-0000-0000-0000-000000000001', 3, -0.6, 0.31, 35.4, 14),  -- activity
@@ -554,14 +608,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30008000-0000-0000-0000-000000000001', 20,-0.8, 0.32, 31.0, 15),  -- variety
   ('30008000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30008000-0000-0000-0000-000000000001', 'altruism', 1.73, 85.0, 1),
+  ('30008000-0000-0000-0000-000000000001', 'achievement', 0.7, 66.8, 2),
+  ('30008000-0000-0000-0000-000000000001', 'autonomy', 0.67, 66.1, 3),
+  ('30008000-0000-0000-0000-000000000001', 'safety', 0.33, 58.3, 4),
+  ('30008000-0000-0000-0000-000000000001', 'comfort', -0.87, 29.6, 5),
+  ('30008000-0000-0000-0000-000000000001', 'status', -1.07, 25.4, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[0.9,0.5,-0.6,-1.2,-1.5,0.6,0.0,-1.0,1.3,1.5,-0.3,1.8,0.2,-0.1,-0.5,2.1,-1.8,0.7,0.3,-0.8,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000008';
 
 -- User09: 自由裁量志向グラフィックデザイナー（autonomy, creativity高め / company_policies, security低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30009000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000009', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30009000-0000-0000-0000-000000000001', 1,  1.3, 0.32, 78.6,  4),  -- ability_utilization
   ('30009000-0000-0000-0000-000000000001', 2,  0.7, 0.31, 66.8,  7),  -- achievement
   ('30009000-0000-0000-0000-000000000001', 3, -0.8, 0.32, 31.0, 15),  -- activity
@@ -584,14 +647,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30009000-0000-0000-0000-000000000001', 20,-1.0, 0.33, 26.9, 16),  -- variety
   ('30009000-0000-0000-0000-000000000001', 21,-1.2, 0.34, 23.1, 17)   -- working_conditions
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30009000-0000-0000-0000-000000000001', 'autonomy', 1.77, 85.4, 1),
+  ('30009000-0000-0000-0000-000000000001', 'achievement', 1.0, 73.1, 2),
+  ('30009000-0000-0000-0000-000000000001', 'altruism', 0.27, 56.6, 3),
+  ('30009000-0000-0000-0000-000000000001', 'comfort', -0.63, 34.7, 4),
+  ('30009000-0000-0000-0000-000000000001', 'safety', -0.63, 34.7, 5),
+  ('30009000-0000-0000-0000-000000000001', 'status', -0.8, 31.0, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[1.3,0.7,-0.8,-0.2,-1.6,2.3,-1.3,-0.5,0.5,2.0,1.5,0.3,0.8,1.0,-1.8,0.0,-2.2,-0.3,-0.3,-1.0,-1.2]'
 WHERE id = '10000000-0000-0000-0000-000000000009';
 
 -- User10: リーダーシップ志向事業開発（authority, advancement高め / autonomy, independence低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3000a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000a', 36, 0.906, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000a000-0000-0000-0000-000000000001', 1,  0.5, 0.30, 62.2,  8),  -- ability_utilization
   ('3000a000-0000-0000-0000-000000000001', 2,  1.5, 0.33, 81.8,  3),  -- achievement
   ('3000a000-0000-0000-0000-000000000001', 3,  0.8, 0.31, 69.0,  6),  -- activity
@@ -614,14 +686,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000a000-0000-0000-0000-000000000001', 20,-1.8, 0.36, 14.2, 20),  -- variety
   ('3000a000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3000a000-0000-0000-0000-000000000001', 'status', 1.25, 77.7, 1),
+  ('3000a000-0000-0000-0000-000000000001', 'achievement', 1.0, 73.1, 2),
+  ('3000a000-0000-0000-0000-000000000001', 'altruism', 0.07, 51.7, 3),
+  ('3000a000-0000-0000-0000-000000000001', 'safety', -0.43, 39.3, 4),
+  ('3000a000-0000-0000-0000-000000000001', 'autonomy', -0.6, 35.4, 5),
+  ('3000a000-0000-0000-0000-000000000001', 'comfort', -0.67, 33.9, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[0.5,1.5,0.8,2.0,1.8,-1.2,0.3,1.0,0.6,-0.8,-1.5,-0.3,1.2,0.2,-0.5,-0.1,0.0,-0.6,-1.0,-1.8,-2.0]'
 WHERE id = '10000000-0000-0000-0000-00000000000a';
 
 -- User11: 対人関係志向セールス（co_workers, recognition高め / creativity, independence低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3000b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000b', 42, 0.891, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000b000-0000-0000-0000-000000000001', 1, -0.2, 0.29, 45.0, 11),  -- ability_utilization
   ('3000b000-0000-0000-0000-000000000001', 2,  1.5, 0.33, 81.8,  3),  -- achievement
   ('3000b000-0000-0000-0000-000000000001', 3,  0.8, 0.31, 69.0,  6),  -- activity
@@ -644,14 +725,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000b000-0000-0000-0000-000000000001', 20,-1.0, 0.33, 26.9, 16),  -- variety
   ('3000b000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3000b000-0000-0000-0000-000000000001', 'altruism', 0.73, 67.6, 1),
+  ('3000b000-0000-0000-0000-000000000001', 'status', 0.7, 66.8, 2),
+  ('3000b000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 3),
+  ('3000b000-0000-0000-0000-000000000001', 'safety', -0.33, 41.7, 4),
+  ('3000b000-0000-0000-0000-000000000001', 'comfort', -0.37, 40.9, 5),
+  ('3000b000-0000-0000-0000-000000000001', 'autonomy', -1.03, 26.2, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[-0.2,1.5,0.8,1.0,0.5,-1.3,0.2,1.2,2.2,-1.5,-1.8,0.0,1.8,-0.3,0.6,0.0,-0.5,-0.8,-0.4,-1.0,-2.0]'
 WHERE id = '10000000-0000-0000-0000-00000000000b';
 
 -- User12: バランス型PM（responsibility, achievement高め / variety, working_conditions低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3000c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000c', 29, 0.925, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000c000-0000-0000-0000-000000000001', 1,  1.2, 0.32, 76.9,  4),  -- ability_utilization
   ('3000c000-0000-0000-0000-000000000001', 2,  1.8, 0.34, 85.8,  2),  -- achievement
   ('3000c000-0000-0000-0000-000000000001', 3,  0.3, 0.30, 57.4,  9),  -- activity
@@ -674,14 +764,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000c000-0000-0000-0000-000000000001', 20,-1.8, 0.36, 14.2, 19),  -- variety
   ('3000c000-0000-0000-0000-000000000001', 21,-2.2, 0.38, 10.0, 20)   -- working_conditions  (note: rank adjusted)
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3000c000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('3000c000-0000-0000-0000-000000000001', 'autonomy', 0.97, 72.4, 2),
+  ('3000c000-0000-0000-0000-000000000001', 'altruism', 0.83, 69.7, 3),
+  ('3000c000-0000-0000-0000-000000000001', 'status', 0.0, 50.0, 4),
+  ('3000c000-0000-0000-0000-000000000001', 'safety', -0.47, 38.5, 5),
+  ('3000c000-0000-0000-0000-000000000001', 'comfort', -0.67, 33.9, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[1.2,1.8,0.3,1.0,0.5,0.6,0.0,0.5,0.8,0.3,-0.5,0.2,0.0,2.0,-0.3,1.5,-1.5,-0.8,-0.6,-1.8,-2.2]'
 WHERE id = '10000000-0000-0000-0000-00000000000c';
 
 -- User13: コミュニケーション志向マーケター（social_service, co_workers高め / authority, social_status低め）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3000d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000d', 37, 0.904, 'high', 'general')
 ON CONFLICT DO NOTHING;
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000d000-0000-0000-0000-000000000001', 1,  0.6, 0.31, 64.6,  7),  -- ability_utilization
   ('3000d000-0000-0000-0000-000000000001', 2,  1.0, 0.32, 73.1,  5),  -- achievement
   ('3000d000-0000-0000-0000-000000000001', 3,  0.3, 0.30, 57.4,  9),  -- activity
@@ -704,6 +803,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000d000-0000-0000-0000-000000000001', 20,-1.5, 0.35, 18.2, 18),  -- variety
   ('3000d000-0000-0000-0000-000000000001', 21,-1.5, 0.35, 18.2, 18)   -- working_conditions (note: rank adjusted)
 ON CONFLICT DO NOTHING;
+
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3000d000-0000-0000-0000-000000000001', 'altruism', 1.77, 85.4, 1),
+  ('3000d000-0000-0000-0000-000000000001', 'achievement', 0.8, 69.0, 2),
+  ('3000d000-0000-0000-0000-000000000001', 'autonomy', 0.77, 68.3, 3),
+  ('3000d000-0000-0000-0000-000000000001', 'comfort', -0.67, 33.9, 4),
+  ('3000d000-0000-0000-0000-000000000001', 'safety', -0.8, 31.0, 5),
+  ('3000d000-0000-0000-0000-000000000001', 'status', -0.9, 28.9, 6)
+ON CONFLICT DO NOTHING;
 UPDATE users SET wv_vector = '[0.6,1.0,0.3,0.5,-1.8,0.8,-0.2,0.0,1.8,1.3,-0.5,1.5,-0.3,0.2,-0.8,2.0,-2.0,-1.0,-1.2,-1.5,-1.5]'
 WHERE id = '10000000-0000-0000-0000-00000000000d';
 
@@ -713,10 +821,10 @@ WHERE id = '10000000-0000-0000-0000-00000000000d';
 -- ============================================================
 
 -- User04: フロントエンドエンジニア（I高め、A中程度、R中程度）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31004000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000004')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31004000-0000-0000-0000-000000000001', 'A1', 3.8, 5),
   ('31004000-0000-0000-0000-000000000001', 'A2', 3.5, 8),
   ('31004000-0000-0000-0000-000000000001', 'A3', 3.6, 7),
@@ -739,7 +847,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31004000-0000-0000-0000-000000000001', 'S4', 3.3, 9)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(3.2,3.7,3.0)=3.30, I=mean(4.5,4.2,4.0,3.9)=4.15, A=mean(3.8,3.5,3.6)=3.63, S=mean(2.9,2.6,3.1,3.3)=2.98, E=mean(2.7,2.5,2.4)=2.53, C=mean(2.5,2.8,2.3)=2.53
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31004000-0000-0000-0000-000000000001', 'I', 4.15, 1),
   ('31004000-0000-0000-0000-000000000001', 'A', 3.63, 2),
   ('31004000-0000-0000-0000-000000000001', 'R', 3.30, 3),
@@ -751,10 +859,10 @@ UPDATE users SET ci_vector = '[3.8,3.5,3.6,2.5,2.8,2.3,2.7,2.5,2.4,4.5,4.2,4.0,3
 WHERE id = '10000000-0000-0000-0000-000000000004';
 
 -- User05: インフラエンジニア（R高め、C中程度、I中程度）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31005000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000005')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31005000-0000-0000-0000-000000000001', 'A1', 2.3, 17),
   ('31005000-0000-0000-0000-000000000001', 'A2', 2.1, 19),
   ('31005000-0000-0000-0000-000000000001', 'A3', 2.5, 15),
@@ -777,7 +885,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31005000-0000-0000-0000-000000000001', 'S4', 3.0, 11)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(4.5,4.2,3.7)=4.13, I=mean(3.6,3.3,3.4,3.2)=3.38, A=mean(2.3,2.1,2.5)=2.30, S=mean(2.6,2.8,2.7,3.0)=2.78, E=mean(2.4,2.2,2.0)=2.20, C=mean(3.8,3.5,3.9)=3.73
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31005000-0000-0000-0000-000000000001', 'R', 4.13, 1),
   ('31005000-0000-0000-0000-000000000001', 'C', 3.73, 2),
   ('31005000-0000-0000-0000-000000000001', 'I', 3.38, 3),
@@ -789,10 +897,10 @@ UPDATE users SET ci_vector = '[2.3,2.1,2.5,3.8,3.5,3.9,2.4,2.2,2.0,3.6,3.3,3.4,3
 WHERE id = '10000000-0000-0000-0000-000000000005';
 
 -- User06: データサイエンティスト（I高め、R中程度、C中程度）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31006000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000006')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31006000-0000-0000-0000-000000000001', 'A1', 2.8, 14),
   ('31006000-0000-0000-0000-000000000001', 'A2', 3.0, 12),
   ('31006000-0000-0000-0000-000000000001', 'A3', 2.6, 16),
@@ -815,7 +923,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31006000-0000-0000-0000-000000000001', 'S4', 2.1, 19)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(3.2,3.8,3.1)=3.37, I=mean(4.8,4.5,4.3,4.0)=4.40, A=mean(2.8,3.0,2.6)=2.80, S=mean(2.0,2.5,2.9,2.1)=2.38, E=mean(2.4,2.2,2.3)=2.30, C=mean(3.5,3.3,3.6)=3.47
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31006000-0000-0000-0000-000000000001', 'I', 4.40, 1),
   ('31006000-0000-0000-0000-000000000001', 'C', 3.47, 2),
   ('31006000-0000-0000-0000-000000000001', 'R', 3.37, 3),
@@ -827,10 +935,10 @@ UPDATE users SET ci_vector = '[2.8,3.0,2.6,3.5,3.3,3.6,2.4,2.2,2.3,4.8,4.5,4.3,4
 WHERE id = '10000000-0000-0000-0000-000000000006';
 
 -- User07: バックエンドエンジニア（I高め、R高め、E低め）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31007000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000007')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31007000-0000-0000-0000-000000000001', 'A1', 2.5, 16),
   ('31007000-0000-0000-0000-000000000001', 'A2', 2.3, 18),
   ('31007000-0000-0000-0000-000000000001', 'A3', 2.7, 14),
@@ -853,7 +961,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31007000-0000-0000-0000-000000000001', 'S4', 2.0, 20)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(4.0,3.7,3.5)=3.73, I=mean(4.6,4.3,4.1,3.8)=4.20, A=mean(2.5,2.3,2.7)=2.50, S=mean(3.3,3.6,3.1,2.0)=3.00, E=mean(2.4,2.6,2.2)=2.40, C=mean(3.0,3.2,2.8)=3.00
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31007000-0000-0000-0000-000000000001', 'I', 4.20, 1),
   ('31007000-0000-0000-0000-000000000001', 'R', 3.73, 2),
   ('31007000-0000-0000-0000-000000000001', 'S', 3.00, 3),
@@ -865,10 +973,10 @@ UPDATE users SET ci_vector = '[2.5,2.3,2.7,3.0,3.2,2.8,2.4,2.6,2.2,4.6,4.3,4.1,3
 WHERE id = '10000000-0000-0000-0000-000000000007';
 
 -- User08: UXデザイナー（A高め、S高め、R低め）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31008000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000008')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31008000-0000-0000-0000-000000000001', 'A1', 4.5, 1),
   ('31008000-0000-0000-0000-000000000001', 'A2', 4.2, 3),
   ('31008000-0000-0000-0000-000000000001', 'A3', 4.3, 2),
@@ -891,7 +999,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31008000-0000-0000-0000-000000000001', 'S4', 3.6, 7)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(2.2,2.4,2.9)=2.50, I=mean(3.5,3.3,3.2,3.1)=3.28, A=mean(4.5,4.2,4.3)=4.33, S=mean(4.0,3.8,3.7,3.6)=3.78, E=mean(3.0,2.8,2.6)=2.80, C=mean(2.3,2.5,2.1)=2.30
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31008000-0000-0000-0000-000000000001', 'A', 4.33, 1),
   ('31008000-0000-0000-0000-000000000001', 'S', 3.78, 2),
   ('31008000-0000-0000-0000-000000000001', 'I', 3.28, 3),
@@ -903,10 +1011,10 @@ UPDATE users SET ci_vector = '[4.5,4.2,4.3,2.3,2.5,2.1,3.0,2.8,2.6,3.5,3.3,3.2,3
 WHERE id = '10000000-0000-0000-0000-000000000008';
 
 -- User09: グラフィックデザイナー（A高め、I中程度、S低め）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31009000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000009')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31009000-0000-0000-0000-000000000001', 'A1', 4.8, 1),
   ('31009000-0000-0000-0000-000000000001', 'A2', 4.5, 2),
   ('31009000-0000-0000-0000-000000000001', 'A3', 4.6, 2),
@@ -929,7 +1037,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31009000-0000-0000-0000-000000000001', 'S4', 2.4, 16)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(3.2,2.9,3.4)=3.17, I=mean(3.5,3.3,3.7,3.6)=3.53, A=mean(4.8,4.5,4.6)=4.63, S=mean(2.3,2.6,3.1,2.4)=2.60, E=mean(2.8,3.0,2.5)=2.77, C=mean(2.0,2.2,2.1)=2.10
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31009000-0000-0000-0000-000000000001', 'A', 4.63, 1),
   ('31009000-0000-0000-0000-000000000001', 'I', 3.53, 2),
   ('31009000-0000-0000-0000-000000000001', 'R', 3.17, 3),
@@ -941,10 +1049,10 @@ UPDATE users SET ci_vector = '[4.8,4.5,4.6,2.0,2.2,2.1,2.8,3.0,2.5,3.5,3.3,3.7,3
 WHERE id = '10000000-0000-0000-0000-000000000009';
 
 -- User10: 事業開発（E高め、S中程度、C低め）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3100a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000a')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3100a000-0000-0000-0000-000000000001', 'A1', 2.8, 14),
   ('3100a000-0000-0000-0000-000000000001', 'A2', 3.0, 12),
   ('3100a000-0000-0000-0000-000000000001', 'A3', 2.5, 16),
@@ -967,7 +1075,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3100a000-0000-0000-0000-000000000001', 'S4', 4.2, 3)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(2.2,2.0,2.1)=2.10, I=mean(2.9,3.1,2.7,3.2)=2.98, A=mean(2.8,3.0,2.5)=2.77, S=mean(3.8,3.5,3.6,4.2)=3.78, E=mean(4.5,4.3,4.0)=4.27, C=mean(2.3,2.6,2.4)=2.43
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3100a000-0000-0000-0000-000000000001', 'E', 4.27, 1),
   ('3100a000-0000-0000-0000-000000000001', 'S', 3.78, 2),
   ('3100a000-0000-0000-0000-000000000001', 'I', 2.98, 3),
@@ -979,10 +1087,10 @@ UPDATE users SET ci_vector = '[2.8,3.0,2.5,2.3,2.6,2.4,4.5,4.3,4.0,2.9,3.1,2.7,3
 WHERE id = '10000000-0000-0000-0000-00000000000a';
 
 -- User11: セールス（E高め、S高め、I低め）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3100b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000b')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3100b000-0000-0000-0000-000000000001', 'A1', 2.3, 17),
   ('3100b000-0000-0000-0000-000000000001', 'A2', 2.5, 15),
   ('3100b000-0000-0000-0000-000000000001', 'A3', 2.1, 19),
@@ -1005,7 +1113,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3100b000-0000-0000-0000-000000000001', 'S4', 3.7, 6)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(2.8,3.1,2.9)=2.93, I=mean(2.2,2.4,2.0,2.6)=2.30, A=mean(2.3,2.5,2.1)=2.30, S=mean(4.0,3.8,3.6,3.7)=3.78, E=mean(4.6,4.4,4.2)=4.40, C=mean(3.2,3.0,3.4)=3.20
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3100b000-0000-0000-0000-000000000001', 'E', 4.40, 1),
   ('3100b000-0000-0000-0000-000000000001', 'S', 3.78, 2),
   ('3100b000-0000-0000-0000-000000000001', 'C', 3.20, 3),
@@ -1017,10 +1125,10 @@ UPDATE users SET ci_vector = '[2.3,2.5,2.1,3.2,3.0,3.4,4.6,4.4,4.2,2.2,2.4,2.0,2
 WHERE id = '10000000-0000-0000-0000-00000000000b';
 
 -- User12: PM（E中程度、I中程度、S中程度 - バランス型）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3100c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000c')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3100c000-0000-0000-0000-000000000001', 'A1', 3.2, 10),
   ('3100c000-0000-0000-0000-000000000001', 'A2', 3.0, 13),
   ('3100c000-0000-0000-0000-000000000001', 'A3', 3.4, 8),
@@ -1043,7 +1151,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3100c000-0000-0000-0000-000000000001', 'S4', 3.1, 11)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(2.5,2.7,2.6)=2.60, I=mean(3.8,3.5,3.3,4.2)=3.70, A=mean(3.2,3.0,3.4)=3.20, S=mean(3.6,4.1,2.9,3.1)=3.43, E=mean(3.9,4.0,3.7)=3.87, C=mean(3.1,2.8,3.0)=2.97
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3100c000-0000-0000-0000-000000000001', 'E', 3.87, 1),
   ('3100c000-0000-0000-0000-000000000001', 'I', 3.70, 2),
   ('3100c000-0000-0000-0000-000000000001', 'S', 3.43, 3),
@@ -1055,10 +1163,10 @@ UPDATE users SET ci_vector = '[3.2,3.0,3.4,3.1,2.8,3.0,3.9,4.0,3.7,3.8,3.5,3.3,4
 WHERE id = '10000000-0000-0000-0000-00000000000c';
 
 -- User13: マーケター（E中程度、A中程度、S高め）
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3100d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000d')
 ON CONFLICT DO NOTHING;
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3100d000-0000-0000-0000-000000000001', 'A1', 3.6, 6),
   ('3100d000-0000-0000-0000-000000000001', 'A2', 3.8, 5),
   ('3100d000-0000-0000-0000-000000000001', 'A3', 3.4, 9),
@@ -1081,7 +1189,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3100d000-0000-0000-0000-000000000001', 'S4', 3.7, 5)
 ON CONFLICT DO NOTHING;
 -- RIASEC: R=mean(2.2,2.4,2.0)=2.20, I=mean(2.9,2.6,3.1,2.5)=2.78, A=mean(3.6,3.8,3.4)=3.60, S=mean(4.2,4.0,4.1,3.7)=4.00, E=mean(3.5,3.9,3.3)=3.57, C=mean(3.0,2.8,3.2)=3.00
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3100d000-0000-0000-0000-000000000001', 'S', 4.00, 1),
   ('3100d000-0000-0000-0000-000000000001', 'A', 3.60, 2),
   ('3100d000-0000-0000-0000-000000000001', 'E', 3.57, 3),
@@ -1241,11 +1349,11 @@ ON CONFLICT (name) DO NOTHING;
 -- ============================================================
 
 -- ユーザー14: 森田悠希（データサイエンティスト）— 知的好奇心・分析力重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3000e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000e', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000e000-0000-0000-0000-000000000001', 1,  2.3, 0.34, 90.9,  1),  -- ability_utilization
   ('3000e000-0000-0000-0000-000000000001', 2,  1.5, 0.32, 81.8,  4),  -- achievement
   ('3000e000-0000-0000-0000-000000000001', 3,  0.2, 0.29, 55.0, 10),  -- activity
@@ -1269,15 +1377,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000e000-0000-0000-0000-000000000001', 21,-1.5, 0.35, 18.2, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3000e000-0000-0000-0000-000000000001', 'achievement', 1.9, 87.0, 1),
+  ('3000e000-0000-0000-0000-000000000001', 'autonomy', 1.53, 82.2, 2),
+  ('3000e000-0000-0000-0000-000000000001', 'comfort', -0.07, 48.3, 3),
+  ('3000e000-0000-0000-0000-000000000001', 'altruism', -0.33, 41.7, 4),
+  ('3000e000-0000-0000-0000-000000000001', 'safety', -0.83, 30.3, 5),
+  ('3000e000-0000-0000-0000-000000000001', 'status', -0.97, 27.4, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.3,1.5,0.2,0.5,-1.8,1.8,-0.4,-0.1,0.3,2.0,1.2,-0.3,-0.6,0.8,-0.8,-1.0,-2.0,-0.9,-1.2,0.6,-1.5]'
 WHERE id = '10000000-0000-0000-0000-00000000000e';
 
 -- ユーザー15: 藤田里奈（フロントエンド）— チームワーク・創造性・社会貢献重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3000f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000f', 38, 0.901, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000f000-0000-0000-0000-000000000001', 1,  0.8, 0.31, 69.0,  6),  -- ability_utilization
   ('3000f000-0000-0000-0000-000000000001', 2,  0.5, 0.30, 62.2,  8),  -- achievement
   ('3000f000-0000-0000-0000-000000000001', 3, -0.6, 0.31, 35.4, 14),  -- activity
@@ -1301,15 +1418,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3000f000-0000-0000-0000-000000000001', 21,-1.5, 0.35, 18.2, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3000f000-0000-0000-0000-000000000001', 'altruism', 1.6, 83.2, 1),
+  ('3000f000-0000-0000-0000-000000000001', 'autonomy', 0.73, 67.6, 2),
+  ('3000f000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 3),
+  ('3000f000-0000-0000-0000-000000000001', 'comfort', -0.5, 37.8, 4),
+  ('3000f000-0000-0000-0000-000000000001', 'safety', -0.8, 31.0, 5),
+  ('3000f000-0000-0000-0000-000000000001', 'status', -0.9, 28.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,0.5,-0.6,-0.2,-1.5,0.6,0.1,-0.3,2.0,1.6,-0.8,1.0,0.3,0.0,-1.0,1.8,-2.2,-1.2,-1.3,1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-00000000000f';
 
 -- ユーザー16: 小川健二（SRE）— 安定・自律・責任重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30010000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000010', 25, 0.935, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30010000-0000-0000-0000-000000000001', 1,  1.0, 0.32, 73.1,  6),  -- ability_utilization
   ('30010000-0000-0000-0000-000000000001', 2,  0.8, 0.31, 69.0,  8),  -- achievement
   ('30010000-0000-0000-0000-000000000001', 3,  0.4, 0.30, 59.9, 10),  -- activity
@@ -1333,15 +1459,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30010000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30010000-0000-0000-0000-000000000001', 'autonomy', 1.13, 75.6, 1),
+  ('30010000-0000-0000-0000-000000000001', 'achievement', 0.9, 71.1, 2),
+  ('30010000-0000-0000-0000-000000000001', 'comfort', 0.13, 53.3, 3),
+  ('30010000-0000-0000-0000-000000000001', 'safety', -0.03, 49.2, 4),
+  ('30010000-0000-0000-0000-000000000001', 'altruism', -0.27, 43.4, 5),
+  ('30010000-0000-0000-0000-000000000001', 'status', -0.55, 36.6, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,0.8,0.4,0.6,-0.5,1.8,1.2,0.9,0.0,-0.4,1.3,0.2,-0.8,2.0,1.5,-1.0,-1.5,-0.3,-1.0,-1.3,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000010';
 
 -- ユーザー17: 中村真央（UXリサーチャー）— 社会貢献・協調・倫理重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30011000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000011', 40, 0.896, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30011000-0000-0000-0000-000000000001', 1,  0.6, 0.31, 64.6,  7),  -- ability_utilization
   ('30011000-0000-0000-0000-000000000001', 2,  0.3, 0.30, 57.4,  9),  -- achievement
   ('30011000-0000-0000-0000-000000000001', 3, -0.9, 0.32, 28.9, 16),  -- activity
@@ -1365,15 +1500,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30011000-0000-0000-0000-000000000001', 21,-1.8, 0.36, 14.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30011000-0000-0000-0000-000000000001', 'altruism', 1.77, 85.4, 1),
+  ('30011000-0000-0000-0000-000000000001', 'autonomy', 0.57, 63.8, 2),
+  ('30011000-0000-0000-0000-000000000001', 'achievement', 0.45, 61.1, 3),
+  ('30011000-0000-0000-0000-000000000001', 'safety', -0.53, 37.0, 4),
+  ('30011000-0000-0000-0000-000000000001', 'comfort', -0.67, 33.9, 5),
+  ('30011000-0000-0000-0000-000000000001', 'status', -0.8, 31.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.6,0.3,-0.9,-0.5,-2.0,0.4,0.0,-0.6,1.8,1.5,-0.7,1.3,0.8,-0.2,-1.0,2.2,-1.5,-0.4,-1.2,1.0,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000011';
 
 -- ユーザー18: 伊藤拓也（セキュリティエンジニア）— 報酬・地位・権威重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30012000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000012', 32, 0.917, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30012000-0000-0000-0000-000000000001', 1,  0.5, 0.30, 62.2,  9),  -- ability_utilization
   ('30012000-0000-0000-0000-000000000001', 2,  1.5, 0.33, 81.8,  4),  -- achievement
   ('30012000-0000-0000-0000-000000000001', 3,  0.2, 0.29, 55.0, 11),  -- activity
@@ -1397,15 +1541,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30012000-0000-0000-0000-000000000001', 21,-2.2, 0.38, 10.0, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30012000-0000-0000-0000-000000000001', 'status', 1.4, 80.2, 1),
+  ('30012000-0000-0000-0000-000000000001', 'achievement', 1.0, 73.1, 2),
+  ('30012000-0000-0000-0000-000000000001', 'autonomy', 0.5, 62.2, 3),
+  ('30012000-0000-0000-0000-000000000001', 'comfort', -0.27, 43.4, 4),
+  ('30012000-0000-0000-0000-000000000001', 'safety', -0.73, 32.4, 5),
+  ('30012000-0000-0000-0000-000000000001', 'altruism', -0.93, 28.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.5,1.5,0.2,2.0,1.2,0.8,0.0,2.3,-0.5,-0.3,0.3,-0.8,1.8,1.0,-0.4,-1.5,0.6,-1.0,-1.2,-1.8,-2.2]'
 WHERE id = '10000000-0000-0000-0000-000000000012';
 
 -- ユーザー19: 清水彩花（iOSエンジニア）— 多様性・活動・創造性重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30013000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000013', 42, 0.891, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30013000-0000-0000-0000-000000000001', 1,  1.2, 0.32, 76.9,  4),  -- ability_utilization
   ('30013000-0000-0000-0000-000000000001', 2,  0.6, 0.31, 64.6,  7),  -- achievement
   ('30013000-0000-0000-0000-000000000001', 3,  1.5, 0.33, 81.8,  3),  -- activity
@@ -1429,15 +1582,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30013000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30013000-0000-0000-0000-000000000001', 'achievement', 0.9, 71.1, 1),
+  ('30013000-0000-0000-0000-000000000001', 'autonomy', 0.67, 66.1, 2),
+  ('30013000-0000-0000-0000-000000000001', 'altruism', 0.4, 59.9, 3),
+  ('30013000-0000-0000-0000-000000000001', 'comfort', -0.05, 48.8, 4),
+  ('30013000-0000-0000-0000-000000000001', 'status', -0.55, 36.6, 5),
+  ('30013000-0000-0000-0000-000000000001', 'safety', -0.83, 30.3, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.2,0.6,1.5,0.1,-1.0,0.8,-0.5,-0.2,1.0,1.8,-0.3,0.3,0.5,-0.6,-1.5,-0.1,-1.8,-0.8,-1.2,2.2,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000013';
 
 -- ユーザー20: 渡辺大樹（QAエンジニア）— 制度の公正性・上司の信頼・安定重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30014000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000014', 45, 0.883, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30014000-0000-0000-0000-000000000001', 1,  0.3, 0.30, 57.4, 10),  -- ability_utilization
   ('30014000-0000-0000-0000-000000000001', 2,  0.5, 0.30, 62.2,  8),  -- achievement
   ('30014000-0000-0000-0000-000000000001', 3,  0.0, 0.29, 50.0, 11),  -- activity
@@ -1461,15 +1623,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30014000-0000-0000-0000-000000000001', 21,-2.2, 0.38, 10.0, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30014000-0000-0000-0000-000000000001', 'safety', 0.77, 68.3, 1),
+  ('30014000-0000-0000-0000-000000000001', 'achievement', 0.4, 59.9, 2),
+  ('30014000-0000-0000-0000-000000000001', 'altruism', 0.4, 59.9, 3),
+  ('30014000-0000-0000-0000-000000000001', 'autonomy', -0.13, 46.7, 4),
+  ('30014000-0000-0000-0000-000000000001', 'comfort', -0.27, 43.4, 5),
+  ('30014000-0000-0000-0000-000000000001', 'status', -0.8, 31.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.3,0.5,0.0,-0.3,-1.5,0.8,2.0,0.6,1.0,-0.8,-0.5,1.2,0.4,-0.4,1.8,-1.0,-1.8,1.5,-1.2,-1.3,-2.2]'
 WHERE id = '10000000-0000-0000-0000-000000000014';
 
 -- ユーザー21: 本田咲（マーケティング）— 達成・承認・影響力重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30015000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000015', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30015000-0000-0000-0000-000000000001', 1,  0.8, 0.31, 69.0,  6),  -- ability_utilization
   ('30015000-0000-0000-0000-000000000001', 2,  2.2, 0.35, 90.0,  1),  -- achievement
   ('30015000-0000-0000-0000-000000000001', 3,  0.5, 0.30, 62.2,  8),  -- activity
@@ -1493,15 +1664,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30015000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30015000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30015000-0000-0000-0000-000000000001', 'autonomy', 0.77, 68.3, 2),
+  ('30015000-0000-0000-0000-000000000001', 'status', 0.72, 67.4, 3),
+  ('30015000-0000-0000-0000-000000000001', 'altruism', -0.53, 37.0, 4),
+  ('30015000-0000-0000-0000-000000000001', 'comfort', -0.6, 35.4, 5),
+  ('30015000-0000-0000-0000-000000000001', 'safety', -1.0, 26.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,2.2,0.5,1.5,0.6,0.3,-0.2,1.0,0.0,0.2,-0.5,-0.6,2.0,1.8,-0.8,-1.0,-1.2,-1.5,-1.3,-1.8,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000015';
 
 -- ユーザー22: 松田涼太（組み込みエンジニア）— 安全性・労働条件・独立重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30016000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000016', 28, 0.927, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30016000-0000-0000-0000-000000000001', 1,  0.6, 0.31, 64.6,  6),  -- ability_utilization
   ('30016000-0000-0000-0000-000000000001', 2,  0.3, 0.30, 57.4,  8),  -- achievement
   ('30016000-0000-0000-0000-000000000001', 3,  0.1, 0.29, 52.5, 10),  -- activity
@@ -1525,15 +1705,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30016000-0000-0000-0000-000000000001', 21, 1.8, 0.34, 85.8,  2)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30016000-0000-0000-0000-000000000001', 'comfort', 0.65, 65.7, 1),
+  ('30016000-0000-0000-0000-000000000001', 'achievement', 0.45, 61.1, 2),
+  ('30016000-0000-0000-0000-000000000001', 'safety', -0.1, 47.5, 3),
+  ('30016000-0000-0000-0000-000000000001', 'autonomy', -0.27, 43.4, 4),
+  ('30016000-0000-0000-0000-000000000001', 'altruism', -0.43, 39.3, 5),
+  ('30016000-0000-0000-0000-000000000001', 'status', -1.15, 24.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.6,0.3,0.1,-0.5,-1.5,0.8,1.0,0.5,-0.3,-1.0,1.5,0.2,-0.8,-0.6,2.0,-1.2,-1.8,0.0,-1.3,-2.0,1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000016';
 
 -- ユーザー23: 青木遥（カスタマーサクセス）— 同僚・社会貢献・上司重視型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30017000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000017', 36, 0.906, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30017000-0000-0000-0000-000000000001', 1,  0.0, 0.29, 50.0, 11),  -- ability_utilization
   ('30017000-0000-0000-0000-000000000001', 2,  0.5, 0.30, 62.2,  8),  -- achievement
   ('30017000-0000-0000-0000-000000000001', 3,  0.3, 0.30, 57.4,  9),  -- activity
@@ -1557,6 +1746,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30017000-0000-0000-0000-000000000001', 21,-1.5, 0.35, 18.2, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30017000-0000-0000-0000-000000000001', 'altruism', 1.67, 84.1, 1),
+  ('30017000-0000-0000-0000-000000000001', 'safety', 0.97, 72.4, 2),
+  ('30017000-0000-0000-0000-000000000001', 'achievement', 0.25, 56.2, 3),
+  ('30017000-0000-0000-0000-000000000001', 'autonomy', -0.03, 49.2, 4),
+  ('30017000-0000-0000-0000-000000000001', 'comfort', -0.8, 31.0, 5),
+  ('30017000-0000-0000-0000-000000000001', 'status', -0.82, 30.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.0,0.5,0.3,-0.5,-1.8,-0.3,0.2,-0.6,2.2,0.6,-1.0,0.8,1.0,-0.4,-0.8,2.0,-2.0,1.5,1.2,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000017';
 
@@ -1565,11 +1763,11 @@ WHERE id = '10000000-0000-0000-0000-000000000017';
 -- ============================================================
 
 -- ユーザー14: 森田悠希 — I(研究)寄り、次いでC(慣習)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3100e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000e')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3100e000-0000-0000-0000-000000000001', 'A1', 2.8, 12),
   ('3100e000-0000-0000-0000-000000000001', 'A2', 2.5, 15),
   ('3100e000-0000-0000-0000-000000000001', 'A3', 2.3, 17),
@@ -1593,7 +1791,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: I=(4.8+4.5+4.2+4.0)/4=4.38, R=(3.6+3.5+3.0)/3=3.37, C=(3.8+3.5+3.2)/3=3.50, A=(2.8+2.5+2.3)/3=2.53, E=(2.6+2.4+2.2)/3=2.40, S=(2.7+2.2+2.0+3.3)/4=2.55
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3100e000-0000-0000-0000-000000000001', 'I', 4.38, 1),
   ('3100e000-0000-0000-0000-000000000001', 'C', 3.50, 2),
   ('3100e000-0000-0000-0000-000000000001', 'R', 3.37, 3),
@@ -1606,11 +1804,11 @@ UPDATE users SET ci_vector = '[2.8,2.5,2.3,3.8,3.5,3.2,2.6,2.4,2.2,4.8,4.5,4.2,4
 WHERE id = '10000000-0000-0000-0000-00000000000e';
 
 -- ユーザー15: 藤田里奈 — A(芸術)寄り、次いでS(社会)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3100f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000000f')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3100f000-0000-0000-0000-000000000001', 'A1', 4.5, 1),
   ('3100f000-0000-0000-0000-000000000001', 'A2', 4.2, 3),
   ('3100f000-0000-0000-0000-000000000001', 'A3', 4.0, 4),
@@ -1634,7 +1832,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: A=(4.5+4.2+4.0)/3=4.23, S=(3.8+3.6+3.4+4.3)/4=3.78, I=(3.5+3.3+3.0+3.2)/4=3.25, E=(2.8+2.5+2.6)/3=2.63, R=(2.4+2.2+3.0)/3=2.53, C=(2.3+2.0+1.8)/3=2.03
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3100f000-0000-0000-0000-000000000001', 'A', 4.23, 1),
   ('3100f000-0000-0000-0000-000000000001', 'S', 3.78, 2),
   ('3100f000-0000-0000-0000-000000000001', 'I', 3.25, 3),
@@ -1647,11 +1845,11 @@ UPDATE users SET ci_vector = '[4.5,4.2,4.0,2.3,2.0,1.8,2.8,2.5,2.6,3.5,3.3,3.0,3
 WHERE id = '10000000-0000-0000-0000-00000000000f';
 
 -- ユーザー16: 小川健二 — R(現実)寄り、次いでI(研究)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31010000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000010')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31010000-0000-0000-0000-000000000001', 'A1', 2.0, 18),
   ('31010000-0000-0000-0000-000000000001', 'A2', 1.8, 19),
   ('31010000-0000-0000-0000-000000000001', 'A3', 1.5, 20),
@@ -1675,7 +1873,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(4.5+4.3+4.2)/3=4.33, I=(4.0+3.8+3.5+3.2)/4=3.63, C=(3.5+3.3+3.0)/3=3.27, S=(2.8+2.6+3.1+3.6)/4=3.03, E=(2.5+2.3+2.2)/3=2.33, A=(2.0+1.8+1.5)/3=1.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31010000-0000-0000-0000-000000000001', 'R', 4.33, 1),
   ('31010000-0000-0000-0000-000000000001', 'I', 3.63, 2),
   ('31010000-0000-0000-0000-000000000001', 'C', 3.27, 3),
@@ -1688,11 +1886,11 @@ UPDATE users SET ci_vector = '[2.0,1.8,1.5,3.5,3.3,3.0,2.5,2.3,2.2,4.0,3.8,3.5,3
 WHERE id = '10000000-0000-0000-0000-000000000010';
 
 -- ユーザー17: 中村真央 — S(社会)寄り、次いでA(芸術)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31011000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000011')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31011000-0000-0000-0000-000000000001', 'A1', 3.8, 5),
   ('31011000-0000-0000-0000-000000000001', 'A2', 4.0, 4),
   ('31011000-0000-0000-0000-000000000001', 'A3', 3.5, 8),
@@ -1716,7 +1914,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: S=(4.5+4.2+4.1+3.6)/4=4.10, A=(3.8+4.0+3.5)/3=3.77, E=(3.0+2.8+2.5)/3=2.77, I=(3.2+2.9+2.6+2.3)/4=2.75, R=(2.1+3.3+1.9)/3=2.43, C=(2.2+2.0+1.8)/3=2.00
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31011000-0000-0000-0000-000000000001', 'S', 4.10, 1),
   ('31011000-0000-0000-0000-000000000001', 'A', 3.77, 2),
   ('31011000-0000-0000-0000-000000000001', 'E', 2.77, 3),
@@ -1729,11 +1927,11 @@ UPDATE users SET ci_vector = '[3.8,4.0,3.5,2.2,2.0,1.8,3.0,2.8,2.5,3.2,2.9,2.6,2
 WHERE id = '10000000-0000-0000-0000-000000000011';
 
 -- ユーザー18: 伊藤拓也 — E(企業)寄り、次いでI(研究)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31012000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000012')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31012000-0000-0000-0000-000000000001', 'A1', 2.2, 17),
   ('31012000-0000-0000-0000-000000000001', 'A2', 2.0, 18),
   ('31012000-0000-0000-0000-000000000001', 'A3', 1.8, 20),
@@ -1757,7 +1955,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: E=(4.5+4.2+4.3)/3=4.33, I=(3.8+3.6+3.5+4.0)/4=3.73, C=(3.5+3.3+3.0)/3=3.27, R=(3.2+3.0+2.8)/3=3.00, S=(2.5+2.3+1.9+2.9)/4=2.40, A=(2.2+2.0+1.8)/3=2.00
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31012000-0000-0000-0000-000000000001', 'E', 4.33, 1),
   ('31012000-0000-0000-0000-000000000001', 'I', 3.73, 2),
   ('31012000-0000-0000-0000-000000000001', 'C', 3.27, 3),
@@ -1770,11 +1968,11 @@ UPDATE users SET ci_vector = '[2.2,2.0,1.8,3.5,3.3,3.0,4.5,4.2,4.3,3.8,3.6,3.5,4
 WHERE id = '10000000-0000-0000-0000-000000000012';
 
 -- ユーザー19: 清水彩花 — A(芸術)寄り、次いでR(現実)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31013000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000013')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31013000-0000-0000-0000-000000000001', 'A1', 4.3, 2),
   ('31013000-0000-0000-0000-000000000001', 'A2', 4.5, 1),
   ('31013000-0000-0000-0000-000000000001', 'A3', 3.8, 5),
@@ -1798,7 +1996,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: A=(4.3+4.5+3.8)/3=4.20, R=(4.0+3.9+3.7)/3=3.87, I=(3.5+3.2+3.0+3.6)/4=3.33, S=(3.0+2.2+2.0+3.3)/4=2.63, E=(2.8+2.5+2.6)/3=2.63, C=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31013000-0000-0000-0000-000000000001', 'A', 4.20, 1),
   ('31013000-0000-0000-0000-000000000001', 'R', 3.87, 2),
   ('31013000-0000-0000-0000-000000000001', 'I', 3.33, 3),
@@ -1811,11 +2009,11 @@ UPDATE users SET ci_vector = '[4.3,4.5,3.8,2.5,2.3,2.0,2.8,2.5,2.6,3.5,3.2,3.0,3
 WHERE id = '10000000-0000-0000-0000-000000000013';
 
 -- ユーザー20: 渡辺大樹 — C(慣習)寄り、次いでR(現実)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31014000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000014')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31014000-0000-0000-0000-000000000001', 'A1', 2.0, 18),
   ('31014000-0000-0000-0000-000000000001', 'A2', 1.8, 19),
   ('31014000-0000-0000-0000-000000000001', 'A3', 1.5, 20),
@@ -1839,7 +2037,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: C=(4.5+4.3+4.0)/3=4.27, R=(4.2+3.8+3.5)/3=3.83, I=(3.5+3.3+3.0+3.2)/4=3.25, S=(2.8+2.6+3.1+3.6)/4=3.03, E=(2.5+2.3+2.2)/3=2.33, A=(2.0+1.8+1.5)/3=1.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31014000-0000-0000-0000-000000000001', 'C', 4.27, 1),
   ('31014000-0000-0000-0000-000000000001', 'R', 3.83, 2),
   ('31014000-0000-0000-0000-000000000001', 'I', 3.25, 3),
@@ -1852,11 +2050,11 @@ UPDATE users SET ci_vector = '[2.0,1.8,1.5,4.5,4.3,4.0,2.5,2.3,2.2,3.5,3.3,3.0,3
 WHERE id = '10000000-0000-0000-0000-000000000014';
 
 -- ユーザー21: 本田咲 — E(企業)寄り、次いでS(社会)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31015000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000015')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31015000-0000-0000-0000-000000000001', 'A1', 3.0, 10),
   ('31015000-0000-0000-0000-000000000001', 'A2', 2.7, 14),
   ('31015000-0000-0000-0000-000000000001', 'A3', 3.2, 9),
@@ -1880,7 +2078,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: E=(4.5+4.3+4.0)/3=4.27, S=(4.2+3.8+3.5+3.6)/4=3.78, R=(2.9+3.3+2.8)/3=3.00, A=(3.0+2.7+3.2)/3=2.97, C=(2.5+2.3+2.1)/3=2.30, I=(2.6+2.4+2.2+1.9)/4=2.28
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31015000-0000-0000-0000-000000000001', 'E', 4.27, 1),
   ('31015000-0000-0000-0000-000000000001', 'S', 3.78, 2),
   ('31015000-0000-0000-0000-000000000001', 'R', 3.00, 3),
@@ -1893,11 +2091,11 @@ UPDATE users SET ci_vector = '[3.0,2.7,3.2,2.5,2.3,2.1,4.5,4.3,4.0,2.6,2.4,2.2,1
 WHERE id = '10000000-0000-0000-0000-000000000015';
 
 -- ユーザー22: 松田涼太 — R(現実)寄り、次いでC(慣習)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31016000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000016')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31016000-0000-0000-0000-000000000001', 'A1', 1.8, 19),
   ('31016000-0000-0000-0000-000000000001', 'A2', 1.5, 20),
   ('31016000-0000-0000-0000-000000000001', 'A3', 2.0, 18),
@@ -1921,7 +2119,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(4.8+4.5+4.3)/3=4.53, C=(3.8+3.6+3.5)/3=3.63, S=(2.8+2.6+3.8+4.0)/4=3.30, I=(3.5+3.3+3.0+3.2)/4=3.25, E=(2.5+2.3+2.2)/3=2.33, A=(1.8+1.5+2.0)/3=1.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31016000-0000-0000-0000-000000000001', 'R', 4.53, 1),
   ('31016000-0000-0000-0000-000000000001', 'C', 3.63, 2),
   ('31016000-0000-0000-0000-000000000001', 'S', 3.30, 3),
@@ -1934,11 +2132,11 @@ UPDATE users SET ci_vector = '[1.8,1.5,2.0,3.8,3.6,3.5,2.5,2.3,2.2,3.5,3.3,3.0,3
 WHERE id = '10000000-0000-0000-0000-000000000016';
 
 -- ユーザー23: 青木遥 — S(社会)寄り、次いでE(企業)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31017000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000017')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31017000-0000-0000-0000-000000000001', 'A1', 2.8, 12),
   ('31017000-0000-0000-0000-000000000001', 'A2', 2.5, 14),
   ('31017000-0000-0000-0000-000000000001', 'A3', 2.3, 17),
@@ -1962,7 +2160,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: S=(4.5+4.3+4.2+3.6)/4=4.15, E=(4.0+3.8+3.5)/3=3.77, R=(3.3+2.4+3.5)/3=3.07, C=(3.0+2.8+2.5)/3=2.77, A=(2.8+2.5+2.3)/3=2.53, I=(2.2+2.0+1.8+3.2)/4=2.30
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31017000-0000-0000-0000-000000000001', 'S', 4.15, 1),
   ('31017000-0000-0000-0000-000000000001', 'E', 3.77, 2),
   ('31017000-0000-0000-0000-000000000001', 'R', 3.07, 3),
@@ -2125,11 +2323,11 @@ ON CONFLICT (name) DO NOTHING;
 -- ============================================================
 
 -- ユーザー24: 森田悠希（SRE）- 自律性・技術力重視、権威・地位無関心
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30018000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000018', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30018000-0000-0000-0000-000000000001', 1,  1.9, 0.33, 87.0,  2),  -- ability_utilization
   ('30018000-0000-0000-0000-000000000001', 2,  1.2, 0.31, 76.9,  5),  -- achievement
   ('30018000-0000-0000-0000-000000000001', 3, -0.3, 0.29, 42.6, 12),  -- activity
@@ -2153,15 +2351,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30018000-0000-0000-0000-000000000001', 21,-1.5, 0.35, 18.2, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30018000-0000-0000-0000-000000000001', 'autonomy', 1.67, 84.1, 1),
+  ('30018000-0000-0000-0000-000000000001', 'achievement', 1.55, 82.5, 2),
+  ('30018000-0000-0000-0000-000000000001', 'altruism', 0.03, 50.8, 3),
+  ('30018000-0000-0000-0000-000000000001', 'comfort', -0.35, 41.3, 4),
+  ('30018000-0000-0000-0000-000000000001', 'safety', -0.63, 34.7, 5),
+  ('30018000-0000-0000-0000-000000000001', 'status', -1.02, 26.4, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.9,1.2,-0.3,0.4,-1.8,2.2,-0.1,0.3,0.5,1.5,1.0,-0.5,-0.7,1.3,-0.4,0.1,-2.0,-0.8,-1.0,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000018';
 
 -- ユーザー25: 中村澪（UXリサーチャー）- 創造性・社会貢献・同僚重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30019000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000019', 38, 0.901, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30019000-0000-0000-0000-000000000001', 1,  1.0, 0.31, 73.1,  5),  -- ability_utilization
   ('30019000-0000-0000-0000-000000000001', 2,  0.6, 0.30, 64.6,  8),  -- achievement
   ('30019000-0000-0000-0000-000000000001', 3, -0.4, 0.30, 40.1, 13),  -- activity
@@ -2185,15 +2392,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30019000-0000-0000-0000-000000000001', 21,-1.4, 0.34, 19.8, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30019000-0000-0000-0000-000000000001', 'autonomy', 1.37, 79.7, 1),
+  ('30019000-0000-0000-0000-000000000001', 'altruism', 1.33, 79.1, 2),
+  ('30019000-0000-0000-0000-000000000001', 'achievement', 0.8, 69.0, 3),
+  ('30019000-0000-0000-0000-000000000001', 'safety', -0.37, 40.9, 4),
+  ('30019000-0000-0000-0000-000000000001', 'comfort', -0.75, 32.1, 5),
+  ('30019000-0000-0000-0000-000000000001', 'status', -0.95, 27.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,0.6,-0.4,-0.6,-1.6,1.3,0.0,-0.5,1.7,2.1,-0.2,0.8,0.2,0.7,-0.8,1.5,-1.8,-0.1,-1.0,-1.2,-1.4]'
 WHERE id = '10000000-0000-0000-0000-000000000019';
 
 -- ユーザー26: 小川健二（データエンジニア）- 能力活用・独立性重視、社会貢献低い
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3001a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001a', 25, 0.935, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001a000-0000-0000-0000-000000000001', 1,  2.3, 0.35, 90.9,  1),  -- ability_utilization
   ('3001a000-0000-0000-0000-000000000001', 2,  1.5, 0.32, 81.8,  3),  -- achievement
   ('3001a000-0000-0000-0000-000000000001', 3,  0.2, 0.29, 55.0, 10),  -- activity
@@ -2217,15 +2433,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001a000-0000-0000-0000-000000000001', 21,-1.3, 0.34, 21.4, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3001a000-0000-0000-0000-000000000001', 'achievement', 1.9, 87.0, 1),
+  ('3001a000-0000-0000-0000-000000000001', 'autonomy', 1.1, 75.0, 2),
+  ('3001a000-0000-0000-0000-000000000001', 'comfort', -0.18, 45.4, 3),
+  ('3001a000-0000-0000-0000-000000000001', 'status', -0.53, 37.2, 4),
+  ('3001a000-0000-0000-0000-000000000001', 'altruism', -0.57, 36.2, 5),
+  ('3001a000-0000-0000-0000-000000000001', 'safety', -0.57, 36.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.3,1.5,0.2,0.6,-1.0,1.8,-0.3,0.8,0.0,1.0,0.7,-0.2,-0.5,0.5,0.3,-1.5,-1.2,-0.8,-0.6,-1.8,-1.3]'
 WHERE id = '10000000-0000-0000-0000-00000000001a';
 
 -- ユーザー27: 伊藤さくら（カスタマーサクセス）- 同僚・社会貢献・道徳重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3001b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001b', 42, 0.891, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001b000-0000-0000-0000-000000000001', 1,  0.3, 0.30, 57.4, 10),  -- ability_utilization
   ('3001b000-0000-0000-0000-000000000001', 2,  1.0, 0.31, 73.1,  5),  -- achievement
   ('3001b000-0000-0000-0000-000000000001', 3,  0.5, 0.30, 62.2,  8),  -- activity
@@ -2249,15 +2474,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001b000-0000-0000-0000-000000000001', 21,-1.8, 0.36, 14.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3001b000-0000-0000-0000-000000000001', 'altruism', 1.67, 84.1, 1),
+  ('3001b000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 2),
+  ('3001b000-0000-0000-0000-000000000001', 'safety', 0.63, 65.3, 3),
+  ('3001b000-0000-0000-0000-000000000001', 'autonomy', 0.03, 50.8, 4),
+  ('3001b000-0000-0000-0000-000000000001', 'status', -0.45, 38.9, 5),
+  ('3001b000-0000-0000-0000-000000000001', 'comfort', -0.67, 33.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.3,1.0,0.5,0.2,-1.3,0.4,0.6,-0.4,2.0,-0.3,-0.8,1.2,0.8,0.0,-0.5,1.8,-1.5,1.5,-0.2,-1.0,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000001b';
 
 -- ユーザー28: 本田武（組み込みエンジニア）- 能力活用・責任・安定重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3001c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001c', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001c000-0000-0000-0000-000000000001', 1,  2.0, 0.34, 88.1,  1),  -- ability_utilization
   ('3001c000-0000-0000-0000-000000000001', 2,  1.3, 0.32, 78.6,  4),  -- achievement
   ('3001c000-0000-0000-0000-000000000001', 3,  0.4, 0.30, 59.9,  9),  -- activity
@@ -2281,15 +2515,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001c000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3001c000-0000-0000-0000-000000000001', 'achievement', 1.65, 83.9, 1),
+  ('3001c000-0000-0000-0000-000000000001', 'autonomy', 1.1, 75.0, 2),
+  ('3001c000-0000-0000-0000-000000000001', 'comfort', -0.1, 47.5, 3),
+  ('3001c000-0000-0000-0000-000000000001', 'altruism', -0.43, 39.3, 4),
+  ('3001c000-0000-0000-0000-000000000001', 'safety', -0.53, 37.0, 5),
+  ('3001c000-0000-0000-0000-000000000001', 'status', -0.78, 31.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.0,1.3,0.4,0.0,-0.6,1.0,0.3,0.5,-0.2,0.8,0.6,-0.3,-1.0,1.5,1.7,-0.8,-1.5,-0.7,-1.2,-1.8,-2.0]'
 WHERE id = '10000000-0000-0000-0000-00000000001c';
 
 -- ユーザー29: 清水彩花（マーケティング）- 達成・昇進・報酬重視（ビジネス型）
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3001d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001d', 36, 0.906, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001d000-0000-0000-0000-000000000001', 1,  0.8, 0.31, 69.0,  6),  -- ability_utilization
   ('3001d000-0000-0000-0000-000000000001', 2,  2.0, 0.34, 88.1,  1),  -- achievement
   ('3001d000-0000-0000-0000-000000000001', 3,  0.5, 0.30, 62.2,  8),  -- activity
@@ -2313,15 +2556,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001d000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3001d000-0000-0000-0000-000000000001', 'achievement', 1.4, 80.2, 1),
+  ('3001d000-0000-0000-0000-000000000001', 'status', 0.6, 64.6, 2),
+  ('3001d000-0000-0000-0000-000000000001', 'autonomy', 0.37, 59.1, 3),
+  ('3001d000-0000-0000-0000-000000000001', 'altruism', -0.13, 46.7, 4),
+  ('3001d000-0000-0000-0000-000000000001', 'comfort', -0.52, 37.4, 5),
+  ('3001d000-0000-0000-0000-000000000001', 'safety', -1.0, 26.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,2.0,0.5,1.6,0.3,0.6,-0.2,1.3,0.2,-0.5,-0.3,0.0,1.5,1.0,-0.8,-0.6,-1.0,-1.3,-1.5,-1.8,-2.0]'
 WHERE id = '10000000-0000-0000-0000-00000000001d';
 
 -- ユーザー30: 松田良太（機械学習エンジニア）- 創造性・能力活用・自律性重視、研究者型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3001e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001e', 22, 0.943, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001e000-0000-0000-0000-000000000001', 1,  2.2, 0.35, 90.0,  2),  -- ability_utilization
   ('3001e000-0000-0000-0000-000000000001', 2,  1.6, 0.33, 83.2,  4),  -- achievement
   ('3001e000-0000-0000-0000-000000000001', 3, -0.6, 0.31, 35.4, 15),  -- activity
@@ -2345,15 +2597,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001e000-0000-0000-0000-000000000001', 21,-2.2, 0.38, 10.0, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3001e000-0000-0000-0000-000000000001', 'achievement', 1.9, 87.0, 1),
+  ('3001e000-0000-0000-0000-000000000001', 'autonomy', 1.7, 84.6, 2),
+  ('3001e000-0000-0000-0000-000000000001', 'altruism', 0.03, 50.8, 3),
+  ('3001e000-0000-0000-0000-000000000001', 'safety', -0.27, 43.4, 4),
+  ('3001e000-0000-0000-0000-000000000001', 'comfort', -0.37, 40.9, 5),
+  ('3001e000-0000-0000-0000-000000000001', 'status', -0.88, 29.4, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.2,1.6,-0.6,0.3,-1.5,1.8,-0.4,0.0,-0.3,2.5,1.2,-0.1,-0.5,0.8,-0.7,0.5,-1.8,-1.0,0.6,0.1,-2.2]'
 WHERE id = '10000000-0000-0000-0000-00000000001e';
 
 -- ユーザー31: 吉田花（法務）- 道徳・安定・会社方針重視、堅実型
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3001f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001f', 40, 0.896, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001f000-0000-0000-0000-000000000001', 1,  0.5, 0.30, 62.2,  8),  -- ability_utilization
   ('3001f000-0000-0000-0000-000000000001', 2,  0.3, 0.30, 57.4, 10),  -- achievement
   ('3001f000-0000-0000-0000-000000000001', 3, -0.5, 0.30, 37.8, 14),  -- activity
@@ -2377,15 +2638,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3001f000-0000-0000-0000-000000000001', 21,-1.8, 0.36, 14.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3001f000-0000-0000-0000-000000000001', 'altruism', 1.27, 78.0, 1),
+  ('3001f000-0000-0000-0000-000000000001', 'achievement', 0.4, 59.9, 2),
+  ('3001f000-0000-0000-0000-000000000001', 'autonomy', 0.33, 58.3, 3),
+  ('3001f000-0000-0000-0000-000000000001', 'safety', 0.07, 51.7, 4),
+  ('3001f000-0000-0000-0000-000000000001', 'comfort', -0.23, 44.2, 5),
+  ('3001f000-0000-0000-0000-000000000001', 'status', -0.62, 34.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.5,0.3,-0.5,-0.3,-1.2,0.8,1.5,0.4,0.6,-0.8,0.2,2.0,0.0,1.0,1.8,1.2,-1.0,-0.6,-0.7,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000001f';
 
 -- ユーザー32: 青木翔（モバイルエンジニア）- 創造性・自律性・多様性重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30020000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000020', 28, 0.927, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30020000-0000-0000-0000-000000000001', 1,  1.5, 0.32, 81.8,  3),  -- ability_utilization
   ('30020000-0000-0000-0000-000000000001', 2,  1.0, 0.31, 73.1,  6),  -- achievement
   ('30020000-0000-0000-0000-000000000001', 3,  0.3, 0.30, 57.4,  9),  -- activity
@@ -2409,15 +2679,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30020000-0000-0000-0000-000000000001', 21,-2.0, 0.37, 11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30020000-0000-0000-0000-000000000001', 'autonomy', 1.67, 84.1, 1),
+  ('30020000-0000-0000-0000-000000000001', 'achievement', 1.25, 77.7, 2),
+  ('30020000-0000-0000-0000-000000000001', 'altruism', -0.0, 50.0, 3),
+  ('30020000-0000-0000-0000-000000000001', 'comfort', -0.2, 45.0, 4),
+  ('30020000-0000-0000-0000-000000000001', 'safety', -0.7, 33.2, 5),
+  ('30020000-0000-0000-0000-000000000001', 'status', -0.78, 31.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.0,0.3,0.5,-1.5,1.8,-0.4,0.2,0.7,2.0,0.0,-0.2,-0.3,1.2,-0.8,-0.5,-1.8,-0.7,-1.0,1.1,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000020';
 
 -- ユーザー33: 高橋里奈（人事企画）- 社会貢献・同僚・承認重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30021000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000021', 34, 0.912, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30021000-0000-0000-0000-000000000001', 1,  0.4, 0.30, 59.9,  9),  -- ability_utilization
   ('30021000-0000-0000-0000-000000000001', 2,  0.8, 0.31, 69.0,  6),  -- achievement
   ('30021000-0000-0000-0000-000000000001', 3,  0.3, 0.30, 57.4, 10),  -- activity
@@ -2441,6 +2720,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30021000-0000-0000-0000-000000000001', 21,-1.8, 0.36, 14.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30021000-0000-0000-0000-000000000001', 'altruism', 1.6, 83.2, 1),
+  ('30021000-0000-0000-0000-000000000001', 'achievement', 0.6, 64.6, 2),
+  ('30021000-0000-0000-0000-000000000001', 'safety', 0.57, 63.8, 3),
+  ('30021000-0000-0000-0000-000000000001', 'status', -0.1, 47.5, 4),
+  ('30021000-0000-0000-0000-000000000001', 'autonomy', -0.1, 47.5, 5),
+  ('30021000-0000-0000-0000-000000000001', 'comfort', -0.68, 33.6, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.4,0.8,0.3,0.5,-0.8,0.0,0.6,-0.3,1.8,-0.5,-0.6,1.0,1.2,0.2,-0.2,2.0,-1.3,1.5,-0.4,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000021';
 
@@ -2450,11 +2738,11 @@ WHERE id = '10000000-0000-0000-0000-000000000021';
 
 -- ユーザー24: 森田悠希（SRE）- I(研究)型、R(現実)型高い
 -- RIASEC: R=(3.5+3.3+2.8)/3=3.20, I=(4.3+4.0+3.8+3.5)/4=3.90, A=(2.5+2.3+2.0)/3=2.27, S=(2.2+2.0+1.8+1.6)/4=1.90, E=(3.0+2.8+2.5)/3=2.77, C=(2.6+2.4+2.2)/3=2.40
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31018000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000018')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31018000-0000-0000-0000-000000000001', 'A1', 2.5, 13),
   ('31018000-0000-0000-0000-000000000001', 'A2', 2.3, 15),
   ('31018000-0000-0000-0000-000000000001', 'A3', 2.0, 18),
@@ -2477,7 +2765,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31018000-0000-0000-0000-000000000001', 'S4', 1.6, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31018000-0000-0000-0000-000000000001', 'I', 3.90, 1),
   ('31018000-0000-0000-0000-000000000001', 'R', 3.20, 2),
   ('31018000-0000-0000-0000-000000000001', 'E', 2.77, 3),
@@ -2491,11 +2779,11 @@ WHERE id = '10000000-0000-0000-0000-000000000018';
 
 -- ユーザー25: 中村澪（UXリサーチャー）- A(芸術)型、S(社会)型高い
 -- RIASEC: R=(2.0+1.8+1.5)/3=1.77, I=(3.2+3.0+2.8+2.5)/4=2.88, A=(4.5+4.2+3.8)/3=4.17, S=(3.8+3.5+3.3+3.0)/4=3.40, E=(2.5+2.3+2.0)/3=2.27, C=(2.2+2.0+1.8)/3=2.00
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31019000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000019')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31019000-0000-0000-0000-000000000001', 'A1', 4.5, 1),
   ('31019000-0000-0000-0000-000000000001', 'A2', 4.2, 2),
   ('31019000-0000-0000-0000-000000000001', 'A3', 3.8, 4),
@@ -2518,7 +2806,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31019000-0000-0000-0000-000000000001', 'S4', 3.0, 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31019000-0000-0000-0000-000000000001', 'A', 4.17, 1),
   ('31019000-0000-0000-0000-000000000001', 'S', 3.40, 2),
   ('31019000-0000-0000-0000-000000000001', 'I', 2.88, 3),
@@ -2532,11 +2820,11 @@ WHERE id = '10000000-0000-0000-0000-000000000019';
 
 -- ユーザー26: 小川健二（データエンジニア）- I(研究)型、R(現実)型高い
 -- RIASEC: R=(3.8+3.5+3.2)/3=3.50, I=(4.5+4.2+4.0+3.7)/4=4.10, A=(2.3+2.0+1.8)/3=2.03, S=(2.0+1.8+1.5+1.3)/4=1.65, E=(2.8+2.5+2.3)/3=2.53, C=(3.0+2.8+2.5)/3=2.77
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3101a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001a')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3101a000-0000-0000-0000-000000000001', 'A1', 2.3, 14),
   ('3101a000-0000-0000-0000-000000000001', 'A2', 2.0, 16),
   ('3101a000-0000-0000-0000-000000000001', 'A3', 1.8, 18),
@@ -2559,7 +2847,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3101a000-0000-0000-0000-000000000001', 'S4', 1.3, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3101a000-0000-0000-0000-000000000001', 'I', 4.10, 1),
   ('3101a000-0000-0000-0000-000000000001', 'R', 3.50, 2),
   ('3101a000-0000-0000-0000-000000000001', 'C', 2.77, 3),
@@ -2573,11 +2861,11 @@ WHERE id = '10000000-0000-0000-0000-00000000001a';
 
 -- ユーザー27: 伊藤さくら（カスタマーサクセス）- S(社会)型、E(企業)型高い
 -- RIASEC: R=(1.8+1.5+1.3)/3=1.53, I=(2.5+2.3+2.0+1.8)/4=2.15, A=(3.0+2.8+2.5)/3=2.77, S=(4.5+4.2+4.0+3.8)/4=4.13, E=(3.8+3.5+3.3)/3=3.53, C=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3101b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001b')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3101b000-0000-0000-0000-000000000001', 'A1', 3.0, 10),
   ('3101b000-0000-0000-0000-000000000001', 'A2', 2.8, 11),
   ('3101b000-0000-0000-0000-000000000001', 'A3', 2.5, 13),
@@ -2600,7 +2888,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3101b000-0000-0000-0000-000000000001', 'S4', 3.8, 5)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3101b000-0000-0000-0000-000000000001', 'S', 4.13, 1),
   ('3101b000-0000-0000-0000-000000000001', 'E', 3.53, 2),
   ('3101b000-0000-0000-0000-000000000001', 'A', 2.77, 3),
@@ -2614,11 +2902,11 @@ WHERE id = '10000000-0000-0000-0000-00000000001b';
 
 -- ユーザー28: 本田武（組み込みエンジニア）- R(現実)型、I(研究)型高い
 -- RIASEC: R=(4.5+4.2+4.0)/3=4.23, I=(3.8+3.5+3.3+3.0)/4=3.40, A=(2.0+1.8+1.5)/3=1.77, S=(2.3+2.0+1.8+1.5)/4=1.90, E=(2.5+2.3+2.0)/3=2.27, C=(2.8+2.5+2.3)/3=2.53
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3101c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001c')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3101c000-0000-0000-0000-000000000001', 'A1', 2.0, 15),
   ('3101c000-0000-0000-0000-000000000001', 'A2', 1.8, 17),
   ('3101c000-0000-0000-0000-000000000001', 'A3', 1.5, 19),
@@ -2641,7 +2929,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3101c000-0000-0000-0000-000000000001', 'S4', 1.5, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3101c000-0000-0000-0000-000000000001', 'R', 4.23, 1),
   ('3101c000-0000-0000-0000-000000000001', 'I', 3.40, 2),
   ('3101c000-0000-0000-0000-000000000001', 'C', 2.53, 3),
@@ -2655,11 +2943,11 @@ WHERE id = '10000000-0000-0000-0000-00000000001c';
 
 -- ユーザー29: 清水彩花（マーケティング）- E(企業)型、A(芸術)型高い
 -- RIASEC: R=(2.0+1.8+1.5)/3=1.77, I=(2.8+2.5+2.3+2.0)/4=2.40, A=(3.8+3.5+3.3)/3=3.53, S=(3.0+2.8+2.5+2.3)/4=2.65, E=(4.5+4.2+4.0)/3=4.23, C=(3.0+2.8+2.5)/3=2.77
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3101d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001d')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3101d000-0000-0000-0000-000000000001', 'A1', 3.8, 4),
   ('3101d000-0000-0000-0000-000000000001', 'A2', 3.5, 6),
   ('3101d000-0000-0000-0000-000000000001', 'A3', 3.3, 7),
@@ -2682,7 +2970,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3101d000-0000-0000-0000-000000000001', 'S4', 2.3, 16)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3101d000-0000-0000-0000-000000000001', 'E', 4.23, 1),
   ('3101d000-0000-0000-0000-000000000001', 'A', 3.53, 2),
   ('3101d000-0000-0000-0000-000000000001', 'C', 2.77, 3),
@@ -2696,11 +2984,11 @@ WHERE id = '10000000-0000-0000-0000-00000000001d';
 
 -- ユーザー30: 松田良太（機械学習エンジニア）- I(研究)型トップ、A(芸術)型高い
 -- RIASEC: R=(3.2+3.0+2.8)/3=3.00, I=(4.8+4.5+4.3+4.0)/4=4.40, A=(3.5+3.2+3.0)/3=3.23, S=(2.0+1.8+1.5+1.3)/4=1.65, E=(2.5+2.3+2.0)/3=2.27, C=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3101e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001e')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3101e000-0000-0000-0000-000000000001', 'A1', 3.5, 6),
   ('3101e000-0000-0000-0000-000000000001', 'A2', 3.2, 8),
   ('3101e000-0000-0000-0000-000000000001', 'A3', 3.0, 9),
@@ -2723,7 +3011,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3101e000-0000-0000-0000-000000000001', 'S4', 1.3, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3101e000-0000-0000-0000-000000000001', 'I', 4.40, 1),
   ('3101e000-0000-0000-0000-000000000001', 'A', 3.23, 2),
   ('3101e000-0000-0000-0000-000000000001', 'R', 3.00, 3),
@@ -2737,11 +3025,11 @@ WHERE id = '10000000-0000-0000-0000-00000000001e';
 
 -- ユーザー31: 吉田花（法務）- C(慣習)型、S(社会)型高い
 -- RIASEC: R=(2.0+1.8+1.5)/3=1.77, I=(2.8+2.5+2.3+2.0)/4=2.40, A=(2.5+2.3+2.0)/3=2.27, S=(3.5+3.3+3.0+2.8)/4=3.15, E=(3.2+3.0+2.8)/3=3.00, C=(4.5+4.2+4.0)/3=4.23
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3101f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000001f')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3101f000-0000-0000-0000-000000000001', 'A1', 2.5, 13),
   ('3101f000-0000-0000-0000-000000000001', 'A2', 2.3, 14),
   ('3101f000-0000-0000-0000-000000000001', 'A3', 2.0, 16),
@@ -2764,7 +3052,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3101f000-0000-0000-0000-000000000001', 'S4', 2.8, 11)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3101f000-0000-0000-0000-000000000001', 'C', 4.23, 1),
   ('3101f000-0000-0000-0000-000000000001', 'S', 3.15, 2),
   ('3101f000-0000-0000-0000-000000000001', 'E', 3.00, 3),
@@ -2778,11 +3066,11 @@ WHERE id = '10000000-0000-0000-0000-00000000001f';
 
 -- ユーザー32: 青木翔（モバイルエンジニア）- I(研究)型、A(芸術)型高い（クリエイティブ技術者）
 -- RIASEC: R=(3.0+2.8+2.5)/3=2.77, I=(4.2+4.0+3.8+3.5)/4=3.88, A=(4.0+3.8+3.5)/3=3.77, S=(2.3+2.0+1.8+1.5)/4=1.90, E=(2.5+2.3+2.0)/3=2.27, C=(2.3+2.0+1.8)/3=2.03
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31020000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000020')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31020000-0000-0000-0000-000000000001', 'A1', 4.0, 3),
   ('31020000-0000-0000-0000-000000000001', 'A2', 3.8, 5),
   ('31020000-0000-0000-0000-000000000001', 'A3', 3.5, 7),
@@ -2805,7 +3093,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31020000-0000-0000-0000-000000000001', 'S4', 1.5, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31020000-0000-0000-0000-000000000001', 'I', 3.88, 1),
   ('31020000-0000-0000-0000-000000000001', 'A', 3.77, 2),
   ('31020000-0000-0000-0000-000000000001', 'R', 2.77, 3),
@@ -2819,11 +3107,11 @@ WHERE id = '10000000-0000-0000-0000-000000000020';
 
 -- ユーザー33: 高橋里奈（人事企画）- S(社会)型、E(企業)型高い
 -- RIASEC: R=(1.8+1.5+1.3)/3=1.53, I=(2.5+2.3+2.0+1.8)/4=2.15, A=(3.3+3.0+2.8)/3=3.03, S=(4.3+4.0+3.8+3.5)/4=3.90, E=(4.0+3.8+3.5)/3=3.77, C=(2.8+2.5+2.3)/3=2.53
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31021000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000021')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31021000-0000-0000-0000-000000000001', 'A1', 3.3, 8),
   ('31021000-0000-0000-0000-000000000001', 'A2', 3.0, 10),
   ('31021000-0000-0000-0000-000000000001', 'A3', 2.8, 11),
@@ -2846,7 +3134,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31021000-0000-0000-0000-000000000001', 'S4', 3.5, 7)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31021000-0000-0000-0000-000000000001', 'S', 3.90, 1),
   ('31021000-0000-0000-0000-000000000001', 'E', 3.77, 2),
   ('31021000-0000-0000-0000-000000000001', 'A', 3.03, 3),
@@ -3001,11 +3289,11 @@ VALUES
 -- ============================================================
 
 -- ユーザー34: SREエンジニア (技術力・自律・責任を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30022000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000022', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30022000-0000-0000-0000-000000000001',  1,   2.0, 0.34,  88.1,  1),  -- ability_utilization
   ('30022000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  3),  -- achievement
   ('30022000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 13),  -- activity
@@ -3029,15 +3317,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30022000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30022000-0000-0000-0000-000000000001', 'achievement', 1.75, 85.2, 1),
+  ('30022000-0000-0000-0000-000000000001', 'autonomy', 1.2, 76.9, 2),
+  ('30022000-0000-0000-0000-000000000001', 'altruism', 0.03, 50.8, 3),
+  ('30022000-0000-0000-0000-000000000001', 'comfort', -0.25, 43.8, 4),
+  ('30022000-0000-0000-0000-000000000001', 'safety', -0.43, 39.3, 5),
+  ('30022000-0000-0000-0000-000000000001', 'status', -0.45, 38.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.0,1.5,-0.3,0.4,-0.8,1.8,0.0,0.5,0.3,1.0,1.2,0.0,-0.4,0.8,0.2,-0.2,-1.0,-0.5,-0.8,-1.3,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000022';
 
 -- ユーザー35: データアナリスト (達成感・仲間・社会貢献を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30023000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000023', 36, 0.907, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30023000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  5),  -- ability_utilization
   ('30023000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  2),  -- achievement
   ('30023000-0000-0000-0000-000000000001',  3,   0.2, 0.29,  55.0, 11),  -- activity
@@ -3061,15 +3358,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30023000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30023000-0000-0000-0000-000000000001', 'altruism', 1.27, 78.0, 1),
+  ('30023000-0000-0000-0000-000000000001', 'achievement', 1.15, 76.0, 2),
+  ('30023000-0000-0000-0000-000000000001', 'autonomy', 0.43, 60.7, 3),
+  ('30023000-0000-0000-0000-000000000001', 'status', -0.33, 41.9, 4),
+  ('30023000-0000-0000-0000-000000000001', 'safety', -0.37, 40.9, 5),
+  ('30023000-0000-0000-0000-000000000001', 'comfort', -0.45, 38.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,1.5,0.2,0.5,-1.0,0.6,0.0,0.3,1.8,0.5,-0.2,0.8,0.0,0.2,-0.3,1.2,-0.8,-0.5,-0.6,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000023';
 
 -- ユーザー36: ゲームエンジニア (創造性・能力活用・自律を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30024000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000024', 28, 0.927, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30024000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('30024000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  4),  -- achievement
   ('30024000-0000-0000-0000-000000000001',  3,   0.5, 0.30,  62.2,  8),  -- activity
@@ -3093,15 +3399,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30024000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30024000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30024000-0000-0000-0000-000000000001', 'autonomy', 1.5, 81.8, 2),
+  ('30024000-0000-0000-0000-000000000001', 'altruism', 0.47, 61.5, 3),
+  ('30024000-0000-0000-0000-000000000001', 'comfort', -0.4, 40.1, 4),
+  ('30024000-0000-0000-0000-000000000001', 'safety', -0.57, 36.2, 5),
+  ('30024000-0000-0000-0000-000000000001', 'status', -0.7, 33.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.2,0.5,0.3,-1.2,1.5,-0.3,0.0,0.6,2.2,0.4,0.0,-0.4,0.8,-0.5,0.8,-1.5,-0.6,-0.8,-1.0,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000024';
 
 -- ユーザー37: モバイルエンジニア (創造性・自律・仲間を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30025000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000025', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30025000-0000-0000-0000-000000000001',  1,   1.2, 0.32,  76.9,  4),  -- ability_utilization
   ('30025000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  5),  -- achievement
   ('30025000-0000-0000-0000-000000000001',  3,  -0.5, 0.30,  37.8, 15),  -- activity
@@ -3125,15 +3440,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30025000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30025000-0000-0000-0000-000000000001', 'autonomy', 1.43, 80.7, 1),
+  ('30025000-0000-0000-0000-000000000001', 'achievement', 1.1, 75.0, 2),
+  ('30025000-0000-0000-0000-000000000001', 'altruism', 0.93, 71.8, 3),
+  ('30025000-0000-0000-0000-000000000001', 'comfort', -0.47, 38.5, 4),
+  ('30025000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 5),
+  ('30025000-0000-0000-0000-000000000001', 'status', -0.85, 29.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.2,1.0,-0.5,0.2,-1.5,1.8,-0.1,0.0,1.5,2.0,0.3,0.5,-0.3,0.5,-0.4,0.8,-1.8,-0.6,-0.8,-1.0,-1.2]'
 WHERE id = '10000000-0000-0000-0000-000000000025';
 
 -- ユーザー38: Webエンジニア (自律・達成感・能力活用を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30026000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000026', 31, 0.919, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30026000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  2),  -- ability_utilization
   ('30026000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  3),  -- achievement
   ('30026000-0000-0000-0000-000000000001',  3,   0.0, 0.28,  50.0, 12),  -- activity
@@ -3157,15 +3481,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30026000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30026000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30026000-0000-0000-0000-000000000001', 'autonomy', 1.1, 75.0, 2),
+  ('30026000-0000-0000-0000-000000000001', 'altruism', 0.13, 53.3, 3),
+  ('30026000-0000-0000-0000-000000000001', 'status', -0.32, 41.9, 4),
+  ('30026000-0000-0000-0000-000000000001', 'comfort', -0.35, 41.3, 5),
+  ('30026000-0000-0000-0000-000000000001', 'safety', -0.47, 38.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.5,0.0,0.8,-0.6,2.0,-0.1,0.5,0.6,1.0,0.5,0.0,-0.3,0.3,0.2,-0.2,-1.2,-0.5,-0.8,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000026';
 
 -- ユーザー39: 情報アーキテクト (創造性・仲間・社会貢献を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30027000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000027', 34, 0.912, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30027000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  5),  -- ability_utilization
   ('30027000-0000-0000-0000-000000000001',  2,   0.5, 0.30,  62.2,  8),  -- achievement
   ('30027000-0000-0000-0000-000000000001',  3,  -0.4, 0.29,  40.1, 14),  -- activity
@@ -3189,15 +3522,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30027000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30027000-0000-0000-0000-000000000001', 'altruism', 1.37, 79.7, 1),
+  ('30027000-0000-0000-0000-000000000001', 'autonomy', 1.17, 76.3, 2),
+  ('30027000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 3),
+  ('30027000-0000-0000-0000-000000000001', 'safety', -0.4, 40.1, 4),
+  ('30027000-0000-0000-0000-000000000001', 'comfort', -0.55, 36.6, 5),
+  ('30027000-0000-0000-0000-000000000001', 'status', -0.7, 33.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,0.5,-0.4,0.0,-1.5,1.0,0.2,-0.2,1.8,2.0,0.0,0.8,0.5,0.5,-0.5,1.5,-1.8,-0.6,-0.8,-1.0,-1.2]'
 WHERE id = '10000000-0000-0000-0000-000000000027';
 
 -- ユーザー40: バックエンドPHP (能力活用・安定・報酬を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30028000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000028', 35, 0.909, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30028000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  1),  -- ability_utilization
   ('30028000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  4),  -- achievement
   ('30028000-0000-0000-0000-000000000001',  3,   0.0, 0.28,  50.0, 10),  -- activity
@@ -3221,15 +3563,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30028000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30028000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30028000-0000-0000-0000-000000000001', 'autonomy', 0.5, 62.2, 2),
+  ('30028000-0000-0000-0000-000000000001', 'altruism', 0.0, 50.0, 3),
+  ('30028000-0000-0000-0000-000000000001', 'comfort', -0.1, 47.5, 4),
+  ('30028000-0000-0000-0000-000000000001', 'status', -0.28, 43.2, 5),
+  ('30028000-0000-0000-0000-000000000001', 'safety', -0.33, 41.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.2,0.0,0.5,-0.5,1.0,0.5,1.5,0.3,0.5,0.0,0.0,-0.3,0.0,1.2,-0.3,-0.8,-0.5,-1.0,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000028';
 
 -- ユーザー41: マーケティングマネージャー (達成感・昇進・承認を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30029000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000029', 37, 0.904, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30029000-0000-0000-0000-000000000001',  1,   0.5, 0.30,  62.2,  7),  -- ability_utilization
   ('30029000-0000-0000-0000-000000000001',  2,   2.0, 0.34,  88.1,  1),  -- achievement
   ('30029000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4, 10),  -- activity
@@ -3253,15 +3604,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30029000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30029000-0000-0000-0000-000000000001', 'achievement', 1.25, 77.7, 1),
+  ('30029000-0000-0000-0000-000000000001', 'autonomy', 0.6, 64.6, 2),
+  ('30029000-0000-0000-0000-000000000001', 'status', 0.55, 63.4, 3),
+  ('30029000-0000-0000-0000-000000000001', 'altruism', 0.33, 58.3, 4),
+  ('30029000-0000-0000-0000-000000000001', 'safety', -0.27, 43.4, 5),
+  ('30029000-0000-0000-0000-000000000001', 'comfort', -0.3, 42.6, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.5,2.0,0.3,1.5,0.0,0.5,0.3,0.8,1.0,0.5,-0.2,0.2,1.2,0.8,0.0,-0.2,-0.5,-0.3,-0.8,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000029';
 
 -- ユーザー42: フロントエンドVue (創造性・自律・仲間を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3002a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002a', 29, 0.925, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002a000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  3),  -- ability_utilization
   ('3002a000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  5),  -- achievement
   ('3002a000-0000-0000-0000-000000000001',  3,  -0.6, 0.30,  35.4, 16),  -- activity
@@ -3285,15 +3645,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002a000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3002a000-0000-0000-0000-000000000001', 'autonomy', 1.5, 81.8, 1),
+  ('3002a000-0000-0000-0000-000000000001', 'achievement', 1.25, 77.7, 2),
+  ('3002a000-0000-0000-0000-000000000001', 'altruism', 0.93, 71.8, 3),
+  ('3002a000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 4),
+  ('3002a000-0000-0000-0000-000000000001', 'comfort', -0.57, 36.2, 5),
+  ('3002a000-0000-0000-0000-000000000001', 'status', -0.68, 33.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.0,-0.6,0.3,-1.2,1.8,-0.1,0.0,1.5,2.2,0.5,0.5,-0.3,0.5,-0.5,0.8,-1.5,-0.6,-0.8,-1.0,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000002a';
 
 -- ユーザー43: セールスエンジニア (達成感・昇進・責任を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3002b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002b', 38, 0.901, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002b000-0000-0000-0000-000000000001',  1,   1.0, 0.31,  73.1,  5),  -- ability_utilization
   ('3002b000-0000-0000-0000-000000000001',  2,   1.8, 0.33,  85.8,  1),  -- achievement
   ('3002b000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4, 10),  -- activity
@@ -3317,6 +3686,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002b000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3002b000-0000-0000-0000-000000000001', 'achievement', 1.4, 80.2, 1),
+  ('3002b000-0000-0000-0000-000000000001', 'autonomy', 0.77, 68.3, 2),
+  ('3002b000-0000-0000-0000-000000000001', 'status', 0.5, 62.2, 3),
+  ('3002b000-0000-0000-0000-000000000001', 'altruism', 0.1, 52.5, 4),
+  ('3002b000-0000-0000-0000-000000000001', 'safety', -0.3, 42.6, 5),
+  ('3002b000-0000-0000-0000-000000000001', 'comfort', -0.33, 41.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,1.8,0.3,1.5,0.2,0.8,0.2,1.0,0.5,0.3,-0.3,0.0,0.8,1.2,0.0,-0.2,-0.5,-0.3,-0.8,-1.2,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000002b';
 
@@ -3325,11 +3703,11 @@ WHERE id = '10000000-0000-0000-0000-00000000002b';
 -- ============================================================
 
 -- ユーザー34: SRE → I(研究)・R(現実)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31022000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000022')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31022000-0000-0000-0000-000000000001', 'A1', 2.5, 14),
   ('31022000-0000-0000-0000-000000000001', 'A2', 2.3, 16),
   ('31022000-0000-0000-0000-000000000001', 'A3', 2.0, 18),
@@ -3352,7 +3730,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31022000-0000-0000-0000-000000000001', 'S4', 3.0, 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31022000-0000-0000-0000-000000000001', 'R', 3.50, 2),
   ('31022000-0000-0000-0000-000000000001', 'I', 4.13, 1),
   ('31022000-0000-0000-0000-000000000001', 'A', 2.27, 5),
@@ -3365,11 +3743,11 @@ UPDATE users SET ci_vector = '[2.5,2.3,2.0,3.5,3.3,3.0,2.8,2.5,2.3,4.5,4.2,4.0,3
 WHERE id = '10000000-0000-0000-0000-000000000022';
 
 -- ユーザー35: データアナリスト → I(研究)・C(慣習)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31023000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000023')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31023000-0000-0000-0000-000000000001', 'A1', 2.8, 12),
   ('31023000-0000-0000-0000-000000000001', 'A2', 2.5, 14),
   ('31023000-0000-0000-0000-000000000001', 'A3', 2.3, 16),
@@ -3392,7 +3770,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31023000-0000-0000-0000-000000000001', 'S4', 1.8, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31023000-0000-0000-0000-000000000001', 'R', 2.60, 4),
   ('31023000-0000-0000-0000-000000000001', 'I', 3.95, 1),
   ('31023000-0000-0000-0000-000000000001', 'A', 2.53, 5),
@@ -3405,11 +3783,11 @@ UPDATE users SET ci_vector = '[2.8,2.5,2.3,4.0,3.8,3.5,2.5,2.3,2.0,4.3,4.2,3.8,3
 WHERE id = '10000000-0000-0000-0000-000000000023';
 
 -- ユーザー36: ゲームエンジニア → A(芸術)・R(現実)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31024000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000024')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31024000-0000-0000-0000-000000000001', 'A1', 4.5, 1),
   ('31024000-0000-0000-0000-000000000001', 'A2', 4.0, 4),
   ('31024000-0000-0000-0000-000000000001', 'A3', 4.2, 3),
@@ -3432,7 +3810,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31024000-0000-0000-0000-000000000001', 'S4', 1.5, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31024000-0000-0000-0000-000000000001', 'R', 3.77, 2),
   ('31024000-0000-0000-0000-000000000001', 'I', 3.38, 3),
   ('31024000-0000-0000-0000-000000000001', 'A', 4.23, 1),
@@ -3445,11 +3823,11 @@ UPDATE users SET ci_vector = '[4.5,4.0,4.2,2.0,2.0,1.8,2.5,2.3,2.5,3.8,3.5,3.2,3
 WHERE id = '10000000-0000-0000-0000-000000000024';
 
 -- ユーザー37: モバイルエンジニア → A(芸術)・I(研究)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31025000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000025')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31025000-0000-0000-0000-000000000001', 'A1', 4.2, 2),
   ('31025000-0000-0000-0000-000000000001', 'A2', 4.0, 4),
   ('31025000-0000-0000-0000-000000000001', 'A3', 4.5, 1),
@@ -3472,7 +3850,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31025000-0000-0000-0000-000000000001', 'S4', 1.8, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31025000-0000-0000-0000-000000000001', 'R', 3.17, 3),
   ('31025000-0000-0000-0000-000000000001', 'I', 3.63, 2),
   ('31025000-0000-0000-0000-000000000001', 'A', 4.23, 1),
@@ -3485,11 +3863,11 @@ UPDATE users SET ci_vector = '[4.2,4.0,4.5,2.3,2.0,2.0,2.8,2.5,2.5,4.0,3.8,3.5,3
 WHERE id = '10000000-0000-0000-0000-000000000025';
 
 -- ユーザー38: Webエンジニア → I(研究)・R(現実)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31026000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000026')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31026000-0000-0000-0000-000000000001', 'A1', 3.0, 10),
   ('31026000-0000-0000-0000-000000000001', 'A2', 2.8, 12),
   ('31026000-0000-0000-0000-000000000001', 'A3', 2.5, 15),
@@ -3512,7 +3890,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31026000-0000-0000-0000-000000000001', 'S4', 2.3, 18)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31026000-0000-0000-0000-000000000001', 'R', 3.67, 2),
   ('31026000-0000-0000-0000-000000000001', 'I', 3.95, 1),
   ('31026000-0000-0000-0000-000000000001', 'A', 2.77, 4),
@@ -3525,11 +3903,11 @@ UPDATE users SET ci_vector = '[3.0,2.8,2.5,3.0,2.8,2.5,3.2,3.0,2.8,4.5,4.0,3.8,3
 WHERE id = '10000000-0000-0000-0000-000000000026';
 
 -- ユーザー39: 情報アーキテクト → A(芸術)・S(社会)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31027000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000027')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31027000-0000-0000-0000-000000000001', 'A1', 4.5, 1),
   ('31027000-0000-0000-0000-000000000001', 'A2', 4.2, 3),
   ('31027000-0000-0000-0000-000000000001', 'A3', 4.0, 4),
@@ -3552,7 +3930,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31027000-0000-0000-0000-000000000001', 'S4', 3.2, 8)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31027000-0000-0000-0000-000000000001', 'R', 2.33, 5),
   ('31027000-0000-0000-0000-000000000001', 'I', 3.13, 3),
   ('31027000-0000-0000-0000-000000000001', 'A', 4.23, 1),
@@ -3565,11 +3943,11 @@ UPDATE users SET ci_vector = '[4.5,4.2,4.0,2.5,2.3,2.0,2.8,2.5,2.0,3.5,3.2,3.0,2
 WHERE id = '10000000-0000-0000-0000-000000000027';
 
 -- ユーザー40: バックエンドPHP → R(現実)・C(慣習)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31028000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000028')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31028000-0000-0000-0000-000000000001', 'A1', 2.3, 15),
   ('31028000-0000-0000-0000-000000000001', 'A2', 2.0, 18),
   ('31028000-0000-0000-0000-000000000001', 'A3', 2.0, 19),
@@ -3592,7 +3970,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31028000-0000-0000-0000-000000000001', 'S4', 3.0, 11)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31028000-0000-0000-0000-000000000001', 'R', 4.00, 1),
   ('31028000-0000-0000-0000-000000000001', 'I', 3.13, 3),
   ('31028000-0000-0000-0000-000000000001', 'A', 2.10, 6),
@@ -3605,11 +3983,11 @@ UPDATE users SET ci_vector = '[2.3,2.0,2.0,3.8,3.5,3.5,2.8,2.5,2.3,3.5,3.2,3.0,2
 WHERE id = '10000000-0000-0000-0000-000000000028';
 
 -- ユーザー41: マーケティングマネージャー → E(企業)・S(社会)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31029000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000029')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31029000-0000-0000-0000-000000000001', 'A1', 3.0, 10),
   ('31029000-0000-0000-0000-000000000001', 'A2', 3.5, 7),
   ('31029000-0000-0000-0000-000000000001', 'A3', 2.8, 12),
@@ -3632,7 +4010,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31029000-0000-0000-0000-000000000001', 'S4', 3.5, 8)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31029000-0000-0000-0000-000000000001', 'R', 2.50, 5),
   ('31029000-0000-0000-0000-000000000001', 'I', 2.33, 6),
   ('31029000-0000-0000-0000-000000000001', 'A', 3.10, 3),
@@ -3645,11 +4023,11 @@ UPDATE users SET ci_vector = '[3.0,3.5,2.8,3.0,2.8,2.5,4.5,4.2,4.0,2.5,2.5,2.3,2
 WHERE id = '10000000-0000-0000-0000-000000000029';
 
 -- ユーザー42: フロントエンドVue → A(芸術)・I(研究)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3102a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002a')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3102a000-0000-0000-0000-000000000001', 'A1', 4.3, 2),
   ('3102a000-0000-0000-0000-000000000001', 'A2', 4.0, 3),
   ('3102a000-0000-0000-0000-000000000001', 'A3', 4.5, 1),
@@ -3672,7 +4050,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3102a000-0000-0000-0000-000000000001', 'S4', 3.0, 8)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3102a000-0000-0000-0000-000000000001', 'R', 3.10, 3),
   ('3102a000-0000-0000-0000-000000000001', 'I', 3.63, 2),
   ('3102a000-0000-0000-0000-000000000001', 'A', 4.27, 1),
@@ -3685,11 +4063,11 @@ UPDATE users SET ci_vector = '[4.3,4.0,4.5,2.5,2.3,2.0,2.8,2.5,2.3,3.8,4.0,3.5,3
 WHERE id = '10000000-0000-0000-0000-00000000002a';
 
 -- ユーザー43: セールスエンジニア → E(企業)・I(研究)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3102b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002b')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3102b000-0000-0000-0000-000000000001', 'A1', 2.8, 13),
   ('3102b000-0000-0000-0000-000000000001', 'A2', 2.5, 15),
   ('3102b000-0000-0000-0000-000000000001', 'A3', 2.3, 17),
@@ -3712,7 +4090,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3102b000-0000-0000-0000-000000000001', 'S4', 2.0, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3102b000-0000-0000-0000-000000000001', 'R', 2.43, 5),
   ('3102b000-0000-0000-0000-000000000001', 'I', 3.38, 2),
   ('3102b000-0000-0000-0000-000000000001', 'A', 2.53, 4),
@@ -3873,11 +4251,11 @@ VALUES
 -- ============================================================
 
 -- ユーザー44: Rustエンジニア (能力活用・自律・独立を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3002c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002c', 27, 0.930, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002c000-0000-0000-0000-000000000001',  1,   2.2, 0.35,  90.0,  1),  -- ability_utilization
   ('3002c000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  4),  -- achievement
   ('3002c000-0000-0000-0000-000000000001',  3,  -0.4, 0.29,  40.1, 14),  -- activity
@@ -3901,15 +4279,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002c000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3002c000-0000-0000-0000-000000000001', 'achievement', 1.7, 84.6, 1),
+  ('3002c000-0000-0000-0000-000000000001', 'autonomy', 1.43, 80.7, 2),
+  ('3002c000-0000-0000-0000-000000000001', 'altruism', -0.1, 47.5, 3),
+  ('3002c000-0000-0000-0000-000000000001', 'comfort', -0.33, 41.7, 4),
+  ('3002c000-0000-0000-0000-000000000001', 'safety', -0.53, 37.0, 5),
+  ('3002c000-0000-0000-0000-000000000001', 'status', -0.6, 35.4, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.2,1.2,-0.4,0.3,-1.0,2.0,-0.2,0.5,0.0,1.5,1.0,0.0,-0.5,0.8,0.2,-0.3,-1.2,-0.6,-0.8,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000002c';
 
 -- ユーザー45: データサイエンティスト (達成感・能力活用・社会貢献を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3002d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002d', 34, 0.912, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002d000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('3002d000-0000-0000-0000-000000000001',  2,   2.0, 0.34,  88.1,  1),  -- achievement
   ('3002d000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 13),  -- activity
@@ -3933,15 +4320,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002d000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3002d000-0000-0000-0000-000000000001', 'achievement', 1.9, 87.0, 1),
+  ('3002d000-0000-0000-0000-000000000001', 'altruism', 0.93, 71.8, 2),
+  ('3002d000-0000-0000-0000-000000000001', 'autonomy', 0.9, 71.1, 3),
+  ('3002d000-0000-0000-0000-000000000001', 'safety', -0.33, 41.7, 4),
+  ('3002d000-0000-0000-0000-000000000001', 'status', -0.38, 40.7, 5),
+  ('3002d000-0000-0000-0000-000000000001', 'comfort', -0.5, 37.8, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,2.0,-0.3,0.5,-0.8,1.0,0.0,0.3,0.8,1.2,0.2,0.5,-0.2,0.5,-0.5,1.5,-1.0,-0.4,-0.6,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-00000000002d';
 
 -- ユーザー46: Androidエンジニア (創造性・能力活用・自律を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3002e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002e', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002e000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('3002e000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  5),  -- achievement
   ('3002e000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4,  9),  -- activity
@@ -3965,15 +4361,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002e000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3002e000-0000-0000-0000-000000000001', 'autonomy', 1.57, 82.7, 1),
+  ('3002e000-0000-0000-0000-000000000001', 'achievement', 1.4, 80.2, 2),
+  ('3002e000-0000-0000-0000-000000000001', 'altruism', 0.13, 53.3, 3),
+  ('3002e000-0000-0000-0000-000000000001', 'comfort', -0.42, 39.7, 4),
+  ('3002e000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 5),
+  ('3002e000-0000-0000-0000-000000000001', 'status', -0.57, 36.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.0,0.3,0.5,-1.0,1.5,-0.1,0.2,0.8,2.0,0.5,0.0,-0.3,1.2,-0.5,-0.4,-1.5,-0.6,-0.8,-1.2,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000002e';
 
 -- ユーザー47: UXリサーチャー (仲間・創造性・社会貢献を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3002f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002f', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002f000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  6),  -- ability_utilization
   ('3002f000-0000-0000-0000-000000000001',  2,   0.5, 0.30,  62.2,  8),  -- achievement
   ('3002f000-0000-0000-0000-000000000001',  3,  -0.5, 0.30,  37.8, 15),  -- activity
@@ -3997,15 +4402,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3002f000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3002f000-0000-0000-0000-000000000001', 'altruism', 1.43, 80.7, 1),
+  ('3002f000-0000-0000-0000-000000000001', 'autonomy', 1.1, 75.0, 2),
+  ('3002f000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 3),
+  ('3002f000-0000-0000-0000-000000000001', 'safety', -0.4, 40.1, 4),
+  ('3002f000-0000-0000-0000-000000000001', 'comfort', -0.57, 36.2, 5),
+  ('3002f000-0000-0000-0000-000000000001', 'status', -0.75, 32.1, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,0.5,-0.5,0.0,-1.5,1.0,0.2,-0.2,2.0,1.8,-0.1,0.8,0.3,0.5,-0.4,1.5,-1.8,-0.6,-0.8,-1.0,-1.2]'
 WHERE id = '10000000-0000-0000-0000-00000000002f';
 
 -- ユーザー48: プラットフォームエンジニア (自律・能力活用・責任を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30030000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000030', 29, 0.925, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30030000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('30030000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  4),  -- achievement
   ('30030000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 12),  -- activity
@@ -4029,15 +4443,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30030000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30030000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30030000-0000-0000-0000-000000000001', 'autonomy', 1.43, 80.7, 2),
+  ('30030000-0000-0000-0000-000000000001', 'altruism', -0.03, 49.2, 3),
+  ('30030000-0000-0000-0000-000000000001', 'comfort', -0.3, 42.6, 4),
+  ('30030000-0000-0000-0000-000000000001', 'status', -0.33, 41.9, 5),
+  ('30030000-0000-0000-0000-000000000001', 'safety', -0.47, 38.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.2,-0.2,0.5,-0.5,2.0,0.0,0.5,0.3,0.8,1.0,0.0,-0.3,1.5,0.2,-0.4,-1.0,-0.6,-0.8,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000030';
 
 -- ユーザー49: フルスタックエンジニア (創造性・自律・達成感を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30031000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000031', 31, 0.919, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30031000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  3),  -- ability_utilization
   ('30031000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  4),  -- achievement
   ('30031000-0000-0000-0000-000000000001',  3,   0.0, 0.28,  50.0, 11),  -- activity
@@ -4061,15 +4484,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30031000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30031000-0000-0000-0000-000000000001', 'autonomy', 1.6, 83.2, 1),
+  ('30031000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 2),
+  ('30031000-0000-0000-0000-000000000001', 'altruism', 0.13, 53.3, 3),
+  ('30031000-0000-0000-0000-000000000001', 'status', -0.38, 40.7, 4),
+  ('30031000-0000-0000-0000-000000000001', 'comfort', -0.42, 39.7, 5),
+  ('30031000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.5,0.0,0.8,-0.8,1.8,-0.2,0.3,0.5,2.0,0.5,0.0,-0.3,1.0,0.0,-0.1,-1.2,-0.5,-0.8,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000031';
 
 -- ユーザー50: セキュリティエンジニア (責任・能力活用・安定を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30032000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000032', 32, 0.917, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30032000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('30032000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  5),  -- achievement
   ('30032000-0000-0000-0000-000000000001',  3,   0.2, 0.29,  55.0, 10),  -- activity
@@ -4093,15 +4525,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30032000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30032000-0000-0000-0000-000000000001', 'achievement', 1.4, 80.2, 1),
+  ('30032000-0000-0000-0000-000000000001', 'autonomy', 1.17, 76.3, 2),
+  ('30032000-0000-0000-0000-000000000001', 'altruism', 0.3, 57.4, 3),
+  ('30032000-0000-0000-0000-000000000001', 'comfort', -0.08, 47.9, 4),
+  ('30032000-0000-0000-0000-000000000001', 'safety', -0.17, 45.8, 5),
+  ('30032000-0000-0000-0000-000000000001', 'status', -0.25, 43.8, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.0,0.2,0.3,-0.3,1.0,0.5,0.8,0.0,0.5,0.0,1.2,-0.2,2.0,1.2,-0.3,-0.8,-0.5,-0.5,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000032';
 
 -- ユーザー51: データエンジニア (能力活用・達成感・自律を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30033000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000033', 35, 0.909, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30033000-0000-0000-0000-000000000001',  1,   2.0, 0.34,  88.1,  1),  -- ability_utilization
   ('30033000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  2),  -- achievement
   ('30033000-0000-0000-0000-000000000001',  3,  -0.1, 0.28,  47.5, 12),  -- activity
@@ -4125,15 +4566,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30033000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30033000-0000-0000-0000-000000000001', 'achievement', 1.75, 85.2, 1),
+  ('30033000-0000-0000-0000-000000000001', 'autonomy', 0.9, 71.1, 2),
+  ('30033000-0000-0000-0000-000000000001', 'altruism', 0.17, 54.2, 3),
+  ('30033000-0000-0000-0000-000000000001', 'safety', -0.27, 43.4, 4),
+  ('30033000-0000-0000-0000-000000000001', 'comfort', -0.33, 41.7, 5),
+  ('30033000-0000-0000-0000-000000000001', 'status', -0.4, 40.1, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.0,1.5,-0.1,0.5,-0.8,1.2,0.2,0.5,0.8,1.0,0.3,0.0,-0.3,0.5,0.0,-0.3,-1.0,-0.5,-0.5,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000033';
 
 -- ユーザー52: Javaアーキテクト (責任・安定・報酬を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30034000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000034', 36, 0.907, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30034000-0000-0000-0000-000000000001',  1,   1.2, 0.32,  76.9,  4),  -- ability_utilization
   ('30034000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  5),  -- achievement
   ('30034000-0000-0000-0000-000000000001',  3,   0.2, 0.29,  55.0, 10),  -- activity
@@ -4157,15 +4607,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30034000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30034000-0000-0000-0000-000000000001', 'achievement', 1.1, 75.0, 1),
+  ('30034000-0000-0000-0000-000000000001', 'autonomy', 0.77, 68.3, 2),
+  ('30034000-0000-0000-0000-000000000001', 'altruism', 0.1, 52.5, 3),
+  ('30034000-0000-0000-0000-000000000001', 'comfort', 0.03, 50.8, 4),
+  ('30034000-0000-0000-0000-000000000001', 'status', 0.03, 50.6, 5),
+  ('30034000-0000-0000-0000-000000000001', 'safety', -0.2, 45.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.2,1.0,0.2,0.8,0.0,0.5,0.5,1.5,0.3,0.0,0.0,0.3,-0.2,1.8,1.2,-0.3,-0.5,-0.3,-0.8,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000034';
 
 -- ユーザー53: QAエンジニア (達成感・仲間・道徳を重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30035000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000035', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30035000-0000-0000-0000-000000000001',  1,   1.0, 0.31,  73.1,  4),  -- ability_utilization
   ('30035000-0000-0000-0000-000000000001',  2,   1.8, 0.33,  85.8,  1),  -- achievement
   ('30035000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4, 10),  -- activity
@@ -4189,6 +4648,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30035000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30035000-0000-0000-0000-000000000001', 'achievement', 1.4, 80.2, 1),
+  ('30035000-0000-0000-0000-000000000001', 'altruism', 0.83, 69.7, 2),
+  ('30035000-0000-0000-0000-000000000001', 'autonomy', 0.7, 66.8, 3),
+  ('30035000-0000-0000-0000-000000000001', 'safety', -0.17, 45.8, 4),
+  ('30035000-0000-0000-0000-000000000001', 'comfort', -0.33, 41.7, 5),
+  ('30035000-0000-0000-0000-000000000001', 'status', -0.33, 41.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,1.8,0.3,0.5,-0.8,0.8,0.3,0.2,1.5,0.5,0.0,1.2,0.0,0.8,0.2,-0.2,-1.0,-0.3,-0.5,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000035';
 
@@ -4197,11 +4665,11 @@ WHERE id = '10000000-0000-0000-0000-000000000035';
 -- ============================================================
 
 -- ユーザー44: Rust → I(研究)・R(現実)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3102c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002c')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3102c000-0000-0000-0000-000000000001', 'A1', 2.3, 15),
   ('3102c000-0000-0000-0000-000000000001', 'A2', 2.0, 18),
   ('3102c000-0000-0000-0000-000000000001', 'A3', 2.0, 19),
@@ -4225,7 +4693,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(3.8+3.5+3.2)/3=3.50, I=(4.8+4.5+4.2+4.0)/4=4.38, A=(2.3+2.0+2.0)/3=2.10, S=(2.8+2.0+2.8+3.0)/4=2.65, E=(2.5+2.3+2.0)/3=2.27, C=(3.2+3.0+2.8)/3=3.00
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3102c000-0000-0000-0000-000000000001', 'I', 4.38, 1),
   ('3102c000-0000-0000-0000-000000000001', 'R', 3.50, 2),
   ('3102c000-0000-0000-0000-000000000001', 'C', 3.00, 3),
@@ -4238,11 +4706,11 @@ UPDATE users SET ci_vector = '[2.3,2.0,2.0,3.2,3.0,2.8,2.5,2.3,2.0,4.8,4.5,4.2,4
 WHERE id = '10000000-0000-0000-0000-00000000002c';
 
 -- ユーザー45: データサイエンティスト → I(研究)・C(慣習)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3102d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002d')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3102d000-0000-0000-0000-000000000001', 'A1', 2.5, 14),
   ('3102d000-0000-0000-0000-000000000001', 'A2', 2.3, 16),
   ('3102d000-0000-0000-0000-000000000001', 'A3', 2.0, 18),
@@ -4266,7 +4734,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(3.0+3.2+2.0)/3=2.73, I=(4.5+4.3+4.0+3.8)/4=4.15, A=(2.5+2.3+2.0)/3=2.27, S=(3.0+3.0+2.8+2.8)/4=2.90, E=(2.5+2.3+2.0)/3=2.27, C=(4.0+3.8+3.5)/3=3.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3102d000-0000-0000-0000-000000000001', 'I', 4.15, 1),
   ('3102d000-0000-0000-0000-000000000001', 'C', 3.77, 2),
   ('3102d000-0000-0000-0000-000000000001', 'S', 2.90, 3),
@@ -4279,11 +4747,11 @@ UPDATE users SET ci_vector = '[2.5,2.3,2.0,4.0,3.8,3.5,2.5,2.3,2.0,4.5,4.3,4.0,3
 WHERE id = '10000000-0000-0000-0000-00000000002d';
 
 -- ユーザー46: Android → A(芸術)・R(現実)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3102e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002e')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3102e000-0000-0000-0000-000000000001', 'A1', 4.0, 3),
   ('3102e000-0000-0000-0000-000000000001', 'A2', 3.8, 5),
   ('3102e000-0000-0000-0000-000000000001', 'A3', 4.2, 2),
@@ -4307,7 +4775,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(4.3+3.5+3.2)/3=3.67, I=(3.8+3.5+3.2+3.0)/4=3.38, A=(4.0+3.8+4.2)/3=4.00, S=(2.8+2.5+2.0+2.0)/4=2.33, E=(2.8+2.5+2.3)/3=2.53, C=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3102e000-0000-0000-0000-000000000001', 'A', 4.00, 1),
   ('3102e000-0000-0000-0000-000000000001', 'R', 3.67, 2),
   ('3102e000-0000-0000-0000-000000000001', 'I', 3.38, 3),
@@ -4320,11 +4788,11 @@ UPDATE users SET ci_vector = '[4.0,3.8,4.2,2.5,2.3,2.0,2.8,2.5,2.3,3.8,3.5,3.2,3
 WHERE id = '10000000-0000-0000-0000-00000000002e';
 
 -- ユーザー47: UXリサーチャー → A(芸術)・S(社会)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3102f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000002f')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3102f000-0000-0000-0000-000000000001', 'A1', 4.5, 1),
   ('3102f000-0000-0000-0000-000000000001', 'A2', 4.2, 3),
   ('3102f000-0000-0000-0000-000000000001', 'A3', 4.0, 4),
@@ -4348,7 +4816,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(2.5+2.0+3.0)/3=2.50, I=(3.2+3.0+2.8+2.8)/4=2.95, A=(4.5+4.2+4.0)/3=4.23, S=(4.3+3.5+3.5+3.2)/4=3.63, E=(2.5+2.3+2.5)/3=2.43, C=(2.3+2.0+2.0)/3=2.10
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3102f000-0000-0000-0000-000000000001', 'A', 4.23, 1),
   ('3102f000-0000-0000-0000-000000000001', 'S', 3.63, 2),
   ('3102f000-0000-0000-0000-000000000001', 'I', 2.95, 3),
@@ -4361,11 +4829,11 @@ UPDATE users SET ci_vector = '[4.5,4.2,4.0,2.3,2.0,2.0,2.5,2.3,2.5,3.2,3.0,2.8,2
 WHERE id = '10000000-0000-0000-0000-00000000002f';
 
 -- ユーザー48: プラットフォームエンジニア → I(研究)・R(現実)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31030000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000030')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31030000-0000-0000-0000-000000000001', 'A1', 2.0, 17),
   ('31030000-0000-0000-0000-000000000001', 'A2', 2.0, 18),
   ('31030000-0000-0000-0000-000000000001', 'A3', 1.8, 19),
@@ -4389,7 +4857,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(4.0+3.5+3.0)/3=3.50, I=(4.5+4.2+4.0+3.8)/4=4.13, A=(2.0+2.0+1.8)/3=1.93, S=(2.5+2.3+1.8+3.0)/4=2.40, E=(2.8+2.5+2.5)/3=2.60, C=(3.5+3.5+3.2)/3=3.40
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31030000-0000-0000-0000-000000000001', 'I', 4.13, 1),
   ('31030000-0000-0000-0000-000000000001', 'R', 3.50, 2),
   ('31030000-0000-0000-0000-000000000001', 'C', 3.40, 3),
@@ -4402,11 +4870,11 @@ UPDATE users SET ci_vector = '[2.0,2.0,1.8,3.5,3.5,3.2,2.8,2.5,2.5,4.5,4.2,4.0,3
 WHERE id = '10000000-0000-0000-0000-000000000030';
 
 -- ユーザー49: フルスタック → I(研究)・A(芸術)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31031000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000031')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31031000-0000-0000-0000-000000000001', 'A1', 3.8, 4),
   ('31031000-0000-0000-0000-000000000001', 'A2', 3.5, 7),
   ('31031000-0000-0000-0000-000000000001', 'A3', 3.5, 8),
@@ -4430,7 +4898,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(3.5+3.0+2.5)/3=3.00, I=(4.5+4.0+3.8+3.5)/4=3.95, A=(3.8+3.5+3.5)/3=3.60, S=(2.3+2.0+2.0+2.3)/4=2.15, E=(3.0+2.8+3.0)/3=2.93, C=(2.8+2.5+2.3)/3=2.53
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31031000-0000-0000-0000-000000000001', 'I', 3.95, 1),
   ('31031000-0000-0000-0000-000000000001', 'A', 3.60, 2),
   ('31031000-0000-0000-0000-000000000001', 'R', 3.00, 3),
@@ -4443,11 +4911,11 @@ UPDATE users SET ci_vector = '[3.8,3.5,3.5,2.8,2.5,2.3,3.0,2.8,3.0,4.5,4.0,3.8,3
 WHERE id = '10000000-0000-0000-0000-000000000031';
 
 -- ユーザー50: セキュリティ → I(研究)・C(慣習)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31032000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000032')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31032000-0000-0000-0000-000000000001', 'A1', 2.0, 17),
   ('31032000-0000-0000-0000-000000000001', 'A2', 2.0, 18),
   ('31032000-0000-0000-0000-000000000001', 'A3', 1.8, 19),
@@ -4471,7 +4939,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(3.5+3.2+3.0)/3=3.23, I=(4.5+4.2+3.8+3.5)/4=4.00, A=(2.0+2.0+1.8)/3=1.93, S=(2.5+2.5+3.0+1.5)/4=2.38, E=(2.8+2.5+2.3)/3=2.53, C=(4.0+3.8+3.5)/3=3.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31032000-0000-0000-0000-000000000001', 'I', 4.00, 1),
   ('31032000-0000-0000-0000-000000000001', 'C', 3.77, 2),
   ('31032000-0000-0000-0000-000000000001', 'R', 3.23, 3),
@@ -4484,11 +4952,11 @@ UPDATE users SET ci_vector = '[2.0,2.0,1.8,4.0,3.8,3.5,2.8,2.5,2.3,4.5,4.2,3.8,3
 WHERE id = '10000000-0000-0000-0000-000000000032';
 
 -- ユーザー51: データエンジニア → I(研究)・C(慣習)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31033000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000033')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31033000-0000-0000-0000-000000000001', 'A1', 2.3, 15),
   ('31033000-0000-0000-0000-000000000001', 'A2', 2.0, 18),
   ('31033000-0000-0000-0000-000000000001', 'A3', 2.3, 16),
@@ -4512,7 +4980,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(3.2+3.5+2.0)/3=2.90, I=(4.5+4.0+3.8+3.5)/4=3.95, A=(2.3+2.0+2.3)/3=2.20, S=(3.0+2.8+2.8+2.8)/4=2.85, E=(2.5+2.3+2.0)/3=2.27, C=(4.2+4.0+3.8)/3=4.00
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31033000-0000-0000-0000-000000000001', 'C', 4.00, 1),
   ('31033000-0000-0000-0000-000000000001', 'I', 3.95, 2),
   ('31033000-0000-0000-0000-000000000001', 'R', 2.90, 3),
@@ -4525,11 +4993,11 @@ UPDATE users SET ci_vector = '[2.3,2.0,2.3,4.2,4.0,3.8,2.5,2.3,2.0,4.5,4.0,3.8,3
 WHERE id = '10000000-0000-0000-0000-000000000033';
 
 -- ユーザー52: Java → R(現実)・C(慣習)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31034000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000034')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31034000-0000-0000-0000-000000000001', 'A1', 2.0, 17),
   ('31034000-0000-0000-0000-000000000001', 'A2', 2.0, 18),
   ('31034000-0000-0000-0000-000000000001', 'A3', 1.8, 19),
@@ -4553,7 +5021,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(4.5+4.2+3.8)/3=4.17, I=(3.5+3.0+2.8+2.8)/4=3.03, A=(2.0+2.0+1.8)/3=1.93, S=(2.5+2.3+2.0+2.3)/4=2.28, E=(3.0+2.8+3.0)/3=2.93, C=(4.0+3.8+3.5)/3=3.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31034000-0000-0000-0000-000000000001', 'R', 4.17, 1),
   ('31034000-0000-0000-0000-000000000001', 'C', 3.77, 2),
   ('31034000-0000-0000-0000-000000000001', 'I', 3.03, 3),
@@ -4566,11 +5034,11 @@ UPDATE users SET ci_vector = '[2.0,2.0,1.8,4.0,3.8,3.5,3.0,2.8,3.0,3.5,3.0,2.8,2
 WHERE id = '10000000-0000-0000-0000-000000000034';
 
 -- ユーザー53: QA → C(慣習)・I(研究)型
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31035000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000035')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31035000-0000-0000-0000-000000000001', 'A1', 2.5, 13),
   ('31035000-0000-0000-0000-000000000001', 'A2', 2.3, 16),
   ('31035000-0000-0000-0000-000000000001', 'A3', 2.5, 14),
@@ -4594,7 +5062,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- R=(3.0+3.5+2.0)/3=2.83, I=(3.8+3.5+3.5+3.2)/4=3.50, A=(2.5+2.3+2.5)/3=2.43, S=(3.2+3.0+2.8+1.8)/4=2.70, E=(2.5+2.3+2.0)/3=2.27, C=(4.5+4.2+4.0)/3=4.23
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31035000-0000-0000-0000-000000000001', 'C', 4.23, 1),
   ('31035000-0000-0000-0000-000000000001', 'I', 3.50, 2),
   ('31035000-0000-0000-0000-000000000001', 'R', 2.83, 3),
@@ -4902,11 +5370,11 @@ VALUES
 -- ============================================================
 -- Work Values 診断データ
 -- ============================================================
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30036000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000036', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30036000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('30036000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  3),  -- achievement
   ('30036000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 13),  -- activity
@@ -4930,14 +5398,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30036000-0000-0000-0000-000000000001', 21,  -1.9, 0.34,  13.0, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30036000-0000-0000-0000-000000000001', 'achievement', 1.65, 83.9, 1),
+  ('30036000-0000-0000-0000-000000000001', 'autonomy', 1.4, 80.2, 2),
+  ('30036000-0000-0000-0000-000000000001', 'altruism', 0.1, 52.5, 3),
+  ('30036000-0000-0000-0000-000000000001', 'safety', -0.47, 38.5, 4),
+  ('30036000-0000-0000-0000-000000000001', 'comfort', -0.55, 36.6, 5),
+  ('30036000-0000-0000-0000-000000000001', 'status', -0.57, 36.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.5,-0.3,0.5,-1.0,2.0,-0.2,0.3,0.4,1.2,0.8,-0.1,-0.5,1.0,-0.7,0.0,-1.3,-0.4,-0.8,-1.5,-1.9]'
 WHERE id = '10000000-0000-0000-0000-000000000036';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30037000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000037', 32, 0.917, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30037000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  3),  -- ability_utilization
   ('30037000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  5),  -- achievement
   ('30037000-0000-0000-0000-000000000001',  3,  -0.6, 0.30,  35.4, 15),  -- activity
@@ -4961,14 +5438,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30037000-0000-0000-0000-000000000001', 21,  -1.6, 0.33,  16.8, 20)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30037000-0000-0000-0000-000000000001', 'autonomy', 1.53, 82.2, 1),
+  ('30037000-0000-0000-0000-000000000001', 'achievement', 1.25, 77.7, 2),
+  ('30037000-0000-0000-0000-000000000001', 'altruism', 0.93, 71.8, 3),
+  ('30037000-0000-0000-0000-000000000001', 'safety', -0.57, 36.2, 4),
+  ('30037000-0000-0000-0000-000000000001', 'comfort', -0.58, 35.8, 5),
+  ('30037000-0000-0000-0000-000000000001', 'status', -0.85, 29.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.0,-0.6,0.2,-1.5,1.8,-0.1,0.0,1.5,2.2,0.3,0.5,-0.3,0.6,-0.4,0.8,-1.8,-0.7,-0.9,-1.2,-1.6]'
 WHERE id = '10000000-0000-0000-0000-000000000037';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30038000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000038', 28, 0.927, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30038000-0000-0000-0000-000000000001',  1,   1.0, 0.31,  73.1,  5),  -- ability_utilization
   ('30038000-0000-0000-0000-000000000001',  2,   0.8, 0.30,  69.0,  7),  -- achievement
   ('30038000-0000-0000-0000-000000000001',  3,  -0.5, 0.30,  37.8, 15),  -- activity
@@ -4992,14 +5478,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30038000-0000-0000-0000-000000000001', 21,  -1.3, 0.32,  21.4, 19)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30038000-0000-0000-0000-000000000001', 'altruism', 1.6, 83.2, 1),
+  ('30038000-0000-0000-0000-000000000001', 'autonomy', 1.47, 81.3, 2),
+  ('30038000-0000-0000-0000-000000000001', 'achievement', 0.9, 71.1, 3),
+  ('30038000-0000-0000-0000-000000000001', 'safety', -0.37, 40.9, 4),
+  ('30038000-0000-0000-0000-000000000001', 'comfort', -0.58, 35.8, 5),
+  ('30038000-0000-0000-0000-000000000001', 'status', -0.85, 29.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,0.8,-0.5,0.1,-1.8,1.5,0.0,-0.3,2.0,2.5,0.2,1.0,0.3,0.4,-0.6,1.8,-2.0,-0.4,-0.7,-1.0,-1.3]'
 WHERE id = '10000000-0000-0000-0000-000000000038';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30039000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000039', 35, 0.909, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30039000-0000-0000-0000-000000000001',  1,   1.2, 0.32,  76.9,  4),  -- ability_utilization
   ('30039000-0000-0000-0000-000000000001',  2,   2.0, 0.34,  88.1,  1),  -- achievement
   ('30039000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 14),  -- activity
@@ -5023,14 +5518,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30039000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30039000-0000-0000-0000-000000000001', 'achievement', 1.6, 83.2, 1),
+  ('30039000-0000-0000-0000-000000000001', 'autonomy', 1.03, 73.8, 2),
+  ('30039000-0000-0000-0000-000000000001', 'status', 0.3, 57.4, 3),
+  ('30039000-0000-0000-0000-000000000001', 'altruism', 0.17, 54.2, 4),
+  ('30039000-0000-0000-0000-000000000001', 'safety', -0.23, 44.2, 5),
+  ('30039000-0000-0000-0000-000000000001', 'comfort', -0.4, 40.1, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.2,2.0,-0.2,1.5,-0.5,0.8,0.3,0.6,0.4,0.5,0.0,0.2,1.0,1.8,-0.3,-0.1,-0.8,-0.4,-0.6,-1.0,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000039';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3003a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003a', 27, 0.93, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003a000-0000-0000-0000-000000000001',  1,   2.2, 0.35,  90.0,  1),  -- ability_utilization
   ('3003a000-0000-0000-0000-000000000001',  2,   1.8, 0.33,  85.8,  2),  -- achievement
   ('3003a000-0000-0000-0000-000000000001',  3,  -0.4, 0.29,  40.1, 14),  -- activity
@@ -5054,14 +5558,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003a000-0000-0000-0000-000000000001', 21,  -2.0, 0.34,  11.9, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3003a000-0000-0000-0000-000000000001', 'achievement', 2.0, 88.1, 1),
+  ('3003a000-0000-0000-0000-000000000001', 'autonomy', 1.37, 79.7, 2),
+  ('3003a000-0000-0000-0000-000000000001', 'altruism', 0.0, 50.0, 3),
+  ('3003a000-0000-0000-0000-000000000001', 'status', -0.42, 39.5, 4),
+  ('3003a000-0000-0000-0000-000000000001', 'comfort', -0.5, 37.8, 5),
+  ('3003a000-0000-0000-0000-000000000001', 'safety', -0.53, 37.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.2,1.8,-0.4,0.6,-0.8,1.5,-0.1,0.4,0.2,1.8,1.0,0.0,-0.3,0.8,-0.5,-0.2,-1.2,-0.6,-0.9,-1.5,-2.0]'
 WHERE id = '10000000-0000-0000-0000-00000000003a';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3003b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003b', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003b000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  2),  -- ability_utilization
   ('3003b000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  4),  -- achievement
   ('3003b000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 14),  -- activity
@@ -5085,14 +5598,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003b000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3003b000-0000-0000-0000-000000000001', 'autonomy', 1.4, 80.2, 1),
+  ('3003b000-0000-0000-0000-000000000001', 'achievement', 1.35, 79.4, 2),
+  ('3003b000-0000-0000-0000-000000000001', 'altruism', 0.2, 55.0, 3),
+  ('3003b000-0000-0000-0000-000000000001', 'comfort', -0.27, 43.4, 4),
+  ('3003b000-0000-0000-0000-000000000001', 'safety', -0.37, 40.9, 5),
+  ('3003b000-0000-0000-0000-000000000001', 'status', -0.42, 39.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.2,-0.3,0.3,-0.6,2.2,0.1,0.5,0.6,0.8,1.5,0.0,-0.4,1.2,-0.2,0.0,-1.0,-0.5,-0.7,-1.3,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000003b';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3003c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003c', 38, 0.901, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003c000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  6),  -- ability_utilization
   ('3003c000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  1),  -- achievement
   ('3003c000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4, 11),  -- activity
@@ -5116,14 +5638,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003c000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3003c000-0000-0000-0000-000000000001', 'achievement', 1.15, 76.0, 1),
+  ('3003c000-0000-0000-0000-000000000001', 'autonomy', 0.7, 66.8, 2),
+  ('3003c000-0000-0000-0000-000000000001', 'altruism', 0.57, 63.8, 3),
+  ('3003c000-0000-0000-0000-000000000001', 'status', 0.35, 58.7, 4),
+  ('3003c000-0000-0000-0000-000000000001', 'comfort', -0.3, 42.6, 5),
+  ('3003c000-0000-0000-0000-000000000001', 'safety', -0.37, 40.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,1.5,0.3,1.2,-0.3,0.5,0.1,0.8,1.0,1.0,0.0,0.2,1.3,0.6,-0.4,0.5,-0.8,-0.5,-0.7,-1.0,-1.5]'
 WHERE id = '10000000-0000-0000-0000-00000000003c';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3003d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003d', 29, 0.925, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003d000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  1),  -- ability_utilization
   ('3003d000-0000-0000-0000-000000000001',  2,   1.3, 0.32,  78.6,  4),  -- achievement
   ('3003d000-0000-0000-0000-000000000001',  3,  -0.5, 0.30,  37.8, 14),  -- activity
@@ -5147,14 +5678,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003d000-0000-0000-0000-000000000001', 21,  -1.7, 0.33,  15.4, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3003d000-0000-0000-0000-000000000001', 'achievement', 1.55, 82.5, 1),
+  ('3003d000-0000-0000-0000-000000000001', 'autonomy', 1.4, 80.2, 2),
+  ('3003d000-0000-0000-0000-000000000001', 'altruism', 0.2, 55.0, 3),
+  ('3003d000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 4),
+  ('3003d000-0000-0000-0000-000000000001', 'comfort', -0.53, 37.0, 5),
+  ('3003d000-0000-0000-0000-000000000001', 'status', -0.53, 37.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.3,-0.5,0.4,-0.9,1.8,-0.2,0.3,0.5,1.5,0.7,0.0,-0.4,0.9,-0.6,0.1,-1.2,-0.5,-0.8,-1.4,-1.7]'
 WHERE id = '10000000-0000-0000-0000-00000000003d';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3003e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003e', 40, 0.896, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003e000-0000-0000-0000-000000000001',  1,   0.5, 0.30,  62.2,  7),  -- ability_utilization
   ('3003e000-0000-0000-0000-000000000001',  2,   1.8, 0.33,  85.8,  1),  -- achievement
   ('3003e000-0000-0000-0000-000000000001',  3,   0.2, 0.29,  55.0, 11),  -- activity
@@ -5178,14 +5718,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003e000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3003e000-0000-0000-0000-000000000001', 'achievement', 1.15, 76.0, 1),
+  ('3003e000-0000-0000-0000-000000000001', 'status', 0.82, 69.5, 2),
+  ('3003e000-0000-0000-0000-000000000001', 'autonomy', 0.6, 64.6, 3),
+  ('3003e000-0000-0000-0000-000000000001', 'altruism', 0.27, 56.6, 4),
+  ('3003e000-0000-0000-0000-000000000001', 'comfort', -0.22, 44.6, 5),
+  ('3003e000-0000-0000-0000-000000000001', 'safety', -0.27, 43.4, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.5,1.8,0.2,1.8,0.5,0.3,0.2,1.0,0.8,0.3,-0.2,0.1,1.5,1.2,-0.3,-0.1,-0.5,-0.4,-0.6,-0.8,-1.2]'
 WHERE id = '10000000-0000-0000-0000-00000000003e';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3003f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003f', 31, 0.919, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003f000-0000-0000-0000-000000000001',  1,   1.6, 0.33,  83.2,  2),  -- ability_utilization
   ('3003f000-0000-0000-0000-000000000001',  2,   1.3, 0.32,  78.6,  3),  -- achievement
   ('3003f000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 13),  -- activity
@@ -5209,14 +5758,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3003f000-0000-0000-0000-000000000001', 21,  -1.7, 0.33,  15.4, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3003f000-0000-0000-0000-000000000001', 'achievement', 1.45, 81.0, 1),
+  ('3003f000-0000-0000-0000-000000000001', 'autonomy', 1.33, 79.1, 2),
+  ('3003f000-0000-0000-0000-000000000001', 'altruism', 0.23, 55.8, 3),
+  ('3003f000-0000-0000-0000-000000000001', 'comfort', -0.35, 41.3, 4),
+  ('3003f000-0000-0000-0000-000000000001', 'safety', -0.37, 40.9, 5),
+  ('3003f000-0000-0000-0000-000000000001', 'status', -0.42, 39.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.6,1.3,-0.2,0.4,-0.7,2.0,0.2,0.4,0.7,1.0,1.2,0.0,-0.3,1.0,-0.5,0.0,-1.1,-0.5,-0.8,-1.3,-1.7]'
 WHERE id = '10000000-0000-0000-0000-00000000003f';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30040000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000040', 34, 0.912, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30040000-0000-0000-0000-000000000001',  1,   1.0, 0.31,  73.1,  6),  -- ability_utilization
   ('30040000-0000-0000-0000-000000000001',  2,   0.8, 0.30,  69.0,  7),  -- achievement
   ('30040000-0000-0000-0000-000000000001',  3,  -0.4, 0.29,  40.1, 15),  -- activity
@@ -5240,14 +5798,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30040000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30040000-0000-0000-0000-000000000001', 'altruism', 1.67, 84.1, 1),
+  ('30040000-0000-0000-0000-000000000001', 'autonomy', 0.97, 72.4, 2),
+  ('30040000-0000-0000-0000-000000000001', 'achievement', 0.9, 71.1, 3),
+  ('30040000-0000-0000-0000-000000000001', 'safety', -0.4, 40.1, 4),
+  ('30040000-0000-0000-0000-000000000001', 'comfort', -0.53, 37.0, 5),
+  ('30040000-0000-0000-0000-000000000001', 'status', -0.75, 32.1, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,0.8,-0.4,0.0,-1.5,1.2,0.1,-0.2,1.8,1.5,0.0,1.2,0.3,0.2,-0.3,2.0,-1.8,-0.5,-0.8,-0.8,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000040';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30041000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000041', 29, 0.925, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30041000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('30041000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  3),  -- achievement
   ('30041000-0000-0000-0000-000000000001',  3,  -0.1, 0.28,  47.5, 12),  -- activity
@@ -5271,14 +5838,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30041000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30041000-0000-0000-0000-000000000001', 'achievement', 1.65, 83.9, 1),
+  ('30041000-0000-0000-0000-000000000001', 'autonomy', 1.57, 82.7, 2),
+  ('30041000-0000-0000-0000-000000000001', 'altruism', 0.17, 54.2, 3),
+  ('30041000-0000-0000-0000-000000000001', 'comfort', -0.4, 40.1, 4),
+  ('30041000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 5),
+  ('30041000-0000-0000-0000-000000000001', 'status', -0.53, 37.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.5,-0.1,0.3,-0.8,2.2,-0.2,0.2,0.5,1.5,1.2,0.0,-0.4,1.0,-0.6,0.0,-1.2,-0.5,-0.8,-1.3,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000041';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30042000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000042', 42, 0.891, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30042000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  6),  -- ability_utilization
   ('30042000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  1),  -- achievement
   ('30042000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4, 10),  -- activity
@@ -5302,14 +5878,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30042000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30042000-0000-0000-0000-000000000001', 'achievement', 1.15, 76.0, 1),
+  ('30042000-0000-0000-0000-000000000001', 'autonomy', 0.73, 67.6, 2),
+  ('30042000-0000-0000-0000-000000000001', 'status', 0.62, 65.1, 3),
+  ('30042000-0000-0000-0000-000000000001', 'altruism', 0.27, 56.6, 4),
+  ('30042000-0000-0000-0000-000000000001', 'comfort', -0.13, 46.7, 5),
+  ('30042000-0000-0000-0000-000000000001', 'safety', -0.13, 46.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,1.5,0.3,1.5,0.3,0.5,0.5,1.2,0.3,0.2,-0.1,0.5,1.0,1.5,-0.2,0.0,-0.3,-0.4,-0.5,-0.8,-1.2]'
 WHERE id = '10000000-0000-0000-0000-000000000042';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30043000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000043', 36, 0.906, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30043000-0000-0000-0000-000000000001',  1,   1.2, 0.32,  76.9,  1),  -- ability_utilization
   ('30043000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  2),  -- achievement
   ('30043000-0000-0000-0000-000000000001',  3,   0.2, 0.29,  55.0, 14),  -- activity
@@ -5333,14 +5918,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30043000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30043000-0000-0000-0000-000000000001', 'achievement', 1.1, 75.0, 1),
+  ('30043000-0000-0000-0000-000000000001', 'altruism', 0.7, 66.8, 2),
+  ('30043000-0000-0000-0000-000000000001', 'autonomy', 0.7, 66.8, 3),
+  ('30043000-0000-0000-0000-000000000001', 'safety', 0.0, 50.0, 4),
+  ('30043000-0000-0000-0000-000000000001', 'comfort', -0.13, 46.7, 5),
+  ('30043000-0000-0000-0000-000000000001', 'status', -0.53, 37.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.2,1.0,0.2,0.3,-1.0,1.0,0.8,0.3,1.0,0.5,0.5,0.8,-0.2,0.6,0.5,0.3,-1.2,-0.3,-0.5,-0.8,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000043';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30044000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000044', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30044000-0000-0000-0000-000000000001',  1,   1.7, 0.33,  84.6,  2),  -- ability_utilization
   ('30044000-0000-0000-0000-000000000001',  2,   1.3, 0.32,  78.6,  4),  -- achievement
   ('30044000-0000-0000-0000-000000000001',  3,  -0.4, 0.29,  40.1, 14),  -- activity
@@ -5364,14 +5958,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30044000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30044000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30044000-0000-0000-0000-000000000001', 'autonomy', 1.4, 80.2, 2),
+  ('30044000-0000-0000-0000-000000000001', 'altruism', 0.2, 55.0, 3),
+  ('30044000-0000-0000-0000-000000000001', 'status', -0.43, 39.5, 4),
+  ('30044000-0000-0000-0000-000000000001', 'safety', -0.47, 38.5, 5),
+  ('30044000-0000-0000-0000-000000000001', 'comfort', -0.48, 38.1, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.7,1.3,-0.4,0.5,-0.8,1.8,-0.1,0.4,0.6,1.5,0.8,0.0,-0.3,0.9,-0.5,0.0,-1.1,-0.5,-0.8,-1.4,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000044';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30045000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000045', 45, 0.883, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30045000-0000-0000-0000-000000000001',  1,   0.5, 0.30,  62.2,  7),  -- ability_utilization
   ('30045000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  3),  -- achievement
   ('30045000-0000-0000-0000-000000000001',  3,   0.5, 0.30,  62.2,  8),  -- activity
@@ -5395,14 +5998,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30045000-0000-0000-0000-000000000001', 21,  -1.0, 0.31,  26.9, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30045000-0000-0000-0000-000000000001', 'altruism', 1.5, 81.8, 1),
+  ('30045000-0000-0000-0000-000000000001', 'achievement', 0.75, 67.9, 2),
+  ('30045000-0000-0000-0000-000000000001', 'autonomy', 0.33, 58.3, 3),
+  ('30045000-0000-0000-0000-000000000001', 'status', 0.28, 56.8, 4),
+  ('30045000-0000-0000-0000-000000000001', 'safety', -0.07, 48.3, 5),
+  ('30045000-0000-0000-0000-000000000001', 'comfort', -0.15, 46.3, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.5,1.0,0.5,0.8,0.0,0.3,0.3,0.5,2.0,0.2,-0.3,1.0,0.8,0.5,0.2,1.5,-0.5,-0.2,-0.3,-0.8,-1.0]'
 WHERE id = '10000000-0000-0000-0000-000000000045';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30046000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000046', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30046000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  1),  -- ability_utilization
   ('30046000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  5),  -- achievement
   ('30046000-0000-0000-0000-000000000001',  3,   0.0, 0.28,  50.0, 14),  -- activity
@@ -5426,14 +6038,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30046000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30046000-0000-0000-0000-000000000001', 'achievement', 1.25, 77.7, 1),
+  ('30046000-0000-0000-0000-000000000001', 'autonomy', 1.17, 76.3, 2),
+  ('30046000-0000-0000-0000-000000000001', 'altruism', 0.43, 60.7, 3),
+  ('30046000-0000-0000-0000-000000000001', 'comfort', -0.07, 48.3, 4),
+  ('30046000-0000-0000-0000-000000000001', 'safety', -0.1, 47.5, 5),
+  ('30046000-0000-0000-0000-000000000001', 'status', -0.35, 41.3, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.0,0.0,0.3,-0.5,1.2,0.5,0.5,0.3,0.8,1.3,0.8,-0.2,1.5,0.3,0.2,-1.0,-0.3,-0.5,-1.0,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000046';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30047000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000047', 32, 0.917, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30047000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  1),  -- ability_utilization
   ('30047000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  2),  -- achievement
   ('30047000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 15),  -- activity
@@ -5457,14 +6078,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30047000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30047000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30047000-0000-0000-0000-000000000001', 'autonomy', 1.0, 73.1, 2),
+  ('30047000-0000-0000-0000-000000000001', 'altruism', 0.23, 55.8, 3),
+  ('30047000-0000-0000-0000-000000000001', 'status', -0.23, 44.4, 4),
+  ('30047000-0000-0000-0000-000000000001', 'safety', -0.23, 44.2, 5),
+  ('30047000-0000-0000-0000-000000000001', 'comfort', -0.33, 41.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.5,-0.3,0.6,-0.5,1.2,0.3,0.6,0.5,0.8,0.5,0.2,-0.2,1.0,0.2,0.0,-0.8,-0.4,-0.6,-1.2,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000047';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30048000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000048', 35, 0.909, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30048000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  5),  -- ability_utilization
   ('30048000-0000-0000-0000-000000000001',  2,   0.5, 0.30,  62.2,  7),  -- achievement
   ('30048000-0000-0000-0000-000000000001',  3,  -0.8, 0.30,  31.0, 17),  -- activity
@@ -5488,14 +6118,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30048000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30048000-0000-0000-0000-000000000001', 'autonomy', 1.43, 80.7, 1),
+  ('30048000-0000-0000-0000-000000000001', 'altruism', 1.1, 75.0, 2),
+  ('30048000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 3),
+  ('30048000-0000-0000-0000-000000000001', 'safety', -0.33, 41.7, 4),
+  ('30048000-0000-0000-0000-000000000001', 'comfort', -0.52, 37.4, 5),
+  ('30048000-0000-0000-0000-000000000001', 'status', -0.7, 33.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,0.5,-0.8,0.0,-1.5,1.5,0.0,-0.2,1.5,2.5,0.5,0.8,0.5,0.3,-0.3,1.0,-1.8,-0.4,-0.6,-0.8,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000048';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30049000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000049', 40, 0.896, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30049000-0000-0000-0000-000000000001',  1,   0.5, 0.30,  62.2,  7),  -- ability_utilization
   ('30049000-0000-0000-0000-000000000001',  2,   1.0, 0.31,  73.1,  3),  -- achievement
   ('30049000-0000-0000-0000-000000000001',  3,   0.5, 0.30,  62.2,  8),  -- activity
@@ -5519,14 +6158,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30049000-0000-0000-0000-000000000001', 21,  -1.0, 0.31,  26.9, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30049000-0000-0000-0000-000000000001', 'altruism', 1.47, 81.3, 1),
+  ('30049000-0000-0000-0000-000000000001', 'achievement', 0.75, 67.9, 2),
+  ('30049000-0000-0000-0000-000000000001', 'status', 0.33, 58.1, 3),
+  ('30049000-0000-0000-0000-000000000001', 'autonomy', 0.3, 57.4, 4),
+  ('30049000-0000-0000-0000-000000000001', 'safety', -0.07, 48.3, 5),
+  ('30049000-0000-0000-0000-000000000001', 'comfort', -0.1, 47.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.5,1.0,0.5,0.8,0.0,0.2,0.3,0.5,1.8,0.2,-0.2,0.8,1.0,0.5,0.2,1.8,-0.5,-0.2,-0.3,-0.6,-1.0]'
 WHERE id = '10000000-0000-0000-0000-000000000049';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3004a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004a', 28, 0.927, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004a000-0000-0000-0000-000000000001',  1,   2.0, 0.34,  88.1,  1),  -- ability_utilization
   ('3004a000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  4),  -- achievement
   ('3004a000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 13),  -- activity
@@ -5550,14 +6198,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004a000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3004a000-0000-0000-0000-000000000001', 'achievement', 1.75, 85.2, 1),
+  ('3004a000-0000-0000-0000-000000000001', 'autonomy', 1.47, 81.3, 2),
+  ('3004a000-0000-0000-0000-000000000001', 'altruism', 0.07, 51.7, 3),
+  ('3004a000-0000-0000-0000-000000000001', 'comfort', -0.42, 39.7, 4),
+  ('3004a000-0000-0000-0000-000000000001', 'status', -0.42, 39.5, 5),
+  ('3004a000-0000-0000-0000-000000000001', 'safety', -0.47, 38.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.0,1.5,-0.3,0.5,-0.7,1.8,-0.1,0.4,0.3,1.8,1.0,0.0,-0.3,0.8,-0.5,-0.1,-1.2,-0.5,-0.8,-1.3,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000004a';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3004b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004b', 37, 0.904, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004b000-0000-0000-0000-000000000001',  1,   1.0, 0.31,  73.1,  3),  -- ability_utilization
   ('3004b000-0000-0000-0000-000000000001',  2,   0.8, 0.30,  69.0,  5),  -- achievement
   ('3004b000-0000-0000-0000-000000000001',  3,   0.0, 0.28,  50.0, 13),  -- activity
@@ -5581,14 +6238,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004b000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 20)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3004b000-0000-0000-0000-000000000001', 'autonomy', 1.07, 74.4, 1),
+  ('3004b000-0000-0000-0000-000000000001', 'achievement', 0.9, 71.1, 2),
+  ('3004b000-0000-0000-0000-000000000001', 'altruism', 0.6, 64.6, 3),
+  ('3004b000-0000-0000-0000-000000000001', 'comfort', -0.07, 48.3, 4),
+  ('3004b000-0000-0000-0000-000000000001', 'safety', -0.2, 45.0, 5),
+  ('3004b000-0000-0000-0000-000000000001', 'status', -0.62, 34.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,0.8,0.0,0.0,-1.2,1.5,0.2,0.0,0.8,1.2,1.0,0.5,0.2,0.5,0.3,0.5,-1.5,-0.3,-0.5,-0.5,-1.2]'
 WHERE id = '10000000-0000-0000-0000-00000000004b';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3004c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004c', 34, 0.912, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004c000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  1),  -- ability_utilization
   ('3004c000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  3),  -- achievement
   ('3004c000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 13),  -- activity
@@ -5612,14 +6278,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004c000-0000-0000-0000-000000000001', 21,  -1.6, 0.33,  16.8, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3004c000-0000-0000-0000-000000000001', 'achievement', 1.35, 79.4, 1),
+  ('3004c000-0000-0000-0000-000000000001', 'autonomy', 1.1, 75.0, 2),
+  ('3004c000-0000-0000-0000-000000000001', 'altruism', 0.17, 54.2, 3),
+  ('3004c000-0000-0000-0000-000000000001', 'comfort', -0.3, 42.6, 4),
+  ('3004c000-0000-0000-0000-000000000001', 'safety', -0.33, 41.7, 5),
+  ('3004c000-0000-0000-0000-000000000001', 'status', -0.38, 40.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,1.2,-0.2,0.4,-0.6,1.5,0.2,0.5,0.5,1.0,1.0,0.0,-0.3,0.8,-0.3,0.0,-1.0,-0.5,-0.7,-1.2,-1.6]'
 WHERE id = '10000000-0000-0000-0000-00000000004c';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3004d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004d', 38, 0.901, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004d000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  5),  -- ability_utilization
   ('3004d000-0000-0000-0000-000000000001',  2,   0.8, 0.30,  69.0,  6),  -- achievement
   ('3004d000-0000-0000-0000-000000000001',  3,   0.2, 0.29,  55.0, 12),  -- activity
@@ -5643,14 +6318,23 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004d000-0000-0000-0000-000000000001', 21,  -1.0, 0.31,  26.9, 20)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3004d000-0000-0000-0000-000000000001', 'autonomy', 1.1, 75.0, 1),
+  ('3004d000-0000-0000-0000-000000000001', 'altruism', 0.9, 71.1, 2),
+  ('3004d000-0000-0000-0000-000000000001', 'achievement', 0.8, 69.0, 3),
+  ('3004d000-0000-0000-0000-000000000001', 'comfort', -0.17, 45.8, 4),
+  ('3004d000-0000-0000-0000-000000000001', 'safety', -0.27, 43.4, 5),
+  ('3004d000-0000-0000-0000-000000000001', 'status', -0.35, 41.3, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,0.8,0.2,0.3,-1.0,1.2,0.0,0.0,1.2,1.8,0.5,0.5,0.5,0.3,-0.2,1.0,-1.2,-0.3,-0.5,-0.5,-1.0]'
 WHERE id = '10000000-0000-0000-0000-00000000004d';
 
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3004e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004e', 26, 0.932, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004e000-0000-0000-0000-000000000001',  1,   2.2, 0.35,  90.0,  1),  -- ability_utilization
   ('3004e000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  4),  -- achievement
   ('3004e000-0000-0000-0000-000000000001',  3,  -0.5, 0.30,  37.8, 13),  -- activity
@@ -5674,17 +6358,26 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004e000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 21)  -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3004e000-0000-0000-0000-000000000001', 'achievement', 1.85, 86.4, 1),
+  ('3004e000-0000-0000-0000-000000000001', 'autonomy', 1.73, 85.0, 2),
+  ('3004e000-0000-0000-0000-000000000001', 'altruism', 0.1, 52.5, 3),
+  ('3004e000-0000-0000-0000-000000000001', 'comfort', -0.37, 40.9, 4),
+  ('3004e000-0000-0000-0000-000000000001', 'safety', -0.6, 35.4, 5),
+  ('3004e000-0000-0000-0000-000000000001', 'status', -0.62, 34.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.2,1.5,-0.5,0.3,-0.8,2.2,-0.2,0.2,0.3,2.0,1.5,0.0,-0.5,1.0,-0.7,0.0,-1.5,-0.6,-1.0,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-00000000004e';
 
 -- ============================================================
 -- Career Interest 診断データ
 -- ============================================================
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31036000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000036')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31036000-0000-0000-0000-000000000001', 'A1', 3.0, 12),
   ('31036000-0000-0000-0000-000000000001', 'A2', 2.8, 15),
   ('31036000-0000-0000-0000-000000000001', 'A3', 2.5, 16),
@@ -5707,7 +6400,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31036000-0000-0000-0000-000000000001', 'S4', 1.3, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31036000-0000-0000-0000-000000000001', 'R', 3.5, 2),
   ('31036000-0000-0000-0000-000000000001', 'I', 4.12, 1),
   ('31036000-0000-0000-0000-000000000001', 'A', 2.77, 5),
@@ -5719,11 +6412,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[3.0,2.8,2.5,3.5,3.2,3.0,3.3,3.1,2.9,4.5,4.2,4.0,3.8,3.8,3.5,3.2,2.0,1.8,1.5,1.3]'
 WHERE id = '10000000-0000-0000-0000-000000000036';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31037000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000037')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31037000-0000-0000-0000-000000000001', 'A1', 4.0, 3),
   ('31037000-0000-0000-0000-000000000001', 'A2', 3.8, 5),
   ('31037000-0000-0000-0000-000000000001', 'A3', 4.2, 2),
@@ -5746,7 +6439,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31037000-0000-0000-0000-000000000001', 'S4', 2.0, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31037000-0000-0000-0000-000000000001', 'R', 2.5, 4),
   ('31037000-0000-0000-0000-000000000001', 'I', 3.75, 2),
   ('31037000-0000-0000-0000-000000000001', 'A', 4.0, 1),
@@ -5758,11 +6451,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[4.0,3.8,4.2,2.5,2.3,2.0,3.0,2.8,2.5,4.3,4.0,3.5,3.2,3.0,2.5,2.0,2.8,2.5,2.3,2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000037';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31038000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000038')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31038000-0000-0000-0000-000000000001', 'A1', 4.5, 2),
   ('31038000-0000-0000-0000-000000000001', 'A2', 4.2, 3),
   ('31038000-0000-0000-0000-000000000001', 'A3', 4.8, 1),
@@ -5785,7 +6478,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31038000-0000-0000-0000-000000000001', 'S4', 2.8, 11)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31038000-0000-0000-0000-000000000001', 'R', 1.77, 5),
   ('31038000-0000-0000-0000-000000000001', 'I', 3.38, 2),
   ('31038000-0000-0000-0000-000000000001', 'A', 4.5, 1),
@@ -5797,11 +6490,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[4.5,4.2,4.8,2.0,1.8,1.5,2.5,2.3,2.0,3.8,3.5,3.2,3.0,2.0,1.8,1.5,3.5,3.2,3.0,2.8]'
 WHERE id = '10000000-0000-0000-0000-000000000038';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31039000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000039')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31039000-0000-0000-0000-000000000001', 'A1', 2.5, 14),
   ('31039000-0000-0000-0000-000000000001', 'A2', 2.3, 16),
   ('31039000-0000-0000-0000-000000000001', 'A3', 2.0, 17),
@@ -5824,7 +6517,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31039000-0000-0000-0000-000000000001', 'S4', 3.0, 11)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31039000-0000-0000-0000-000000000001', 'R', 1.77, 6),
   ('31039000-0000-0000-0000-000000000001', 'I', 3.12, 3),
   ('31039000-0000-0000-0000-000000000001', 'A', 2.27, 5),
@@ -5836,11 +6529,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.5,2.3,2.0,3.0,2.8,2.5,4.5,4.2,4.0,3.5,3.2,3.0,2.8,2.0,1.8,1.5,3.8,3.5,3.2,3.0]'
 WHERE id = '10000000-0000-0000-0000-000000000039';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3103a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003a')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3103a000-0000-0000-0000-000000000001', 'A1', 3.2, 8),
   ('3103a000-0000-0000-0000-000000000001', 'A2', 3.0, 11),
   ('3103a000-0000-0000-0000-000000000001', 'A3', 2.8, 13),
@@ -5863,7 +6556,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3103a000-0000-0000-0000-000000000001', 'S4', 1.2, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3103a000-0000-0000-0000-000000000001', 'R', 3.23, 3),
   ('3103a000-0000-0000-0000-000000000001', 'I', 4.38, 1),
   ('3103a000-0000-0000-0000-000000000001', 'A', 3.0, 4),
@@ -5875,11 +6568,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[3.2,3.0,2.8,3.8,3.5,3.2,2.5,2.3,2.0,4.8,4.5,4.2,4.0,3.5,3.2,3.0,2.0,1.8,1.5,1.2]'
 WHERE id = '10000000-0000-0000-0000-00000000003a';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3103b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003b')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3103b000-0000-0000-0000-000000000001', 'A1', 2.5, 12),
   ('3103b000-0000-0000-0000-000000000001', 'A2', 2.2, 14),
   ('3103b000-0000-0000-0000-000000000001', 'A3', 2.0, 16),
@@ -5902,7 +6595,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3103b000-0000-0000-0000-000000000001', 'S4', 0.8, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3103b000-0000-0000-0000-000000000001', 'R', 3.77, 2),
   ('3103b000-0000-0000-0000-000000000001', 'I', 3.88, 1),
   ('3103b000-0000-0000-0000-000000000001', 'A', 2.23, 5),
@@ -5914,11 +6607,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.5,2.2,2.0,3.8,3.5,3.2,2.8,2.5,2.2,4.2,4.0,3.8,3.5,4.0,3.8,3.5,1.5,1.3,1.0,0.8]'
 WHERE id = '10000000-0000-0000-0000-00000000003b';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3103c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003c')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3103c000-0000-0000-0000-000000000001', 'A1', 3.5, 4),
   ('3103c000-0000-0000-0000-000000000001', 'A2', 3.2, 6),
   ('3103c000-0000-0000-0000-000000000001', 'A3', 3.0, 8),
@@ -5941,7 +6634,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3103c000-0000-0000-0000-000000000001', 'S4', 2.8, 13)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3103c000-0000-0000-0000-000000000001', 'R', 1.77, 6),
   ('3103c000-0000-0000-0000-000000000001', 'I', 2.62, 4),
   ('3103c000-0000-0000-0000-000000000001', 'A', 3.23, 2),
@@ -5953,11 +6646,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[3.5,3.2,3.0,2.8,2.5,2.3,4.2,4.0,3.8,3.0,2.8,2.5,2.2,2.0,1.8,1.5,3.5,3.2,3.0,2.8]'
 WHERE id = '10000000-0000-0000-0000-00000000003c';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3103d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003d')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3103d000-0000-0000-0000-000000000001', 'A1', 3.5, 5),
   ('3103d000-0000-0000-0000-000000000001', 'A2', 3.2, 8),
   ('3103d000-0000-0000-0000-000000000001', 'A3', 3.0, 9),
@@ -5980,7 +6673,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3103d000-0000-0000-0000-000000000001', 'S4', 1.5, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3103d000-0000-0000-0000-000000000001', 'R', 3.43, 2),
   ('3103d000-0000-0000-0000-000000000001', 'I', 4.0, 1),
   ('3103d000-0000-0000-0000-000000000001', 'A', 3.23, 3),
@@ -5992,11 +6685,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[3.5,3.2,3.0,3.0,2.8,2.5,2.8,2.5,2.2,4.5,4.2,3.8,3.5,3.8,3.5,3.0,2.2,2.0,1.8,1.5]'
 WHERE id = '10000000-0000-0000-0000-00000000003d';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3103e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003e')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3103e000-0000-0000-0000-000000000001', 'A1', 2.0, 13),
   ('3103e000-0000-0000-0000-000000000001', 'A2', 1.8, 15),
   ('3103e000-0000-0000-0000-000000000001', 'A3', 1.5, 17),
@@ -6019,7 +6712,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3103e000-0000-0000-0000-000000000001', 'S4', 3.2, 8)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3103e000-0000-0000-0000-000000000001', 'R', 1.23, 6),
   ('3103e000-0000-0000-0000-000000000001', 'I', 2.12, 4),
   ('3103e000-0000-0000-0000-000000000001', 'A', 1.77, 5),
@@ -6031,11 +6724,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.0,1.8,1.5,3.2,3.0,2.8,4.8,4.5,4.2,2.5,2.2,2.0,1.8,1.5,1.2,1.0,4.0,3.8,3.5,3.2]'
 WHERE id = '10000000-0000-0000-0000-00000000003e';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3103f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000003f')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3103f000-0000-0000-0000-000000000001', 'A1', 2.2, 14),
   ('3103f000-0000-0000-0000-000000000001', 'A2', 2.0, 15),
   ('3103f000-0000-0000-0000-000000000001', 'A3', 1.8, 16),
@@ -6058,7 +6751,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3103f000-0000-0000-0000-000000000001', 'S4', 1.0, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3103f000-0000-0000-0000-000000000001', 'R', 3.83, 2),
   ('3103f000-0000-0000-0000-000000000001', 'I', 3.88, 1),
   ('3103f000-0000-0000-0000-000000000001', 'A', 2.0, 5),
@@ -6070,11 +6763,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.2,2.0,1.8,4.0,3.8,3.5,3.0,2.8,2.5,4.2,4.0,3.8,3.5,4.2,3.8,3.5,1.8,1.5,1.2,1.0]'
 WHERE id = '10000000-0000-0000-0000-00000000003f';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31040000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000040')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31040000-0000-0000-0000-000000000001', 'A1', 4.0, 3),
   ('31040000-0000-0000-0000-000000000001', 'A2', 3.8, 5),
   ('31040000-0000-0000-0000-000000000001', 'A3', 3.5, 7),
@@ -6097,7 +6790,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31040000-0000-0000-0000-000000000001', 'S4', 3.8, 6)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31040000-0000-0000-0000-000000000001', 'R', 1.5, 6),
   ('31040000-0000-0000-0000-000000000001', 'I', 3.12, 3),
   ('31040000-0000-0000-0000-000000000001', 'A', 3.77, 2),
@@ -6109,11 +6802,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[4.0,3.8,3.5,2.2,2.0,1.8,2.5,2.2,2.0,3.5,3.2,3.0,2.8,1.8,1.5,1.2,4.5,4.2,4.0,3.8]'
 WHERE id = '10000000-0000-0000-0000-000000000040';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31041000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000041')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31041000-0000-0000-0000-000000000001', 'A1', 3.5, 5),
   ('31041000-0000-0000-0000-000000000001', 'A2', 3.2, 7),
   ('31041000-0000-0000-0000-000000000001', 'A3', 3.0, 11),
@@ -6136,7 +6829,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31041000-0000-0000-0000-000000000001', 'S4', 1.8, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31041000-0000-0000-0000-000000000001', 'R', 3.23, 2),
   ('31041000-0000-0000-0000-000000000001', 'I', 4.12, 1),
   ('31041000-0000-0000-0000-000000000001', 'A', 3.23, 3),
@@ -6148,11 +6841,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[3.5,3.2,3.0,3.2,3.0,2.8,3.2,3.0,2.8,4.5,4.2,4.0,3.8,3.5,3.2,3.0,2.5,2.2,2.0,1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000041';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31042000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000042')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31042000-0000-0000-0000-000000000001', 'A1', 1.8, 15),
   ('31042000-0000-0000-0000-000000000001', 'A2', 1.5, 16),
   ('31042000-0000-0000-0000-000000000001', 'A3', 1.2, 18),
@@ -6175,7 +6868,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31042000-0000-0000-0000-000000000001', 'S4', 2.8, 12)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31042000-0000-0000-0000-000000000001', 'R', 1.23, 6),
   ('31042000-0000-0000-0000-000000000001', 'I', 2.62, 4),
   ('31042000-0000-0000-0000-000000000001', 'A', 1.5, 5),
@@ -6187,11 +6880,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[1.8,1.5,1.2,4.0,3.8,3.5,4.5,4.2,3.8,3.0,2.8,2.5,2.2,1.5,1.2,1.0,3.5,3.2,3.0,2.8]'
 WHERE id = '10000000-0000-0000-0000-000000000042';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31043000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000043')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31043000-0000-0000-0000-000000000001', 'A1', 2.5, 12),
   ('31043000-0000-0000-0000-000000000001', 'A2', 2.2, 15),
   ('31043000-0000-0000-0000-000000000001', 'A3', 2.0, 18),
@@ -6214,7 +6907,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31043000-0000-0000-0000-000000000001', 'S4', 2.0, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31043000-0000-0000-0000-000000000001', 'R', 3.23, 3),
   ('31043000-0000-0000-0000-000000000001', 'I', 3.62, 2),
   ('31043000-0000-0000-0000-000000000001', 'A', 2.23, 5),
@@ -6226,11 +6919,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.5,2.2,2.0,4.2,4.0,3.8,2.5,2.2,2.0,4.0,3.8,3.5,3.2,3.5,3.2,3.0,2.8,2.5,2.2,2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000043';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31044000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000044')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31044000-0000-0000-0000-000000000001', 'A1', 3.2, 7),
   ('31044000-0000-0000-0000-000000000001', 'A2', 3.0, 10),
   ('31044000-0000-0000-0000-000000000001', 'A3', 2.8, 12),
@@ -6253,7 +6946,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31044000-0000-0000-0000-000000000001', 'S4', 1.5, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31044000-0000-0000-0000-000000000001', 'R', 3.5, 2),
   ('31044000-0000-0000-0000-000000000001', 'I', 4.12, 1),
   ('31044000-0000-0000-0000-000000000001', 'A', 3.0, 3),
@@ -6265,11 +6958,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[3.2,3.0,2.8,3.2,3.0,2.8,2.8,2.5,2.2,4.5,4.2,4.0,3.8,3.8,3.5,3.2,2.2,2.0,1.8,1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000044';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31045000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000045')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31045000-0000-0000-0000-000000000001', 'A1', 2.5, 8),
   ('31045000-0000-0000-0000-000000000001', 'A2', 2.2, 10),
   ('31045000-0000-0000-0000-000000000001', 'A3', 2.0, 12),
@@ -6292,7 +6985,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31045000-0000-0000-0000-000000000001', 'S4', 4.0, 4)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31045000-0000-0000-0000-000000000001', 'R', 1.23, 6),
   ('31045000-0000-0000-0000-000000000001', 'I', 1.62, 5),
   ('31045000-0000-0000-0000-000000000001', 'A', 2.23, 3),
@@ -6304,11 +6997,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.5,2.2,2.0,2.5,2.2,2.0,3.5,3.2,3.0,2.0,1.8,1.5,1.2,1.5,1.2,1.0,4.8,4.5,4.2,4.0]'
 WHERE id = '10000000-0000-0000-0000-000000000045';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31046000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000046')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31046000-0000-0000-0000-000000000001', 'A1', 2.0, 13),
   ('31046000-0000-0000-0000-000000000001', 'A2', 1.8, 15),
   ('31046000-0000-0000-0000-000000000001', 'A3', 1.5, 17),
@@ -6331,7 +7024,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31046000-0000-0000-0000-000000000001', 'S4', 1.0, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31046000-0000-0000-0000-000000000001', 'R', 3.5, 3),
   ('31046000-0000-0000-0000-000000000001', 'I', 4.12, 1),
   ('31046000-0000-0000-0000-000000000001', 'A', 1.77, 5),
@@ -6343,11 +7036,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.0,1.8,1.5,4.2,4.0,3.8,2.5,2.2,2.0,4.5,4.2,4.0,3.8,3.8,3.5,3.2,1.8,1.5,1.2,1.0]'
 WHERE id = '10000000-0000-0000-0000-000000000046';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31047000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000047')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31047000-0000-0000-0000-000000000001', 'A1', 2.5, 13),
   ('31047000-0000-0000-0000-000000000001', 'A2', 2.2, 16),
   ('31047000-0000-0000-0000-000000000001', 'A3', 2.0, 18),
@@ -6370,7 +7063,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31047000-0000-0000-0000-000000000001', 'S4', 1.8, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31047000-0000-0000-0000-000000000001', 'R', 3.23, 2),
   ('31047000-0000-0000-0000-000000000001', 'I', 3.88, 1),
   ('31047000-0000-0000-0000-000000000001', 'A', 2.23, 5),
@@ -6382,11 +7075,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.5,2.2,2.0,3.5,3.2,3.0,3.0,2.8,2.5,4.2,4.0,3.8,3.5,3.5,3.2,3.0,2.5,2.2,2.0,1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000047';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31048000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000048')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31048000-0000-0000-0000-000000000001', 'A1', 4.8, 1),
   ('31048000-0000-0000-0000-000000000001', 'A2', 4.5, 2),
   ('31048000-0000-0000-0000-000000000001', 'A3', 4.2, 3),
@@ -6409,7 +7102,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31048000-0000-0000-0000-000000000001', 'S4', 2.2, 15)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31048000-0000-0000-0000-000000000001', 'R', 2.23, 4),
   ('31048000-0000-0000-0000-000000000001', 'I', 2.62, 2),
   ('31048000-0000-0000-0000-000000000001', 'A', 4.5, 1),
@@ -6421,11 +7114,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[4.8,4.5,4.2,1.8,1.5,1.2,2.5,2.2,2.0,3.0,2.8,2.5,2.2,2.5,2.2,2.0,3.0,2.8,2.5,2.2]'
 WHERE id = '10000000-0000-0000-0000-000000000048';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31049000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000049')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31049000-0000-0000-0000-000000000001', 'A1', 2.2, 12),
   ('31049000-0000-0000-0000-000000000001', 'A2', 2.0, 14),
   ('31049000-0000-0000-0000-000000000001', 'A3', 1.8, 16),
@@ -6448,7 +7141,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('31049000-0000-0000-0000-000000000001', 'S4', 3.8, 5)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31049000-0000-0000-0000-000000000001', 'R', 1.23, 6),
   ('31049000-0000-0000-0000-000000000001', 'I', 2.12, 4),
   ('31049000-0000-0000-0000-000000000001', 'A', 2.0, 5),
@@ -6460,11 +7153,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.2,2.0,1.8,3.0,2.8,2.5,3.8,3.5,3.2,2.5,2.2,2.0,1.8,1.5,1.2,1.0,4.5,4.2,4.0,3.8]'
 WHERE id = '10000000-0000-0000-0000-000000000049';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3104a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004a')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3104a000-0000-0000-0000-000000000001', 'A1', 3.0, 10),
   ('3104a000-0000-0000-0000-000000000001', 'A2', 2.8, 12),
   ('3104a000-0000-0000-0000-000000000001', 'A3', 2.5, 13),
@@ -6487,7 +7180,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3104a000-0000-0000-0000-000000000001', 'S4', 1.0, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3104a000-0000-0000-0000-000000000001', 'R', 3.77, 2),
   ('3104a000-0000-0000-0000-000000000001', 'I', 4.38, 1),
   ('3104a000-0000-0000-0000-000000000001', 'A', 2.77, 4),
@@ -6499,11 +7192,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[3.0,2.8,2.5,3.5,3.2,3.0,2.5,2.2,2.0,4.8,4.5,4.2,4.0,4.0,3.8,3.5,1.8,1.5,1.2,1.0]'
 WHERE id = '10000000-0000-0000-0000-00000000004a';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3104b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004b')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3104b000-0000-0000-0000-000000000001', 'A1', 3.8, 1),
   ('3104b000-0000-0000-0000-000000000001', 'A2', 3.5, 2),
   ('3104b000-0000-0000-0000-000000000001', 'A3', 3.2, 5),
@@ -6526,7 +7219,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3104b000-0000-0000-0000-000000000001', 'S4', 2.8, 13)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3104b000-0000-0000-0000-000000000001', 'R', 2.23, 5),
   ('3104b000-0000-0000-0000-000000000001', 'I', 3.12, 2),
   ('3104b000-0000-0000-0000-000000000001', 'A', 3.5, 1),
@@ -6538,11 +7231,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[3.8,3.5,3.2,3.0,2.8,2.5,2.2,2.0,1.8,3.5,3.2,3.0,2.8,2.5,2.2,2.0,3.5,3.2,3.0,2.8]'
 WHERE id = '10000000-0000-0000-0000-00000000004b';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3104c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004c')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3104c000-0000-0000-0000-000000000001', 'A1', 2.5, 12),
   ('3104c000-0000-0000-0000-000000000001', 'A2', 2.2, 14),
   ('3104c000-0000-0000-0000-000000000001', 'A3', 2.0, 16),
@@ -6565,7 +7258,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3104c000-0000-0000-0000-000000000001', 'S4', 1.2, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3104c000-0000-0000-0000-000000000001', 'R', 3.23, 3),
   ('3104c000-0000-0000-0000-000000000001', 'I', 4.12, 1),
   ('3104c000-0000-0000-0000-000000000001', 'A', 2.23, 5),
@@ -6577,11 +7270,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[2.5,2.2,2.0,4.0,3.8,3.5,2.8,2.5,2.2,4.5,4.2,4.0,3.8,3.5,3.2,3.0,2.0,1.8,1.5,1.2]'
 WHERE id = '10000000-0000-0000-0000-00000000004c';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3104d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004d')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3104d000-0000-0000-0000-000000000001', 'A1', 4.2, 1),
   ('3104d000-0000-0000-0000-000000000001', 'A2', 4.0, 2),
   ('3104d000-0000-0000-0000-000000000001', 'A3', 3.8, 3),
@@ -6604,7 +7297,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3104d000-0000-0000-0000-000000000001', 'S4', 3.0, 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3104d000-0000-0000-0000-000000000001', 'R', 1.77, 6),
   ('3104d000-0000-0000-0000-000000000001', 'I', 2.62, 4),
   ('3104d000-0000-0000-0000-000000000001', 'A', 4.0, 1),
@@ -6616,11 +7309,11 @@ ON CONFLICT DO NOTHING;
 UPDATE users SET ci_vector = '[4.2,4.0,3.8,2.5,2.2,2.0,3.2,3.0,2.8,3.0,2.8,2.5,2.2,2.0,1.8,1.5,3.8,3.5,3.2,3.0]'
 WHERE id = '10000000-0000-0000-0000-00000000004d';
 
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3104e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004e')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3104e000-0000-0000-0000-000000000001', 'A1', 3.0, 10),
   ('3104e000-0000-0000-0000-000000000001', 'A2', 2.8, 12),
   ('3104e000-0000-0000-0000-000000000001', 'A3', 2.5, 13),
@@ -6643,7 +7336,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
   ('3104e000-0000-0000-0000-000000000001', 'S4', 0.8, 20)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3104e000-0000-0000-0000-000000000001', 'R', 4.0, 2),
   ('3104e000-0000-0000-0000-000000000001', 'I', 4.38, 1),
   ('3104e000-0000-0000-0000-000000000001', 'A', 2.77, 4),
@@ -6810,11 +7503,11 @@ VALUES
 -- ============================================================
 
 -- 79: 長谷川亜美 (フロントエンド: creativity, co_workers, autonomy重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3004f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004f', 31, 0.919, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004f000-0000-0000-0000-000000000001',  1,   1.2, 0.32,  76.9,  4),  -- ability_utilization
   ('3004f000-0000-0000-0000-000000000001',  2,   0.8, 0.30,  69.0,  7),  -- achievement
   ('3004f000-0000-0000-0000-000000000001',  3,  -0.6, 0.30,  35.4, 15),  -- activity
@@ -6838,15 +7531,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3004f000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3004f000-0000-0000-0000-000000000001', 'autonomy', 1.6, 83.2, 1),
+  ('3004f000-0000-0000-0000-000000000001', 'achievement', 1.0, 73.1, 2),
+  ('3004f000-0000-0000-0000-000000000001', 'altruism', 0.93, 71.8, 3),
+  ('3004f000-0000-0000-0000-000000000001', 'comfort', -0.52, 37.4, 4),
+  ('3004f000-0000-0000-0000-000000000001', 'safety', -0.53, 37.0, 5),
+  ('3004f000-0000-0000-0000-000000000001', 'status', -0.85, 29.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.2,0.8,-0.6,0.2,-1.5,1.8,0.0,-0.1,1.5,2.0,0.3,0.5,-0.3,1.0,-0.5,0.8,-1.8,-0.7,-0.9,-1.0,-1.2]'
 WHERE id = '10000000-0000-0000-0000-00000000004f';
 
 -- 80: 本田裕介 (バックエンド: ability_utilization, responsibility, achievement重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30050000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000050', 29, 0.925, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30050000-0000-0000-0000-000000000001',  1,   2.0, 0.34,  88.1,  1),  -- ability_utilization
   ('30050000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  3),  -- achievement
   ('30050000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 12),  -- activity
@@ -6870,15 +7572,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30050000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30050000-0000-0000-0000-000000000001', 'achievement', 1.75, 85.2, 1),
+  ('30050000-0000-0000-0000-000000000001', 'autonomy', 1.33, 79.1, 2),
+  ('30050000-0000-0000-0000-000000000001', 'altruism', 0.1, 52.5, 3),
+  ('30050000-0000-0000-0000-000000000001', 'comfort', -0.28, 43.0, 4),
+  ('30050000-0000-0000-0000-000000000001', 'safety', -0.43, 39.3, 5),
+  ('30050000-0000-0000-0000-000000000001', 'status', -0.45, 38.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.0,1.5,-0.2,0.6,-0.8,1.2,0.0,0.5,0.3,1.0,0.8,0.1,-0.4,1.8,-0.3,-0.1,-1.2,-0.6,-0.7,-1.0,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000050';
 
 -- 81: 井上美咲 (モバイル: creativity, autonomy, ability_utilization重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30051000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000051', 34, 0.912, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30051000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('30051000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  4),  -- achievement
   ('30051000-0000-0000-0000-000000000001',  3,  -0.4, 0.29,  40.1, 13),  -- activity
@@ -6902,15 +7613,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30051000-0000-0000-0000-000000000001', 21,  -1.7, 0.33,  15.4, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30051000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30051000-0000-0000-0000-000000000001', 'autonomy', 1.5, 81.8, 2),
+  ('30051000-0000-0000-0000-000000000001', 'altruism', 0.37, 59.1, 3),
+  ('30051000-0000-0000-0000-000000000001', 'comfort', -0.52, 37.4, 4),
+  ('30051000-0000-0000-0000-000000000001', 'safety', -0.57, 36.2, 5),
+  ('30051000-0000-0000-0000-000000000001', 'status', -0.62, 34.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.2,-0.4,0.5,-1.0,2.0,-0.2,0.2,0.8,1.5,0.6,0.0,-0.5,1.0,-0.6,0.3,-1.5,-0.7,-0.8,-1.2,-1.7]'
 WHERE id = '10000000-0000-0000-0000-000000000051';
 
 -- 82: 西村武志 (ゲーム: creativity, achievement, variety重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30052000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000052', 36, 0.906, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30052000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  3),  -- ability_utilization
   ('30052000-0000-0000-0000-000000000001',  2,   2.0, 0.34,  88.1,  1),  -- achievement
   ('30052000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4, 10),  -- activity
@@ -6934,15 +7654,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30052000-0000-0000-0000-000000000001', 21,  -1.8, 0.34,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30052000-0000-0000-0000-000000000001', 'achievement', 1.75, 85.2, 1),
+  ('30052000-0000-0000-0000-000000000001', 'autonomy', 1.0, 73.1, 2),
+  ('30052000-0000-0000-0000-000000000001', 'altruism', 0.17, 54.2, 3),
+  ('30052000-0000-0000-0000-000000000001', 'comfort', -0.1, 47.5, 4),
+  ('30052000-0000-0000-0000-000000000001', 'status', -0.23, 44.4, 5),
+  ('30052000-0000-0000-0000-000000000001', 'safety', -0.93, 28.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,2.0,0.3,0.4,-0.6,1.0,-0.4,0.5,0.8,1.8,0.0,-0.1,0.6,0.2,-0.8,-0.2,-1.3,-0.9,-1.5,1.2,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000052';
 
 -- 83: 村田佳奈子 (データアナリスト: achievement, ability_utilization, social_service重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30053000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000053', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30053000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('30053000-0000-0000-0000-000000000001',  2,   2.0, 0.34,  88.1,  1),  -- achievement
   ('30053000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 13),  -- activity
@@ -6966,15 +7695,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30053000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30053000-0000-0000-0000-000000000001', 'achievement', 1.9, 87.0, 1),
+  ('30053000-0000-0000-0000-000000000001', 'autonomy', 0.93, 71.8, 2),
+  ('30053000-0000-0000-0000-000000000001', 'altruism', 0.87, 70.4, 3),
+  ('30053000-0000-0000-0000-000000000001', 'safety', -0.3, 42.6, 4),
+  ('30053000-0000-0000-0000-000000000001', 'comfort', -0.37, 40.9, 5),
+  ('30053000-0000-0000-0000-000000000001', 'status', -0.57, 36.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,2.0,-0.3,0.4,-1.2,1.0,0.2,0.0,0.8,0.6,0.5,0.3,-0.5,1.2,-0.1,1.5,-1.0,-0.4,-0.7,-0.8,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000053';
 
 -- 84: 青木光希 (法務: moral_values, security, company_policies重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30054000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000054', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30054000-0000-0000-0000-000000000001',  1,   0.5, 0.30,  62.2,  8),  -- ability_utilization
   ('30054000-0000-0000-0000-000000000001',  2,   0.8, 0.30,  69.0,  6),  -- achievement
   ('30054000-0000-0000-0000-000000000001',  3,  -0.1, 0.28,  47.5, 11),  -- activity
@@ -6998,15 +7736,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30054000-0000-0000-0000-000000000001', 21,  -1.8, 0.34,  14.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30054000-0000-0000-0000-000000000001', 'altruism', 0.77, 68.3, 1),
+  ('30054000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 2),
+  ('30054000-0000-0000-0000-000000000001', 'autonomy', 0.5, 62.2, 3),
+  ('30054000-0000-0000-0000-000000000001', 'safety', 0.13, 53.3, 4),
+  ('30054000-0000-0000-0000-000000000001', 'comfort', -0.13, 46.7, 5),
+  ('30054000-0000-0000-0000-000000000001', 'status', -0.42, 39.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.5,0.8,-0.1,0.2,-0.5,0.6,1.8,1.0,0.3,-0.3,-0.2,2.0,-0.4,1.2,1.5,0.0,-1.0,-0.6,-0.8,-1.2,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000054';
 
 -- 85: 山下理沙 (セールスエンジニア: achievement, advancement, recognition重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30055000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000055', 37, 0.904, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30055000-0000-0000-0000-000000000001',  1,   1.0, 0.31,  73.1,  5),  -- ability_utilization
   ('30055000-0000-0000-0000-000000000001',  2,   2.0, 0.34,  88.1,  1),  -- achievement
   ('30055000-0000-0000-0000-000000000001',  3,   0.5, 0.30,  62.2,  8),  -- activity
@@ -7030,15 +7777,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30055000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30055000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30055000-0000-0000-0000-000000000001', 'status', 0.7, 66.8, 2),
+  ('30055000-0000-0000-0000-000000000001', 'altruism', 0.4, 59.9, 3),
+  ('30055000-0000-0000-0000-000000000001', 'autonomy', 0.2, 55.0, 4),
+  ('30055000-0000-0000-0000-000000000001', 'comfort', -0.32, 42.1, 5),
+  ('30055000-0000-0000-0000-000000000001', 'safety', -0.53, 37.0, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,2.0,0.5,1.8,0.3,0.2,0.0,1.2,0.8,-0.2,-0.4,0.0,1.5,0.6,-0.5,0.4,-0.8,-0.6,-1.0,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000055';
 
 -- 86: 藤本智也 (SRE: autonomy, independence, ability_utilization重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30056000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000056', 28, 0.927, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30056000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  3),  -- ability_utilization
   ('30056000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  4),  -- achievement
   ('30056000-0000-0000-0000-000000000001',  3,  -0.5, 0.30,  37.8, 14),  -- activity
@@ -7062,15 +7818,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30056000-0000-0000-0000-000000000001', 21,  -2.0, 0.34,  11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30056000-0000-0000-0000-000000000001', 'achievement', 1.5, 81.8, 1),
+  ('30056000-0000-0000-0000-000000000001', 'autonomy', 1.33, 79.1, 2),
+  ('30056000-0000-0000-0000-000000000001', 'altruism', -0.17, 45.8, 3),
+  ('30056000-0000-0000-0000-000000000001', 'comfort', -0.18, 45.4, 4),
+  ('30056000-0000-0000-0000-000000000001', 'status', -0.5, 37.8, 5),
+  ('30056000-0000-0000-0000-000000000001', 'safety', -0.57, 36.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,1.2,-0.5,0.3,-0.8,2.2,0.0,0.5,0.2,1.0,2.0,-0.1,-0.3,0.8,0.4,-0.6,-1.2,-0.7,-1.0,-1.5,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000056';
 
 -- 87: 野村千尋 (モーションデザイナー: creativity, co_workers, social_service重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30057000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000057', 32, 0.917, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30057000-0000-0000-0000-000000000001',  1,   1.0, 0.31,  73.1,  5),  -- ability_utilization
   ('30057000-0000-0000-0000-000000000001',  2,   0.6, 0.30,  64.6,  8),  -- achievement
   ('30057000-0000-0000-0000-000000000001',  3,  -0.4, 0.29,  40.1, 14),  -- activity
@@ -7094,15 +7859,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30057000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30057000-0000-0000-0000-000000000001', 'altruism', 1.37, 79.7, 1),
+  ('30057000-0000-0000-0000-000000000001', 'autonomy', 1.3, 78.6, 2),
+  ('30057000-0000-0000-0000-000000000001', 'achievement', 0.8, 69.0, 3),
+  ('30057000-0000-0000-0000-000000000001', 'safety', -0.53, 37.0, 4),
+  ('30057000-0000-0000-0000-000000000001', 'comfort', -0.55, 36.6, 5),
+  ('30057000-0000-0000-0000-000000000001', 'status', -0.78, 31.5, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.0,0.6,-0.4,-0.1,-1.5,1.2,0.0,-0.3,1.8,2.2,0.2,0.8,0.3,0.5,-0.6,1.5,-1.8,-0.7,-0.9,-1.0,-1.2]'
 WHERE id = '10000000-0000-0000-0000-000000000057';
 
 -- 88: 岡本慎 (フルスタック: ability_utilization, creativity, responsibility重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30058000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000058', 26, 0.932, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30058000-0000-0000-0000-000000000001',  1,   2.2, 0.35,  90.0,  1),  -- ability_utilization
   ('30058000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  3),  -- achievement
   ('30058000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 13),  -- activity
@@ -7126,15 +7900,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30058000-0000-0000-0000-000000000001', 21,  -1.8, 0.34,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30058000-0000-0000-0000-000000000001', 'achievement', 1.85, 86.4, 1),
+  ('30058000-0000-0000-0000-000000000001', 'autonomy', 1.5, 81.8, 2),
+  ('30058000-0000-0000-0000-000000000001', 'altruism', 0.27, 56.6, 3),
+  ('30058000-0000-0000-0000-000000000001', 'comfort', -0.45, 38.9, 4),
+  ('30058000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 5),
+  ('30058000-0000-0000-0000-000000000001', 'status', -0.6, 35.4, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.2,1.5,-0.3,0.5,-1.0,1.5,-0.1,0.3,0.6,1.8,0.8,0.0,-0.4,1.2,-0.5,0.2,-1.5,-0.6,-0.8,-1.2,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000058';
 
 -- 89: 川口絵理 (リサーチャー: achievement, social_service, ability_utilization重視)
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30059000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000059', 35, 0.909, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30059000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  3),  -- ability_utilization
   ('30059000-0000-0000-0000-000000000001',  2,   2.0, 0.34,  88.1,  1),  -- achievement
   ('30059000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 12),  -- activity
@@ -7158,6 +7941,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30059000-0000-0000-0000-000000000001', 21,  -1.5, 0.33,  18.2, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30059000-0000-0000-0000-000000000001', 'achievement', 1.75, 85.2, 1),
+  ('30059000-0000-0000-0000-000000000001', 'altruism', 1.0, 73.1, 2),
+  ('30059000-0000-0000-0000-000000000001', 'autonomy', 0.93, 71.8, 3),
+  ('30059000-0000-0000-0000-000000000001', 'safety', -0.27, 43.4, 4),
+  ('30059000-0000-0000-0000-000000000001', 'comfort', -0.38, 40.5, 5),
+  ('30059000-0000-0000-0000-000000000001', 'status', -0.53, 37.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,2.0,-0.2,0.0,-1.0,1.0,0.3,-0.1,0.8,0.6,0.5,0.4,-0.3,1.2,0.2,1.8,-0.8,-0.5,-0.6,-1.2,-1.5]'
 WHERE id = '10000000-0000-0000-0000-000000000059';
 
@@ -7166,11 +7958,11 @@ WHERE id = '10000000-0000-0000-0000-000000000059';
 -- ============================================================
 
 -- 79: 長谷川亜美 (A高め、I中程度)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3104f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000004f')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3104f000-0000-0000-0000-000000000001', 'A1', 4.2, 2),
   ('3104f000-0000-0000-0000-000000000001', 'A2', 4.0, 3),
   ('3104f000-0000-0000-0000-000000000001', 'A3', 3.8, 5),
@@ -7194,7 +7986,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: A=(4.2+4.0+3.8)/3=4.0, C=(2.5+2.3+2.0)/3=2.27, E=(2.8+2.5+2.3)/3=2.53, I=(4.5+3.8+3.5+3.2)/4=3.75, R=(3.5+3.2+3.0)/3=3.23, S=(3.9+2.8+2.0+3.3)/4=3.0
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3104f000-0000-0000-0000-000000000001', 'A', 4.0, 1),
   ('3104f000-0000-0000-0000-000000000001', 'I', 3.75, 2),
   ('3104f000-0000-0000-0000-000000000001', 'R', 3.23, 3),
@@ -7207,11 +7999,11 @@ UPDATE users SET ci_vector = '[4.2,4.0,3.8,2.5,2.3,2.0,2.8,2.5,2.3,4.5,3.8,3.5,3
 WHERE id = '10000000-0000-0000-0000-00000000004f';
 
 -- 80: 本田裕介 (I高め、R中程度)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31050000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000050')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31050000-0000-0000-0000-000000000001', 'A1', 2.5, 15),
   ('31050000-0000-0000-0000-000000000001', 'A2', 2.3, 17),
   ('31050000-0000-0000-0000-000000000001', 'A3', 2.0, 19),
@@ -7235,7 +8027,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: I=(4.8+4.5+4.2+4.0)/4=4.38, R=(3.8+3.5+3.2)/3=3.5, C=(3.5+3.2+3.0)/3=3.23, E=(3.0+2.8+2.5)/3=2.77, A=(2.5+2.3+2.0)/3=2.27, S=(2.0+1.8+2.0+3.3)/4=2.28
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31050000-0000-0000-0000-000000000001', 'I', 4.38, 1),
   ('31050000-0000-0000-0000-000000000001', 'R', 3.5, 2),
   ('31050000-0000-0000-0000-000000000001', 'C', 3.23, 3),
@@ -7248,11 +8040,11 @@ UPDATE users SET ci_vector = '[2.5,2.3,2.0,3.5,3.2,3.0,3.0,2.8,2.5,4.8,4.5,4.2,4
 WHERE id = '10000000-0000-0000-0000-000000000050';
 
 -- 81: 井上美咲 (I高め、A中程度、R中程度)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31051000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000051')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31051000-0000-0000-0000-000000000001', 'A1', 3.5, 7),
   ('31051000-0000-0000-0000-000000000001', 'A2', 3.3, 9),
   ('31051000-0000-0000-0000-000000000001', 'A3', 3.0, 12),
@@ -7276,7 +8068,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: I=(4.5+4.2+3.8+3.5)/4=4.0, R=(4.0+3.8+3.5)/3=3.77, A=(3.5+3.3+3.0)/3=3.27, S=(3.0+3.0+2.2+3.2)/4=2.85, C=(2.8+2.5+2.2)/3=2.5, E=(2.8+2.5+2.0)/3=2.43
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31051000-0000-0000-0000-000000000001', 'I', 4.0, 1),
   ('31051000-0000-0000-0000-000000000001', 'R', 3.77, 2),
   ('31051000-0000-0000-0000-000000000001', 'A', 3.27, 3),
@@ -7289,11 +8081,11 @@ UPDATE users SET ci_vector = '[3.5,3.3,3.0,2.8,2.5,2.2,2.8,2.5,2.0,4.5,4.2,3.8,3
 WHERE id = '10000000-0000-0000-0000-000000000051';
 
 -- 82: 西村武志 (A高め、R高め ゲーム志向)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31052000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000052')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31052000-0000-0000-0000-000000000001', 'A1', 4.5, 1),
   ('31052000-0000-0000-0000-000000000001', 'A2', 4.2, 2),
   ('31052000-0000-0000-0000-000000000001', 'A3', 4.0, 4),
@@ -7317,7 +8109,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: A=(4.5+4.2+4.0)/3=4.23, R=(4.0+3.8+3.5)/3=3.77, I=(3.8+3.5+3.2+3.0)/4=3.38, S=(3.0+2.8+2.5+3.2)/4=2.88, E=(2.5+2.3+2.0)/3=2.27, C=(2.0+1.8+1.5)/3=1.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31052000-0000-0000-0000-000000000001', 'A', 4.23, 1),
   ('31052000-0000-0000-0000-000000000001', 'R', 3.77, 2),
   ('31052000-0000-0000-0000-000000000001', 'I', 3.38, 3),
@@ -7330,11 +8122,11 @@ UPDATE users SET ci_vector = '[4.5,4.2,4.0,2.0,1.8,1.5,2.5,2.3,2.0,3.8,3.5,3.2,3
 WHERE id = '10000000-0000-0000-0000-000000000052';
 
 -- 83: 村田佳奈子 (I高め、C高め データ分析志向)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31053000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000053')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31053000-0000-0000-0000-000000000001', 'A1', 2.5, 15),
   ('31053000-0000-0000-0000-000000000001', 'A2', 2.3, 17),
   ('31053000-0000-0000-0000-000000000001', 'A3', 2.0, 19),
@@ -7358,7 +8150,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: I=(4.5+4.0+3.8+3.5)/4=3.95, C=(4.2+4.0+3.8)/3=4.0, S=(3.5+3.2+3.0+2.0)/4=2.93, R=(3.0+2.8+3.0)/3=2.93, E=(2.8+2.5+2.2)/3=2.5, A=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31053000-0000-0000-0000-000000000001', 'C', 4.0, 1),
   ('31053000-0000-0000-0000-000000000001', 'I', 3.95, 2),
   ('31053000-0000-0000-0000-000000000001', 'R', 2.93, 3),
@@ -7371,11 +8163,11 @@ UPDATE users SET ci_vector = '[2.5,2.3,2.0,4.2,4.0,3.8,2.8,2.5,2.2,4.5,4.0,3.8,3
 WHERE id = '10000000-0000-0000-0000-000000000053';
 
 -- 84: 青木光希 (C高め、E中程度 法務志向)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31054000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000054')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31054000-0000-0000-0000-000000000001', 'A1', 2.0, 18),
   ('31054000-0000-0000-0000-000000000001', 'A2', 1.8, 19),
   ('31054000-0000-0000-0000-000000000001', 'A3', 1.5, 20),
@@ -7399,7 +8191,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: C=(4.5+4.2+4.0)/3=4.23, E=(3.8+3.5+3.2)/3=3.5, I=(3.5+3.2+3.0+2.8)/4=3.13, S=(3.5+3.2+2.8+2.5)/4=3.0, A=(2.0+1.8+1.5)/3=1.77, R=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31054000-0000-0000-0000-000000000001', 'C', 4.23, 1),
   ('31054000-0000-0000-0000-000000000001', 'E', 3.5, 2),
   ('31054000-0000-0000-0000-000000000001', 'I', 3.13, 3),
@@ -7412,11 +8204,11 @@ UPDATE users SET ci_vector = '[2.0,1.8,1.5,4.5,4.2,4.0,3.8,3.5,3.2,3.5,3.2,3.0,2
 WHERE id = '10000000-0000-0000-0000-000000000054';
 
 -- 85: 山下理沙 (E高め、S中程度 セールス志向)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31055000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000055')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31055000-0000-0000-0000-000000000001', 'A1', 2.5, 15),
   ('31055000-0000-0000-0000-000000000001', 'A2', 2.2, 17),
   ('31055000-0000-0000-0000-000000000001', 'A3', 2.0, 19),
@@ -7440,7 +8232,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: E=(4.5+4.2+4.0)/3=4.23, S=(3.8+3.5+3.5+3.2)/4=3.5, C=(3.2+3.0+2.8)/3=3.0, I=(3.2+3.0+2.8+2.5)/4=2.88, R=(2.0+2.0+3.5)/3=2.5, A=(2.5+2.2+2.0)/3=2.23
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31055000-0000-0000-0000-000000000001', 'E', 4.23, 1),
   ('31055000-0000-0000-0000-000000000001', 'S', 3.5, 2),
   ('31055000-0000-0000-0000-000000000001', 'C', 3.0, 3),
@@ -7453,11 +8245,11 @@ UPDATE users SET ci_vector = '[2.5,2.2,2.0,3.2,3.0,2.8,4.5,4.2,4.0,3.2,3.0,2.8,2
 WHERE id = '10000000-0000-0000-0000-000000000055';
 
 -- 86: 藤本智也 (I高め、R高め SRE志向)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31056000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000056')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31056000-0000-0000-0000-000000000001', 'A1', 2.0, 18),
   ('31056000-0000-0000-0000-000000000001', 'A2', 1.8, 19),
   ('31056000-0000-0000-0000-000000000001', 'A3', 1.5, 20),
@@ -7481,7 +8273,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: I=(4.8+4.5+4.0+3.8)/4=4.28, R=(4.2+3.8+3.5)/3=3.83, C=(3.5+3.2+3.0)/3=3.23, S=(2.8+2.5+3.2+3.3)/4=2.95, E=(2.5+2.3+2.0)/3=2.27, A=(2.0+1.8+1.5)/3=1.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31056000-0000-0000-0000-000000000001', 'I', 4.28, 1),
   ('31056000-0000-0000-0000-000000000001', 'R', 3.83, 2),
   ('31056000-0000-0000-0000-000000000001', 'C', 3.23, 3),
@@ -7494,11 +8286,11 @@ UPDATE users SET ci_vector = '[2.0,1.8,1.5,3.5,3.2,3.0,2.5,2.3,2.0,4.8,4.5,4.0,3
 WHERE id = '10000000-0000-0000-0000-000000000056';
 
 -- 87: 野村千尋 (A高め、S中程度 デザイン志向)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31057000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000057')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31057000-0000-0000-0000-000000000001', 'A1', 4.8, 1),
   ('31057000-0000-0000-0000-000000000001', 'A2', 4.5, 2),
   ('31057000-0000-0000-0000-000000000001', 'A3', 4.2, 3),
@@ -7522,7 +8314,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: A=(4.8+4.5+4.2)/3=4.5, S=(4.0+3.5+3.2+2.8)/4=3.38, R=(3.5+3.0+3.8)/3=3.43, I=(3.5+3.2+3.0+2.0)/4=2.93, E=(2.5+2.3+2.0)/3=2.27, C=(2.0+1.8+1.5)/3=1.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31057000-0000-0000-0000-000000000001', 'A', 4.5, 1),
   ('31057000-0000-0000-0000-000000000001', 'R', 3.43, 2),
   ('31057000-0000-0000-0000-000000000001', 'S', 3.38, 3),
@@ -7535,11 +8327,11 @@ UPDATE users SET ci_vector = '[4.8,4.5,4.2,2.0,1.8,1.5,2.5,2.3,2.0,3.5,3.2,3.0,2
 WHERE id = '10000000-0000-0000-0000-000000000057';
 
 -- 88: 岡本慎 (I高め、R高め フルスタック志向)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31058000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000058')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31058000-0000-0000-0000-000000000001', 'A1', 3.0, 12),
   ('31058000-0000-0000-0000-000000000001', 'A2', 2.8, 14),
   ('31058000-0000-0000-0000-000000000001', 'A3', 3.2, 10),
@@ -7563,7 +8355,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: I=(4.8+4.5+4.2+3.8)/4=4.33, R=(4.0+3.5+3.5)/3=3.67, A=(3.0+2.8+3.2)/3=3.0, S=(2.0+3.2+3.2+3.5)/4=2.98, C=(3.0+2.8+2.5)/3=2.77, E=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31058000-0000-0000-0000-000000000001', 'I', 4.33, 1),
   ('31058000-0000-0000-0000-000000000001', 'R', 3.67, 2),
   ('31058000-0000-0000-0000-000000000001', 'A', 3.0, 3),
@@ -7576,11 +8368,11 @@ UPDATE users SET ci_vector = '[3.0,2.8,3.2,3.0,2.8,2.5,2.5,2.3,2.0,4.8,4.5,4.2,3
 WHERE id = '10000000-0000-0000-0000-000000000058';
 
 -- 89: 川口絵理 (I高め、S高め リサーチ志向)
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31059000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000059')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31059000-0000-0000-0000-000000000001', 'A1', 2.8, 14),
   ('31059000-0000-0000-0000-000000000001', 'A2', 2.5, 16),
   ('31059000-0000-0000-0000-000000000001', 'A3', 2.2, 18),
@@ -7604,7 +8396,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: I=(4.5+4.2+4.0+3.8)/4=4.13, S=(3.8+3.5+3.5+3.2)/4=3.5, C=(3.5+3.2+3.0)/3=3.23, R=(3.0+2.8+2.0)/3=2.6, A=(2.8+2.5+2.2)/3=2.5, E=(2.5+2.2+2.0)/3=2.23
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31059000-0000-0000-0000-000000000001', 'I', 4.13, 1),
   ('31059000-0000-0000-0000-000000000001', 'S', 3.5, 2),
   ('31059000-0000-0000-0000-000000000001', 'C', 3.23, 3),
@@ -7772,11 +8564,11 @@ VALUES
 -- ============================================================
 
 -- 90: 森本剛 (データエンジニア) - 技術力・自律性重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3005a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005a', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005a000-0000-0000-0000-000000000001',  1,   2.0, 0.34,  88.1,  1),  -- ability_utilization
   ('3005a000-0000-0000-0000-000000000001',  2,   1.5, 0.33,  81.8,  3),  -- achievement
   ('3005a000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 12),  -- activity
@@ -7800,15 +8592,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005a000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3005a000-0000-0000-0000-000000000001', 'achievement', 1.75, 85.2, 1),
+  ('3005a000-0000-0000-0000-000000000001', 'autonomy', 1.27, 78.0, 2),
+  ('3005a000-0000-0000-0000-000000000001', 'altruism', 0.07, 51.7, 3),
+  ('3005a000-0000-0000-0000-000000000001', 'comfort', -0.47, 38.5, 4),
+  ('3005a000-0000-0000-0000-000000000001', 'safety', -0.5, 37.8, 5),
+  ('3005a000-0000-0000-0000-000000000001', 'status', -0.55, 36.6, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.0,1.5,-0.3,0.5,-1.0,1.8,-0.2,0.4,0.3,1.2,1.0,0.0,-0.4,0.8,-0.6,-0.1,-1.3,-0.5,-0.8,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000005a';
 
 -- 91: 西田千尋 (データアナリスト) - 安定・協調性重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3005b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005b', 35, 0.909, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005b000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  5),  -- ability_utilization
   ('3005b000-0000-0000-0000-000000000001',  2,   0.5, 0.30,  62.2,  8),  -- achievement
   ('3005b000-0000-0000-0000-000000000001',  3,   0.2, 0.29,  55.0, 11),  -- activity
@@ -7832,15 +8633,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005b000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 19)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3005b000-0000-0000-0000-000000000001', 'altruism', 1.33, 79.1, 1),
+  ('3005b000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 2),
+  ('3005b000-0000-0000-0000-000000000001', 'autonomy', 0.07, 51.7, 3),
+  ('3005b000-0000-0000-0000-000000000001', 'comfort', -0.03, 49.2, 4),
+  ('3005b000-0000-0000-0000-000000000001', 'safety', -0.17, 45.8, 5),
+  ('3005b000-0000-0000-0000-000000000001', 'status', -0.75, 32.1, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,0.5,0.2,0.3,-1.5,0.5,0.8,0.6,1.8,0.0,-0.3,1.0,0.0,-0.3,1.5,1.2,-1.8,-0.5,-0.8,-1.0,-1.2]'
 WHERE id = '10000000-0000-0000-0000-00000000005b';
 
 -- 92: 本田和也 (情シス) - 安定・制度・セキュリティ重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3005c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005c', 32, 0.917, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005c000-0000-0000-0000-000000000001',  1,   0.5, 0.30,  62.2,  7),  -- ability_utilization
   ('3005c000-0000-0000-0000-000000000001',  2,   0.3, 0.29,  57.4,  9),  -- achievement
   ('3005c000-0000-0000-0000-000000000001',  3,   0.5, 0.30,  62.2,  8),  -- activity
@@ -7864,15 +8674,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005c000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3005c000-0000-0000-0000-000000000001', 'safety', 0.73, 67.6, 1),
+  ('3005c000-0000-0000-0000-000000000001', 'altruism', 0.53, 63.0, 2),
+  ('3005c000-0000-0000-0000-000000000001', 'achievement', 0.4, 59.9, 3),
+  ('3005c000-0000-0000-0000-000000000001', 'comfort', -0.1, 47.5, 4),
+  ('3005c000-0000-0000-0000-000000000001', 'autonomy', -0.33, 41.7, 5),
+  ('3005c000-0000-0000-0000-000000000001', 'status', -0.38, 40.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.5,0.3,0.5,0.0,-0.5,-0.2,1.8,1.0,0.8,-0.5,-0.3,0.8,0.0,-0.3,1.5,0.0,-1.0,1.2,-0.8,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000005c';
 
 -- 93: 上野真由 (Webディレクター) - 協調・社会貢献・創造性重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3005d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005d', 33, 0.914, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005d000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  6),  -- ability_utilization
   ('3005d000-0000-0000-0000-000000000001',  2,   0.5, 0.30,  62.2,  8),  -- achievement
   ('3005d000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4, 10),  -- activity
@@ -7896,15 +8715,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005d000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3005d000-0000-0000-0000-000000000001', 'altruism', 1.27, 78.0, 1),
+  ('3005d000-0000-0000-0000-000000000001', 'autonomy', 1.0, 73.1, 2),
+  ('3005d000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 3),
+  ('3005d000-0000-0000-0000-000000000001', 'comfort', -0.28, 43.0, 4),
+  ('3005d000-0000-0000-0000-000000000001', 'safety', -0.6, 35.4, 5),
+  ('3005d000-0000-0000-0000-000000000001', 'status', -0.75, 32.1, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,0.5,0.3,0.0,-1.2,0.5,0.0,-0.2,1.8,1.5,-0.5,0.8,-0.3,1.0,-0.5,1.2,-1.5,-0.8,-1.0,1.0,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000005d';
 
 -- 94: 池田蒼 (モーションデザイナー) - 創造性・自律性・多様性重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3005e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005e', 28, 0.927, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005e000-0000-0000-0000-000000000001',  1,   1.5, 0.33,  81.8,  3),  -- ability_utilization
   ('3005e000-0000-0000-0000-000000000001',  2,   0.8, 0.30,  69.0,  6),  -- achievement
   ('3005e000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 12),  -- activity
@@ -7928,15 +8756,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005e000-0000-0000-0000-000000000001', 21,   0.5, 0.30,  62.2,  7)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3005e000-0000-0000-0000-000000000001', 'autonomy', 1.5, 81.8, 1),
+  ('3005e000-0000-0000-0000-000000000001', 'achievement', 1.15, 76.0, 2),
+  ('3005e000-0000-0000-0000-000000000001', 'altruism', 0.33, 58.3, 3),
+  ('3005e000-0000-0000-0000-000000000001', 'comfort', 0.2, 55.0, 4),
+  ('3005e000-0000-0000-0000-000000000001', 'status', -1.07, 25.4, 5),
+  ('3005e000-0000-0000-0000-000000000001', 'safety', -1.07, 25.6, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.5,0.8,-0.2,-0.5,-1.5,2.0,-0.5,-0.3,0.5,2.5,1.0,0.3,-0.3,0.0,-1.0,0.2,-2.0,-1.2,-1.5,1.2,0.5]'
 WHERE id = '10000000-0000-0000-0000-00000000005e';
 
 -- 95: 島田悠花 (法務) - 道徳・安定・制度重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('3005f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005f', 31, 0.919, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005f000-0000-0000-0000-000000000001',  1,   0.8, 0.30,  69.0,  6),  -- ability_utilization
   ('3005f000-0000-0000-0000-000000000001',  2,   0.5, 0.30,  62.2,  8),  -- achievement
   ('3005f000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 13),  -- activity
@@ -7960,15 +8797,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('3005f000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('3005f000-0000-0000-0000-000000000001', 'altruism', 0.67, 66.1, 1),
+  ('3005f000-0000-0000-0000-000000000001', 'achievement', 0.65, 65.7, 2),
+  ('3005f000-0000-0000-0000-000000000001', 'autonomy', 0.33, 58.3, 3),
+  ('3005f000-0000-0000-0000-000000000001', 'safety', 0.0, 50.0, 4),
+  ('3005f000-0000-0000-0000-000000000001', 'comfort', -0.08, 47.9, 5),
+  ('3005f000-0000-0000-0000-000000000001', 'status', -0.47, 38.3, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.8,0.5,-0.2,0.3,-0.8,0.5,1.5,0.8,0.0,-0.5,1.0,2.0,-0.2,1.0,1.2,0.0,-1.2,-0.5,-1.0,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-00000000005f';
 
 -- 96: 藤本隼人 (フルスタック) - 技術力・創造性・達成感重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30060000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000060', 29, 0.925, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30060000-0000-0000-0000-000000000001',  1,   2.0, 0.34,  88.1,  1),  -- ability_utilization
   ('30060000-0000-0000-0000-000000000001',  2,   1.8, 0.33,  85.8,  2),  -- achievement
   ('30060000-0000-0000-0000-000000000001',  3,  -0.2, 0.29,  45.0, 12),  -- activity
@@ -7992,15 +8838,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30060000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30060000-0000-0000-0000-000000000001', 'achievement', 1.9, 87.0, 1),
+  ('30060000-0000-0000-0000-000000000001', 'autonomy', 1.23, 77.4, 2),
+  ('30060000-0000-0000-0000-000000000001', 'altruism', 0.23, 55.8, 3),
+  ('30060000-0000-0000-0000-000000000001', 'comfort', -0.48, 38.1, 4),
+  ('30060000-0000-0000-0000-000000000001', 'status', -0.55, 36.6, 5),
+  ('30060000-0000-0000-0000-000000000001', 'safety', -0.7, 33.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.0,1.8,-0.2,0.8,-1.0,1.5,-0.3,0.3,0.5,1.2,0.5,0.0,-0.5,1.0,-0.5,0.2,-1.5,-0.8,-1.0,-1.2,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000060';
 
 -- 97: 岡本理沙 (プロダクトデザイナー) - 創造性・協調・社会貢献重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30061000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000061', 34, 0.912, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30061000-0000-0000-0000-000000000001',  1,   1.2, 0.32,  76.9,  4),  -- ability_utilization
   ('30061000-0000-0000-0000-000000000001',  2,   0.8, 0.30,  69.0,  6),  -- achievement
   ('30061000-0000-0000-0000-000000000001',  3,  -0.5, 0.30,  37.8, 15),  -- activity
@@ -8024,15 +8879,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30061000-0000-0000-0000-000000000001', 21,  -1.2, 0.32,  23.1, 20)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30061000-0000-0000-0000-000000000001', 'altruism', 1.37, 79.7, 1),
+  ('30061000-0000-0000-0000-000000000001', 'autonomy', 1.17, 76.3, 2),
+  ('30061000-0000-0000-0000-000000000001', 'achievement', 1.0, 73.1, 3),
+  ('30061000-0000-0000-0000-000000000001', 'comfort', -0.53, 37.0, 4),
+  ('30061000-0000-0000-0000-000000000001', 'safety', -0.6, 35.4, 5),
+  ('30061000-0000-0000-0000-000000000001', 'status', -0.7, 33.2, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.2,0.8,-0.5,0.0,-1.5,1.0,0.0,-0.3,1.8,2.2,-0.2,0.8,0.5,0.3,-0.5,1.5,-1.8,-0.8,-1.0,-0.5,-1.2]'
 WHERE id = '10000000-0000-0000-0000-000000000061';
 
 -- 98: 井上智也 (SRE) - 技術力・自律性・独立性重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30062000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000062', 27, 0.930, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30062000-0000-0000-0000-000000000001',  1,   2.2, 0.35,  90.0,  1),  -- ability_utilization
   ('30062000-0000-0000-0000-000000000001',  2,   1.2, 0.32,  76.9,  4),  -- achievement
   ('30062000-0000-0000-0000-000000000001',  3,  -0.3, 0.29,  42.6, 13),  -- activity
@@ -8056,15 +8920,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30062000-0000-0000-0000-000000000001', 21,  -2.0, 0.34,  11.9, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30062000-0000-0000-0000-000000000001', 'achievement', 1.7, 84.6, 1),
+  ('30062000-0000-0000-0000-000000000001', 'autonomy', 1.27, 78.0, 2),
+  ('30062000-0000-0000-0000-000000000001', 'altruism', 0.07, 51.7, 3),
+  ('30062000-0000-0000-0000-000000000001', 'comfort', -0.43, 39.3, 4),
+  ('30062000-0000-0000-0000-000000000001', 'status', -0.62, 34.9, 5),
+  ('30062000-0000-0000-0000-000000000001', 'safety', -0.67, 33.9, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[2.2,1.2,-0.3,0.3,-0.8,2.0,-0.2,0.5,0.0,1.0,1.5,0.0,-0.5,0.8,-0.5,0.2,-1.5,-0.8,-1.0,-1.8,-2.0]'
 WHERE id = '10000000-0000-0000-0000-000000000062';
 
 -- 99: 川口愛子 (品質管理/ISMS) - 制度・道徳・安定重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30063000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000063', 36, 0.906, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30063000-0000-0000-0000-000000000001',  1,   0.3, 0.29,  57.4,  9),  -- ability_utilization
   ('30063000-0000-0000-0000-000000000001',  2,   0.5, 0.30,  62.2,  7),  -- achievement
   ('30063000-0000-0000-0000-000000000001',  3,   0.3, 0.29,  57.4,  8),  -- activity
@@ -8088,15 +8961,24 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30063000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30063000-0000-0000-0000-000000000001', 'altruism', 1.1, 75.0, 1),
+  ('30063000-0000-0000-0000-000000000001', 'achievement', 0.4, 59.9, 2),
+  ('30063000-0000-0000-0000-000000000001', 'safety', 0.03, 50.8, 3),
+  ('30063000-0000-0000-0000-000000000001', 'comfort', -0.27, 43.4, 4),
+  ('30063000-0000-0000-0000-000000000001', 'autonomy', -0.37, 40.9, 5),
+  ('30063000-0000-0000-0000-000000000001', 'status', -0.38, 40.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[0.3,0.5,0.3,0.0,-0.5,-0.3,1.8,0.5,0.8,-0.8,-0.3,1.5,0.0,0.0,1.2,1.0,-1.0,-0.5,-1.2,-1.5,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000063';
 
 -- 100: 村上大地 (バックエンド) - 達成・責任・技術力重視
-INSERT INTO sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES ('30064000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000064', 30, 0.922, 'high', 'general')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
+INSERT INTO work_needs_scores (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30064000-0000-0000-0000-000000000001',  1,   1.8, 0.33,  85.8,  2),  -- ability_utilization
   ('30064000-0000-0000-0000-000000000001',  2,   2.0, 0.34,  88.1,  1),  -- achievement
   ('30064000-0000-0000-0000-000000000001',  3,   0.0, 0.28,  50.0, 11),  -- activity
@@ -8120,6 +9002,15 @@ INSERT INTO results (session_id, need_id, mu, se, display_score, rank) VALUES
   ('30064000-0000-0000-0000-000000000001', 21,  -1.8, 0.33,  14.2, 21)   -- working_conditions
 ON CONFLICT DO NOTHING;
 
+INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank) VALUES
+  ('30064000-0000-0000-0000-000000000001', 'achievement', 1.9, 87.0, 1),
+  ('30064000-0000-0000-0000-000000000001', 'autonomy', 1.07, 74.4, 2),
+  ('30064000-0000-0000-0000-000000000001', 'altruism', -0.07, 48.3, 3),
+  ('30064000-0000-0000-0000-000000000001', 'status', -0.25, 43.8, 4),
+  ('30064000-0000-0000-0000-000000000001', 'comfort', -0.38, 40.5, 5),
+  ('30064000-0000-0000-0000-000000000001', 'safety', -0.77, 31.7, 6)
+ON CONFLICT DO NOTHING;
+
 UPDATE users SET wv_vector = '[1.8,2.0,0.0,1.0,-0.5,1.2,0.0,0.5,0.3,0.5,0.8,0.0,-0.3,1.5,-0.5,-0.5,-1.2,-0.8,-1.5,-1.3,-1.8]'
 WHERE id = '10000000-0000-0000-0000-000000000064';
 
@@ -8128,11 +9019,11 @@ WHERE id = '10000000-0000-0000-0000-000000000064';
 -- ============================================================
 
 -- 90: 森本剛 (データエンジニア) - I(研究)高、R(現実)中、C(慣習)中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3105a000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005a')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3105a000-0000-0000-0000-000000000001', 'A1', 2.8, 12),
   ('3105a000-0000-0000-0000-000000000001', 'A2', 2.5, 15),
   ('3105a000-0000-0000-0000-000000000001', 'A3', 2.3, 17),
@@ -8156,7 +9047,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(3.5+3.2+3.0)/3=3.23, I=(4.5+4.2+4.0+3.8)/4=4.12, A=(2.8+2.5+2.3)/3=2.53, S=(2.5+2.0+2.8+1.8)/4=2.28, E=(2.5+2.3+2.0)/3=2.27, C=(3.5+3.3+3.0)/3=3.27
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3105a000-0000-0000-0000-000000000001', 'R', 3.23, 3),
   ('3105a000-0000-0000-0000-000000000001', 'I', 4.12, 1),
   ('3105a000-0000-0000-0000-000000000001', 'A', 2.53, 4),
@@ -8169,11 +9060,11 @@ UPDATE users SET ci_vector = '[2.8,2.5,2.3,3.5,3.3,3.0,2.5,2.3,2.0,4.5,4.2,4.0,3
 WHERE id = '10000000-0000-0000-0000-00000000005a';
 
 -- 91: 西田千尋 (データアナリスト) - I高、C中、S中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3105b000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005b')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3105b000-0000-0000-0000-000000000001', 'A1', 2.5, 14),
   ('3105b000-0000-0000-0000-000000000001', 'A2', 2.3, 16),
   ('3105b000-0000-0000-0000-000000000001', 'A3', 2.0, 18),
@@ -8197,7 +9088,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(2.0+1.8+2.8)/3=2.2, I=(4.2+4.0+3.8+3.5)/4=3.88, A=(2.5+2.3+2.0)/3=2.27, S=(3.2+3.0+3.0+2.8)/4=3.0, E=(2.8+2.5+2.3)/3=2.53, C=(3.5+3.2+3.5)/3=3.4
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3105b000-0000-0000-0000-000000000001', 'R', 2.2, 6),
   ('3105b000-0000-0000-0000-000000000001', 'I', 3.88, 1),
   ('3105b000-0000-0000-0000-000000000001', 'A', 2.27, 5),
@@ -8210,11 +9101,11 @@ UPDATE users SET ci_vector = '[2.5,2.3,2.0,3.5,3.2,3.5,2.8,2.5,2.3,4.2,4.0,3.8,3
 WHERE id = '10000000-0000-0000-0000-00000000005b';
 
 -- 92: 本田和也 (情シス) - C高、R中、I中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3105c000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005c')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3105c000-0000-0000-0000-000000000001', 'A1', 2.0, 17),
   ('3105c000-0000-0000-0000-000000000001', 'A2', 1.8, 19),
   ('3105c000-0000-0000-0000-000000000001', 'A3', 1.5, 20),
@@ -8238,7 +9129,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(3.5+3.2+3.0)/3=3.23, I=(3.5+3.2+3.0+2.8)/4=3.12, A=(2.0+1.8+1.5)/3=1.77, S=(2.8+2.5+2.5+2.0)/4=2.45, E=(2.8+2.5+2.3)/3=2.53, C=(4.2+4.0+3.8)/3=4.0
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3105c000-0000-0000-0000-000000000001', 'R', 3.23, 3),
   ('3105c000-0000-0000-0000-000000000001', 'I', 3.12, 2),
   ('3105c000-0000-0000-0000-000000000001', 'A', 1.77, 6),
@@ -8251,11 +9142,11 @@ UPDATE users SET ci_vector = '[2.0,1.8,1.5,4.2,4.0,3.8,2.8,2.5,2.3,3.5,3.2,3.0,2
 WHERE id = '10000000-0000-0000-0000-00000000005c';
 
 -- 93: 上野真由 (Webディレクター) - A高、S中、E中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3105d000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005d')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3105d000-0000-0000-0000-000000000001', 'A1', 4.2, 1),
   ('3105d000-0000-0000-0000-000000000001', 'A2', 4.0, 2),
   ('3105d000-0000-0000-0000-000000000001', 'A3', 3.8, 3),
@@ -8279,7 +9170,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(1.8+1.5+2.5)/3=1.93, I=(2.8+2.5+2.3+2.0)/4=2.4, A=(4.2+4.0+3.8)/3=4.0, S=(3.8+3.5+3.2+3.0)/4=3.38, E=(3.5+3.2+3.0)/3=3.23, C=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3105d000-0000-0000-0000-000000000001', 'R', 1.93, 6),
   ('3105d000-0000-0000-0000-000000000001', 'I', 2.4, 5),
   ('3105d000-0000-0000-0000-000000000001', 'A', 4.0, 1),
@@ -8292,11 +9183,11 @@ UPDATE users SET ci_vector = '[4.2,4.0,3.8,2.5,2.3,2.0,3.5,3.2,3.0,2.8,2.5,2.3,2
 WHERE id = '10000000-0000-0000-0000-00000000005d';
 
 -- 94: 池田蒼 (モーションデザイナー) - A高、I中、S低
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3105e000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005e')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3105e000-0000-0000-0000-000000000001', 'A1', 4.8, 1),
   ('3105e000-0000-0000-0000-000000000001', 'A2', 4.5, 2),
   ('3105e000-0000-0000-0000-000000000001', 'A3', 4.2, 3),
@@ -8320,7 +9211,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(3.0+2.8+1.8)/3=2.53, I=(3.5+3.2+3.0+3.5)/4=3.3, A=(4.8+4.5+4.2)/3=4.5, S=(2.8+2.5+2.0+1.8)/4=2.28, E=(2.5+2.3+2.0)/3=2.27, C=(2.0+1.8+1.5)/3=1.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3105e000-0000-0000-0000-000000000001', 'R', 2.53, 3),
   ('3105e000-0000-0000-0000-000000000001', 'I', 3.3, 2),
   ('3105e000-0000-0000-0000-000000000001', 'A', 4.5, 1),
@@ -8333,11 +9224,11 @@ UPDATE users SET ci_vector = '[4.8,4.5,4.2,2.0,1.8,1.5,2.5,2.3,2.0,3.5,3.2,3.0,3
 WHERE id = '10000000-0000-0000-0000-00000000005e';
 
 -- 95: 島田悠花 (法務) - C高、I中、E中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('3105f000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-00000000005f')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('3105f000-0000-0000-0000-000000000001', 'A1', 2.0, 16),
   ('3105f000-0000-0000-0000-000000000001', 'A2', 1.8, 18),
   ('3105f000-0000-0000-0000-000000000001', 'A3', 2.0, 17),
@@ -8361,7 +9252,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(1.5+1.8+2.3)/3=1.87, I=(3.5+3.2+3.0+3.0)/4=3.18, A=(2.0+1.8+2.0)/3=1.93, S=(3.0+2.8+2.5+2.5)/4=2.7, E=(3.5+3.2+3.0)/3=3.23, C=(4.5+4.2+4.0)/3=4.23
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('3105f000-0000-0000-0000-000000000001', 'R', 1.87, 6),
   ('3105f000-0000-0000-0000-000000000001', 'I', 3.18, 3),
   ('3105f000-0000-0000-0000-000000000001', 'A', 1.93, 5),
@@ -8374,11 +9265,11 @@ UPDATE users SET ci_vector = '[2.0,1.8,2.0,4.5,4.2,4.0,3.5,3.2,3.0,3.5,3.2,3.0,3
 WHERE id = '10000000-0000-0000-0000-00000000005f';
 
 -- 96: 藤本隼人 (フルスタック) - I高、R中、A中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31060000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000060')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31060000-0000-0000-0000-000000000001', 'A1', 3.5, 6),
   ('31060000-0000-0000-0000-000000000001', 'A2', 3.2, 8),
   ('31060000-0000-0000-0000-000000000001', 'A3', 3.0, 10),
@@ -8402,7 +9293,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(3.5+3.2+3.0)/3=3.23, I=(4.5+4.2+4.0+3.8)/4=4.12, A=(3.5+3.2+3.0)/3=3.23, S=(2.0+1.8+2.8+1.5)/4=2.03, E=(2.8+2.5+2.0)/3=2.43, C=(2.5+2.3+2.0)/3=2.27
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31060000-0000-0000-0000-000000000001', 'R', 3.23, 2),
   ('31060000-0000-0000-0000-000000000001', 'I', 4.12, 1),
   ('31060000-0000-0000-0000-000000000001', 'A', 3.23, 3),
@@ -8415,11 +9306,11 @@ UPDATE users SET ci_vector = '[3.5,3.2,3.0,2.5,2.3,2.0,2.8,2.5,2.0,4.5,4.2,4.0,3
 WHERE id = '10000000-0000-0000-0000-000000000060';
 
 -- 97: 岡本理沙 (プロダクトデザイナー) - A高、S中、I中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31061000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000061')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31061000-0000-0000-0000-000000000001', 'A1', 4.5, 1),
   ('31061000-0000-0000-0000-000000000001', 'A2', 4.3, 2),
   ('31061000-0000-0000-0000-000000000001', 'A3', 4.0, 3),
@@ -8443,7 +9334,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(2.0+1.8+1.5)/3=1.77, I=(3.5+3.2+3.0+2.8)/4=3.12, A=(4.5+4.3+4.0)/3=4.27, S=(3.8+3.5+3.0+3.0)/4=3.33, E=(2.8+2.5+2.3)/3=2.53, C=(2.3+2.0+1.8)/3=2.03
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31061000-0000-0000-0000-000000000001', 'R', 1.77, 6),
   ('31061000-0000-0000-0000-000000000001', 'I', 3.12, 3),
   ('31061000-0000-0000-0000-000000000001', 'A', 4.27, 1),
@@ -8456,11 +9347,11 @@ UPDATE users SET ci_vector = '[4.5,4.3,4.0,2.3,2.0,1.8,2.8,2.5,2.3,3.5,3.2,3.0,2
 WHERE id = '10000000-0000-0000-0000-000000000061';
 
 -- 98: 井上智也 (SRE) - R高、I高、C中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31062000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000062')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31062000-0000-0000-0000-000000000001', 'A1', 2.0, 16),
   ('31062000-0000-0000-0000-000000000001', 'A2', 1.8, 18),
   ('31062000-0000-0000-0000-000000000001', 'A3', 2.0, 17),
@@ -8484,7 +9375,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(4.5+3.5+3.2)/3=3.73, I=(4.2+4.0+3.8+3.5)/4=3.88, A=(2.0+1.8+2.0)/3=1.93, S=(1.8+1.5+2.8+2.5)/4=2.15, E=(2.5+2.3+2.0)/3=2.27, C=(3.5+3.2+3.0)/3=3.23
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31062000-0000-0000-0000-000000000001', 'R', 3.73, 2),
   ('31062000-0000-0000-0000-000000000001', 'I', 3.88, 1),
   ('31062000-0000-0000-0000-000000000001', 'A', 1.93, 5),
@@ -8497,11 +9388,11 @@ UPDATE users SET ci_vector = '[2.0,1.8,2.0,3.5,3.2,3.0,2.5,2.3,2.0,4.2,4.0,3.8,3
 WHERE id = '10000000-0000-0000-0000-000000000062';
 
 -- 99: 川口愛子 (品質管理/ISMS) - C高、E中、S中
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31063000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000063')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31063000-0000-0000-0000-000000000001', 'A1', 2.0, 16),
   ('31063000-0000-0000-0000-000000000001', 'A2', 1.8, 18),
   ('31063000-0000-0000-0000-000000000001', 'A3', 1.5, 20),
@@ -8525,7 +9416,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(2.0+2.0+1.8)/3=1.93, I=(3.0+2.8+2.5+2.3)/4=2.65, A=(2.0+1.8+1.5)/3=1.77, S=(3.5+3.2+3.0+2.8)/4=3.12, E=(3.5+3.2+3.0)/3=3.23, C=(4.5+4.2+4.0)/3=4.23
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31063000-0000-0000-0000-000000000001', 'R', 1.93, 5),
   ('31063000-0000-0000-0000-000000000001', 'I', 2.65, 4),
   ('31063000-0000-0000-0000-000000000001', 'A', 1.77, 6),
@@ -8538,11 +9429,11 @@ UPDATE users SET ci_vector = '[2.0,1.8,1.5,4.5,4.2,4.0,3.5,3.2,3.0,3.0,2.8,2.5,2
 WHERE id = '10000000-0000-0000-0000-000000000063';
 
 -- 100: 村上大地 (バックエンド) - I高、R高、E低
-INSERT INTO career_sessions (id, user_id)
+INSERT INTO career_interest_sessions (id, user_id)
 VALUES ('31064000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000064')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
+INSERT INTO career_interest_scores (session_id, basic_interest_id, score, rank) VALUES
   ('31064000-0000-0000-0000-000000000001', 'A1', 2.5, 13),
   ('31064000-0000-0000-0000-000000000001', 'A2', 2.3, 15),
   ('31064000-0000-0000-0000-000000000001', 'A3', 2.0, 17),
@@ -8566,7 +9457,7 @@ INSERT INTO career_results (session_id, basic_interest_id, score, rank) VALUES
 ON CONFLICT DO NOTHING;
 
 -- RIASEC: R=(3.8+3.5+3.2)/3=3.5, I=(4.5+4.3+4.0+3.8)/4=4.15, A=(2.5+2.3+2.0)/3=2.27, S=(1.8+2.8+2.8+3.5)/4=2.73, E=(2.3+2.0+1.8)/3=2.03, C=(3.0+2.8+2.5)/3=2.77
-INSERT INTO career_riasec_results (session_id, riasec_type, score, rank) VALUES
+INSERT INTO career_riasec_scores (session_id, riasec_type, score, rank) VALUES
   ('31064000-0000-0000-0000-000000000001', 'R', 3.5, 2),
   ('31064000-0000-0000-0000-000000000001', 'I', 4.15, 1),
   ('31064000-0000-0000-0000-000000000001', 'A', 2.27, 5),
@@ -9479,7 +10370,7 @@ UPDATE teams SET
 WHERE id = 'A0000000-0000-0000-0000-000000000003';
 
 -- WV診断セッション（12名分）
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose)
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose)
 VALUES
   ('A3000000-0000-0000-0000-000000000001', NULL, 'A2000000-0000-0000-0000-000000000001', 25, 0.935, 'high', 'team'),
   ('A3000000-0000-0000-0000-000000000002', NULL, 'A2000000-0000-0000-0000-000000000002', 30, 0.922, 'high', 'team'),
@@ -9568,7 +10459,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0301000-0000-0000-0000-000000000001', NULL, 'c0201000-0000-0000-0000-000000000001', 26, 0.932, 'high', 'team'),
   ('c0301000-0000-0000-0000-000000000002', NULL, 'c0201000-0000-0000-0000-000000000002', 30, 0.922, 'high', 'team'),
   ('c0301000-0000-0000-0000-000000000003', NULL, 'c0201000-0000-0000-0000-000000000003', 24, 0.938, 'high', 'team'),
@@ -9663,7 +10554,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0302000-0000-0000-0000-000000000001', NULL, 'c0202000-0000-0000-0000-000000000001', 25, 0.935, 'high', 'team'),
   ('c0302000-0000-0000-0000-000000000002', NULL, 'c0202000-0000-0000-0000-000000000002', 29, 0.925, 'high', 'team'),
   ('c0302000-0000-0000-0000-000000000003', NULL, 'c0202000-0000-0000-0000-000000000003', 23, 0.940, 'high', 'team'),
@@ -9758,7 +10649,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0303000-0000-0000-0000-000000000001', NULL, 'c0203000-0000-0000-0000-000000000001', 24, 0.938, 'high', 'team'),
   ('c0303000-0000-0000-0000-000000000002', NULL, 'c0203000-0000-0000-0000-000000000002', 28, 0.927, 'high', 'team'),
   ('c0303000-0000-0000-0000-000000000003', NULL, 'c0203000-0000-0000-0000-000000000003', 21, 0.945, 'high', 'team'),
@@ -9853,7 +10744,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0304000-0000-0000-0000-000000000001', NULL, 'c0204000-0000-0000-0000-000000000001', 30, 0.922, 'high', 'team'),
   ('c0304000-0000-0000-0000-000000000002', NULL, 'c0204000-0000-0000-0000-000000000002', 25, 0.935, 'high', 'team'),
   ('c0304000-0000-0000-0000-000000000003', NULL, 'c0204000-0000-0000-0000-000000000003', 34, 0.912, 'high', 'team'),
@@ -9948,7 +10839,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0305000-0000-0000-0000-000000000001', NULL, 'c0205000-0000-0000-0000-000000000001', 24, 0.938, 'high', 'team'),
   ('c0305000-0000-0000-0000-000000000002', NULL, 'c0205000-0000-0000-0000-000000000002', 28, 0.927, 'high', 'team'),
   ('c0305000-0000-0000-0000-000000000003', NULL, 'c0205000-0000-0000-0000-000000000003', 22, 0.943, 'high', 'team'),
@@ -10043,7 +10934,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0306000-0000-0000-0000-000000000001', NULL, 'c0206000-0000-0000-0000-000000000001', 23, 0.940, 'high', 'team'),
   ('c0306000-0000-0000-0000-000000000002', NULL, 'c0206000-0000-0000-0000-000000000002', 27, 0.930, 'high', 'team'),
   ('c0306000-0000-0000-0000-000000000003', NULL, 'c0206000-0000-0000-0000-000000000003', 21, 0.945, 'high', 'team'),
@@ -10138,7 +11029,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0307000-0000-0000-0000-000000000001', NULL, 'c0207000-0000-0000-0000-000000000001', 25, 0.935, 'high', 'team'),
   ('c0307000-0000-0000-0000-000000000002', NULL, 'c0207000-0000-0000-0000-000000000002', 29, 0.925, 'high', 'team'),
   ('c0307000-0000-0000-0000-000000000003', NULL, 'c0207000-0000-0000-0000-000000000003', 22, 0.943, 'high', 'team'),
@@ -10233,7 +11124,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0308000-0000-0000-0000-000000000001', NULL, 'c0208000-0000-0000-0000-000000000001', 24, 0.938, 'high', 'team'),
   ('c0308000-0000-0000-0000-000000000002', NULL, 'c0208000-0000-0000-0000-000000000002', 30, 0.922, 'high', 'team'),
   ('c0308000-0000-0000-0000-000000000003', NULL, 'c0208000-0000-0000-0000-000000000003', 22, 0.943, 'high', 'team'),
@@ -10328,7 +11219,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0309000-0000-0000-0000-000000000001', NULL, 'c0209000-0000-0000-0000-000000000001', 26, 0.932, 'high', 'team'),
   ('c0309000-0000-0000-0000-000000000002', NULL, 'c0209000-0000-0000-0000-000000000002', 30, 0.922, 'high', 'team'),
   ('c0309000-0000-0000-0000-000000000003', NULL, 'c0209000-0000-0000-0000-000000000003', 23, 0.940, 'high', 'team'),
@@ -10423,7 +11314,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c030a000-0000-0000-0000-000000000001', NULL, 'c020a000-0000-0000-0000-000000000001', 25, 0.935, 'high', 'team'),
   ('c030a000-0000-0000-0000-000000000002', NULL, 'c020a000-0000-0000-0000-000000000002', 29, 0.925, 'high', 'team'),
   ('c030a000-0000-0000-0000-000000000003', NULL, 'c020a000-0000-0000-0000-000000000003', 23, 0.940, 'high', 'team'),
@@ -10520,7 +11411,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c030b000-0000-0000-0000-000000000001', NULL, 'c020b000-0000-0000-0000-000000000001', 24, 0.938, 'high', 'team'),
   ('c030b000-0000-0000-0000-000000000002', NULL, 'c020b000-0000-0000-0000-000000000002', 28, 0.927, 'high', 'team'),
   ('c030b000-0000-0000-0000-000000000003', NULL, 'c020b000-0000-0000-0000-000000000003', 22, 0.943, 'high', 'team'),
@@ -10615,7 +11506,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c030c000-0000-0000-0000-000000000001', NULL, 'c020c000-0000-0000-0000-000000000001', 27, 0.930, 'high', 'team'),
   ('c030c000-0000-0000-0000-000000000002', NULL, 'c020c000-0000-0000-0000-000000000002', 23, 0.940, 'high', 'team'),
   ('c030c000-0000-0000-0000-000000000003', NULL, 'c020c000-0000-0000-0000-000000000003', 31, 0.919, 'high', 'team'),
@@ -10710,7 +11601,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c030d000-0000-0000-0000-000000000001', NULL, 'c020d000-0000-0000-0000-000000000001', 28, 0.927, 'high', 'team'),
   ('c030d000-0000-0000-0000-000000000002', NULL, 'c020d000-0000-0000-0000-000000000002', 33, 0.914, 'high', 'team'),
   ('c030d000-0000-0000-0000-000000000003', NULL, 'c020d000-0000-0000-0000-000000000003', 21, 0.945, 'high', 'team'),
@@ -10805,7 +11696,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c030e000-0000-0000-0000-000000000001', NULL, 'c020e000-0000-0000-0000-000000000001', 23, 0.940, 'high', 'team'),
   ('c030e000-0000-0000-0000-000000000002', NULL, 'c020e000-0000-0000-0000-000000000002', 29, 0.925, 'high', 'team'),
   ('c030e000-0000-0000-0000-000000000003', NULL, 'c020e000-0000-0000-0000-000000000003', 25, 0.935, 'high', 'team'),
@@ -10900,7 +11791,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c030f000-0000-0000-0000-000000000001', NULL, 'c020f000-0000-0000-0000-000000000001', 22, 0.943, 'high', 'team'),
   ('c030f000-0000-0000-0000-000000000002', NULL, 'c020f000-0000-0000-0000-000000000002', 27, 0.930, 'high', 'team'),
   ('c030f000-0000-0000-0000-000000000003', NULL, 'c020f000-0000-0000-0000-000000000003', 31, 0.919, 'high', 'team'),
@@ -10995,7 +11886,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0310000-0000-0000-0000-000000000001', NULL, 'c0210000-0000-0000-0000-000000000001', 26, 0.932, 'high', 'team'),
   ('c0310000-0000-0000-0000-000000000002', NULL, 'c0210000-0000-0000-0000-000000000002', 30, 0.922, 'high', 'team'),
   ('c0310000-0000-0000-0000-000000000003', NULL, 'c0210000-0000-0000-0000-000000000003', 23, 0.940, 'high', 'team'),
@@ -11090,7 +11981,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0311000-0000-0000-0000-000000000001', NULL, 'c0211000-0000-0000-0000-000000000001', 25, 0.935, 'high', 'team'),
   ('c0311000-0000-0000-0000-000000000002', NULL, 'c0211000-0000-0000-0000-000000000002', 30, 0.922, 'high', 'team'),
   ('c0311000-0000-0000-0000-000000000003', NULL, 'c0211000-0000-0000-0000-000000000003', 22, 0.943, 'high', 'team'),
@@ -11185,7 +12076,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0312000-0000-0000-0000-000000000001', NULL, 'c0212000-0000-0000-0000-000000000001', 24, 0.938, 'high', 'team'),
   ('c0312000-0000-0000-0000-000000000002', NULL, 'c0212000-0000-0000-0000-000000000002', 29, 0.925, 'high', 'team'),
   ('c0312000-0000-0000-0000-000000000003', NULL, 'c0212000-0000-0000-0000-000000000003', 32, 0.917, 'high', 'team'),
@@ -11280,7 +12171,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0313000-0000-0000-0000-000000000001', NULL, 'c0213000-0000-0000-0000-000000000001', 27, 0.930, 'high', 'team'),
   ('c0313000-0000-0000-0000-000000000002', NULL, 'c0213000-0000-0000-0000-000000000002', 22, 0.943, 'high', 'team'),
   ('c0313000-0000-0000-0000-000000000003', NULL, 'c0213000-0000-0000-0000-000000000003', 31, 0.919, 'high', 'team'),
@@ -11375,7 +12266,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0314000-0000-0000-0000-000000000001', NULL, 'c0214000-0000-0000-0000-000000000001', 23, 0.940, 'high', 'team'),
   ('c0314000-0000-0000-0000-000000000002', NULL, 'c0214000-0000-0000-0000-000000000002', 28, 0.927, 'high', 'team'),
   ('c0314000-0000-0000-0000-000000000003', NULL, 'c0214000-0000-0000-0000-000000000003', 34, 0.912, 'high', 'team'),
@@ -11471,7 +12362,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0315000-0000-0000-0000-000000000001', NULL, 'c0215000-0000-0000-0000-000000000001', 28, 0.927, 'high', 'team'),
   ('c0315000-0000-0000-0000-000000000002', NULL, 'c0215000-0000-0000-0000-000000000002', 33, 0.914, 'high', 'team'),
   ('c0315000-0000-0000-0000-000000000003', NULL, 'c0215000-0000-0000-0000-000000000003', 25, 0.935, 'high', 'team'),
@@ -11566,7 +12457,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0316000-0000-0000-0000-000000000001', NULL, 'c0216000-0000-0000-0000-000000000001', 24, 0.938, 'high', 'team'),
   ('c0316000-0000-0000-0000-000000000002', NULL, 'c0216000-0000-0000-0000-000000000002', 29, 0.925, 'high', 'team'),
   ('c0316000-0000-0000-0000-000000000003', NULL, 'c0216000-0000-0000-0000-000000000003', 22, 0.943, 'high', 'team'),
@@ -11661,7 +12552,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0317000-0000-0000-0000-000000000001', NULL, 'c0217000-0000-0000-0000-000000000001', 25, 0.935, 'high', 'team'),
   ('c0317000-0000-0000-0000-000000000002', NULL, 'c0217000-0000-0000-0000-000000000002', 30, 0.922, 'high', 'team'),
   ('c0317000-0000-0000-0000-000000000003', NULL, 'c0217000-0000-0000-0000-000000000003', 22, 0.943, 'high', 'team'),
@@ -11756,7 +12647,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0318000-0000-0000-0000-000000000001', NULL, 'c0218000-0000-0000-0000-000000000001', 29, 0.925, 'high', 'team'),
   ('c0318000-0000-0000-0000-000000000002', NULL, 'c0218000-0000-0000-0000-000000000002', 24, 0.938, 'high', 'team'),
   ('c0318000-0000-0000-0000-000000000003', NULL, 'c0218000-0000-0000-0000-000000000003', 32, 0.917, 'high', 'team'),
@@ -11851,7 +12742,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c0319000-0000-0000-0000-000000000001', NULL, 'c0219000-0000-0000-0000-000000000001', 26, 0.932, 'high', 'team'),
   ('c0319000-0000-0000-0000-000000000002', NULL, 'c0219000-0000-0000-0000-000000000002', 23, 0.940, 'high', 'team'),
   ('c0319000-0000-0000-0000-000000000003', NULL, 'c0219000-0000-0000-0000-000000000003', 31, 0.919, 'high', 'team'),
@@ -11946,7 +12837,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c031a000-0000-0000-0000-000000000001', NULL, 'c021a000-0000-0000-0000-000000000001', 24, 0.938, 'high', 'team'),
   ('c031a000-0000-0000-0000-000000000002', NULL, 'c021a000-0000-0000-0000-000000000002', 29, 0.925, 'high', 'team'),
   ('c031a000-0000-0000-0000-000000000003', NULL, 'c021a000-0000-0000-0000-000000000003', 22, 0.943, 'high', 'team'),
@@ -12041,7 +12932,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c031b000-0000-0000-0000-000000000001', NULL, 'c021b000-0000-0000-0000-000000000001', 26, 0.932, 'high', 'team'),
   ('c031b000-0000-0000-0000-000000000002', NULL, 'c021b000-0000-0000-0000-000000000002', 23, 0.940, 'high', 'team'),
   ('c031b000-0000-0000-0000-000000000003', NULL, 'c021b000-0000-0000-0000-000000000003', 30, 0.922, 'high', 'team'),
@@ -12136,7 +13027,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c031c000-0000-0000-0000-000000000001', NULL, 'c021c000-0000-0000-0000-000000000001', 25, 0.935, 'high', 'team'),
   ('c031c000-0000-0000-0000-000000000002', NULL, 'c021c000-0000-0000-0000-000000000002', 22, 0.943, 'high', 'team'),
   ('c031c000-0000-0000-0000-000000000003', NULL, 'c021c000-0000-0000-0000-000000000003', 30, 0.922, 'high', 'team'),
@@ -12231,7 +13122,7 @@ INSERT INTO team_members (id, team_id, invitation_id, name, wv_vector, ci_vector
 ON CONFLICT DO NOTHING;
 
 -- セッション
-INSERT INTO sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
+INSERT INTO work_values_sessions (id, user_id, team_member_id, circular_triads, consistency_coefficient, consistency_level, purpose) VALUES
   ('c031d000-0000-0000-0000-000000000001', NULL, 'c021d000-0000-0000-0000-000000000001', 28, 0.927, 'high', 'team'),
   ('c031d000-0000-0000-0000-000000000002', NULL, 'c021d000-0000-0000-0000-000000000002', 24, 0.938, 'high', 'team'),
   ('c031d000-0000-0000-0000-000000000003', NULL, 'c021d000-0000-0000-0000-000000000003', 31, 0.919, 'high', 'team'),

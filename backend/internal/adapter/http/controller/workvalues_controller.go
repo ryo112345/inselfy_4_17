@@ -14,28 +14,33 @@ type WorkValuesController struct {
 	inputFactory func(
 		sessionRepo port.WorkValuesSessionRepository,
 		resultRepo port.WorkValuesResultRepository,
+		scoreRepo port.WorkValuesScoreRepository,
 		output port.WorkValuesOutputPort,
 	) port.WorkValuesInputPort
 	outputFactory      func() *presenter.WorkValuesPresenter
 	sessionRepoFactory func() port.WorkValuesSessionRepository
 	resultRepoFactory  func() port.WorkValuesResultRepository
+	scoreRepoFactory   func() port.WorkValuesScoreRepository
 }
 
 func NewWorkValuesController(
 	inputFactory func(
 		sessionRepo port.WorkValuesSessionRepository,
 		resultRepo port.WorkValuesResultRepository,
+		scoreRepo port.WorkValuesScoreRepository,
 		output port.WorkValuesOutputPort,
 	) port.WorkValuesInputPort,
 	outputFactory func() *presenter.WorkValuesPresenter,
 	sessionRepoFactory func() port.WorkValuesSessionRepository,
 	resultRepoFactory func() port.WorkValuesResultRepository,
+	scoreRepoFactory func() port.WorkValuesScoreRepository,
 ) *WorkValuesController {
 	return &WorkValuesController{
 		inputFactory:       inputFactory,
 		outputFactory:      outputFactory,
 		sessionRepoFactory: sessionRepoFactory,
 		resultRepoFactory:  resultRepoFactory,
+		scoreRepoFactory:   scoreRepoFactory,
 	}
 }
 
@@ -60,9 +65,9 @@ func (c *WorkValuesController) StartSession(ctx echo.Context) error {
 }
 
 type submitResultRequest struct {
-	Responses []workvalues.Response  `json:"responses"`
-	Mu        map[string]float64     `json:"mu"`
-	SE        map[string]float64     `json:"se"`
+	Responses []workvalues.Response `json:"responses"`
+	Mu        map[string]float64   `json:"mu"`
+	SE        map[string]float64   `json:"se"`
 }
 
 func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) error {
@@ -101,6 +106,6 @@ func (c *WorkValuesController) GetResultBySessionID(ctx echo.Context, sessionID 
 
 func (c *WorkValuesController) newIO() (port.WorkValuesInputPort, *presenter.WorkValuesPresenter) {
 	output := c.outputFactory()
-	input := c.inputFactory(c.sessionRepoFactory(), c.resultRepoFactory(), output)
+	input := c.inputFactory(c.sessionRepoFactory(), c.resultRepoFactory(), c.scoreRepoFactory(), output)
 	return input, output
 }

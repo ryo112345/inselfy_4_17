@@ -49,3 +49,10 @@ func NewWVResultRepoFactory(pool *pgxpool.Pool) func() port.WorkValuesResultRepo
 		return sqlcgw.NewWorkValuesResultRepository(pool)
 	}
 }
+
+// NewWVScoreRepoFactory returns a factory function that produces WorkValuesScoreRepository instances.
+func NewWVScoreRepoFactory(pool *pgxpool.Pool) func() port.WorkValuesScoreRepository {
+	return func() port.WorkValuesScoreRepository {
+		return sqlcgw.NewWorkValuesScoreRepository(pool)
+	}
+}

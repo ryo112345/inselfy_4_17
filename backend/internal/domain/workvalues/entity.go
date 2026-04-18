@@ -33,6 +33,7 @@ type Result struct {
 	ConsistencyCoefficient *float64
 	ConsistencyLevel       *string
 	QuestionCount          int
+	Values                 []ValueScore
 	CreatedAt              time.Time
 }
 

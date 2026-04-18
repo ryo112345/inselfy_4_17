@@ -12,6 +12,7 @@ import (
 type WorkValuesInteractor struct {
 	sessionRepo port.WorkValuesSessionRepository
 	resultRepo  port.WorkValuesResultRepository
+	scoreRepo   port.WorkValuesScoreRepository
 	output      port.WorkValuesOutputPort
 }
 
@@ -20,11 +21,13 @@ var _ port.WorkValuesInputPort = (*WorkValuesInteractor)(nil)
 func NewWorkValuesInteractor(
 	sessionRepo port.WorkValuesSessionRepository,
 	resultRepo port.WorkValuesResultRepository,
+	scoreRepo port.WorkValuesScoreRepository,
 	output port.WorkValuesOutputPort,
 ) *WorkValuesInteractor {
 	return &WorkValuesInteractor{
 		sessionRepo: sessionRepo,
 		resultRepo:  resultRepo,
+		scoreRepo:   scoreRepo,
 		output:      output,
 	}
 }
@@ -64,6 +67,12 @@ func (i *WorkValuesInteractor) SubmitResult(ctx context.Context, sessionID strin
 		return err
 	}
 
+	values := workvalues.AggregateValues(created.Mu)
+	if err := i.scoreRepo.Save(ctx, sessionID, values); err != nil {
+		return err
+	}
+	created.Values = values
+
 	if err := i.sessionRepo.UpdateStatus(ctx, sessionID, workvalues.StatusCompleted); err != nil {
 		return err
 	}
@@ -76,6 +85,13 @@ func (i *WorkValuesInteractor) GetLatestResult(ctx context.Context, userID strin
 	if err != nil {
 		return err
 	}
+
+	values, err := i.scoreRepo.GetBySessionID(ctx, result.SessionID)
+	if err != nil {
+		return err
+	}
+	result.Values = values
+
 	return i.output.PresentResult(ctx, result)
 }
 
@@ -84,5 +100,12 @@ func (i *WorkValuesInteractor) GetResultBySessionID(ctx context.Context, session
 	if err != nil {
 		return err
 	}
+
+	values, err := i.scoreRepo.GetBySessionID(ctx, sessionID)
+	if err != nil {
+		return err
+	}
+	result.Values = values
+
 	return i.output.PresentResult(ctx, result)
 }

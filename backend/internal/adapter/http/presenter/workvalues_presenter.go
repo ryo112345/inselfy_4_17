@@ -2,6 +2,8 @@ package presenter
 
 import (
 	"context"
+	"math"
+	"sort"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -34,19 +36,33 @@ func (p *WorkValuesPresenter) PresentSession(_ context.Context, s *workvalues.Se
 func (p *WorkValuesPresenter) PresentResult(_ context.Context, r *workvalues.Result) error {
 	needs := make([]NeedScore, 0, len(r.Mu))
 	for key, mu := range r.Mu {
+		ds := 100.0 / (1.0 + math.Exp(-mu))
 		needs = append(needs, NeedScore{
-			NeedID: key,
-			Mu:     mu,
-			SE:     r.SE[key],
+			NeedID:       key,
+			DisplayScore: math.Round(ds*10) / 10,
 		})
 	}
+	sort.Slice(needs, func(i, j int) bool {
+		return needs[i].DisplayScore > needs[j].DisplayScore
+	})
+	for i := range needs {
+		needs[i].Rank = i + 1
+	}
+
+	values := make([]ValueScoreResponse, len(r.Values))
+	for i, v := range r.Values {
+		values[i] = ValueScoreResponse{
+			ValueID:      v.ValueID,
+			DisplayScore: math.Round(v.DisplayScore*10) / 10,
+			Rank:         v.Rank,
+		}
+	}
+
 	p.result = &ResultResponse{
-		ID:                     r.ID,
-		SessionID:              r.SessionID,
-		Needs:                  needs,
-		ConsistencyCoefficient: r.ConsistencyCoefficient,
-		ConsistencyLevel:       r.ConsistencyLevel,
-		QuestionCount:          r.QuestionCount,
+		ID:        r.ID,
+		SessionID: r.SessionID,
+		Needs:     needs,
+		Values:    values,
 	}
 	return nil
 }
@@ -66,16 +82,20 @@ type PairResponse struct {
 }
 
 type ResultResponse struct {
-	ID                     string     `json:"id"`
-	SessionID              string     `json:"session_id"`
-	Needs                  []NeedScore `json:"needs"`
-	ConsistencyCoefficient *float64   `json:"consistency_coefficient"`
-	ConsistencyLevel       *string    `json:"consistency_level"`
-	QuestionCount          int        `json:"question_count"`
+	ID        string               `json:"id"`
+	SessionID string               `json:"session_id"`
+	Needs     []NeedScore          `json:"needs"`
+	Values    []ValueScoreResponse `json:"values"`
 }
 
 type NeedScore struct {
-	NeedID string  `json:"need_id"`
-	Mu     float64 `json:"mu"`
-	SE     float64 `json:"se"`
+	NeedID       string  `json:"need_id"`
+	DisplayScore float64 `json:"display_score"`
+	Rank         int     `json:"rank"`
+}
+
+type ValueScoreResponse struct {
+	ValueID      string  `json:"value_id"`
+	DisplayScore float64 `json:"display_score"`
+	Rank         int     `json:"rank"`
 }

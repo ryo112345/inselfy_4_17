@@ -46,14 +46,16 @@ func NewEducationInputFactory() func(
 func NewWorkValuesInputFactory() func(
 	sessionRepo port.WorkValuesSessionRepository,
 	resultRepo port.WorkValuesResultRepository,
+	scoreRepo port.WorkValuesScoreRepository,
 	output port.WorkValuesOutputPort,
 ) port.WorkValuesInputPort {
 	return func(
 		sessionRepo port.WorkValuesSessionRepository,
 		resultRepo port.WorkValuesResultRepository,
+		scoreRepo port.WorkValuesScoreRepository,
 		output port.WorkValuesOutputPort,
 	) port.WorkValuesInputPort {
-		return usecase.NewWorkValuesInteractor(sessionRepo, resultRepo, output)
+		return usecase.NewWorkValuesInteractor(sessionRepo, resultRepo, scoreRepo, output)
 	}
 }
 

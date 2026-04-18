@@ -20,17 +20,21 @@ export interface ResponseDTO {
 
 export interface NeedScoreDTO {
   need_id: string;
-  mu: number;
-  se: number;
+  display_score: number;
+  rank: number;
+}
+
+export interface ValueScoreDTO {
+  value_id: string;
+  display_score: number;
+  rank: number;
 }
 
 export interface ResultDTO {
   id: string;
   session_id: string;
   needs: NeedScoreDTO[];
-  consistency_coefficient: number | null;
-  consistency_level: string | null;
-  question_count: number;
+  values: ValueScoreDTO[];
 }
 
 export async function startSession(userId: string): Promise<SessionDTO> {
