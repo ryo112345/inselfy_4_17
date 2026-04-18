@@ -20,6 +20,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId }:
   const panelCount = urls.length;
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [expanded, setExpanded] = useState(true);
 
   const goTo = (index: number) => {
     if (index < 0 || index >= panelCount) return;
@@ -30,13 +31,16 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId }:
   const panelPx = 672;
   const gapPx = 12;
 
+  const focusedTransform = `calc(50vw - ${panelPx / 2}px - ${activeIndex * (panelPx + gapPx)}px)`;
+  const expandedTransform = `-${activeIndex * (panelPx + gapPx)}px`;
+
   return (
     <div className="relative px-4">
       <div
-        className="flex items-start transition-transform duration-300 ease-in-out"
+        className="flex items-start transition-all duration-300 ease-in-out"
         style={{
           gap: `${gapPx}px`,
-          transform: `translateX(-${activeIndex * (panelPx + gapPx)}px)`,
+          transform: `translateX(${expanded ? expandedTransform : focusedTransform})`,
         }}
       >
         <div className="shrink-0" style={{ width: `${panelPx}px` }}>{children}</div>
@@ -66,10 +70,11 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId }:
             </svg>
           </button>
           <button
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-md cursor-default"
+            onClick={() => setExpanded(!expanded)}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-md transition hover:bg-gray-50 cursor-pointer"
           >
             <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 5v14M5 12h14" />
+              {expanded ? <path d="M5 12h14" /> : <path d="M12 5v14M5 12h14" />}
             </svg>
           </button>
           <button
