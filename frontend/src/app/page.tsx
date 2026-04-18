@@ -1,16 +1,45 @@
-import Link from "next/link";
+import { fetchTimeline } from "@/features/timeline/api";
+import { Timeline } from "@/features/timeline/Timeline";
+import { PostForm } from "@/features/timeline/PostForm";
+import { FeedTabs } from "@/features/timeline/FeedTabs";
+import { Sidebar } from "@/app/components/Sidebar";
+import { cookies } from "next/headers";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get("userId")?.value ?? "";
+  const username = cookieStore.get("username")?.value ?? "guest";
+  const displayName = cookieStore.get("displayName")?.value;
+  const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
+
+  let posts: Awaited<ReturnType<typeof fetchTimeline>> | null = null;
+  try {
+    posts = await fetchTimeline();
+  } catch {
+    // API not available
+  }
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-6 px-4">
-      <h1 className="text-4xl font-bold">inselfy</h1>
-      <p className="text-sm text-gray-600">価値観に寄り添う逆求人プラットフォーム</p>
-      <Link
-        href="/sign_up"
-        className="inline-flex items-center justify-center rounded-md bg-black text-white px-6 py-2 text-sm font-medium hover:bg-gray-800"
-      >
-        サインアップ
-      </Link>
-    </main>
+    <>
+      <Sidebar
+        username={username}
+        displayName={displayName}
+        defaultOpen={sidebarOpen}
+      />
+      <div className="flex justify-center min-h-screen pl-[50px]">
+        <main className="w-full max-w-[600px] bg-white border-x border-gray-200/80">
+          <FeedTabs />
+          <PostForm userId={userId} username={username} displayName={displayName} />
+
+          {posts ? (
+            <Timeline posts={posts.items ?? []} />
+          ) : (
+            <div className="flex items-center justify-center py-16 text-gray-400">
+              <p className="text-sm">タイムラインを読み込めませんでした</p>
+            </div>
+          )}
+        </main>
+      </div>
+    </>
   );
 }

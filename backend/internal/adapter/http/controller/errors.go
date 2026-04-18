@@ -11,6 +11,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
+	"github.com/akiyama/inselfy/backend/internal/domain/post"
 	"github.com/akiyama/inselfy/backend/internal/domain/skill"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -86,6 +87,9 @@ func isBadRequest(err error) bool {
 		return true
 	case errors.Is(err, skill.ErrNameRequired),
 		errors.Is(err, skill.ErrNameTooLong):
+		return true
+	case errors.Is(err, post.ErrContentRequired),
+		errors.Is(err, post.ErrContentTooLong):
 		return true
 	}
 	return false

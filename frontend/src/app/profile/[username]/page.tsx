@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
+import { fetchUserPosts } from "@/features/timeline/api";
 import { Sidebar } from "@/app/components/Sidebar";
 
 import { PanelNavigator } from "./PanelNavigator";
@@ -22,6 +23,14 @@ export default async function ProfilePage({
   if (!data) notFound();
 
   const profileColor = data.user.profileColor ?? "#3D8B6E";
+
+  let posts: Awaited<ReturnType<typeof fetchUserPosts>>["items"] = [];
+  try {
+    const res = await fetchUserPosts(data.user.id);
+    posts = res.items ?? [];
+  } catch {
+    posts = [];
+  }
 
   return (
     <ProfileColorContext value={profileColor}>
@@ -44,6 +53,7 @@ export default async function ProfilePage({
             experiences={data.experiences}
             educations={data.educations}
             skills={data.skills}
+            posts={posts}
           />
         </PanelNavigator>
       </main>

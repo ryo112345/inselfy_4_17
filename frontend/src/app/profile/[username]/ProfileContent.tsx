@@ -4,6 +4,7 @@ import type {
   ModelsSkillResponse,
   ModelsUserResponse,
 } from "@/external/client/api/generated";
+import type { PostItem } from "@/features/timeline/api";
 
 import { AboutCard } from "./AboutCard";
 import { AiReportCard } from "./AiReportCard";
@@ -20,9 +21,10 @@ type Props = {
   experiences: ModelsExperienceResponse[];
   educations: ModelsEducationResponse[];
   skills: ModelsSkillResponse[];
+  posts?: PostItem[];
 };
 
-export function ProfileContent({ user, username, experiences, educations, skills }: Props) {
+export function ProfileContent({ user, username, experiences, educations, skills, posts }: Props) {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-3">
       <ProfileHeaderCard user={user} experienceCount={experiences.length} />
@@ -36,7 +38,7 @@ export function ProfileContent({ user, username, experiences, educations, skills
       <ExperienceCard username={username} experiences={experiences} />
       <EducationCard username={username} educations={educations} />
       <AboutCard user={user} />
-      <PostsTabs />
+      <PostsTabs posts={posts} />
     </div>
   );
 }

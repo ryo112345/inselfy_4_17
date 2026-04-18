@@ -84,3 +84,10 @@ func NewCITypeScoreRepoFactory(pool *pgxpool.Pool) func() port.CareerInterestTyp
 		return sqlcgw.NewCareerInterestTypeScoreRepository(pool)
 	}
 }
+
+// NewPostRepoFactory returns a factory function that produces PostRepository instances.
+func NewPostRepoFactory(pool *pgxpool.Pool) func() port.PostRepository {
+	return func() port.PostRepository {
+		return sqlcgw.NewPostRepository(pool)
+	}
+}

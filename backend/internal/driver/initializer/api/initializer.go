@@ -33,6 +33,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	experienceRepoFactory := factory.NewExperienceRepoFactory(pool)
 	educationRepoFactory := factory.NewEducationRepoFactory(pool)
 	skillRepoFactory := factory.NewSkillRepoFactory(pool)
+	postRepoFactory := factory.NewPostRepoFactory(pool)
 	wvSessionRepoFactory := factory.NewWVSessionRepoFactory(pool)
 	wvResultRepoFactory := factory.NewWVResultRepoFactory(pool)
 	wvScoreRepoFactory := factory.NewWVScoreRepoFactory(pool)
@@ -45,6 +46,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	experienceInputFactory := factory.NewExperienceInputFactory()
 	educationInputFactory := factory.NewEducationInputFactory()
 	skillInputFactory := factory.NewSkillInputFactory()
+	postInputFactory := factory.NewPostInputFactory()
 	wvInputFactory := factory.NewWorkValuesInputFactory()
 	ciInputFactory := factory.NewCareerInterestInputFactory()
 
@@ -52,6 +54,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	experienceOutputFactory := httpfactory.NewExperienceOutputFactory()
 	educationOutputFactory := httpfactory.NewEducationOutputFactory()
 	skillOutputFactory := httpfactory.NewSkillOutputFactory()
+	postOutputFactory := httpfactory.NewPostOutputFactory()
 	wvOutputFactory := httpfactory.NewWorkValuesOutputFactory()
 	ciOutputFactory := httpfactory.NewCareerInterestOutputFactory()
 
@@ -59,6 +62,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
 	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationOutputFactory, educationRepoFactory, userRepoFactory)
 	skillCtrl := httpcontroller.NewSkillController(skillInputFactory, skillOutputFactory, skillRepoFactory, userRepoFactory, tx)
+	postCtrl := httpcontroller.NewPostController(postInputFactory, postOutputFactory, postRepoFactory)
 	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvOutputFactory, wvSessionRepoFactory, wvResultRepoFactory, wvScoreRepoFactory)
 	ciCtrl := httpcontroller.NewCareerInterestController(ciInputFactory, ciOutputFactory, ciSessionRepoFactory, ciResultRepoFactory, ciBasicScoreRepoFactory, ciTypeScoreRepoFactory)
 
@@ -76,6 +80,16 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	e.GET("/api/users/id/:id", func(c echo.Context) error {
 		return userCtrl.GetByID(c, c.Param("id"))
+	})
+
+	postGroup := e.Group("/api/posts")
+	postGroup.POST("", postCtrl.Create)
+	postGroup.GET("", postCtrl.ListTimeline)
+	postGroup.GET("/users/:userId", func(c echo.Context) error {
+		return postCtrl.ListByUserID(c, c.Param("userId"))
+	})
+	postGroup.DELETE("/:postId", func(c echo.Context) error {
+		return postCtrl.Delete(c, c.Param("postId"))
 	})
 
 	wvGroup := e.Group("/api/work-values")

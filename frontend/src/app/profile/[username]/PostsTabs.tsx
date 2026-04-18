@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { PostItem } from "@/features/timeline/api";
+import { PostCard } from "@/features/timeline/PostCard";
 
 const TABS = [
   { key: "posts", label: "ポスト", empty: "まだポストがありません" },
@@ -11,7 +13,11 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"];
 
-export function PostsTabs() {
+type Props = {
+  posts?: PostItem[];
+};
+
+export function PostsTabs({ posts = [] }: Props) {
   const [active, setActive] = useState<TabKey>("posts");
   const activeTab = TABS.find((t) => t.key === active) ?? TABS[0];
 
@@ -35,9 +41,18 @@ export function PostsTabs() {
           );
         })}
       </div>
-      <div className="py-14 text-center text-base text-gray-500">
-        {activeTab.empty}
-      </div>
+
+      {active === "posts" && posts.length > 0 ? (
+        <div>
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      ) : (
+        <div className="py-14 text-center text-base text-gray-500">
+          {activeTab.empty}
+        </div>
+      )}
     </section>
   );
 }

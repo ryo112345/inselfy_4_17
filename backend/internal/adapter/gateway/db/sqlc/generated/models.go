@@ -8,6 +8,40 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type CareerInterestBasicScore struct {
+	SessionID       pgtype.UUID `json:"session_id"`
+	BasicInterestID string      `json:"basic_interest_id"`
+	Score           float32     `json:"score"`
+	Rank            int16       `json:"rank"`
+}
+
+type CareerInterestResult struct {
+	ID                   pgtype.UUID        `json:"id"`
+	SessionID            pgtype.UUID        `json:"session_id"`
+	UserID               pgtype.UUID        `json:"user_id"`
+	Responses            []byte             `json:"responses"`
+	QuestionCount        int16              `json:"question_count"`
+	DifferentiationSd    pgtype.Float4      `json:"differentiation_sd"`
+	DifferentiationLevel pgtype.Text        `json:"differentiation_level"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+}
+
+type CareerInterestSession struct {
+	ID          pgtype.UUID        `json:"id"`
+	UserID      pgtype.UUID        `json:"user_id"`
+	Status      string             `json:"status"`
+	Items       []byte             `json:"items"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	CompletedAt pgtype.Timestamptz `json:"completed_at"`
+}
+
+type CareerInterestTypeScore struct {
+	SessionID pgtype.UUID `json:"session_id"`
+	TypeID    string      `json:"type_id"`
+	Score     float32     `json:"score"`
+	Rank      int16       `json:"rank"`
+}
+
 type Education struct {
 	ID        pgtype.UUID        `json:"id"`
 	UserID    pgtype.UUID        `json:"user_id"`
@@ -32,6 +66,14 @@ type Experience struct {
 	Description string             `json:"description"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
+type Post struct {
+	ID        pgtype.UUID        `json:"id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	Content   string             `json:"content"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Skill struct {
@@ -61,4 +103,34 @@ type UserSkill struct {
 	UserID    pgtype.UUID        `json:"user_id"`
 	SkillID   pgtype.UUID        `json:"skill_id"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type WorkNeedsScore struct {
+	ID                     pgtype.UUID        `json:"id"`
+	SessionID              pgtype.UUID        `json:"session_id"`
+	UserID                 pgtype.UUID        `json:"user_id"`
+	Responses              []byte             `json:"responses"`
+	Mu                     []byte             `json:"mu"`
+	Se                     []byte             `json:"se"`
+	ConsistencyCoefficient pgtype.Float4      `json:"consistency_coefficient"`
+	ConsistencyLevel       pgtype.Text        `json:"consistency_level"`
+	QuestionCount          int16              `json:"question_count"`
+	CreatedAt              pgtype.Timestamptz `json:"created_at"`
+}
+
+type WorkValuesScore struct {
+	SessionID    pgtype.UUID `json:"session_id"`
+	ValueID      string      `json:"value_id"`
+	Mu           float32     `json:"mu"`
+	DisplayScore float32     `json:"display_score"`
+	Rank         int16       `json:"rank"`
+}
+
+type WorkValuesSession struct {
+	ID           pgtype.UUID        `json:"id"`
+	UserID       pgtype.UUID        `json:"user_id"`
+	Status       string             `json:"status"`
+	InitialPairs []byte             `json:"initial_pairs"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	CompletedAt  pgtype.Timestamptz `json:"completed_at"`
 }

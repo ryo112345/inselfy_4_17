@@ -44,3 +44,10 @@ func NewCareerInterestOutputFactory() func() *presenter.CareerInterestPresenter 
 		return presenter.NewCareerInterestPresenter()
 	}
 }
+
+// NewPostOutputFactory returns a factory function that creates PostPresenter instances.
+func NewPostOutputFactory() func() *presenter.PostPresenter {
+	return func() *presenter.PostPresenter {
+		return presenter.NewPostPresenter()
+	}
+}

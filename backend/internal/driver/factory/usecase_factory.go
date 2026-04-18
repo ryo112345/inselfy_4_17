@@ -78,6 +78,13 @@ func NewCareerInterestInputFactory() func(
 	}
 }
 
+// NewPostInputFactory returns a factory function that builds a PostInputPort.
+func NewPostInputFactory() func(repo port.PostRepository, output port.PostOutputPort) port.PostInputPort {
+	return func(repo port.PostRepository, output port.PostOutputPort) port.PostInputPort {
+		return usecase.NewPostInteractor(repo, output)
+	}
+}
+
 // NewSkillInputFactory returns a factory function that builds a SkillInputPort.
 func NewSkillInputFactory() func(
 	repo port.SkillRepository,
