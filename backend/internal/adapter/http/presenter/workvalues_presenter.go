@@ -25,10 +25,15 @@ func (p *WorkValuesPresenter) PresentSession(_ context.Context, s *workvalues.Se
 	for i, pair := range s.InitialPairs {
 		pairs[i] = PairResponse{NeedA: pair.NeedA, NeedB: pair.NeedB}
 	}
+	needs := make([]NeedDefResponse, workvalues.N)
+	for i, d := range workvalues.NeedDefs {
+		needs[i] = NeedDefResponse{ID: d.ID, Label: d.Label, DescriptionJa: d.DescriptionJa}
+	}
 	p.session = &SessionResponse{
 		ID:           s.ID,
 		Status:       s.Status,
 		InitialPairs: pairs,
+		Needs:        needs,
 	}
 	return nil
 }
@@ -37,10 +42,15 @@ func (p *WorkValuesPresenter) PresentResult(_ context.Context, r *workvalues.Res
 	needs := make([]NeedScore, 0, len(r.Mu))
 	for key, mu := range r.Mu {
 		ds := 100.0 / (1.0 + math.Exp(-mu))
-		needs = append(needs, NeedScore{
+		ns := NeedScore{
 			NeedID:       key,
 			DisplayScore: math.Round(ds*10) / 10,
-		})
+		}
+		if def, ok := workvalues.NeedDefByID(key); ok {
+			ns.Label = def.Label
+			ns.DescriptionJa = def.DescriptionJa
+		}
+		needs = append(needs, ns)
 	}
 	sort.Slice(needs, func(i, j int) bool {
 		return needs[i].DisplayScore > needs[j].DisplayScore
@@ -71,9 +81,16 @@ func (p *WorkValuesPresenter) Session() *SessionResponse { return p.session }
 func (p *WorkValuesPresenter) Result() *ResultResponse    { return p.result }
 
 type SessionResponse struct {
-	ID           string         `json:"id"`
-	Status       string         `json:"status"`
-	InitialPairs []PairResponse `json:"initial_pairs"`
+	ID           string            `json:"id"`
+	Status       string            `json:"status"`
+	InitialPairs []PairResponse    `json:"initial_pairs"`
+	Needs        []NeedDefResponse `json:"needs"`
+}
+
+type NeedDefResponse struct {
+	ID            string `json:"id"`
+	Label         string `json:"label"`
+	DescriptionJa string `json:"description_ja"`
 }
 
 type PairResponse struct {
@@ -89,9 +106,11 @@ type ResultResponse struct {
 }
 
 type NeedScore struct {
-	NeedID       string  `json:"need_id"`
-	DisplayScore float64 `json:"display_score"`
-	Rank         int     `json:"rank"`
+	NeedID        string  `json:"need_id"`
+	Label         string  `json:"label"`
+	DescriptionJa string  `json:"description_ja"`
+	DisplayScore  float64 `json:"display_score"`
+	Rank          int     `json:"rank"`
 }
 
 type ValueScoreResponse struct {

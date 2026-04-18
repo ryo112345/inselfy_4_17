@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Playfair_Display, Inter } from "next/font/google";
 import { useWorkValuesQuiz, type DebugInfo } from "@/features/work-values/useWorkValuesQuiz";
-import { NEED_LABELS, NEED_DESCRIPTIONS, type NeedId } from "@/features/work-values/lib/needs";
+import type { NeedDefDTO } from "@/features/work-values/api";
+import type { NeedId } from "@/features/work-values/lib/needs";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -22,7 +23,7 @@ const inter = Inter({
 const TEMP_USER_ID = "5313d9df-1b19-4d3f-b158-ca0464196f55";
 
 export default function WorkValuesStartPage() {
-  const { state, start, answer, sessionId } = useWorkValuesQuiz(TEMP_USER_ID);
+  const { state, start, answer, sessionId, needDefs } = useWorkValuesQuiz(TEMP_USER_ID);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function WorkValuesStartPage() {
         maxQuestions={state.maxQuestions}
         onAnswer={answer}
         debug={state.debug}
+        needDefs={needDefs}
       />
     );
   }
@@ -110,12 +112,14 @@ function QuizScreen({
   maxQuestions,
   onAnswer,
   debug,
+  needDefs,
 }: {
   pair: { needA: NeedId; needB: NeedId };
   questionNumber: number;
   maxQuestions: number;
   onAnswer: (winner: NeedId) => void;
   debug: DebugInfo | null;
+  needDefs: Record<string, NeedDefDTO>;
 }) {
   const progress = (questionNumber / maxQuestions) * 100;
 
@@ -156,7 +160,7 @@ function QuizScreen({
         {/* choices */}
         <div className="relative z-10 px-8 pb-8 flex flex-col gap-3">
           <ChoiceButton
-            label={NEED_DESCRIPTIONS[pair.needA]}
+            label={needDefs[pair.needA]?.description_ja ?? pair.needA}
             onClick={() => onAnswer(pair.needA)}
             variant="a"
           />
@@ -166,14 +170,14 @@ function QuizScreen({
             <div className="flex-1 h-px bg-gray-700" />
           </div>
           <ChoiceButton
-            label={NEED_DESCRIPTIONS[pair.needB]}
+            label={needDefs[pair.needB]?.description_ja ?? pair.needB}
             onClick={() => onAnswer(pair.needB)}
             variant="b"
           />
         </div>
       </div>
 
-      {debug && <DebugPanel debug={debug} />}
+      {debug && <DebugPanel debug={debug} needDefs={needDefs} />}
     </main>
   );
 }
@@ -220,7 +224,7 @@ function SubmittingScreen() {
   );
 }
 
-function DebugPanel({ debug }: { debug: DebugInfo }) {
+function DebugPanel({ debug, needDefs }: { debug: DebugInfo; needDefs: Record<string, NeedDefDTO> }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -273,7 +277,7 @@ function DebugPanel({ debug }: { debug: DebugInfo }) {
                   <tr key={n.needId} className={rowColor}>
                     <td className="py-0.5 pr-2">{n.rank}</td>
                     <td className="py-0.5 pr-2 truncate max-w-[140px]">
-                      {NEED_LABELS[n.needId]}
+                      {needDefs[n.needId]?.label ?? n.needId}
                     </td>
                     <td className="py-0.5 pr-2 text-right tabular-nums">
                       {n.mu >= 0 ? "+" : ""}{n.mu.toFixed(2)}

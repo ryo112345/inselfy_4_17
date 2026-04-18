@@ -7,6 +7,7 @@ import {
   startSession,
   submitResult,
   type SessionDTO,
+  type NeedDefDTO,
   type ResultDTO,
   type ResponseDTO,
 } from "./api";
@@ -52,12 +53,19 @@ export function useWorkValuesQuiz(userId: string) {
 
   const selectorRef = useRef<AdaptiveSelector | null>(null);
   const sessionRef = useRef<SessionDTO | null>(null);
+  const needDefsRef = useRef<Record<string, NeedDefDTO>>({});
 
   const start = useCallback(async () => {
     setState((s) => ({ ...s, phase: "loading", error: null }));
     try {
       const session = await startSession(userId);
       sessionRef.current = session;
+
+      const defs: Record<string, NeedDefDTO> = {};
+      for (const n of session.needs) {
+        defs[n.id] = n;
+      }
+      needDefsRef.current = defs;
 
       const initialPairs: Pair[] = session.initial_pairs.map((p) => ({
         needA: NEED_IDS.indexOf(p.need_a as NeedId),
@@ -142,7 +150,7 @@ export function useWorkValuesQuiz(userId: string) {
     }));
   }, [state.currentPair]);
 
-  return { state, start, answer, sessionId: sessionRef.current?.id ?? null };
+  return { state, start, answer, sessionId: sessionRef.current?.id ?? null, needDefs: needDefsRef.current };
 }
 
 function buildDebugInfo(selector: AdaptiveSelector): DebugInfo {

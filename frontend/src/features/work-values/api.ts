@@ -5,10 +5,17 @@ export interface PairDTO {
   need_b: string;
 }
 
+export interface NeedDefDTO {
+  id: string;
+  label: string;
+  description_ja: string;
+}
+
 export interface SessionDTO {
   id: string;
   status: string;
   initial_pairs: PairDTO[];
+  needs: NeedDefDTO[];
 }
 
 export interface ResponseDTO {
@@ -20,6 +27,8 @@ export interface ResponseDTO {
 
 export interface NeedScoreDTO {
   need_id: string;
+  label: string;
+  description_ja: string;
   display_score: number;
   rank: number;
 }

@@ -8,8 +8,6 @@ import {
   type NeedScoreDTO,
 } from "@/features/work-values/api";
 import {
-  NEED_LABELS,
-  NEED_DESCRIPTIONS,
   VALUE_LABELS,
   VALUE_DESCRIPTIONS,
   VALUE_ABBREVIATIONS,
@@ -246,7 +244,7 @@ function NeedsSection({
               {/* needs list */}
               <div className="flex flex-col">
                 {needsWithScores.map(({ nid, score }, i) => (
-                  <NeedRow key={nid} needId={nid} score={score} colors={colors} badge={badge} showDivider={i > 0} />
+                  <NeedRow key={nid} score={score} colors={colors} badge={badge} showDivider={i > 0} />
                 ))}
               </div>
             </div>
@@ -263,7 +261,7 @@ function NeedsSection({
 
 const MEDAL = ["🥇", "🥈", "🥉"] as const;
 
-function NeedRow({ needId, score, colors, badge, showDivider = false }: { needId: NeedId; score: NeedScoreDTO; colors: ScoreColors; badge: BadgeColors; showDivider?: boolean }) {
+function NeedRow({ score, colors, badge, showDivider = false }: { score: NeedScoreDTO; colors: ScoreColors; badge: BadgeColors; showDivider?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const medal = score.rank <= 3 ? MEDAL[score.rank - 1] : null;
   const isTop = score.rank <= 3;
@@ -287,14 +285,14 @@ function NeedRow({ needId, score, colors, badge, showDivider = false }: { needId
       {/* label + medal */}
       <div className="flex items-center gap-0.5 w-[88px] shrink-0">
         <span className="text-[14px] truncate" style={{ color: badge.needLabelColor, fontWeight: badge.needLabelWeight }}>
-          {NEED_LABELS[needId]}
+          {score.label}
         </span>
         {medal && <span className="text-[13px]">{medal}</span>}
       </div>
 
       {/* description */}
       <p className="flex-1 text-[13px] font-medium leading-snug min-w-0" style={{ color: badge.descColor }}>
-        {NEED_DESCRIPTIONS[needId]}
+        {score.description_ja}
       </p>
 
       {/* score bar */}
