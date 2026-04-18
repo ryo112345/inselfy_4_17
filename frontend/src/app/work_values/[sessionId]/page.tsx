@@ -27,9 +27,11 @@ const SCORE_COLORS = {
 };
 
 const DEFAULT_BADGE = {
-  border: "#149470",
-  text: "#149470",
-  bg: "#ffffff",
+  border: "#40b090",
+  text: "#057f5d",
+  bg: "#ebf9f3",
+  labelColor: "#787878",
+  headingColor: "#5e5a5a",
 };
 
 type BadgeColors = typeof DEFAULT_BADGE;
@@ -81,7 +83,7 @@ export default function WorkValuesResultPage() {
           🎨 バッジ設定
         </button>
       )}
-      <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 py-8">
+      <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 pt-5 pb-8">
         <ValuesSection values={sortedValues} colors={colors} badge={badge} />
         <NeedsSection values={sortedValues} needScoreMap={needScoreMap} colors={colors} badge={badge} />
       </div>
@@ -99,36 +101,36 @@ function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"];
   const maxScore = Math.max(...values.map((v) => v.display_score));
 
   return (
-    <section className="mb-10">
-      <h2 className="text-[13px] font-semibold text-gray-500 tracking-widest mb-3">
+    <section className="mb-6">
+      <h2 className="text-[13px] font-bold tracking-widest mb-1.5" style={{ color: badge.headingColor }}>
         WORK VALUES スコア
       </h2>
-      <div className="border-t border-gray-200 mb-4" />
+      <div className="border-t border-gray-200 mb-2" />
 
-      <div className="divide-y divide-gray-200">
+      <div>
         {values.map((v, i) => {
           const vid = v.value_id as ValueId;
           const barPct = (v.display_score / maxScore) * 100;
           const barColor = scoreColor(v.display_score, colors);
 
           return (
-            <div key={vid} className="py-2 first:pt-0">
+            <div key={vid} className="py-1 first:pt-0">
               {/* top row */}
-              <div className="flex items-start gap-3">
+              <div className="flex items-center gap-2">
                 <ValueBadge valueId={vid} variant="outline" badge={badge} />
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-[15px] font-bold text-gray-800">
+                    <span className="text-[15px] font-bold" style={{ color: badge.labelColor }}>
                       {VALUE_LABELS[vid]}
                     </span>
-                    <span className="text-[13px] text-gray-400">
+                    <span className="text-[15px] font-bold" style={{ color: badge.labelColor }}>
                       ({VALUE_ENGLISH_NAMES[vid]})
                     </span>
                   </div>
                 </div>
 
-                <p className="text-[12px] text-gray-500 leading-relaxed max-w-[180px] text-right">
+                <p className="text-[14px] font-medium text-gray-500 leading-relaxed max-w-[220px] text-left">
                   {VALUE_DESCRIPTIONS[vid]}
                 </p>
 
@@ -173,12 +175,12 @@ function NeedsSection({
 }) {
   return (
     <section>
-      <h2 className="text-[13px] font-semibold text-gray-500 tracking-widest mb-1">
+      <h2 className="text-[13px] font-bold tracking-widest mb-1.5" style={{ color: badge.headingColor }}>
         WORK NEEDS スコア
       </h2>
-      <div className="border-t border-gray-200" />
+      <div className="border-t border-gray-200 mb-2" />
 
-      <div className="mt-4 flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
         {values.map((v) => {
           const vid = v.value_id as ValueId;
           const needIds = VALUE_NEEDS[vid];
@@ -325,6 +327,8 @@ function BadgeDebugPanel({
     { key: "border" as const, label: "枠線" },
     { key: "text" as const, label: "文字" },
     { key: "bg" as const, label: "背景" },
+    { key: "labelColor" as const, label: "ラベル文字" },
+    { key: "headingColor" as const, label: "見出し" },
   ];
 
   return (
