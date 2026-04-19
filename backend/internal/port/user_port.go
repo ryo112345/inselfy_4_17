@@ -25,5 +25,6 @@ type UserRepository interface {
 	Create(ctx context.Context, u *user.User) (*user.User, error)
 	GetByUsername(ctx context.Context, username user.Username) (*user.User, error)
 	GetByID(ctx context.Context, id string) (*user.User, error)
+	GetByOAuthProvider(ctx context.Context, provider, providerID string) (*user.User, error)
 	UpdateProfile(ctx context.Context, id string, input user.UpdateProfileInput) (*user.User, error)
 }

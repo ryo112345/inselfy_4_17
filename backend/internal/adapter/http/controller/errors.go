@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
@@ -102,8 +103,20 @@ func badRequest(ctx echo.Context, message string) error {
 	})
 }
 
-// invalidField builds a domain-level bad-request error tagged with the field
-// name, so `handleError` maps it to 400 and the client sees which field is wrong.
+func handleAuthError(ctx echo.Context, err error) error {
+	if err == nil ||
+		errors.Is(err, auth.ErrInvalidGoogleToken) ||
+		errors.Is(err, auth.ErrUnauthorized) ||
+		errors.Is(err, auth.ErrTokenExpired) ||
+		errors.Is(err, auth.ErrRefreshTokenRevoked) {
+		return ctx.JSON(http.StatusUnauthorized, map[string]string{
+			"code":    "UNAUTHORIZED",
+			"message": "unauthorized",
+		})
+	}
+	return handleError(ctx, err)
+}
+
 func invalidField(name string) error {
 	return fmt.Errorf("%w: invalid field %q", domainerr.ErrBadRequest, name)
 }

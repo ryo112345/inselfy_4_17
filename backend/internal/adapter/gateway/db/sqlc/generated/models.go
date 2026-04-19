@@ -76,6 +76,15 @@ type Post struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
+type RefreshToken struct {
+	ID        pgtype.UUID        `json:"id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	TokenHash string             `json:"token_hash"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	RevokedAt pgtype.Timestamptz `json:"revoked_at"`
+}
+
 type Skill struct {
 	ID        pgtype.UUID        `json:"id"`
 	Name      string             `json:"name"`
@@ -97,6 +106,10 @@ type User struct {
 	JobSeekingStatus pgtype.Text        `json:"job_seeking_status"`
 	ProfileColor     pgtype.Text        `json:"profile_color"`
 	IsPublic         bool               `json:"is_public"`
+	Email            pgtype.Text        `json:"email"`
+	OauthProvider    pgtype.Text        `json:"oauth_provider"`
+	OauthProviderID  pgtype.Text        `json:"oauth_provider_id"`
+	AvatarUrl        pgtype.Text        `json:"avatar_url"`
 }
 
 type UserSkill struct {

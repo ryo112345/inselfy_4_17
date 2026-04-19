@@ -3,6 +3,16 @@ INSERT INTO users (username, name)
 VALUES ($1, $2)
 RETURNING *;
 
+-- name: CreateUserWithOAuth :one
+INSERT INTO users (username, name, email, oauth_provider, oauth_provider_id, avatar_url)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING *;
+
+-- name: GetUserByOAuthProvider :one
+SELECT *
+FROM users
+WHERE oauth_provider = $1 AND oauth_provider_id = $2;
+
 -- name: GetUserByUsername :one
 SELECT *
 FROM users
@@ -16,6 +26,7 @@ WHERE id = $1;
 -- name: UpdateUserProfile :one
 UPDATE users
 SET
+    username = COALESCE(sqlc.narg('username'), username),
     name = COALESCE(sqlc.narg('name'), name),
     display_name = CASE WHEN sqlc.arg('display_name_set')::bool THEN sqlc.narg('display_name') ELSE display_name END,
     headline = CASE WHEN sqlc.arg('headline_set')::bool THEN sqlc.narg('headline') ELSE headline END,

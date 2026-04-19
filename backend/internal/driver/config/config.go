@@ -19,6 +19,7 @@ type Config struct {
 	LineRedirectURI   string `env:"LINE_REDIRECT_URI" envDefault:"http://localhost:5173/auth/callback"`
 
 	GoogleClientID string `env:"GOOGLE_CLIENT_ID" envDefault:""`
+	JWTSecret      string `env:"JWT_SECRET" envDefault:"dev-secret-change-me"`
 
 	InitialAdminEmail string `env:"INITIAL_ADMIN_EMAIL" envDefault:""`
 

@@ -92,13 +92,23 @@ func (c *UserController) UpdateProfile(ctx echo.Context, username string) error 
 func decodeUpdateProfile(raw map[string]json.RawMessage) (user.UpdateProfileInput, error) {
 	var input user.UpdateProfileInput
 
+	if v, ok := raw["username"]; ok {
+		var s *string
+		if err := json.Unmarshal(v, &s); err != nil {
+			return input, invalidField("username")
+		}
+		if s == nil {
+			return input, invalidField("username")
+		}
+		input.Username = s
+	}
 	if v, ok := raw["name"]; ok {
 		var s *string
 		if err := json.Unmarshal(v, &s); err != nil {
 			return input, invalidField("name")
 		}
 		if s == nil {
-			return input, invalidField("name") // name cannot be cleared
+			return input, invalidField("name")
 		}
 		input.Name = s
 	}

@@ -30,10 +30,26 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 // Create inserts a new user and returns the persisted entity.
 func (r *UserRepository) Create(ctx context.Context, u *user.User) (*user.User, error) {
 	q := queriesForContext(ctx, r.queries)
-	row, err := q.CreateUser(ctx, &generated.CreateUserParams{
-		Username: u.Username.String(),
-		Name:     u.Name,
-	})
+
+	var row *generated.User
+	var err error
+
+	if u.OAuthProvider != nil {
+		row, err = q.CreateUserWithOAuth(ctx, &generated.CreateUserWithOAuthParams{
+			Username:        u.Username.String(),
+			Name:            u.Name,
+			Email:           pgText(u.Email),
+			OauthProvider:   pgText(u.OAuthProvider),
+			OauthProviderID: pgText(u.OAuthProviderID),
+			AvatarUrl:       pgText(u.AvatarURL),
+		})
+	} else {
+		row, err = q.CreateUser(ctx, &generated.CreateUserParams{
+			Username: u.Username.String(),
+			Name:     u.Name,
+		})
+	}
+
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -86,6 +102,7 @@ func (r *UserRepository) UpdateProfile(ctx context.Context, id string, input use
 
 	params := &generated.UpdateUserProfileParams{
 		ID:       pgID,
+		Username: pgText(input.Username),
 		Name:     pgText(input.Name),
 		IsPublic: pgBool(input.IsPublic),
 	}
@@ -118,6 +135,22 @@ func setTextField(flag *bool, target *pgtype.Text, src **string) {
 	*target = pgText(*src)
 }
 
+// GetByOAuthProvider fetches a user by OAuth provider and provider ID.
+func (r *UserRepository) GetByOAuthProvider(ctx context.Context, provider, providerID string) (*user.User, error) {
+	q := queriesForContext(ctx, r.queries)
+	row, err := q.GetUserByOAuthProvider(ctx, &generated.GetUserByOAuthProviderParams{
+		OauthProvider:   pgtype.Text{String: provider, Valid: true},
+		OauthProviderID: pgtype.Text{String: providerID, Valid: true},
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domainerr.ErrNotFound
+		}
+		return nil, err
+	}
+	return toDomainUser(row)
+}
+
 func toDomainUser(u *generated.User) (*user.User, error) {
 	username, err := user.ParseUsername(u.Username)
 	if err != nil {
@@ -136,6 +169,10 @@ func toDomainUser(u *generated.User) (*user.User, error) {
 		JobSeekingStatus: textPtr(u.JobSeekingStatus),
 		ProfileColor:     textPtr(u.ProfileColor),
 		IsPublic:         u.IsPublic,
+		Email:            textPtr(u.Email),
+		OAuthProvider:    textPtr(u.OauthProvider),
+		OAuthProviderID:  textPtr(u.OauthProviderID),
+		AvatarURL:        textPtr(u.AvatarUrl),
 		CreatedAt:        u.CreatedAt.Time,
 		UpdatedAt:        u.UpdatedAt.Time,
 	}, nil

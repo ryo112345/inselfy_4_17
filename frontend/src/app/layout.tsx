@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
+import { AuthProvider } from "@/features/auth/auth-context";
+import { GoogleProvider } from "@/features/auth/google-provider";
 import "./globals.css";
 
 const notoSansJp = Noto_Sans_JP({
@@ -21,7 +23,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja" className={notoSansJp.variable}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <GoogleProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </GoogleProvider>
+      </body>
     </html>
   );
 }

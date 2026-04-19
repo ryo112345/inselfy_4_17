@@ -1,0 +1,36 @@
+package port
+
+import (
+	"context"
+
+	"github.com/akiyama/inselfy/backend/internal/domain/auth"
+	"github.com/akiyama/inselfy/backend/internal/domain/user"
+)
+
+type AuthInputPort interface {
+	GoogleLogin(ctx context.Context, idToken string) error
+	RefreshToken(ctx context.Context, refreshToken string) error
+	GetCurrentUser(ctx context.Context, userID string) error
+}
+
+type AuthOutputPort interface {
+	PresentTokenPair(ctx context.Context, pair *auth.TokenPair, u *user.User) error
+	PresentUser(ctx context.Context, u *user.User) error
+}
+
+type RefreshTokenRepository interface {
+	Create(ctx context.Context, rt *auth.RefreshToken) error
+	GetByTokenHash(ctx context.Context, tokenHash string) (*auth.RefreshToken, error)
+	RevokeByUserID(ctx context.Context, userID string) error
+}
+
+type GoogleTokenVerifier interface {
+	Verify(ctx context.Context, idToken string, clientID string) (*auth.GoogleClaims, error)
+}
+
+type JWTService interface {
+	GenerateAccessToken(userID string) (string, error)
+	GenerateRefreshToken() (string, error)
+	ValidateAccessToken(tokenString string) (userID string, err error)
+	HashRefreshToken(token string) string
+}

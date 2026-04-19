@@ -14,7 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, name)
 VALUES ($1, $2)
-RETURNING id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public
+RETURNING id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 `
 
 type CreateUserParams struct {
@@ -40,12 +40,64 @@ func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (*User,
 		&i.JobSeekingStatus,
 		&i.ProfileColor,
 		&i.IsPublic,
+		&i.Email,
+		&i.OauthProvider,
+		&i.OauthProviderID,
+		&i.AvatarUrl,
+	)
+	return &i, err
+}
+
+const createUserWithOAuth = `-- name: CreateUserWithOAuth :one
+INSERT INTO users (username, name, email, oauth_provider, oauth_provider_id, avatar_url)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
+`
+
+type CreateUserWithOAuthParams struct {
+	Username        string      `json:"username"`
+	Name            string      `json:"name"`
+	Email           pgtype.Text `json:"email"`
+	OauthProvider   pgtype.Text `json:"oauth_provider"`
+	OauthProviderID pgtype.Text `json:"oauth_provider_id"`
+	AvatarUrl       pgtype.Text `json:"avatar_url"`
+}
+
+func (q *Queries) CreateUserWithOAuth(ctx context.Context, arg *CreateUserWithOAuthParams) (*User, error) {
+	row := q.db.QueryRow(ctx, createUserWithOAuth,
+		arg.Username,
+		arg.Name,
+		arg.Email,
+		arg.OauthProvider,
+		arg.OauthProviderID,
+		arg.AvatarUrl,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DisplayName,
+		&i.Headline,
+		&i.Location,
+		&i.About,
+		&i.Industry,
+		&i.JobType,
+		&i.JobSeekingStatus,
+		&i.ProfileColor,
+		&i.IsPublic,
+		&i.Email,
+		&i.OauthProvider,
+		&i.OauthProviderID,
+		&i.AvatarUrl,
 	)
 	return &i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public
+SELECT id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 FROM users
 WHERE id = $1
 `
@@ -68,12 +120,53 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (*User, error
 		&i.JobSeekingStatus,
 		&i.ProfileColor,
 		&i.IsPublic,
+		&i.Email,
+		&i.OauthProvider,
+		&i.OauthProviderID,
+		&i.AvatarUrl,
+	)
+	return &i, err
+}
+
+const getUserByOAuthProvider = `-- name: GetUserByOAuthProvider :one
+SELECT id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
+FROM users
+WHERE oauth_provider = $1 AND oauth_provider_id = $2
+`
+
+type GetUserByOAuthProviderParams struct {
+	OauthProvider   pgtype.Text `json:"oauth_provider"`
+	OauthProviderID pgtype.Text `json:"oauth_provider_id"`
+}
+
+func (q *Queries) GetUserByOAuthProvider(ctx context.Context, arg *GetUserByOAuthProviderParams) (*User, error) {
+	row := q.db.QueryRow(ctx, getUserByOAuthProvider, arg.OauthProvider, arg.OauthProviderID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DisplayName,
+		&i.Headline,
+		&i.Location,
+		&i.About,
+		&i.Industry,
+		&i.JobType,
+		&i.JobSeekingStatus,
+		&i.ProfileColor,
+		&i.IsPublic,
+		&i.Email,
+		&i.OauthProvider,
+		&i.OauthProviderID,
+		&i.AvatarUrl,
 	)
 	return &i, err
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public
+SELECT id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 FROM users
 WHERE username = $1
 `
@@ -96,6 +189,10 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (*User
 		&i.JobSeekingStatus,
 		&i.ProfileColor,
 		&i.IsPublic,
+		&i.Email,
+		&i.OauthProvider,
+		&i.OauthProviderID,
+		&i.AvatarUrl,
 	)
 	return &i, err
 }
@@ -103,22 +200,24 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (*User
 const updateUserProfile = `-- name: UpdateUserProfile :one
 UPDATE users
 SET
-    name = COALESCE($1, name),
-    display_name = CASE WHEN $2::bool THEN $3 ELSE display_name END,
-    headline = CASE WHEN $4::bool THEN $5 ELSE headline END,
-    location = CASE WHEN $6::bool THEN $7 ELSE location END,
-    about = CASE WHEN $8::bool THEN $9 ELSE about END,
-    industry = CASE WHEN $10::bool THEN $11 ELSE industry END,
-    job_type = CASE WHEN $12::bool THEN $13 ELSE job_type END,
-    job_seeking_status = CASE WHEN $14::bool THEN $15 ELSE job_seeking_status END,
-    profile_color = CASE WHEN $16::bool THEN $17 ELSE profile_color END,
-    is_public = COALESCE($18, is_public),
+    username = COALESCE($1, username),
+    name = COALESCE($2, name),
+    display_name = CASE WHEN $3::bool THEN $4 ELSE display_name END,
+    headline = CASE WHEN $5::bool THEN $6 ELSE headline END,
+    location = CASE WHEN $7::bool THEN $8 ELSE location END,
+    about = CASE WHEN $9::bool THEN $10 ELSE about END,
+    industry = CASE WHEN $11::bool THEN $12 ELSE industry END,
+    job_type = CASE WHEN $13::bool THEN $14 ELSE job_type END,
+    job_seeking_status = CASE WHEN $15::bool THEN $16 ELSE job_seeking_status END,
+    profile_color = CASE WHEN $17::bool THEN $18 ELSE profile_color END,
+    is_public = COALESCE($19, is_public),
     updated_at = NOW()
-WHERE id = $19
-RETURNING id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public
+WHERE id = $20
+RETURNING id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 `
 
 type UpdateUserProfileParams struct {
+	Username            pgtype.Text `json:"username"`
 	Name                pgtype.Text `json:"name"`
 	DisplayNameSet      bool        `json:"display_name_set"`
 	DisplayName         pgtype.Text `json:"display_name"`
@@ -142,6 +241,7 @@ type UpdateUserProfileParams struct {
 
 func (q *Queries) UpdateUserProfile(ctx context.Context, arg *UpdateUserProfileParams) (*User, error) {
 	row := q.db.QueryRow(ctx, updateUserProfile,
+		arg.Username,
 		arg.Name,
 		arg.DisplayNameSet,
 		arg.DisplayName,
@@ -178,6 +278,10 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg *UpdateUserProfileP
 		&i.JobSeekingStatus,
 		&i.ProfileColor,
 		&i.IsPublic,
+		&i.Email,
+		&i.OauthProvider,
+		&i.OauthProviderID,
+		&i.AvatarUrl,
 	)
 	return &i, err
 }

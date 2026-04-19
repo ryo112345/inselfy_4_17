@@ -51,3 +51,10 @@ func NewPostOutputFactory() func() *presenter.PostPresenter {
 		return presenter.NewPostPresenter()
 	}
 }
+
+// NewAuthOutputFactory returns a factory function that creates AuthPresenter instances.
+func NewAuthOutputFactory() func() *presenter.AuthPresenter {
+	return func() *presenter.AuthPresenter {
+		return presenter.NewAuthPresenter()
+	}
+}

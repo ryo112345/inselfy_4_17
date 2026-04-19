@@ -5,6 +5,17 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/usecase"
 )
 
+// NewAuthInputFactory returns a factory function that builds an AuthInputPort.
+func NewAuthInputFactory(
+	googleVerifier port.GoogleTokenVerifier,
+	jwtService port.JWTService,
+	googleClientID string,
+) func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository, output port.AuthOutputPort) port.AuthInputPort {
+	return func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository, output port.AuthOutputPort) port.AuthInputPort {
+		return usecase.NewAuthInteractor(userRepo, refreshRepo, googleVerifier, jwtService, output, googleClientID)
+	}
+}
+
 // NewUserInputFactory returns a factory function that builds a UserInputPort.
 func NewUserInputFactory() func(repo port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 	return func(repo port.UserRepository, output port.UserOutputPort) port.UserInputPort {

@@ -1,0 +1,122 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useAuth } from "@/features/auth/auth-context";
+
+export default function SetupPage() {
+  const { user, isAuthenticated, isLoading, updateUser } = useAuth();
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState(() => user?.name ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!isLoading && !isAuthenticated) {
+    router.replace("/login");
+    return null;
+  }
+
+  if (isLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-gray-400">読み込み中...</p>
+      </div>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const trimmedUsername = username.trim().replace(/^@/, "");
+    const trimmedName = name.trim();
+
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(trimmedUsername)) {
+      setError("ユーザー名は3〜20文字の英数字・アンダースコアで入力してください");
+      return;
+    }
+    if (!trimmedName) {
+      setError("名前を入力してください");
+      return;
+    }
+
+    setSubmitting(true);
+
+    const res = await fetch(`/api/users/${user.username}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ username: trimmedUsername, name: trimmedName }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      if (res.status === 409) {
+        setError("このユーザー名はすでに使われています");
+      } else {
+        setError(body?.message || "設定に失敗しました");
+      }
+      setSubmitting(false);
+      return;
+    }
+
+    const updated = await res.json();
+    updateUser({ ...user, ...updated, needsSetup: false });
+    router.push(`/profile/${updated.username}`);
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold">プロフィール設定</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            ユーザー名と名前を設定してください
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">ユーザー名</span>
+            <div className="flex items-center rounded-md border border-gray-300 focus-within:ring-2 focus-within:ring-black">
+              <span className="pl-3 text-gray-500 text-sm">@</span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.replace(/^@/, ""))}
+                placeholder="yamada_taro"
+                className="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none"
+                autoFocus
+              />
+            </div>
+            <span className="text-xs text-gray-500">
+              プロフィールURL: /profile/{username || "your_username"}
+            </span>
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">名前</span>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="山田 太郎"
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </label>
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-md bg-black text-white px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+          >
+            {submitting ? "設定中..." : "設定する"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}

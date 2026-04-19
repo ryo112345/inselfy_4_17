@@ -72,6 +72,13 @@ func (u *UserInteractor) UpdateProfile(ctx context.Context, rawUsername string, 
 	if err != nil {
 		return err
 	}
+	if input.Username != nil {
+		trimmed := strings.TrimSpace(*input.Username)
+		if _, err := user.ParseUsername(trimmed); err != nil {
+			return err
+		}
+		input.Username = &trimmed
+	}
 	if input.Name != nil {
 		trimmed := strings.TrimSpace(*input.Name)
 		input.Name = &trimmed

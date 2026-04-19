@@ -20,6 +20,10 @@ type User struct {
 	JobSeekingStatus *string
 	ProfileColor     *string
 	IsPublic         bool
+	Email            *string
+	OAuthProvider    *string
+	OAuthProviderID  *string
+	AvatarURL        *string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
@@ -34,6 +38,7 @@ type CreateUserInput struct {
 // A nil pointer means "do not touch this field"; a non-nil pointer to
 // a pointer means "set to that value (possibly nil to clear)".
 type UpdateProfileInput struct {
+	Username         *string
 	Name             *string
 	DisplayName      **string
 	Headline         **string

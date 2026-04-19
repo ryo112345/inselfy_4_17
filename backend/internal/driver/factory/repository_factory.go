@@ -91,3 +91,10 @@ func NewPostRepoFactory(pool *pgxpool.Pool) func() port.PostRepository {
 		return sqlcgw.NewPostRepository(pool)
 	}
 }
+
+// NewRefreshTokenRepoFactory returns a factory function that produces RefreshTokenRepository instances.
+func NewRefreshTokenRepoFactory(pool *pgxpool.Pool) func() port.RefreshTokenRepository {
+	return func() port.RefreshTokenRepository {
+		return sqlcgw.NewRefreshTokenRepository(pool)
+	}
+}
