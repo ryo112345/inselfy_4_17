@@ -4,16 +4,20 @@ import { useState, useEffect, useCallback, useMemo, type ReactNode } from "react
 import Link from "next/link";
 import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/WorkValuesContent";
 import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/CareerInterestContent";
+import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
+import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 
 type Props = {
   children: ReactNode;
   username: string;
   wvSessionId: string | null;
   ciSessionId: string | null;
+  wvResult?: WvResultDTO | null;
+  ciResult?: CiResultDTO | null;
   initialPanel?: number;
 };
 
-export function PanelNavigator({ children, username, wvSessionId, ciSessionId, initialPanel = 0 }: Props) {
+export function PanelNavigator({ children, username, wvSessionId, ciSessionId, wvResult, ciResult, initialPanel = 0 }: Props) {
   const urls = useMemo(() => [
     `/profile/${username}`,
     wvSessionId ? `/work_values/${wvSessionId}` : `/profile/${username}`,
@@ -82,7 +86,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, i
 
         <div className="shrink-0" style={{ width: `${panelPx}px` }}>
           {wvSessionId ? (
-            <WorkValuesResultContent sessionId={wvSessionId} />
+            <WorkValuesResultContent sessionId={wvSessionId} initialData={wvResult} />
           ) : (
             <WorkValuesPlaceholder />
           )}
@@ -90,7 +94,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, i
 
         <div className="shrink-0" style={{ width: `${panelPx}px` }}>
           {ciSessionId ? (
-            <CareerInterestResultContent sessionId={ciSessionId} />
+            <CareerInterestResultContent sessionId={ciSessionId} initialData={ciResult} />
           ) : (
             <CareerInterestPlaceholder />
           )}

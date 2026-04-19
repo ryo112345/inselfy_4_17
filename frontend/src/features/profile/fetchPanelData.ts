@@ -31,6 +31,8 @@ export type PanelData = {
   skills: ModelsSkillResponse[];
   wvSessionId: string | null;
   ciSessionId: string | null;
+  wvResult: WvResultDTO | null;
+  ciResult: CiResultDTO | null;
   diagnostics: DiagnosticSummary[];
 };
 
@@ -114,6 +116,8 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
     skills,
     wvSessionId: wvResult?.session_id ?? null,
     ciSessionId: ciResult?.session_id ?? null,
+    wvResult,
+    ciResult,
     diagnostics,
   };
 }

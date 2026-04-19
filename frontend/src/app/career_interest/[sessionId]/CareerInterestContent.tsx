@@ -41,18 +41,18 @@ const DEFAULT_BADGE = {
 type BadgeColors = typeof DEFAULT_BADGE;
 type ScoreColors = typeof SCORE_COLORS;
 
-export function CareerInterestResultContent({ sessionId }: { sessionId: string }) {
-  const [result, setResult] = useState<ResultDTO | null>(null);
+export function CareerInterestResultContent({ sessionId, initialData }: { sessionId: string; initialData?: ResultDTO | null }) {
+  const [result, setResult] = useState<ResultDTO | null>(initialData ?? null);
   const [error, setError] = useState<string | null>(null);
   const colors = SCORE_COLORS;
   const badge = DEFAULT_BADGE;
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (result || !sessionId) return;
     getResultBySessionId(sessionId)
       .then(setResult)
       .catch(() => setError("診断結果が見つかりませんでした"));
-  }, [sessionId]);
+  }, [sessionId, result]);
 
   if (error) {
     return (

@@ -45,6 +45,8 @@ export default async function ProfilePage({
           username={data.username}
           wvSessionId={data.wvSessionId}
           ciSessionId={data.ciSessionId}
+          wvResult={data.wvResult}
+          ciResult={data.ciResult}
           initialPanel={0}
         >
           <ProfileContent
