@@ -13,6 +13,7 @@ import {
 } from "./api";
 import { CapIcon, PencilIcon, PlusIcon, TrashIcon } from "./Icons";
 import { Field, PrimaryButton, SecondaryButton } from "./Modal";
+import { DashedButton } from "./DashedButton";
 import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
@@ -86,14 +87,9 @@ export function EducationCard({ username, educations }: Props) {
       )}
 
       {educations.length === 0 && formState.mode === "closed" ? (
-        <button
-          type="button"
-          onClick={() => setFormState({ mode: "create" })}
-          className="mt-4 block w-full rounded-xl border-2 border-dashed border-[#d6d9de] bg-white bg-clip-padding py-5 text-center text-lg font-semibold leading-relaxed transition hover:opacity-80"
-          style={{ color: pc }}
-        >
+        <DashedButton color={pc} onClick={() => setFormState({ mode: "create" })}>
           + 学歴を追加しましょう。
-        </button>
+        </DashedButton>
       ) : (
         <ul className="mt-2 divide-y divide-gray-100">
           {educations.map((e) => (

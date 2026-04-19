@@ -13,6 +13,7 @@ import {
 } from "./api";
 import { BriefcaseIcon, PencilIcon, PlusIcon, TrashIcon } from "./Icons";
 import { Field, PrimaryButton, SecondaryButton } from "./Modal";
+import { DashedButton } from "./DashedButton";
 import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
@@ -92,14 +93,9 @@ export function ExperienceCard({ username, experiences }: Props) {
       )}
 
       {experiences.length === 0 && formState.mode === "closed" ? (
-        <button
-          type="button"
-          onClick={() => setFormState({ mode: "create" })}
-          className="mt-4 block w-full rounded-xl border-2 border-dashed border-[#d6d9de] bg-white bg-clip-padding py-5 text-center text-lg font-semibold leading-relaxed transition hover:opacity-80"
-          style={{ color: pc }}
-        >
+        <DashedButton color={pc} onClick={() => setFormState({ mode: "create" })}>
           + 職歴を追加して、キャリアをアピールしましょう。
-        </button>
+        </DashedButton>
       ) : (
         <ul className="mt-2">
           {groups.map((group, idx) => {
