@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getResultBySessionId,
   type ResultDTO,
@@ -328,11 +328,49 @@ function scoreColor(score: number, colors: ScoreColors): string {
   return colors.tier4;
 }
 
+function useTypewriter(fullText: string | null, charsPerTick = 2, intervalMs = 30) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+  const indexRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setInterval>>(null);
+
+  const start = useCallback(() => {
+    if (!fullText) return;
+    indexRef.current = 0;
+    setDisplayed("");
+    setDone(false);
+
+    timerRef.current = setInterval(() => {
+      indexRef.current += charsPerTick;
+      if (indexRef.current >= fullText.length) {
+        indexRef.current = fullText.length;
+        if (timerRef.current) clearInterval(timerRef.current);
+        setDone(true);
+      }
+      setDisplayed(fullText.slice(0, indexRef.current));
+    }, intervalMs);
+  }, [fullText, charsPerTick, intervalMs]);
+
+  const skip = useCallback(() => {
+    if (!fullText) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    setDisplayed(fullText);
+    setDone(true);
+  }, [fullText]);
+
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+  return { displayed, done, start, skip };
+}
+
 function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: BadgeColors }) {
   const [reportContent, setReportContent] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const { displayed, done, start, skip } = useTypewriter(reportContent);
+  const hasAnimated = useRef(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   const handleClick = async () => {
     if (showReport && reportContent) {
@@ -359,8 +397,22 @@ function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: Bad
     }
   };
 
+  useEffect(() => {
+    if (showReport && reportContent && !hasAnimated.current) {
+      hasAnimated.current = true;
+      if (sectionRef.current) {
+        sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(start, 600);
+      } else {
+        start();
+      }
+    }
+  }, [showReport, reportContent, start]);
+
+  const reportProseClasses = "prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-emerald-800 [&_h2]:border-l-3 [&_h2]:border-emerald-600 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-emerald-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-emerald-400 [&_.catchphrase]:bg-emerald-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4";
+
   return (
-    <div className="relative mt-10">
+    <div ref={sectionRef} className={`relative mt-10 scroll-mt-4 ${showReport ? "min-h-screen pb-[50vh]" : ""}`}>
       <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
         <span
           className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
@@ -377,9 +429,12 @@ function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: Bad
         <div className="border-t border-gray-200 mb-3" />
 
         {showReport && reportContent ? (
-          <div className="prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-emerald-800 [&_h2]:border-l-3 [&_h2]:border-emerald-600 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-emerald-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-emerald-400 [&_.catchphrase]:bg-emerald-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4"
-            dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
-          />
+          <>
+            <div
+              className={reportProseClasses}
+              dangerouslySetInnerHTML={{ __html: markdownToHtml(displayed) }}
+            />
+          </>
         ) : (
           <>
             <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
