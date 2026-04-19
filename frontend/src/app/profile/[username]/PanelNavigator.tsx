@@ -74,17 +74,17 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, w
   const expandedTransform = `-${activeIndex * (panelPx + gapPx)}px`;
 
   return (
-    <div className="relative px-4 overflow-hidden">
+    <div className="relative px-4 overflow-hidden h-[calc(100vh-1rem)]">
       <div
-        className="flex items-start transition-all duration-300 ease-in-out"
+        className="flex items-stretch h-full transition-all duration-300 ease-in-out"
         style={{
           gap: `${gapPx}px`,
           transform: `translateX(${expanded ? expandedTransform : focusedTransform})`,
         }}
       >
-        <div className="shrink-0" style={{ width: `${panelPx}px` }}>{children}</div>
+        <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>{children}</div>
 
-        <div className="shrink-0" style={{ width: `${panelPx}px` }}>
+        <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
           {wvSessionId ? (
             <WorkValuesResultContent sessionId={wvSessionId} initialData={wvResult} />
           ) : (
@@ -92,7 +92,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, w
           )}
         </div>
 
-        <div className="shrink-0" style={{ width: `${panelPx}px` }}>
+        <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
           {ciSessionId ? (
             <CareerInterestResultContent sessionId={ciSessionId} initialData={ciResult} />
           ) : (

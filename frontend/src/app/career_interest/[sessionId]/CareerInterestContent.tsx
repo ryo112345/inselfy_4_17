@@ -381,33 +381,33 @@ function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: Bad
             dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
           />
         ) : (
-          <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
-            AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
-          </p>
-        )}
+          <>
+            <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
+              AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
+            </p>
 
-        {notFound && (
-          <p className="text-[13px] text-amber-600 mb-4">
-            レポートはまだ作成中です。しばらくお待ちください。
-          </p>
-        )}
+            {notFound && (
+              <p className="text-[13px] text-amber-600 mb-4">
+                レポートはまだ作成中です。しばらくお待ちください。
+              </p>
+            )}
 
-        <button
-          onClick={handleClick}
-          disabled={loading}
-          className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer disabled:opacity-50"
-        >
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              読み込み中
-            </span>
-          ) : showReport ? (
-            "レポートを閉じる"
-          ) : (
-            "レポートを見る"
-          )}
-        </button>
+            <button
+              onClick={handleClick}
+              disabled={loading}
+              className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer disabled:opacity-50"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  読み込み中
+                </span>
+              ) : (
+                "レポートを作成する"
+              )}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

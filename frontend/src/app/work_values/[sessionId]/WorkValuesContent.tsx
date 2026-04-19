@@ -396,7 +396,7 @@ function AiReportSection({ sessionId, badge }: { sessionId: string; badge: Badge
             dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
           />
         ) : (
-          <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
+          <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
             AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
           </p>
         )}
