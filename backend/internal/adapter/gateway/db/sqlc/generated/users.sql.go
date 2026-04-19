@@ -11,6 +11,33 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countSearchUsers = `-- name: CountSearchUsers :one
+SELECT count(*)
+FROM users
+WHERE username ILIKE '%' || $1 || '%'
+   OR name ILIKE '%' || $1 || '%'
+   OR display_name::text ILIKE '%' || $1 || '%'
+   OR email::text ILIKE '%' || $1 || '%'
+`
+
+func (q *Queries) CountSearchUsers(ctx context.Context, dollar_1 pgtype.Text) (int64, error) {
+	row := q.db.QueryRow(ctx, countSearchUsers, dollar_1)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countUsers = `-- name: CountUsers :one
+SELECT count(*) FROM users
+`
+
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, name)
 VALUES ($1, $2)
@@ -94,6 +121,15 @@ func (q *Queries) CreateUserWithOAuth(ctx context.Context, arg *CreateUserWithOA
 		&i.AvatarUrl,
 	)
 	return &i, err
+}
+
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
 }
 
 const getUserByID = `-- name: GetUserByID :one
@@ -195,6 +231,111 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (*User
 		&i.AvatarUrl,
 	)
 	return &i, err
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, username, name, display_name, email, avatar_url, created_at
+FROM users
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListUsersParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type ListUsersRow struct {
+	ID          pgtype.UUID        `json:"id"`
+	Username    string             `json:"username"`
+	Name        string             `json:"name"`
+	DisplayName pgtype.Text        `json:"display_name"`
+	Email       pgtype.Text        `json:"email"`
+	AvatarUrl   pgtype.Text        `json:"avatar_url"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg *ListUsersParams) ([]*ListUsersRow, error) {
+	rows, err := q.db.Query(ctx, listUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ListUsersRow
+	for rows.Next() {
+		var i ListUsersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Name,
+			&i.DisplayName,
+			&i.Email,
+			&i.AvatarUrl,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsers = `-- name: SearchUsers :many
+SELECT id, username, name, display_name, email, avatar_url, created_at
+FROM users
+WHERE username ILIKE '%' || $1 || '%'
+   OR name ILIKE '%' || $1 || '%'
+   OR display_name::text ILIKE '%' || $1 || '%'
+   OR email::text ILIKE '%' || $1 || '%'
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type SearchUsersParams struct {
+	Column1 pgtype.Text `json:"column_1"`
+	Limit   int32       `json:"limit"`
+	Offset  int32       `json:"offset"`
+}
+
+type SearchUsersRow struct {
+	ID          pgtype.UUID        `json:"id"`
+	Username    string             `json:"username"`
+	Name        string             `json:"name"`
+	DisplayName pgtype.Text        `json:"display_name"`
+	Email       pgtype.Text        `json:"email"`
+	AvatarUrl   pgtype.Text        `json:"avatar_url"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) SearchUsers(ctx context.Context, arg *SearchUsersParams) ([]*SearchUsersRow, error) {
+	rows, err := q.db.Query(ctx, searchUsers, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*SearchUsersRow
+	for rows.Next() {
+		var i SearchUsersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Name,
+			&i.DisplayName,
+			&i.Email,
+			&i.AvatarUrl,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateUserProfile = `-- name: UpdateUserProfile :one

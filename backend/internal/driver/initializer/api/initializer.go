@@ -180,5 +180,13 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return ciCtrl.GetResultBySessionID(c, c.Param("sessionId"))
 	})
 
+	// --- Admin ---
+	adminUserCtrl := httpcontroller.NewAdminUserController(pool)
+	adminGroup := e.Group("/api/admin")
+	adminGroup.GET("/users", adminUserCtrl.List)
+	adminGroup.DELETE("/users/:id", func(c echo.Context) error {
+		return adminUserCtrl.Delete(c, c.Param("id"))
+	})
+
 	return e, cfg, cleanup, nil
 }
