@@ -41,7 +41,7 @@ const DEFAULT_BADGE = {
 type BadgeColors = typeof DEFAULT_BADGE;
 type ScoreColors = typeof SCORE_COLORS;
 
-export function CareerInterestResultContent({ sessionId, initialData }: { sessionId: string; initialData?: ResultDTO | null }) {
+export function CareerInterestResultContent({ sessionId, initialData, isOwner = true }: { sessionId: string; initialData?: ResultDTO | null; isOwner?: boolean }) {
   const [result, setResult] = useState<ResultDTO | null>(initialData ?? null);
   const [error, setError] = useState<string | null>(null);
   const colors = SCORE_COLORS;
@@ -80,7 +80,7 @@ export function CareerInterestResultContent({ sessionId, initialData }: { sessio
       <TypesSection types={sortedTypes} colors={colors} badge={badge} />
       <BasicInterestsSection types={sortedTypes} basicScoreMap={basicScoreMap} colors={colors} badge={badge} />
 
-      <CIAiReportSection sessionId={sessionId} badge={badge} />
+      <CIAiReportSection sessionId={sessionId} badge={badge} isOwner={isOwner} />
     </div>
   );
 }
@@ -363,7 +363,7 @@ function useTypewriter(fullText: string | null, charsPerTick = 2, intervalMs = 3
   return { displayed, done, start, skip };
 }
 
-function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: BadgeColors }) {
+function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: string; badge: BadgeColors; isOwner?: boolean }) {
   const [reportContent, setReportContent] = useState<string | null>(null);
   const [firstView, setFirstView] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -462,23 +462,29 @@ function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: Bad
             dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
           />
         ) : (
-          <>
-            <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
-              AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
-            </p>
-            <button
-              onClick={handleClick}
-              disabled={loading}
-              className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer disabled:opacity-50"
-            >
-              レポートを作成する
-            </button>
-            {notFound && (
-              <p className="text-[13px] text-amber-600 mt-4">
-                レポートはまだ作成中です。しばらくお待ちください。
+          isOwner ? (
+            <>
+              <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
+                AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
               </p>
-            )}
-          </>
+              <button
+                onClick={handleClick}
+                disabled={loading}
+                className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer disabled:opacity-50"
+              >
+                レポートを作成する
+              </button>
+              {notFound && (
+                <p className="text-[13px] text-amber-600 mt-4">
+                  レポートはまだ作成中です。しばらくお待ちください。
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-[16px] text-gray-500 leading-relaxed">
+              レポートはまだ作成されていません。
+            </p>
+          )
         )}
       </div>
       {scrollSpacer && !done && <div className="h-screen" />}

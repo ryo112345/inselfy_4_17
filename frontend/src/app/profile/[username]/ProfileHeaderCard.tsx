@@ -25,9 +25,10 @@ const JOB_SEEKING_LABELS: Record<string, { label: string; color: string }> = {
 type Props = {
   user: ModelsUserResponse;
   experienceCount: number;
+  isOwner?: boolean;
 };
 
-export function ProfileHeaderCard({ user, experienceCount }: Props) {
+export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Props) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user.name);
@@ -84,13 +85,15 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
         style={{ background: headerColor }}
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
-        <button
-          type="button"
-          aria-label="カバー画像を変更"
-          className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur hover:bg-black/30"
-        >
-          <CameraIcon className="h-[18px] w-[18px]" />
-        </button>
+        {isOwner && (
+          <button
+            type="button"
+            aria-label="カバー画像を変更"
+            className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur hover:bg-black/30"
+          >
+            <CameraIcon className="h-[18px] w-[18px]" />
+          </button>
+        )}
       </div>
 
       <div className="relative px-7 pb-6">
@@ -100,18 +103,20 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
             <div className="group flex h-36 w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
               <FaceIcon className="h-20 w-20" style={{ color: headerColor }} />
             </div>
-            <button
-              type="button"
-              aria-label="アバターを追加"
-              className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white shadow-sm transition hover:opacity-80"
-              style={{ borderColor: headerColor, color: headerColor }}
-            >
-              <PlusIcon className="h-[22px] w-[22px]" />
-            </button>
+            {isOwner && (
+              <button
+                type="button"
+                aria-label="アバターを追加"
+                className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white shadow-sm transition hover:opacity-80"
+                style={{ borderColor: headerColor, color: headerColor }}
+              >
+                <PlusIcon className="h-[22px] w-[22px]" />
+              </button>
+            )}
           </div>
         </div>
 
-        {!isEditing && (
+        {isOwner && !isEditing && (
           <button
             type="button"
             aria-label="プロフィールを編集"
@@ -407,9 +412,9 @@ export function ProfileHeaderCard({ user, experienceCount }: Props) {
               </div>
               {user.headline ? (
                 <p className="mt-2 text-lg text-gray-700">{user.headline}</p>
-              ) : (
+              ) : isOwner ? (
                 <p className="mt-2 text-lg text-gray-400">ヘッドラインを追加</p>
-              )}
+              ) : null}
               <div className="mt-2.5 flex flex-wrap items-center gap-3 text-base text-gray-500">
                 {user.location ? (
                   <span className="inline-flex items-center gap-1">

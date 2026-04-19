@@ -19,6 +19,7 @@ import { useProfileColor } from "./ProfileColorContext";
 type Props = {
   username: string;
   educations: ModelsEducationResponse[];
+  isOwner?: boolean;
 };
 
 const currentYear = new Date().getFullYear();
@@ -27,7 +28,7 @@ const YEARS = Array.from({ length: currentYear - 1969 }, (_, i) => currentYear -
 const selectClass =
   "w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none";
 
-export function EducationCard({ username, educations }: Props) {
+export function EducationCard({ username, educations, isOwner = true }: Props) {
   const router = useRouter();
   const pc = useProfileColor();
   const [formState, setFormState] = useState<
@@ -64,7 +65,7 @@ export function EducationCard({ username, educations }: Props) {
           <CapIcon className="h-6 w-6 text-gray-900" />
           学歴
         </h2>
-        {formState.mode === "closed" && (
+        {isOwner && formState.mode === "closed" && (
           <button
             type="button"
             aria-label="学歴を追加"
@@ -77,7 +78,7 @@ export function EducationCard({ username, educations }: Props) {
         )}
       </div>
 
-      {formState.mode === "create" && (
+      {isOwner && formState.mode === "create" && (
         <EducationForm
           username={username}
           mode="create"
@@ -87,9 +88,11 @@ export function EducationCard({ username, educations }: Props) {
       )}
 
       {educations.length === 0 && formState.mode === "closed" ? (
-        <DashedButton color={pc} onClick={() => setFormState({ mode: "create" })}>
-          + 学歴を追加しましょう。
-        </DashedButton>
+        isOwner ? (
+          <DashedButton color={pc} onClick={() => setFormState({ mode: "create" })}>
+            + 学歴を追加しましょう。
+          </DashedButton>
+        ) : null
       ) : (
         <ul className="mt-2 divide-y divide-gray-100">
           {educations.map((e) => (
@@ -117,7 +120,7 @@ export function EducationCard({ username, educations }: Props) {
                           {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
                         </p>
                       </div>
-                      {formState.mode === "closed" && (
+                      {isOwner && formState.mode === "closed" && (
                         <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
                           <button
                             type="button"

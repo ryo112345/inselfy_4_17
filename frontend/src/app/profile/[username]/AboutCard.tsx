@@ -12,9 +12,10 @@ import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
   user: ModelsUserResponse;
+  isOwner?: boolean;
 };
 
-export function AboutCard({ user }: Props) {
+export function AboutCard({ user, isOwner = true }: Props) {
   const router = useRouter();
   const pc = useProfileColor();
   const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +48,7 @@ export function AboutCard({ user }: Props) {
     <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900">自己紹介</h2>
-        {!isEditing && (
+        {isOwner && !isEditing && (
           <button
             type="button"
             aria-label="自己紹介を編集"
@@ -86,11 +87,11 @@ export function AboutCard({ user }: Props) {
             <p className="mt-3 whitespace-pre-wrap text-lg leading-relaxed text-gray-800">
               {user.about}
             </p>
-          ) : (
+          ) : isOwner ? (
             <p className="mt-3 text-lg leading-relaxed text-gray-500">
               自己紹介を追加して、あなたのことを教えてください。
             </p>
-          )}
+          ) : null}
         </>
       )}
     </section>

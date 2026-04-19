@@ -19,9 +19,10 @@ import { useProfileColor } from "./ProfileColorContext";
 type Props = {
   username: string;
   experiences: ModelsExperienceResponse[];
+  isOwner?: boolean;
 };
 
-export function ExperienceCard({ username, experiences }: Props) {
+export function ExperienceCard({ username, experiences, isOwner = true }: Props) {
   const pc = useProfileColor();
   const [formState, setFormState] = useState<
     | { mode: "closed" }
@@ -70,7 +71,7 @@ export function ExperienceCard({ username, experiences }: Props) {
           <BriefcaseIcon className="h-6 w-6 text-gray-900" />
           職歴
         </h2>
-        {formState.mode === "closed" && (
+        {isOwner && formState.mode === "closed" && (
           <button
             type="button"
             aria-label="職歴を追加"
@@ -83,7 +84,7 @@ export function ExperienceCard({ username, experiences }: Props) {
         )}
       </div>
 
-      {formState.mode === "create" && (
+      {isOwner && formState.mode === "create" && (
         <ExperienceForm
           username={username}
           mode="create"
@@ -93,9 +94,11 @@ export function ExperienceCard({ username, experiences }: Props) {
       )}
 
       {experiences.length === 0 && formState.mode === "closed" ? (
-        <DashedButton color={pc} onClick={() => setFormState({ mode: "create" })}>
-          + 職歴を追加して、キャリアをアピールしましょう。
-        </DashedButton>
+        isOwner ? (
+          <DashedButton color={pc} onClick={() => setFormState({ mode: "create" })}>
+            + 職歴を追加して、キャリアをアピールしましょう。
+          </DashedButton>
+        ) : null
       ) : (
         <ul className="mt-2">
           {groups.map((group, idx) => {
@@ -119,7 +122,7 @@ export function ExperienceCard({ username, experiences }: Props) {
                     <SingleExperience
                       experience={group.items[0]}
                       pending={pending && deletingId === group.items[0].id}
-                      showActions={formState.mode === "closed"}
+                      showActions={isOwner && formState.mode === "closed"}
                       onEdit={() =>
                         setFormState({ mode: "edit", experience: group.items[0] })
                       }
@@ -132,7 +135,7 @@ export function ExperienceCard({ username, experiences }: Props) {
                     editingId={editingId}
                     deletingId={deletingId}
                     pending={pending}
-                    showActions={formState.mode === "closed"}
+                    showActions={isOwner && formState.mode === "closed"}
                     onEdit={(e) =>
                       setFormState({ mode: "edit", experience: e })
                     }

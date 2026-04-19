@@ -10,19 +10,26 @@ import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 type Props = {
   children: ReactNode;
   username: string;
+  displayName?: string;
   wvSessionId: string | null;
   ciSessionId: string | null;
   wvResult?: WvResultDTO | null;
   ciResult?: CiResultDTO | null;
+  wvHasReport?: boolean;
+  ciHasReport?: boolean;
+  isOwner?: boolean;
   initialPanel?: number;
 };
 
-export function PanelNavigator({ children, username, wvSessionId, ciSessionId, wvResult, ciResult, initialPanel = 0 }: Props) {
+export function PanelNavigator({ children, username, displayName = username, wvSessionId, ciSessionId, wvResult, ciResult, wvHasReport, ciHasReport, isOwner = true, initialPanel = 0 }: Props) {
+  const showWvResult = !!wvSessionId && (isOwner || !!wvHasReport);
+  const showCiResult = !!ciSessionId && (isOwner || !!ciHasReport);
+
   const urls = useMemo(() => [
     `/profile/${username}`,
-    wvSessionId ? `/work_values/${wvSessionId}` : `/profile/${username}`,
-    ciSessionId ? `/career_interest/${ciSessionId}` : `/profile/${username}`,
-  ], [username, wvSessionId, ciSessionId]);
+    showWvResult ? `/work_values/${wvSessionId}` : `/profile/${username}`,
+    showCiResult ? `/career_interest/${ciSessionId}` : `/profile/${username}`,
+  ], [username, wvSessionId, ciSessionId, showWvResult, showCiResult]);
   const panelCount = 3;
 
   const [activeIndex, setActiveIndex] = useState(initialPanel);
@@ -85,18 +92,18 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, w
         <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>{children}</div>
 
         <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
-          {wvSessionId ? (
-            <WorkValuesResultContent sessionId={wvSessionId} initialData={wvResult} />
+          {showWvResult ? (
+            <WorkValuesResultContent sessionId={wvSessionId!} initialData={wvResult} isOwner={isOwner} />
           ) : (
-            <WorkValuesPlaceholder />
+            <WorkValuesPlaceholder isOwner={isOwner} displayName={displayName} />
           )}
         </div>
 
         <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
-          {ciSessionId ? (
-            <CareerInterestResultContent sessionId={ciSessionId} initialData={ciResult} />
+          {showCiResult ? (
+            <CareerInterestResultContent sessionId={ciSessionId!} initialData={ciResult} isOwner={isOwner} />
           ) : (
-            <CareerInterestPlaceholder />
+            <CareerInterestPlaceholder isOwner={isOwner} displayName={displayName} />
           )}
         </div>
       </div>
@@ -135,7 +142,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, w
   );
 }
 
-function WorkValuesPlaceholder() {
+function WorkValuesPlaceholder({ isOwner = true, displayName = "" }: { isOwner?: boolean; displayName?: string }) {
   return (
     <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)] flex flex-col min-h-[520px]">
       <WvFloatingSpheres />
@@ -157,7 +164,6 @@ function WorkValuesPlaceholder() {
           <br />
           あなたの内なるコンパスを可視化します。
         </p>
-
         <div className="flex justify-center gap-8 mt-8">
           <div>
             <span className="text-[32px] font-bold text-white">70</span>
@@ -172,21 +178,35 @@ function WorkValuesPlaceholder() {
             <span className="text-[13px] font-semibold text-emerald-400 tracking-wider ml-1.5">MIN</span>
           </div>
         </div>
+        {!isOwner && (
+          <p className="text-[14px] text-gray-500 mt-6">
+            {displayName} さんはまだ診断を受けていません
+          </p>
+        )}
       </div>
 
       <div className="relative z-10 -mx-10 mt-10 border-t border-gray-700 bg-gradient-to-t from-black/90 to-[#0a1628] px-10 py-8">
-        <Link
-          href="/work_values/start"
-          className="block mx-auto w-3/4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-base py-4 transition-colors text-center"
-        >
-          診断を開始する &rarr;
-        </Link>
+        {isOwner ? (
+          <Link
+            href="/work_values/start"
+            className="block mx-auto w-3/4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-base py-4 transition-colors text-center"
+          >
+            診断を開始する &rarr;
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="block mx-auto w-3/4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-base py-4 transition-colors text-center cursor-pointer"
+          >
+            受診を依頼する
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-function CareerInterestPlaceholder() {
+function CareerInterestPlaceholder({ isOwner = true, displayName = "" }: { isOwner?: boolean; displayName?: string }) {
   return (
     <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#e8f0fa] border border-gray-200 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.08)] flex flex-col min-h-[520px]">
       <CiFloatingShapes />
@@ -208,7 +228,6 @@ function CareerInterestPlaceholder() {
           <br />
           直感で答えて大丈夫です。
         </p>
-
         <div className="flex justify-center gap-8 mt-8">
           <div>
             <span className="text-[32px] font-bold text-gray-800">60</span>
@@ -223,15 +242,29 @@ function CareerInterestPlaceholder() {
             <span className="text-[13px] font-semibold text-blue-500 tracking-wider ml-1.5">MIN</span>
           </div>
         </div>
+        {!isOwner && (
+          <p className="text-[14px] text-gray-500 mt-6">
+            {displayName} さんはまだ診断を受けていません
+          </p>
+        )}
       </div>
 
       <div className="relative z-10 -mx-10 mt-10 border-t border-gray-200 bg-white px-10 py-8">
-        <Link
-          href="/career_interest/start"
-          className="block mx-auto w-3/4 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base py-4 transition-colors text-center"
-        >
-          診断を開始する &rarr;
-        </Link>
+        {isOwner ? (
+          <Link
+            href="/career_interest/start"
+            className="block mx-auto w-3/4 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base py-4 transition-colors text-center"
+          >
+            診断を開始する &rarr;
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className="block mx-auto w-3/4 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base py-4 transition-colors text-center cursor-pointer"
+          >
+            受診を依頼する
+          </button>
+        )}
       </div>
     </div>
   );

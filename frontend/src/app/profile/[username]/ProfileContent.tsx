@@ -22,22 +22,33 @@ type Props = {
   educations: ModelsEducationResponse[];
   skills: ModelsSkillResponse[];
   posts?: PostItem[];
+  isOwner?: boolean;
 };
 
-export function ProfileContent({ user, username, experiences, educations, skills, posts }: Props) {
+export function ProfileContent({ user, username, experiences, educations, skills, posts, isOwner = true }: Props) {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-3">
-      <ProfileHeaderCard user={user} experienceCount={experiences.length} />
-      <AiReportCard
-        hasExperience={experiences.length > 0}
-        hasSkills={skills.length > 0}
-        hasEducation={educations.length > 0}
-      />
-      <ResumeUploadCard />
-      <SkillsCard username={username} skills={skills} />
-      <ExperienceCard username={username} experiences={experiences} />
-      <EducationCard username={username} educations={educations} />
-      <AboutCard user={user} />
+      <ProfileHeaderCard user={user} experienceCount={experiences.length} isOwner={isOwner} />
+      {isOwner && (
+        <AiReportCard
+          hasExperience={experiences.length > 0}
+          hasSkills={skills.length > 0}
+          hasEducation={educations.length > 0}
+        />
+      )}
+      {isOwner && <ResumeUploadCard />}
+      {(isOwner || skills.length > 0) && (
+        <SkillsCard username={username} skills={skills} isOwner={isOwner} />
+      )}
+      {(isOwner || experiences.length > 0) && (
+        <ExperienceCard username={username} experiences={experiences} isOwner={isOwner} />
+      )}
+      {(isOwner || educations.length > 0) && (
+        <EducationCard username={username} educations={educations} isOwner={isOwner} />
+      )}
+      {(isOwner || user.about) && (
+        <AboutCard user={user} isOwner={isOwner} />
+      )}
       <PostsTabs posts={posts} />
     </div>
   );

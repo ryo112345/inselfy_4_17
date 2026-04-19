@@ -33,6 +33,8 @@ export type PanelData = {
   ciSessionId: string | null;
   wvResult: WvResultDTO | null;
   ciResult: CiResultDTO | null;
+  wvHasReport: boolean;
+  ciHasReport: boolean;
   diagnostics: DiagnosticSummary[];
 };
 
@@ -72,6 +74,17 @@ function buildCiKeywords(result: CiResultDTO): string {
     .join("・");
 }
 
+async function checkReportExists(sessionId: string, kind: "work-values" | "career-interest"): Promise<boolean> {
+  try {
+    const res = await fetch(`${INTERNAL_API}/api/${kind}/sessions/${sessionId}/ai-report`);
+    if (!res.ok) return false;
+    const data = await res.json();
+    return !!data?.content;
+  } catch {
+    return false;
+  }
+}
+
 async function fetchRest(user: ModelsUserResponse, username: string): Promise<PanelData> {
   const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult] = await Promise.all([
     experiencesListExperiences({ path: { username } }),
@@ -79,6 +92,11 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
     skillsListSkills({ path: { username } }),
     getLatestWvResult(user.id).catch(() => null),
     getLatestCiResult(user.id).catch(() => null),
+  ]);
+
+  const [wvHasReport, ciHasReport] = await Promise.all([
+    wvResult?.session_id ? checkReportExists(wvResult.session_id, "work-values") : Promise.resolve(false),
+    ciResult?.session_id ? checkReportExists(ciResult.session_id, "career-interest") : Promise.resolve(false),
   ]);
 
   const experiences: ModelsExperienceResponse[] =
@@ -118,6 +136,8 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
     ciSessionId: ciResult?.session_id ?? null,
     wvResult,
     ciResult,
+    wvHasReport,
+    ciHasReport,
     diagnostics,
   };
 }
