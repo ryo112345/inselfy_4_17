@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import Link from "next/link";
 import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/WorkValuesContent";
 import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/CareerInterestContent";
@@ -14,20 +14,53 @@ type Props = {
 };
 
 export function PanelNavigator({ children, username, wvSessionId, ciSessionId, initialPanel = 0 }: Props) {
-  const urls = [
+  const urls = useMemo(() => [
     `/profile/${username}`,
     wvSessionId ? `/work_values/${wvSessionId}` : `/profile/${username}`,
     ciSessionId ? `/career_interest/${ciSessionId}` : `/profile/${username}`,
-  ];
+  ], [username, wvSessionId, ciSessionId]);
   const panelCount = 3;
 
   const [activeIndex, setActiveIndex] = useState(initialPanel);
   const [expanded, setExpanded] = useState(false);
 
+  const urlToIndex = useCallback((path: string) => {
+    for (let i = urls.length - 1; i >= 0; i--) {
+      if (urls[i] === path) return i;
+    }
+    return 0;
+  }, [urls]);
+
+  useEffect(() => {
+    const restored = window.history.state?.panelIndex;
+    if (restored != null && restored !== initialPanel) {
+      setActiveIndex(restored);
+    } else {
+      window.history.replaceState(
+        { ...window.history.state, panelIndex: initialPanel },
+        "",
+        urls[initialPanel],
+      );
+    }
+  }, [initialPanel, urls]);
+
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      const idx = e.state?.panelIndex ?? urlToIndex(window.location.pathname);
+      setActiveIndex(idx);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [urlToIndex]);
+
   const goTo = (index: number) => {
     if (index < 0 || index >= panelCount) return;
     setActiveIndex(index);
-    window.history.replaceState(null, "", urls[index]);
+    window.history.pushState(
+      { ...window.history.state, panelIndex: index },
+      "",
+      urls[index],
+    );
   };
 
   const panelPx = 672;
@@ -66,6 +99,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, i
 
       <div className="fixed bottom-6 right-6 z-40 flex items-center gap-1">
         <button
+          data-testid="panel-prev"
           onClick={() => goTo(activeIndex - 1)}
           disabled={activeIndex === 0}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-md transition hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
@@ -83,6 +117,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, i
           </svg>
         </button>
         <button
+          data-testid="panel-next"
           onClick={() => goTo(activeIndex + 1)}
           disabled={activeIndex === panelCount - 1}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-md transition hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"

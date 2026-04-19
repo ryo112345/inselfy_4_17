@@ -24,6 +24,11 @@ export default function RootLayout({
   return (
     <html lang="ja" className={notoSansJp.variable}>
       <body className="antialiased">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.addEventListener("pageshow",function(){var n=performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")location.reload()})`,
+          }}
+        />
         <GoogleProvider>
           <AuthProvider>{children}</AuthProvider>
         </GoogleProvider>
