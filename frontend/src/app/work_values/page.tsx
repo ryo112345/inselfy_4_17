@@ -16,8 +16,8 @@ const inter = Inter({
 export default function WorkValuesPage() {
 
   return (
-    <main className="min-h-screen flex justify-center bg-[#f6f7f5] px-4 pt-[15vh] pb-12 relative">
-<div className="relative w-full max-w-lg h-fit text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
+      <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
         <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-5 py-2 mb-8">
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -45,7 +45,7 @@ export default function WorkValuesPage() {
           <Stat value="10" label="MIN" />
         </div>
 
-        <div className="relative z-10 -mx-10 -mb-14 mt-10 border-t border-gray-700 bg-gradient-to-t from-black/90 to-[#0a1628] px-10 py-8">
+        <div className="relative z-10 -mx-10 border-t border-gray-700 bg-gradient-to-t from-black/90 to-[#0a1628] px-8 pt-6 pb-8">
           <Link
             href="/work_values/start"
             className="block mx-auto w-3/4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-base py-4 transition-colors"
