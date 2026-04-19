@@ -370,6 +370,7 @@ function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: Bad
   const [showReport, setShowReport] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [scrollSpacer, setScrollSpacer] = useState(false);
   const { displayed, done, start } = useTypewriter(reportContent);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -388,14 +389,26 @@ function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: Bad
 
   const handleClick = () => {
     if (reportContent) {
+      setScrollSpacer(true);
       setShowReport(true);
       if (firstView) {
-        if (sectionRef.current) {
-          sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-          setTimeout(start, 600);
-        } else {
-          start();
-        }
+        requestAnimationFrame(() => {
+          if (sectionRef.current) {
+            sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+            let timer: ReturnType<typeof setTimeout>;
+            const onScroll = () => {
+              clearTimeout(timer);
+              timer = setTimeout(() => {
+                window.removeEventListener("scroll", onScroll);
+                start();
+              }, 80);
+            };
+            window.addEventListener("scroll", onScroll);
+            onScroll();
+          } else {
+            start();
+          }
+        });
       }
     } else {
       setLoading(true);
@@ -468,7 +481,7 @@ function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: Bad
           </>
         )}
       </div>
-      {showReport && firstView && !done && <div className="h-screen" />}
+      {scrollSpacer && !done && <div className="h-screen" />}
     </div>
   );
 }
