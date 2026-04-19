@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 
 export default function SetupPage() {
@@ -12,10 +12,11 @@ export default function SetupPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!isLoading && !isAuthenticated) {
-    router.replace("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   if (isLoading || !user) {
     return (

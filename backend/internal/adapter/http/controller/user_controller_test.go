@@ -39,6 +39,9 @@ type stubRepo struct{}
 func (stubRepo) Create(context.Context, *user.User) (*user.User, error)                { return nil, nil }
 func (stubRepo) GetByUsername(context.Context, user.Username) (*user.User, error)      { return nil, nil }
 func (stubRepo) GetByID(context.Context, string) (*user.User, error)                  { return nil, nil }
+func (stubRepo) GetByOAuthProvider(context.Context, string, string) (*user.User, error) {
+	return nil, nil
+}
 func (stubRepo) UpdateProfile(context.Context, string, user.UpdateProfileInput) (*user.User, error) {
 	return nil, nil
 }

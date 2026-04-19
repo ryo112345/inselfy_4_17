@@ -28,6 +28,9 @@ func (s *userRepoStub) GetByID(ctx context.Context, id string) (*user.User, erro
 	}
 	return nil, nil
 }
+func (s *userRepoStub) GetByOAuthProvider(_ context.Context, _, _ string) (*user.User, error) {
+	return nil, nil
+}
 func (s *userRepoStub) UpdateProfile(ctx context.Context, id string, in user.UpdateProfileInput) (*user.User, error) {
 	return s.updateProfile(ctx, id, in)
 }
