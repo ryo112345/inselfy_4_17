@@ -205,6 +205,10 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// --- Admin CI Reports ---
 	adminCIReportCtrl := httpcontroller.NewAdminCIReportController(pool)
 	adminGroup.GET("/ci-reports/pending", adminCIReportCtrl.ListPending)
+	adminGroup.GET("/ci-reports/list", adminCIReportCtrl.ListReports)
+	adminGroup.POST("/ci-sessions/:sessionId/reset-viewed", func(c echo.Context) error {
+		return adminCIReportCtrl.ResetViewed(c, c.Param("sessionId"))
+	})
 	adminGroup.PUT("/ci-sessions/:sessionId/ai-report", func(c echo.Context) error {
 		return adminCIReportCtrl.SaveReport(c, c.Param("sessionId"))
 	})

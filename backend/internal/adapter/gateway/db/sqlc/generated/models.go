@@ -56,6 +56,7 @@ type CiAiReport struct {
 	UserID    pgtype.UUID        `json:"user_id"`
 	Content   string             `json:"content"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ViewedAt  pgtype.Timestamptz `json:"viewed_at"`
 }
 
 type Education struct {

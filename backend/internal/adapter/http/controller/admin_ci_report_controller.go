@@ -104,12 +104,64 @@ func (c *AdminCIReportController) GetReport(ctx echo.Context, sessionID string) 
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
+	firstView := !report.ViewedAt.Valid
+	if firstView {
+		_ = c.queries.MarkCIAIReportViewed(ctx.Request().Context(), pgSessionID)
+	}
+
+	resp := map[string]any{
 		"id":         pgUUIDToString(report.ID),
 		"session_id": pgUUIDToString(report.SessionID),
 		"content":    report.Content,
 		"created_at": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+		"first_view": firstView,
+	}
+	return ctx.JSON(http.StatusOK, resp)
+}
+
+func (c *AdminCIReportController) ListReports(ctx echo.Context) error {
+	rows, err := c.queries.ListCIAIReports(ctx.Request().Context())
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	items := make([]map[string]any, 0, len(rows))
+	for _, r := range rows {
+		item := map[string]any{
+			"id":         pgUUIDToString(r.ID),
+			"session_id": pgUUIDToString(r.SessionID),
+			"user_id":    pgUUIDToString(r.UserID),
+			"username":   r.Username,
+			"created_at": r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			"viewed_at":  nil,
+		}
+		if r.DisplayName.Valid {
+			item["display_name"] = r.DisplayName.String
+		}
+		if r.ViewedAt.Valid {
+			item["viewed_at"] = r.ViewedAt.Time.Format("2006-01-02T15:04:05Z")
+		}
+		items = append(items, item)
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]any{
+		"reports": items,
+		"total":   len(items),
 	})
+}
+
+func (c *AdminCIReportController) ResetViewed(ctx echo.Context, sessionID string) error {
+	parsedSession, err := uuid.Parse(sessionID)
+	if err != nil {
+		return badRequest(ctx, "invalid session_id")
+	}
+
+	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
+	if err := c.queries.ResetCIAIReportViewed(ctx.Request().Context(), pgSessionID); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]string{"message": "ok"})
 }
 
 func (c *AdminCIReportController) GetPrompt(ctx echo.Context, sessionID string) error {

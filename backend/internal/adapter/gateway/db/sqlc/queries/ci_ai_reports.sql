@@ -4,9 +4,30 @@ FROM career_interest_sessions
 WHERE id = $1;
 
 -- name: GetCIAIReportBySessionID :one
-SELECT id, session_id, user_id, content, created_at
+SELECT id, session_id, user_id, content, created_at, viewed_at
 FROM ci_ai_reports
 WHERE session_id = $1;
+
+-- name: MarkCIAIReportViewed :exec
+UPDATE ci_ai_reports SET viewed_at = NOW()
+WHERE session_id = $1 AND viewed_at IS NULL;
+
+-- name: ResetCIAIReportViewed :exec
+UPDATE ci_ai_reports SET viewed_at = NULL
+WHERE session_id = $1;
+
+-- name: ListCIAIReports :many
+SELECT
+    r.id,
+    r.session_id,
+    r.user_id,
+    r.created_at,
+    r.viewed_at,
+    u.username,
+    u.display_name
+FROM ci_ai_reports r
+JOIN users u ON u.id = r.user_id
+ORDER BY r.created_at DESC;
 
 -- name: UpsertCIAIReport :one
 INSERT INTO ci_ai_reports (session_id, user_id, content)
