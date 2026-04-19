@@ -198,6 +198,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	adminGroup.GET("/sessions/:sessionId/scores", func(c echo.Context) error {
 		return adminReportCtrl.GetSessionScores(c, c.Param("sessionId"))
 	})
+	adminGroup.GET("/sessions/:sessionId/prompt", func(c echo.Context) error {
+		return adminReportCtrl.GetPrompt(c, c.Param("sessionId"))
+	})
 
 	// --- AI Report (user-facing) ---
 	wvGroup.GET("/sessions/:sessionId/ai-report", func(c echo.Context) error {
