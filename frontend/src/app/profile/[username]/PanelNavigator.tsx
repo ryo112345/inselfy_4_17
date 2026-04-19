@@ -37,7 +37,7 @@ export function PanelNavigator({ children, username, wvSessionId, ciSessionId, i
   const expandedTransform = `-${activeIndex * (panelPx + gapPx)}px`;
 
   return (
-    <div className="relative px-4">
+    <div className="relative px-4 overflow-hidden">
       <div
         className="flex items-start transition-all duration-300 ease-in-out"
         style={{

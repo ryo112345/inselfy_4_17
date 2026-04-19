@@ -75,8 +75,9 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
     document.cookie = `sidebar-open=${open}; path=/; max-age=31536000; SameSite=Lax`;
   }, [open]);
 
-  const profileHref = `/profile/${username}`;
-  const initial = displayName ? displayName.charAt(0) : username.charAt(0);
+  const profileHref = `/profile/${user?.username ?? username}`;
+  const myDisplayName = user?.name ?? displayName;
+  const initial = myDisplayName ? myDisplayName.charAt(0) : (user?.username ?? username).charAt(0);
 
   return (
     <>
@@ -203,7 +204,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
               <span className="flex shrink-0 w-9 h-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white leading-none">
                 {initial}
               </span>
-              <span className="whitespace-nowrap">{displayName ?? username}</span>
+              <span className="whitespace-nowrap">{myDisplayName ?? user?.username ?? username}</span>
             </button>
           </div>
         </aside>
