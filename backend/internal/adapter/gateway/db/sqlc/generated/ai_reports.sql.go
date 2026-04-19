@@ -12,7 +12,7 @@ import (
 )
 
 const getAIReportBySessionID = `-- name: GetAIReportBySessionID :one
-SELECT id, session_id, user_id, content, created_at
+SELECT id, session_id, user_id, content, created_at, viewed_at
 FROM ai_reports
 WHERE session_id = $1
 `
@@ -26,6 +26,7 @@ func (q *Queries) GetAIReportBySessionID(ctx context.Context, sessionID pgtype.U
 		&i.UserID,
 		&i.Content,
 		&i.CreatedAt,
+		&i.ViewedAt,
 	)
 	return &i, err
 }
@@ -82,6 +83,58 @@ func (q *Queries) GetWVSessionByID(ctx context.Context, id pgtype.UUID) (*GetWVS
 	return &i, err
 }
 
+const listAIReports = `-- name: ListAIReports :many
+SELECT
+    r.id,
+    r.session_id,
+    r.user_id,
+    r.created_at,
+    r.viewed_at,
+    u.username,
+    u.display_name
+FROM ai_reports r
+JOIN users u ON u.id = r.user_id
+ORDER BY r.created_at DESC
+`
+
+type ListAIReportsRow struct {
+	ID          pgtype.UUID        `json:"id"`
+	SessionID   pgtype.UUID        `json:"session_id"`
+	UserID      pgtype.UUID        `json:"user_id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ViewedAt    pgtype.Timestamptz `json:"viewed_at"`
+	Username    string             `json:"username"`
+	DisplayName pgtype.Text        `json:"display_name"`
+}
+
+func (q *Queries) ListAIReports(ctx context.Context) ([]*ListAIReportsRow, error) {
+	rows, err := q.db.Query(ctx, listAIReports)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ListAIReportsRow
+	for rows.Next() {
+		var i ListAIReportsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.SessionID,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.ViewedAt,
+			&i.Username,
+			&i.DisplayName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listSessionsWithoutReport = `-- name: ListSessionsWithoutReport :many
 SELECT
     s.id AS session_id,
@@ -130,12 +183,32 @@ func (q *Queries) ListSessionsWithoutReport(ctx context.Context) ([]*ListSession
 	return items, nil
 }
 
+const markAIReportViewed = `-- name: MarkAIReportViewed :exec
+UPDATE ai_reports SET viewed_at = NOW()
+WHERE session_id = $1 AND viewed_at IS NULL
+`
+
+func (q *Queries) MarkAIReportViewed(ctx context.Context, sessionID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, markAIReportViewed, sessionID)
+	return err
+}
+
+const resetAIReportViewed = `-- name: ResetAIReportViewed :exec
+UPDATE ai_reports SET viewed_at = NULL
+WHERE session_id = $1
+`
+
+func (q *Queries) ResetAIReportViewed(ctx context.Context, sessionID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, resetAIReportViewed, sessionID)
+	return err
+}
+
 const upsertAIReport = `-- name: UpsertAIReport :one
 INSERT INTO ai_reports (session_id, user_id, content)
 VALUES ($1, $2, $3)
 ON CONFLICT (session_id)
 DO UPDATE SET content = EXCLUDED.content, created_at = NOW()
-RETURNING id, session_id, user_id, content, created_at
+RETURNING id, session_id, user_id, content, created_at, viewed_at
 `
 
 type UpsertAIReportParams struct {
@@ -153,6 +226,7 @@ func (q *Queries) UpsertAIReport(ctx context.Context, arg *UpsertAIReportParams)
 		&i.UserID,
 		&i.Content,
 		&i.CreatedAt,
+		&i.ViewedAt,
 	)
 	return &i, err
 }

@@ -11,7 +11,7 @@ interface PendingSession {
   completed_at: string | null;
 }
 
-interface CIReport {
+interface Report {
   id: string;
   session_id: string;
   user_id: string;
@@ -29,7 +29,8 @@ export default function AdminReportsPage() {
   const [section, setSection] = useState<SectionType>("pending");
   const [wvSessions, setWvSessions] = useState<PendingSession[]>([]);
   const [ciSessions, setCiSessions] = useState<PendingSession[]>([]);
-  const [ciReports, setCiReports] = useState<CIReport[]>([]);
+  const [wvReports, setWvReports] = useState<Report[]>([]);
+  const [ciReports, setCiReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPrompt, setExpandedPrompt] = useState<string | null>(null);
   const [promptContent, setPromptContent] = useState<Record<string, string>>({});
@@ -38,9 +39,10 @@ export default function AdminReportsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [wvRes, ciRes, ciReportsRes] = await Promise.all([
+      const [wvRes, ciRes, wvReportsRes, ciReportsRes] = await Promise.all([
         fetch("/api/admin/reports/pending"),
         fetch("/api/admin/ci-reports/pending"),
+        fetch("/api/admin/reports/list"),
         fetch("/api/admin/ci-reports/list"),
       ]);
       if (wvRes.ok) {
@@ -51,6 +53,10 @@ export default function AdminReportsPage() {
         const data = await ciRes.json();
         setCiSessions(data.sessions ?? []);
       }
+      if (wvReportsRes.ok) {
+        const data = await wvReportsRes.json();
+        setWvReports(data.reports ?? []);
+      }
       if (ciReportsRes.ok) {
         const data = await ciReportsRes.json();
         setCiReports(data.reports ?? []);
@@ -58,6 +64,7 @@ export default function AdminReportsPage() {
     } catch {
       setWvSessions([]);
       setCiSessions([]);
+      setWvReports([]);
       setCiReports([]);
     } finally {
       setLoading(false);
@@ -67,6 +74,7 @@ export default function AdminReportsPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const pendingSessions = tab === "wv" ? wvSessions : ciSessions;
+  const reports = tab === "wv" ? wvReports : ciReports;
 
   const togglePrompt = async (session: PendingSession) => {
     const sid = session.session_id;
@@ -105,9 +113,13 @@ export default function AdminReportsPage() {
   };
 
   const resetViewed = async (sessionId: string) => {
-    const res = await fetch(`/api/admin/ci-sessions/${sessionId}/reset-viewed`, { method: "POST" });
+    const endpoint = tab === "wv"
+      ? `/api/admin/sessions/${sessionId}/reset-viewed`
+      : `/api/admin/ci-sessions/${sessionId}/reset-viewed`;
+    const res = await fetch(endpoint, { method: "POST" });
     if (res.ok) {
-      setCiReports((prev) =>
+      const setter = tab === "wv" ? setWvReports : setCiReports;
+      setter((prev) =>
         prev.map((r) => r.session_id === sessionId ? { ...r, viewed_at: null } : r)
       );
     }
@@ -127,7 +139,7 @@ export default function AdminReportsPage() {
 
         <div className="flex gap-2 mb-4">
           <button
-            onClick={() => { setTab("wv"); setExpandedPrompt(null); }}
+            onClick={() => { setTab("wv"); setSection("pending"); setExpandedPrompt(null); }}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
               tab === "wv"
                 ? "bg-emerald-700 text-white"
@@ -144,7 +156,7 @@ export default function AdminReportsPage() {
             )}
           </button>
           <button
-            onClick={() => { setTab("ci"); setExpandedPrompt(null); }}
+            onClick={() => { setTab("ci"); setSection("pending"); setExpandedPrompt(null); }}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
               tab === "ci"
                 ? "bg-emerald-700 text-white"
@@ -162,47 +174,45 @@ export default function AdminReportsPage() {
           </button>
         </div>
 
-        {tab === "ci" && (
-          <div className="flex gap-1 mb-6 border-b border-gray-200">
-            <button
-              onClick={() => setSection("pending")}
-              className={`px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px ${
-                section === "pending"
-                  ? "border-emerald-600 text-emerald-700"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              未生成
-            </button>
-            <button
-              onClick={() => setSection("generated")}
-              className={`px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px ${
-                section === "generated"
-                  ? "border-emerald-600 text-emerald-700"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              作成済み
-              {ciReports.length > 0 && (
-                <span className="ml-1.5 text-xs text-gray-400">{ciReports.length}</span>
-              )}
-            </button>
-          </div>
-        )}
+        <div className="flex gap-1 mb-6 border-b border-gray-200">
+          <button
+            onClick={() => setSection("pending")}
+            className={`px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px ${
+              section === "pending"
+                ? "border-emerald-600 text-emerald-700"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            未生成
+          </button>
+          <button
+            onClick={() => setSection("generated")}
+            className={`px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px ${
+              section === "generated"
+                ? "border-emerald-600 text-emerald-700"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            作成済み
+            {reports.length > 0 && (
+              <span className="ml-1.5 text-xs text-gray-400">{reports.length}</span>
+            )}
+          </button>
+        </div>
 
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : tab === "ci" && section === "generated" ? (
-          ciReports.length === 0 ? (
+        ) : section === "generated" ? (
+          reports.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-500">作成済みのレポートはありません</p>
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-gray-500 mb-4">作成済み: {ciReports.length}件</p>
-              {ciReports.map((r) => (
+              <p className="text-sm text-gray-500 mb-4">作成済み: {reports.length}件</p>
+              {reports.map((r) => (
                 <div key={r.id} className="bg-white rounded-lg border border-gray-200 p-4">
                   <div className="flex items-center justify-between">
                     <div className="min-w-0">

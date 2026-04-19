@@ -9,9 +9,30 @@ FROM work_needs_scores
 WHERE session_id = $1;
 
 -- name: GetAIReportBySessionID :one
-SELECT id, session_id, user_id, content, created_at
+SELECT id, session_id, user_id, content, created_at, viewed_at
 FROM ai_reports
 WHERE session_id = $1;
+
+-- name: MarkAIReportViewed :exec
+UPDATE ai_reports SET viewed_at = NOW()
+WHERE session_id = $1 AND viewed_at IS NULL;
+
+-- name: ResetAIReportViewed :exec
+UPDATE ai_reports SET viewed_at = NULL
+WHERE session_id = $1;
+
+-- name: ListAIReports :many
+SELECT
+    r.id,
+    r.session_id,
+    r.user_id,
+    r.created_at,
+    r.viewed_at,
+    u.username,
+    u.display_name
+FROM ai_reports r
+JOIN users u ON u.id = r.user_id
+ORDER BY r.created_at DESC;
 
 -- name: UpsertAIReport :one
 INSERT INTO ai_reports (session_id, user_id, content)

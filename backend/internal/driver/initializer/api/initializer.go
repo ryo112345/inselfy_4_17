@@ -189,6 +189,10 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return adminUserCtrl.Delete(c, c.Param("id"))
 	})
 	adminGroup.GET("/reports/pending", adminReportCtrl.ListPending)
+	adminGroup.GET("/reports/list", adminReportCtrl.ListReports)
+	adminGroup.POST("/sessions/:sessionId/reset-viewed", func(c echo.Context) error {
+		return adminReportCtrl.ResetViewed(c, c.Param("sessionId"))
+	})
 	adminGroup.PUT("/sessions/:sessionId/ai-report", func(c echo.Context) error {
 		return adminReportCtrl.SaveReport(c, c.Param("sessionId"))
 	})

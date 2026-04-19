@@ -1,0 +1,1 @@
+ALTER TABLE ai_reports ADD COLUMN viewed_at TIMESTAMPTZ;
