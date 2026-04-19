@@ -392,7 +392,7 @@ function AiReportSection({ sessionId, badge }: { sessionId: string; badge: Badge
         <div className="border-t border-gray-200 mb-3" />
 
         {showReport && reportContent ? (
-          <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[16px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-emerald-800 [&_h2]:border-l-3 [&_h2]:border-emerald-600 [&_h2]:pl-3 [&_h3]:text-[14px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-emerald-700 [&_p]:text-[15px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[15px] [&_li]:mb-1 [&_blockquote]:border-l-3 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4"
+          <div className="prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-emerald-800 [&_h2]:border-l-3 [&_h2]:border-emerald-600 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-emerald-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-emerald-400 [&_.catchphrase]:bg-emerald-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4"
             dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
           />
         ) : (
@@ -429,7 +429,7 @@ function AiReportSection({ sessionId, badge }: { sessionId: string; badge: Badge
 }
 
 function markdownToHtml(md: string): string {
-  return md
+  let html = md
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -445,4 +445,9 @@ function markdownToHtml(md: string): string {
     .replace(/(<\/ul>)<\/p>/g, '$1')
     .replace(/<p>(<blockquote>)/g, '$1')
     .replace(/(<\/blockquote>)<\/p>/g, '$1');
+
+  // 最初の<p>をキャッチコピーとしてスタイル付与（最初の見出しより前の段落）
+  html = html.replace(/^<p>/, '<p class="catchphrase">');
+
+  return html;
 }
