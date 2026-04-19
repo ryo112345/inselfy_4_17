@@ -23,34 +23,44 @@ const navItems = [
 ];
 
 const navItems2 = [
-  { label: "診断", href: "/assessment", icon: CompassIcon },
   { label: "気になる", href: "/bookmarks", icon: BookmarkIcon },
   { label: "メッセージ", href: "/messages", icon: ChatIcon },
   { label: "スカウト", href: "/scout", icon: SendIcon },
 ];
 
+const assessmentItems = [
+  { label: "価値観診断", href: "/work_values" },
+  { label: "職業興味診断", href: "/career_interest/start" },
+];
+
 export function Sidebar({ username, displayName, diagnostics = [], defaultOpen = false, debug }: Props) {
   const [open, setOpen] = useState(defaultOpen);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [assessmentOpen, setAssessmentOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const assessmentRef = useRef<HTMLDivElement>(null);
+  const assessmentTriggerRef = useRef<HTMLButtonElement>(null);
   const initialRender = useRef(true);
   const { user, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen && !assessmentOpen) return;
     function handleClick(e: MouseEvent) {
-      if (
-        menuRef.current && !menuRef.current.contains(e.target as Node) &&
-        triggerRef.current && !triggerRef.current.contains(e.target as Node)
-      ) {
+      const target = e.target as Node;
+      if (menuOpen && menuRef.current && !menuRef.current.contains(target) &&
+        triggerRef.current && !triggerRef.current.contains(target)) {
         setMenuOpen(false);
+      }
+      if (assessmentOpen && assessmentRef.current && !assessmentRef.current.contains(target) &&
+        assessmentTriggerRef.current && !assessmentTriggerRef.current.contains(target)) {
+        setAssessmentOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [menuOpen]);
+  }, [menuOpen, assessmentOpen]);
 
   const handleLogout = useCallback(async () => {
     await logout();
@@ -131,6 +141,18 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
             <div className="sb-divider my-2 mx-2 border-t" />
 
             <ul className="space-y-0.5">
+              <li>
+                <button
+                  ref={assessmentTriggerRef}
+                  onClick={(e) => { e.stopPropagation(); setAssessmentOpen(!assessmentOpen); }}
+                  className={`sb-item flex items-center rounded-md py-2 px-2 text-sm text-gray-700 transition-colors gap-3 cursor-pointer ${open ? "w-full" : "w-9"}`}
+                >
+                  <span className="shrink-0 w-5 h-5">
+                    <CompassIcon />
+                  </span>
+                  <span className="whitespace-nowrap">診断</span>
+                </button>
+              </li>
               {navItems2.map((item) => (
                 <li key={item.label}>
                   <Link
@@ -176,7 +198,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
             <button
               ref={triggerRef}
               onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
-              className={`sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3 w-full cursor-pointer ${open ? "" : "w-11"}`}
+              className={`sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3 cursor-pointer ${open ? "w-full" : "w-11"}`}
             >
               <span className="flex shrink-0 w-9 h-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white leading-none">
                 {initial}
@@ -186,6 +208,15 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
           </div>
         </aside>
       </div>
+
+      {assessmentOpen && (
+        <AssessmentMenu
+          ref={assessmentRef}
+          triggerRef={assessmentTriggerRef}
+          sidebarOpen={open}
+          onClose={() => setAssessmentOpen(false)}
+        />
+      )}
 
       {menuOpen && (
         <UserMenu
@@ -201,6 +232,43 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
 }
 
 import { forwardRef } from "react";
+
+const AssessmentMenu = forwardRef<
+  HTMLDivElement,
+  {
+    triggerRef: React.RefObject<HTMLButtonElement | null>;
+    sidebarOpen: boolean;
+    onClose: () => void;
+  }
+>(function AssessmentMenu({ triggerRef, sidebarOpen, onClose }, ref) {
+  const [top, setTop] = useState(0);
+
+  useEffect(() => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setTop(rect.bottom + 4);
+    }
+  }, [triggerRef]);
+
+  return (
+    <div
+      ref={ref}
+      className="fixed w-52 rounded-xl border border-gray-200 bg-white shadow-lg py-1 z-[60]"
+      style={{ top, left: sidebarOpen ? 8 : 4 }}
+    >
+      {assessmentItems.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          onClick={onClose}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </div>
+  );
+});
 
 const UserMenu = forwardRef<
   HTMLDivElement,
