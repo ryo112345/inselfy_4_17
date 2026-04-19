@@ -45,12 +45,16 @@ export default function LoginPage() {
               }
             }}
             onError={() => setError("Google認証に失敗しました")}
-            text="signin_with"
+            text="continue_with"
             shape="rectangular"
             size="large"
             width={300}
           />
         </div>
+
+        <p className="text-center text-xs text-gray-500">
+          アカウントをお持ちでない場合も、こちらから新規登録できます
+        </p>
 
         {error && (
           <p className="text-center text-sm text-red-600">{error}</p>

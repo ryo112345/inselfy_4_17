@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/features/auth/auth-context";
 import type { DiagnosticSummary } from "@/features/profile/fetchPanelData";
 
 type Props = {
@@ -29,7 +31,31 @@ const navItems2 = [
 
 export function Sidebar({ username, displayName, diagnostics = [], defaultOpen = false, debug }: Props) {
   const [open, setOpen] = useState(defaultOpen);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const initialRender = useRef(true);
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (
+        menuRef.current && !menuRef.current.contains(e.target as Node) &&
+        triggerRef.current && !triggerRef.current.contains(e.target as Node)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [menuOpen]);
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    router.push("/login");
+  }, [logout, router]);
 
   useEffect(() => {
     initialRender.current = false;
@@ -148,21 +174,96 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
           </nav>
 
           <div className="shrink-0 px-1 py-2 space-y-0.5">
-<Link
-              href={profileHref}
-              className={`sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3 ${open ? "" : "w-11"}`}
+            <button
+              ref={triggerRef}
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+              className={`sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3 w-full cursor-pointer ${open ? "" : "w-11"}`}
             >
               <span className="flex shrink-0 w-9 h-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white leading-none">
                 {initial}
               </span>
               <span className="whitespace-nowrap">{displayName ?? username}</span>
-            </Link>
+            </button>
           </div>
         </aside>
       </div>
+
+      {menuOpen && (
+        <UserMenu
+          ref={menuRef}
+          triggerRef={triggerRef}
+          email={user?.email ?? username}
+          onClose={() => setMenuOpen(false)}
+          onLogout={handleLogout}
+        />
+      )}
     </>
   );
 }
+
+import { forwardRef } from "react";
+
+const UserMenu = forwardRef<
+  HTMLDivElement,
+  {
+    triggerRef: React.RefObject<HTMLButtonElement | null>;
+    email: string;
+    onClose: () => void;
+    onLogout: () => void;
+  }
+>(function UserMenu({ triggerRef, email, onClose, onLogout }, ref) {
+  const [pos, setPos] = useState<{ bottom: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPos({ bottom: window.innerHeight - rect.top + 4, left: rect.left });
+    }
+  }, [triggerRef]);
+
+  if (!pos) return null;
+
+  return (
+    <div
+      ref={ref}
+      className="fixed w-64 rounded-xl border border-gray-200 bg-white shadow-lg py-1 z-[60]"
+      style={{ bottom: pos.bottom, left: pos.left }}
+    >
+      <div className="px-4 py-2 text-sm text-gray-500 truncate">
+        {email}
+      </div>
+
+      <div className="py-1">
+        <Link
+          href="/settings"
+          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          onClick={onClose}
+        >
+          <span className="w-5 h-5 text-gray-500"><SettingsIcon /></span>
+          設定
+        </Link>
+        <Link
+          href="/help"
+          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          onClick={onClose}
+        >
+          <span className="w-5 h-5 text-gray-500"><HelpIcon /></span>
+          ヘルプを表示
+        </Link>
+      </div>
+
+      <div className="border-t border-gray-100 my-1" />
+
+      <button
+        onClick={onLogout}
+        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+      >
+        <span className="w-5 h-5 text-gray-500"><LogoutIcon /></span>
+        ログアウト
+      </button>
+    </div>
+  );
+});
 
 function MenuIcon() {
   return (
@@ -358,6 +459,35 @@ function SendIcon() {
     >
       <path d="M22 2L11 13" />
       <path d="M22 2L15 22l-4-9-9-4z" />
+    </svg>
+  );
+}
+
+function SettingsIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
+
+function HelpIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
     </svg>
   );
 }
