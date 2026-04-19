@@ -80,29 +80,7 @@ export function CareerInterestResultContent({ sessionId, initialData }: { sessio
       <TypesSection types={sortedTypes} colors={colors} badge={badge} />
       <BasicInterestsSection types={sortedTypes} basicScoreMap={basicScoreMap} colors={colors} badge={badge} />
 
-      <div className="relative mt-10">
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-          <span
-            className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
-            style={{
-              background: "linear-gradient(180deg, #4a8c6f 0%, #2d6b4e 50%, #1f5c3f 100%)",
-              boxShadow: "0 4px 10px rgba(30,80,55,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
-            }}
-          >
-            inselfy.ai
-          </span>
-        </div>
-        <div className="rounded-md border border-gray-200 bg-[#fbfdfb] px-8 pt-8 pb-7">
-          <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>AI キャリアレポート</h3>
-          <div className="border-t border-gray-200 mb-3" />
-          <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
-            AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
-          </p>
-          <button className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer">
-            レポートを生成する
-          </button>
-        </div>
-      </div>
+      <CIAiReportSection sessionId={sessionId} badge={badge} />
     </div>
   );
 }
@@ -348,6 +326,114 @@ function scoreColor(score: number, colors: ScoreColors): string {
   if (score >= 3.0) return colors.tier2;
   if (score >= 2.0) return colors.tier3;
   return colors.tier4;
+}
+
+function CIAiReportSection({ sessionId, badge }: { sessionId: string; badge: BadgeColors }) {
+  const [reportContent, setReportContent] = useState<string | null>(null);
+  const [showReport, setShowReport] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+
+  const handleClick = async () => {
+    if (showReport && reportContent) {
+      setShowReport(false);
+      return;
+    }
+
+    setLoading(true);
+    setNotFound(false);
+    try {
+      const res = await fetch(`/api/career-interest/sessions/${sessionId}/ai-report`);
+      if (res.status === 404) {
+        setNotFound(true);
+        return;
+      }
+      if (!res.ok) throw new Error("Failed to fetch report");
+      const data = await res.json();
+      setReportContent(data.content);
+      setShowReport(true);
+    } catch {
+      setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="relative mt-10">
+      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+        <span
+          className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
+          style={{
+            background: "linear-gradient(180deg, #4a8c6f 0%, #2d6b4e 50%, #1f5c3f 100%)",
+            boxShadow: "0 4px 10px rgba(30,80,55,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
+          }}
+        >
+          inselfy.ai
+        </span>
+      </div>
+      <div className="rounded-md border border-gray-200 bg-[#fbfdfb] px-8 pt-8 pb-7">
+        <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>AI キャリアレポート</h3>
+        <div className="border-t border-gray-200 mb-3" />
+
+        {showReport && reportContent ? (
+          <div className="prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-emerald-800 [&_h2]:border-l-3 [&_h2]:border-emerald-600 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-emerald-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-emerald-400 [&_.catchphrase]:bg-emerald-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4"
+            dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
+          />
+        ) : (
+          <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
+            AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
+          </p>
+        )}
+
+        {notFound && (
+          <p className="text-[13px] text-amber-600 mb-4">
+            レポートはまだ作成中です。しばらくお待ちください。
+          </p>
+        )}
+
+        <button
+          onClick={handleClick}
+          disabled={loading}
+          className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer disabled:opacity-50"
+        >
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              読み込み中
+            </span>
+          ) : showReport ? (
+            "レポートを閉じる"
+          ) : (
+            "レポートを見る"
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function markdownToHtml(md: string): string {
+  let html = md
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^> (.+)$/gm, '<blockquote><p>$1</p></blockquote>')
+    .replace(/^[・-] (.+)$/gm, '<li>$1</li>')
+    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^/, '<p>')
+    .replace(/$/, '</p>')
+    .replace(/<p>(<h[23]>)/g, '$1')
+    .replace(/(<\/h[23]>)<\/p>/g, '$1')
+    .replace(/<p>(<ul>)/g, '$1')
+    .replace(/(<\/ul>)<\/p>/g, '$1')
+    .replace(/<p>(<blockquote>)/g, '$1')
+    .replace(/(<\/blockquote>)<\/p>/g, '$1');
+
+  html = html.replace(/^<p>/, '<p class="catchphrase">');
+
+  return html;
 }
 
 function ChevronIcon({ size = 18 }: { size?: number }) {

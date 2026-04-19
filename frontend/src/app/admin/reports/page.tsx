@@ -11,8 +11,12 @@ interface PendingSession {
   completed_at: string | null;
 }
 
+type TabType = "wv" | "ci";
+
 export default function AdminReportsPage() {
-  const [sessions, setSessions] = useState<PendingSession[]>([]);
+  const [tab, setTab] = useState<TabType>("wv");
+  const [wvSessions, setWvSessions] = useState<PendingSession[]>([]);
+  const [ciSessions, setCiSessions] = useState<PendingSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPrompt, setExpandedPrompt] = useState<string | null>(null);
   const [promptContent, setPromptContent] = useState<Record<string, string>>({});
@@ -21,18 +25,29 @@ export default function AdminReportsPage() {
   const fetchPending = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/reports/pending");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      setSessions(data.sessions ?? []);
+      const [wvRes, ciRes] = await Promise.all([
+        fetch("/api/admin/reports/pending"),
+        fetch("/api/admin/ci-reports/pending"),
+      ]);
+      if (wvRes.ok) {
+        const data = await wvRes.json();
+        setWvSessions(data.sessions ?? []);
+      }
+      if (ciRes.ok) {
+        const data = await ciRes.json();
+        setCiSessions(data.sessions ?? []);
+      }
     } catch {
-      setSessions([]);
+      setWvSessions([]);
+      setCiSessions([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => { fetchPending(); }, [fetchPending]);
+
+  const sessions = tab === "wv" ? wvSessions : ciSessions;
 
   const togglePrompt = async (session: PendingSession) => {
     const sid = session.session_id;
@@ -49,7 +64,10 @@ export default function AdminReportsPage() {
 
     setLoadingPrompt(sid);
     try {
-      const res = await fetch(`/api/admin/sessions/${sid}/prompt`);
+      const endpoint = tab === "wv"
+        ? `/api/admin/sessions/${sid}/prompt`
+        : `/api/admin/ci-sessions/${sid}/prompt`;
+      const res = await fetch(endpoint);
       if (!res.ok) throw new Error("プロンプトの取得に失敗しました");
       const data = await res.json();
       setPromptContent((prev) => ({ ...prev, [sid]: data.prompt }));
@@ -77,6 +95,43 @@ export default function AdminReportsPage() {
             </svg>
           </Link>
           <h1 className="text-xl font-bold text-[var(--foreground)]">AIレポート管理</h1>
+        </div>
+
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => { setTab("wv"); setExpandedPrompt(null); }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+              tab === "wv"
+                ? "bg-emerald-700 text-white"
+                : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            Work Values
+            {wvSessions.length > 0 && (
+              <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+                tab === "wv" ? "bg-emerald-600" : "bg-gray-200 text-gray-600"
+              }`}>
+                {wvSessions.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => { setTab("ci"); setExpandedPrompt(null); }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+              tab === "ci"
+                ? "bg-emerald-700 text-white"
+                : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            Career Interest
+            {ciSessions.length > 0 && (
+              <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+                tab === "ci" ? "bg-emerald-600" : "bg-gray-200 text-gray-600"
+              }`}>
+                {ciSessions.length}
+              </span>
+            )}
+          </button>
         </div>
 
         {loading ? (

@@ -50,6 +50,14 @@ type CareerInterestTypeScore struct {
 	Rank      int16       `json:"rank"`
 }
 
+type CiAiReport struct {
+	ID        pgtype.UUID        `json:"id"`
+	SessionID pgtype.UUID        `json:"session_id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	Content   string             `json:"content"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type Education struct {
 	ID        pgtype.UUID        `json:"id"`
 	UserID    pgtype.UUID        `json:"user_id"`

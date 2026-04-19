@@ -202,9 +202,25 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return adminReportCtrl.GetPrompt(c, c.Param("sessionId"))
 	})
 
+	// --- Admin CI Reports ---
+	adminCIReportCtrl := httpcontroller.NewAdminCIReportController(pool)
+	adminGroup.GET("/ci-reports/pending", adminCIReportCtrl.ListPending)
+	adminGroup.PUT("/ci-sessions/:sessionId/ai-report", func(c echo.Context) error {
+		return adminCIReportCtrl.SaveReport(c, c.Param("sessionId"))
+	})
+	adminGroup.GET("/ci-sessions/:sessionId/ai-report", func(c echo.Context) error {
+		return adminCIReportCtrl.GetReport(c, c.Param("sessionId"))
+	})
+	adminGroup.GET("/ci-sessions/:sessionId/prompt", func(c echo.Context) error {
+		return adminCIReportCtrl.GetPrompt(c, c.Param("sessionId"))
+	})
+
 	// --- AI Report (user-facing) ---
 	wvGroup.GET("/sessions/:sessionId/ai-report", func(c echo.Context) error {
 		return adminReportCtrl.GetReport(c, c.Param("sessionId"))
+	})
+	ciGroup.GET("/sessions/:sessionId/ai-report", func(c echo.Context) error {
+		return adminCIReportCtrl.GetReport(c, c.Param("sessionId"))
 	})
 
 	return e, cfg, cleanup, nil

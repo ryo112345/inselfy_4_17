@@ -256,10 +256,10 @@ curl -s -X PUT \
 
 ---
 
-# AIレポート生成ワークフロー
+# AIレポート生成ワークフロー（Work Values）
 
 以下のいずれかの依頼でこのワークフローを実行する:
-- 「未生成のレポートを処理して」「レポートを生成して」→ 未生成の全件を処理
+- 「未生成のレポートを処理して」「レポートを生成して」→ WV・CI両方の未生成全件を処理
 - 「aahoのレポートを生成して」→ 指定ユーザーの未生成セッションだけ処理
 - 「セッション xxx のレポートを生成して」→ 指定セッションだけ処理
 
@@ -295,6 +295,43 @@ GET /api/admin/sessions/{sessionId}/prompt
 #### 2-3. レポートを保存
 ```
 PUT /api/admin/sessions/{sessionId}/ai-report
+Content-Type: application/json
+
+{ "content": "生成したマークダウンレポート" }
+```
+
+### 3. 完了報告
+処理した件数をユーザーに報告する。
+
+---
+
+# AIレポート生成ワークフロー（Career Interest）
+
+Work Valuesと同じ流れ。APIエンドポイントのみ異なる。
+
+**認証:** 同上（`X-Admin-Key` ヘッダー）。
+
+## 手順
+
+### 1. 未生成のセッション一覧を取得
+```
+GET /api/admin/ci-reports/pending
+```
+
+### 2. 各セッションを順番に処理する
+
+#### 2-1. プロンプトを取得
+```
+GET /api/admin/ci-sessions/{sessionId}/prompt
+```
+レスポンスの `prompt` フィールドに、RIASECスコア・基本興味スコア・個別回答が埋め込まれたプロンプトが返される。
+
+#### 2-2. プロンプトに従いレポートを生成する
+取得したプロンプトの指示に従い、マークダウン形式のレポートを生成する。
+
+#### 2-3. レポートを保存
+```
+PUT /api/admin/ci-sessions/{sessionId}/ai-report
 Content-Type: application/json
 
 { "content": "生成したマークダウンレポート" }
