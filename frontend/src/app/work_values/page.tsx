@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Playfair_Display, Inter } from "next/font/google";
+import { Sidebar } from "@/app/components/Sidebar";
+import { cookies } from "next/headers";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -13,10 +15,20 @@ const inter = Inter({
   display: "swap",
 });
 
-export default function WorkValuesPage() {
+export default async function WorkValuesPage() {
+  const cookieStore = await cookies();
+  const username = cookieStore.get("username")?.value ?? "guest";
+  const displayName = cookieStore.get("displayName")?.value;
+  const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
+    <>
+      <Sidebar
+        username={username}
+        displayName={displayName}
+        defaultOpen={sidebarOpen}
+      />
+    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12 pl-[50px]">
       <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
         <FloatingSpheres />
         <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-5 py-2 mb-8">
@@ -55,6 +67,7 @@ export default function WorkValuesPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
 

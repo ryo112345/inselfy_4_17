@@ -8,6 +8,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AiReport struct {
+	ID        pgtype.UUID        `json:"id"`
+	SessionID pgtype.UUID        `json:"session_id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	Content   string             `json:"content"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type CareerInterestBasicScore struct {
 	SessionID       pgtype.UUID `json:"session_id"`
 	BasicInterestID string      `json:"basic_interest_id"`

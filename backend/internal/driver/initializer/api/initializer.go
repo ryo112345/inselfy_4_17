@@ -182,10 +182,26 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	// --- Admin ---
 	adminUserCtrl := httpcontroller.NewAdminUserController(pool)
+	adminReportCtrl := httpcontroller.NewAdminReportController(pool)
 	adminGroup := e.Group("/api/admin")
 	adminGroup.GET("/users", adminUserCtrl.List)
 	adminGroup.DELETE("/users/:id", func(c echo.Context) error {
 		return adminUserCtrl.Delete(c, c.Param("id"))
+	})
+	adminGroup.GET("/reports/pending", adminReportCtrl.ListPending)
+	adminGroup.PUT("/sessions/:sessionId/ai-report", func(c echo.Context) error {
+		return adminReportCtrl.SaveReport(c, c.Param("sessionId"))
+	})
+	adminGroup.GET("/sessions/:sessionId/ai-report", func(c echo.Context) error {
+		return adminReportCtrl.GetReport(c, c.Param("sessionId"))
+	})
+	adminGroup.GET("/sessions/:sessionId/scores", func(c echo.Context) error {
+		return adminReportCtrl.GetSessionScores(c, c.Param("sessionId"))
+	})
+
+	// --- AI Report (user-facing) ---
+	wvGroup.GET("/sessions/:sessionId/ai-report", func(c echo.Context) error {
+		return adminReportCtrl.GetReport(c, c.Param("sessionId"))
 	})
 
 	return e, cfg, cleanup, nil

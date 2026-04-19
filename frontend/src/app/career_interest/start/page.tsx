@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Playfair_Display, Inter } from "next/font/google";
 import { useCareerInterestQuiz } from "@/features/career-interest/useCareerInterestQuiz";
 import type { ItemDTO } from "@/features/career-interest/api";
+import { useAuth } from "@/features/auth/auth-context";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -18,8 +19,6 @@ const inter = Inter({
   display: "swap",
 });
 
-const TEMP_USER_ID = "5313d9df-1b19-4d3f-b158-ca0464196f55";
-
 const SCORE_OPTIONS = [
   { value: 1, label: "全く興味がない" },
   { value: 2, label: "あまり興味がない" },
@@ -29,14 +28,26 @@ const SCORE_OPTIONS = [
 ] as const;
 
 export default function CareerInterestStartPage() {
-  const { state, start, answer, sessionId } = useCareerInterestQuiz(TEMP_USER_ID);
+  const { user, isLoading: authLoading } = useAuth();
+  const userId = user?.id ?? "";
+  const { state, start, answer, sessionId } = useCareerInterestQuiz(userId);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/login");
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     if (state.phase === "done" && sessionId) {
       router.replace(`/career_interest/${sessionId}`);
     }
   }, [state.phase, sessionId, router]);
+
+  if (authLoading || !user) {
+    return <LoadingScreen />;
+  }
 
   if (state.phase === "idle") {
     return <StartScreen onStart={start} />;

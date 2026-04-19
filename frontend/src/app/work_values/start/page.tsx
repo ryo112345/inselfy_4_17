@@ -6,6 +6,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 import { useWorkValuesQuiz, type DebugInfo } from "@/features/work-values/useWorkValuesQuiz";
 import type { NeedDefDTO } from "@/features/work-values/api";
 import type { NeedId } from "@/features/work-values/lib/needs";
+import { useAuth } from "@/features/auth/auth-context";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -19,18 +20,27 @@ const inter = Inter({
   display: "swap",
 });
 
-// TODO: ログインユーザーのIDを取得する仕組みに置き換え
-const TEMP_USER_ID = "5313d9df-1b19-4d3f-b158-ca0464196f55";
-
 export default function WorkValuesStartPage() {
-  const { state, start, answer, sessionId, needDefs } = useWorkValuesQuiz(TEMP_USER_ID);
+  const { user, isLoading: authLoading } = useAuth();
+  const userId = user?.id ?? "";
+  const { state, start, answer, sessionId, needDefs } = useWorkValuesQuiz(userId);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/login");
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     if (state.phase === "done" && sessionId) {
       router.replace(`/work_values/${sessionId}`);
     }
   }, [state.phase, sessionId, router]);
+
+  if (authLoading || !user) {
+    return <LoadingScreen />;
+  }
 
   if (state.phase === "idle") {
     return <StartScreen onStart={start} />;
