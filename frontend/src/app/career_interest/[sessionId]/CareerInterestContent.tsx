@@ -90,7 +90,7 @@ function RIASECCodeSection({ code, badge }: { code: string; badge: BadgeColors }
   return (
     <section className="mb-6 text-center">
       <h2 className="text-[13px] font-bold tracking-widest mb-2" style={{ color: badge.headingColor }}>
-        RIASEC CODE
+        YOUR RIASEC CODE
       </h2>
       <div className="flex justify-center gap-2">
         {code.split("").map((letter, i) => (
