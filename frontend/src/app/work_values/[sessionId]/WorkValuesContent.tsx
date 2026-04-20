@@ -76,7 +76,7 @@ export function WorkValuesResultContent({ sessionId, initialData, isOwner = true
 
   return (
     <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 pt-5 pb-8">
-      <TopValuesCodeSection values={sortedValues} badge={badge} />
+      <TopValuesCodeSection values={sortedValues} badge={badge} createdAt={result.created_at} />
       <ValuesSection values={sortedValues} colors={colors} badge={badge} />
       <NeedsSection values={sortedValues} needScoreMap={needScoreMap} colors={colors} badge={badge} />
 
@@ -86,13 +86,13 @@ export function WorkValuesResultContent({ sessionId, initialData, isOwner = true
 }
 
 
-function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; badge: BadgeColors }) {
+function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO["values"]; badge: BadgeColors; createdAt: string }) {
   const top3 = values.slice(0, 3);
   const persona = getWVPersona(values);
 
   return (
     <section
-      className="mb-6 text-center rounded-2xl px-6 py-6 relative overflow-hidden"
+      className="mb-6 text-center px-6 py-6 relative overflow-hidden -mx-6 -mt-5"
       style={{ backgroundColor: "#F5FBF8" }}
     >
       <style>{`
@@ -120,9 +120,73 @@ function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; 
         .wv-badge-text {
           text-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
+        @keyframes wv-shimmer {
+          0% { opacity: 0; transform: translate(-30%, -30%) scale(0.5); }
+          50% { opacity: 1; }
+          100% { opacity: 0; transform: translate(30%, 30%) scale(1.2); }
+        }
+        @keyframes wv-float-1 {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+        @keyframes wv-float-2 {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+        @keyframes wv-float-3 {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-2.5px); }
+        }
+        .wv-badge-glow {
+          position: relative;
+          overflow: hidden;
+        }
+        .wv-badge-float-1 { animation: wv-float-1 5s ease-in-out infinite; }
+        .wv-badge-float-2 { animation: wv-float-2 5.6s ease-in-out 0.5s infinite; }
+        .wv-badge-float-3 { animation: wv-float-3 4.6s ease-in-out 1s infinite; }
+        .wv-badge-glow::after {
+          content: '';
+          position: absolute;
+          width: 60%;
+          height: 60%;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+          animation: wv-shimmer 4s ease-in-out infinite;
+          pointer-events: none;
+        }
       `}</style>
       <div className="wv-ripple-tl" style={{ animation: "wv-ripple-pulse 8s ease-in-out infinite" }} />
       <div className="wv-ripple-br" style={{ animation: "wv-ripple-pulse 8s ease-in-out 4s infinite" }} />
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors" style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}>
+          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 6 12 2 8 6" />
+            <line x1={12} y1={2} x2={12} y2={15} />
+          </svg>
+          Share Link
+        </button>
+        <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors" style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}>
+          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <rect x={2} y={2} width={20} height={20} rx={5} />
+            <circle cx={12} cy={12} r={4} />
+            <circle cx={18} cy={6} r={1.5} fill="currentColor" stroke="none" />
+          </svg>
+          Share Story
+        </button>
+      </div>
+      <div className="absolute top-4 left-4 z-10">
+        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border" style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}>
+          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx={12} cy={12} r={10} />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          {(() => {
+            const d = new Date(createdAt);
+            return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+          })()}
+        </span>
+      </div>
       <h2 className="relative text-[12px] font-bold tracking-[0.2em] mb-2 uppercase" style={{ color: "#8a9e94" }}>
         Your Work Values
       </h2>
@@ -156,22 +220,25 @@ function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; 
               const s = sizes[i];
               const badgeStyles = [
                 {
-                  background: "linear-gradient(160deg, #78d0de 0%, #60c4d4 25%, #4ab4c8 50%, #52b8b0 80%, #6ec4b0 100%)",
-                  boxShadow: "0 6px 18px rgba(60,180,200,0.3), 0 2px 4px rgba(0,0,0,0.06)",
+                  background: "linear-gradient(170deg, #98e0f0 0%, #6ad0e0 30%, #4ac0d4 60%, #58c0b8 100%)",
+                  boxShadow: "0 6px 14px rgba(70,180,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                  border: "1px solid rgba(255,255,255,0.25)",
                 },
                 {
-                  background: "linear-gradient(160deg, #74d0ca 0%, #6cc8be 25%, #52b8b0 50%, #4eb0a0 80%, #62bca8 100%)",
-                  boxShadow: "0 6px 18px rgba(70,180,170,0.25), 0 2px 4px rgba(0,0,0,0.06)",
+                  background: "linear-gradient(170deg, #90dcd6 0%, #64d0c4 30%, #48c0b4 60%, #50bca8 100%)",
+                  boxShadow: "0 6px 14px rgba(70,180,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                  border: "1px solid rgba(255,255,255,0.25)",
                 },
                 {
-                  background: "linear-gradient(160deg, #7cd4b0 0%, #78ccaa 25%, #62c096 50%, #58b88c 80%, #6cc49c 100%)",
-                  boxShadow: "0 6px 18px rgba(90,185,140,0.25), 0 2px 4px rgba(0,0,0,0.06)",
+                  background: "linear-gradient(170deg, #94dcc4 0%, #6cd0ac 30%, #54c498 60%, #4cbc90 100%)",
+                  boxShadow: "0 6px 14px rgba(90,180,140,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                  border: "1px solid rgba(255,255,255,0.25)",
                 },
               ];
               return (
                 <span
                   key={vid}
-                  className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center wv-badge-text shrink-0`}
+                  className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center wv-badge-text wv-badge-glow wv-badge-float-${i + 1} shrink-0`}
                   style={{ ...badgeStyles[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
                 >
                   {VALUE_ABBREVIATIONS[vid]}
