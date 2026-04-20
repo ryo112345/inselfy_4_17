@@ -85,69 +85,15 @@ export function WorkValuesResultContent({ sessionId, initialData, isOwner = true
   );
 }
 
-const BADGE_GRADIENT_PRESETS: { name: string; gradients: [string, string, string] }[] = [
-  { name: "A: Ocean Teal", gradients: [
-    "linear-gradient(135deg, #5b9eb8 0%, #4a8e7e 50%, #6db89a 100%)",
-    "linear-gradient(135deg, #6aab94 0%, #5a9e84 100%)",
-    "linear-gradient(135deg, #80bfa6 0%, #6db896 100%)",
-  ]},
-  { name: "B: Deep Forest", gradients: [
-    "linear-gradient(135deg, #3d7d6a 0%, #2d6b52 50%, #4a8e6e 100%)",
-    "linear-gradient(135deg, #4a8e6e 0%, #3d7d5e 100%)",
-    "linear-gradient(135deg, #5a9e7e 0%, #4a8e6e 100%)",
-  ]},
-  { name: "C: Mint Fresh", gradients: [
-    "linear-gradient(135deg, #6ec4b0 0%, #52b096 50%, #7ed4be 100%)",
-    "linear-gradient(135deg, #7ed4be 0%, #6ec4aa 100%)",
-    "linear-gradient(135deg, #90deca 0%, #7ed4ba 100%)",
-  ]},
-  { name: "D: Sky Sage", gradients: [
-    "linear-gradient(135deg, #78b4c8 0%, #5a9aac 50%, #8ac4c0 100%)",
-    "linear-gradient(135deg, #7abcb4 0%, #68aca4 100%)",
-    "linear-gradient(135deg, #8eccc4 0%, #7abcb0 100%)",
-  ]},
-  { name: "E: Emerald Ice", gradients: [
-    "linear-gradient(135deg, #4db8a0 0%, #38a488 50%, #62c8ac 100%)",
-    "linear-gradient(135deg, #5cc4a8 0%, #4ab89c 100%)",
-    "linear-gradient(135deg, #72d0b6 0%, #5cc4a8 100%)",
-  ]},
-  { name: "F: Blue Lagoon", gradients: [
-    "linear-gradient(135deg, #5a9cc0 0%, #488aaa 50%, #6ab0c4 100%)",
-    "linear-gradient(135deg, #60a8b8 0%, #509caa 100%)",
-    "linear-gradient(135deg, #74b8c4 0%, #60a8b4 100%)",
-  ]},
-  { name: "G: Jade", gradients: [
-    "linear-gradient(135deg, #46a080 0%, #358e6e 50%, #58b292 100%)",
-    "linear-gradient(135deg, #58b292 0%, #46a080 100%)",
-    "linear-gradient(135deg, #6cc2a2 0%, #58b290 100%)",
-  ]},
-  { name: "H: Seafoam", gradients: [
-    "linear-gradient(135deg, #84c4bc 0%, #6ab4a8 50%, #96d0c4 100%)",
-    "linear-gradient(135deg, #90ccbe 0%, #7cc0b2 100%)",
-    "linear-gradient(135deg, #a0d8cc 0%, #90ccbe 100%)",
-  ]},
-  { name: "I: Turquoise", gradients: [
-    "linear-gradient(135deg, #4ab8b0 0%, #38a4a0 50%, #5cc8be 100%)",
-    "linear-gradient(135deg, #52c0b4 0%, #44b0a8 100%)",
-    "linear-gradient(135deg, #66ccc2 0%, #52c0b4 100%)",
-  ]},
-  { name: "J: Moss", gradients: [
-    "linear-gradient(135deg, #6a9e78 0%, #588c66 50%, #7cb08a 100%)",
-    "linear-gradient(135deg, #74a880 0%, #629874 100%)",
-    "linear-gradient(135deg, #86b894 0%, #74a880 100%)",
-  ]},
-];
 
 function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; badge: BadgeColors }) {
   const top3 = values.slice(0, 3);
   const persona = getWVPersona(values);
-  const [presetIdx, setPresetIdx] = useState(0);
-  const currentGradients = BADGE_GRADIENT_PRESETS[presetIdx].gradients;
 
   return (
     <section
       className="mb-6 text-center rounded-2xl px-6 py-6 relative overflow-hidden"
-      style={{ background: "linear-gradient(135deg, #e8f1ec 0%, #eef4f0 40%, #f3f7f5 100%)" }}
+      style={{ backgroundColor: "#F5FBF8" }}
     >
       <style>{`
         @keyframes wv-ripple-pulse {
@@ -159,7 +105,7 @@ function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; 
           position: absolute;
           top: 12%; left: 6%;
           border-radius: 50%;
-          border: 1px solid rgba(160,210,185,0.5);
+          border: 1.5px solid #7DC4A0;
           pointer-events: none;
           transform: translate(-50%, -50%);
         }
@@ -167,7 +113,7 @@ function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; 
           position: absolute;
           bottom: 18%; right: 10%;
           border-radius: 50%;
-          border: 1px solid rgba(160,210,185,0.5);
+          border: 1.5px solid #7DC4A0;
           pointer-events: none;
           transform: translate(50%, 50%);
         }
@@ -181,30 +127,31 @@ function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; 
         Your Work Values
       </h2>
       <p
-        className="relative text-[26px] font-bold mb-1.5"
-        style={{ color: "#2a7d5a", textShadow: "0 1px 2px rgba(42,125,90,0.1)" }}
+        className="relative text-[26px] font-bold mb-1.5 bg-clip-text text-transparent"
+        style={{
+          backgroundImage: "linear-gradient(to right, #0E7B4E, #1B9E6A, #4ECFA0, #7EDDBB)",
+        }}
       >
         {persona.modifier}{persona.name}
       </p>
       <p className="relative text-[14px] mb-5 tracking-wide" style={{ color: "#8a9e94" }}>
         {persona.subtitle}
       </p>
-      <div className="relative flex justify-center items-center gap-8 mt-1">
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-end gap-1">
-            {top3.map((v) => (
-              <span key={v.value_id} className="text-[13px] font-medium leading-snug tracking-wide" style={{ color: "#5a7568" }}>
-                {VALUE_ENGLISH_NAMES[v.value_id as ValueId]}
-              </span>
-            ))}
-          </div>
-          <div className="flex items-end gap-2.5">
+      <div className="relative grid grid-cols-3 items-center -mt-11">
+        <div className="flex flex-col items-end gap-1 pr-4 justify-self-center translate-x-2">
+          {top3.map((v) => (
+            <span key={v.value_id} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+              {VALUE_ENGLISH_NAMES[v.value_id as ValueId]}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-end justify-center gap-2.5">
             {top3.map((v, i) => {
               const vid = v.value_id as ValueId;
               const sizes = [
-                { w: "w-16", h: "h-16", text: "text-2xl", radius: "rounded-2xl" },
-                { w: "w-13", h: "h-13", text: "text-xl", radius: "rounded-xl" },
-                { w: "w-11", h: "h-11", text: "text-lg", radius: "rounded-xl" },
+                { size: "80px", text: "text-3xl", radius: "rounded-2xl" },
+                { size: "64px", text: "text-2xl", radius: "rounded-2xl" },
+                { size: "52px", text: "text-xl", radius: "rounded-xl" },
               ];
               const s = sizes[i];
               const badgeStyles = [
@@ -224,35 +171,16 @@ function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; 
               return (
                 <span
                   key={vid}
-                  className={`${s.w} ${s.h} ${s.radius} text-white ${s.text} font-bold flex items-center justify-center wv-badge-text`}
-                  style={badgeStyles[i]}
+                  className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center wv-badge-text shrink-0`}
+                  style={{ ...badgeStyles[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
                 >
                   {VALUE_ABBREVIATIONS[vid]}
                 </span>
               );
             })}
           </div>
-        </div>
-        <ValuesRadarChart values={values} badge={badge} />
-      </div>
-
-      {/* DEBUG: gradient selector */}
-      <div className="mt-4 pt-3 border-t border-dashed border-gray-300 relative z-10">
-        <p className="text-[11px] text-gray-400 mb-2">🎨 Badge Gradient (debug)</p>
-        <div className="flex flex-wrap gap-1.5 justify-center">
-          {BADGE_GRADIENT_PRESETS.map((preset, i) => (
-            <button
-              key={i}
-              onClick={() => setPresetIdx(i)}
-              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
-                i === presetIdx
-                  ? "border-emerald-600 bg-emerald-50 text-emerald-700 font-semibold"
-                  : "border-gray-300 text-gray-500 hover:border-gray-400"
-              }`}
-            >
-              {preset.name}
-            </button>
-          ))}
+        <div className="flex justify-start pl-4">
+          <ValuesRadarChart values={values} badge={badge} />
         </div>
       </div>
     </section>
@@ -262,9 +190,9 @@ function TopValuesCodeSection({ values, badge }: { values: ResultDTO["values"]; 
 const RADAR_ORDER: ValueId[] = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"];
 
 function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badge: BadgeColors }) {
-  const cx = 90;
-  const cy = 90;
-  const R = 58;
+  const cx = 95;
+  const cy = 95;
+  const R = 60;
   const scoreMap = new Map(values.map((v) => [v.value_id, v]));
   const top3Set = new Set(
     [...values].sort((a, b) => a.rank - b.rank).slice(0, 3).map((v) => v.value_id)
@@ -291,7 +219,7 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
   const spokes = RADAR_ORDER.map((_, i) => hexPoint(i, R));
 
   return (
-    <svg width={180} height={180} className="shrink-0">
+    <svg width={190} height={190} className="shrink-0">
       {gridPaths.map((d, i) => (
         <path key={i} d={d} fill="none" stroke="#d0ddd6" strokeWidth={0.6} />
       ))}
@@ -309,9 +237,9 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
             <circle
               cx={pt.x}
               cy={pt.y}
-              r={13}
-              fill="rgba(255,255,255,0.7)"
-              stroke="#b0c8bb"
+              r={14}
+              fill="#ebf9f3"
+              stroke="#40b090"
               strokeWidth={1}
             />
             <text
@@ -319,8 +247,8 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
               y={pt.y}
               textAnchor="middle"
               dominantBaseline="central"
-              fill="#6b8a78"
-              fontSize={10}
+              fill="#057f5d"
+              fontSize={13}
               fontWeight="600"
             >
               {VALUE_ABBREVIATIONS[vid]}
