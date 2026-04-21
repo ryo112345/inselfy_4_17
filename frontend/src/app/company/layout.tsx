@@ -8,7 +8,7 @@ export default function CompanyLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <CompanyHeader />
-      <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
     </div>
   );
 }
