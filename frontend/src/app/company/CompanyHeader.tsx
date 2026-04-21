@@ -15,119 +15,103 @@ const navItems = [
   { label: "設定", href: "/company/settings", icon: SettingsIcon },
 ];
 
-export function CompanyHeader() {
+export function CompanyHeader({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [visible, setVisible] = useState(true);
-  const [collapsed, setCollapsed] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const accentColor = "#2979ff";
 
   const handleClose = () => {
-    setCollapsed(true);
-  };
-
-  const handleTransitionEnd = () => {
-    if (collapsed) {
-      setVisible(false);
-    }
-  };
-
-  const handleOpen = () => {
-    setVisible(true);
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setCollapsed(false);
-      });
-    });
+    setExpanded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <>
-      {!visible && (
-        <div className="flex h-12 items-center px-4">
-          <button
-            onClick={handleOpen}
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-[#ece9e0] text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <HamburgerIcon />
-          </button>
-        </div>
-      )}
+      <button
+        onClick={() => setExpanded(true)}
+        className={`fixed top-3 left-4 z-50 flex h-9 w-9 items-center justify-center rounded-md border border-[#ece9e0] bg-white text-gray-700 hover:bg-gray-50 transition-opacity duration-300 cursor-pointer ${
+          expanded ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+      >
+        <HamburgerIcon />
+      </button>
 
-      {visible && (
-        <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            collapsed ? "max-h-0 opacity-0" : "max-h-52 opacity-100"
-          }`}
-          onTransitionEnd={handleTransitionEnd}
-        >
-          <header>
-            <div className="border-b border-gray-200 bg-white">
-              <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
-                <div className="flex items-center gap-6">
-                  <Link href="/company" className="text-xl font-bold" style={{ color: accentColor }}>
-                    Inselfy
-                  </Link>
-                  <span className="text-sm text-gray-700">株式会社サンプル　担当者様</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Link
-                    href="/company/manual"
-                    className="text-sm font-medium hover:underline"
-                    style={{ color: accentColor }}
-                  >
-                    マニュアル
-                  </Link>
-                  <button className="rounded border border-gray-300 px-4 py-1.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
-                    ログアウト
-                  </button>
-                  <button
-                    onClick={handleClose}
-                    className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
-                  >
-                    <CloseIcon />
-                  </button>
-                </div>
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          expanded ? "max-h-52 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <header>
+          <div className="border-b border-gray-200 bg-white">
+            <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
+              <div className="flex items-center gap-6">
+                <Link href="/company" className="text-xl font-bold" style={{ color: accentColor }}>
+                  Inselfy
+                </Link>
+                <span className="text-sm text-gray-700">株式会社サンプル　担当者様</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/company/manual"
+                  className="text-sm font-medium hover:underline"
+                  style={{ color: accentColor }}
+                >
+                  マニュアル
+                </Link>
+                <button className="rounded border border-gray-300 px-4 py-1.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
+                  ログアウト
+                </button>
+                <button
+                  onClick={handleClose}
+                  className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <CloseIcon />
+                </button>
               </div>
             </div>
+          </div>
 
-            <style>{`
-              .company-nav-item:hover:not(.company-nav-active) {
-                background-color: color-mix(in srgb, var(--company-accent) 10%, transparent);
-              }
-            `}</style>
-            <nav
-              className="border-b-3 bg-white shadow-sm"
-              style={{ borderColor: accentColor, "--company-accent": accentColor } as React.CSSProperties}
-            >
-              <div className="flex items-center justify-center">
-                {navItems.map((item) => {
-                  const isActive =
-                    item.href === "/company"
-                      ? pathname === "/company"
-                      : pathname.startsWith(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`company-nav-item flex flex-col items-center gap-1.5 px-8 py-4 text-xs font-medium transition-colors relative ${isActive ? "company-nav-active" : ""}`}
-                      style={
-                        isActive
-                          ? { color: "#fff", backgroundColor: accentColor }
-                          : { color: "#4b5563" }
-                      }
-                    >
-                      <span className="h-6 w-6">
-                        <item.icon />
-                      </span>
-                      <span className="whitespace-nowrap">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </nav>
-          </header>
-        </div>
-      )}
+          <style>{`
+            .company-nav-item:hover:not(.company-nav-active) {
+              background-color: color-mix(in srgb, var(--company-accent) 10%, transparent);
+            }
+          `}</style>
+          <nav
+            className="border-b-3 bg-white shadow-sm"
+            style={{ borderColor: accentColor, "--company-accent": accentColor } as React.CSSProperties}
+          >
+            <div className="flex items-center justify-center">
+              {navItems.map((item) => {
+                const isActive =
+                  item.href === "/company"
+                    ? pathname === "/company"
+                    : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`company-nav-item flex flex-col items-center gap-1.5 px-8 py-4 text-xs font-medium transition-colors relative ${isActive ? "company-nav-active" : ""}`}
+                    style={
+                      isActive
+                        ? { color: "#fff", backgroundColor: accentColor }
+                        : { color: "#4b5563" }
+                    }
+                  >
+                    <span className="h-6 w-6">
+                      <item.icon />
+                    </span>
+                    <span className="whitespace-nowrap">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        </header>
+      </div>
+
+      <main className="mx-auto max-w-5xl px-6 pt-8 pb-8">
+        {children}
+      </main>
     </>
   );
 }
