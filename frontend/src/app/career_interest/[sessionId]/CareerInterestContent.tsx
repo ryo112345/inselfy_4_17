@@ -14,9 +14,11 @@ import {
   TYPE_ABBREVIATIONS,
   TYPE_BASIC_INTERESTS,
   BASIC_INTEREST_LABELS,
+  TYPE_IDS,
   type TypeId,
   type BasicInterestId,
 } from "@/features/career-interest/lib/types";
+import { getCIPersona } from "@/features/career-interest/lib/personas";
 
 const SCORE_COLORS = {
   tier1: "#149470",
@@ -72,11 +74,10 @@ export function CareerInterestResultContent({ sessionId, initialData, isOwner = 
 
   const basicScoreMap = new Map(result.basic_scores.map((b) => [b.basic_interest_id, b]));
   const sortedTypes = [...result.type_scores].sort((a, b) => a.rank - b.rank);
-  const riasecCode = sortedTypes.slice(0, 3).map((t) => t.type_id).join("");
 
   return (
     <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 pt-5 pb-8">
-      <RIASECCodeSection code={riasecCode} badge={badge} />
+      <TopRIASECHeroSection types={sortedTypes} badge={badge} createdAt={result.created_at} />
       <TypesSection types={sortedTypes} colors={colors} badge={badge} />
       <BasicInterestsSection types={sortedTypes} basicScoreMap={basicScoreMap} colors={colors} badge={badge} />
 
@@ -86,27 +87,241 @@ export function CareerInterestResultContent({ sessionId, initialData, isOwner = 
 }
 
 
-function RIASECCodeSection({ code, badge }: { code: string; badge: BadgeColors }) {
+function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["type_scores"]; badge: BadgeColors; createdAt: string }) {
+  const top3 = types.slice(0, 3);
+  const persona = getCIPersona(types);
+
   return (
-    <section className="mb-6 text-center">
-      <h2 className="text-[13px] font-bold tracking-widest mb-2" style={{ color: badge.headingColor }}>
-        YOUR RIASEC CODE
-      </h2>
-      <div className="flex justify-center gap-2">
-        {code.split("").map((letter, i) => (
-          <span
-            key={i}
-            className="w-12 h-12 rounded-xl text-white text-xl font-bold flex items-center justify-center shadow-md"
-            style={{ backgroundColor: badge.text }}
-          >
-            {letter}
-          </span>
-        ))}
+    <section
+      className="mb-6 text-center px-6 pt-10 pb-6 relative overflow-hidden -mx-6 -mt-5"
+      style={{ backgroundColor: "#F8F3FD" }}
+    >
+      <style>{`
+        @keyframes ci-ripple-pulse {
+          0% { width: 180px; height: 180px; opacity: 0.2; }
+          50% { width: 280px; height: 280px; opacity: 0.08; }
+          100% { width: 180px; height: 180px; opacity: 0.2; }
+        }
+        .ci-ripple-tr {
+          position: absolute;
+          top: 12%; right: 6%;
+          border-radius: 50%;
+          border: 1.5px solid #B08CD4;
+          pointer-events: none;
+          transform: translate(50%, -50%);
+        }
+        .ci-ripple-bl {
+          position: absolute;
+          bottom: 8%; left: 5%;
+          border-radius: 50%;
+          border: 1.5px solid #B08CD4;
+          pointer-events: none;
+          transform: translate(-50%, 50%);
+        }
+        .ci-badge-text {
+          text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        @keyframes ci-shimmer {
+          0% { opacity: 0; transform: translate(-30%, -30%) scale(0.5); }
+          50% { opacity: 1; }
+          100% { opacity: 0; transform: translate(30%, 30%) scale(1.2); }
+        }
+        @keyframes ci-float-1 {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+        @keyframes ci-float-2 {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+        @keyframes ci-float-3 {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-2.5px); }
+        }
+        .ci-badge-glow {
+          position: relative;
+          overflow: hidden;
+        }
+        .ci-badge-float-1 { animation: ci-float-1 5s ease-in-out infinite; }
+        .ci-badge-float-2 { animation: ci-float-2 5.6s ease-in-out 0.5s infinite; }
+        .ci-badge-float-3 { animation: ci-float-3 4.6s ease-in-out 1s infinite; }
+        .ci-badge-glow::after {
+          content: '';
+          position: absolute;
+          width: 60%;
+          height: 60%;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+          animation: ci-shimmer 4s ease-in-out infinite;
+          pointer-events: none;
+        }
+      `}</style>
+      <div className="ci-ripple-tr" style={{ animation: "ci-ripple-pulse 8s ease-in-out infinite" }} />
+      <div className="ci-ripple-bl" style={{ animation: "ci-ripple-pulse 8s ease-in-out infinite" }} />
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-purple-50 transition-colors" style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}>
+          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 6 12 2 8 6" />
+            <line x1={12} y1={2} x2={12} y2={15} />
+          </svg>
+          Share Link
+        </button>
+        <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-purple-50 transition-colors" style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}>
+          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <rect x={2} y={2} width={20} height={20} rx={5} />
+            <circle cx={12} cy={12} r={4} />
+            <circle cx={18} cy={6} r={1.5} fill="currentColor" stroke="none" />
+          </svg>
+          Share Story
+        </button>
       </div>
-      <p className="text-sm mt-2" style={{ color: badge.labelColor }}>
-        {code.split("").map((l) => TYPE_LABELS[l as TypeId]).join(" / ")}
+      <div className="absolute top-4 left-4 z-10">
+        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border" style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}>
+          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx={12} cy={12} r={10} />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          {(() => {
+            const d = new Date(createdAt);
+            return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+          })()}
+        </span>
+      </div>
+      <h2 className="relative text-[12px] font-bold tracking-[0.2em] mb-2 uppercase" style={{ color: "#9a8aaa" }}>
+        Your RIASEC Type
+      </h2>
+      <p
+        className="relative text-[26px] font-bold mb-1.5 bg-clip-text text-transparent"
+        style={{
+          backgroundImage: "linear-gradient(to right, #6B3FA0, #8B5CC8, #A87DE0, #C49CF0)",
+        }}
+      >
+        {persona.modifier}{persona.name}
       </p>
+      <p className="relative text-[14px] mb-5 tracking-wide" style={{ color: "#9a8aaa" }}>
+        {persona.subtitle}
+      </p>
+      <div className="relative grid grid-cols-3 items-center -mt-11">
+        <div className="flex flex-col items-end gap-1 pr-4 justify-self-center translate-x-2">
+          {top3.map((t) => (
+            <span key={t.type_id} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+              {TYPE_ENGLISH_NAMES[t.type_id as TypeId]}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-end justify-center gap-2.5">
+          {top3.map((t, i) => {
+            const tid = t.type_id as TypeId;
+            const sizes = [
+              { size: "80px", text: "text-3xl", radius: "rounded-2xl" },
+              { size: "64px", text: "text-2xl", radius: "rounded-2xl" },
+              { size: "52px", text: "text-xl", radius: "rounded-xl" },
+            ];
+            const s = sizes[i];
+            const badgeStyles = [
+              {
+                background: "linear-gradient(170deg, #C49CF0 0%, #A87DE0 30%, #8B5CC8 60%, #7B4BAF 100%)",
+                boxShadow: "0 6px 14px rgba(120,70,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                border: "1px solid rgba(255,255,255,0.25)",
+              },
+              {
+                background: "linear-gradient(170deg, #B890E8 0%, #9C70DC 30%, #8858C8 60%, #7A50B8 100%)",
+                boxShadow: "0 6px 14px rgba(110,70,190,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                border: "1px solid rgba(255,255,255,0.25)",
+              },
+              {
+                background: "linear-gradient(170deg, #B088DC 0%, #9668C8 30%, #8058B8 60%, #7450A8 100%)",
+                boxShadow: "0 6px 14px rgba(100,70,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                border: "1px solid rgba(255,255,255,0.25)",
+              },
+            ];
+            return (
+              <span
+                key={tid}
+                className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center ci-badge-text ci-badge-glow ci-badge-float-${i + 1} shrink-0`}
+                style={{ ...badgeStyles[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
+              >
+                {TYPE_ABBREVIATIONS[tid]}
+              </span>
+            );
+          })}
+        </div>
+        <div className="flex justify-start pl-4">
+          <RIASECRadarChart types={types} />
+        </div>
+      </div>
     </section>
+  );
+}
+
+const RADAR_ORDER: TypeId[] = ["R", "I", "A", "S", "E", "C"];
+
+function RIASECRadarChart({ types }: { types: ResultDTO["type_scores"] }) {
+  const cx = 95;
+  const cy = 95;
+  const R = 60;
+  const scoreMap = new Map(types.map((t) => [t.type_id, t]));
+
+  const hexPoint = (i: number, r: number) => {
+    const angle = (Math.PI / 2) + (2 * Math.PI * i) / 6;
+    return { x: cx - Math.cos(angle) * r, y: cy - Math.sin(angle) * r };
+  };
+
+  const gridLevels = [0.25, 0.5, 0.75, 1.0];
+  const gridPaths = gridLevels.map((level) => {
+    const pts = RADAR_ORDER.map((_, i) => hexPoint(i, R * level));
+    return pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+  });
+
+  const dataPoints = RADAR_ORDER.map((tid, i) => {
+    const t = scoreMap.get(tid);
+    const score = t ? (t.score - 1) / 4 : 0;
+    return hexPoint(i, R * Math.max(score, 0.05));
+  });
+  const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+
+  const spokes = RADAR_ORDER.map((_, i) => hexPoint(i, R));
+
+  return (
+    <svg width={190} height={190} className="shrink-0">
+      {gridPaths.map((d, i) => (
+        <path key={i} d={d} fill="none" stroke="#d0c0e0" strokeWidth={0.6} />
+      ))}
+      {spokes.map((p, i) => (
+        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d0c0e0" strokeWidth={0.6} />
+      ))}
+      <path d={dataPath} fill="rgba(139,92,200,0.15)" stroke="#8B5CC8" strokeWidth={1.2} />
+      {dataPoints.map((pt, i) => (
+        <circle key={i} cx={pt.x} cy={pt.y} r={3} fill="#8B5CC8" />
+      ))}
+      {RADAR_ORDER.map((tid, i) => {
+        const pt = hexPoint(i, R + 20);
+        return (
+          <g key={tid}>
+            <circle
+              cx={pt.x}
+              cy={pt.y}
+              r={14}
+              fill="#f0e8fa"
+              stroke="#A87DE0"
+              strokeWidth={1}
+            />
+            <text
+              x={pt.x}
+              y={pt.y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="#6B3FA0"
+              fontSize={13}
+              fontWeight="600"
+            >
+              {TYPE_ABBREVIATIONS[tid]}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
   );
 }
 
@@ -427,7 +642,7 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
     }
   };
 
-  const reportProseClasses = "prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-emerald-800 [&_h2]:border-l-3 [&_h2]:border-emerald-600 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-emerald-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-emerald-400 [&_.catchphrase]:bg-emerald-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4";
+  const reportProseClasses = "prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-purple-800 [&_h2]:border-l-3 [&_h2]:border-purple-500 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-purple-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-purple-400 [&_.catchphrase]:bg-purple-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-purple-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4";
 
   return (
     <div ref={sectionRef} className="relative mt-10 scroll-mt-4">
@@ -435,14 +650,14 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
         <span
           className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
           style={{
-            background: "linear-gradient(180deg, #4a8c6f 0%, #2d6b4e 50%, #1f5c3f 100%)",
-            boxShadow: "0 4px 10px rgba(30,80,55,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
+            background: "linear-gradient(180deg, #9B6BC8 0%, #7B4BAF 50%, #6B3FA0 100%)",
+            boxShadow: "0 4px 10px rgba(107,63,160,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
           }}
         >
           inselfy.ai
         </span>
       </div>
-      <div className="rounded-md border border-gray-200 bg-[#fbfdfb] px-8 pt-8 pb-7">
+      <div className="rounded-md border border-gray-200 bg-[#fdfbff] px-8 pt-8 pb-7">
         <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>AI キャリアレポート</h3>
         <div className="border-t border-gray-200 mb-3" />
 
@@ -470,7 +685,7 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
               <button
                 onClick={handleClick}
                 disabled={loading}
-                className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer disabled:opacity-50"
+                className="bg-purple-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(107,63,160,0.45)] hover:bg-purple-800 hover:shadow-[0_6px_16px_-4px_rgba(107,63,160,0.55)] transition cursor-pointer disabled:opacity-50"
               >
                 レポートを作成する
               </button>

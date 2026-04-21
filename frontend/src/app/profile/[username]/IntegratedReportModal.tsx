@@ -81,7 +81,7 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
             disabled={!canSubmit}
             loading={submitting}
           >
-            リクエストを送信する
+            この内容で生成する
           </PrimaryButton>
         </>
       }

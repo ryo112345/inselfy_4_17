@@ -92,7 +92,7 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
 
   return (
     <section
-      className="mb-6 text-center px-6 py-6 relative overflow-hidden -mx-6 -mt-5"
+      className="mb-6 text-center px-6 pt-10 pb-6 relative overflow-hidden -mx-6 -mt-5"
       style={{ backgroundColor: "#F5FBF8" }}
     >
       <style>{`
@@ -101,21 +101,21 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
           50% { width: 280px; height: 280px; opacity: 0.08; }
           100% { width: 180px; height: 180px; opacity: 0.2; }
         }
-        .wv-ripple-tl {
+        .wv-ripple-tr {
           position: absolute;
-          top: 12%; left: 6%;
+          top: 12%; right: 6%;
           border-radius: 50%;
           border: 1.5px solid #7DC4A0;
           pointer-events: none;
-          transform: translate(-50%, -50%);
+          transform: translate(50%, -50%);
         }
-        .wv-ripple-br {
+        .wv-ripple-bl {
           position: absolute;
-          bottom: 18%; right: 10%;
+          bottom: 8%; left: 5%;
           border-radius: 50%;
           border: 1.5px solid #7DC4A0;
           pointer-events: none;
-          transform: translate(50%, 50%);
+          transform: translate(-50%, 50%);
         }
         .wv-badge-text {
           text-shadow: 0 1px 3px rgba(0,0,0,0.15);
@@ -155,8 +155,8 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
           pointer-events: none;
         }
       `}</style>
-      <div className="wv-ripple-tl" style={{ animation: "wv-ripple-pulse 8s ease-in-out infinite" }} />
-      <div className="wv-ripple-br" style={{ animation: "wv-ripple-pulse 8s ease-in-out 4s infinite" }} />
+      <div className="wv-ripple-tr" style={{ animation: "wv-ripple-pulse 8s ease-in-out infinite" }} />
+      <div className="wv-ripple-bl" style={{ animation: "wv-ripple-pulse 8s ease-in-out infinite" }} />
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
         <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors" style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}>
           <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
