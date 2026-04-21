@@ -231,5 +231,28 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return adminCIReportCtrl.GetReport(c, c.Param("sessionId"))
 	})
 
+	// --- Admin Integrated Reports ---
+	adminIntReportCtrl := httpcontroller.NewAdminIntegratedReportController(pool)
+	adminGroup.GET("/integrated-reports/pending", adminIntReportCtrl.ListPending)
+	adminGroup.GET("/integrated-reports/list", adminIntReportCtrl.ListReports)
+	adminGroup.POST("/integrated-requests/:requestId/reset-viewed", func(c echo.Context) error {
+		return adminIntReportCtrl.ResetViewed(c, c.Param("requestId"))
+	})
+	adminGroup.PUT("/integrated-requests/:requestId/ai-report", func(c echo.Context) error {
+		return adminIntReportCtrl.SaveReport(c, c.Param("requestId"))
+	})
+	adminGroup.GET("/integrated-requests/:requestId/ai-report", func(c echo.Context) error {
+		return adminIntReportCtrl.GetReport(c, c.Param("requestId"))
+	})
+	adminGroup.GET("/integrated-requests/:requestId/prompt", func(c echo.Context) error {
+		return adminIntReportCtrl.GetPrompt(c, c.Param("requestId"))
+	})
+
+	// --- Integrated Report (user-facing) ---
+	intGroup := e.Group("/api/integrated-report")
+	intGroup.POST("/requests", adminIntReportCtrl.CreateRequest, jwtMW)
+	intGroup.GET("/me", adminIntReportCtrl.GetReportByUser, jwtMW)
+	intGroup.GET("/status", adminIntReportCtrl.GetRequestStatus, jwtMW)
+
 	return e, cfg, cleanup, nil
 }

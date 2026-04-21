@@ -86,6 +86,25 @@ type Experience struct {
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
+type IntegratedReport struct {
+	ID        pgtype.UUID        `json:"id"`
+	RequestID pgtype.UUID        `json:"request_id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	Content   string             `json:"content"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ViewedAt  pgtype.Timestamptz `json:"viewed_at"`
+}
+
+type IntegratedReportRequest struct {
+	ID        pgtype.UUID        `json:"id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	Topic1    int16              `json:"topic1"`
+	Topic2    int16              `json:"topic2"`
+	Topic3    int16              `json:"topic3"`
+	FreeText  string             `json:"free_text"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type Post struct {
 	ID        pgtype.UUID        `json:"id"`
 	UserID    pgtype.UUID        `json:"user_id"`
