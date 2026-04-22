@@ -47,22 +47,6 @@ const jobs = [
   { title: "デザイナー", status: "下書き", applicants: 0, views: 0, daysLeft: null, href: "/company/jobs/4" },
 ];
 
-const kpiData = {
-  applicationToOffer: 18,
-  avgLeadTimeDays: 32,
-  monthlyApplications: [
-    { month: "1月", count: 15 },
-    { month: "2月", count: 22 },
-    { month: "3月", count: 28 },
-    { month: "4月", count: 19 },
-  ],
-  stageConversion: [
-    { from: "応募", to: "書類通過", rate: 62 },
-    { from: "書類通過", to: "一次面接", rate: 78 },
-    { from: "一次面接", to: "最終面接", rate: 45 },
-    { from: "最終面接", to: "内定", rate: 67 },
-  ],
-};
 
 function PipelineArrow() {
   return (
@@ -83,14 +67,7 @@ function UrgencyDot({ urgency }: { urgency: string }) {
   return <span className={`inline-block h-2 w-2 rounded-full ${colors[urgency as keyof typeof colors]}`} />;
 }
 
-function MiniBar({ value, max, color }: { value: number; max: number; color: string }) {
-  const pct = Math.round((value / max) * 100);
-  return (
-    <div className="h-2 w-full rounded-full bg-gray-100">
-      <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
-    </div>
-  );
-}
+
 
 const sectionIcons: Record<string, React.ReactNode> = {
   採用パイプライン: (
@@ -115,11 +92,6 @@ const sectionIcons: Record<string, React.ReactNode> = {
   求人パフォーマンス: (
     <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M1 2.75A.75.75 0 011.75 2h16.5a.75.75 0 010 1.5H17v12.136l.894.447a.75.75 0 01-.788 1.278l-1.591-.796a.75.75 0 01-.415-.67V3.5h-1.5v9.136l.894.447a.75.75 0 01-.788 1.278l-1.591-.796a.75.75 0 01-.415-.67V3.5H10v6.636l.894.447a.75.75 0 01-.788 1.278l-1.591-.796A.75.75 0 018.1 10.4V3.5H6.5v3.636l.894.447a.75.75 0 01-.788 1.278l-1.591-.796A.75.75 0 014.6 7.4V3.5H3v14.75a.75.75 0 01-1.5 0V3.5h-.75A.75.75 0 011 2.75z" clipRule="evenodd" />
-    </svg>
-  ),
-  採用KPI: (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-      <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z" />
     </svg>
   ),
 };
@@ -218,9 +190,9 @@ export default function CompanyPage() {
       {/* ── 要対応 + スカウト (2カラム) ── */}
       <div className="grid grid-cols-5 gap-5">
         {/* 要対応アイテム */}
-        <section className="col-span-2">
+        <section className="col-span-2 flex flex-col">
           <SectionHeader title="要対応" />
-          <div className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="mt-3 flex flex-1 flex-col divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white shadow-sm">
             {actionItems.map((item) => (
               <Link
                 key={item.label}
@@ -230,11 +202,11 @@ export default function CompanyPage() {
                 <div className="flex items-center gap-2.5">
                   <UrgencyDot urgency={item.urgency} />
                   <div>
-                    <p className="text-[13px] font-medium text-gray-900">{item.label}</p>
-                    <p className="text-[11px] text-gray-400">{item.description}</p>
+                    <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                    <p className="text-sm text-gray-400">{item.description}</p>
                   </div>
                 </div>
-                <span className="ml-2 text-lg font-bold" style={{ color: item.urgency === "high" ? "#ef4444" : accent }}>
+                <span className="ml-2 text-lg font-bold text-gray-900">
                   {item.count}
                 </span>
               </Link>
@@ -246,7 +218,7 @@ export default function CompanyPage() {
         <section className="col-span-3">
           <SectionHeader title="スカウト状況" action="スカウト管理" href="/company/scout" />
           <div className="mt-3 rounded-2xl border border-gray-200 bg-white px-6 pb-0 pt-3 shadow-sm">
-            {/* 送信可能 + 回収待ち（横並び） */}
+            {/* 送信可能 + 返信待ち（横並び） */}
             <div className="mb-3 grid grid-cols-2 gap-6">
               <div>
                 <p className="text-base font-semibold text-gray-700">送信可能</p>
@@ -282,7 +254,7 @@ export default function CompanyPage() {
                 </div>
               </div>
               <div>
-                <p className="text-base font-semibold text-gray-700">回収待ち</p>
+                <p className="text-base font-semibold text-gray-700">返信待ち</p>
                 <div className="mt-1.5 flex items-baseline gap-2">
                   <span className="text-3xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.pending.total}</span>
                   <span className="text-sm font-normal text-gray-400">通</span>
@@ -370,59 +342,6 @@ export default function CompanyPage() {
         </div>
       </section>
 
-      {/* ── 採用KPI ── */}
-      <section>
-          <SectionHeader title="採用KPI" />
-          <div className="mt-3 space-y-4">
-            {/* サマリーカード */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                <p className="text-[11px] font-medium text-gray-400">応募→内定率</p>
-                <p className="mt-1 text-2xl font-bold" style={{ color: accent }}>{kpiData.applicationToOffer}%</p>
-              </div>
-              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-                <p className="text-[11px] font-medium text-gray-400">平均採用日数</p>
-                <p className="mt-1 text-2xl font-bold" style={{ color: accent }}>{kpiData.avgLeadTimeDays}<span className="text-sm font-normal text-gray-400">日</span></p>
-              </div>
-            </div>
-
-            {/* 月次応募推移 */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="mb-3 text-[11px] font-medium text-gray-400">月次応募数</p>
-              <div className="flex items-end gap-3">
-                {kpiData.monthlyApplications.map((m) => {
-                  const maxCount = Math.max(...kpiData.monthlyApplications.map((d) => d.count));
-                  const h = Math.max(16, (m.count / maxCount) * 80);
-                  return (
-                    <div key={m.month} className="flex flex-1 flex-col items-center gap-1">
-                      <span className="text-xs font-medium text-gray-600">{m.count}</span>
-                      <div className="w-full rounded-t-md" style={{ height: `${h}px`, backgroundColor: accent, opacity: 0.8 }} />
-                      <span className="text-[10px] text-gray-400">{m.month}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ステージ通過率 */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="mb-3 text-[11px] font-medium text-gray-400">ステージ通過率</p>
-              <div className="space-y-3">
-                {kpiData.stageConversion.map((s) => (
-                  <div key={s.from}>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-600">{s.from} → {s.to}</span>
-                      <span className="font-semibold" style={{ color: accent }}>{s.rate}%</span>
-                    </div>
-                    <div className="mt-1">
-                      <MiniBar value={s.rate} max={100} color={accent} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-      </section>
     </div>
   );
 }
