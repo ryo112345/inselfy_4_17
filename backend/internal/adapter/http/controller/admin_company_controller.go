@@ -1,0 +1,155 @@
+package controller
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo/v4"
+
+	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+)
+
+type AdminCompanyController struct {
+	queries *generated.Queries
+}
+
+func NewAdminCompanyController(pool *pgxpool.Pool) *AdminCompanyController {
+	return &AdminCompanyController{queries: generated.New(pool)}
+}
+
+type adminCompanyItem struct {
+	ID                string `json:"id"`
+	Email             string `json:"email"`
+	CompanyName       string `json:"companyName"`
+	ContactPersonName string `json:"contactPersonName"`
+	PhoneNumber       string `json:"phoneNumber"`
+	Status            string `json:"status"`
+	CreatedAt         string `json:"createdAt"`
+}
+
+type adminCompanyListResponse struct {
+	Companies  []adminCompanyItem `json:"companies"`
+	Total      int64              `json:"total"`
+	Page       int                `json:"page"`
+	PerPage    int                `json:"per_page"`
+	TotalPages int                `json:"total_pages"`
+}
+
+func (c *AdminCompanyController) List(ctx echo.Context) error {
+	page, _ := strconv.Atoi(ctx.QueryParam("page"))
+	if page < 1 {
+		page = 1
+	}
+	perPage, _ := strconv.Atoi(ctx.QueryParam("per_page"))
+	if perPage < 1 || perPage > 100 {
+		perPage = 20
+	}
+	offset := int32((page - 1) * perPage)
+	status := ctx.QueryParam("status")
+
+	var total int64
+	var err error
+
+	if status != "" {
+		cs := generated.CompanyStatus(status)
+		total, err = c.queries.CountCompanyAccountsByStatus(ctx.Request().Context(), cs)
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		rows, err := c.queries.ListCompanyAccountsByStatus(ctx.Request().Context(), &generated.ListCompanyAccountsByStatusParams{
+			Status: cs,
+			Limit:  int32(perPage),
+			Offset: offset,
+		})
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		return ctx.JSON(http.StatusOK, buildCompanyListResponse(toCompanyItems(rows), total, page, perPage))
+	}
+
+	total, err = c.queries.CountAllCompanyAccounts(ctx.Request().Context())
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	rows, err := c.queries.ListAllCompanyAccounts(ctx.Request().Context(), &generated.ListAllCompanyAccountsParams{
+		Limit:  int32(perPage),
+		Offset: offset,
+	})
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	return ctx.JSON(http.StatusOK, buildCompanyListResponse(toCompanyItems(rows), total, page, perPage))
+}
+
+func (c *AdminCompanyController) UpdateStatus(ctx echo.Context, id string) error {
+	parsed, err := uuid.Parse(id)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+	}
+
+	var body struct {
+		Status string `json:"status"`
+	}
+	if err := ctx.Bind(&body); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request"})
+	}
+
+	if body.Status != "approved" && body.Status != "rejected" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "status must be 'approved' or 'rejected'"})
+	}
+
+	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
+	row, err := c.queries.UpdateCompanyStatus(ctx.Request().Context(), &generated.UpdateCompanyStatusParams{
+		ID:     pgID,
+		Status: generated.CompanyStatus(body.Status),
+	})
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return ctx.JSON(http.StatusOK, adminCompanyItem{
+		ID:                pgUUIDToString(row.ID),
+		Email:             row.Email,
+		CompanyName:       row.CompanyName,
+		ContactPersonName: row.ContactPersonName,
+		PhoneNumber:       row.PhoneNumber,
+		Status:            string(row.Status),
+		CreatedAt:         row.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+	})
+}
+
+func toCompanyItems(rows []*generated.CompanyAccount) []adminCompanyItem {
+	items := make([]adminCompanyItem, 0, len(rows))
+	for _, r := range rows {
+		items = append(items, adminCompanyItem{
+			ID:                pgUUIDToString(r.ID),
+			Email:             r.Email,
+			CompanyName:       r.CompanyName,
+			ContactPersonName: r.ContactPersonName,
+			PhoneNumber:       r.PhoneNumber,
+			Status:            string(r.Status),
+			CreatedAt:         r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+		})
+	}
+	return items
+}
+
+func buildCompanyListResponse(companies []adminCompanyItem, total int64, page, perPage int) adminCompanyListResponse {
+	totalPages := int(total) / perPage
+	if int(total)%perPage != 0 {
+		totalPages++
+	}
+	if totalPages < 1 {
+		totalPages = 1
+	}
+	return adminCompanyListResponse{
+		Companies:  companies,
+		Total:      total,
+		Page:       page,
+		PerPage:    perPage,
+		TotalPages: totalPages,
+	}
+}

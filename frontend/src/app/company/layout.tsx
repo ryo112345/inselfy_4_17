@@ -1,3 +1,4 @@
+import { CompanyAuthProvider } from "@/features/company-auth/company-auth-context";
 import { CompanyHeader } from "./CompanyHeader";
 
 export default function CompanyLayout({
@@ -6,8 +7,10 @@ export default function CompanyLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <CompanyHeader>{children}</CompanyHeader>
-    </div>
+    <CompanyAuthProvider>
+      <div className="min-h-screen bg-gray-50">
+        <CompanyHeader>{children}</CompanyHeader>
+      </div>
+    </CompanyAuthProvider>
   );
 }

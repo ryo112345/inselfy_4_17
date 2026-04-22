@@ -47,7 +47,6 @@ const jobs = [
   { title: "デザイナー", status: "下書き", applicants: 0, views: 0, daysLeft: null, href: "/company/jobs/4" },
 ];
 
-
 const kpiData = {
   applicationToOffer: 18,
   avgLeadTimeDays: 32,
@@ -84,7 +83,6 @@ function UrgencyDot({ urgency }: { urgency: string }) {
   return <span className={`inline-block h-2 w-2 rounded-full ${colors[urgency as keyof typeof colors]}`} />;
 }
 
-
 function MiniBar({ value, max, color }: { value: number; max: number; color: string }) {
   const pct = Math.round((value / max) * 100);
   return (
@@ -96,8 +94,11 @@ function MiniBar({ value, max, color }: { value: number; max: number; color: str
 
 const sectionIcons: Record<string, React.ReactNode> = {
   採用パイプライン: (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-      <path d="M2 4.5A2.5 2.5 0 014.5 2h11A2.5 2.5 0 0118 4.5v2.062a2.5 2.5 0 01-.703 1.738l-4.844 4.844A2.5 2.5 0 0110.714 14H9.286a2.5 2.5 0 01-1.739-.856L2.703 8.3A2.5 2.5 0 012 6.562V4.5z" />
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z" />
+      <path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11.05A22 22 0 0112 15z" />
+      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </svg>
   ),
   要対応: (
@@ -106,9 +107,9 @@ const sectionIcons: Record<string, React.ReactNode> = {
     </svg>
   ),
   スカウト状況: (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-      <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
-      <path d="M19 8.839l-7.556 3.778a2.75 2.75 0 01-2.888 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2L11 13" />
+      <path d="M22 2l-7 20-4-9-9-4 20-7z" />
     </svg>
   ),
   求人パフォーマンス: (
@@ -125,29 +126,34 @@ const sectionIcons: Record<string, React.ReactNode> = {
 
 const stageIcons: Record<string, React.ReactNode> = {
   match: (
-    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-      <path d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z" />
+    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M19 8l2 2 4-4" />
     </svg>
   ),
   scout: (
-    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-      <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
-      <path d="M19 8.839l-7.556 3.778a2.75 2.75 0 01-2.888 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2L11 13" />
+      <path d="M22 2l-7 20-4-9-9-4 20-7z" />
     </svg>
   ),
   application: (
-    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M1 6a3 3 0 013-3h12a3 3 0 013 3v8a3 3 0 01-3 3H4a3 3 0 01-3-3V6zm4 1.5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 015 7.5zm0 3a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5a.75.75 0 01-.75-.75zm0 3a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z" clipRule="evenodd" />
+    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
     </svg>
   ),
   interview: (
-    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clipRule="evenodd" />
+    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
     </svg>
   ),
   offer: (
-    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-      <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
+    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
   ),
 };
@@ -183,8 +189,8 @@ export default function CompanyPage() {
           <div className="flex items-center">
             {pipelineStages.map((stage, i) => (
               <div key={stage.label} className="flex flex-1 items-center">
-                <div className="flex flex-1 flex-col items-center gap-1 py-6">
-                  <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-500">
+                <div className="flex flex-1 flex-col items-center gap-2 pt-5 pb-6 pl-4">
+                  <span className="flex items-center gap-1.5 text-base font-medium text-gray-500 -ml-5">
                     {stageIcons[stage.icon]}
                     {stage.label}
                   </span>
@@ -194,7 +200,7 @@ export default function CompanyPage() {
                   </span>
                   <Link
                     href={stage.href}
-                    className="pipeline-action-btn mt-2 inline-flex items-center gap-1 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-4 py-1.5 text-xs font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
+                    className="pipeline-action-btn mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-5 py-2 text-sm font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
                   >
                     <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4.5 2.5l3.5 3.5-3.5 3.5" />
@@ -239,9 +245,9 @@ export default function CompanyPage() {
         {/* スカウト状況 */}
         <section className="col-span-3">
           <SectionHeader title="スカウト状況" action="スカウト管理" href="/company/scout" />
-          <div className="mt-3 rounded-2xl border border-gray-200 bg-white px-6 pb-6 pt-3 shadow-sm">
+          <div className="mt-3 rounded-2xl border border-gray-200 bg-white px-6 pb-0 pt-3 shadow-sm">
             {/* 送信可能 + 回収待ち（横並び） */}
-            <div className="mb-5 grid grid-cols-2 gap-6">
+            <div className="mb-3 grid grid-cols-2 gap-6">
               <div>
                 <p className="text-base font-semibold text-gray-700">送信可能</p>
                 <div className="mt-1.5 flex items-baseline gap-2">
@@ -255,8 +261,25 @@ export default function CompanyPage() {
                   />
                 </div>
                 <p className="mt-2 text-sm text-gray-400">
-                  補充: {scoutData.nextReplenishDate}（+{scoutData.monthlyAllowance}）→ {scoutData.balanceAfterReplenish}通
+                  補充: {scoutData.nextReplenishDate}（+{scoutData.monthlyAllowance}通 / 上限{scoutData.cap}通）
                 </p>
+                <div className="mt-4 border-t border-gray-100 pt-4">
+                  <p className="mb-2.5 text-base font-semibold text-gray-700">スカウト成果（直近90日）</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">スカウト経由応募</span>
+                      <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.last90d.applications}</span> 件</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">応募あたり送信数</span>
+                      <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{costPerApp ?? "—"}</span> 通/件</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">返信率</span>
+                      <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.replyRate.current}</span> %</span>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div>
                 <p className="text-base font-semibold text-gray-700">回収待ち</p>
@@ -277,39 +300,19 @@ export default function CompanyPage() {
                     </div>
                   ))}
                 </div>
-                {scoutData.pending.expiringSoon > 0 && (
-                  <div className="mt-3 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2">
-                    <span className="text-sm">⚠</span>
-                    <p className="text-sm text-red-700">
-                      <span className="font-semibold">{scoutData.pending.expiringSoon}通</span>が14日以内に期限切れ
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* スカウト成果（直近90日） */}
-            <div className="border-t border-gray-100 pt-5">
-              <p className="mb-3 text-base font-semibold text-gray-700">スカウト成果（直近90日）</p>
-              <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl border border-gray-100 px-4 py-3">
-                <p className="text-xs font-medium text-gray-500">スカウト経由応募</p>
-                <p className="mt-1.5 text-2xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
-                  {scoutData.last90d.applications}<span className="ml-0.5 text-sm font-normal text-gray-400">件</span>
-                </p>
-              </div>
-              <div className="rounded-xl border border-gray-100 px-4 py-3">
-                <p className="text-xs font-medium text-gray-500">応募あたり送信数</p>
-                <p className="mt-1.5 text-2xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
-                  {costPerApp ?? "—"}<span className="ml-0.5 text-sm font-normal text-gray-400">通/件</span>
-                </p>
-              </div>
-              <div className="rounded-xl border border-gray-100 px-4 py-3">
-                <p className="text-xs font-medium text-gray-500">返信率</p>
-                <p className="mt-1.5 text-2xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
-                  {scoutData.replyRate.current}<span className="ml-0.5 text-sm font-normal text-gray-400">%</span>
-                </p>
-              </div>
+                <div className="mt-2 flex items-center justify-between text-sm">
+                  <span className="text-gray-500">平均返信日数</span>
+                  <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.avgReplyDays}</span> 日</span>
+                </div>
+                <Link
+                  href="/company/scout?status=pending"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-5 py-2 text-sm font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
+                >
+                  <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4.5 2.5l3.5 3.5-3.5 3.5" />
+                  </svg>
+                  返信待ちスカウト一覧を見る
+                </Link>
               </div>
             </div>
           </div>
