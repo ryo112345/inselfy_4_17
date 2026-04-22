@@ -21,6 +21,10 @@ async function proxy(req: NextRequest) {
     duplex: "half",
   });
 
+  if (res.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const data = await res.arrayBuffer();
   const response = new NextResponse(data, {
     status: res.status,
