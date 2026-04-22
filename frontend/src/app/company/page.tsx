@@ -94,10 +94,71 @@ function MiniBar({ value, max, color }: { value: number; max: number; color: str
   );
 }
 
+const sectionIcons: Record<string, React.ReactNode> = {
+  採用パイプライン: (
+    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M2 4.5A2.5 2.5 0 014.5 2h11A2.5 2.5 0 0118 4.5v2.062a2.5 2.5 0 01-.703 1.738l-4.844 4.844A2.5 2.5 0 0110.714 14H9.286a2.5 2.5 0 01-1.739-.856L2.703 8.3A2.5 2.5 0 012 6.562V4.5z" />
+    </svg>
+  ),
+  要対応: (
+    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+    </svg>
+  ),
+  スカウト状況: (
+    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
+      <path d="M19 8.839l-7.556 3.778a2.75 2.75 0 01-2.888 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+    </svg>
+  ),
+  求人パフォーマンス: (
+    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M1 2.75A.75.75 0 011.75 2h16.5a.75.75 0 010 1.5H17v12.136l.894.447a.75.75 0 01-.788 1.278l-1.591-.796a.75.75 0 01-.415-.67V3.5h-1.5v9.136l.894.447a.75.75 0 01-.788 1.278l-1.591-.796a.75.75 0 01-.415-.67V3.5H10v6.636l.894.447a.75.75 0 01-.788 1.278l-1.591-.796A.75.75 0 018.1 10.4V3.5H6.5v3.636l.894.447a.75.75 0 01-.788 1.278l-1.591-.796A.75.75 0 014.6 7.4V3.5H3v14.75a.75.75 0 01-1.5 0V3.5h-.75A.75.75 0 011 2.75z" clipRule="evenodd" />
+    </svg>
+  ),
+  採用KPI: (
+    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M15.5 2A1.5 1.5 0 0014 3.5v13a1.5 1.5 0 001.5 1.5h1a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0016.5 2h-1zM9.5 6A1.5 1.5 0 008 7.5v9A1.5 1.5 0 009.5 18h1a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0010.5 6h-1zM3.5 10A1.5 1.5 0 002 11.5v5A1.5 1.5 0 003.5 18h1A1.5 1.5 0 006 16.5v-5A1.5 1.5 0 004.5 10h-1z" />
+    </svg>
+  ),
+};
+
+const stageIcons: Record<string, React.ReactNode> = {
+  match: (
+    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z" />
+    </svg>
+  ),
+  scout: (
+    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
+      <path d="M19 8.839l-7.556 3.778a2.75 2.75 0 01-2.888 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+    </svg>
+  ),
+  application: (
+    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M1 6a3 3 0 013-3h12a3 3 0 013 3v8a3 3 0 01-3 3H4a3 3 0 01-3-3V6zm4 1.5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5A.75.75 0 015 7.5zm0 3a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5h-8.5a.75.75 0 01-.75-.75zm0 3a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z" clipRule="evenodd" />
+    </svg>
+  ),
+  interview: (
+    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clipRule="evenodd" />
+    </svg>
+  ),
+  offer: (
+    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
+    </svg>
+  ),
+};
+
 function SectionHeader({ title, action, href }: { title: string; action?: string; href?: string }) {
   return (
     <div className="flex items-center justify-between">
-      <p className="text-sm font-semibold text-gray-500">{title}</p>
+      <div className="flex items-center gap-1.5 text-gray-500">
+        {sectionIcons[title]}
+        <p className="text-sm font-semibold">{title}</p>
+      </div>
       {action && href && (
         <Link href={href} className="text-xs font-medium hover:underline" style={{ color: accent }}>
           {action} →
@@ -123,15 +184,21 @@ export default function CompanyPage() {
             {pipelineStages.map((stage, i) => (
               <div key={stage.label} className="flex flex-1 items-center">
                 <div className="flex flex-1 flex-col items-center gap-1 py-6">
-                  <span className="text-[13px] font-medium text-gray-500">{stage.label}</span>
+                  <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-500">
+                    {stageIcons[stage.icon]}
+                    {stage.label}
+                  </span>
                   <span className="text-3xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
                     {stage.count}
                     <span className="ml-1 text-sm font-normal text-gray-400">{stage.unit}</span>
                   </span>
                   <Link
                     href={stage.href}
-                    className="pipeline-action-btn mt-2 rounded-lg border border-[#2979ff] px-3.5 py-1.5 text-xs font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
+                    className="pipeline-action-btn mt-2 inline-flex items-center gap-1 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-4 py-1.5 text-xs font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
                   >
+                    <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4.5 2.5l3.5 3.5-3.5 3.5" />
+                    </svg>
                     {stage.action}
                   </Link>
                 </div>
