@@ -17,6 +17,7 @@ const actionItems = [
   { label: "未返信メッセージ", count: 2, urgency: "medium", href: "/company/messages?filter=unread", description: "最新: 田中様より (3時間前)" },
   { label: "選考結果の入力待ち", count: 4, urgency: "medium", href: "/company/applications?status=pending_result", description: "面談後3日以上が2件" },
   { label: "面接日程の確認待ち", count: 1, urgency: "low", href: "/company/applications?status=scheduling", description: "佐藤様 — 候補日回答済み" },
+  { label: "期限切れ間近の求人", count: 2, urgency: "medium", href: "/company/jobs?filter=expiring", description: "7日以内に掲載終了が2件" },
 ];
 
 const scoutData = {
@@ -79,8 +80,9 @@ const sectionIcons: Record<string, React.ReactNode> = {
     </svg>
   ),
   要対応: (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.168 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="6" width="15" height="15" rx="3" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M7 14l3 3L22 5" stroke="currentColor" strokeWidth="2.5" />
     </svg>
   ),
   スカウト状況: (
@@ -90,8 +92,9 @@ const sectionIcons: Record<string, React.ReactNode> = {
     </svg>
   ),
   求人パフォーマンス: (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d="M1 2.75A.75.75 0 011.75 2h16.5a.75.75 0 010 1.5H17v12.136l.894.447a.75.75 0 01-.788 1.278l-1.591-.796a.75.75 0 01-.415-.67V3.5h-1.5v9.136l.894.447a.75.75 0 01-.788 1.278l-1.591-.796a.75.75 0 01-.415-.67V3.5H10v6.636l.894.447a.75.75 0 01-.788 1.278l-1.591-.796A.75.75 0 018.1 10.4V3.5H6.5v3.636l.894.447a.75.75 0 01-.788 1.278l-1.591-.796A.75.75 0 014.6 7.4V3.5H3v14.75a.75.75 0 01-1.5 0V3.5h-.75A.75.75 0 011 2.75z" clipRule="evenodd" />
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 20L9 13l4 4L21 7" stroke="currentColor" strokeWidth="2.5" />
+      <path d="M17 7h4v4" stroke="currentColor" strokeWidth="2" />
     </svg>
   ),
 };
@@ -190,14 +193,14 @@ export default function CompanyPage() {
       {/* ── 要対応 + スカウト (2カラム) ── */}
       <div className="grid grid-cols-5 gap-5">
         {/* 要対応アイテム */}
-        <section className="col-span-2 flex flex-col">
+        <section className="col-span-2">
           <SectionHeader title="要対応" />
-          <div className="mt-3 flex flex-1 flex-col divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white shadow-sm">
             {actionItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-gray-50"
+                className="flex items-center justify-between px-4 py-[10.5px] transition-colors hover:bg-gray-50"
               >
                 <div className="flex items-center gap-2.5">
                   <UrgencyDot urgency={item.urgency} />
@@ -278,7 +281,7 @@ export default function CompanyPage() {
                 </div>
                 <Link
                   href="/company/scout?status=pending"
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-5 py-2 text-sm font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
+                  className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-5 py-2 text-sm font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
                 >
                   <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4.5 2.5l3.5 3.5-3.5 3.5" />
@@ -313,13 +316,13 @@ export default function CompanyPage() {
                 return (
                   <tr key={job.title} className="transition-colors hover:bg-gray-50">
                     <td className="py-3.5 pl-5 pr-2">
-                      <Link href={job.href} className="font-medium text-gray-900 hover:underline" style={{ textDecorationColor: accent }}>
+                      <Link href={job.href} className="text-base font-medium text-gray-900 hover:underline" style={{ textDecorationColor: accent }}>
                         {job.title}
                       </Link>
                     </td>
                     <td className="px-2 py-3.5">
                       <span
-                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${
                           job.status === "公開中"
                             ? "bg-emerald-50 text-emerald-700"
                             : "bg-gray-100 text-gray-500"
@@ -328,10 +331,10 @@ export default function CompanyPage() {
                         {job.status}
                       </span>
                     </td>
-                    <td className="px-2 py-3.5 text-right text-gray-600">{job.views > 0 ? job.views.toLocaleString() : "—"}</td>
-                    <td className="px-2 py-3.5 text-right font-medium text-gray-900">{job.applicants}</td>
-                    <td className="px-2 py-3.5 text-right text-gray-600">{rate}{rate !== "—" ? "%" : ""}</td>
-                    <td className={`py-3.5 pl-2 pr-5 text-right ${isUrgent ? "font-semibold text-red-500" : "text-gray-600"}`}>
+                    <td className="px-2 py-3.5 text-right text-base text-gray-600">{job.views > 0 ? job.views.toLocaleString() : "—"}</td>
+                    <td className="px-2 py-3.5 text-right text-base font-medium text-gray-900">{job.applicants}</td>
+                    <td className="px-2 py-3.5 text-right text-base text-gray-600">{rate}{rate !== "—" ? "%" : ""}</td>
+                    <td className={`py-3.5 pl-2 pr-5 text-right text-base ${isUrgent ? "font-semibold text-red-500" : "text-gray-600"}`}>
                       {job.daysLeft !== null ? `${job.daysLeft}日` : "—"}
                     </td>
                   </tr>
