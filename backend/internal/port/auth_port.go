@@ -30,7 +30,9 @@ type GoogleTokenVerifier interface {
 
 type JWTService interface {
 	GenerateAccessToken(userID string) (string, error)
+	GenerateCompanyAccessToken(companyID string) (string, error)
 	GenerateRefreshToken() (string, error)
 	ValidateAccessToken(tokenString string) (userID string, err error)
+	ValidateCompanyAccessToken(tokenString string) (companyID string, err error)
 	HashRefreshToken(token string) string
 }

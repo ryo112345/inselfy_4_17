@@ -1,5 +1,5 @@
 import { CompanyAuthProvider } from "@/features/company-auth/company-auth-context";
-import { CompanyHeader } from "./CompanyHeader";
+import { CompanyAuthGuard } from "./CompanyAuthGuard";
 
 export default function CompanyLayout({
   children,
@@ -8,9 +8,7 @@ export default function CompanyLayout({
 }) {
   return (
     <CompanyAuthProvider>
-      <div className="min-h-screen bg-gray-50">
-        <CompanyHeader>{children}</CompanyHeader>
-      </div>
+      <CompanyAuthGuard>{children}</CompanyAuthGuard>
     </CompanyAuthProvider>
   );
 }

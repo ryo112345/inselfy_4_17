@@ -10,10 +10,12 @@ import (
 	jwtgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/jwt"
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/driver/config"
 	driverdb "github.com/akiyama/inselfy/backend/internal/driver/db"
 	"github.com/akiyama/inselfy/backend/internal/driver/factory"
 	httpfactory "github.com/akiyama/inselfy/backend/internal/driver/factory/http"
+	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error) {
@@ -45,6 +47,8 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	ciResultRepoFactory := factory.NewCIResultRepoFactory(pool)
 	ciBasicScoreRepoFactory := factory.NewCIBasicScoreRepoFactory(pool)
 	ciTypeScoreRepoFactory := factory.NewCITypeScoreRepoFactory(pool)
+	companyAccountRepoFactory := factory.NewCompanyAccountRepoFactory(pool)
+	companyRefreshTokenRepoFactory := factory.NewCompanyRefreshTokenRepoFactory(pool)
 
 	userInputFactory := factory.NewUserInputFactory()
 	authInputFactory := factory.NewAuthInputFactory(googleVerifier, jwtService, cfg.GoogleClientID)
@@ -54,6 +58,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	postInputFactory := factory.NewPostInputFactory()
 	wvInputFactory := factory.NewWorkValuesInputFactory()
 	ciInputFactory := factory.NewCareerInterestInputFactory()
+	companyAuthInputFactory := factory.NewCompanyAuthInputFactory(jwtService)
 
 	userOutputFactory := httpfactory.NewUserOutputFactory()
 	authOutputFactory := httpfactory.NewAuthOutputFactory()
@@ -63,6 +68,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	postOutputFactory := httpfactory.NewPostOutputFactory()
 	wvOutputFactory := httpfactory.NewWorkValuesOutputFactory()
 	ciOutputFactory := httpfactory.NewCareerInterestOutputFactory()
+	companyAuthOutputFactory := httpfactory.NewCompanyAuthOutputFactory()
 
 	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
 	authCtrl := httpcontroller.NewAuthController(authInputFactory, authOutputFactory, userRepoFactory, refreshTokenRepoFactory)
@@ -72,6 +78,14 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	postCtrl := httpcontroller.NewPostController(postInputFactory, postOutputFactory, postRepoFactory)
 	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvOutputFactory, wvSessionRepoFactory, wvResultRepoFactory, wvScoreRepoFactory)
 	ciCtrl := httpcontroller.NewCareerInterestController(ciInputFactory, ciOutputFactory, ciSessionRepoFactory, ciResultRepoFactory, ciBasicScoreRepoFactory, ciTypeScoreRepoFactory)
+	companyAuthCtrl := httpcontroller.NewCompanyAuthController(
+		func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort {
+			return companyAuthInputFactory(companyRepo, refreshRepo, output)
+		},
+		func() *presenter.CompanyAuthPresenter { return companyAuthOutputFactory() },
+		companyAccountRepoFactory,
+		companyRefreshTokenRepoFactory,
+	)
 
 	e := echo.New()
 	e.Use(echomw.Recover())
@@ -84,6 +98,15 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	}))
 
 	jwtMW := authmw.JWTAuth(jwtService)
+	companyJwtMW := authmw.CompanyJWTAuth(jwtService)
+
+	// --- Company Auth ---
+	companyAuthGroup := e.Group("/api/company/auth")
+	companyAuthGroup.POST("/register", companyAuthCtrl.Register)
+	companyAuthGroup.POST("/login", companyAuthCtrl.Login)
+	companyAuthGroup.POST("/refresh", companyAuthCtrl.Refresh)
+	companyAuthGroup.POST("/logout", companyAuthCtrl.Logout)
+	companyAuthGroup.GET("/me", companyAuthCtrl.GetMe, companyJwtMW)
 
 	// --- Auth (public) ---
 	authGroup := e.Group("/api/auth")

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 
 const navItems = [
   { label: "HOME", href: "/company", icon: HomeIcon },
@@ -17,8 +18,15 @@ const navItems = [
 
 export function CompanyHeader({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { company, logout } = useCompanyAuth();
   const [expanded, setExpanded] = useState(true);
   const accentColor = "#2979ff";
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/company/login");
+  };
 
   const handleClose = () => {
     setExpanded(false);
@@ -48,7 +56,9 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
                 <Link href="/company" className="text-xl font-bold" style={{ color: accentColor }}>
                   Inselfy
                 </Link>
-                <span className="text-sm text-gray-700">株式会社サンプル　担当者様</span>
+                <span className="text-sm text-gray-700">
+                  {company?.companyName}　{company?.contactPersonName}様
+                </span>
               </div>
               <div className="flex items-center gap-4">
                 <Link
@@ -58,7 +68,10 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
                 >
                   マニュアル
                 </Link>
-                <button className="rounded border border-gray-300 px-4 py-1.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
+                <button
+                  onClick={handleLogout}
+                  className="rounded border border-gray-300 px-4 py-1.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
                   ログアウト
                 </button>
                 <button

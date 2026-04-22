@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	issuer   = "inselfy"
-	audience = "inselfy"
+	issuer          = "inselfy"
+	audience        = "inselfy"
+	companyAudience = "inselfy-company"
 )
 
 type Service struct {
@@ -38,6 +39,39 @@ func (s *Service) GenerateAccessToken(userID string) (string, error) {
 	}
 	token := jwtlib.NewWithClaims(jwtlib.SigningMethodHS256, claims)
 	return token.SignedString(s.secret)
+}
+
+func (s *Service) GenerateCompanyAccessToken(companyID string) (string, error) {
+	claims := jwtlib.RegisteredClaims{
+		Subject:   companyID,
+		Issuer:    issuer,
+		Audience:  jwtlib.ClaimStrings{companyAudience},
+		ExpiresAt: jwtlib.NewNumericDate(time.Now().Add(15 * time.Minute)),
+		IssuedAt:  jwtlib.NewNumericDate(time.Now()),
+	}
+	token := jwtlib.NewWithClaims(jwtlib.SigningMethodHS256, claims)
+	return token.SignedString(s.secret)
+}
+
+func (s *Service) ValidateCompanyAccessToken(tokenString string) (string, error) {
+	token, err := jwtlib.ParseWithClaims(tokenString, &jwtlib.RegisteredClaims{}, func(t *jwtlib.Token) (any, error) {
+		if _, ok := t.Method.(*jwtlib.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+		return s.secret, nil
+	},
+		jwtlib.WithIssuer(issuer),
+		jwtlib.WithAudience(companyAudience),
+		jwtlib.WithExpirationRequired(),
+	)
+	if err != nil {
+		return "", auth.ErrUnauthorized
+	}
+	subject, err := token.Claims.GetSubject()
+	if err != nil || subject == "" {
+		return "", auth.ErrUnauthorized
+	}
+	return subject, nil
 }
 
 func (s *Service) GenerateRefreshToken() (string, error) {

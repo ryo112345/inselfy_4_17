@@ -8,6 +8,35 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type CompanyStatus string
+
+const (
+	CompanyStatusPending  CompanyStatus = "pending"
+	CompanyStatusApproved CompanyStatus = "approved"
+	CompanyStatusRejected CompanyStatus = "rejected"
+)
+
+type CompanyAccount struct {
+	ID                pgtype.UUID        `json:"id"`
+	Email             string             `json:"email"`
+	PasswordHash      string             `json:"password_hash"`
+	CompanyName       string             `json:"company_name"`
+	ContactPersonName string             `json:"contact_person_name"`
+	PhoneNumber       string             `json:"phone_number"`
+	Status            CompanyStatus      `json:"status"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+}
+
+type CompanyRefreshToken struct {
+	ID        pgtype.UUID        `json:"id"`
+	CompanyID pgtype.UUID        `json:"company_id"`
+	TokenHash string             `json:"token_hash"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	RevokedAt pgtype.Timestamptz `json:"revoked_at"`
+}
+
 type AiReport struct {
 	ID        pgtype.UUID        `json:"id"`
 	SessionID pgtype.UUID        `json:"session_id"`

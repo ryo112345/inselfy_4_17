@@ -98,3 +98,15 @@ func NewRefreshTokenRepoFactory(pool *pgxpool.Pool) func() port.RefreshTokenRepo
 		return sqlcgw.NewRefreshTokenRepository(pool)
 	}
 }
+
+func NewCompanyAccountRepoFactory(pool *pgxpool.Pool) func() port.CompanyAccountRepository {
+	return func() port.CompanyAccountRepository {
+		return sqlcgw.NewCompanyAccountRepository(pool)
+	}
+}
+
+func NewCompanyRefreshTokenRepoFactory(pool *pgxpool.Pool) func() port.CompanyRefreshTokenRepository {
+	return func() port.CompanyRefreshTokenRepository {
+		return sqlcgw.NewCompanyRefreshTokenRepository(pool)
+	}
+}

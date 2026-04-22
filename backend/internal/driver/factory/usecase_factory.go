@@ -1,6 +1,7 @@
 package factory
 
 import (
+	bcryptgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/bcrypt"
 	"github.com/akiyama/inselfy/backend/internal/port"
 	"github.com/akiyama/inselfy/backend/internal/usecase"
 )
@@ -93,6 +94,15 @@ func NewCareerInterestInputFactory() func(
 func NewPostInputFactory() func(repo port.PostRepository, output port.PostOutputPort) port.PostInputPort {
 	return func(repo port.PostRepository, output port.PostOutputPort) port.PostInputPort {
 		return usecase.NewPostInteractor(repo, output)
+	}
+}
+
+func NewCompanyAuthInputFactory(
+	jwtService port.JWTService,
+) func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort {
+	hasher := bcryptgw.NewService()
+	return func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort {
+		return usecase.NewCompanyAuthInteractor(companyRepo, refreshRepo, jwtService, hasher, output)
 	}
 }
 
