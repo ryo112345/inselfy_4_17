@@ -1,6 +1,6 @@
 const BASE_URL =
   typeof window === "undefined"
-    ? process.env.INTERNAL_API_URL ?? "http://localhost:8080"
+    ? process.env.INTERNAL_API_URL ?? "http://localhost:8081"
     : "";
 
 export type PostItem = {
