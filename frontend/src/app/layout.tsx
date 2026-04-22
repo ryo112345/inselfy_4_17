@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Noto_Sans_JP } from "next/font/google";
+import Script from "next/script";
+import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { GoogleProvider } from "@/features/auth/google-provider";
 import "./globals.css";
@@ -10,6 +11,8 @@ const notoSansJp = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
   display: "swap",
 });
+
+const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-plus-jakarta-sans", display: "swap" });
 
 export const metadata: Metadata = {
   title: "inselfy",
@@ -22,13 +25,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja" className={notoSansJp.variable}>
+    <html lang="ja" className={`${notoSansJp.variable} ${plusJakartaSans.variable}`}>
       <body className="antialiased">
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.addEventListener("pageshow",function(){var n=performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")location.reload()})`,
-          }}
-        />
+        <Script id="bfcache-reload" strategy="afterInteractive">
+          {`window.addEventListener("pageshow",function(){var n=performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")location.reload()})`}
+        </Script>
         <GoogleProvider>
           <AuthProvider>{children}</AuthProvider>
         </GoogleProvider>
