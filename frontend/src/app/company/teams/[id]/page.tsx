@@ -402,21 +402,32 @@ const MEMBER_COLORS = [
   "#006064", "#bf360c", "#283593", "#33691e", "#b71c1c",
 ];
 
+const OUTLIER_WEIGHT = 0.15;
+const WV_OUTLIER_THRESHOLD = 25;
+const CI_OUTLIER_THRESHOLD = 1.0;
+
 function computeAvg(members: MemberScore[], key: "wv_scores" | "ci_scores", order: readonly string[]) {
   const completed = members.filter((m) => m[key] && m[key]!.length > 0);
   if (completed.length === 0) return null;
-  const sums: Record<string, number> = {};
-  const counts: Record<string, number> = {};
-  for (const m of completed) {
-    for (const s of m[key]!) {
-      sums[s.id] = (sums[s.id] || 0) + s.display_score;
-      counts[s.id] = (counts[s.id] || 0) + 1;
+
+  const threshold = key === "wv_scores" ? WV_OUTLIER_THRESHOLD : CI_OUTLIER_THRESHOLD;
+
+  return order.map((id) => {
+    const values = completed
+      .map((m) => m[key]!.find((s) => s.id === id)?.display_score)
+      .filter((v): v is number => v != null);
+    if (values.length === 0) return { id, score: 0 };
+
+    const simpleAvg = values.reduce((a, b) => a + b, 0) / values.length;
+    let weightedSum = 0;
+    let weightTotal = 0;
+    for (const v of values) {
+      const w = Math.abs(v - simpleAvg) > threshold ? OUTLIER_WEIGHT : 1.0;
+      weightedSum += w * v;
+      weightTotal += w;
     }
-  }
-  return order.map((id) => ({
-    id,
-    score: counts[id] ? sums[id] / counts[id] : 0,
-  }));
+    return { id, score: weightedSum / weightTotal };
+  });
 }
 
 function TeamRadarChartSection({
