@@ -64,7 +64,7 @@ const PHASE_CONFIG = {
     ),
     title: "まずメンバーを追加しましょう",
     description: "チームメンバーを登録すると、一人ひとりに専用の診断URLが発行されます。",
-    stepLabel: "ステップ 1/3",
+    stepLabel: "ステップ 1/4",
     bg: "bg-blue-50/60",
     border: "border-blue-200",
   },
@@ -77,7 +77,7 @@ const PHASE_CONFIG = {
     ),
     title: "招待URLを送りましょう",
     description: "各メンバーの「招待URLをコピー」ボタンからURLを取得し、SlackやメールでURLを共有してください。",
-    stepLabel: "ステップ 2/3",
+    stepLabel: "ステップ 2/4",
     bg: "bg-blue-50/60",
     border: "border-blue-200",
   },
@@ -90,7 +90,7 @@ const PHASE_CONFIG = {
     ),
     title: "診断の回答を待っています",
     description: "まだ回答していないメンバーには、リマインドを送ってみましょう。",
-    stepLabel: "ステップ 2/3",
+    stepLabel: "ステップ 2/4",
     bg: "bg-amber-50/60",
     border: "border-amber-200",
   },
@@ -101,8 +101,8 @@ const PHASE_CONFIG = {
         <polyline points="22 4 12 14.01 9 11.01" />
       </svg>
     ),
-    title: "全員の診断が完了しました！",
-    description: "チーム全体の傾向をレーダーチャートで確認できます。エースを設定すると、理想のチーム像との比較ができます。",
+    title: "セットアップが完了しました！",
+    description: "チーム全体の傾向をレーダーチャートで確認できます。",
     stepLabel: "完了",
     bg: "bg-emerald-50/60",
     border: "border-emerald-200",
@@ -241,6 +241,8 @@ export default function TeamDetailPage() {
 
   const phase = detectPhase(team.members);
   const config = PHASE_CONFIG[phase];
+  const hasAce = team.members.some((m) => m.is_ace);
+  const aceMember = team.members.find((m) => m.is_ace);
   const wvCompleted = team.members.filter((m) => m.wv_status === "completed").length;
   const ciCompleted = team.members.filter((m) => m.ci_status === "completed").length;
   const totalDiagnosis = team.members.length * 2;
@@ -263,7 +265,7 @@ export default function TeamDetailPage() {
       <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{team.name}</h1>
-          {team.description && <p className="mt-1 text-sm text-gray-500">{team.description}</p>}
+          {team.description && <p className="mt-1 text-base text-gray-500">{team.description}</p>}
         </div>
         <div className="relative">
           <button
@@ -298,16 +300,16 @@ export default function TeamDetailPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-lg font-bold text-gray-900">{config.title}</h2>
-              <span className="text-xs font-medium text-gray-500 bg-white/80 rounded-full px-2.5 py-0.5">
+              <span className="text-sm font-medium text-gray-500 bg-white/80 rounded-full px-2.5 py-0.5">
                 {config.stepLabel}
               </span>
             </div>
-            <p className="text-sm text-gray-600">{config.description}</p>
+            <p className="text-base text-gray-600">{config.description}</p>
 
             {/* Progress bar for in_progress & invite phases */}
             {team.members.length > 0 && phase !== "empty" && (
               <div className="mt-4">
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-1.5">
                   <span>診断進捗</span>
                   <span className="font-medium">{completedDiagnosis}/{totalDiagnosis} 完了（{progressPct}%）</span>
                 </div>
@@ -320,7 +322,7 @@ export default function TeamDetailPage() {
                     }}
                   />
                 </div>
-                <div className="mt-2 flex gap-4 text-xs text-gray-500">
+                <div className="mt-2 flex gap-4 text-sm text-gray-500">
                   <span>価値観診断: {wvCompleted}/{team.members.length}</span>
                   <span>職業興味診断: {ciCompleted}/{team.members.length}</span>
                 </div>
@@ -340,13 +342,14 @@ export default function TeamDetailPage() {
                 メンバーを追加する
               </button>
             )}
+
           </div>
         </div>
       </div>
 
-      {/* Workflow Steps (for non-complete phases) */}
-      {phase !== "complete" && team.members.length > 0 && (
-        <div className="grid grid-cols-3 gap-4 mb-6">
+      {/* Workflow Steps */}
+      {team.members.length > 0 && (
+        <div className="grid grid-cols-4 gap-2 mb-6">
           <StepCard
             number={1}
             title="メンバーを追加"
@@ -357,15 +360,22 @@ export default function TeamDetailPage() {
             number={2}
             title="招待URLを送信"
             description="各メンバーにURLを共有"
-            done={phase === "in_progress"}
+            done={phase === "in_progress" || phase === "complete"}
             active={phase === "invite"}
           />
           <StepCard
             number={3}
             title="診断結果を確認"
             description="全員完了後にチャート表示"
-            done={false}
+            done={phase === "complete"}
             active={false}
+          />
+          <StepCard
+            number={4}
+            title="理想の人材像を設定"
+            description="マッチング精度UP"
+            done={hasAce}
+            active={!hasAce}
           />
         </div>
       )}
@@ -381,24 +391,48 @@ export default function TeamDetailPage() {
 
       {/* Members */}
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h2 className="text-base font-bold text-gray-900">
-            メンバー
-            <span className="ml-1.5 text-sm font-normal text-gray-400">
-              {team.members.length}/30
-            </span>
-          </h2>
-          {team.members.length < 30 && (
-            <button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors cursor-pointer hover:opacity-90"
-              style={{ backgroundColor: "#2979ff" }}
-            >
-              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              メンバーを追加
-            </button>
+        <div className="border-b border-gray-100 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-gray-900">
+              メンバー
+              <span className="ml-1.5 text-sm font-normal text-gray-400">
+                {team.members.length}/30
+              </span>
+            </h2>
+            {team.members.length < 30 && (
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors cursor-pointer hover:opacity-90"
+                style={{ backgroundColor: "#2979ff" }}
+              >
+                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                メンバーを追加
+              </button>
+            )}
+          </div>
+          {team.members.length > 0 && (
+            <div className="flex items-center gap-3 mt-3">
+              <span className="text-sm text-gray-500">理想の人材像:</span>
+              <select
+                value={aceMember?.id || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val) {
+                    handleToggleAce(val, false);
+                  } else if (hasAce) {
+                    handleToggleAce(aceMember!.id, true);
+                  }
+                }}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
+              >
+                <option value="">未設定</option>
+                {team.members.map((m) => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
           )}
         </div>
 
@@ -458,13 +492,12 @@ export default function TeamDetailPage() {
         ) : (
           <>
             {/* Column header */}
-            <div className="grid items-center border-b border-gray-100 px-6 py-2 text-xs font-medium text-gray-400"
-              style={{ gridTemplateColumns: "1fr 120px 120px 120px 140px 36px" }}
+            <div className="grid items-center border-b border-gray-100 px-6 py-2 text-[13px] font-medium text-gray-400"
+              style={{ gridTemplateColumns: "1fr 130px 130px 150px 40px" }}
             >
               <span>名前</span>
               <span className="text-center">価値観診断</span>
               <span className="text-center">職業興味診断</span>
-              <span className="text-center">キーパーソン</span>
               <span />
               <span />
             </div>
@@ -478,7 +511,7 @@ export default function TeamDetailPage() {
                   <div
                     key={member.id}
                     className="grid items-center px-6 py-3 transition-colors hover:bg-gray-50/60"
-                    style={{ gridTemplateColumns: "1fr 120px 120px 120px 140px 36px" }}
+                    style={{ gridTemplateColumns: "1fr 130px 130px 150px 40px" }}
                   >
                     {/* Name */}
                     <div className="flex items-center gap-3 min-w-0">
@@ -516,28 +549,11 @@ export default function TeamDetailPage() {
                       <DiagnosisStatus done={ciDone} />
                     </div>
 
-                    {/* Key Person Toggle */}
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => handleToggleAce(member.id, member.is_ace)}
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
-                          member.is_ace
-                            ? "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
-                            : "bg-white text-gray-400 border border-gray-200 hover:border-amber-200 hover:text-amber-600"
-                        }`}
-                      >
-                        <svg width={11} height={11} viewBox="0 0 24 24" fill={member.is_ace ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                        {member.is_ace ? "設定中" : "設定"}
-                      </button>
-                    </div>
-
                     {/* Invite URL */}
                     <div className="flex justify-center">
                       <button
                         onClick={() => copyInviteUrl(member.invite_token)}
-                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
                           copiedToken === member.invite_token
                             ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
                             : "bg-[#2979ff]/5 text-[#2979ff] border border-[#2979ff]/20 hover:bg-[#2979ff]/10"
@@ -610,15 +626,15 @@ function StepCard({
   active?: boolean;
 }) {
   return (
-    <div className={`rounded-xl border p-4 transition-all ${
+    <div className={`rounded-xl border px-3 py-3 transition-all ${
       done
         ? "border-emerald-200 bg-emerald-50/50"
         : active
         ? "border-[#2979ff]/30 bg-[#2979ff]/5"
         : "border-gray-200 bg-gray-50/50"
     }`}>
-      <div className="flex items-center gap-2.5 mb-1.5">
-        <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+      <div className="flex items-center gap-2 mb-1">
+        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
           done
             ? "bg-emerald-500 text-white"
             : active
@@ -639,7 +655,7 @@ function StepCard({
           {title}
         </span>
       </div>
-      <p className={`text-xs ml-8.5 ${done ? "text-emerald-600" : active ? "text-gray-500" : "text-gray-400"}`}>
+      <p className={`text-sm ml-8 ${done ? "text-emerald-600" : active ? "text-gray-500" : "text-gray-400"}`}>
         {description}
       </p>
     </div>
@@ -648,15 +664,15 @@ function StepCard({
 
 function DiagnosisStatus({ done }: { done: boolean }) {
   return done ? (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-      <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-700">
+      <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
         <path d="M20 6L9 17l-5-5" />
       </svg>
       完了
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-400">
-      <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 px-3 py-1 text-xs text-gray-400">
+      <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
         <circle cx="12" cy="12" r="6" />
       </svg>
       未受検
