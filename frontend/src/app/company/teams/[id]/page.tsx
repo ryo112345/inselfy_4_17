@@ -41,6 +41,74 @@ type TeamDetail = {
   created_at: string;
 };
 
+type Phase = "empty" | "invite" | "in_progress" | "complete";
+
+function detectPhase(members: Member[]): Phase {
+  if (members.length === 0) return "empty";
+  const wvDone = members.filter((m) => m.wv_status === "completed").length;
+  const ciDone = members.filter((m) => m.ci_status === "completed").length;
+  if (wvDone === members.length && ciDone === members.length) return "complete";
+  if (wvDone === 0 && ciDone === 0) return "invite";
+  return "in_progress";
+}
+
+const PHASE_CONFIG = {
+  empty: {
+    icon: (
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <line x1="19" y1="8" x2="19" y2="14" />
+        <line x1="22" y1="11" x2="16" y2="11" />
+      </svg>
+    ),
+    title: "まずメンバーを追加しましょう",
+    description: "チームメンバーを登録すると、一人ひとりに専用の診断URLが発行されます。",
+    stepLabel: "ステップ 1/3",
+    bg: "bg-blue-50/60",
+    border: "border-blue-200",
+  },
+  invite: {
+    icon: (
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 2L11 13" />
+        <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+      </svg>
+    ),
+    title: "招待URLを送りましょう",
+    description: "各メンバーの「招待URLをコピー」ボタンからURLを取得し、SlackやメールでURLを共有してください。",
+    stepLabel: "ステップ 2/3",
+    bg: "bg-blue-50/60",
+    border: "border-blue-200",
+  },
+  in_progress: {
+    icon: (
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    ),
+    title: "診断の回答を待っています",
+    description: "まだ回答していないメンバーには、リマインドを送ってみましょう。",
+    stepLabel: "ステップ 2/3",
+    bg: "bg-amber-50/60",
+    border: "border-amber-200",
+  },
+  complete: {
+    icon: (
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    ),
+    title: "全員の診断が完了しました！",
+    description: "チーム全体の傾向をレーダーチャートで確認できます。エースを設定すると、理想のチーム像との比較ができます。",
+    stepLabel: "完了",
+    bg: "bg-emerald-50/60",
+    border: "border-emerald-200",
+  },
+};
+
 export default function TeamDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -57,6 +125,7 @@ export default function TeamDetailPage() {
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [memberScores, setMemberScores] = useState<MemberScore[]>([]);
   const [viewMode, setViewMode] = useState<string>("average");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const fetchTeamScores = useCallback(async () => {
     try {
@@ -138,11 +207,8 @@ export default function TeamDetailPage() {
   };
 
   const handleDeleteTeam = async () => {
-    if (!confirm("このチームを削除しますか？メンバーと診断データもすべて失われます。")) return;
     try {
-      await companyFetch(`/api/company/teams/${teamId}`, {
-        method: "DELETE",
-      });
+      await companyFetch(`/api/company/teams/${teamId}`, { method: "DELETE" });
       router.push("/company/teams");
     } catch {}
   };
@@ -173,12 +239,17 @@ export default function TeamDetailPage() {
     );
   }
 
+  const phase = detectPhase(team.members);
+  const config = PHASE_CONFIG[phase];
   const wvCompleted = team.members.filter((m) => m.wv_status === "completed").length;
   const ciCompleted = team.members.filter((m) => m.ci_status === "completed").length;
-  const allDone = team.members.length > 0 && wvCompleted === team.members.length && ciCompleted === team.members.length;
+  const totalDiagnosis = team.members.length * 2;
+  const completedDiagnosis = wvCompleted + ciCompleted;
+  const progressPct = totalDiagnosis > 0 ? Math.round((completedDiagnosis / totalDiagnosis) * 100) : 0;
 
   return (
     <div>
+      {/* Header */}
       <Link
         href="/company/teams"
         className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6"
@@ -194,59 +265,133 @@ export default function TeamDetailPage() {
           <h1 className="text-2xl font-bold text-gray-900">{team.name}</h1>
           {team.description && <p className="mt-1 text-sm text-gray-500">{team.description}</p>}
         </div>
-        <button
-          onClick={handleDeleteTeam}
-          className="rounded-lg border border-red-200 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-        >
-          チームを削除
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
+            className="rounded-lg border border-gray-200 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+            title="チーム設定"
+          >
+            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+              <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
+            </svg>
+          </button>
+          {showDeleteConfirm && (
+            <div className="absolute right-0 top-full mt-1 w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-10 py-1">
+              <button
+                onClick={handleDeleteTeam}
+                className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer flex items-center gap-2"
+              >
+                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                </svg>
+                チームを削除
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Progress Summary */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm mb-6">
-        <h2 className="text-sm font-medium text-gray-500 mb-4">診断進捗</h2>
-        <div className="grid grid-cols-3 gap-6">
-          <div className="text-center">
-            <p className="text-3xl font-bold text-gray-900">{team.members.length}</p>
-            <p className="text-xs text-gray-500 mt-1">メンバー</p>
-          </div>
-          <div className="text-center">
-            <p className={`text-3xl font-bold ${wvCompleted === team.members.length && team.members.length > 0 ? "text-emerald-600" : "text-gray-900"}`}>
-              {wvCompleted}/{team.members.length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">WV診断 完了</p>
-          </div>
-          <div className="text-center">
-            <p className={`text-3xl font-bold ${ciCompleted === team.members.length && team.members.length > 0 ? "text-emerald-600" : "text-gray-900"}`}>
-              {ciCompleted}/{team.members.length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">CI診断 完了</p>
+      {/* Phase Guide Card */}
+      <div className={`rounded-2xl ${config.bg} ${config.border} border p-6 mb-6`}>
+        <div className="flex items-start gap-4">
+          <div className="shrink-0 mt-0.5">{config.icon}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-1">
+              <h2 className="text-lg font-bold text-gray-900">{config.title}</h2>
+              <span className="text-xs font-medium text-gray-500 bg-white/80 rounded-full px-2.5 py-0.5">
+                {config.stepLabel}
+              </span>
+            </div>
+            <p className="text-sm text-gray-600">{config.description}</p>
+
+            {/* Progress bar for in_progress & invite phases */}
+            {team.members.length > 0 && phase !== "empty" && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                  <span>診断進捗</span>
+                  <span className="font-medium">{completedDiagnosis}/{totalDiagnosis} 完了（{progressPct}%）</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-white/80 overflow-hidden">
+                  <div
+                    className="h-2 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${progressPct}%`,
+                      backgroundColor: phase === "complete" ? "#10b981" : "#2979ff",
+                    }}
+                  />
+                </div>
+                <div className="mt-2 flex gap-4 text-xs text-gray-500">
+                  <span>WV: {wvCompleted}/{team.members.length}</span>
+                  <span>CI: {ciCompleted}/{team.members.length}</span>
+                </div>
+              </div>
+            )}
+
+            {/* CTA for empty phase */}
+            {phase === "empty" && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="mt-4 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors cursor-pointer hover:opacity-90"
+                style={{ backgroundColor: "#2979ff" }}
+              >
+                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                メンバーを追加する
+              </button>
+            )}
           </div>
         </div>
-        {allDone && (
-          <div className="mt-4 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700 text-center">
-            全メンバーの診断が完了しました
-          </div>
-        )}
       </div>
 
-      {/* Team Radar Chart */}
-      <TeamRadarChartSection
-        memberScores={memberScores}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
+      {/* Workflow Steps (for non-complete phases) */}
+      {phase !== "complete" && team.members.length > 0 && (
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <StepCard
+            number={1}
+            title="メンバーを追加"
+            description={`${team.members.length}人を登録済み`}
+            done={true}
+          />
+          <StepCard
+            number={2}
+            title="招待URLを送信"
+            description="各メンバーにURLを共有"
+            done={phase === "in_progress"}
+            active={phase === "invite"}
+          />
+          <StepCard
+            number={3}
+            title="診断結果を確認"
+            description="全員完了後にチャート表示"
+            done={false}
+            active={false}
+          />
+        </div>
+      )}
+
+      {/* Radar Chart (prominent when complete) */}
+      {phase === "complete" && (
+        <TeamRadarChartSection
+          memberScores={memberScores}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+      )}
 
       {/* Members */}
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <h2 className="text-base font-bold text-gray-900">
-            メンバー（{team.members.length}/30）
+            メンバー
+            <span className="ml-1.5 text-sm font-normal text-gray-400">
+              {team.members.length}/30
+            </span>
           </h2>
           {team.members.length < 30 && (
             <button
               onClick={() => setShowAddForm(!showAddForm)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors cursor-pointer hover:opacity-90"
               style={{ backgroundColor: "#2979ff" }}
             >
               <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -302,107 +447,197 @@ export default function TeamDetailPage() {
                 キャンセル
               </button>
             </form>
-            {error && (
-              <p className="mt-2 text-sm text-red-600">{error}</p>
-            )}
+            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
           </div>
         )}
 
         {team.members.length === 0 ? (
           <div className="px-6 py-12 text-center text-sm text-gray-500">
-            メンバーがまだいません。「メンバーを追加」からメンバーを登録してください。
+            メンバーがまだいません。上の「メンバーを追加する」ボタンから登録してください。
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {team.members.map((member) => (
-              <div key={member.id} className="flex items-center justify-between px-6 py-4">
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-[#2979ff] shrink-0">
-                    {member.name.slice(0, 1)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{member.name}</p>
-                    {member.email && (
-                      <p className="text-xs text-gray-400 truncate">{member.email}</p>
-                    )}
+            {team.members.map((member) => {
+              const wvDone = member.wv_status === "completed";
+              const ciDone = member.ci_status === "completed";
+              const allDone = wvDone && ciDone;
+
+              return (
+                <div key={member.id} className="px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold shrink-0 ${
+                        allDone
+                          ? "bg-emerald-50 text-emerald-600"
+                          : "bg-blue-50 text-[#2979ff]"
+                      }`}>
+                        {member.name.slice(0, 1)}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-gray-900 truncate">{member.name}</p>
+                          {member.is_ace && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-yellow-50 border border-yellow-200 px-2 py-0.5 text-xs font-medium text-yellow-700">
+                              <svg width={10} height={10} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                              エース
+                            </span>
+                          )}
+                        </div>
+                        {member.email && (
+                          <p className="text-xs text-gray-400 truncate">{member.email}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5">
+                      {/* Diagnosis Status */}
+                      <div className="flex items-center gap-1.5">
+                        <DiagnosisPill label="WV" done={wvDone} />
+                        <DiagnosisPill label="CI" done={ciDone} />
+                      </div>
+
+                      <div className="w-px h-5 bg-gray-200" />
+
+                      {/* Invite URL Copy */}
+                      <button
+                        onClick={() => copyInviteUrl(member.invite_token)}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+                          copiedToken === member.invite_token
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
+                            : "bg-[#2979ff]/5 text-[#2979ff] border border-[#2979ff]/20 hover:bg-[#2979ff]/10"
+                        }`}
+                      >
+                        {copiedToken === member.invite_token ? (
+                          <>
+                            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                            コピー済
+                          </>
+                        ) : (
+                          <>
+                            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                              <rect x="9" y="9" width="13" height="13" rx="2" />
+                              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                            </svg>
+                            招待URL
+                          </>
+                        )}
+                      </button>
+
+                      {/* Actions */}
+                      <button
+                        onClick={() => handleToggleAce(member.id, member.is_ace)}
+                        className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
+                          member.is_ace
+                            ? "text-yellow-500 hover:bg-yellow-50"
+                            : "text-gray-300 hover:bg-gray-50 hover:text-yellow-400"
+                        }`}
+                        title={member.is_ace ? "エース解除" : "エースに設定"}
+                      >
+                        <svg width={16} height={16} viewBox="0 0 24 24" fill={member.is_ace ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      </button>
+
+                      <button
+                        onClick={() => handleRemoveMember(member.id, member.name)}
+                        className="rounded-lg p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                        title="削除"
+                      >
+                        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => handleToggleAce(member.id, member.is_ace)}
-                    className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
-                      member.is_ace
-                        ? "text-yellow-500 hover:bg-yellow-50"
-                        : "text-gray-300 hover:bg-gray-50 hover:text-yellow-400"
-                    }`}
-                    title={member.is_ace ? "エース解除" : "エースに設定"}
-                  >
-                    <svg width={16} height={16} viewBox="0 0 24 24" fill={member.is_ace ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                  </button>
-                  <StatusBadge label="WV" status={member.wv_status} />
-                  <StatusBadge label="CI" status={member.ci_status} />
-
-                  <button
-                    onClick={() => copyInviteUrl(member.invite_token)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
-                    {copiedToken === member.invite_token ? (
-                      <>
-                        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={2}>
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                        コピー済
-                      </>
-                    ) : (
-                      <>
-                        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                          <rect x="9" y="9" width="13" height="13" rx="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                        招待URL
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={() => handleRemoveMember(member.id, member.name)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
-                    title="削除"
-                  >
-                    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Radar Chart (below members for non-complete) */}
+      {phase !== "complete" && phase !== "empty" && (
+        <div className="mt-6">
+          <TeamRadarChartSection
+            memberScores={memberScores}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
-function StatusBadge({ label, status }: { label: string; status: string }) {
-  const done = status === "completed";
+function StepCard({
+  number,
+  title,
+  description,
+  done,
+  active,
+}: {
+  number: number;
+  title: string;
+  description: string;
+  done: boolean;
+  active?: boolean;
+}) {
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-        done
-          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-          : "bg-gray-100 text-gray-500 border border-gray-200"
-      }`}
-    >
+    <div className={`rounded-xl border p-4 transition-all ${
+      done
+        ? "border-emerald-200 bg-emerald-50/50"
+        : active
+        ? "border-[#2979ff]/30 bg-[#2979ff]/5"
+        : "border-gray-200 bg-gray-50/50"
+    }`}>
+      <div className="flex items-center gap-2.5 mb-1.5">
+        <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+          done
+            ? "bg-emerald-500 text-white"
+            : active
+            ? "bg-[#2979ff] text-white"
+            : "bg-gray-200 text-gray-500"
+        }`}>
+          {done ? (
+            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          ) : (
+            number
+          )}
+        </div>
+        <span className={`text-sm font-semibold ${
+          done ? "text-emerald-700" : active ? "text-gray-900" : "text-gray-400"
+        }`}>
+          {title}
+        </span>
+      </div>
+      <p className={`text-xs ml-8.5 ${done ? "text-emerald-600" : active ? "text-gray-500" : "text-gray-400"}`}>
+        {description}
+      </p>
+    </div>
+  );
+}
+
+function DiagnosisPill({ label, done }: { label: string; done: boolean }) {
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
+      done
+        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+        : "bg-gray-50 text-gray-400 border border-gray-200"
+    }`}>
       {done ? (
         <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
           <path d="M20 6L9 17l-5-5" />
         </svg>
       ) : (
-        <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
-          <circle cx={12} cy={12} r={6} />
+        <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <circle cx="12" cy="12" r="6" />
         </svg>
       )}
       {label}
@@ -419,15 +654,6 @@ const CI_ORDER = ["R", "I", "A", "S", "E", "C"] as const;
 const CI_FULL_LABELS: Record<string, string> = {
   R: "現実的", I: "研究的", A: "芸術的", S: "社会的", E: "企業的", C: "慣習的",
 };
-
-const MEMBER_COLORS = [
-  "#2979ff", "#e91e63", "#ff9800", "#4caf50", "#9c27b0",
-  "#00bcd4", "#ff5722", "#3f51b5", "#8bc34a", "#f44336",
-  "#009688", "#ffc107", "#673ab7", "#03a9f4", "#cddc39",
-  "#795548", "#607d8b", "#e040fb", "#76ff03", "#ff6e40",
-  "#1a237e", "#880e4f", "#e65100", "#1b5e20", "#4a148c",
-  "#006064", "#bf360c", "#283593", "#33691e", "#b71c1c",
-];
 
 const OUTLIER_WEIGHT = 0.15;
 const ACE_WEIGHT = 1.8;
@@ -507,7 +733,6 @@ function TeamRadarChartSection({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* WV Chart */}
         <div className="flex flex-col items-center pl-8">
           <h3 className="text-sm font-medium text-gray-500 mb-3">Work Values（価値観）</h3>
           {isAverage ? (
@@ -537,7 +762,6 @@ function TeamRadarChartSection({
           )}
         </div>
 
-        {/* CI Chart */}
         <div className="flex flex-col items-center pl-8">
           <h3 className="text-sm font-medium text-gray-500 mb-3">Career Interest（興味）</h3>
           {isAverage ? (
