@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import type { ReactNode } from "react";
@@ -26,6 +27,7 @@ type CompanyAuthContextValue = {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<CompanyUser>;
   logout: () => void;
+  companyFetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 };
 
 const CompanyAuthContext = createContext<CompanyAuthContextValue | null>(null);
@@ -63,6 +65,43 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const refreshPromiseRef = useRef<Promise<boolean> | null>(null);
+
+  const refreshToken = useCallback((): Promise<boolean> => {
+    if (refreshPromiseRef.current) return refreshPromiseRef.current;
+    const p = fetch("/api/company/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          setCompany(await res.json());
+          return true;
+        }
+        return false;
+      })
+      .finally(() => {
+        refreshPromiseRef.current = null;
+      });
+    refreshPromiseRef.current = p;
+    return p;
+  }, []);
+
+  const companyFetch = useCallback(
+    async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+      const opts = { ...init, credentials: "include" as RequestCredentials };
+      let res = await fetch(input, opts);
+      if (res.status === 401) {
+        const refreshed = await refreshToken();
+        if (refreshed) {
+          res = await fetch(input, opts);
+        }
+      }
+      return res;
+    },
+    [refreshToken],
+  );
+
   useEffect(() => {
     fetch("/api/company/auth/me", { credentials: "include" })
       .then(async (res) => {
@@ -70,16 +109,10 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
           setCompany(await res.json());
           return;
         }
-        const refreshRes = await fetch("/api/company/auth/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
-        if (refreshRes.ok) {
-          setCompany(await refreshRes.json());
-        }
+        await refreshToken();
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [refreshToken]);
 
   const value = useMemo(
     () => ({
@@ -88,8 +121,9 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       logout,
+      companyFetch,
     }),
-    [company, isLoading, login, logout],
+    [company, isLoading, login, logout, companyFetch],
   );
 
   return (

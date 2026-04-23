@@ -46,7 +46,7 @@ func (s *Service) GenerateCompanyAccessToken(companyID string) (string, error) {
 		Subject:   companyID,
 		Issuer:    issuer,
 		Audience:  jwtlib.ClaimStrings{companyAudience},
-		ExpiresAt: jwtlib.NewNumericDate(time.Now().Add(15 * time.Minute)),
+		ExpiresAt: jwtlib.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		IssuedAt:  jwtlib.NewNumericDate(time.Now()),
 	}
 	token := jwtlib.NewWithClaims(jwtlib.SigningMethodHS256, claims)

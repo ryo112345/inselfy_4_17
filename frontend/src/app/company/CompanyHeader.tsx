@@ -8,6 +8,7 @@ import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 const navItems = [
   { label: "HOME", href: "/company", icon: HomeIcon },
   { label: "企業情報", href: "/company/profile", icon: CompanyIcon },
+  { label: "チーム", href: "/company/teams", icon: TeamIcon },
   { label: "求人一覧", href: "/company/jobs", icon: JobIcon },
   { label: "応募一覧", href: "/company/applications", icon: ApplicationIcon },
   { label: "人材を探す", href: "/company/talents", icon: TalentIcon },
@@ -208,6 +209,17 @@ function ScoutIcon() {
     <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <path d="M22 2L11 13" />
       <path d="M22 2L15 22l-4-9-9-4z" />
+    </svg>
+  );
+}
+
+function TeamIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="19" cy="7" r="2.5" />
+      <circle cx="5" cy="7" r="2.5" />
     </svg>
   );
 }

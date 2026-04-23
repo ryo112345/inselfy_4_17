@@ -12,6 +12,8 @@ async function proxy(req: NextRequest) {
   if (ct) headers.set("Content-Type", ct);
   const authHeader = req.headers.get("authorization");
   if (authHeader) headers.set("Authorization", authHeader);
+  const adminKey = req.headers.get("x-admin-key");
+  if (adminKey) headers.set("X-Admin-Key", adminKey);
 
   const res = await fetch(dest, {
     method: req.method,
@@ -26,15 +28,22 @@ async function proxy(req: NextRequest) {
   }
 
   const data = await res.arrayBuffer();
-  const response = new NextResponse(data, {
-    status: res.status,
-    headers: { "Content-Type": res.headers.get("content-type") ?? "application/json" },
-  });
+  const responseHeaders = new Headers();
+  responseHeaders.set("Content-Type", res.headers.get("content-type") ?? "application/json");
 
-  for (const cookie of res.headers.getSetCookie()) {
-    response.headers.append("Set-Cookie", cookie);
+  const setCookies = res.headers.getSetCookie();
+  if (setCookies.length > 0) {
+    console.log(`[proxy] ${req.method} ${url.pathname} → ${res.status}, forwarding ${setCookies.length} cookies:`);
+    for (const cookie of setCookies) {
+      console.log(`  Set-Cookie: ${cookie.substring(0, 80)}...`);
+      responseHeaders.append("Set-Cookie", cookie);
+    }
   }
-  return response;
+
+  return new NextResponse(data, {
+    status: res.status,
+    headers: responseHeaders,
+  });
 }
 
 export const GET = proxy;

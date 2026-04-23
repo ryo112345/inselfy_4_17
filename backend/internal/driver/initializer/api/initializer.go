@@ -203,6 +203,36 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return ciCtrl.GetResultBySessionID(c, c.Param("sessionId"))
 	})
 
+	// --- Company Teams ---
+	teamCtrl := httpcontroller.NewCompanyTeamController(pool)
+	teamGroup := e.Group("/api/company/teams", companyJwtMW)
+	teamGroup.GET("", teamCtrl.ListTeams)
+	teamGroup.POST("", teamCtrl.CreateTeam)
+	teamGroup.GET("/:teamId", func(c echo.Context) error {
+		return teamCtrl.GetTeam(c, c.Param("teamId"))
+	})
+	teamGroup.PUT("/:teamId", func(c echo.Context) error {
+		return teamCtrl.UpdateTeam(c, c.Param("teamId"))
+	})
+	teamGroup.DELETE("/:teamId", func(c echo.Context) error {
+		return teamCtrl.DeleteTeam(c, c.Param("teamId"))
+	})
+	teamGroup.POST("/:teamId/members", func(c echo.Context) error {
+		return teamCtrl.AddMember(c, c.Param("teamId"))
+	})
+	teamGroup.DELETE("/:teamId/members/:memberId", func(c echo.Context) error {
+		return teamCtrl.RemoveMember(c, c.Param("teamId"), c.Param("memberId"))
+	})
+
+	// --- Team Diagnose (public) ---
+	diagCtrl := httpcontroller.NewTeamDiagnoseController(pool)
+	e.GET("/api/team-diagnose/:token", func(c echo.Context) error {
+		return diagCtrl.GetByToken(c, c.Param("token"))
+	})
+	e.PUT("/api/team-diagnose/:token/status", func(c echo.Context) error {
+		return diagCtrl.UpdateStatus(c, c.Param("token"))
+	})
+
 	// --- Admin ---
 	adminUserCtrl := httpcontroller.NewAdminUserController(pool)
 	adminReportCtrl := httpcontroller.NewAdminReportController(pool)

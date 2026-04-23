@@ -129,7 +129,7 @@ func setCompanyAuthCookies(ctx echo.Context, resp *presenter.CompanyAuthTokenRes
 		HttpOnly: true,
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   900,
+		MaxAge:   86400,
 	})
 	ctx.SetCookie(&http.Cookie{
 		Name:     "company_refresh_token",
