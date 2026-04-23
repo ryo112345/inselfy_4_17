@@ -42,6 +42,7 @@ type memberResponse struct {
 	InviteToken string  `json:"invite_token"`
 	WVStatus    string  `json:"wv_status"`
 	CIStatus    string  `json:"ci_status"`
+	IsAce       bool    `json:"is_ace"`
 	CreatedAt   string  `json:"created_at"`
 }
 
@@ -163,7 +164,7 @@ func (c *CompanyTeamController) GetTeam(ctx echo.Context, teamID string) error {
 	team.CreatedAt = createdAt.Format(time.RFC3339)
 
 	memberRows, err := c.pool.Query(ctx.Request().Context(),
-		`SELECT id, name, email, invite_token, wv_status, ci_status, created_at
+		`SELECT id, name, email, invite_token, wv_status, ci_status, is_ace, created_at
 		 FROM team_members WHERE team_id = $1 ORDER BY created_at ASC`, parsedTeamID)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
@@ -176,7 +177,7 @@ func (c *CompanyTeamController) GetTeam(ctx echo.Context, teamID string) error {
 		var mid uuid.UUID
 		var email *string
 		var mCreatedAt time.Time
-		if err := memberRows.Scan(&mid, &m.Name, &email, &m.InviteToken, &m.WVStatus, &m.CIStatus, &mCreatedAt); err != nil {
+		if err := memberRows.Scan(&mid, &m.Name, &email, &m.InviteToken, &m.WVStatus, &m.CIStatus, &m.IsAce, &mCreatedAt); err != nil {
 			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 		}
 		m.ID = mid.String()
@@ -409,6 +410,7 @@ type memberScoreResponse struct {
 	UserID     string  `json:"user_id"`
 	WVStatus   string  `json:"wv_status"`
 	CIStatus   string  `json:"ci_status"`
+	IsAce      bool    `json:"is_ace"`
 	WVScores   []score `json:"wv_scores,omitempty"`
 	CIScores   []score `json:"ci_scores,omitempty"`
 }
@@ -443,7 +445,7 @@ func (c *CompanyTeamController) GetTeamScores(ctx echo.Context, teamID string) e
 	reqCtx := ctx.Request().Context()
 
 	memberRows, err := c.pool.Query(reqCtx,
-		`SELECT id, user_id, name, wv_status, ci_status FROM team_members WHERE team_id = $1 ORDER BY created_at ASC`,
+		`SELECT id, user_id, name, wv_status, ci_status, is_ace FROM team_members WHERE team_id = $1 ORDER BY created_at ASC`,
 		parsedTeamID)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
@@ -456,11 +458,12 @@ func (c *CompanyTeamController) GetTeamScores(ctx echo.Context, teamID string) e
 		name     string
 		wvStatus string
 		ciStatus string
+		isAce    bool
 	}
 	var members []memberInfo
 	for memberRows.Next() {
 		var m memberInfo
-		if err := memberRows.Scan(&m.id, &m.userID, &m.name, &m.wvStatus, &m.ciStatus); err != nil {
+		if err := memberRows.Scan(&m.id, &m.userID, &m.name, &m.wvStatus, &m.ciStatus, &m.isAce); err != nil {
 			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 		}
 		members = append(members, m)
@@ -474,6 +477,7 @@ func (c *CompanyTeamController) GetTeamScores(ctx echo.Context, teamID string) e
 			UserID:     m.userID.String(),
 			WVStatus:   m.wvStatus,
 			CIStatus:   m.ciStatus,
+			IsAce:      m.isAce,
 		}
 
 		if m.wvStatus == "completed" {
@@ -524,4 +528,91 @@ func (c *CompanyTeamController) GetTeamScores(ctx echo.Context, teamID string) e
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{"members": result})
+}
+
+func (c *CompanyTeamController) SetAceMember(ctx echo.Context, teamID, memberID string) error {
+	companyID := c.companyID(ctx)
+	parsedTeamID, err := uuid.Parse(teamID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid team id"})
+	}
+	parsedMemberID, err := uuid.Parse(memberID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid member id"})
+	}
+
+	var ownerID string
+	err = c.pool.QueryRow(ctx.Request().Context(),
+		`SELECT company_id FROM teams WHERE id = $1`, parsedTeamID,
+	).Scan(&ownerID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "team not found"})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	if ownerID != companyID {
+		return ctx.JSON(http.StatusForbidden, map[string]string{"message": "not your team"})
+	}
+
+	reqCtx := ctx.Request().Context()
+	tx, err := c.pool.Begin(reqCtx)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	defer tx.Rollback(reqCtx)
+
+	_, err = tx.Exec(reqCtx,
+		`UPDATE team_members SET is_ace = FALSE, updated_at = NOW() WHERE team_id = $1 AND is_ace = TRUE`,
+		parsedTeamID)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	tag, err := tx.Exec(reqCtx,
+		`UPDATE team_members SET is_ace = TRUE, updated_at = NOW() WHERE id = $1 AND team_id = $2`,
+		parsedMemberID, parsedTeamID)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	if tag.RowsAffected() == 0 {
+		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "member not found"})
+	}
+
+	if err := tx.Commit(reqCtx); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+func (c *CompanyTeamController) UnsetAceMember(ctx echo.Context, teamID string) error {
+	companyID := c.companyID(ctx)
+	parsedTeamID, err := uuid.Parse(teamID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid team id"})
+	}
+
+	var ownerID string
+	err = c.pool.QueryRow(ctx.Request().Context(),
+		`SELECT company_id FROM teams WHERE id = $1`, parsedTeamID,
+	).Scan(&ownerID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "team not found"})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	if ownerID != companyID {
+		return ctx.JSON(http.StatusForbidden, map[string]string{"message": "not your team"})
+	}
+
+	_, err = c.pool.Exec(ctx.Request().Context(),
+		`UPDATE team_members SET is_ace = FALSE, updated_at = NOW() WHERE team_id = $1 AND is_ace = TRUE`,
+		parsedTeamID)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
 }

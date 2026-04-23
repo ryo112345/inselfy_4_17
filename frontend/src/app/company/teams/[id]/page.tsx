@@ -12,6 +12,7 @@ type Member = {
   invite_token: string;
   wv_status: string;
   ci_status: string;
+  is_ace: boolean;
   created_at: string;
 };
 
@@ -26,6 +27,7 @@ type MemberScore = {
   member_name: string;
   wv_status: string;
   ci_status: string;
+  is_ace: boolean;
   wv_scores: Score[] | null;
   ci_scores: Score[] | null;
 };
@@ -120,6 +122,18 @@ export default function TeamDetailPage() {
         method: "DELETE",
       });
       await fetchTeam();
+    } catch {}
+  };
+
+  const handleToggleAce = async (memberId: string, currentlyAce: boolean) => {
+    try {
+      if (currentlyAce) {
+        await companyFetch(`/api/company/teams/${teamId}/ace`, { method: "DELETE" });
+      } else {
+        await companyFetch(`/api/company/teams/${teamId}/ace/${memberId}`, { method: "PUT" });
+      }
+      await fetchTeam();
+      await fetchTeamScores();
     } catch {}
   };
 
@@ -315,6 +329,19 @@ export default function TeamDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => handleToggleAce(member.id, member.is_ace)}
+                    className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
+                      member.is_ace
+                        ? "text-yellow-500 hover:bg-yellow-50"
+                        : "text-gray-300 hover:bg-gray-50 hover:text-yellow-400"
+                    }`}
+                    title={member.is_ace ? "エース解除" : "エースに設定"}
+                  >
+                    <svg width={16} height={16} viewBox="0 0 24 24" fill={member.is_ace ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </button>
                   <StatusBadge label="WV" status={member.wv_status} />
                   <StatusBadge label="CI" status={member.ci_status} />
 
@@ -403,27 +430,36 @@ const MEMBER_COLORS = [
 ];
 
 const OUTLIER_WEIGHT = 0.15;
+const ACE_WEIGHT = 1.8;
 const WV_OUTLIER_THRESHOLD = 25;
 const CI_OUTLIER_THRESHOLD = 1.0;
+const MIN_MEMBERS_FOR_AVERAGE = 3;
 
 function computeAvg(members: MemberScore[], key: "wv_scores" | "ci_scores", order: readonly string[]) {
   const completed = members.filter((m) => m[key] && m[key]!.length > 0);
-  if (completed.length === 0) return null;
+  if (completed.length < MIN_MEMBERS_FOR_AVERAGE) return null;
 
   const threshold = key === "wv_scores" ? WV_OUTLIER_THRESHOLD : CI_OUTLIER_THRESHOLD;
 
   return order.map((id) => {
-    const values = completed
-      .map((m) => m[key]!.find((s) => s.id === id)?.display_score)
-      .filter((v): v is number => v != null);
-    if (values.length === 0) return { id, score: 0 };
+    const entries = completed
+      .map((m) => ({ score: m[key]!.find((s) => s.id === id)?.display_score, isAce: m.is_ace }))
+      .filter((e): e is { score: number; isAce: boolean } => e.score != null);
+    if (entries.length === 0) return { id, score: 0 };
 
-    const simpleAvg = values.reduce((a, b) => a + b, 0) / values.length;
+    const simpleAvg = entries.reduce((a, e) => a + e.score, 0) / entries.length;
     let weightedSum = 0;
     let weightTotal = 0;
-    for (const v of values) {
-      const w = Math.abs(v - simpleAvg) > threshold ? OUTLIER_WEIGHT : 1.0;
-      weightedSum += w * v;
+    for (const e of entries) {
+      let w: number;
+      if (e.isAce) {
+        w = ACE_WEIGHT;
+      } else if (Math.abs(e.score - simpleAvg) > threshold) {
+        w = OUTLIER_WEIGHT;
+      } else {
+        w = 1.0;
+      }
+      weightedSum += w * e.score;
       weightTotal += w;
     }
     return { id, score: weightedSum / weightTotal };
@@ -475,7 +511,7 @@ function TeamRadarChartSection({
         <div className="flex flex-col items-center pl-8">
           <h3 className="text-sm font-medium text-gray-500 mb-3">Work Values（価値観）</h3>
           {isAverage ? (
-            wvCompleted.length > 0 ? (
+            wvCompleted.length >= MIN_MEMBERS_FOR_AVERAGE ? (
               <SingleRadarChart
                 scores={wvAvg}
                 order={WV_ORDER as readonly string[]}
@@ -483,7 +519,11 @@ function TeamRadarChartSection({
                 isWV={true}
               />
             ) : (
-              <div className="py-10 text-sm text-gray-400">データなし</div>
+              <div className="py-10 text-sm text-gray-400">
+                {wvCompleted.length > 0
+                  ? `${MIN_MEMBERS_FOR_AVERAGE}人以上の受検が必要です（現在${wvCompleted.length}人）`
+                  : "データなし"}
+              </div>
             )
           ) : selectedMember?.wv_scores && selectedMember.wv_scores.length > 0 ? (
             <SingleRadarChart
@@ -501,7 +541,7 @@ function TeamRadarChartSection({
         <div className="flex flex-col items-center pl-8">
           <h3 className="text-sm font-medium text-gray-500 mb-3">Career Interest（興味）</h3>
           {isAverage ? (
-            ciCompleted.length > 0 ? (
+            ciCompleted.length >= MIN_MEMBERS_FOR_AVERAGE ? (
               <SingleRadarChart
                 scores={ciAvg}
                 order={CI_ORDER as readonly string[]}
@@ -509,7 +549,11 @@ function TeamRadarChartSection({
                 isWV={false}
               />
             ) : (
-              <div className="py-10 text-sm text-gray-400">データなし</div>
+              <div className="py-10 text-sm text-gray-400">
+                {ciCompleted.length > 0
+                  ? `${MIN_MEMBERS_FOR_AVERAGE}人以上の受検が必要です（現在${ciCompleted.length}人）`
+                  : "データなし"}
+              </div>
             )
           ) : selectedMember?.ci_scores && selectedMember.ci_scores.length > 0 ? (
             <SingleRadarChart
