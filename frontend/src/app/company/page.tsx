@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ActionItemsSection } from "./ActionItemsSection";
+import { ScoutSection } from "./ScoutSection";
 
 const accent = "#2979ff";
 
@@ -12,34 +14,8 @@ const pipelineStages = [
   { label: "内定 / 目標", count: "7/10", unit: "人", href: "/company/applications?status=offer", action: "内定者一覧", icon: "offer" },
 ];
 
-const actionItems = [
-  { label: "未対応の応募", count: 3, urgency: "high", href: "/company/applications?status=new", description: "48時間以上未対応が1件" },
-  { label: "未返信メッセージ", count: 2, urgency: "medium", href: "/company/messages?filter=unread", description: "最新: 田中様より (3時間前)" },
-  { label: "選考結果の入力待ち", count: 4, urgency: "medium", href: "/company/applications?status=pending_result", description: "面談後3日以上が2件" },
-  { label: "面接日程の確認待ち", count: 1, urgency: "low", href: "/company/applications?status=scheduling", description: "佐藤様 — 候補日回答済み" },
-  { label: "期限切れ間近の求人", count: 2, urgency: "medium", href: "/company/jobs?filter=expiring", description: "7日以内に掲載終了が2件" },
-];
 
-const scoutData = {
-  balance: 42,
-  cap: 120,
-  monthlyAllowance: 30,
-  nextReplenishDate: "5月1日",
-  daysUntilReplenish: 9,
-  balanceAfterReplenish: Math.min(42 + 30, 120),
-  pending: {
-    total: 23,
-    expiringSoon: 5,
-    byMonth: [
-      { month: "2月", count: 5, daysLeft: 7 },
-      { month: "3月", count: 8, daysLeft: 38 },
-      { month: "4月", count: 10, daysLeft: 68 },
-    ],
-  },
-  replyRate: { current: 62, prev: 55 },
-  avgReplyDays: 12,
-  last90d: { sent: 58, applications: 12 },
-};
+
 
 const jobs = [
   { title: "バックエンドエンジニア", status: "公開中", applicants: 12, views: 340, daysLeft: 28, href: "/company/jobs/1" },
@@ -59,14 +35,6 @@ function PipelineArrow() {
   );
 }
 
-function UrgencyDot({ urgency }: { urgency: string }) {
-  const colors = {
-    high: "bg-red-500",
-    medium: "bg-amber-400",
-    low: "bg-emerald-400",
-  };
-  return <span className={`inline-block h-2 w-2 rounded-full ${colors[urgency as keyof typeof colors]}`} />;
-}
 
 
 
@@ -150,11 +118,6 @@ function SectionHeader({ title, action, href }: { title: string; action?: string
 }
 
 export default function CompanyPage() {
-  const balancePct = Math.round((scoutData.balance / scoutData.cap) * 100);
-  const costPerApp = scoutData.last90d.applications > 0
-    ? Math.round((scoutData.last90d.sent / scoutData.last90d.applications) * 10) / 10
-    : null;
-
   return (
     <div className="space-y-6">
       {/* ── 採用パイプライン ── */}
@@ -192,106 +155,9 @@ export default function CompanyPage() {
 
       {/* ── 要対応 + スカウト (2カラム) ── */}
       <div className="grid grid-cols-5 gap-5">
-        {/* 要対応アイテム */}
-        <section className="col-span-2">
-          <SectionHeader title="要対応" />
-          <div className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white shadow-sm">
-            {actionItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-center justify-between px-4 py-[10.5px] transition-colors hover:bg-gray-50"
-              >
-                <div className="flex items-center gap-2.5">
-                  <UrgencyDot urgency={item.urgency} />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{item.label}</p>
-                    <p className="text-sm text-gray-400">{item.description}</p>
-                  </div>
-                </div>
-                <span className="ml-2 text-lg font-bold text-gray-900">
-                  {item.count}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <ActionItemsSection />
 
-        {/* スカウト状況 */}
-        <section className="col-span-3">
-          <SectionHeader title="スカウト状況" action="スカウト管理" href="/company/scout" />
-          <div className="mt-3 rounded-2xl border border-gray-200 bg-white px-6 pb-0 pt-3 shadow-sm">
-            {/* 送信可能 + 返信待ち（横並び） */}
-            <div className="mb-3 grid grid-cols-2 gap-6">
-              <div>
-                <p className="text-base font-semibold text-gray-700">送信可能</p>
-                <div className="mt-1.5 flex items-baseline gap-2">
-                  <span className="text-3xl font-bold" style={{ color: accent, fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.balance}</span>
-                  <span className="text-sm font-normal text-gray-400">/ <span style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.cap}</span></span>
-                </div>
-                <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-gray-100">
-                  <div
-                    className="h-3 rounded-full transition-all"
-                    style={{ width: `${balancePct}%`, backgroundColor: accent }}
-                  />
-                </div>
-                <p className="mt-2 text-sm text-gray-400">
-                  補充: {scoutData.nextReplenishDate}（+{scoutData.monthlyAllowance}通 / 上限{scoutData.cap}通）
-                </p>
-                <div className="mt-4 border-t border-gray-100 pt-4">
-                  <p className="mb-2.5 text-base font-semibold text-gray-700">スカウト成果（直近90日）</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">スカウト経由応募</span>
-                      <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.last90d.applications}</span> 件</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">応募あたり送信数</span>
-                      <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{costPerApp ?? "—"}</span> 通/件</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">返信率</span>
-                      <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.replyRate.current}</span> %</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <p className="text-base font-semibold text-gray-700">返信待ち</p>
-                <div className="mt-1.5 flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.pending.total}</span>
-                  <span className="text-sm font-normal text-gray-400">通</span>
-                </div>
-                <div className="mt-2.5 space-y-2">
-                  {scoutData.pending.byMonth.map((m) => (
-                    <div key={m.month} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">{m.month}送信分</span>
-                      <span className="flex items-baseline">
-                        <span className="inline-flex items-baseline justify-end font-medium text-gray-700" style={{ width: "3.5rem" }}><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{m.count}</span><span className="ml-1">通</span></span>
-                        <span className={`inline-flex items-baseline justify-end ${m.daysLeft <= 14 ? "font-semibold text-red-500" : "text-gray-400"}`} style={{ width: "4.5rem" }}>
-                          残<span className="ml-1.5 text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{m.daysLeft}</span> 日
-                        </span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2 flex items-center justify-between text-sm">
-                  <span className="text-gray-500">平均返信日数</span>
-                  <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{scoutData.avgReplyDays}</span> 日</span>
-                </div>
-                <Link
-                  href="/company/scout?status=pending"
-                  className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-5 py-2 text-sm font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
-                >
-                  <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4.5 2.5l3.5 3.5-3.5 3.5" />
-                  </svg>
-                  返信待ちスカウト一覧を見る
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+        <ScoutSection />
       </div>
 
       {/* ── 求人パフォーマンス ── */}
