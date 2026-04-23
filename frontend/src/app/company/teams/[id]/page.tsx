@@ -399,41 +399,43 @@ export default function TeamDetailPage() {
                 {team.members.length}/30
               </span>
             </h2>
-            {team.members.length < 30 && (
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors cursor-pointer hover:opacity-90"
-                style={{ backgroundColor: "#2979ff" }}
-              >
-                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                メンバーを追加
-              </button>
-            )}
-          </div>
-          {team.members.length > 0 && (
-            <div className="flex items-center gap-3 mt-3">
-              <span className="text-sm text-gray-500">理想の人材像:</span>
-              <select
-                value={aceMember?.id || ""}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val) {
-                    handleToggleAce(val, false);
-                  } else if (hasAce) {
-                    handleToggleAce(aceMember!.id, true);
-                  }
-                }}
-                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
-              >
-                <option value="">未設定</option>
-                {team.members.map((m) => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
-                ))}
-              </select>
+            <div className="flex items-center gap-3">
+              {team.members.length > 0 && (
+                <>
+                  <span className="text-sm text-gray-500">理想の人材像:</span>
+                  <select
+                    value={aceMember?.id || ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val) {
+                        handleToggleAce(val, false);
+                      } else if (hasAce) {
+                        handleToggleAce(aceMember!.id, true);
+                      }
+                    }}
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
+                  >
+                    <option value="">未設定</option>
+                    {team.members.map((m) => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </>
+              )}
+              {team.members.length < 30 && (
+                <button
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors cursor-pointer hover:opacity-90"
+                  style={{ backgroundColor: "#2979ff" }}
+                >
+                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  メンバーを追加
+                </button>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {showAddForm && (
@@ -516,12 +518,12 @@ export default function TeamDetailPage() {
                     {/* Name */}
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative shrink-0">
-                        <div className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ${
+                        <div className={`flex h-9 w-9 items-center justify-center rounded-full font-bold ${
                           allDone
-                            ? "bg-emerald-50 text-emerald-600"
-                            : "bg-blue-50 text-[#2979ff]"
+                            ? "bg-emerald-50 text-emerald-600 text-[10px]"
+                            : "bg-blue-50 text-[#2979ff] text-xs"
                         }`}>
-                          {member.name.slice(0, 1)}
+                          {allDone ? "完了" : "未"}
                         </div>
                         {allDone && (
                           <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white">
@@ -863,7 +865,7 @@ function SingleRadarChart({
   const spokes = order.map((_, i) => hexPoint(i, R));
 
   const gridColor = isWV ? "#d0ddd6" : "#d0c0e0";
-  const fillColor = isWV ? "rgba(61,139,110,0.18)" : "rgba(139,92,200,0.18)";
+  const fillColor = isWV ? "rgba(61,139,110,0.15)" : "rgba(139,92,200,0.15)";
   const strokeColor = isWV ? "#5a9e82" : "#8B5CC8";
   const dotColor = isWV ? "#4a9474" : "#8B5CC8";
   const scoreTextColor = isWV ? "#2d7a5e" : "#6B3FA0";
@@ -898,7 +900,7 @@ function SingleRadarChart({
       ))}
       {scores && (
         <>
-          <path d={dataPath} fill={fillColor} stroke={strokeColor} strokeWidth={1.5} />
+          <path d={dataPath} fill={fillColor} stroke={strokeColor} strokeWidth={1.2} />
           {dataPoints.map((pt, i) => (
             <circle key={i} cx={pt.x} cy={pt.y} r={3} fill={dotColor} />
           ))}
