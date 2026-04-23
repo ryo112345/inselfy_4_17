@@ -245,8 +245,13 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// --- Admin ---
 	adminUserCtrl := httpcontroller.NewAdminUserController(pool)
 	adminReportCtrl := httpcontroller.NewAdminReportController(pool)
+	adminCompanyCtrl := httpcontroller.NewAdminCompanyController(pool)
 	adminGroup := e.Group("/api/admin")
 	adminGroup.GET("/users", adminUserCtrl.List)
+	adminGroup.GET("/companies", adminCompanyCtrl.List)
+	adminGroup.PATCH("/companies/:id/status", func(c echo.Context) error {
+		return adminCompanyCtrl.UpdateStatus(c, c.Param("id"))
+	})
 	adminGroup.DELETE("/users/:id", func(c echo.Context) error {
 		return adminUserCtrl.Delete(c, c.Param("id"))
 	})
