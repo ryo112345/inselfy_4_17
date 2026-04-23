@@ -233,69 +233,14 @@ export default function TeamDetailPage() {
         </div>
       </div>
 
-      {/* Phase Banner — compact, contextual guidance */}
-      {phase !== "complete" && (
-        <PhaseBanner phase={phase} onAddMember={() => setShowAddForm(true)} />
-      )}
-
-      {/* Summary Stats */}
-      {team.members.length > 0 && (
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
-                <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
-                  {team.members.length}
-                  <span className="ml-1 text-sm font-normal text-gray-400">人</span>
-                </p>
-                <p className="text-sm text-gray-500">メンバー</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <ProgressRing
-                value={team.members.length > 0 ? wvCompleted / team.members.length : 0}
-                size={40}
-                strokeWidth={3.5}
-                color={wvCompleted === team.members.length ? "#10b981" : "#48c88c"}
-                trackColor="#e5f5ed"
-              />
-              <div>
-                <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
-                  {wvCompleted}<span className="text-base font-normal text-gray-400">/{team.members.length}</span>
-                </p>
-                <p className="text-sm text-gray-500">価値観診断</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <ProgressRing
-                value={team.members.length > 0 ? ciCompleted / team.members.length : 0}
-                size={40}
-                strokeWidth={3.5}
-                color={ciCompleted === team.members.length ? "#10b981" : "#a878dc"}
-                trackColor="#f0e8f8"
-              />
-              <div>
-                <p className="text-2xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
-                  {ciCompleted}<span className="text-base font-normal text-gray-400">/{team.members.length}</span>
-                </p>
-                <p className="text-sm text-gray-500">興味診断</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Phase Banner with inline progress */}
+      <PhaseBanner
+        phase={phase}
+        onAddMember={() => setShowAddForm(true)}
+        memberCount={team.members.length}
+        wvCompleted={wvCompleted}
+        ciCompleted={ciCompleted}
+      />
 
       {/* Radar Chart + Ace Member */}
       <TeamRadarChartSection
@@ -564,55 +509,29 @@ function MemberMenu({
   );
 }
 
-function PhaseBanner({ phase, onAddMember }: { phase: Phase; onAddMember: () => void }) {
-  const config: Record<Exclude<Phase, "complete">, { icon: React.ReactNode; message: string; bg: string; border: string; textColor: string }> = {
-    empty: {
-      icon: (
-        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+function PhaseBanner({
+  phase,
+  onAddMember,
+  memberCount,
+  wvCompleted,
+  ciCompleted,
+}: {
+  phase: Phase;
+  onAddMember: () => void;
+  memberCount: number;
+  wvCompleted: number;
+  ciCompleted: number;
+}) {
+  if (phase === "empty") {
+    return (
+      <div className="rounded-xl bg-blue-50/60 border border-blue-200 px-5 py-3.5 mb-6 flex items-center gap-3">
+        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
           <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <line x1="19" y1="8" x2="19" y2="14" />
           <line x1="22" y1="11" x2="16" y2="11" />
         </svg>
-      ),
-      message: "まずメンバーを追加しましょう。登録すると一人ひとりに専用の診断URLが発行されます。",
-      bg: "bg-blue-50/60",
-      border: "border-blue-200",
-      textColor: "text-blue-900",
-    },
-    invite: {
-      icon: (
-        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 2L11 13" />
-          <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-        </svg>
-      ),
-      message: "各メンバーの「招待URL」をコピーして、SlackやメールでURLを共有してください。",
-      bg: "bg-blue-50/60",
-      border: "border-blue-200",
-      textColor: "text-blue-900",
-    },
-    in_progress: {
-      icon: (
-        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-      ),
-      message: "診断の回答を待っています。まだ回答していないメンバーにはリマインドを送りましょう。",
-      bg: "bg-amber-50/60",
-      border: "border-amber-200",
-      textColor: "text-amber-900",
-    },
-  };
-
-  const c = config[phase];
-
-  return (
-    <div className={`rounded-xl ${c.bg} ${c.border} border px-5 py-3.5 mb-6 flex items-center gap-3`}>
-      <div className="shrink-0">{c.icon}</div>
-      <p className={`text-sm ${c.textColor} flex-1`}>{c.message}</p>
-      {phase === "empty" && (
+        <p className="text-sm text-blue-900 flex-1">まずメンバーを追加しましょう。登録すると一人ひとりに専用の診断URLが発行されます。</p>
         <button
           onClick={onAddMember}
           className="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white cursor-pointer hover:opacity-90"
@@ -623,7 +542,60 @@ function PhaseBanner({ phase, onAddMember }: { phase: Phase; onAddMember: () => 
           </svg>
           メンバーを追加
         </button>
-      )}
+      </div>
+    );
+  }
+
+  if (phase === "complete") {
+    return (
+      <div className="rounded-xl bg-emerald-50/60 border border-emerald-200 px-5 py-3 mb-6 flex items-center gap-3">
+        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        <p className="text-sm text-emerald-800">
+          <span className="font-medium">{memberCount}人</span>全員の診断が完了しました
+        </p>
+      </div>
+    );
+  }
+
+  const isInvite = phase === "invite";
+  const bg = isInvite ? "bg-blue-50/60" : "bg-amber-50/60";
+  const border = isInvite ? "border-blue-200" : "border-amber-200";
+  const textColor = isInvite ? "text-blue-900" : "text-amber-900";
+  const message = isInvite
+    ? "各メンバーの「招待URL」をコピーして、SlackやメールでURLを共有してください。"
+    : "診断の回答を待っています。まだ回答していないメンバーにはリマインドを送りましょう。";
+
+  return (
+    <div className={`rounded-xl ${bg} ${border} border px-5 py-3.5 mb-6`}>
+      <div className="flex items-center gap-3">
+        {isInvite ? (
+          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <path d="M22 2L11 13" />
+            <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+          </svg>
+        ) : (
+          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        )}
+        <p className={`text-sm ${textColor} flex-1`}>{message}</p>
+        {memberCount > 0 && (
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-1.5">
+              <ProgressRing value={wvCompleted / memberCount} size={20} strokeWidth={2} color={wvCompleted === memberCount ? "#10b981" : "#48c88c"} trackColor="#e5f5ed" />
+              <span className="text-sm text-gray-600">価値観 <span className="font-medium">{wvCompleted}/{memberCount}</span></span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <ProgressRing value={ciCompleted / memberCount} size={20} strokeWidth={2} color={ciCompleted === memberCount ? "#10b981" : "#a878dc"} trackColor="#f0e8f8" />
+              <span className="text-sm text-gray-600">興味 <span className="font-medium">{ciCompleted}/{memberCount}</span></span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -769,56 +741,66 @@ function TeamRadarChartSection({
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm mb-6">
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-base font-bold text-gray-900">チーム診断チャート</h2>
-        <select
-          value={viewMode}
-          onChange={(e) => onViewModeChange(e.target.value)}
-          className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 bg-white focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
-        >
-          <option value="average">チーム平均</option>
-          {memberScores
-            .filter((m) => (m.wv_scores && m.wv_scores.length > 0) || (m.ci_scores && m.ci_scores.length > 0))
-            .map((m) => (
-              <option key={m.member_id} value={m.member_id}>{m.member_name}</option>
-            ))}
-        </select>
-      </div>
-
-      {/* Ace member — contextual, inside the chart card */}
-      {isAverage && completedMembers.length > 0 && (
-        <div className="mb-5 flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-          <svg width={16} height={16} viewBox="0 0 24 24" fill={aceMember ? "#f59e0b" : "none"} stroke={aceMember ? "#f59e0b" : "#9ca3af"} strokeWidth={1.5}>
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-          {aceMember ? (
-            <div className="flex items-center gap-2 flex-1">
-              <span className="text-sm text-gray-700">
-                <span className="font-medium">{aceMember.name}</span>
-                <span className="text-gray-400 ml-1">の傾向を重視して平均を算出中</span>
-              </span>
-              <button
-                onClick={onClearAce}
-                className="ml-auto text-sm text-gray-400 hover:text-gray-600 cursor-pointer"
-              >
-                解除
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 flex-1">
-              <span className="text-sm text-gray-500">理想の人材像:</span>
-              <select
-                defaultValue=""
-                onChange={(e) => { if (e.target.value) onSetAce(e.target.value); }}
-                className="rounded-lg border border-gray-300 bg-white px-2.5 py-1 text-sm text-gray-700 focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
-              >
-                <option value="" disabled>選択してチーム平均に反映</option>
-                {completedMembers.map((m) => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
-                ))}
-              </select>
+        <div className="flex items-center gap-3">
+          {/* Ace member — inline next to view selector */}
+          {isAverage && completedMembers.length > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <svg width={14} height={14} viewBox="0 0 24 24" fill={aceMember ? "#f59e0b" : "none"} stroke={aceMember ? "#f59e0b" : "#9ca3af"} strokeWidth={1.5}>
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                <span className="text-sm text-gray-500">理想の人材像</span>
+                <div className="relative group">
+                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="cursor-help">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                    <circle cx="12" cy="17" r="0.5" fill="#9ca3af" />
+                  </svg>
+                  <div className="absolute bottom-full right-0 mb-2 w-64 rounded-lg bg-gray-800 px-3 py-2 text-xs text-white opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10">
+                    活躍しているメンバーを設定すると、その人の診断傾向がチーム平均に強く反映され、採用マッチングの精度が上がります。
+                    <div className="absolute top-full right-4 border-4 border-transparent border-t-gray-800" />
+                  </div>
+                </div>
+              </div>
+              {aceMember ? (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-medium text-gray-700">{aceMember.name}</span>
+                  <button
+                    onClick={onClearAce}
+                    className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    解除
+                  </button>
+                </div>
+              ) : (
+                <select
+                  defaultValue=""
+                  onChange={(e) => { if (e.target.value) onSetAce(e.target.value); }}
+                  className="rounded-lg border border-gray-300 bg-white px-2.5 py-1 text-sm text-gray-700 focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
+                >
+                  <option value="" disabled>選択</option>
+                  {completedMembers.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              )}
+              <div className="w-px h-5 bg-gray-200" />
             </div>
           )}
+          <select
+            value={viewMode}
+            onChange={(e) => onViewModeChange(e.target.value)}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 bg-white focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
+          >
+            <option value="average">チーム平均</option>
+            {memberScores
+              .filter((m) => (m.wv_scores && m.wv_scores.length > 0) || (m.ci_scores && m.ci_scores.length > 0))
+              .map((m) => (
+                <option key={m.member_id} value={m.member_id}>{m.member_name}</option>
+              ))}
+          </select>
         </div>
-      )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col items-center pl-8">
