@@ -864,11 +864,11 @@ function SingleRadarChart({
   });
   const spokes = order.map((_, i) => hexPoint(i, R));
 
-  const gridColor = isWV ? "#d0ddd6" : "#d0c0e0";
-  const fillColor = isWV ? "rgba(61,139,110,0.15)" : "rgba(139,92,200,0.15)";
-  const strokeColor = isWV ? "#5a9e82" : "#8B5CC8";
-  const dotColor = isWV ? "#4a9474" : "#8B5CC8";
-  const scoreTextColor = isWV ? "#2d7a5e" : "#6B3FA0";
+  const gridColor = isWV ? "#d8ede2" : "#e0d4f0";
+  const fillColor = isWV ? "rgba(72,200,140,0.2)" : "rgba(160,120,220,0.2)";
+  const strokeColor = isWV ? "#48c88c" : "#a878dc";
+  const dotColor = isWV ? "#48c88c" : "#a878dc";
+  const scoreTextColor = isWV ? "#2eb872" : "#9060d0";
 
   const scoreMap = new Map(scores?.map((s) => [s.id, s.score]) || []);
   const dataPoints = order.map((id, i) => {
