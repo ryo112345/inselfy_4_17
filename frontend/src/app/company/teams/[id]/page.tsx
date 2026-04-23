@@ -321,8 +321,8 @@ export default function TeamDetailPage() {
                   />
                 </div>
                 <div className="mt-2 flex gap-4 text-xs text-gray-500">
-                  <span>WV: {wvCompleted}/{team.members.length}</span>
-                  <span>CI: {ciCompleted}/{team.members.length}</span>
+                  <span>価値観診断: {wvCompleted}/{team.members.length}</span>
+                  <span>職業興味診断: {ciCompleted}/{team.members.length}</span>
                 </div>
               </div>
             )}
@@ -456,51 +456,85 @@ export default function TeamDetailPage() {
             メンバーがまだいません。上の「メンバーを追加する」ボタンから登録してください。
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
-            {team.members.map((member) => {
-              const wvDone = member.wv_status === "completed";
-              const ciDone = member.ci_status === "completed";
-              const allDone = wvDone && ciDone;
+          <>
+            {/* Column header */}
+            <div className="grid items-center border-b border-gray-100 px-6 py-2 text-xs font-medium text-gray-400"
+              style={{ gridTemplateColumns: "1fr 120px 120px 120px 140px 36px" }}
+            >
+              <span>名前</span>
+              <span className="text-center">価値観診断</span>
+              <span className="text-center">職業興味診断</span>
+              <span className="text-center">キーパーソン</span>
+              <span />
+              <span />
+            </div>
+            <div className="divide-y divide-gray-50">
+              {team.members.map((member) => {
+                const wvDone = member.wv_status === "completed";
+                const ciDone = member.ci_status === "completed";
+                const allDone = wvDone && ciDone;
 
-              return (
-                <div key={member.id} className="px-6 py-4">
-                  <div className="flex items-center justify-between">
+                return (
+                  <div
+                    key={member.id}
+                    className="grid items-center px-6 py-3 transition-colors hover:bg-gray-50/60"
+                    style={{ gridTemplateColumns: "1fr 120px 120px 120px 140px 36px" }}
+                  >
+                    {/* Name */}
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold shrink-0 ${
-                        allDone
-                          ? "bg-emerald-50 text-emerald-600"
-                          : "bg-blue-50 text-[#2979ff]"
-                      }`}>
-                        {member.name.slice(0, 1)}
+                      <div className="relative shrink-0">
+                        <div className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ${
+                          allDone
+                            ? "bg-emerald-50 text-emerald-600"
+                            : "bg-blue-50 text-[#2979ff]"
+                        }`}>
+                          {member.name.slice(0, 1)}
+                        </div>
+                        {allDone && (
+                          <div className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white">
+                            <svg width={8} height={8} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5}>
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-gray-900 truncate">{member.name}</p>
-                          {member.is_ace && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-yellow-50 border border-yellow-200 px-2 py-0.5 text-xs font-medium text-yellow-700">
-                              <svg width={10} height={10} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1}>
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                              </svg>
-                              エース
-                            </span>
-                          )}
-                        </div>
+                        <p className="text-sm font-medium text-gray-900 truncate">{member.name}</p>
                         {member.email && (
                           <p className="text-xs text-gray-400 truncate">{member.email}</p>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5">
-                      {/* Diagnosis Status */}
-                      <div className="flex items-center gap-1.5">
-                        <DiagnosisPill label="WV" done={wvDone} />
-                        <DiagnosisPill label="CI" done={ciDone} />
-                      </div>
+                    {/* WV Status */}
+                    <div className="flex justify-center">
+                      <DiagnosisStatus done={wvDone} />
+                    </div>
 
-                      <div className="w-px h-5 bg-gray-200" />
+                    {/* CI Status */}
+                    <div className="flex justify-center">
+                      <DiagnosisStatus done={ciDone} />
+                    </div>
 
-                      {/* Invite URL Copy */}
+                    {/* Key Person Toggle */}
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => handleToggleAce(member.id, member.is_ace)}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
+                          member.is_ace
+                            ? "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
+                            : "bg-white text-gray-400 border border-gray-200 hover:border-amber-200 hover:text-amber-600"
+                        }`}
+                      >
+                        <svg width={11} height={11} viewBox="0 0 24 24" fill={member.is_ace ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                        {member.is_ace ? "設定中" : "設定"}
+                      </button>
+                    </div>
+
+                    {/* Invite URL */}
+                    <div className="flex justify-center">
                       <button
                         onClick={() => copyInviteUrl(member.invite_token)}
                         className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
@@ -511,52 +545,40 @@ export default function TeamDetailPage() {
                       >
                         {copiedToken === member.invite_token ? (
                           <>
-                            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                            <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                               <path d="M20 6L9 17l-5-5" />
                             </svg>
                             コピー済
                           </>
                         ) : (
                           <>
-                            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                              <rect x="9" y="9" width="13" height="13" rx="2" />
-                              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                            <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+                              <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
                             </svg>
                             招待URL
                           </>
                         )}
                       </button>
+                    </div>
 
-                      {/* Actions */}
-                      <button
-                        onClick={() => handleToggleAce(member.id, member.is_ace)}
-                        className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
-                          member.is_ace
-                            ? "text-yellow-500 hover:bg-yellow-50"
-                            : "text-gray-300 hover:bg-gray-50 hover:text-yellow-400"
-                        }`}
-                        title={member.is_ace ? "エース解除" : "エースに設定"}
-                      >
-                        <svg width={16} height={16} viewBox="0 0 24 24" fill={member.is_ace ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2}>
-                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                      </button>
-
+                    {/* Delete */}
+                    <div className="flex justify-end">
                       <button
                         onClick={() => handleRemoveMember(member.id, member.name)}
                         className="rounded-lg p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
                         title="削除"
                       >
-                        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                           <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                         </svg>
                       </button>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
@@ -624,23 +646,20 @@ function StepCard({
   );
 }
 
-function DiagnosisPill({ label, done }: { label: string; done: boolean }) {
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-      done
-        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-        : "bg-gray-50 text-gray-400 border border-gray-200"
-    }`}>
-      {done ? (
-        <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
-          <path d="M20 6L9 17l-5-5" />
-        </svg>
-      ) : (
-        <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <circle cx="12" cy="12" r="6" />
-        </svg>
-      )}
-      {label}
+function DiagnosisStatus({ done }: { done: boolean }) {
+  return done ? (
+    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+      <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+      完了
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-400">
+      <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <circle cx="12" cy="12" r="6" />
+      </svg>
+      未受検
     </span>
   );
 }
