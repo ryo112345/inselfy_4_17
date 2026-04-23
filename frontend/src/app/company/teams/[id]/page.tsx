@@ -184,6 +184,7 @@ export default function TeamDetailPage() {
 
   const phase = detectPhase(team.members);
   const hasAce = team.members.some((m) => m.is_ace);
+  const aceMember = team.members.find((m) => m.is_ace);
   const wvCompleted = team.members.filter((m) => m.wv_status === "completed").length;
   const ciCompleted = team.members.filter((m) => m.ci_status === "completed").length;
 
@@ -296,11 +297,15 @@ export default function TeamDetailPage() {
         </div>
       )}
 
-      {/* Radar Chart */}
+      {/* Radar Chart + Ace Member */}
       <TeamRadarChartSection
         memberScores={memberScores}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        members={team.members}
+        aceMember={aceMember ?? null}
+        onSetAce={(id) => handleToggleAce(id, false)}
+        onClearAce={() => aceMember && handleToggleAce(aceMember.id, true)}
       />
 
       {/* Members */}
@@ -730,10 +735,18 @@ function TeamRadarChartSection({
   memberScores,
   viewMode,
   onViewModeChange,
+  members,
+  aceMember,
+  onSetAce,
+  onClearAce,
 }: {
   memberScores: MemberScore[];
   viewMode: string;
   onViewModeChange: (v: string) => void;
+  members: Member[];
+  aceMember: Member | null;
+  onSetAce: (memberId: string) => void;
+  onClearAce: () => void;
 }) {
   const wvCompleted = memberScores.filter((m) => m.wv_scores && m.wv_scores.length > 0);
   const ciCompleted = memberScores.filter((m) => m.ci_scores && m.ci_scores.length > 0);
@@ -747,6 +760,10 @@ function TeamRadarChartSection({
   const selectedMember = !isAverage
     ? memberScores.find((m) => m.member_id === viewMode) || null
     : null;
+
+  const completedMembers = members.filter(
+    (m) => m.wv_status === "completed" && m.ci_status === "completed"
+  );
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm mb-6">
@@ -765,6 +782,43 @@ function TeamRadarChartSection({
             ))}
         </select>
       </div>
+
+      {/* Ace member — contextual, inside the chart card */}
+      {isAverage && completedMembers.length > 0 && (
+        <div className="mb-5 flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+          <svg width={16} height={16} viewBox="0 0 24 24" fill={aceMember ? "#f59e0b" : "none"} stroke={aceMember ? "#f59e0b" : "#9ca3af"} strokeWidth={1.5}>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          {aceMember ? (
+            <div className="flex items-center gap-2 flex-1">
+              <span className="text-sm text-gray-700">
+                <span className="font-medium">{aceMember.name}</span>
+                <span className="text-gray-400 ml-1">の傾向を重視して平均を算出中</span>
+              </span>
+              <button
+                onClick={onClearAce}
+                className="ml-auto text-sm text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                解除
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 flex-1">
+              <span className="text-sm text-gray-500">理想の人材像:</span>
+              <select
+                defaultValue=""
+                onChange={(e) => { if (e.target.value) onSetAce(e.target.value); }}
+                className="rounded-lg border border-gray-300 bg-white px-2.5 py-1 text-sm text-gray-700 focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
+              >
+                <option value="" disabled>選択してチーム平均に反映</option>
+                {completedMembers.map((m) => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col items-center pl-8">
