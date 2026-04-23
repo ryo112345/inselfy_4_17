@@ -266,10 +266,10 @@ export default function CompanyPage() {
                   {scoutData.pending.byMonth.map((m) => (
                     <div key={m.month} className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">{m.month}送信分</span>
-                      <span className="flex items-center gap-2.5">
-                        <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{m.count}</span> 通</span>
-                        <span className={m.daysLeft <= 14 ? "font-semibold text-red-500" : "text-gray-400"}>
-                          残 <span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{m.daysLeft}</span> 日
+                      <span className="flex items-baseline">
+                        <span className="inline-flex items-baseline justify-end font-medium text-gray-700" style={{ width: "3.5rem" }}><span className="text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{m.count}</span><span className="ml-1">通</span></span>
+                        <span className={`inline-flex items-baseline justify-end ${m.daysLeft <= 14 ? "font-semibold text-red-500" : "text-gray-400"}`} style={{ width: "4.5rem" }}>
+                          残<span className="ml-1.5 text-lg font-bold" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>{m.daysLeft}</span> 日
                         </span>
                       </span>
                     </div>
