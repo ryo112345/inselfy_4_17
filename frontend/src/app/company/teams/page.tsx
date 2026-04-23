@@ -142,7 +142,7 @@ function SummaryCard({
         </span>
         {unit && <span className="text-sm text-gray-400">{unit}</span>}
       </div>
-      {sub && <p className="mt-1 text-xs text-gray-400">{sub}</p>}
+      {sub && <p className="mt-1 text-sm text-gray-400">{sub}</p>}
     </div>
   );
 }
@@ -164,9 +164,6 @@ function TeamCard({ team }: { team: Team }) {
             <h2 className="text-lg font-bold text-gray-900 truncate group-hover:text-[#2979ff] transition-colors">
               {team.name}
             </h2>
-            {team.description && (
-              <p className="mt-0.5 text-sm text-gray-500 line-clamp-1">{team.description}</p>
-            )}
           </div>
           <div className="shrink-0 ml-3 text-gray-300 group-hover:text-[#2979ff] transition-colors">
             <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -178,18 +175,18 @@ function TeamCard({ team }: { team: Team }) {
         {/* Stats Row */}
         <div className="flex items-center gap-6">
           {/* Member Count */}
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50">
-              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50">
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </div>
             <div>
-              <p className="text-lg font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
-                {team.member_count}
+              <p className="text-base font-bold text-gray-900">
+                {team.member_count}<span className="ml-0.5 text-sm font-normal text-gray-400">人</span>
               </p>
-              <p className="text-[11px] text-gray-400 -mt-0.5">メンバー</p>
+              <p className="text-sm text-gray-400">メンバー</p>
             </div>
           </div>
 
@@ -205,10 +202,10 @@ function TeamCard({ team }: { team: Team }) {
               trackColor="#e5f5ed"
             />
             <div>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-base font-bold text-gray-900">
                 {team.wv_completed}/{team.member_count}
               </p>
-              <p className="text-[11px] text-gray-400 -mt-0.5">価値観診断</p>
+              <p className="text-sm text-gray-400">価値観診断</p>
             </div>
           </div>
 
@@ -222,10 +219,10 @@ function TeamCard({ team }: { team: Team }) {
               trackColor="#f0e8f8"
             />
             <div>
-              <p className="text-sm font-bold text-gray-900">
+              <p className="text-base font-bold text-gray-900">
                 {team.ci_completed}/{team.member_count}
               </p>
-              <p className="text-[11px] text-gray-400 -mt-0.5">興味診断</p>
+              <p className="text-sm text-gray-400">興味診断</p>
             </div>
           </div>
         </div>
@@ -310,7 +307,7 @@ function EmptyState() {
           チームを作成し、メンバーに価値観診断・興味診断を受けてもらうことで、
           チームの傾向を可視化し、採用のミスマッチを防ぎます。
         </p>
-        <div className="flex items-center justify-center gap-4 text-xs text-gray-400 mb-8">
+        <div className="flex items-center justify-center gap-4 text-sm text-gray-400 mb-8">
           <span className="flex items-center gap-1">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">1</span>
             チーム作成
