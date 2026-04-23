@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
@@ -13,6 +13,21 @@ type Member = {
   wv_status: string;
   ci_status: string;
   created_at: string;
+};
+
+type Score = {
+  id: string;
+  display_score: number;
+  rank: number;
+};
+
+type MemberScore = {
+  member_id: string;
+  member_name: string;
+  wv_status: string;
+  ci_status: string;
+  wv_scores: Score[] | null;
+  ci_scores: Score[] | null;
 };
 
 type TeamDetail = {
@@ -38,6 +53,17 @@ export default function TeamDetailPage() {
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [memberScores, setMemberScores] = useState<MemberScore[]>([]);
+  const [viewMode, setViewMode] = useState<string>("average");
+
+  const fetchTeamScores = useCallback(async () => {
+    try {
+      const res = await companyFetch(`/api/company/teams/${teamId}/scores`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setMemberScores(data.members || []);
+    } catch {}
+  }, [teamId, companyFetch]);
 
   const fetchTeam = useCallback(async () => {
     try {
@@ -54,7 +80,8 @@ export default function TeamDetailPage() {
 
   useEffect(() => {
     fetchTeam();
-  }, [fetchTeam]);
+    fetchTeamScores();
+  }, [fetchTeam, fetchTeamScores]);
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,6 +215,13 @@ export default function TeamDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Team Radar Chart */}
+      <TeamRadarChartSection
+        memberScores={memberScores}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
 
       {/* Members */}
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -346,5 +380,248 @@ function StatusBadge({ label, status }: { label: string; status: string }) {
       )}
       {label}
     </span>
+  );
+}
+
+const WV_ORDER = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"] as const;
+const WV_FULL_LABELS: Record<string, string> = {
+  achievement: "達成", status: "地位・名声", autonomy: "自主性", safety: "支援", altruism: "人間関係", comfort: "労働条件",
+};
+
+const CI_ORDER = ["R", "I", "A", "S", "E", "C"] as const;
+const CI_FULL_LABELS: Record<string, string> = {
+  R: "現実的", I: "研究的", A: "芸術的", S: "社会的", E: "企業的", C: "慣習的",
+};
+
+const MEMBER_COLORS = [
+  "#2979ff", "#e91e63", "#ff9800", "#4caf50", "#9c27b0",
+  "#00bcd4", "#ff5722", "#3f51b5", "#8bc34a", "#f44336",
+  "#009688", "#ffc107", "#673ab7", "#03a9f4", "#cddc39",
+  "#795548", "#607d8b", "#e040fb", "#76ff03", "#ff6e40",
+  "#1a237e", "#880e4f", "#e65100", "#1b5e20", "#4a148c",
+  "#006064", "#bf360c", "#283593", "#33691e", "#b71c1c",
+];
+
+function computeAvg(members: MemberScore[], key: "wv_scores" | "ci_scores", order: readonly string[]) {
+  const completed = members.filter((m) => m[key] && m[key]!.length > 0);
+  if (completed.length === 0) return null;
+  const sums: Record<string, number> = {};
+  const counts: Record<string, number> = {};
+  for (const m of completed) {
+    for (const s of m[key]!) {
+      sums[s.id] = (sums[s.id] || 0) + s.display_score;
+      counts[s.id] = (counts[s.id] || 0) + 1;
+    }
+  }
+  return order.map((id) => ({
+    id,
+    score: counts[id] ? sums[id] / counts[id] : 0,
+  }));
+}
+
+function TeamRadarChartSection({
+  memberScores,
+  viewMode,
+  onViewModeChange,
+}: {
+  memberScores: MemberScore[];
+  viewMode: string;
+  onViewModeChange: (v: string) => void;
+}) {
+  const wvCompleted = memberScores.filter((m) => m.wv_scores && m.wv_scores.length > 0);
+  const ciCompleted = memberScores.filter((m) => m.ci_scores && m.ci_scores.length > 0);
+
+  if (wvCompleted.length === 0 && ciCompleted.length === 0) return null;
+
+  const wvAvg = useMemo(() => computeAvg(memberScores, "wv_scores", WV_ORDER), [memberScores]);
+  const ciAvg = useMemo(() => computeAvg(memberScores, "ci_scores", CI_ORDER), [memberScores]);
+
+  const isAverage = viewMode === "average";
+  const selectedMember = !isAverage
+    ? memberScores.find((m) => m.member_id === viewMode) || null
+    : null;
+
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm mb-6">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-base font-bold text-gray-900">チーム診断チャート</h2>
+        <select
+          value={viewMode}
+          onChange={(e) => onViewModeChange(e.target.value)}
+          className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 bg-white focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
+        >
+          <option value="average">チーム平均</option>
+          {memberScores
+            .filter((m) => (m.wv_scores && m.wv_scores.length > 0) || (m.ci_scores && m.ci_scores.length > 0))
+            .map((m) => (
+              <option key={m.member_id} value={m.member_id}>{m.member_name}</option>
+            ))}
+        </select>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* WV Chart */}
+        <div className="flex flex-col items-center pl-8">
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Work Values（価値観）</h3>
+          {isAverage ? (
+            wvCompleted.length > 0 ? (
+              <SingleRadarChart
+                scores={wvAvg}
+                order={WV_ORDER as readonly string[]}
+                fullLabels={WV_FULL_LABELS}
+                isWV={true}
+              />
+            ) : (
+              <div className="py-10 text-sm text-gray-400">データなし</div>
+            )
+          ) : selectedMember?.wv_scores && selectedMember.wv_scores.length > 0 ? (
+            <SingleRadarChart
+              scores={selectedMember.wv_scores.map((s) => ({ id: s.id, score: s.display_score }))}
+              order={WV_ORDER as readonly string[]}
+              fullLabels={WV_FULL_LABELS}
+              isWV={true}
+            />
+          ) : (
+            <div className="py-10 text-sm text-gray-400">未受検</div>
+          )}
+        </div>
+
+        {/* CI Chart */}
+        <div className="flex flex-col items-center pl-8">
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Career Interest（興味）</h3>
+          {isAverage ? (
+            ciCompleted.length > 0 ? (
+              <SingleRadarChart
+                scores={ciAvg}
+                order={CI_ORDER as readonly string[]}
+                fullLabels={CI_FULL_LABELS}
+                isWV={false}
+              />
+            ) : (
+              <div className="py-10 text-sm text-gray-400">データなし</div>
+            )
+          ) : selectedMember?.ci_scores && selectedMember.ci_scores.length > 0 ? (
+            <SingleRadarChart
+              scores={selectedMember.ci_scores.map((s) => ({ id: s.id, score: s.display_score }))}
+              order={CI_ORDER as readonly string[]}
+              fullLabels={CI_FULL_LABELS}
+              isWV={false}
+            />
+          ) : (
+            <div className="py-10 text-sm text-gray-400">未受検</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SingleRadarChart({
+  scores,
+  order,
+  fullLabels,
+  isWV,
+}: {
+  scores: { id: string; score: number }[] | null;
+  order: readonly string[];
+  fullLabels: Record<string, string>;
+  isWV: boolean;
+}) {
+  const cx = 175;
+  const cy = 155;
+  const R = 75;
+
+  const hexPoint = (i: number, r: number) => {
+    const angle = (Math.PI / 2) + (2 * Math.PI * i) / order.length;
+    return { x: cx - Math.cos(angle) * r, y: cy - Math.sin(angle) * r };
+  };
+
+  const normalize = (score: number) => {
+    if (isWV) return score / 100;
+    return (score - 1) / 4;
+  };
+
+  const gridLevels = [0.25, 0.5, 0.75, 1.0];
+  const gridPaths = gridLevels.map((level) => {
+    const pts = order.map((_, i) => hexPoint(i, R * level));
+    return pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+  });
+  const spokes = order.map((_, i) => hexPoint(i, R));
+
+  const gridColor = isWV ? "#d0ddd6" : "#d0c0e0";
+  const fillColor = isWV ? "rgba(61,139,110,0.18)" : "rgba(139,92,200,0.18)";
+  const strokeColor = isWV ? "#5a9e82" : "#8B5CC8";
+  const dotColor = isWV ? "#4a9474" : "#8B5CC8";
+  const scoreTextColor = isWV ? "#2d7a5e" : "#6B3FA0";
+
+  const scoreMap = new Map(scores?.map((s) => [s.id, s.score]) || []);
+  const dataPoints = order.map((id, i) => {
+    const val = normalize(scoreMap.get(id) || 0);
+    return hexPoint(i, R * Math.max(val, 0.05));
+  });
+  const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+
+  const labelPositions = order.map((id, i) => {
+    const pt = hexPoint(i, R + 52);
+    const angle = (Math.PI / 2) + (2 * Math.PI * i) / order.length;
+    const cos = -Math.cos(angle);
+    let anchor: "middle" | "start" | "end" = "middle";
+    if (cos > 0.3) anchor = "start";
+    else if (cos < -0.3) anchor = "end";
+    return { id, x: pt.x, y: pt.y, anchor };
+  });
+
+  const w = 400;
+  const h = 310;
+
+  return (
+    <svg width={w} height={h} className="shrink-0">
+      {gridPaths.map((d, i) => (
+        <path key={i} d={d} fill="none" stroke={gridColor} strokeWidth={0.6} />
+      ))}
+      {spokes.map((p, i) => (
+        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={gridColor} strokeWidth={0.6} />
+      ))}
+      {scores && (
+        <>
+          <path d={dataPath} fill={fillColor} stroke={strokeColor} strokeWidth={1.5} />
+          {dataPoints.map((pt, i) => (
+            <circle key={i} cx={pt.x} cy={pt.y} r={3} fill={dotColor} />
+          ))}
+        </>
+      )}
+      {labelPositions.map((lp) => {
+        const val = scoreMap.get(lp.id);
+        const scoreStr = val != null
+          ? (isWV ? val.toFixed(0) : val.toFixed(1))
+          : "-";
+        return (
+          <g key={lp.id}>
+            <text
+              x={lp.x}
+              y={lp.y - 9}
+              textAnchor={lp.anchor}
+              dominantBaseline="auto"
+              fill="#444"
+              fontSize={15}
+              fontWeight="600"
+            >
+              {fullLabels[lp.id]}
+            </text>
+            <text
+              x={lp.x}
+              y={lp.y + 14}
+              textAnchor={lp.anchor}
+              dominantBaseline="auto"
+              fill={scoreTextColor}
+              fontSize={18}
+              fontWeight="700"
+            >
+              {scoreStr}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
   );
 }

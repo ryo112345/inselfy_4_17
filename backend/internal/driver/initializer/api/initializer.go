@@ -223,6 +223,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	teamGroup.DELETE("/:teamId/members/:memberId", func(c echo.Context) error {
 		return teamCtrl.RemoveMember(c, c.Param("teamId"), c.Param("memberId"))
 	})
+	teamGroup.GET("/:teamId/scores", func(c echo.Context) error {
+		return teamCtrl.GetTeamScores(c, c.Param("teamId"))
+	})
 
 	// --- Team Diagnose (public) ---
 	diagCtrl := httpcontroller.NewTeamDiagnoseController(pool)

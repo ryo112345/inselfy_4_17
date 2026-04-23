@@ -402,3 +402,126 @@ func generateRandomString(n int) string {
 	rand.Read(b)
 	return hex.EncodeToString(b)[:n]
 }
+
+type memberScoreResponse struct {
+	MemberID   string  `json:"member_id"`
+	MemberName string  `json:"member_name"`
+	UserID     string  `json:"user_id"`
+	WVStatus   string  `json:"wv_status"`
+	CIStatus   string  `json:"ci_status"`
+	WVScores   []score `json:"wv_scores,omitempty"`
+	CIScores   []score `json:"ci_scores,omitempty"`
+}
+
+type score struct {
+	ID           string  `json:"id"`
+	DisplayScore float64 `json:"display_score"`
+	Rank         int     `json:"rank"`
+}
+
+func (c *CompanyTeamController) GetTeamScores(ctx echo.Context, teamID string) error {
+	companyID := c.companyID(ctx)
+	parsedTeamID, err := uuid.Parse(teamID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid team id"})
+	}
+
+	var ownerID string
+	err = c.pool.QueryRow(ctx.Request().Context(),
+		`SELECT company_id FROM teams WHERE id = $1`, parsedTeamID,
+	).Scan(&ownerID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "team not found"})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	if ownerID != companyID {
+		return ctx.JSON(http.StatusForbidden, map[string]string{"message": "not your team"})
+	}
+
+	reqCtx := ctx.Request().Context()
+
+	memberRows, err := c.pool.Query(reqCtx,
+		`SELECT id, user_id, name, wv_status, ci_status FROM team_members WHERE team_id = $1 ORDER BY created_at ASC`,
+		parsedTeamID)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	defer memberRows.Close()
+
+	type memberInfo struct {
+		id       uuid.UUID
+		userID   uuid.UUID
+		name     string
+		wvStatus string
+		ciStatus string
+	}
+	var members []memberInfo
+	for memberRows.Next() {
+		var m memberInfo
+		if err := memberRows.Scan(&m.id, &m.userID, &m.name, &m.wvStatus, &m.ciStatus); err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		members = append(members, m)
+	}
+
+	result := make([]memberScoreResponse, 0, len(members))
+	for _, m := range members {
+		msr := memberScoreResponse{
+			MemberID:   m.id.String(),
+			MemberName: m.name,
+			UserID:     m.userID.String(),
+			WVStatus:   m.wvStatus,
+			CIStatus:   m.ciStatus,
+		}
+
+		if m.wvStatus == "completed" {
+			wvRows, err := c.pool.Query(reqCtx,
+				`SELECT ws.value_id, ws.display_score, ws.rank
+				 FROM work_values_scores ws
+				 JOIN work_values_sessions s ON s.id = ws.session_id
+				 WHERE s.user_id = $1 AND s.status = 'completed'
+				 ORDER BY s.completed_at DESC`, m.userID)
+			if err == nil {
+				seen := map[string]bool{}
+				for wvRows.Next() {
+					var sc score
+					if err := wvRows.Scan(&sc.ID, &sc.DisplayScore, &sc.Rank); err == nil {
+						if !seen[sc.ID] {
+							seen[sc.ID] = true
+							msr.WVScores = append(msr.WVScores, sc)
+						}
+					}
+				}
+				wvRows.Close()
+			}
+		}
+
+		if m.ciStatus == "completed" {
+			ciRows, err := c.pool.Query(reqCtx,
+				`SELECT ts.type_id, ts.score, ts.rank
+				 FROM career_interest_type_scores ts
+				 JOIN career_interest_sessions s ON s.id = ts.session_id
+				 WHERE s.user_id = $1 AND s.status = 'completed'
+				 ORDER BY s.completed_at DESC`, m.userID)
+			if err == nil {
+				seen := map[string]bool{}
+				for ciRows.Next() {
+					var sc score
+					if err := ciRows.Scan(&sc.ID, &sc.DisplayScore, &sc.Rank); err == nil {
+						if !seen[sc.ID] {
+							seen[sc.ID] = true
+							msr.CIScores = append(msr.CIScores, sc)
+						}
+					}
+				}
+				ciRows.Close()
+			}
+		}
+
+		result = append(result, msr)
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]any{"members": result})
+}
