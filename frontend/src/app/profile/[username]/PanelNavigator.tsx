@@ -157,7 +157,7 @@ export function PanelNavigator({ children, username, displayName = username, wvS
 
 function WorkValuesPlaceholder({ isOwner = true, displayName = "" }: { isOwner?: boolean; displayName?: string }) {
   return (
-    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)] flex flex-col min-h-[520px]">
+    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 pt-14 pb-0 overflow-hidden shadow-sm flex flex-col min-h-[520px]">
       <WvFloatingSpheres />
 
       <div className="relative z-10 mb-6 flex-1">
@@ -221,7 +221,7 @@ function WorkValuesPlaceholder({ isOwner = true, displayName = "" }: { isOwner?:
 
 function CareerInterestPlaceholder({ isOwner = true, displayName = "" }: { isOwner?: boolean; displayName?: string }) {
   return (
-    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#e8f0fa] border border-gray-200 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.08)] flex flex-col min-h-[520px]">
+    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#e8f0fa] border border-gray-200 px-10 pt-14 pb-0 overflow-hidden shadow-sm flex flex-col min-h-[520px]">
       <CiFloatingShapes />
 
       <div className="relative z-10 mb-6 flex-1">
@@ -285,7 +285,7 @@ function CareerInterestPlaceholder({ isOwner = true, displayName = "" }: { isOwn
 
 function IntegratedReportPlaceholder({ isOwner = true, displayName = "" }: { isOwner?: boolean; displayName?: string }) {
   return (
-    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#fdf6e3] border border-amber-200/60 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(120,80,20,0.08)] flex flex-col min-h-[545px]">
+    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#fdf6e3] border border-amber-200/60 px-10 pt-14 pb-0 overflow-hidden shadow-sm flex flex-col min-h-[590px]">
       <IntFloatingParticles />
 
       <div className="relative z-10 mb-6 flex-1">
