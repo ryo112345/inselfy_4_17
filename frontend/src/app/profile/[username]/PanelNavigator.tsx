@@ -341,17 +341,29 @@ function IntegratedReportPlaceholder({ isOwner = true, displayName = "" }: { isO
   );
 }
 
-const INT_PARTICLES = [
-  { size: 140, top: "-5%", left: "-8%", color: "rgba(217,170,100,0.25)", dur: "20s", dx: 55, dy: 40 },
-  { size: 120, top: "50%", left: "65%", color: "rgba(200,150,80,0.22)", dur: "24s", dx: -50, dy: -45 },
-  { size: 130, top: "70%", left: "-3%", color: "rgba(180,140,70,0.20)", dur: "22s", dx: 60, dy: -35 },
-  { size: 110, top: "30%", left: "12%", color: "rgba(220,180,100,0.22)", dur: "18s", dx: -40, dy: -50 },
-  { size: 100, top: "-3%", left: "70%", color: "rgba(200,160,90,0.24)", dur: "16s", dx: -55, dy: 45 },
-  { size: 90, top: "40%", left: "80%", color: "rgba(180,130,60,0.20)", dur: "20s", dx: -45, dy: 35 },
-  { size: 95, top: "15%", left: "40%", color: "rgba(210,170,90,0.22)", dur: "18s", dx: -35, dy: 50 },
-  { size: 80, top: "75%", left: "45%", color: "rgba(190,150,80,0.22)", dur: "16s", dx: 40, dy: -40 },
-  { size: 85, top: "60%", left: "25%", color: "rgba(230,190,110,0.20)", dur: "22s", dx: 50, dy: -30 },
+const INT_PARTICLES: IntParticle[] = [
+  { type: "sphere", size: 140, top: "-5%", left: "-8%", color: "rgba(217,170,100,0.25)", dur: "20s", dx: 55, dy: 40 },
+  { type: "sphere", size: 120, top: "50%", left: "65%", color: "rgba(200,150,80,0.22)", dur: "24s", dx: -50, dy: -45 },
+  { type: "sphere", size: 110, top: "30%", left: "12%", color: "rgba(220,180,100,0.22)", dur: "18s", dx: -40, dy: -50 },
+  { type: "sphere", size: 100, top: "-3%", left: "70%", color: "rgba(200,160,90,0.24)", dur: "16s", dx: -55, dy: 45 },
+  { type: "sphere", size: 85, top: "60%", left: "25%", color: "rgba(230,190,110,0.20)", dur: "22s", dx: 50, dy: -30 },
+  { type: "hex", size: 120, top: "70%", left: "-3%", color: "rgba(190,160,100,0.18)", dur: "22s", dx: 60, dy: -35, rotate: 15 },
+  { type: "rect", size: 100, top: "40%", left: "78%", color: "rgba(200,170,110,0.16)", dur: "20s", dx: -45, dy: 35, rotate: 20 },
+  { type: "hex", size: 90, top: "15%", left: "40%", color: "rgba(210,175,105,0.17)", dur: "18s", dx: -35, dy: 50, rotate: -10 },
+  { type: "rect", size: 80, top: "75%", left: "45%", color: "rgba(195,155,90,0.16)", dur: "16s", dx: 40, dy: -40, rotate: 30 },
 ];
+
+type IntParticle = {
+  type: "sphere" | "hex" | "rect";
+  size: number;
+  top: string;
+  left: string;
+  color: string;
+  dur: string;
+  dx: number;
+  dy: number;
+  rotate?: number;
+};
 
 function IntFloatingParticles() {
   return (
@@ -364,22 +376,63 @@ function IntFloatingParticles() {
         }
       `}</style>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {INT_PARTICLES.map((s, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full blur-[3px]"
-            style={{
-              width: s.size,
-              height: s.size,
-              top: s.top,
-              left: s.left,
-              background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.3) 0%, ${s.color} 40%, rgba(120,80,20,0.15) 100%)`,
-              "--dx": `${s.dx}px`,
-              "--dy": `${s.dy}px`,
-              animation: `int-particle-float ${s.dur} ease-in-out infinite`,
-            } as React.CSSProperties}
-          />
-        ))}
+        {INT_PARTICLES.map((s, i) =>
+          s.type === "sphere" ? (
+            <div
+              key={i}
+              className="absolute rounded-full blur-[3px]"
+              style={{
+                width: s.size,
+                height: s.size,
+                top: s.top,
+                left: s.left,
+                background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.3) 0%, ${s.color} 40%, rgba(120,80,20,0.15) 100%)`,
+                "--dx": `${s.dx}px`,
+                "--dy": `${s.dy}px`,
+                animation: `int-particle-float ${s.dur} ease-in-out infinite`,
+              } as React.CSSProperties}
+            />
+          ) : (
+            <div
+              key={i}
+              className="absolute blur-[3px]"
+              style={{
+                width: s.size,
+                height: s.size,
+                top: s.top,
+                left: s.left,
+                transform: `rotate(${s.rotate ?? 0}deg)`,
+                "--dx": `${s.dx}px`,
+                "--dy": `${s.dy}px`,
+                animation: `int-particle-float ${s.dur} ease-in-out infinite`,
+              } as React.CSSProperties}
+            >
+              {s.type === "hex" ? (
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  <polygon
+                    points="50,2 93,25 93,75 50,98 7,75 7,25"
+                    fill={s.color}
+                    stroke={s.color.replace(/[\d.]+\)$/, "0.25)")}
+                    strokeWidth="1"
+                  />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  <rect
+                    x="5"
+                    y="5"
+                    width="90"
+                    height="90"
+                    rx="12"
+                    fill={s.color}
+                    stroke={s.color.replace(/[\d.]+\)$/, "0.25)")}
+                    strokeWidth="1"
+                  />
+                </svg>
+              )}
+            </div>
+          )
+        )}
       </div>
     </>
   );
