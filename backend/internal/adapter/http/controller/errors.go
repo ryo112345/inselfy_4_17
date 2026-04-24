@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	"github.com/akiyama/inselfy/backend/internal/domain/article"
 	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
@@ -91,6 +92,20 @@ func isBadRequest(err error) bool {
 		return true
 	case errors.Is(err, post.ErrContentRequired),
 		errors.Is(err, post.ErrContentTooLong):
+		return true
+	case errors.Is(err, article.ErrTitleRequired),
+		errors.Is(err, article.ErrTitleTooLong),
+		errors.Is(err, article.ErrBodyTooLong),
+		errors.Is(err, article.ErrInvalidPrice),
+		errors.Is(err, article.ErrPaidRequiresPrice),
+		errors.Is(err, article.ErrFreeNoPrice),
+		errors.Is(err, article.ErrNotAuthor),
+		errors.Is(err, article.ErrAlreadyPurchased),
+		errors.Is(err, article.ErrCannotBuyOwn),
+		errors.Is(err, article.ErrNotPublished),
+		errors.Is(err, article.ErrNotPaid),
+		errors.Is(err, article.ErrTooManyTags),
+		errors.Is(err, article.ErrTagTooLong):
 		return true
 	}
 	return false

@@ -106,6 +106,20 @@ func NewCompanyAuthInputFactory(
 	}
 }
 
+func NewArticleInputFactory(stripeService port.StripeService) func(
+	repo port.ArticleRepository,
+	purchaseRepo port.ArticlePurchaseRepository,
+	output port.ArticleOutputPort,
+) port.ArticleInputPort {
+	return func(
+		repo port.ArticleRepository,
+		purchaseRepo port.ArticlePurchaseRepository,
+		output port.ArticleOutputPort,
+	) port.ArticleInputPort {
+		return usecase.NewArticleInteractor(repo, purchaseRepo, stripeService, output)
+	}
+}
+
 // NewSkillInputFactory returns a factory function that builds a SkillInputPort.
 func NewSkillInputFactory() func(
 	repo port.SkillRepository,

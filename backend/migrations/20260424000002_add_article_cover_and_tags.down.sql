@@ -1,0 +1,2 @@
+ALTER TABLE articles DROP COLUMN IF EXISTS tags;
+ALTER TABLE articles DROP COLUMN IF EXISTS cover_image_url;
