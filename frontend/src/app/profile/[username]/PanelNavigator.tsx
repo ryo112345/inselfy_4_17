@@ -341,44 +341,74 @@ function IntegratedReportPlaceholder({ isOwner = true, displayName = "" }: { isO
   );
 }
 
-const INT_PARTICLES = [
-  { size: 140, top: "-5%", left: "-8%", color: "rgba(217,170,100,0.25)", dur: "20s", dx: 55, dy: 40 },
-  { size: 120, top: "50%", left: "65%", color: "rgba(200,150,80,0.22)", dur: "24s", dx: -50, dy: -45 },
-  { size: 130, top: "70%", left: "-3%", color: "rgba(180,140,70,0.20)", dur: "22s", dx: 60, dy: -35 },
-  { size: 110, top: "30%", left: "12%", color: "rgba(220,180,100,0.22)", dur: "18s", dx: -40, dy: -50 },
-  { size: 100, top: "-3%", left: "70%", color: "rgba(200,160,90,0.24)", dur: "16s", dx: -55, dy: 45 },
-  { size: 90, top: "40%", left: "80%", color: "rgba(180,130,60,0.20)", dur: "20s", dx: -45, dy: 35 },
-  { size: 95, top: "15%", left: "40%", color: "rgba(210,170,90,0.22)", dur: "18s", dx: -35, dy: 50 },
-  { size: 80, top: "75%", left: "45%", color: "rgba(190,150,80,0.22)", dur: "16s", dx: 40, dy: -40 },
-  { size: 85, top: "60%", left: "25%", color: "rgba(230,190,110,0.20)", dur: "22s", dx: 50, dy: -30 },
+const INT_RINGS = [
+  { size: 120, top: "-5%", left: "-8%", color: "rgba(217,170,100,0.25)", border: 12, floatDur: "20s", spinDur: "8s", tiltX: 25, tiltZ: 15, dx: 55, dy: 40 },
+  { size: 100, top: "50%", left: "65%", color: "rgba(200,150,80,0.22)", border: 10, floatDur: "24s", spinDur: "10s", tiltX: -20, tiltZ: 35, dx: -50, dy: -45 },
+  { size: 110, top: "70%", left: "-3%", color: "rgba(180,140,70,0.20)", border: 11, floatDur: "22s", spinDur: "12s", tiltX: 40, tiltZ: -20, dx: 60, dy: -35 },
+  { size: 85, top: "30%", left: "12%", color: "rgba(220,180,100,0.22)", border: 9, floatDur: "18s", spinDur: "9s", tiltX: -35, tiltZ: 25, dx: -40, dy: -50 },
+  { size: 75, top: "-3%", left: "70%", color: "rgba(200,160,90,0.24)", border: 8, floatDur: "16s", spinDur: "11s", tiltX: 30, tiltZ: -40, dx: -55, dy: 45 },
+  { size: 65, top: "40%", left: "80%", color: "rgba(180,130,60,0.20)", border: 7, floatDur: "20s", spinDur: "7s", tiltX: -15, tiltZ: 30, dx: -45, dy: 35 },
+  { size: 90, top: "15%", left: "40%", color: "rgba(210,170,90,0.22)", border: 10, floatDur: "18s", spinDur: "13s", tiltX: 45, tiltZ: -10, dx: -35, dy: 50 },
+  { size: 60, top: "75%", left: "45%", color: "rgba(190,150,80,0.22)", border: 7, floatDur: "16s", spinDur: "8s", tiltX: -25, tiltZ: 45, dx: 40, dy: -40 },
+  { size: 95, top: "60%", left: "25%", color: "rgba(230,190,110,0.20)", border: 11, floatDur: "22s", spinDur: "10s", tiltX: 35, tiltZ: -30, dx: 50, dy: -30 },
 ];
 
 function IntFloatingParticles() {
   return (
     <>
       <style>{`
-        @keyframes int-particle-float {
+        @keyframes int-ring-float {
           0%, 100% { translate: 0 0; }
           33% { translate: var(--dx) var(--dy); }
           66% { translate: calc(var(--dx) * -0.6) calc(var(--dy) * 0.8); }
         }
+        @keyframes int-ring-orbit {
+          0%   { transform: rotateY(0deg); }
+          100% { transform: rotateY(360deg); }
+        }
       `}</style>
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {INT_PARTICLES.map((s, i) => (
+      <div className="absolute inset-0 pointer-events-none" style={{ perspective: 600 }} aria-hidden="true">
+        {INT_RINGS.map((r, i) => (
           <div
             key={i}
-            className="absolute rounded-full blur-[3px]"
+            className="absolute"
             style={{
-              width: s.size,
-              height: s.size,
-              top: s.top,
-              left: s.left,
-              background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.3) 0%, ${s.color} 40%, rgba(120,80,20,0.15) 100%)`,
-              "--dx": `${s.dx}px`,
-              "--dy": `${s.dy}px`,
-              animation: `int-particle-float ${s.dur} ease-in-out infinite`,
+              width: r.size,
+              height: r.size,
+              top: r.top,
+              left: r.left,
+              "--dx": `${r.dx}px`,
+              "--dy": `${r.dy}px`,
+              animation: `int-ring-float ${r.floatDur} ease-in-out infinite`,
+              transform: `rotateX(${r.tiltX}deg) rotateZ(${r.tiltZ}deg)`,
+              transformStyle: "preserve-3d",
             } as React.CSSProperties}
-          />
+          >
+            <div
+              className="absolute inset-0 rounded-full blur-[3px]"
+              style={{
+                background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.3) 0%, ${r.color} 40%, rgba(120,80,20,0.15) 100%)`,
+              }}
+            />
+            <div
+              className="w-full h-full"
+              style={{
+                transformStyle: "preserve-3d",
+                animation: `int-ring-orbit ${r.spinDur} linear infinite`,
+              }}
+            >
+              {[0, 90].map((angle) => (
+                <div
+                  key={angle}
+                  className="absolute inset-0 rounded-full blur-[3px]"
+                  style={{
+                    border: `${r.border}px solid ${r.color}`,
+                    transform: `rotateY(${angle}deg)`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </>
