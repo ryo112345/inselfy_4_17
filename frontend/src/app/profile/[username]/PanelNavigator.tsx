@@ -285,7 +285,7 @@ function CareerInterestPlaceholder({ isOwner = true, displayName = "" }: { isOwn
 
 function IntegratedReportPlaceholder({ isOwner = true, displayName = "" }: { isOwner?: boolean; displayName?: string }) {
   return (
-    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#fdf6e3] border border-amber-200/60 px-10 pt-14 pb-0 overflow-hidden shadow-sm flex flex-col min-h-[590px]">
+    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#fdf6e3] border border-amber-200/60 px-10 pt-14 pb-0 overflow-hidden shadow-sm flex flex-col min-h-[520px]">
       <IntFloatingParticles />
 
       <div className="relative z-10 mb-6 flex-1">
@@ -326,7 +326,7 @@ function IntegratedReportPlaceholder({ isOwner = true, displayName = "" }: { isO
         )}
       </div>
 
-      <div className="relative z-10 -mx-10 mt-auto border-t border-amber-200/60 bg-white px-10 py-12">
+      <div className="relative z-10 -mx-10 mt-10 border-t border-amber-200/60 bg-white px-10 py-12">
         {isOwner ? (
           <p className="text-[14px] text-gray-500">
             プロフィールの「AI Report」カードからレポートを生成できます
