@@ -35,6 +35,8 @@ export type PanelData = {
   ciResult: CiResultDTO | null;
   wvHasReport: boolean;
   ciHasReport: boolean;
+  intReportRequestId: string | null;
+  intReportHasReport: boolean;
   diagnostics: DiagnosticSummary[];
 };
 
@@ -85,13 +87,25 @@ async function checkReportExists(sessionId: string, kind: "work-values" | "caree
   }
 }
 
+async function fetchLatestIntegratedRequest(userId: string): Promise<{ requestId: string; hasReport: boolean } | null> {
+  try {
+    const res = await fetch(`${INTERNAL_API}/api/integrated-report/users/${userId}/latest-request`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { requestId: data.request_id, hasReport: !!data.has_report };
+  } catch {
+    return null;
+  }
+}
+
 async function fetchRest(user: ModelsUserResponse, username: string): Promise<PanelData> {
-  const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult] = await Promise.all([
+  const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult, intRequest] = await Promise.all([
     experiencesListExperiences({ path: { username } }),
     educationsListEducations({ path: { username } }),
     skillsListSkills({ path: { username } }),
     getLatestWvResult(user.id).catch(() => null),
     getLatestCiResult(user.id).catch(() => null),
+    fetchLatestIntegratedRequest(user.id),
   ]);
 
   const [wvHasReport, ciHasReport] = await Promise.all([
@@ -138,6 +152,8 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
     ciResult,
     wvHasReport,
     ciHasReport,
+    intReportRequestId: intRequest?.requestId ?? null,
+    intReportHasReport: intRequest?.hasReport ?? false,
     diagnostics,
   };
 }

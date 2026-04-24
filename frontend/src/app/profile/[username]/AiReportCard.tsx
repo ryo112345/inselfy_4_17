@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CheckIcon } from "./Icons";
 import { IntegratedReportModal } from "./IntegratedReportModal";
 
@@ -8,11 +8,24 @@ type Props = {
   hasExperience: boolean;
   hasSkills: boolean;
   hasEducation: boolean;
+  intReportRequestId?: string | null;
 };
 
-export function AiReportCard({ hasExperience, hasSkills, hasEducation }: Props) {
+export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReportRequestId }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
-  const [requestStatus, setRequestStatus] = useState<"none" | "pending" | "ready">("none");
+  const [requestStatus, setRequestStatus] = useState<"none" | "pending" | "ready">(
+    intReportRequestId ? "pending" : "none",
+  );
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/integrated-report/status", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.status) setRequestStatus(data.status);
+      })
+      .finally(() => setInitialLoading(false));
+  }, []);
 
   const steps = [
     { label: "職歴を入力", done: hasExperience },
@@ -21,21 +34,28 @@ export function AiReportCard({ hasExperience, hasSkills, hasEducation }: Props) 
   ];
   const allDone = steps.every((s) => s.done);
 
-  const handleClick = () => {
-    if (!allDone) return;
-    setModalOpen(true);
-  };
-
   const handleSubmitted = useCallback(() => {
     setRequestStatus("pending");
   }, []);
 
+  if (initialLoading) {
+    return (
+      <section className="rounded-2xl border border-gray-200/80 bg-white px-8 py-10 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+        <div className="flex items-center justify-center gap-2 text-gray-400 text-[14px]">
+          <span className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </section>
+    );
+  }
+
+  if (requestStatus === "ready") {
+    return null;
+  }
+
   const buttonLabel =
     requestStatus === "pending"
       ? "リクエスト済み（生成中）"
-      : requestStatus === "ready"
-        ? "レポートを見る"
-        : "レポートを生成する";
+      : "レポートを生成する";
 
   return (
     <>
@@ -78,7 +98,7 @@ export function AiReportCard({ hasExperience, hasSkills, hasEducation }: Props) 
           <button
             type="button"
             disabled={!allDone || requestStatus === "pending"}
-            onClick={handleClick}
+            onClick={() => { if (allDone) setModalOpen(true); }}
             className={`mt-5 inline-flex w-full max-w-[260px] items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition ${
               allDone && requestStatus !== "pending"
                 ? "bg-gradient-to-r from-amber-700 via-amber-600 to-amber-500 text-white shadow-[0_4px_14px_-4px_rgba(180,120,40,0.55)] hover:shadow-[0_6px_18px_-4px_rgba(180,120,40,0.65)]"

@@ -320,6 +320,12 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	intGroup.POST("/requests", adminIntReportCtrl.CreateRequest, jwtMW)
 	intGroup.GET("/me", adminIntReportCtrl.GetReportByUser, jwtMW)
 	intGroup.GET("/status", adminIntReportCtrl.GetRequestStatus, jwtMW)
+	intGroup.GET("/requests/:requestId/report", func(c echo.Context) error {
+		return adminIntReportCtrl.GetReport(c, c.Param("requestId"))
+	})
+	intGroup.GET("/users/:userId/latest-request", func(c echo.Context) error {
+		return adminIntReportCtrl.GetLatestRequest(c, c.Param("userId"))
+	})
 
 	return e, cfg, cleanup, nil
 }

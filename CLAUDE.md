@@ -356,32 +356,36 @@ Content-Type: application/json
 
 ## 手順
 
-### 1. 未生成のユーザー一覧を取得
+### 1. 未生成のリクエスト一覧を取得
 ```
-GET /api/admin/reports/integrated/pending
+GET /api/admin/integrated-reports/pending
 ```
-レスポンスの `users` 配列から未生成件数を確認し、ユーザーに一覧を表示する。
-各ユーザーには `user_id`, `display_name`, `username` が含まれる。
+レスポンスの `requests` 配列から未生成件数を確認し、ユーザーに一覧を表示する。
+各リクエストには `request_id`, `user_id`, `username`, `display_name`, `topic1`, `topic2`, `topic3`, `free_text`, `created_at` が含まれる。
 
-### 2. プロンプトを取得
+### 2. 各リクエストを順番に処理する
+
+対象リクエストごとに以下を繰り返す（1件ずつ直列で処理）:
+
+#### 2-1. プロンプトを取得
 ```
-GET /api/admin/users/{userId}/integrated-report/prompt
+GET /api/admin/integrated-requests/{requestId}/prompt
 ```
 レスポンスの `prompt` フィールドにデータ埋め込み済みのプロンプトが含まれる。
-プロンプトにはプロフィール（職歴・スキル・学歴）、Work Values診断結果、Career Interest診断結果が統合されている。
+プロンプトにはプロフィール（職歴・スキル・学歴）、Work Values診断結果、Career Interest診断結果、選択されたトピックの章立て指示が統合されている。
 
-### 3. プロンプトに従いレポートを生成する
+#### 2-2. プロンプトに従いレポートを生成する
 取得したプロンプトの指示に従い、マークダウン形式のレポートを生成する。
 
-### 4. レポートを保存
+#### 2-3. レポートを保存
 ```
-PUT /api/admin/users/{userId}/integrated-report
+PUT /api/admin/integrated-requests/{requestId}/ai-report
 Content-Type: application/json
 
 { "content": "生成したマークダウンレポート" }
 ```
 
-### 5. 完了報告
+### 3. 完了報告
 処理した件数をユーザーに報告する。
 
 ---

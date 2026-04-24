@@ -70,6 +70,8 @@ export default async function ProfilePage({
           ciResult={data.ciResult}
           wvHasReport={data.wvHasReport}
           ciHasReport={data.ciHasReport}
+          intReportRequestId={data.intReportRequestId}
+          intReportHasReport={data.intReportHasReport}
           isOwner={isOwner}
           initialPanel={0}
         >
@@ -81,6 +83,7 @@ export default async function ProfilePage({
             skills={data.skills}
             posts={posts}
             isOwner={isOwner}
+            intReportRequestId={data.intReportRequestId}
           />
         </PanelNavigator>
       </main>

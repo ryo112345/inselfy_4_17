@@ -170,6 +170,7 @@ func (ctrl *AdminIntegratedReportController) GetReport(ctx echo.Context, request
 	return ctx.JSON(http.StatusOK, map[string]any{
 		"id":         pgUUIDToString(report.ID),
 		"request_id": pgUUIDToString(report.RequestID),
+		"user_id":    pgUUIDToString(report.UserID),
 		"content":    report.Content,
 		"created_at": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 		"first_view": firstView,
@@ -290,4 +291,33 @@ func (ctrl *AdminIntegratedReportController) ResetViewed(ctx echo.Context, reque
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{"message": "ok"})
+}
+
+func (ctrl *AdminIntegratedReportController) GetLatestRequest(ctx echo.Context, userID string) error {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		return badRequest(ctx, "invalid user_id")
+	}
+	pgUserID := pgtype.UUID{Bytes: parsedUserID, Valid: true}
+
+	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx.Request().Context(), pgUserID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "not found"})
+		}
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	hasReport := false
+	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), req.ID)
+	if err == nil && report != nil {
+		hasReport = true
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]any{
+		"request_id": pgUUIDToString(req.ID),
+		"user_id":    pgUUIDToString(req.UserID),
+		"has_report": hasReport,
+		"created_at": req.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+	})
 }

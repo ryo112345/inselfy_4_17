@@ -29,7 +29,7 @@ export default async function WorkValuesResultPage({
   const data = await fetchPanelDataByUserId(result.user_id);
   if (!data) notFound();
 
-  const wvIndex = 1;
+  const wvIndex = 2;
   const profileColor = data.user.profileColor ?? "#3D8B6E";
 
   return (
@@ -47,6 +47,8 @@ export default async function WorkValuesResultPage({
           ciSessionId={data.ciSessionId}
           wvResult={data.wvResult}
           ciResult={data.ciResult}
+          intReportRequestId={data.intReportRequestId}
+          intReportHasReport={data.intReportHasReport}
           initialPanel={wvIndex}
         >
           <ProfileContent

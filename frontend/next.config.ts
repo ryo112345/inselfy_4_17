@@ -6,7 +6,7 @@ config({ path: resolve(__dirname, "../.env") });
 
 const nextConfig: NextConfig = {
   devIndicators: {
-    position: "bottom-right",
+    position: "bottom-left",
   },
   output: "standalone",
 };

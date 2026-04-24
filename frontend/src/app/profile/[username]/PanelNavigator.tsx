@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, type ReactNode } from "react
 import Link from "next/link";
 import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/WorkValuesContent";
 import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/CareerInterestContent";
+import { IntegratedReportContent } from "@/app/integrated-report/[requestId]/IntegratedReportContent";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 
@@ -17,20 +18,24 @@ type Props = {
   ciResult?: CiResultDTO | null;
   wvHasReport?: boolean;
   ciHasReport?: boolean;
+  intReportRequestId?: string | null;
+  intReportHasReport?: boolean;
   isOwner?: boolean;
   initialPanel?: number;
 };
 
-export function PanelNavigator({ children, username, displayName = username, wvSessionId, ciSessionId, wvResult, ciResult, wvHasReport, ciHasReport, isOwner = true, initialPanel = 0 }: Props) {
+export function PanelNavigator({ children, username, displayName = username, wvSessionId, ciSessionId, wvResult, ciResult, wvHasReport, ciHasReport, intReportRequestId, intReportHasReport, isOwner = true, initialPanel = 0 }: Props) {
   const showWvResult = !!wvSessionId && (isOwner || !!wvHasReport);
   const showCiResult = !!ciSessionId && (isOwner || !!ciHasReport);
+  const showIntReport = !!intReportRequestId && (isOwner || !!intReportHasReport);
 
   const urls = useMemo(() => [
     `/profile/${username}`,
+    showIntReport ? `/integrated-report/${intReportRequestId}` : `/profile/${username}`,
     showWvResult ? `/work_values/${wvSessionId}` : `/profile/${username}`,
     showCiResult ? `/career_interest/${ciSessionId}` : `/profile/${username}`,
-  ], [username, wvSessionId, ciSessionId, showWvResult, showCiResult]);
-  const panelCount = 3;
+  ], [username, wvSessionId, ciSessionId, intReportRequestId, showWvResult, showCiResult, showIntReport]);
+  const panelCount = 4;
 
   const [activeIndex, setActiveIndex] = useState(initialPanel);
   const [expanded, setExpanded] = useState(false);
@@ -90,6 +95,14 @@ export function PanelNavigator({ children, username, displayName = username, wvS
         }}
       >
         <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>{children}</div>
+
+        <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
+          {showIntReport ? (
+            <IntegratedReportContent requestId={intReportRequestId!} isOwner={isOwner} />
+          ) : (
+            <IntegratedReportPlaceholder isOwner={isOwner} displayName={displayName} />
+          )}
+        </div>
 
         <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
           {showWvResult ? (
@@ -267,6 +280,108 @@ function CareerInterestPlaceholder({ isOwner = true, displayName = "" }: { isOwn
         )}
       </div>
     </div>
+  );
+}
+
+function IntegratedReportPlaceholder({ isOwner = true, displayName = "" }: { isOwner?: boolean; displayName?: string }) {
+  return (
+    <div className="relative mx-auto max-w-2xl text-center rounded-3xl bg-[#fdf6e3] border border-amber-200/60 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(120,80,20,0.08)] flex flex-col min-h-[545px]">
+      <IntFloatingParticles />
+
+      <div className="relative z-10 mb-6 flex-1">
+        <span className="inline-block rounded-full border border-amber-400/40 px-5 py-1.5 text-[13px] font-semibold tracking-[0.15em] text-amber-700 mb-8">
+          <span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-2 align-middle" />
+          INTEGRATED ANALYSIS
+        </span>
+
+        <h2 className="text-[42px] font-bold text-gray-800 leading-tight mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+          Career Report
+        </h2>
+        <p className="text-[16px] text-gray-600 tracking-[0.3em] mb-6">
+          統 合 キ ャ リ ア レ ポ ー ト
+        </p>
+        <p className="text-[15px] text-gray-500 leading-relaxed">
+          診断結果と経歴をAIが統合分析し、
+          <br />
+          あなただけのキャリアレポートを作成します。
+        </p>
+        <div className="flex justify-center gap-8 mt-8">
+          <div>
+            <span className="text-[32px] font-bold text-gray-800">2</span>
+            <span className="text-[13px] font-semibold text-amber-600 tracking-wider ml-1.5">DIAGNOSTICS</span>
+          </div>
+          <div>
+            <span className="text-[32px] font-bold text-gray-800">10</span>
+            <span className="text-[13px] font-semibold text-amber-600 tracking-wider ml-1.5">THEMES</span>
+          </div>
+          <div>
+            <span className="text-[32px] font-bold text-gray-800">4</span>
+            <span className="text-[13px] font-semibold text-amber-600 tracking-wider ml-1.5">CHAPTERS</span>
+          </div>
+        </div>
+        {!isOwner && (
+          <p className="text-[14px] text-gray-500 mt-6">
+            {displayName} さんはまだレポートを作成していません
+          </p>
+        )}
+      </div>
+
+      <div className="relative z-10 -mx-10 mt-auto border-t border-amber-200/60 bg-white px-10 py-12">
+        {isOwner ? (
+          <p className="text-[14px] text-gray-500">
+            プロフィールの「AI Report」カードからレポートを生成できます
+          </p>
+        ) : (
+          <p className="text-[14px] text-gray-500">
+            レポートはまだ作成されていません
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const INT_PARTICLES = [
+  { size: 140, top: "-5%", left: "-8%", color: "rgba(217,170,100,0.25)", dur: "20s", dx: 55, dy: 40 },
+  { size: 120, top: "50%", left: "65%", color: "rgba(200,150,80,0.22)", dur: "24s", dx: -50, dy: -45 },
+  { size: 130, top: "70%", left: "-3%", color: "rgba(180,140,70,0.20)", dur: "22s", dx: 60, dy: -35 },
+  { size: 110, top: "30%", left: "12%", color: "rgba(220,180,100,0.22)", dur: "18s", dx: -40, dy: -50 },
+  { size: 100, top: "-3%", left: "70%", color: "rgba(200,160,90,0.24)", dur: "16s", dx: -55, dy: 45 },
+  { size: 90, top: "40%", left: "80%", color: "rgba(180,130,60,0.20)", dur: "20s", dx: -45, dy: 35 },
+  { size: 95, top: "15%", left: "40%", color: "rgba(210,170,90,0.22)", dur: "18s", dx: -35, dy: 50 },
+  { size: 80, top: "75%", left: "45%", color: "rgba(190,150,80,0.22)", dur: "16s", dx: 40, dy: -40 },
+  { size: 85, top: "60%", left: "25%", color: "rgba(230,190,110,0.20)", dur: "22s", dx: 50, dy: -30 },
+];
+
+function IntFloatingParticles() {
+  return (
+    <>
+      <style>{`
+        @keyframes int-particle-float {
+          0%, 100% { translate: 0 0; }
+          33% { translate: var(--dx) var(--dy); }
+          66% { translate: calc(var(--dx) * -0.6) calc(var(--dy) * 0.8); }
+        }
+      `}</style>
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        {INT_PARTICLES.map((s, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full blur-[3px]"
+            style={{
+              width: s.size,
+              height: s.size,
+              top: s.top,
+              left: s.left,
+              background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.3) 0%, ${s.color} 40%, rgba(120,80,20,0.15) 100%)`,
+              "--dx": `${s.dx}px`,
+              "--dy": `${s.dy}px`,
+              animation: `int-particle-float ${s.dur} ease-in-out infinite`,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 

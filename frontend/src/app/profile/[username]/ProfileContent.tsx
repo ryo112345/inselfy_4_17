@@ -23,9 +23,10 @@ type Props = {
   skills: ModelsSkillResponse[];
   posts?: PostItem[];
   isOwner?: boolean;
+  intReportRequestId?: string | null;
 };
 
-export function ProfileContent({ user, username, experiences, educations, skills, posts, isOwner = true }: Props) {
+export function ProfileContent({ user, username, experiences, educations, skills, posts, isOwner = true, intReportRequestId }: Props) {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-3">
       <ProfileHeaderCard user={user} experienceCount={experiences.length} isOwner={isOwner} />
@@ -34,6 +35,7 @@ export function ProfileContent({ user, username, experiences, educations, skills
           hasExperience={experiences.length > 0}
           hasSkills={skills.length > 0}
           hasEducation={educations.length > 0}
+          intReportRequestId={intReportRequestId}
         />
       )}
       {isOwner && <ResumeUploadCard />}
