@@ -83,16 +83,20 @@ export function IntegratedReportContent({ requestId, isOwner = true }: Props) {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
     fetch(`/api/integrated-report/requests/${requestId}/report`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
+        if (cancelled) return;
         if (data?.content) {
           setReportContent(data.content);
           setFirstView(!!data.first_view);
           if (!data.first_view) setShowReport(true);
         }
       })
-      .finally(() => setInitialLoading(false));
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setInitialLoading(false); });
+    return () => { cancelled = true; };
   }, [requestId]);
 
   const handleClick = () => {

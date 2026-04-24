@@ -590,16 +590,20 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let cancelled = false;
     fetch(`/api/career-interest/sessions/${sessionId}/ai-report`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
+        if (cancelled) return;
         if (data?.content) {
           setReportContent(data.content);
           setFirstView(!!data.first_view);
           if (!data.first_view) setShowReport(true);
         }
       })
-      .finally(() => setInitialLoading(false));
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setInitialLoading(false); });
+    return () => { cancelled = true; };
   }, [sessionId]);
 
   const handleClick = () => {
