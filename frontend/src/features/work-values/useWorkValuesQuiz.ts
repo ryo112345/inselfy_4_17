@@ -12,7 +12,7 @@ import {
   type ResponseDTO,
 } from "./api";
 
-export type QuizPhase = "idle" | "loading" | "active" | "submitting" | "done" | "error";
+export type QuizPhase = "idle" | "loading" | "active" | "completed" | "submitting" | "done" | "error";
 
 export interface DebugNeedInfo {
   needId: NeedId;
@@ -108,32 +108,7 @@ export function useWorkValuesQuiz(userId: string) {
     selector.recordResponse(pair, winnerIndex);
 
     if (selector.isComplete) {
-      setState((s) => ({ ...s, phase: "submitting", currentPair: null }));
-      try {
-        const responses: ResponseDTO[] = selector.allResponses.map((r) => ({
-          need_a: NEED_IDS[r.needA],
-          need_b: NEED_IDS[r.needB],
-          winner: NEED_IDS[r.winner],
-          question_number: r.questionNumber,
-        }));
-
-        const bt = selector.currentBT;
-        const mu: Record<string, number> = {};
-        const se: Record<string, number> = {};
-        for (let i = 0; i < NEED_IDS.length; i++) {
-          mu[NEED_IDS[i]] = bt.mu[i];
-          se[NEED_IDS[i]] = bt.se[i];
-        }
-
-        const result = await submitResult(sessionRef.current!.id, responses, mu, se);
-        setState((s) => ({ ...s, phase: "done", result }));
-      } catch (e) {
-        setState((s) => ({
-          ...s,
-          phase: "error",
-          error: e instanceof Error ? e.message : "Submit failed",
-        }));
-      }
+      setState((s) => ({ ...s, phase: "completed", currentPair: null }));
       return;
     }
 
@@ -150,7 +125,38 @@ export function useWorkValuesQuiz(userId: string) {
     }));
   }, [state.currentPair]);
 
-  return { state, start, answer, sessionId: sessionRef.current?.id ?? null, needDefs: needDefsRef.current };
+  const submit = useCallback(async () => {
+    const selector = selectorRef.current;
+    if (!selector || !sessionRef.current) return;
+    setState((s) => ({ ...s, phase: "submitting" }));
+    try {
+      const responses: ResponseDTO[] = selector.allResponses.map((r) => ({
+        need_a: NEED_IDS[r.needA],
+        need_b: NEED_IDS[r.needB],
+        winner: NEED_IDS[r.winner],
+        question_number: r.questionNumber,
+      }));
+
+      const bt = selector.currentBT;
+      const mu: Record<string, number> = {};
+      const se: Record<string, number> = {};
+      for (let i = 0; i < NEED_IDS.length; i++) {
+        mu[NEED_IDS[i]] = bt.mu[i];
+        se[NEED_IDS[i]] = bt.se[i];
+      }
+
+      const result = await submitResult(sessionRef.current.id, responses, mu, se);
+      setState((s) => ({ ...s, phase: "done", result }));
+    } catch (e) {
+      setState((s) => ({
+        ...s,
+        phase: "error",
+        error: e instanceof Error ? e.message : "Submit failed",
+      }));
+    }
+  }, []);
+
+  return { state, start, answer, submit, sessionId: sessionRef.current?.id ?? null, needDefs: needDefsRef.current };
 }
 
 function buildDebugInfo(selector: AdaptiveSelector): DebugInfo {

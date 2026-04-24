@@ -10,7 +10,7 @@ import {
   type ResponseDTO,
 } from "./api";
 
-export type QuizPhase = "idle" | "loading" | "active" | "submitting" | "done" | "error";
+export type QuizPhase = "idle" | "loading" | "active" | "completed" | "submitting" | "done" | "error";
 
 export interface QuizState {
   phase: QuizPhase;
@@ -78,20 +78,7 @@ export function useCareerInterestQuiz(userId: string) {
     indexRef.current = nextIndex;
 
     if (nextIndex >= items.length) {
-      setState((s) => ({ ...s, phase: "submitting", currentItem: null }));
-      try {
-        const result = await submitResult(
-          sessionRef.current!.id,
-          responsesRef.current,
-        );
-        setState((s) => ({ ...s, phase: "done", result }));
-      } catch (e) {
-        setState((s) => ({
-          ...s,
-          phase: "error",
-          error: e instanceof Error ? e.message : "Submit failed",
-        }));
-      }
+      setState((s) => ({ ...s, phase: "completed", currentItem: null }));
       return;
     }
 
@@ -102,5 +89,23 @@ export function useCareerInterestQuiz(userId: string) {
     }));
   }, []);
 
-  return { state, start, answer, sessionId: sessionRef.current?.id ?? null };
+  const submit = useCallback(async () => {
+    if (!sessionRef.current) return;
+    setState((s) => ({ ...s, phase: "submitting" }));
+    try {
+      const result = await submitResult(
+        sessionRef.current.id,
+        responsesRef.current,
+      );
+      setState((s) => ({ ...s, phase: "done", result }));
+    } catch (e) {
+      setState((s) => ({
+        ...s,
+        phase: "error",
+        error: e instanceof Error ? e.message : "Submit failed",
+      }));
+    }
+  }, []);
+
+  return { state, start, answer, submit, sessionId: sessionRef.current?.id ?? null };
 }

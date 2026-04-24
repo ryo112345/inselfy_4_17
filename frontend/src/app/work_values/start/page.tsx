@@ -23,7 +23,7 @@ const inter = Inter({
 export default function WorkValuesStartPage() {
   const { user, isLoading: authLoading } = useAuth();
   const userId = user?.id ?? "";
-  const { state, start, answer, sessionId, needDefs } = useWorkValuesQuiz(userId);
+  const { state, start, answer, submit, sessionId, needDefs } = useWorkValuesQuiz(userId);
   const router = useRouter();
 
   useEffect(() => {
@@ -61,6 +61,10 @@ export default function WorkValuesStartPage() {
         needDefs={needDefs}
       />
     );
+  }
+
+  if (state.phase === "completed") {
+    return <CompletedScreen onSubmit={submit} />;
   }
 
   if (state.phase === "submitting" || (state.phase === "done" && sessionId)) {
@@ -214,6 +218,42 @@ function ChoiceButton({
         <span>{label}</span>
       </span>
     </button>
+  );
+}
+
+function CompletedScreen({ onSubmit }: { onSubmit: () => void }) {
+  return (
+    <main className="min-h-screen flex justify-center bg-[#f6f7f5] px-4 pt-[15vh] pb-12">
+      <div className="relative w-full max-w-lg h-fit text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
+        <FloatingSpheres />
+
+        <div className="relative z-10">
+          <div className="w-14 h-14 rounded-full border-2 border-emerald-400/60 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-7 h-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className={`${playfair.className} text-xl font-bold text-white mb-3`}>
+            診断おつかれさまでした！
+          </p>
+          <p className="text-gray-400 text-[15px] leading-relaxed">
+            すべての質問に回答しました。
+            <br />
+            回答を送信して結果を確認しましょう。
+          </p>
+        </div>
+
+        <div className="relative z-10 -mx-10 mt-10 border-t border-gray-700 bg-gradient-to-t from-black/90 to-[#0a1628] px-10 py-8">
+          <button
+            type="button"
+            onClick={onSubmit}
+            className="block mx-auto w-3/4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-base py-4 transition-colors cursor-pointer"
+          >
+            回答を送信する &rarr;
+          </button>
+        </div>
+      </div>
+    </main>
   );
 }
 

@@ -20,17 +20,17 @@ const inter = Inter({
 });
 
 const SCORE_OPTIONS = [
-  { value: 1, label: "全く興味がない" },
-  { value: 2, label: "あまり興味がない" },
-  { value: 3, label: "どちらともいえない" },
-  { value: 4, label: "やや興味がある" },
-  { value: 5, label: "とても興味がある" },
+  { value: 1, label: "全く\n興味がない" },
+  { value: 2, label: "あまり\n興味がない" },
+  { value: 3, label: "どちらとも\nいえない" },
+  { value: 4, label: "やや\n興味がある" },
+  { value: 5, label: "とても\n興味がある" },
 ] as const;
 
 export default function CareerInterestStartPage() {
   const { user, isLoading: authLoading } = useAuth();
   const userId = user?.id ?? "";
-  const { state, start, answer, sessionId } = useCareerInterestQuiz(userId);
+  const { state, start, answer, submit, sessionId } = useCareerInterestQuiz(userId);
   const router = useRouter();
 
   useEffect(() => {
@@ -66,6 +66,10 @@ export default function CareerInterestStartPage() {
         onAnswer={answer}
       />
     );
+  }
+
+  if (state.phase === "completed") {
+    return <CompletedScreen onSubmit={submit} />;
   }
 
   if (state.phase === "submitting" || (state.phase === "done" && sessionId)) {
@@ -162,36 +166,81 @@ function QuizScreen({
         </div>
 
         {/* question text */}
-        <div className="relative z-10 px-8 pb-4">
+        <div className="relative z-10 px-8 pb-2">
           <p className="text-gray-800 text-[17px] leading-relaxed text-center">
             {item.text_ja}
           </p>
         </div>
 
         {/* prompt */}
-        <div className="relative z-10 px-8 pb-3">
-          <p className="text-gray-400 text-[13px] text-center">
+        <div className="relative z-10 px-8 pb-5">
+          <p className="text-gray-500 text-[15px] text-center">
             この活動にどの程度興味がありますか？
           </p>
         </div>
 
         {/* score buttons */}
-        <div className="relative z-10 px-8 pb-8 flex flex-col gap-2">
-          {SCORE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onAnswer(opt.value)}
-              className="group w-full rounded-2xl border border-gray-200 bg-white/60 backdrop-blur-sm hover:border-blue-400 hover:bg-blue-50/80 text-gray-700 text-[15px] leading-relaxed py-4 px-6 transition-all duration-200 text-left cursor-pointer"
-            >
-              <span className="flex items-center gap-3">
-                <span className="shrink-0 w-7 h-7 rounded-full border border-gray-300 group-hover:border-blue-400 flex items-center justify-center text-xs font-semibold text-gray-400 group-hover:text-blue-500 transition-colors">
+        <div className="relative z-10 px-4 pb-8">
+          <div
+            className="flex gap-1"
+            role="radiogroup"
+            aria-label="興味度を選択"
+          >
+            {SCORE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                role="radio"
+                aria-checked={false}
+                aria-label={opt.label.replace("\n", "")}
+                onClick={() => onAnswer(opt.value)}
+                className="group flex-1 flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white/60 backdrop-blur-sm hover:border-blue-400 hover:bg-blue-50/80 active:scale-95 py-3.5 transition-all duration-150 cursor-pointer"
+              >
+                <span className="w-10 h-10 rounded-full border-2 border-gray-300 group-hover:border-blue-400 group-hover:bg-blue-500 group-hover:text-white flex items-center justify-center text-base font-bold text-gray-400 transition-all duration-150">
                   {opt.value}
                 </span>
-                <span>{opt.label}</span>
-              </span>
-            </button>
-          ))}
+                <span className="text-[12px] text-gray-600 group-hover:text-blue-600 transition-colors leading-snug text-center whitespace-pre-line">
+                  {opt.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function CompletedScreen({ onSubmit }: { onSubmit: () => void }) {
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
+      <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#e8f0fa] border border-gray-200 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
+        <FloatingShapes />
+
+        <div className="relative z-10">
+          <div className="w-14 h-14 rounded-full border-2 border-blue-400/60 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-7 h-7 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className={`${playfair.className} text-xl font-bold text-gray-800 mb-3`}>
+            診断おつかれさまでした！
+          </p>
+          <p className="text-gray-500 text-[15px] leading-relaxed">
+            すべての質問に回答しました。
+            <br />
+            回答を送信して結果を確認しましょう。
+          </p>
+        </div>
+
+        <div className="relative z-10 -mx-10 mt-10 border-t border-gray-200 bg-white px-8 pt-6 pb-8">
+          <button
+            type="button"
+            onClick={onSubmit}
+            className="block mx-auto w-3/4 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base py-4 transition-colors cursor-pointer"
+          >
+            回答を送信する &rarr;
+          </button>
         </div>
       </div>
     </main>
