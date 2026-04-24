@@ -8,6 +8,8 @@ import (
 
 	googlegw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/google"
 	jwtgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/jwt"
+	storagegw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/storage"
+	stripegw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/stripe"
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
@@ -58,6 +60,11 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	postInputFactory := factory.NewPostInputFactory()
 	wvInputFactory := factory.NewWorkValuesInputFactory()
 	ciInputFactory := factory.NewCareerInterestInputFactory()
+	fileStorage := storagegw.NewLocal("./uploads", "/api/uploads")
+	stripeService := stripegw.NewService(cfg.StripeSecretKey, "http://localhost:5173")
+	articleRepoFactory := factory.NewArticleRepoFactory(pool)
+	articlePurchaseRepoFactory := factory.NewArticlePurchaseRepoFactory(pool)
+
 	companyAuthInputFactory := factory.NewCompanyAuthInputFactory(jwtService)
 
 	userOutputFactory := httpfactory.NewUserOutputFactory()
@@ -68,6 +75,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	postOutputFactory := httpfactory.NewPostOutputFactory()
 	wvOutputFactory := httpfactory.NewWorkValuesOutputFactory()
 	ciOutputFactory := httpfactory.NewCareerInterestOutputFactory()
+	articleInputFactory := factory.NewArticleInputFactory(stripeService)
+	articleOutputFactory := httpfactory.NewArticleOutputFactory()
+
 	companyAuthOutputFactory := httpfactory.NewCompanyAuthOutputFactory()
 
 	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
@@ -78,6 +88,14 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	postCtrl := httpcontroller.NewPostController(postInputFactory, postOutputFactory, postRepoFactory)
 	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvOutputFactory, wvSessionRepoFactory, wvResultRepoFactory, wvScoreRepoFactory)
 	ciCtrl := httpcontroller.NewCareerInterestController(ciInputFactory, ciOutputFactory, ciSessionRepoFactory, ciResultRepoFactory, ciBasicScoreRepoFactory, ciTypeScoreRepoFactory)
+	articleCtrl := httpcontroller.NewArticleController(
+		articleInputFactory,
+		articleOutputFactory,
+		articleRepoFactory,
+		articlePurchaseRepoFactory,
+		fileStorage,
+	)
+
 	companyAuthCtrl := httpcontroller.NewCompanyAuthController(
 		func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort {
 			return companyAuthInputFactory(companyRepo, refreshRepo, output)
@@ -165,6 +183,53 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	e.DELETE("/api/users/:username/skills/:name", func(c echo.Context) error {
 		return skillCtrl.Detach(c, c.Param("username"), c.Param("name"))
 	}, jwtMW)
+
+	// --- Static uploads ---
+	e.Static("/api/uploads", "./uploads")
+
+	// --- Articles (public) ---
+	articleGroup := e.Group("/api/articles")
+	articleGroup.GET("", articleCtrl.List)
+	articleGroup.GET("/:articleId", func(c echo.Context) error {
+		return articleCtrl.GetByID(c, c.Param("articleId"))
+	})
+
+	// --- Articles (user-authored) ---
+	articleGroup.GET("/mine", articleCtrl.ListMine, jwtMW)
+	articleGroup.POST("/upload-image", articleCtrl.UploadImage, jwtMW)
+	articleGroup.POST("", articleCtrl.CreateAsUser, jwtMW)
+	articleGroup.PUT("/:articleId", func(c echo.Context) error {
+		return articleCtrl.UpdateAsUser(c, c.Param("articleId"))
+	}, jwtMW)
+	articleGroup.DELETE("/:articleId", func(c echo.Context) error {
+		return articleCtrl.DeleteAsUser(c, c.Param("articleId"))
+	}, jwtMW)
+	articleGroup.POST("/:articleId/publish", func(c echo.Context) error {
+		return articleCtrl.PublishAsUser(c, c.Param("articleId"))
+	}, jwtMW)
+	articleGroup.POST("/:articleId/checkout", func(c echo.Context) error {
+		return articleCtrl.CreateCheckout(c, c.Param("articleId"))
+	}, jwtMW)
+
+	// --- Articles (company-authored) ---
+	companyArticleGroup := e.Group("/api/company/articles", companyJwtMW)
+	companyArticleGroup.POST("", articleCtrl.CreateAsCompany)
+	companyArticleGroup.PUT("/:articleId", func(c echo.Context) error {
+		return articleCtrl.UpdateAsCompany(c, c.Param("articleId"))
+	})
+	companyArticleGroup.DELETE("/:articleId", func(c echo.Context) error {
+		return articleCtrl.DeleteAsCompany(c, c.Param("articleId"))
+	})
+	companyArticleGroup.POST("/:articleId/publish", func(c echo.Context) error {
+		return articleCtrl.PublishAsCompany(c, c.Param("articleId"))
+	})
+
+	// --- Stripe Webhook ---
+	stripeWebhookCtrl := httpcontroller.NewStripeWebhookController(
+		articlePurchaseRepoFactory(),
+		cfg.StripeWebhookSecret,
+	)
+	e.POST("/api/stripe/webhook", stripeWebhookCtrl.HandleWebhook)
 
 	// --- Posts ---
 	postGroup := e.Group("/api/posts")

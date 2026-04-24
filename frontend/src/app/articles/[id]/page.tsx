@@ -1,0 +1,39 @@
+import { fetchArticle } from "@/features/articles/api";
+import { ArticleView } from "@/features/articles/ArticleView";
+import { Sidebar } from "@/app/components/Sidebar";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function ArticlePage({ params }: Props) {
+  const { id } = await params;
+  const cookieStore = await cookies();
+  const username = cookieStore.get("username")?.value ?? "guest";
+  const displayName = cookieStore.get("displayName")?.value;
+  const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
+
+  let article;
+  try {
+    article = await fetchArticle(id);
+  } catch {
+    notFound();
+  }
+
+  return (
+    <>
+      <Sidebar
+        username={username}
+        displayName={displayName}
+        defaultOpen={sidebarOpen}
+      />
+      <div className="flex justify-center min-h-screen pl-[50px]">
+        <main className="w-full max-w-2xl bg-white border-x border-gray-200/80">
+          <ArticleView article={article} />
+        </main>
+      </div>
+    </>
+  );
+}

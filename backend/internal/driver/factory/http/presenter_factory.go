@@ -64,3 +64,9 @@ func NewCompanyAuthOutputFactory() func() *presenter.CompanyAuthPresenter {
 		return presenter.NewCompanyAuthPresenter()
 	}
 }
+
+func NewArticleOutputFactory() func() *presenter.ArticlePresenter {
+	return func() *presenter.ArticlePresenter {
+		return presenter.NewArticlePresenter()
+	}
+}
