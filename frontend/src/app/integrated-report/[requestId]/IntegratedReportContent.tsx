@@ -127,62 +127,64 @@ export function IntegratedReportContent({ requestId, isOwner = true }: Props) {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-3">
-      <div ref={sectionRef} className="relative scroll-mt-4">
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-          <span
-            className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
-            style={{
-              background: "linear-gradient(180deg, #b8860b 0%, #9a7209 50%, #7a5a07 100%)",
-              boxShadow: "0 4px 10px rgba(120,80,20,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
-            }}
-          >
-            inselfy.ai
-          </span>
-        </div>
-        <section className="rounded-2xl border border-gray-200/80 bg-[#fffdf7] px-8 pt-8 pb-7 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
-          <h3 className="text-[14px] font-bold mb-1.5 text-amber-800">統合キャリアレポート</h3>
-          <div className="border-t border-gray-200 mb-3" />
+      <div className="rounded-2xl border border-gray-200/80 bg-white px-6 py-6 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+        <div ref={sectionRef} className="relative scroll-mt-4">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+            <span
+              className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
+              style={{
+                background: "linear-gradient(180deg, #b8860b 0%, #9a7209 50%, #7a5a07 100%)",
+                boxShadow: "0 4px 10px rgba(120,80,20,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
+              }}
+            >
+              inselfy.ai
+            </span>
+          </div>
+          <section className="rounded-xl border border-gray-200/60 bg-[#fffdf7] px-8 pt-8 pb-7">
+            <h3 className="text-[14px] font-bold mb-1.5 text-amber-800">統合キャリアレポート</h3>
+            <div className="border-t border-gray-200 mb-3" />
 
-          {initialLoading ? (
-            <div className="flex items-center gap-2 text-gray-400 text-[14px]">
-              <span className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
-              読み込み中
-            </div>
-          ) : showReport && reportContent && firstView ? (
-            <div
-              className={reportProseClasses}
-              dangerouslySetInnerHTML={{ __html: markdownToHtml(displayed) }}
-            />
-          ) : showReport && reportContent ? (
-            <div
-              className={reportProseClasses}
-              dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
-            />
-          ) : reportContent ? (
-            isOwner ? (
-              <>
-                <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
-                  あなたの診断結果と経歴をAIが統合分析したレポートが完成しています。
+            {initialLoading ? (
+              <div className="flex items-center gap-2 text-gray-400 text-[14px]">
+                <span className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                読み込み中
+              </div>
+            ) : showReport && reportContent && firstView ? (
+              <div
+                className={reportProseClasses}
+                dangerouslySetInnerHTML={{ __html: markdownToHtml(displayed) }}
+              />
+            ) : showReport && reportContent ? (
+              <div
+                className={reportProseClasses}
+                dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
+              />
+            ) : reportContent ? (
+              isOwner ? (
+                <>
+                  <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
+                    あなたの診断結果と経歴をAIが統合分析したレポートが完成しています。
+                  </p>
+                  <button
+                    onClick={handleClick}
+                    className="bg-amber-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(120,80,20,0.45)] hover:bg-amber-800 hover:shadow-[0_6px_16px_-4px_rgba(120,80,20,0.55)] transition cursor-pointer"
+                  >
+                    レポートを見る
+                  </button>
+                </>
+              ) : (
+                <p className="text-[16px] text-gray-500 leading-relaxed">
+                  レポートを表示するにはログインしてください。
                 </p>
-                <button
-                  onClick={handleClick}
-                  className="bg-amber-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(120,80,20,0.45)] hover:bg-amber-800 hover:shadow-[0_6px_16px_-4px_rgba(120,80,20,0.55)] transition cursor-pointer"
-                >
-                  レポートを見る
-                </button>
-              </>
+              )
             ) : (
               <p className="text-[16px] text-gray-500 leading-relaxed">
-                レポートを表示するにはログインしてください。
+                レポートはまだ作成されていません。
               </p>
-            )
-          ) : (
-            <p className="text-[16px] text-gray-500 leading-relaxed">
-              レポートはまだ作成されていません。
-            </p>
-          )}
-        </section>
-        {scrollSpacer && !done && <div className="h-screen" />}
+            )}
+          </section>
+          {scrollSpacer && !done && <div className="h-screen" />}
+        </div>
       </div>
     </div>
   );
