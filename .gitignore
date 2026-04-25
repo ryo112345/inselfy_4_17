@@ -1,2 +1,5 @@
 .env
 .env.*
+
+# Uploaded files (runtime data, not source code)
+backend/uploads/

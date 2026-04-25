@@ -283,11 +283,11 @@ export function ArticleView({ article, currentUsername }: Props) {
 
       {/* Cover image */}
       {article.coverImageUrl && (
-        <div className="aspect-[2/1] overflow-hidden bg-gray-100">
+        <div>
           <img
             src={article.coverImageUrl}
             alt=""
-            className="w-full h-full object-cover"
+            className="w-full"
           />
         </div>
       )}
@@ -398,13 +398,13 @@ export function ArticleView({ article, currentUsername }: Props) {
         <div className="mb-8">
           {showFullBody ? (
             <div
-              className="prose prose-gray max-w-none prose-headings:text-gray-900 prose-headings:scroll-mt-4 prose-p:text-gray-700 prose-p:leading-[1.85] prose-a:text-[var(--accent)] prose-img:rounded-lg prose-li:text-gray-700"
+              className="prose prose-gray max-w-none prose-p:text-[18px] prose-li:text-[18px] prose-headings:text-gray-900 prose-headings:scroll-mt-4 prose-p:text-gray-700 prose-p:leading-[1.85] prose-a:text-[var(--accent)] prose-img:rounded-lg prose-li:text-gray-700"
               dangerouslySetInnerHTML={{ __html: processedHtml }}
             />
           ) : (
             <>
               <div
-                className="prose prose-gray max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-[1.85] prose-a:text-[var(--accent)] prose-img:rounded-lg prose-li:text-gray-700"
+                className="prose prose-gray max-w-none prose-p:text-[18px] prose-li:text-[18px] prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-[1.85] prose-a:text-[var(--accent)] prose-img:rounded-lg prose-li:text-gray-700"
                 dangerouslySetInnerHTML={{ __html: processedHtml }}
               />
 
