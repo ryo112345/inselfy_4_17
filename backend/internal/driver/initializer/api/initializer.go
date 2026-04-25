@@ -116,6 +116,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	}))
 
 	jwtMW := authmw.JWTAuth(jwtService)
+	optionalJwtMW := authmw.OptionalJWTAuth(jwtService)
 	companyJwtMW := authmw.CompanyJWTAuth(jwtService)
 
 	// --- Company Auth ---
@@ -192,7 +193,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	articleGroup.GET("", articleCtrl.List)
 	articleGroup.GET("/:articleId", func(c echo.Context) error {
 		return articleCtrl.GetByID(c, c.Param("articleId"))
-	})
+	}, optionalJwtMW)
 
 	// --- Articles (user-authored) ---
 	articleGroup.GET("/mine", articleCtrl.ListMine, jwtMW)

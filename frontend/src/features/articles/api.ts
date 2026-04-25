@@ -14,6 +14,7 @@ export type ArticleItem = {
   isPaid: boolean;
   priceYen: number;
   purchased: boolean;
+  isAuthor: boolean;
   status: string;
   coverImageUrl?: string;
   tags: string[];
@@ -51,9 +52,15 @@ export async function fetchMyArticles(
   return res.json();
 }
 
-export async function fetchArticle(id: string): Promise<ArticleItem> {
+export async function fetchArticle(
+  id: string,
+  opts?: { cookie?: string },
+): Promise<ArticleItem> {
+  const headers: Record<string, string> = {};
+  if (opts?.cookie) headers.cookie = opts.cookie;
   const res = await fetch(`${BASE_URL}/api/articles/${id}`, {
     cache: "no-store",
+    headers,
   });
   if (!res.ok) throw new Error("Failed to fetch article");
   return res.json();

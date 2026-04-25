@@ -52,7 +52,7 @@ func (i *ArticleInteractor) Create(ctx context.Context, input article.CreateArti
 	if err != nil {
 		return err
 	}
-	return i.output.PresentArticle(ctx, &article.ArticleWithAuthor{Article: *created}, false)
+	return i.output.PresentArticle(ctx, &article.ArticleWithAuthor{Article: *created}, false, true)
 }
 
 func (i *ArticleInteractor) GetByID(ctx context.Context, id string, viewerUserID *string) error {
@@ -62,10 +62,10 @@ func (i *ArticleInteractor) GetByID(ctx context.Context, id string, viewerUserID
 	}
 
 	purchased := false
-	if a.Article.IsPaid && viewerUserID != nil {
-		if isAuthor(a, *viewerUserID) {
-			purchased = true
-		} else {
+	author := false
+	if viewerUserID != nil {
+		author = isAuthor(a, *viewerUserID)
+		if a.Article.IsPaid && !author {
 			purchased, err = i.purchaseRepo.HasPurchased(ctx, a.Article.ID, *viewerUserID)
 			if err != nil {
 				return err
@@ -73,7 +73,7 @@ func (i *ArticleInteractor) GetByID(ctx context.Context, id string, viewerUserID
 		}
 	}
 
-	return i.output.PresentArticle(ctx, a, purchased)
+	return i.output.PresentArticle(ctx, a, purchased, author)
 }
 
 func (i *ArticleInteractor) List(ctx context.Context, limit, offset int) error {
@@ -130,7 +130,7 @@ func (i *ArticleInteractor) Update(ctx context.Context, id string, input article
 		Article:        *updated,
 		AuthorName:     existing.AuthorName,
 		AuthorUsername: existing.AuthorUsername,
-	}, false)
+	}, false, true)
 }
 
 func (i *ArticleInteractor) Delete(ctx context.Context, id string, authorType article.AuthorType, authorID string) error {
@@ -160,7 +160,7 @@ func (i *ArticleInteractor) Publish(ctx context.Context, id string, authorType a
 	if err != nil {
 		return err
 	}
-	return i.output.PresentArticle(ctx, a, false)
+	return i.output.PresentArticle(ctx, a, false, true)
 }
 
 func (i *ArticleInteractor) CreateCheckoutSession(ctx context.Context, articleID, buyerUserID string) error {

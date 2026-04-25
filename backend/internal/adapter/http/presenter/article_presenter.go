@@ -19,6 +19,7 @@ type ArticleResponse struct {
 	IsPaid         bool       `json:"isPaid"`
 	PriceYen       int        `json:"priceYen"`
 	Purchased      bool       `json:"purchased"`
+	IsAuthor       bool       `json:"isAuthor"`
 	Status         string     `json:"status"`
 	CoverImageURL  *string    `json:"coverImageUrl,omitempty"`
 	Tags           []string   `json:"tags"`
@@ -48,7 +49,7 @@ func NewArticlePresenter() *ArticlePresenter {
 	return &ArticlePresenter{}
 }
 
-func (p *ArticlePresenter) PresentArticle(_ context.Context, a *article.ArticleWithAuthor, purchased bool) error {
+func (p *ArticlePresenter) PresentArticle(_ context.Context, a *article.ArticleWithAuthor, purchased bool, isAuthor bool) error {
 	freePreview, _ := article.SplitBody(a.Article.Body)
 
 	resp := &ArticleResponse{
@@ -61,6 +62,7 @@ func (p *ArticlePresenter) PresentArticle(_ context.Context, a *article.ArticleW
 		IsPaid:         a.Article.IsPaid,
 		PriceYen:       a.Article.PriceYen,
 		Purchased:      purchased,
+		IsAuthor:       isAuthor,
 		Status:         string(a.Article.Status),
 		CoverImageURL:  a.Article.CoverImageURL,
 		Tags:           a.Article.Tags,
@@ -69,7 +71,7 @@ func (p *ArticlePresenter) PresentArticle(_ context.Context, a *article.ArticleW
 		PublishedAt:    a.Article.PublishedAt,
 	}
 
-	if !a.Article.IsPaid || purchased {
+	if !a.Article.IsPaid || purchased || isAuthor {
 		resp.Body = a.Article.Body
 	}
 

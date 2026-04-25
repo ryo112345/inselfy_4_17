@@ -123,7 +123,7 @@ export function ArticleView({ article, currentUsername }: Props) {
     );
   }, []);
 
-  const showFullBody = !article.isPaid || article.purchased;
+  const showFullBody = !article.isPaid || article.purchased || article.isAuthor;
   const readTime = estimateReadingTime(article.body, article.freePreview);
 
   const bodyHtml = showFullBody ? article.body : article.freePreview;
@@ -361,29 +361,29 @@ export function ArticleView({ article, currentUsername }: Props) {
             </span>
           </div>
 
-          {/* Tags */}
-          {article.tags && article.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {article.tags.map((tag) => (
+          {/* Tags & Paid badge */}
+          {((article.tags && article.tags.length > 0) || article.isPaid) && (
+            <div className="flex flex-wrap items-center gap-1.5 mb-4">
+              {article.tags?.map((tag) => (
                 <Link
                   key={tag}
                   href={`/articles?tag=${encodeURIComponent(tag)}`}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                 >
-                  #{tag}
+                  # {tag}
                 </Link>
               ))}
-            </div>
-          )}
-
-          {/* Paid badge */}
-          {article.isPaid && (
-            <div>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                有料 ¥{article.priceYen.toLocaleString()}
-              </span>
-              {article.purchased && (
-                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+              {article.isPaid && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-[var(--accent-light)] text-[var(--accent)]">
+                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  ¥{article.priceYen.toLocaleString()}
+                </span>
+              )}
+              {article.purchased && !article.isAuthor && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-50 text-green-600">
                   購入済み
                 </span>
               )}
