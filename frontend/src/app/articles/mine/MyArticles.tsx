@@ -19,10 +19,7 @@ function MyArticleCard({ article }: { article: ArticleItem }) {
     ? new Date(article.publishedAt).toLocaleDateString("ja-JP")
     : new Date(article.updatedAt).toLocaleDateString("ja-JP") + " 更新";
 
-  const href =
-    article.status === "draft"
-      ? `/articles/${article.id}/edit`
-      : `/articles/${article.id}`;
+  const href = `/articles/${article.id}/edit`;
 
   return (
     <Link href={href} className="block">

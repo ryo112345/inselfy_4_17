@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { ArticleItem } from "./api";
 
 type Props = {
@@ -28,6 +29,7 @@ function formatRelativeDate(dateStr: string): string {
 }
 
 export function ArticleCard({ article, variant = "compact" }: Props) {
+  const router = useRouter();
   const readTime = estimateReadingTime(article.body, article.freePreview);
   const dateLabel = article.publishedAt
     ? formatRelativeDate(article.publishedAt)
@@ -76,29 +78,18 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
               {article.title}
             </h3>
             <div className="flex items-center gap-2 mt-auto">
-              {article.authorUsername ? (
-                <Link
-                  href={`/profile/${article.authorUsername}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-2 min-w-0 hover:underline"
-                >
-                  <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[11px] font-medium text-gray-600 shrink-0">
-                    {article.authorName.charAt(0)}
-                  </span>
-                  <span className="text-[13px] text-gray-600 truncate">
-                    {article.authorName}
-                  </span>
-                </Link>
-              ) : (
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[11px] font-medium text-gray-600 shrink-0">
-                    {article.authorName.charAt(0)}
-                  </span>
-                  <span className="text-[13px] text-gray-600 truncate">
-                    {article.authorName}
-                  </span>
-                </div>
-              )}
+              <div
+                role={article.authorUsername ? "link" : undefined}
+                onClick={article.authorUsername ? (e) => { e.preventDefault(); e.stopPropagation(); router.push(`/profile/${article.authorUsername}`); } : undefined}
+                className={`flex items-center gap-2 min-w-0${article.authorUsername ? " cursor-pointer hover:underline" : ""}`}
+              >
+                <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[11px] font-medium text-gray-600 shrink-0">
+                  {article.authorName.charAt(0)}
+                </span>
+                <span className="text-[13px] text-gray-600 truncate">
+                  {article.authorName}
+                </span>
+              </div>
               <div className="flex items-center gap-2 ml-auto shrink-0 text-[12px] text-gray-400">
                 <span className="flex items-center gap-0.5">
                   <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="text-gray-400">
@@ -148,29 +139,18 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
         </div>
 
         <div className="flex items-center gap-2 px-3 pt-1 pb-3">
-          {article.authorUsername ? (
-            <Link
-              href={`/profile/${article.authorUsername}`}
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-2 min-w-0 hover:underline"
-            >
-              <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[11px] font-medium text-gray-600 shrink-0">
-                {article.authorName.charAt(0)}
-              </span>
-              <span className="text-[13px] text-gray-700 truncate">
-                {article.authorName}
-              </span>
-            </Link>
-          ) : (
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[11px] font-medium text-gray-600 shrink-0">
-                {article.authorName.charAt(0)}
-              </span>
-              <span className="text-[13px] text-gray-700 truncate">
-                {article.authorName}
-              </span>
-            </div>
-          )}
+          <div
+            role={article.authorUsername ? "link" : undefined}
+            onClick={article.authorUsername ? (e) => { e.preventDefault(); e.stopPropagation(); router.push(`/profile/${article.authorUsername}`); } : undefined}
+            className={`flex items-center gap-2 min-w-0${article.authorUsername ? " cursor-pointer hover:underline" : ""}`}
+          >
+            <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[11px] font-medium text-gray-600 shrink-0">
+              {article.authorName.charAt(0)}
+            </span>
+            <span className="text-[13px] text-gray-700 truncate">
+              {article.authorName}
+            </span>
+          </div>
           <div className="flex items-center gap-1.5 ml-auto shrink-0 text-[12px] text-gray-400">
             <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="text-gray-400">
               <circle cx="12" cy="12" r="10" />

@@ -82,7 +82,7 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
     setGridPageSize(GRID_PAGE_SIZE);
   }, []);
 
-  const featured = useMemo(() => articles.slice(0, 3), [articles]);
+  const featured = useMemo(() => articles.slice(0, 4), [articles]);
   const featuredIds = useMemo(
     () => new Set(featured.map((a) => a.id)),
     [featured],
@@ -244,7 +244,7 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {filteredArticles.slice(0, gridPageSize).map((article) => (
                   <ArticleCard
                     key={article.id}
@@ -292,7 +292,7 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
                 </svg>
                 <h2 className="text-lg font-bold text-gray-900">ピックアップ</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {featured.map((article) => (
                   <ArticleCard
                     key={article.id}
@@ -321,7 +321,7 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
               <h2 className="text-lg font-bold text-gray-900 mb-4">
                 最新の記事
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {remaining.slice(0, gridPageSize).map((article) => (
                   <ArticleCard
                     key={article.id}
