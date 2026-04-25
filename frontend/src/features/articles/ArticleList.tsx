@@ -1,9 +1,31 @@
 import type { ArticleItem } from "./api";
-import { ArticleCard } from "./ArticleCard";
+import { ArticleSection } from "./ArticleSection";
 
 type Props = {
   articles: ArticleItem[];
 };
+
+function groupByTopTag(articles: ArticleItem[]) {
+  const tagMap = new Map<string, ArticleItem[]>();
+
+  for (const article of articles) {
+    if (article.tags.length === 0) continue;
+    const tag = article.tags[0];
+    const list = tagMap.get(tag) ?? [];
+    list.push(article);
+    tagMap.set(tag, list);
+  }
+
+  const groups = Array.from(tagMap.entries())
+    .filter(([, items]) => items.length >= 2)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([tag, items]) => ({ tag, articles: items }));
+
+  const usedIds = new Set(groups.flatMap((g) => g.articles.map((a) => a.id)));
+  const remaining = articles.filter((a) => !usedIds.has(a.id));
+
+  return { groups, remaining };
+}
 
 export function ArticleList({ articles }: Props) {
   if (articles.length === 0) {
@@ -14,10 +36,20 @@ export function ArticleList({ articles }: Props) {
     );
   }
 
+  const { groups, remaining } = groupByTopTag(articles);
+
   return (
-    <div>
-      {articles.map((article) => (
-        <ArticleCard key={article.id} article={article} />
+    <div className="space-y-8 px-6 py-6">
+      {remaining.length > 0 && (
+        <ArticleSection title="最新の記事" articles={remaining} />
+      )}
+
+      {groups.map((group) => (
+        <ArticleSection
+          key={group.tag}
+          title={group.tag}
+          articles={group.articles}
+        />
       ))}
     </div>
   );
