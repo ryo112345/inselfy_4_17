@@ -1,6 +1,8 @@
 import { fetchArticle } from "@/features/articles/api";
 import { ArticleView } from "@/features/articles/ArticleView";
 import { RelatedArticles } from "@/features/articles/RelatedArticles";
+import { PrevNextNav } from "@/features/articles/PrevNextNav";
+import { ScrollProgress } from "@/features/articles/ScrollProgress";
 import { Sidebar } from "@/app/components/Sidebar";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -25,6 +27,7 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <>
+      <ScrollProgress />
       <Sidebar
         username={username}
         displayName={displayName}
@@ -32,7 +35,8 @@ export default async function ArticlePage({ params }: Props) {
       />
       <div className="flex justify-center min-h-screen pl-[50px]">
         <main className="w-full max-w-2xl bg-white border-x border-gray-200/80">
-          <ArticleView article={article} />
+          <ArticleView article={article} currentUsername={username} />
+          <PrevNextNav currentArticle={article} />
           <RelatedArticles currentArticle={article} />
         </main>
       </div>
