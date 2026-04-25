@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 
 const GoogleLogin = dynamic(
@@ -10,16 +10,18 @@ const GoogleLogin = dynamic(
   { ssr: false },
 );
 
-export default function LoginPage() {
+function LoginContent() {
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace("/");
+      router.replace(redirect || "/");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, redirect]);
 
   if (isAuthenticated) {
     return null;
@@ -44,7 +46,7 @@ export default function LoginPage() {
               }
               try {
                 const user = await login(response.credential);
-                router.push(user.needsSetup ? "/setup" : "/");
+                router.push(user.needsSetup ? "/setup" : redirect || "/");
               } catch {
                 setError("ログインに失敗しました");
               }
@@ -66,5 +68,13 @@ export default function LoginPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }
