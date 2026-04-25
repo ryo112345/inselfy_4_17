@@ -29,3 +29,17 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+[contenteditable]:empty::before {
+  content: attr(aria-placeholder);
+  color: #d1d5db;
+  pointer-events: none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #d1d5db;
+  pointer-events: none;
+  height: 0;
+  float: left;
+}

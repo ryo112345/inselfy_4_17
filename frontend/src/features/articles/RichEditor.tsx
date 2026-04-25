@@ -363,7 +363,7 @@ export function RichEditor({ content, onChange, isPaid }: Props) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-gray max-w-none min-h-[400px] px-4 py-3 focus:outline-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-[var(--accent)]",
+          "prose prose-gray max-w-none min-h-[400px] py-3 focus:outline-none prose-headings:text-gray-900 prose-p:text-[18px] prose-p:text-gray-700 prose-p:leading-[1.85] prose-li:text-[18px] prose-li:text-gray-700 prose-a:text-[var(--accent)] prose-img:rounded-lg",
       },
       handleDrop(view, event) {
         const files = event.dataTransfer?.files;
