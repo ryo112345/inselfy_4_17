@@ -412,8 +412,9 @@ export function RichEditor({ content, onChange, isPaid }: Props) {
       try {
         const url = await uploadImage(file);
         editor.chain().focus().setImage({ src: url }).run();
-      } catch {
-        // upload failed
+      } catch (err) {
+        console.error("Image upload failed:", err);
+        alert("画像のアップロードに失敗しました");
       }
       e.target.value = "";
     },
