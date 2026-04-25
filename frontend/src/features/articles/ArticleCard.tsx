@@ -55,7 +55,11 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
               </div>
             )}
             {article.isPaid && (
-              <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-medium bg-amber-50/90 text-amber-700 border border-amber-200 backdrop-blur-sm">
+              <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-light)] text-[var(--accent)] backdrop-blur-sm">
+                <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
                 ¥{article.priceYen.toLocaleString()}
               </span>
             )}
@@ -126,7 +130,11 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
             </div>
           )}
           {article.isPaid && (
-            <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-xs font-medium bg-amber-50/90 text-amber-700 border border-amber-200 backdrop-blur-sm">
+            <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-light)] text-[var(--accent)] backdrop-blur-sm">
+              <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
               ¥{article.priceYen.toLocaleString()}
             </span>
           )}
