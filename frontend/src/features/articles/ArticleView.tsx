@@ -368,9 +368,9 @@ export function ArticleView({ article, currentUsername }: Props) {
                 <Link
                   key={tag}
                   href={`/articles?tag=${encodeURIComponent(tag)}`}
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                 >
-                  {tag}
+                  #{tag}
                 </Link>
               ))}
             </div>

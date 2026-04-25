@@ -39,9 +39,9 @@ export function CoverImageUpload({ value, onChange }: Props) {
         <img
           src={value}
           alt="カバー画像"
-          className="w-full aspect-[2/1] object-cover rounded-lg"
+          className="w-full"
         />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-3">
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
@@ -74,21 +74,24 @@ export function CoverImageUpload({ value, onChange }: Props) {
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-500 transition-colors"
+        className="group w-full py-8 flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100/80 border-b border-gray-200/80 transition-colors cursor-pointer"
       >
         <svg
-          width={18}
-          height={18}
+          width={28}
+          height={28}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth={1.5}
+          strokeWidth={1.2}
+          className="text-gray-300 group-hover:text-gray-400 transition-colors"
         >
           <rect x="3" y="3" width="18" height="18" rx="2" />
           <circle cx="8.5" cy="8.5" r="1.5" />
           <polyline points="21 15 16 10 5 21" />
         </svg>
-        {uploading ? "アップロード中…" : "カバー画像を追加"}
+        <span className="text-xs text-gray-400 group-hover:text-gray-500 transition-colors">
+          {uploading ? "アップロード中…" : "カバー画像を追加"}
+        </span>
       </button>
       <input
         ref={inputRef}

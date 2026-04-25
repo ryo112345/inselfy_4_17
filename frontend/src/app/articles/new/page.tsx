@@ -22,7 +22,7 @@ export default async function NewArticlePage() {
         defaultOpen={sidebarOpen}
       />
       <div className="flex justify-center min-h-screen pl-[50px]">
-        <main className="w-full max-w-2xl">
+        <main className="w-full max-w-2xl bg-white border-x border-gray-200/80">
           <ArticleForm />
         </main>
       </div>
