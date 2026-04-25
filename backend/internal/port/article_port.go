@@ -18,7 +18,7 @@ type ArticleInputPort interface {
 }
 
 type ArticleOutputPort interface {
-	PresentArticle(ctx context.Context, a *article.ArticleWithAuthor, purchased bool) error
+	PresentArticle(ctx context.Context, a *article.ArticleWithAuthor, purchased bool, isAuthor bool) error
 	PresentArticles(ctx context.Context, articles []*article.ArticleWithAuthor, total int) error
 	PresentCheckoutSession(ctx context.Context, sessionURL string) error
 }

@@ -20,7 +20,7 @@ export default async function ArticlePage({ params }: Props) {
 
   let article;
   try {
-    article = await fetchArticle(id);
+    article = await fetchArticle(id, { cookie: cookieStore.toString() });
   } catch {
     notFound();
   }

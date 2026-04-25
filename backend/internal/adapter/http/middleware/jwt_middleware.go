@@ -38,6 +38,23 @@ func JWTAuth(jwtService port.JWTService) echo.MiddlewareFunc {
 	}
 }
 
+func OptionalJWTAuth(jwtService port.JWTService) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			token := tokenFromCookie(c)
+			if token == "" {
+				token = tokenFromHeader(c)
+			}
+			if token != "" {
+				if userID, err := jwtService.ValidateAccessToken(token); err == nil {
+					c.Set(UserIDKey, userID)
+				}
+			}
+			return next(c)
+		}
+	}
+}
+
 func tokenFromCookie(c echo.Context) string {
 	cookie, err := c.Cookie("inselfy_token")
 	if err != nil || cookie.Value == "" {

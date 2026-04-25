@@ -43,7 +43,7 @@ export function TagInput({ tags, onChange, max = 10 }: Props) {
           key={tag}
           className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600"
         >
-          #{tag}
+          # {tag}
           <button
             type="button"
             onClick={(e) => {
