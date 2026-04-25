@@ -15,6 +15,8 @@ export type ArticleItem = {
   priceYen: number;
   purchased: boolean;
   isAuthor: boolean;
+  charCount: number;
+  imageCount: number;
   status: string;
   coverImageUrl?: string;
   tags: string[];

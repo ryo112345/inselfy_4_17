@@ -20,6 +20,8 @@ type ArticleResponse struct {
 	PriceYen       int        `json:"priceYen"`
 	Purchased      bool       `json:"purchased"`
 	IsAuthor       bool       `json:"isAuthor"`
+	CharCount      int        `json:"charCount"`
+	ImageCount     int        `json:"imageCount"`
 	Status         string     `json:"status"`
 	CoverImageURL  *string    `json:"coverImageUrl,omitempty"`
 	Tags           []string   `json:"tags"`
@@ -63,6 +65,8 @@ func (p *ArticlePresenter) PresentArticle(_ context.Context, a *article.ArticleW
 		PriceYen:       a.Article.PriceYen,
 		Purchased:      purchased,
 		IsAuthor:       isAuthor,
+		CharCount:      article.CountChars(a.Article.Body),
+		ImageCount:     article.CountImages(a.Article.Body),
 		Status:         string(a.Article.Status),
 		CoverImageURL:  a.Article.CoverImageURL,
 		Tags:           a.Article.Tags,

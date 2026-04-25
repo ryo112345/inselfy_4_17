@@ -54,7 +54,7 @@ export function ArticleView({ article, currentUsername }: Props) {
   const [bookmarkAnimating, setBookmarkAnimating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pastEngagement, setPastEngagement] = useState(false);
-  const [isScrolling, setIsScrolling] = useState(false);
+  const [hiddenByScroll, setHiddenByScroll] = useState(false);
 
   const engagementRef = useRef<HTMLDivElement>(null);
 
@@ -70,20 +70,21 @@ export function ArticleView({ article, currentUsername }: Props) {
   }, []);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
+    let lastY = window.scrollY;
     function onScroll() {
-      setIsScrolling(true);
-      clearTimeout(timer);
-      timer = setTimeout(() => setIsScrolling(false), 800);
+      const y = window.scrollY;
+      if (y > lastY) {
+        setHiddenByScroll(true);
+      } else if (y < lastY) {
+        setHiddenByScroll(false);
+      }
+      lastY = y;
     }
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      clearTimeout(timer);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const showFloating = pastEngagement && !isScrolling;
+  const showFloating = !hiddenByScroll;
 
   const handleLike = useCallback(() => {
     setLiked((prev) => !prev);
@@ -140,7 +141,13 @@ export function ArticleView({ article, currentUsername }: Props) {
       })
     : null;
 
+  const isLoggedIn = currentUsername && currentUsername !== "guest";
+
   async function handlePurchase() {
+    if (!isLoggedIn) {
+      window.location.href = `/login?redirect=${encodeURIComponent(`/articles/${article.id}`)}`;
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -263,15 +270,11 @@ export function ArticleView({ article, currentUsername }: Props) {
     <article>
       {/* Breadcrumbs */}
       <nav className="px-5 py-3 text-xs text-gray-400 border-b border-gray-100 flex items-center gap-1.5 min-w-0">
-        <Link href="/" className="hover:text-gray-600 transition-colors shrink-0">
-          ホーム
-        </Link>
-        <span className="shrink-0">/</span>
         <Link
           href="/articles"
           className="hover:text-gray-600 transition-colors shrink-0"
         >
-          記事
+          記事一覧
         </Link>
         <span className="shrink-0">/</span>
         <span className="text-gray-500 truncate">
@@ -403,33 +406,49 @@ export function ArticleView({ article, currentUsername }: Props) {
             />
           ) : (
             <>
-              <div
-                className="prose prose-gray max-w-none prose-p:text-[18px] prose-li:text-[18px] prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-[1.85] prose-a:text-[var(--accent)] prose-img:rounded-lg prose-li:text-gray-700"
-                dangerouslySetInnerHTML={{ __html: processedHtml }}
-              />
+              <div className="relative">
+                <div
+                  className="prose prose-gray max-w-none prose-p:text-[18px] prose-li:text-[18px] prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-[1.85] prose-a:text-[var(--accent)] prose-img:rounded-lg prose-li:text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: processedHtml }}
+                />
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
+                  style={{ background: "linear-gradient(0deg, #fff 0%, #fff 5%, transparent)" }}
+                />
+              </div>
 
-              <div className="mt-8 border-t-2 border-dashed border-gray-200 pt-8">
-                <div className="bg-gray-50 rounded-xl p-6 text-center">
-                  <p className="text-gray-500 text-sm mb-1">
-                    この先は有料コンテンツです
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 mb-4">
-                    ¥{article.priceYen.toLocaleString()}
-                  </p>
+              <div className="relative flex items-center justify-center my-8">
+                <svg aria-hidden className="absolute inset-x-0 top-1/2 w-full h-0.5" preserveAspectRatio="none">
+                  <line x1="0" y1="1" x2="100%" y2="1" stroke="#d6d9de" strokeWidth={2} strokeDasharray="5 6" strokeLinecap="round" />
+                </svg>
+                <span className="relative bg-white px-3 text-sm text-gray-400">
+                  この先は有料コンテンツです
+                </span>
+              </div>
 
-                  {error && (
-                    <p className="text-sm text-red-600 mb-3">{error}</p>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handlePurchase}
-                    disabled={loading}
-                    className="px-8 py-2.5 text-sm font-medium text-white bg-[var(--accent)] rounded-lg hover:opacity-90 disabled:opacity-40 transition-colors"
-                  >
-                    {loading ? "処理中…" : "購入して続きを読む"}
-                  </button>
+              <div className="border border-gray-200 rounded-lg p-5 mb-12">
+                <p className="text-xs text-gray-400 text-center mb-1">この記事のみ</p>
+                <div className="text-center mb-1">
+                  <span className="text-sm text-gray-500">¥</span>
+                  <span className="text-xl font-bold text-gray-900">{article.priceYen.toLocaleString()}</span>
                 </div>
+                <p className="text-xs text-gray-400 text-center mb-4">
+                  {article.charCount.toLocaleString()}字
+                  {article.imageCount > 0 && ` / ${article.imageCount}画像`}
+                </p>
+
+                {error && (
+                  <p className="text-sm text-red-600 text-center mb-3">{error}</p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handlePurchase}
+                  disabled={loading}
+                  className="w-full py-2.5 text-sm font-semibold text-white bg-[var(--accent)] rounded-lg hover:opacity-90 disabled:opacity-40 transition-colors cursor-pointer"
+                >
+                  {loading ? "処理中…" : isLoggedIn ? "購入手続きへ" : "ログインして購入"}
+                </button>
               </div>
             </>
           )}

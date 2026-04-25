@@ -2,6 +2,7 @@ package article
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 )
 
@@ -73,6 +74,18 @@ func validateCommon(title, body string, isPaid bool, priceYen int, tags []string
 		}
 	}
 	return nil
+}
+
+var htmlTagRe = regexp.MustCompile(`<[^>]*>`)
+var imgTagRe = regexp.MustCompile(`<img[\s>]`)
+
+func CountChars(body string) int {
+	text := htmlTagRe.ReplaceAllString(body, "")
+	return len([]rune(strings.TrimSpace(text)))
+}
+
+func CountImages(body string) int {
+	return len(imgTagRe.FindAllString(body, -1))
 }
 
 // SplitBody splits article body on the first "---paid---" separator.
