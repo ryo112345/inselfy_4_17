@@ -120,6 +120,68 @@ func NewArticleInputFactory(stripeService port.StripeService) func(
 	}
 }
 
+func NewScoutInputFactory() func(
+	msgRepo port.ScoutMessageRepository,
+	creditRepo port.ScoutCreditRepository,
+	ledgerRepo port.ScoutCreditLedgerRepository,
+	replyRepo port.ScoutReplyRepository,
+	settingsRepo port.UserScoutSettingsRepository,
+	notifRepo port.NotificationRepository,
+	userRepo port.UserRepository,
+	tx port.TxManager,
+	output port.ScoutOutputPort,
+) port.ScoutInputPort {
+	return func(
+		msgRepo port.ScoutMessageRepository,
+		creditRepo port.ScoutCreditRepository,
+		ledgerRepo port.ScoutCreditLedgerRepository,
+		replyRepo port.ScoutReplyRepository,
+		settingsRepo port.UserScoutSettingsRepository,
+		notifRepo port.NotificationRepository,
+		userRepo port.UserRepository,
+		tx port.TxManager,
+		output port.ScoutOutputPort,
+	) port.ScoutInputPort {
+		return usecase.NewScoutInteractor(msgRepo, creditRepo, ledgerRepo, replyRepo, settingsRepo, notifRepo, userRepo, tx, output)
+	}
+}
+
+func NewScoutTemplateInputFactory() func(
+	repo port.ScoutTemplateRepository,
+	output port.ScoutTemplateOutputPort,
+) port.ScoutTemplateInputPort {
+	return func(
+		repo port.ScoutTemplateRepository,
+		output port.ScoutTemplateOutputPort,
+	) port.ScoutTemplateInputPort {
+		return usecase.NewScoutTemplateInteractor(repo, output)
+	}
+}
+
+func NewNotificationInputFactory() func(
+	repo port.NotificationRepository,
+	output port.NotificationOutputPort,
+) port.NotificationInputPort {
+	return func(
+		repo port.NotificationRepository,
+		output port.NotificationOutputPort,
+	) port.NotificationInputPort {
+		return usecase.NewNotificationInteractor(repo, output)
+	}
+}
+
+func NewJobPostingInputFactory() func(
+	repo port.JobPostingRepository,
+	output port.JobPostingOutputPort,
+) port.JobPostingInputPort {
+	return func(
+		repo port.JobPostingRepository,
+		output port.JobPostingOutputPort,
+	) port.JobPostingInputPort {
+		return usecase.NewJobPostingInteractor(repo, output)
+	}
+}
+
 // NewSkillInputFactory returns a factory function that builds a SkillInputPort.
 func NewSkillInputFactory() func(
 	repo port.SkillRepository,

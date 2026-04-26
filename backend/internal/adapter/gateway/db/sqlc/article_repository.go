@@ -189,25 +189,6 @@ func (r *ArticleRepository) Delete(ctx context.Context, id string) error {
 	return q.DeleteArticle(ctx, pgID)
 }
 
-func optionalUUID(s *string) pgtype.UUID {
-	if s == nil {
-		return pgtype.UUID{}
-	}
-	id, err := parseUUID(*s)
-	if err != nil {
-		return pgtype.UUID{}
-	}
-	return id
-}
-
-func uuidPtr(id pgtype.UUID) *string {
-	if !id.Valid {
-		return nil
-	}
-	s := uuidToString(id)
-	return &s
-}
-
 func nonNilTags(tags []string) []string {
 	if tags == nil {
 		return []string{}

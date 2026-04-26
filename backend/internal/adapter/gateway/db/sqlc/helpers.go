@@ -3,6 +3,7 @@ package sqlc
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -70,4 +71,38 @@ func pgInt2(v *int16) pgtype.Int2 {
 		return pgtype.Int2{}
 	}
 	return pgtype.Int2{Int16: *v, Valid: true}
+}
+
+func optionalUUID(s *string) pgtype.UUID {
+	if s == nil {
+		return pgtype.UUID{}
+	}
+	id, err := parseUUID(*s)
+	if err != nil {
+		return pgtype.UUID{}
+	}
+	return id
+}
+
+func uuidPtr(id pgtype.UUID) *string {
+	if !id.Valid {
+		return nil
+	}
+	s := uuidToString(id)
+	return &s
+}
+
+func timePtrToTimestamptz(t *time.Time) pgtype.Timestamptz {
+	if t != nil {
+		return pgtype.Timestamptz{Time: *t, Valid: true}
+	}
+	return pgtype.Timestamptz{}
+}
+
+func timestamptzToTimePtr(t pgtype.Timestamptz) *time.Time {
+	if t.Valid {
+		v := t.Time
+		return &v
+	}
+	return nil
 }

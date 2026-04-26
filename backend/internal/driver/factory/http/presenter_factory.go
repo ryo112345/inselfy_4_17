@@ -70,3 +70,27 @@ func NewArticleOutputFactory() func() *presenter.ArticlePresenter {
 		return presenter.NewArticlePresenter()
 	}
 }
+
+func NewScoutOutputFactory() func() *presenter.ScoutPresenter {
+	return func() *presenter.ScoutPresenter {
+		return presenter.NewScoutPresenter()
+	}
+}
+
+func NewScoutTemplateOutputFactory() func() *presenter.ScoutTemplatePresenter {
+	return func() *presenter.ScoutTemplatePresenter {
+		return presenter.NewScoutTemplatePresenter()
+	}
+}
+
+func NewNotificationOutputFactory() func() *presenter.NotificationPresenter {
+	return func() *presenter.NotificationPresenter {
+		return presenter.NewNotificationPresenter()
+	}
+}
+
+func NewJobPostingOutputFactory() func() *presenter.JobPostingPresenter {
+	return func() *presenter.JobPostingPresenter {
+		return presenter.NewJobPostingPresenter()
+	}
+}

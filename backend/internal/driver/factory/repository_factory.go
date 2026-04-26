@@ -122,3 +122,51 @@ func NewArticlePurchaseRepoFactory(pool *pgxpool.Pool) func() port.ArticlePurcha
 		return sqlcgw.NewArticlePurchaseRepository(pool)
 	}
 }
+
+func NewScoutMessageRepoFactory(pool *pgxpool.Pool) func() port.ScoutMessageRepository {
+	return func() port.ScoutMessageRepository {
+		return sqlcgw.NewScoutMessageRepository(pool)
+	}
+}
+
+func NewScoutCreditRepoFactory(pool *pgxpool.Pool) func() port.ScoutCreditRepository {
+	return func() port.ScoutCreditRepository {
+		return sqlcgw.NewScoutCreditRepository(pool)
+	}
+}
+
+func NewScoutCreditLedgerRepoFactory(pool *pgxpool.Pool) func() port.ScoutCreditLedgerRepository {
+	return func() port.ScoutCreditLedgerRepository {
+		return sqlcgw.NewScoutCreditLedgerRepository(pool)
+	}
+}
+
+func NewScoutReplyRepoFactory(pool *pgxpool.Pool) func() port.ScoutReplyRepository {
+	return func() port.ScoutReplyRepository {
+		return sqlcgw.NewScoutReplyRepository(pool)
+	}
+}
+
+func NewScoutTemplateRepoFactory(pool *pgxpool.Pool) func() port.ScoutTemplateRepository {
+	return func() port.ScoutTemplateRepository {
+		return sqlcgw.NewScoutTemplateRepository(pool)
+	}
+}
+
+func NewUserScoutSettingsRepoFactory(pool *pgxpool.Pool) func() port.UserScoutSettingsRepository {
+	return func() port.UserScoutSettingsRepository {
+		return sqlcgw.NewUserScoutSettingsRepository(pool)
+	}
+}
+
+func NewNotificationRepoFactory(pool *pgxpool.Pool) func() port.NotificationRepository {
+	return func() port.NotificationRepository {
+		return sqlcgw.NewNotificationRepository(pool)
+	}
+}
+
+func NewJobPostingRepoFactory(pool *pgxpool.Pool) func() port.JobPostingRepository {
+	return func() port.JobPostingRepository {
+		return sqlcgw.NewJobPostingRepository(pool)
+	}
+}
