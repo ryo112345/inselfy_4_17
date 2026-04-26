@@ -138,6 +138,100 @@ func (ns NullCompanyStatus) Value() (driver.Value, error) {
 	return string(ns.CompanyStatus), nil
 }
 
+type NotificationType string
+
+const (
+	NotificationTypeScoutReceived     NotificationType = "scout_received"
+	NotificationTypeScoutReplied      NotificationType = "scout_replied"
+	NotificationTypeScoutInterested   NotificationType = "scout_interested"
+	NotificationTypeScoutDeclined     NotificationType = "scout_declined"
+	NotificationTypeScoutExpired      NotificationType = "scout_expired"
+	NotificationTypeCreditReplenished NotificationType = "credit_replenished"
+	NotificationTypeQualityWarning    NotificationType = "quality_warning"
+)
+
+func (e *NotificationType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = NotificationType(s)
+	case string:
+		*e = NotificationType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for NotificationType: %T", src)
+	}
+	return nil
+}
+
+type NullNotificationType struct {
+	NotificationType NotificationType `json:"notification_type"`
+	Valid            bool             `json:"valid"` // Valid is true if NotificationType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullNotificationType) Scan(value interface{}) error {
+	if value == nil {
+		ns.NotificationType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.NotificationType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullNotificationType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.NotificationType), nil
+}
+
+type ScoutMessageStatus string
+
+const (
+	ScoutMessageStatusDraft      ScoutMessageStatus = "draft"
+	ScoutMessageStatusSent       ScoutMessageStatus = "sent"
+	ScoutMessageStatusOpened     ScoutMessageStatus = "opened"
+	ScoutMessageStatusReplied    ScoutMessageStatus = "replied"
+	ScoutMessageStatusInterested ScoutMessageStatus = "interested"
+	ScoutMessageStatusDeclined   ScoutMessageStatus = "declined"
+	ScoutMessageStatusExpired    ScoutMessageStatus = "expired"
+)
+
+func (e *ScoutMessageStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ScoutMessageStatus(s)
+	case string:
+		*e = ScoutMessageStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ScoutMessageStatus: %T", src)
+	}
+	return nil
+}
+
+type NullScoutMessageStatus struct {
+	ScoutMessageStatus ScoutMessageStatus `json:"scout_message_status"`
+	Valid              bool               `json:"valid"` // Valid is true if ScoutMessageStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullScoutMessageStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ScoutMessageStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ScoutMessageStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullScoutMessageStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ScoutMessageStatus), nil
+}
+
 type AiReport struct {
 	ID        pgtype.UUID        `json:"id"`
 	SessionID pgtype.UUID        `json:"session_id"`
@@ -286,6 +380,30 @@ type IntegratedReportRequest struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type JobPosting struct {
+	ID             pgtype.UUID        `json:"id"`
+	CompanyID      pgtype.UUID        `json:"company_id"`
+	Title          string             `json:"title"`
+	Description    string             `json:"description"`
+	EmploymentType string             `json:"employment_type"`
+	Location       pgtype.Text        `json:"location"`
+	IsActive       bool               `json:"is_active"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
+type Notification struct {
+	ID          pgtype.UUID        `json:"id"`
+	UserID      pgtype.UUID        `json:"user_id"`
+	CompanyID   pgtype.UUID        `json:"company_id"`
+	Type        NotificationType   `json:"type"`
+	Title       string             `json:"title"`
+	Body        string             `json:"body"`
+	ReferenceID pgtype.UUID        `json:"reference_id"`
+	IsRead      bool               `json:"is_read"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
 type Post struct {
 	ID        pgtype.UUID        `json:"id"`
 	UserID    pgtype.UUID        `json:"user_id"`
@@ -301,6 +419,64 @@ type RefreshToken struct {
 	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	RevokedAt pgtype.Timestamptz `json:"revoked_at"`
+}
+
+type ScoutCredit struct {
+	ID                pgtype.UUID        `json:"id"`
+	CompanyID         pgtype.UUID        `json:"company_id"`
+	Balance           int32              `json:"balance"`
+	MonthlyAllowance  int32              `json:"monthly_allowance"`
+	MaxStock          int32              `json:"max_stock"`
+	LastReplenishedAt pgtype.Timestamptz `json:"last_replenished_at"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+}
+
+type ScoutCreditLedger struct {
+	ID             pgtype.UUID        `json:"id"`
+	CompanyID      pgtype.UUID        `json:"company_id"`
+	Delta          int32              `json:"delta"`
+	Reason         string             `json:"reason"`
+	ScoutMessageID pgtype.UUID        `json:"scout_message_id"`
+	BalanceAfter   int32              `json:"balance_after"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
+type ScoutMessage struct {
+	ID           pgtype.UUID        `json:"id"`
+	CompanyID    pgtype.UUID        `json:"company_id"`
+	CandidateID  pgtype.UUID        `json:"candidate_id"`
+	JobPostingID pgtype.UUID        `json:"job_posting_id"`
+	TemplateID   pgtype.UUID        `json:"template_id"`
+	Subject      string             `json:"subject"`
+	Body         string             `json:"body"`
+	Status       ScoutMessageStatus `json:"status"`
+	SentAt       pgtype.Timestamptz `json:"sent_at"`
+	OpenedAt     pgtype.Timestamptz `json:"opened_at"`
+	RepliedAt    pgtype.Timestamptz `json:"replied_at"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	ResendCount  int16              `json:"resend_count"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
+type ScoutReply struct {
+	ID             pgtype.UUID        `json:"id"`
+	ScoutMessageID pgtype.UUID        `json:"scout_message_id"`
+	SenderType     string             `json:"sender_type"`
+	SenderID       pgtype.UUID        `json:"sender_id"`
+	Body           string             `json:"body"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
+type ScoutTemplate struct {
+	ID        pgtype.UUID        `json:"id"`
+	CompanyID pgtype.UUID        `json:"company_id"`
+	Name      string             `json:"name"`
+	Subject   string             `json:"subject"`
+	Body      string             `json:"body"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Skill struct {
@@ -351,6 +527,12 @@ type User struct {
 	OauthProvider    pgtype.Text        `json:"oauth_provider"`
 	OauthProviderID  pgtype.Text        `json:"oauth_provider_id"`
 	AvatarUrl        pgtype.Text        `json:"avatar_url"`
+}
+
+type UserScoutSetting struct {
+	UserID          pgtype.UUID        `json:"user_id"`
+	AcceptingScouts bool               `json:"accepting_scouts"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
 }
 
 type UserSkill struct {

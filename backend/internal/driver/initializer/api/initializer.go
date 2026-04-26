@@ -67,6 +67,20 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	companyAuthInputFactory := factory.NewCompanyAuthInputFactory(jwtService)
 
+	scoutMsgRepoFactory := factory.NewScoutMessageRepoFactory(pool)
+	scoutCreditRepoFactory := factory.NewScoutCreditRepoFactory(pool)
+	scoutCreditLedgerRepoFactory := factory.NewScoutCreditLedgerRepoFactory(pool)
+	scoutReplyRepoFactory := factory.NewScoutReplyRepoFactory(pool)
+	scoutTemplateRepoFactory := factory.NewScoutTemplateRepoFactory(pool)
+	userScoutSettingsRepoFactory := factory.NewUserScoutSettingsRepoFactory(pool)
+	notificationRepoFactory := factory.NewNotificationRepoFactory(pool)
+	jobPostingRepoFactory := factory.NewJobPostingRepoFactory(pool)
+
+	scoutInputFactory := factory.NewScoutInputFactory()
+	scoutTemplateInputFactory := factory.NewScoutTemplateInputFactory()
+	notificationInputFactory := factory.NewNotificationInputFactory()
+	jobPostingInputFactory := factory.NewJobPostingInputFactory()
+
 	userOutputFactory := httpfactory.NewUserOutputFactory()
 	authOutputFactory := httpfactory.NewAuthOutputFactory()
 	experienceOutputFactory := httpfactory.NewExperienceOutputFactory()
@@ -79,6 +93,10 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	articleOutputFactory := httpfactory.NewArticleOutputFactory()
 
 	companyAuthOutputFactory := httpfactory.NewCompanyAuthOutputFactory()
+	scoutOutputFactory := httpfactory.NewScoutOutputFactory()
+	scoutTemplateOutputFactory := httpfactory.NewScoutTemplateOutputFactory()
+	notificationOutputFactory := httpfactory.NewNotificationOutputFactory()
+	jobPostingOutputFactory := httpfactory.NewJobPostingOutputFactory()
 
 	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
 	authCtrl := httpcontroller.NewAuthController(authInputFactory, authOutputFactory, userRepoFactory, refreshTokenRepoFactory)
@@ -94,6 +112,34 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		articleRepoFactory,
 		articlePurchaseRepoFactory,
 		fileStorage,
+	)
+
+	scoutCtrl := httpcontroller.NewScoutController(
+		scoutInputFactory, scoutOutputFactory,
+		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
+		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
+		userRepoFactory, tx,
+	)
+	candidateScoutCtrl := httpcontroller.NewCandidateScoutController(
+		scoutInputFactory, scoutOutputFactory,
+		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
+		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
+		userRepoFactory, tx,
+	)
+	scoutSettingsCtrl := httpcontroller.NewScoutSettingsController(
+		scoutInputFactory, scoutOutputFactory,
+		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
+		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
+		userRepoFactory, tx,
+	)
+	scoutTemplateCtrl := httpcontroller.NewScoutTemplateController(
+		scoutTemplateInputFactory, scoutTemplateOutputFactory, scoutTemplateRepoFactory,
+	)
+	notifCtrl := httpcontroller.NewNotificationController(
+		notificationInputFactory, notificationOutputFactory, notificationRepoFactory,
+	)
+	jobPostingCtrl := httpcontroller.NewJobPostingController(
+		jobPostingInputFactory, jobPostingOutputFactory, jobPostingRepoFactory,
 	)
 
 	companyAuthCtrl := httpcontroller.NewCompanyAuthController(
@@ -392,6 +438,83 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	intGroup.GET("/users/:userId/latest-request", func(c echo.Context) error {
 		return adminIntReportCtrl.GetLatestRequest(c, c.Param("userId"))
 	})
+
+	// --- Company Scouts ---
+	scoutGroup := e.Group("/api/company/scouts", companyJwtMW)
+	scoutGroup.POST("", scoutCtrl.Send)
+	scoutGroup.GET("", scoutCtrl.List)
+	scoutGroup.GET("/credits", scoutCtrl.GetCredits)
+	scoutGroup.GET("/quality", scoutCtrl.GetQualityScore)
+	scoutGroup.GET("/:scoutId", func(c echo.Context) error {
+		return scoutCtrl.GetDetail(c, c.Param("scoutId"))
+	})
+	scoutGroup.POST("/:scoutId/reply", func(c echo.Context) error {
+		return scoutCtrl.Reply(c, c.Param("scoutId"))
+	})
+
+	// --- Company Scout Templates ---
+	templateGroup := e.Group("/api/company/scout-templates", companyJwtMW)
+	templateGroup.POST("", scoutTemplateCtrl.Create)
+	templateGroup.GET("", scoutTemplateCtrl.List)
+	templateGroup.GET("/:templateId", func(c echo.Context) error {
+		return scoutTemplateCtrl.Get(c, c.Param("templateId"))
+	})
+	templateGroup.PUT("/:templateId", func(c echo.Context) error {
+		return scoutTemplateCtrl.Update(c, c.Param("templateId"))
+	})
+	templateGroup.DELETE("/:templateId", func(c echo.Context) error {
+		return scoutTemplateCtrl.Delete(c, c.Param("templateId"))
+	})
+
+	// --- Company Jobs ---
+	jobGroup := e.Group("/api/company/jobs", companyJwtMW)
+	jobGroup.POST("", jobPostingCtrl.Create)
+	jobGroup.GET("", jobPostingCtrl.List)
+	jobGroup.GET("/:jobId", func(c echo.Context) error {
+		return jobPostingCtrl.Get(c, c.Param("jobId"))
+	})
+	jobGroup.PUT("/:jobId", func(c echo.Context) error {
+		return jobPostingCtrl.Update(c, c.Param("jobId"))
+	})
+	jobGroup.DELETE("/:jobId", func(c echo.Context) error {
+		return jobPostingCtrl.Delete(c, c.Param("jobId"))
+	})
+
+	// --- Company Notifications ---
+	companyNotifGroup := e.Group("/api/company/notifications", companyJwtMW)
+	companyNotifGroup.GET("", notifCtrl.ListByCompany)
+	companyNotifGroup.GET("/unread-count", notifCtrl.CountUnreadByCompany)
+	companyNotifGroup.POST("/:id/read", func(c echo.Context) error {
+		return notifCtrl.MarkAsRead(c, c.Param("id"))
+	})
+	companyNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByCompany)
+
+	// --- Candidate Scouts ---
+	candidateScoutGroup := e.Group("/api/scouts", jwtMW)
+	candidateScoutGroup.GET("", candidateScoutCtrl.List)
+	candidateScoutGroup.GET("/:scoutId", func(c echo.Context) error {
+		return candidateScoutCtrl.GetDetail(c, c.Param("scoutId"))
+	})
+	candidateScoutGroup.POST("/:scoutId/respond", func(c echo.Context) error {
+		return candidateScoutCtrl.Respond(c, c.Param("scoutId"))
+	})
+	candidateScoutGroup.POST("/:scoutId/reply", func(c echo.Context) error {
+		return candidateScoutCtrl.Reply(c, c.Param("scoutId"))
+	})
+	candidateScoutGroup.POST("/bulk-decline", candidateScoutCtrl.BulkDecline)
+
+	// --- Scout Settings ---
+	e.GET("/api/scout-settings", scoutSettingsCtrl.Get, jwtMW)
+	e.PUT("/api/scout-settings", scoutSettingsCtrl.Update, jwtMW)
+
+	// --- User Notifications ---
+	userNotifGroup := e.Group("/api/notifications", jwtMW)
+	userNotifGroup.GET("", notifCtrl.ListByUser)
+	userNotifGroup.GET("/unread-count", notifCtrl.CountUnreadByUser)
+	userNotifGroup.POST("/:id/read", func(c echo.Context) error {
+		return notifCtrl.MarkAsRead(c, c.Param("id"))
+	})
+	userNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByUser)
 
 	return e, cfg, cleanup, nil
 }

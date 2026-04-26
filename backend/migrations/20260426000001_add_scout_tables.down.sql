@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS notifications;
+DROP TYPE IF EXISTS notification_type;
+DROP TABLE IF EXISTS user_scout_settings;
+DROP TABLE IF EXISTS scout_replies;
+DROP TABLE IF EXISTS scout_messages;
+DROP TYPE IF EXISTS scout_message_status;
+DROP TABLE IF EXISTS scout_templates;
+DROP TABLE IF EXISTS scout_credit_ledger;
+DROP TABLE IF EXISTS scout_credits;
+DROP TABLE IF EXISTS job_postings;

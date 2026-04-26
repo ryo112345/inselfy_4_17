@@ -14,6 +14,7 @@ import (
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
+	"github.com/akiyama/inselfy/backend/internal/domain/scout"
 	"github.com/akiyama/inselfy/backend/internal/domain/skill"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -29,12 +30,17 @@ func handleError(ctx echo.Context, err error) error {
 	case errors.Is(err, domainerr.ErrConflict),
 		errors.Is(err, experience.ErrTooManyEntries),
 		errors.Is(err, education.ErrTooManyEntries),
-		errors.Is(err, skill.ErrTooManyEntries):
+		errors.Is(err, skill.ErrTooManyEntries),
+		errors.Is(err, scout.ErrDuplicateScout),
+		errors.Is(err, scout.ErrTooManyTemplates):
 		return ctx.JSON(http.StatusConflict, openapi.ModelsConflictError{
 			Code:    openapi.ModelsConflictErrorCodeCONFLICT,
 			Message: err.Error(),
 		})
-	case errors.Is(err, port.ErrForbidden):
+	case errors.Is(err, port.ErrForbidden),
+		errors.Is(err, scout.ErrScoutingDisabled),
+		errors.Is(err, scout.ErrQualityRestricted),
+		errors.Is(err, scout.ErrNotOwner):
 		return ctx.JSON(http.StatusForbidden, openapi.ModelsForbiddenError{
 			Code:    openapi.ModelsForbiddenErrorCodeFORBIDDEN,
 			Message: err.Error(),
@@ -106,6 +112,21 @@ func isBadRequest(err error) bool {
 		errors.Is(err, article.ErrNotPaid),
 		errors.Is(err, article.ErrTooManyTags),
 		errors.Is(err, article.ErrTagTooLong):
+		return true
+	case errors.Is(err, scout.ErrSubjectRequired),
+		errors.Is(err, scout.ErrSubjectTooLong),
+		errors.Is(err, scout.ErrBodyRequired),
+		errors.Is(err, scout.ErrBodyTooLong),
+		errors.Is(err, scout.ErrTemplateNameRequired),
+		errors.Is(err, scout.ErrTemplateNameTooLong),
+		errors.Is(err, scout.ErrReplyBodyRequired),
+		errors.Is(err, scout.ErrReplyBodyTooLong),
+		errors.Is(err, scout.ErrInvalidResponse),
+		errors.Is(err, scout.ErrInsufficientCredits),
+		errors.Is(err, scout.ErrAlreadyResponded),
+		errors.Is(err, scout.ErrScoutExpired),
+		errors.Is(err, scout.ErrNotSentOrOpened),
+		errors.Is(err, scout.ErrResendLimitReached):
 		return true
 	}
 	return false
