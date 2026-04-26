@@ -64,16 +64,22 @@ func (i *ScoutInteractor) Send(ctx context.Context, input scout.SendScoutInput) 
 		return scout.ErrScoutingDisabled
 	}
 
-	sent, err := i.msgRepo.CountSentLast14Days(ctx, input.CompanyID)
+	credit, err := i.creditRepo.GetOrCreate(ctx, input.CompanyID)
 	if err != nil {
 		return err
 	}
-	replied, err := i.msgRepo.CountRepliedLast14Days(ctx, input.CompanyID)
+	if credit.QualityRestricted {
+		return scout.ErrQualityRestricted
+	}
+
+	qResult, err := i.evaluateQuality(ctx, input.CompanyID, credit)
 	if err != nil {
 		return err
 	}
-	qs := scout.CalculateQualityScore(sent, replied)
-	if qs.Level == scout.QualityRestricted {
+	if err := i.applyQualityTransitions(ctx, input.CompanyID, qResult); err != nil {
+		return err
+	}
+	if qResult.Score.Level == scout.QualityRestricted {
 		return scout.ErrQualityRestricted
 	}
 
@@ -211,16 +217,69 @@ func (i *ScoutInteractor) GetCredits(ctx context.Context, companyID string) erro
 }
 
 func (i *ScoutInteractor) GetQualityScore(ctx context.Context, companyID string) error {
-	sent, err := i.msgRepo.CountSentLast14Days(ctx, companyID)
+	credit, err := i.creditRepo.GetOrCreate(ctx, companyID)
 	if err != nil {
 		return err
 	}
-	replied, err := i.msgRepo.CountRepliedLast14Days(ctx, companyID)
+	qResult, err := i.evaluateQuality(ctx, companyID, credit)
 	if err != nil {
 		return err
 	}
-	qs := scout.CalculateQualityScore(sent, replied)
-	return i.output.PresentQualityScore(ctx, &qs)
+	if err := i.applyQualityTransitions(ctx, companyID, qResult); err != nil {
+		return err
+	}
+	return i.output.PresentQualityScore(ctx, &qResult.Score)
+}
+
+func (i *ScoutInteractor) evaluateQuality(ctx context.Context, companyID string, credit *scout.ScoutCredit) (scout.QualityResult, error) {
+	now := time.Now()
+
+	sent14, err := i.msgRepo.CountSentLastNDays(ctx, companyID, scout.DefaultLookbackDays)
+	if err != nil {
+		return scout.QualityResult{}, err
+	}
+	replied14, err := i.msgRepo.CountRepliedLastNDays(ctx, companyID, scout.DefaultLookbackDays)
+	if err != nil {
+		return scout.QualityResult{}, err
+	}
+
+	var sent20, replied20 int
+	if credit.WarningStartedAt != nil {
+		deadline := credit.WarningStartedAt.Add(scout.WarningImprovementDays * 24 * time.Hour)
+		if !now.Before(deadline) {
+			sent20, err = i.msgRepo.CountSentLastNDays(ctx, companyID, scout.WarningExtendedLookback)
+			if err != nil {
+				return scout.QualityResult{}, err
+			}
+			replied20, err = i.msgRepo.CountRepliedLastNDays(ctx, companyID, scout.WarningExtendedLookback)
+			if err != nil {
+				return scout.QualityResult{}, err
+			}
+		}
+	}
+
+	return scout.EvaluateQuality(scout.QualityInput{
+		Sent14d:           sent14,
+		Replied14d:        replied14,
+		Sent20d:           sent20,
+		Replied20d:        replied20,
+		WarningStartedAt:  credit.WarningStartedAt,
+		QualityRestricted: credit.QualityRestricted,
+		Now:               now,
+	}), nil
+}
+
+func (i *ScoutInteractor) applyQualityTransitions(ctx context.Context, companyID string, result scout.QualityResult) error {
+	if result.ShouldSetWarning {
+		return i.creditRepo.SetQualityWarning(ctx, companyID)
+	}
+	if result.ShouldClearWarning {
+		return i.creditRepo.ClearQualityWarning(ctx, companyID)
+	}
+	if result.ShouldRestrict {
+		return i.creditRepo.SetQualityRestricted(ctx, companyID)
+	}
+	return nil
 }
 
 func (i *ScoutInteractor) CompanyReply(ctx context.Context, companyID, scoutID, body string) error {

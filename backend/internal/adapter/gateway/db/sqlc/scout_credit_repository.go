@@ -70,6 +70,33 @@ func (r *ScoutCreditRepository) Refund(ctx context.Context, companyID string) (*
 	return scoutCreditToDomain(row), nil
 }
 
+func (r *ScoutCreditRepository) SetQualityWarning(ctx context.Context, companyID string) error {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(companyID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	return q.SetQualityWarning(ctx, pgID)
+}
+
+func (r *ScoutCreditRepository) ClearQualityWarning(ctx context.Context, companyID string) error {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(companyID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	return q.ClearQualityWarning(ctx, pgID)
+}
+
+func (r *ScoutCreditRepository) SetQualityRestricted(ctx context.Context, companyID string) error {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(companyID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	return q.SetQualityRestricted(ctx, pgID)
+}
+
 func scoutCreditToDomain(row *generated.ScoutCredit) *scout.ScoutCredit {
 	return &scout.ScoutCredit{
 		ID:                uuidToString(row.ID),
@@ -78,6 +105,8 @@ func scoutCreditToDomain(row *generated.ScoutCredit) *scout.ScoutCredit {
 		MonthlyAllowance:  int(row.MonthlyAllowance),
 		MaxStock:          int(row.MaxStock),
 		LastReplenishedAt: row.LastReplenishedAt.Time,
+		WarningStartedAt:  timestamptzToTimePtr(row.WarningStartedAt),
+		QualityRestricted: row.QualityRestricted,
 		CreatedAt:         row.CreatedAt.Time,
 		UpdatedAt:         row.UpdatedAt.Time,
 	}

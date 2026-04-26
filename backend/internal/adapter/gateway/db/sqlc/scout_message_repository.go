@@ -230,6 +230,38 @@ func (r *ScoutMessageRepository) CountRepliedLast14Days(ctx context.Context, com
 	return int(count), nil
 }
 
+func (r *ScoutMessageRepository) CountSentLastNDays(ctx context.Context, companyID string, days int) (int, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgCompanyID, err := parseUUID(companyID)
+	if err != nil {
+		return 0, domainerr.ErrBadRequest
+	}
+	count, err := q.CountScoutsSentLastNDays(ctx, &generated.CountScoutsSentLastNDaysParams{
+		CompanyID: pgCompanyID,
+		Days:      int32(days),
+	})
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
+func (r *ScoutMessageRepository) CountRepliedLastNDays(ctx context.Context, companyID string, days int) (int, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgCompanyID, err := parseUUID(companyID)
+	if err != nil {
+		return 0, domainerr.ErrBadRequest
+	}
+	count, err := q.CountScoutsRepliedLastNDays(ctx, &generated.CountScoutsRepliedLastNDaysParams{
+		CompanyID: pgCompanyID,
+		Days:      int32(days),
+	})
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
 func (r *ScoutMessageRepository) ExpireOverdue(ctx context.Context) (int64, error) {
 	q := queriesForContext(ctx, r.queries)
 	return q.ExpireOverdueScoutMessages(ctx)

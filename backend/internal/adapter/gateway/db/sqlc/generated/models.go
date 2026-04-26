@@ -430,6 +430,8 @@ type ScoutCredit struct {
 	LastReplenishedAt pgtype.Timestamptz `json:"last_replenished_at"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	WarningStartedAt  pgtype.Timestamptz `json:"warning_started_at"`
+	QualityRestricted bool               `json:"quality_restricted"`
 }
 
 type ScoutCreditLedger struct {

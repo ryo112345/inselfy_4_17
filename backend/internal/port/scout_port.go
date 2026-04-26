@@ -48,6 +48,8 @@ type ScoutMessageRepository interface {
 	GetLatestByCompanyAndCandidate(ctx context.Context, companyID, candidateID string) (*scout.ScoutMessage, error)
 	CountSentLast14Days(ctx context.Context, companyID string) (int, error)
 	CountRepliedLast14Days(ctx context.Context, companyID string) (int, error)
+	CountSentLastNDays(ctx context.Context, companyID string, days int) (int, error)
+	CountRepliedLastNDays(ctx context.Context, companyID string, days int) (int, error)
 	ExpireOverdue(ctx context.Context) (int64, error)
 }
 
@@ -55,6 +57,9 @@ type ScoutCreditRepository interface {
 	GetOrCreate(ctx context.Context, companyID string) (*scout.ScoutCredit, error)
 	Deduct(ctx context.Context, companyID string) (*scout.ScoutCredit, error)
 	Refund(ctx context.Context, companyID string) (*scout.ScoutCredit, error)
+	SetQualityWarning(ctx context.Context, companyID string) error
+	ClearQualityWarning(ctx context.Context, companyID string) error
+	SetQualityRestricted(ctx context.Context, companyID string) error
 }
 
 type ScoutCreditLedgerRepository interface {
