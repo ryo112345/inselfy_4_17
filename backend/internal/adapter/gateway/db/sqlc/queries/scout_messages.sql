@@ -93,6 +93,18 @@ WHERE company_id = $1
     AND sent_at >= NOW() - INTERVAL '14 days'
     AND status IN ('replied', 'interested');
 
+-- name: CountScoutsSentLastNDays :one
+SELECT count(*) FROM scout_messages
+WHERE company_id = $1
+    AND sent_at >= NOW() - make_interval(days => $2)
+    AND status != 'draft';
+
+-- name: CountScoutsRepliedLastNDays :one
+SELECT count(*) FROM scout_messages
+WHERE company_id = $1
+    AND sent_at >= NOW() - make_interval(days => $2)
+    AND status IN ('replied', 'interested');
+
 -- name: ExpireOverdueScoutMessages :execrows
 UPDATE scout_messages
 SET status = 'expired', updated_at = NOW()

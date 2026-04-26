@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const clearQualityWarning = `-- name: ClearQualityWarning :exec
+UPDATE scout_credits
+SET warning_started_at = NULL, updated_at = NOW()
+WHERE company_id = $1
+`
+
+func (q *Queries) ClearQualityWarning(ctx context.Context, companyID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, clearQualityWarning, companyID)
+	return err
+}
+
 const createScoutCreditLedger = `-- name: CreateScoutCreditLedger :exec
 INSERT INTO scout_credit_ledger (company_id, delta, reason, scout_message_id, balance_after)
 VALUES ($1, $2, $3, $4, $5)
@@ -39,7 +50,7 @@ const deductScoutCredit = `-- name: DeductScoutCredit :one
 UPDATE scout_credits
 SET balance = balance - 1, updated_at = NOW()
 WHERE company_id = $1 AND balance > 0
-RETURNING id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at
+RETURNING id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at, warning_started_at, quality_restricted
 `
 
 func (q *Queries) DeductScoutCredit(ctx context.Context, companyID pgtype.UUID) (*ScoutCredit, error) {
@@ -54,6 +65,8 @@ func (q *Queries) DeductScoutCredit(ctx context.Context, companyID pgtype.UUID) 
 		&i.LastReplenishedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WarningStartedAt,
+		&i.QualityRestricted,
 	)
 	return &i, err
 }
@@ -62,7 +75,7 @@ const getOrCreateScoutCredit = `-- name: GetOrCreateScoutCredit :one
 INSERT INTO scout_credits (company_id)
 VALUES ($1)
 ON CONFLICT (company_id) DO UPDATE SET company_id = scout_credits.company_id
-RETURNING id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at
+RETURNING id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at, warning_started_at, quality_restricted
 `
 
 func (q *Queries) GetOrCreateScoutCredit(ctx context.Context, companyID pgtype.UUID) (*ScoutCredit, error) {
@@ -77,12 +90,14 @@ func (q *Queries) GetOrCreateScoutCredit(ctx context.Context, companyID pgtype.U
 		&i.LastReplenishedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WarningStartedAt,
+		&i.QualityRestricted,
 	)
 	return &i, err
 }
 
 const getScoutCreditByCompanyID = `-- name: GetScoutCreditByCompanyID :one
-SELECT id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at FROM scout_credits WHERE company_id = $1
+SELECT id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at, warning_started_at, quality_restricted FROM scout_credits WHERE company_id = $1
 `
 
 func (q *Queries) GetScoutCreditByCompanyID(ctx context.Context, companyID pgtype.UUID) (*ScoutCredit, error) {
@@ -97,6 +112,8 @@ func (q *Queries) GetScoutCreditByCompanyID(ctx context.Context, companyID pgtyp
 		&i.LastReplenishedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WarningStartedAt,
+		&i.QualityRestricted,
 	)
 	return &i, err
 }
@@ -105,7 +122,7 @@ const refundScoutCredit = `-- name: RefundScoutCredit :one
 UPDATE scout_credits
 SET balance = LEAST(balance + 1, max_stock), updated_at = NOW()
 WHERE company_id = $1
-RETURNING id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at
+RETURNING id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at, warning_started_at, quality_restricted
 `
 
 func (q *Queries) RefundScoutCredit(ctx context.Context, companyID pgtype.UUID) (*ScoutCredit, error) {
@@ -120,6 +137,30 @@ func (q *Queries) RefundScoutCredit(ctx context.Context, companyID pgtype.UUID) 
 		&i.LastReplenishedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.WarningStartedAt,
+		&i.QualityRestricted,
 	)
 	return &i, err
+}
+
+const setQualityRestricted = `-- name: SetQualityRestricted :exec
+UPDATE scout_credits
+SET quality_restricted = true, warning_started_at = NULL, updated_at = NOW()
+WHERE company_id = $1
+`
+
+func (q *Queries) SetQualityRestricted(ctx context.Context, companyID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, setQualityRestricted, companyID)
+	return err
+}
+
+const setQualityWarning = `-- name: SetQualityWarning :exec
+UPDATE scout_credits
+SET warning_started_at = NOW(), updated_at = NOW()
+WHERE company_id = $1
+`
+
+func (q *Queries) SetQualityWarning(ctx context.Context, companyID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, setQualityWarning, companyID)
+	return err
 }

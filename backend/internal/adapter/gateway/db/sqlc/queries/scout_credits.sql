@@ -19,6 +19,21 @@ SET balance = LEAST(balance + 1, max_stock), updated_at = NOW()
 WHERE company_id = $1
 RETURNING *;
 
+-- name: SetQualityWarning :exec
+UPDATE scout_credits
+SET warning_started_at = NOW(), updated_at = NOW()
+WHERE company_id = $1;
+
+-- name: ClearQualityWarning :exec
+UPDATE scout_credits
+SET warning_started_at = NULL, updated_at = NOW()
+WHERE company_id = $1;
+
+-- name: SetQualityRestricted :exec
+UPDATE scout_credits
+SET quality_restricted = true, warning_started_at = NULL, updated_at = NOW()
+WHERE company_id = $1;
+
 -- name: CreateScoutCreditLedger :exec
 INSERT INTO scout_credit_ledger (company_id, delta, reason, scout_message_id, balance_after)
 VALUES ($1, $2, $3, $4, $5);

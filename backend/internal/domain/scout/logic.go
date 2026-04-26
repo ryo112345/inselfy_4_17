@@ -12,8 +12,11 @@ const (
 	ReplyGraceDays         = 90
 	MonthlyAllowance       = 30
 	MaxStock               = 120
-	QualityThreshold       = 0.13
-	QualityMinSamples      = 10
+	QualityThreshold         = 0.13
+	QualityMinSamples        = 50
+	WarningImprovementDays   = 7
+	WarningExtendedLookback  = 20
+	DefaultLookbackDays      = 14
 	MaxResendCount   int16 = 1
 	MaxTemplatesPerCompany = 50
 )
@@ -110,20 +113,94 @@ func IsExpired(m *ScoutMessage) bool {
 	return time.Now().After(*m.ExpiresAt)
 }
 
-func CalculateQualityScore(sent, replied int) QualityScore {
-	qs := QualityScore{
-		SentLast14d:    sent,
-		RepliedLast14d: replied,
+type QualityInput struct {
+	Sent14d           int
+	Replied14d        int
+	Sent20d           int
+	Replied20d        int
+	WarningStartedAt  *time.Time
+	QualityRestricted bool
+	Now               time.Time
+}
+
+type QualityResult struct {
+	Score              QualityScore
+	ShouldSetWarning   bool
+	ShouldClearWarning bool
+	ShouldRestrict     bool
+}
+
+func EvaluateQuality(input QualityInput) QualityResult {
+	result := QualityResult{}
+	result.Score = QualityScore{
+		SentLast14d:    input.Sent14d,
+		RepliedLast14d: input.Replied14d,
 		Level:          QualityGood,
 	}
-	if sent < QualityMinSamples {
-		return qs
+
+	if input.QualityRestricted {
+		result.Score.Level = QualityRestricted
+		return result
 	}
-	qs.ReplyRate14d = float64(replied) / float64(sent)
-	if qs.ReplyRate14d < QualityThreshold {
-		qs.Level = QualityWarning
+
+	if input.Sent14d < QualityMinSamples {
+		if input.WarningStartedAt != nil {
+			result.ShouldClearWarning = true
+		}
+		return result
 	}
-	return qs
+
+	rate := float64(input.Replied14d) / float64(input.Sent14d)
+	result.Score.ReplyRate14d = rate
+
+	if rate >= QualityThreshold {
+		if input.WarningStartedAt != nil {
+			result.ShouldClearWarning = true
+		}
+		return result
+	}
+
+	if input.WarningStartedAt == nil {
+		result.ShouldSetWarning = true
+		result.Score.Level = QualityWarning
+		now := input.Now
+		deadline := now.Add(WarningImprovementDays * 24 * time.Hour)
+		result.Score.WarningStartedAt = &now
+		result.Score.WarningDeadline = &deadline
+		days := WarningImprovementDays
+		result.Score.DaysRemaining = &days
+		return result
+	}
+
+	deadline := input.WarningStartedAt.Add(WarningImprovementDays * 24 * time.Hour)
+	result.Score.WarningStartedAt = input.WarningStartedAt
+	result.Score.WarningDeadline = &deadline
+
+	if input.Now.Before(deadline) {
+		result.Score.Level = QualityWarning
+		days := int(time.Until(deadline).Hours()/24) + 1
+		result.Score.DaysRemaining = &days
+		return result
+	}
+
+	// Improvement period expired — re-evaluate with 20-day window
+	if input.Sent20d < QualityMinSamples {
+		result.ShouldClearWarning = true
+		return result
+	}
+
+	extRate := float64(input.Replied20d) / float64(input.Sent20d)
+	result.Score.ReplyRate14d = extRate
+
+	if extRate >= QualityThreshold {
+		result.ShouldClearWarning = true
+		result.Score.Level = QualityGood
+		return result
+	}
+
+	result.ShouldRestrict = true
+	result.Score.Level = QualityRestricted
+	return result
 }
 
 func RenderTemplate(body string, vars map[string]string) string {

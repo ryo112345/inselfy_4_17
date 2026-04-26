@@ -93,6 +93,8 @@ type ScoutCredit struct {
 	MonthlyAllowance  int
 	MaxStock          int
 	LastReplenishedAt time.Time
+	WarningStartedAt  *time.Time
+	QualityRestricted bool
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }
@@ -123,8 +125,11 @@ type UserScoutSettings struct {
 }
 
 type QualityScore struct {
-	ReplyRate14d   float64
-	Level          QualityLevel
-	SentLast14d    int
-	RepliedLast14d int
+	ReplyRate14d     float64
+	Level            QualityLevel
+	SentLast14d      int
+	RepliedLast14d   int
+	WarningStartedAt *time.Time
+	WarningDeadline  *time.Time
+	DaysRemaining    *int
 }

@@ -55,6 +55,25 @@ func (q *Queries) CountScoutsRepliedLast14Days(ctx context.Context, companyID pg
 	return count, err
 }
 
+const countScoutsRepliedLastNDays = `-- name: CountScoutsRepliedLastNDays :one
+SELECT count(*) FROM scout_messages
+WHERE company_id = $1
+    AND sent_at >= NOW() - make_interval(days => $2)
+    AND status IN ('replied', 'interested')
+`
+
+type CountScoutsRepliedLastNDaysParams struct {
+	CompanyID pgtype.UUID `json:"company_id"`
+	Days      int32       `json:"days"`
+}
+
+func (q *Queries) CountScoutsRepliedLastNDays(ctx context.Context, arg *CountScoutsRepliedLastNDaysParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countScoutsRepliedLastNDays, arg.CompanyID, arg.Days)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countScoutsSentLast14Days = `-- name: CountScoutsSentLast14Days :one
 SELECT count(*) FROM scout_messages
 WHERE company_id = $1
@@ -64,6 +83,25 @@ WHERE company_id = $1
 
 func (q *Queries) CountScoutsSentLast14Days(ctx context.Context, companyID pgtype.UUID) (int64, error) {
 	row := q.db.QueryRow(ctx, countScoutsSentLast14Days, companyID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countScoutsSentLastNDays = `-- name: CountScoutsSentLastNDays :one
+SELECT count(*) FROM scout_messages
+WHERE company_id = $1
+    AND sent_at >= NOW() - make_interval(days => $2)
+    AND status != 'draft'
+`
+
+type CountScoutsSentLastNDaysParams struct {
+	CompanyID pgtype.UUID `json:"company_id"`
+	Days      int32       `json:"days"`
+}
+
+func (q *Queries) CountScoutsSentLastNDays(ctx context.Context, arg *CountScoutsSentLastNDaysParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countScoutsSentLastNDays, arg.CompanyID, arg.Days)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
