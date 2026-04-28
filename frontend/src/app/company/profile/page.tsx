@@ -94,6 +94,7 @@ export default function CompanyProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
   const [galleryUploading, setGalleryUploading] = useState(false);
@@ -101,11 +102,33 @@ export default function CompanyProfilePage() {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const channelRef = useRef<BroadcastChannel | null>(null);
+
+  useEffect(() => {
+    channelRef.current = new BroadcastChannel("company-profile-preview");
+    return () => { channelRef.current?.close(); };
+  }, []);
+
+  useEffect(() => {
+    if (!profile) return;
+    channelRef.current?.postMessage({
+      ...profile,
+      ...form,
+      email: profile.email,
+      logoUrl: profile.logoUrl,
+      coverImageUrl: profile.coverImageUrl,
+      galleryUrls: profile.galleryUrls,
+    });
+  }, [form, profile]);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     setToast({ type, message });
+    setToastVisible(true);
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3500);
+    toastTimer.current = setTimeout(() => {
+      setToastVisible(false);
+      setTimeout(() => setToast(null), 300);
+    }, 3000);
   }, []);
 
   useEffect(() => {
@@ -472,8 +495,15 @@ export default function CompanyProfilePage() {
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all ${toast.type === "success" ? "bg-emerald-600" : "bg-red-600"}`}>
-          {toast.message}
+        <div className={`fixed bottom-20 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 ease-out ${toastVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+          <div className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium shadow-lg backdrop-blur-sm ${
+            toast.type === "success"
+              ? "border-emerald-200 bg-white text-emerald-800"
+              : "border-red-200 bg-white text-red-800"
+          }`}>
+            <span>{toast.type === "success" ? "✓" : "!"}</span>
+            {toast.message}
+          </div>
         </div>
       )}
 
