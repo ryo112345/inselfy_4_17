@@ -39,6 +39,7 @@ const STATUS_BADGE: Record<ScoutStatus, { bg: string; text: string; label: strin
 const QUALITY_BADGE: Record<string, { bg: string; text: string; label: string }> = {
   good: { bg: "bg-emerald-50", text: "text-emerald-700", label: "良好" },
   warning: { bg: "bg-yellow-50", text: "text-yellow-700", label: "注意" },
+  temporarily_restricted: { bg: "bg-orange-50", text: "text-orange-700", label: "一時制限中" },
   restricted: { bg: "bg-red-50", text: "text-red-700", label: "制限中" },
 };
 
@@ -161,6 +162,16 @@ export default function ScoutListPage() {
               <p className="text-xs text-gray-400">
                 送信: {quality.sentLast14d}件 / 返信: {quality.repliedLast14d}件
               </p>
+              {quality.level === "temporarily_restricted" && quality.restrictionEndsAt && (
+                <p className="text-xs text-orange-600 mt-1">
+                  制限解除: {formatDate(quality.restrictionEndsAt)}（残り{quality.daysRemaining}日）
+                </p>
+              )}
+              {quality.level === "warning" && quality.daysRemaining != null && (
+                <p className="text-xs text-yellow-600 mt-1">
+                  改善期限まで残り{quality.daysRemaining}日
+                </p>
+              )}
             </>
           ) : (
             <div className="h-12 flex items-center">

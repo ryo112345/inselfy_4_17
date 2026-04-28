@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
+import { useUnreadScout } from "@/features/scout/unread-context";
 import {
   fetchReceivedScoutDetail,
   respondToScout,
@@ -51,6 +52,7 @@ export default function ScoutDetailPage() {
   const router = useRouter();
   const scoutId = params.scoutId as string;
   const { user, isLoading: authLoading } = useAuth();
+  const { refresh: refreshUnread } = useUnreadScout();
 
   const [detail, setDetail] = useState<ScoutDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,12 +68,13 @@ export default function ScoutDetailPage() {
     try {
       const data = await fetchReceivedScoutDetail(scoutId);
       setDetail(data);
+      refreshUnread();
     } catch (e) {
       setError(e instanceof Error ? e.message : "読み込みに失敗しました");
     } finally {
       setLoading(false);
     }
-  }, [scoutId]);
+  }, [scoutId, refreshUnread]);
 
   useEffect(() => {
     if (authLoading) return;
