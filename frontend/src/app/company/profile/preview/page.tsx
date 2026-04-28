@@ -184,6 +184,9 @@ export default function CompanyProfilePreviewPage() {
           </section>
         )}
 
+        {/* Team Diagnosis */}
+        <TeamScoresSection teams={teamScores} cardClass={cardClass} />
+
         {/* Gallery */}
         {company.galleryUrls.length > 0 && (
           <section className={`overflow-hidden ${cardClass}`}>
@@ -211,23 +214,6 @@ export default function CompanyProfilePreviewPage() {
           </section>
         )}
 
-        {/* Company Details */}
-        {detailItems.length > 0 && (
-          <section className={`overflow-hidden py-5 ${cardClass}`}>
-            <div className="px-6">
-              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">企業情報</h2>
-            </div>
-            <dl className="mt-4">
-              {detailItems.map(({ label, value }, i) => (
-                <div key={label} className={`flex items-baseline justify-between px-6 py-3.5 ${i % 2 === 0 ? "bg-gray-50/70" : ""}`}>
-                  <dt className="shrink-0 text-base text-gray-500">{label}</dt>
-                  <dd className="text-right text-base font-medium text-gray-900">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        )}
-
         {/* Benefits */}
         {(company.benefits.length > 0 || company.smokingPolicy) && (
           <section className={`px-6 py-5 ${cardClass}`}>
@@ -249,8 +235,22 @@ export default function CompanyProfilePreviewPage() {
           </section>
         )}
 
-        {/* Team Diagnosis */}
-        <TeamScoresSection teams={teamScores} cardClass={cardClass} />
+        {/* Company Details */}
+        {detailItems.length > 0 && (
+          <section className={`overflow-hidden py-5 ${cardClass}`}>
+            <div className="px-6">
+              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">企業情報</h2>
+            </div>
+            <dl className="mt-4">
+              {detailItems.map(({ label, value }, i) => (
+                <div key={label} className={`flex items-baseline justify-between px-6 py-3.5 ${i % 2 === 0 ? "bg-gray-50/70" : ""}`}>
+                  <dt className="shrink-0 text-base text-gray-500">{label}</dt>
+                  <dd className="text-right text-base font-medium text-gray-900">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
       </div>
     </div>
   );
