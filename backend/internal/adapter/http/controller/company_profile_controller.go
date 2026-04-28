@@ -49,7 +49,7 @@ type companyProfileResponse struct {
 	RepresentativeName   string   `json:"representativeName"`
 	Capital              string   `json:"capital"`
 	Revenue              string   `json:"revenue"`
-	Benefits             string   `json:"benefits"`
+	Benefits             []string `json:"benefits"`
 	AverageAge           string   `json:"averageAge"`
 	AverageOvertimeHours string   `json:"averageOvertimeHours"`
 	PaidLeaveRate        string   `json:"paidLeaveRate"`
@@ -70,7 +70,7 @@ func (c *CompanyProfileController) GetProfile(ctx echo.Context) error {
 
 	var p companyProfileResponse
 	var foundedYear, foundedMonth *int32
-	var galleryJSON []byte
+	var benefitsJSON, galleryJSON []byte
 	err = c.pool.QueryRow(ctx.Request().Context(),
 		`SELECT id, company_name, contact_person_name, phone_number, email,
 				headline, description, industry, location, employee_count,
@@ -83,7 +83,7 @@ func (c *CompanyProfileController) GetProfile(ctx echo.Context) error {
 			&p.Headline, &p.Description, &p.Industry, &p.Location, &p.EmployeeCount,
 			&foundedYear, &foundedMonth, &p.WebsiteURL, &p.LogoURL, &p.CoverImageURL,
 			&p.RepresentativeName, &p.Capital, &p.Revenue,
-			&p.Benefits, &p.AverageAge, &p.AverageOvertimeHours, &p.PaidLeaveRate,
+			&benefitsJSON, &p.AverageAge, &p.AverageOvertimeHours, &p.PaidLeaveRate,
 			&p.SmokingPolicy, &galleryJSON)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
@@ -95,6 +95,10 @@ func (c *CompanyProfileController) GetProfile(ctx echo.Context) error {
 	if foundedMonth != nil {
 		v := int(*foundedMonth)
 		p.FoundedMonth = &v
+	}
+	p.Benefits = []string{}
+	if len(benefitsJSON) > 0 {
+		_ = json.Unmarshal(benefitsJSON, &p.Benefits)
 	}
 	p.GalleryURLs = []string{}
 	if len(galleryJSON) > 0 {
@@ -126,8 +130,8 @@ func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
 		RepresentativeName   string `json:"representativeName"`
 		Capital              string `json:"capital"`
 		Revenue              string `json:"revenue"`
-		Benefits             string `json:"benefits"`
-		AverageAge           string `json:"averageAge"`
+		Benefits             []string `json:"benefits"`
+		AverageAge           string   `json:"averageAge"`
 		AverageOvertimeHours string `json:"averageOvertimeHours"`
 		PaidLeaveRate        string `json:"paidLeaveRate"`
 		SmokingPolicy        string `json:"smokingPolicy"`
@@ -138,6 +142,11 @@ func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
 
 	if strings.TrimSpace(body.CompanyName) == "" {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "企業名は必須です"})
+	}
+
+	benefitsJSON, _ := json.Marshal(body.Benefits)
+	if body.Benefits == nil {
+		benefitsJSON = []byte("[]")
 	}
 
 	_, err = c.pool.Exec(ctx.Request().Context(),
@@ -167,7 +176,7 @@ func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
 		body.Headline, body.Description, body.Industry, body.Location, body.EmployeeCount,
 		body.FoundedYear, body.FoundedMonth, body.WebsiteURL,
 		body.RepresentativeName, body.Capital, body.Revenue,
-		body.Benefits, body.AverageAge, body.AverageOvertimeHours,
+		string(benefitsJSON), body.AverageAge, body.AverageOvertimeHours,
 		body.PaidLeaveRate, body.SmokingPolicy)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
