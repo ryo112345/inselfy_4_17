@@ -316,6 +316,14 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return ciCtrl.GetResultBySessionID(c, c.Param("sessionId"))
 	})
 
+	// --- Company Profile ---
+	companyProfileCtrl := httpcontroller.NewCompanyProfileController(pool)
+	companyProfileGroup := e.Group("/api/company/profile", companyJwtMW)
+	companyProfileGroup.GET("", companyProfileCtrl.GetProfile)
+	companyProfileGroup.PUT("", companyProfileCtrl.UpdateProfile)
+	companyProfileGroup.POST("/image", companyProfileCtrl.UploadImage)
+	companyProfileGroup.DELETE("/image", companyProfileCtrl.DeleteImage)
+
 	// --- Company Teams ---
 	teamCtrl := httpcontroller.NewCompanyTeamController(pool)
 	teamGroup := e.Group("/api/company/teams", companyJwtMW)
