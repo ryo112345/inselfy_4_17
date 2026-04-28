@@ -12,11 +12,12 @@ const (
 	ReplyGraceDays         = 90
 	MonthlyAllowance       = 30
 	MaxStock               = 120
-	QualityThreshold         = 0.13
-	QualityMinSamples        = 50
-	WarningImprovementDays   = 7
-	WarningExtendedLookback  = 20
-	DefaultLookbackDays      = 14
+	QualityThreshold            = 0.13
+	QualityMinSamples           = 50
+	WarningImprovementDays      = 14
+	TemporaryRestrictionDays    = 30
+	WarningExtendedLookback     = 20
+	DefaultLookbackDays         = 14
 	MaxResendCount   int16 = 1
 	MaxTemplatesPerCompany = 50
 )
@@ -114,20 +115,23 @@ func IsExpired(m *ScoutMessage) bool {
 }
 
 type QualityInput struct {
-	Sent14d           int
-	Replied14d        int
-	Sent20d           int
-	Replied20d        int
-	WarningStartedAt  *time.Time
-	QualityRestricted bool
-	Now               time.Time
+	Sent14d              int
+	Replied14d           int
+	Sent20d              int
+	Replied20d           int
+	WarningStartedAt     *time.Time
+	RestrictionStartedAt *time.Time
+	QualityRestricted    bool
+	Now                  time.Time
 }
 
 type QualityResult struct {
-	Score              QualityScore
-	ShouldSetWarning   bool
-	ShouldClearWarning bool
-	ShouldRestrict     bool
+	Score                QualityScore
+	ShouldSetWarning     bool
+	ShouldClearWarning   bool
+	ShouldTempRestrict   bool
+	ShouldClearRestriction bool
+	ShouldRestrict       bool
 }
 
 func EvaluateQuality(input QualityInput) QualityResult {
@@ -141,6 +145,10 @@ func EvaluateQuality(input QualityInput) QualityResult {
 	if input.QualityRestricted {
 		result.Score.Level = QualityRestricted
 		return result
+	}
+
+	if input.RestrictionStartedAt != nil {
+		return evaluateTempRestriction(input, result)
 	}
 
 	if input.Sent14d < QualityMinSamples {
@@ -183,7 +191,6 @@ func EvaluateQuality(input QualityInput) QualityResult {
 		return result
 	}
 
-	// Improvement period expired — re-evaluate with 20-day window
 	if input.Sent20d < QualityMinSamples {
 		result.ShouldClearWarning = true
 		return result
@@ -195,6 +202,39 @@ func EvaluateQuality(input QualityInput) QualityResult {
 	if extRate >= QualityThreshold {
 		result.ShouldClearWarning = true
 		result.Score.Level = QualityGood
+		return result
+	}
+
+	result.ShouldTempRestrict = true
+	result.Score.Level = QualityTemporarilyRestricted
+	endsAt := input.Now.Add(TemporaryRestrictionDays * 24 * time.Hour)
+	result.Score.RestrictionEndsAt = &endsAt
+	days := TemporaryRestrictionDays
+	result.Score.DaysRemaining = &days
+	return result
+}
+
+func evaluateTempRestriction(input QualityInput, result QualityResult) QualityResult {
+	endsAt := input.RestrictionStartedAt.Add(TemporaryRestrictionDays * 24 * time.Hour)
+	result.Score.RestrictionEndsAt = &endsAt
+
+	if input.Now.Before(endsAt) {
+		result.Score.Level = QualityTemporarilyRestricted
+		days := int(time.Until(endsAt).Hours()/24) + 1
+		result.Score.DaysRemaining = &days
+		return result
+	}
+
+	if input.Sent14d < QualityMinSamples {
+		result.ShouldClearRestriction = true
+		return result
+	}
+
+	rate := float64(input.Replied14d) / float64(input.Sent14d)
+	result.Score.ReplyRate14d = rate
+
+	if rate >= QualityThreshold {
+		result.ShouldClearRestriction = true
 		return result
 	}
 

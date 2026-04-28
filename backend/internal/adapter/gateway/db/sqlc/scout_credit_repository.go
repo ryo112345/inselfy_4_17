@@ -88,6 +88,24 @@ func (r *ScoutCreditRepository) ClearQualityWarning(ctx context.Context, company
 	return q.ClearQualityWarning(ctx, pgID)
 }
 
+func (r *ScoutCreditRepository) SetTemporaryRestriction(ctx context.Context, companyID string) error {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(companyID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	return q.SetTemporaryRestriction(ctx, pgID)
+}
+
+func (r *ScoutCreditRepository) ClearTemporaryRestriction(ctx context.Context, companyID string) error {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(companyID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	return q.ClearTemporaryRestriction(ctx, pgID)
+}
+
 func (r *ScoutCreditRepository) SetQualityRestricted(ctx context.Context, companyID string) error {
 	q := queriesForContext(ctx, r.queries)
 	pgID, err := parseUUID(companyID)
@@ -105,8 +123,9 @@ func scoutCreditToDomain(row *generated.ScoutCredit) *scout.ScoutCredit {
 		MonthlyAllowance:  int(row.MonthlyAllowance),
 		MaxStock:          int(row.MaxStock),
 		LastReplenishedAt: row.LastReplenishedAt.Time,
-		WarningStartedAt:  timestamptzToTimePtr(row.WarningStartedAt),
-		QualityRestricted: row.QualityRestricted,
+		WarningStartedAt:     timestamptzToTimePtr(row.WarningStartedAt),
+		RestrictionStartedAt: timestamptzToTimePtr(row.RestrictionStartedAt),
+		QualityRestricted:    row.QualityRestricted,
 		CreatedAt:         row.CreatedAt.Time,
 		UpdatedAt:         row.UpdatedAt.Time,
 	}

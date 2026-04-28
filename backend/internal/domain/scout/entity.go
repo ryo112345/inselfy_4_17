@@ -17,9 +17,10 @@ const (
 type QualityLevel string
 
 const (
-	QualityGood       QualityLevel = "good"
-	QualityWarning    QualityLevel = "warning"
-	QualityRestricted QualityLevel = "restricted"
+	QualityGood                  QualityLevel = "good"
+	QualityWarning               QualityLevel = "warning"
+	QualityTemporarilyRestricted QualityLevel = "temporarily_restricted"
+	QualityRestricted            QualityLevel = "restricted"
 )
 
 type CandidateResponse string
@@ -93,10 +94,11 @@ type ScoutCredit struct {
 	MonthlyAllowance  int
 	MaxStock          int
 	LastReplenishedAt time.Time
-	WarningStartedAt  *time.Time
-	QualityRestricted bool
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	WarningStartedAt     *time.Time
+	RestrictionStartedAt *time.Time
+	QualityRestricted    bool
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
 
 type CreditLedgerEntry struct {
@@ -132,4 +134,5 @@ type QualityScore struct {
 	WarningStartedAt *time.Time
 	WarningDeadline  *time.Time
 	DaysRemaining    *int
+	RestrictionEndsAt *time.Time
 }
