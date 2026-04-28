@@ -47,6 +47,16 @@ export default function CompanyProfilePreviewPage() {
       .finally(() => setIsLoading(false));
   }, [companyFetch]);
 
+  useEffect(() => {
+    const channel = new BroadcastChannel("company-profile-preview");
+    channel.onmessage = (e) => {
+      const data = e.data;
+      if (!Array.isArray(data.benefits)) data.benefits = [];
+      setCompany(data);
+    };
+    return () => { channel.close(); };
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f6f7f5]">
