@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 
 type ProfileData = {
@@ -31,58 +30,176 @@ type ProfileData = {
   galleryUrls: string[];
 };
 
+type FormData = Omit<ProfileData, "id" | "email" | "logoUrl" | "coverImageUrl" | "galleryUrls">;
+
+const employeeCountOptions = [
+  "", "1〜10名", "11〜50名", "51〜100名", "101〜300名",
+  "301〜500名", "501〜1000名", "1001〜5000名", "5001名以上",
+];
+
+const industryOptions = [
+  "", "IT・通信", "Web・インターネット", "SaaS", "AI・機械学習",
+  "ゲーム・エンタメ", "金融・フィンテック", "コンサルティング", "人材・HR",
+  "広告・マーケティング", "メーカー・製造", "商社", "小売・流通",
+  "不動産・建設", "医療・ヘルスケア", "教育", "エネルギー", "その他",
+];
+
+const smokingPolicyOptions = [
+  "", "屋内禁煙", "屋内原則禁煙（喫煙室あり）", "敷地内禁煙",
+  "敷地内禁煙（喫煙場所あり）", "屋内喫煙可", "対策なし",
+];
+
+const monthOptions = [
+  { value: "", label: "月" },
+  ...Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: `${i + 1}月` })),
+];
+
 const accent = "#2979ff";
 
-type CompletenessItem = { label: string; filled: boolean };
-
-function calcCompleteness(p: ProfileData): { percent: number; missing: string[] } {
-  const items: CompletenessItem[] = [
-    { label: "ロゴ", filled: !!p.logoUrl },
-    { label: "カバー画像", filled: !!p.coverImageUrl },
-    { label: "キャッチコピー", filled: !!p.headline },
-    { label: "事業内容", filled: !!p.description },
-    { label: "業種", filled: !!p.industry },
-    { label: "所在地", filled: !!p.location },
-    { label: "従業員規模", filled: !!p.employeeCount },
-    { label: "Webサイト", filled: !!p.websiteUrl },
-    { label: "写真ギャラリー", filled: p.galleryUrls.length > 0 },
-    { label: "福利厚生", filled: p.benefits.length > 0 },
-    { label: "代表者名", filled: !!p.representativeName },
-    { label: "働く環境データ", filled: !!(p.averageAge || p.averageOvertimeHours || p.paidLeaveRate) },
-  ];
-  const filled = items.filter((i) => i.filled).length;
-  const missing = items.filter((i) => !i.filled).map((i) => i.label);
-  return { percent: Math.round((filled / items.length) * 100), missing };
+function toFormData(p: ProfileData): FormData {
+  return {
+    companyName: p.companyName,
+    contactPersonName: p.contactPersonName,
+    phoneNumber: p.phoneNumber,
+    headline: p.headline,
+    description: p.description,
+    industry: p.industry,
+    location: p.location,
+    employeeCount: p.employeeCount,
+    foundedYear: p.foundedYear,
+    foundedMonth: p.foundedMonth,
+    websiteUrl: p.websiteUrl,
+    representativeName: p.representativeName,
+    capital: p.capital,
+    revenue: p.revenue,
+    benefits: p.benefits,
+    averageAge: p.averageAge,
+    averageOvertimeHours: p.averageOvertimeHours,
+    paidLeaveRate: p.paidLeaveRate,
+    smokingPolicy: p.smokingPolicy,
+  };
 }
 
-export default function CompanyProfileViewPage() {
+export default function CompanyProfilePage() {
   const { companyFetch } = useCompanyAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [form, setForm] = useState<FormData>({
+    companyName: "", contactPersonName: "", phoneNumber: "", headline: "",
+    description: "", industry: "", location: "", employeeCount: "",
+    foundedYear: null, foundedMonth: null, websiteUrl: "",
+    representativeName: "", capital: "", revenue: "", benefits: [],
+    averageAge: "", averageOvertimeHours: "", paidLeaveRate: "", smokingPolicy: "",
+  });
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     setToast({ type, message });
-    setTimeout(() => setToast(null), 3500);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
   }, []);
 
   useEffect(() => {
     companyFetch("/api/company/profile")
       .then(async (res) => {
         if (res.ok) {
-            const data = await res.json();
-            if (!Array.isArray(data.benefits)) data.benefits = [];
-            setProfile(data);
-          }
+          const data: ProfileData = await res.json();
+          if (!Array.isArray(data.benefits)) data.benefits = [];
+          setProfile(data);
+          setForm(toFormData(data));
+        }
       })
       .finally(() => setIsLoading(false));
   }, [companyFetch]);
 
-  const handleGalleryDelete = async (url: string) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === "foundedYear" || name === "foundedMonth"
+        ? (value === "" ? null : Number(value))
+        : value,
+    }));
+    setIsDirty(true);
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
     try {
-      const res = await companyFetch(`/api/company/profile/image?type=gallery&url=${encodeURIComponent(url)}`, { method: "DELETE" });
+      const res = await companyFetch("/api/company/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
       if (res.ok) {
-        setProfile((prev) => prev ? { ...prev, galleryUrls: prev.galleryUrls.filter((u) => u !== url) } : prev);
+        const data: ProfileData = await res.json();
+        setProfile(data);
+        setIsDirty(false);
+        showToast("success", "プロフィールを保存しました");
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast("error", err.message || "保存に失敗しました");
+      }
+    } catch {
+      showToast("error", "保存に失敗しました");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleImageUpload = async (type: "logo" | "cover" | "gallery", file: File) => {
+    const setter = type === "logo" ? setLogoUploading : type === "cover" ? setCoverUploading : setGalleryUploading;
+    setter(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await companyFetch(`/api/company/profile/image?type=${type}`, {
+        method: "POST",
+        body: fd,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile((prev) => {
+          if (!prev) return prev;
+          if (type === "logo") return { ...prev, logoUrl: data.url };
+          if (type === "cover") return { ...prev, coverImageUrl: data.url };
+          return { ...prev, galleryUrls: [...prev.galleryUrls, data.url] };
+        });
+        const labels = { logo: "ロゴ", cover: "カバー画像", gallery: "写真" };
+        showToast("success", `${labels[type]}を更新しました`);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast("error", err.message || "アップロードに失敗しました");
+      }
+    } catch {
+      showToast("error", "アップロードに失敗しました");
+    } finally {
+      setter(false);
+    }
+  };
+
+  const handleImageDelete = async (type: "logo" | "cover" | "gallery", url?: string) => {
+    try {
+      const qs = type === "gallery" ? `type=gallery&url=${encodeURIComponent(url!)}` : `type=${type}`;
+      const res = await companyFetch(`/api/company/profile/image?${qs}`, { method: "DELETE" });
+      if (res.ok) {
+        setProfile((prev) => {
+          if (!prev) return prev;
+          if (type === "logo") return { ...prev, logoUrl: "" };
+          if (type === "cover") return { ...prev, coverImageUrl: "" };
+          return { ...prev, galleryUrls: prev.galleryUrls.filter((u) => u !== url) };
+        });
         showToast("success", "画像を削除しました");
       }
     } catch {
@@ -92,578 +209,421 @@ export default function CompanyProfileViewPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200" style={{ borderTopColor: accent }} />
+      <div className="flex items-center justify-center py-20">
+        <div className="text-sm text-gray-400">読み込み中...</div>
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="flex flex-col items-center justify-center py-32">
-        <p className="text-sm text-red-500">プロフィールの取得に失敗しました</p>
+      <div className="flex items-center justify-center py-20">
+        <div className="text-sm text-red-500">プロフィールの取得に失敗しました</div>
       </div>
     );
   }
 
-  const { percent, missing } = calcCompleteness(profile);
-  const gallery = profile.galleryUrls;
-  const hasWorkplaceData = !!(profile.averageAge || profile.averageOvertimeHours || profile.paidLeaveRate);
-  const hasCompanyDetails = !!(
-    profile.representativeName || profile.foundedYear || profile.capital ||
-    profile.revenue || profile.smokingPolicy
-  );
-
-  const foundedText = profile.foundedYear
-    ? `${profile.foundedYear}年${profile.foundedMonth ? `${profile.foundedMonth}月` : ""}`
-    : null;
-
   return (
-    <div className="mx-auto max-w-3xl pb-12">
+    <div className="mx-auto max-w-2xl pb-28">
       {/* Page Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">企業情報</h1>
-          <p className="mt-0.5 text-sm text-gray-500">求職者にはこのように表示されます</p>
+          <p className="mt-1 text-sm text-gray-500">求職者に表示される企業の基本情報を編集できます</p>
         </div>
-        <Link
-          href="/company/profile/edit"
-          className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
-          style={{ backgroundColor: accent }}
+        <button
+          onClick={() => window.open("/company/profile/preview", "_blank")}
+          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 cursor-pointer"
         >
-          <PenIcon className="h-4 w-4" />
-          編集する
-        </Link>
+          <EyeIcon className="h-4 w-4" />
+          プレビュー
+        </button>
       </div>
 
-      {/* Completeness Banner */}
-      {percent < 100 && (
-        <div className="mb-6 overflow-hidden rounded-xl border bg-white shadow-sm" style={{ borderColor: `${accent}20` }}>
-          <div className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: `${accent}10` }}>
-                  <span className="text-sm font-bold" style={{ color: accent }}>{percent}%</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">プロフィール完成度</p>
-                  <p className="text-xs text-gray-500">情報を充実させると、求職者からの注目度が上がります</p>
-                </div>
+      {/* Cover + Logo */}
+      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="relative h-44 bg-gradient-to-br from-gray-100 to-gray-50">
+          {profile.coverImageUrl ? (
+            <img src={profile.coverImageUrl} alt="カバー画像" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <ImageIcon className="mx-auto h-8 w-8 text-gray-300" />
+                <p className="mt-2 text-xs text-gray-400">カバー画像を追加（16:9推奨）</p>
               </div>
-              <Link
-                href="/company/profile/edit"
-                className="text-sm font-medium transition-colors hover:underline"
-                style={{ color: accent }}
-              >
-                編集する →
-              </Link>
             </div>
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-gray-100">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${percent}%`, backgroundColor: accent }}
-              />
-            </div>
-            {missing.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {missing.map((item) => (
-                  <span key={item} className="rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
-                    {item}
-                  </span>
-                ))}
-              </div>
+          )}
+          <div className="absolute bottom-3 right-3 flex gap-2">
+            <button onClick={() => coverInputRef.current?.click()} disabled={coverUploading}
+              className="flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white cursor-pointer">
+              {coverUploading ? <Spinner /> : <CameraIcon className="h-3.5 w-3.5" />}
+              {profile.coverImageUrl ? "変更" : "追加"}
+            </button>
+            {profile.coverImageUrl && (
+              <button onClick={() => handleImageDelete("cover")}
+                className="flex items-center rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-red-500 shadow-sm backdrop-blur-sm transition-colors hover:bg-white cursor-pointer">
+                <TrashIcon className="h-3.5 w-3.5" />
+              </button>
             )}
           </div>
-        </div>
-      )}
+          <input ref={coverInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("cover", f); e.target.value = ""; }} />
 
-      {/* Hero Card */}
-      <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        {/* Cover Image */}
-        <div className="relative">
-          {profile.coverImageUrl ? (
-            <img
-              src={profile.coverImageUrl}
-              alt="カバー画像"
-              className="w-full max-h-96 object-cover"
-            />
-          ) : (
-            <div className="h-48 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-        </div>
-
-        {/* Profile Info */}
-        <div className="relative px-6 pb-6">
           {/* Logo */}
-          <div className="absolute -top-11 left-6">
-            <div className="h-[88px] w-[88px] overflow-hidden rounded-2xl border-4 border-white bg-white shadow-md">
+          <div className="absolute -bottom-10 left-6">
+            <div className="group relative h-20 w-20 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-sm">
               {profile.logoUrl ? (
                 <img src={profile.logoUrl} alt="ロゴ" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gray-50">
-                  <BuildingIcon className="h-8 w-8 text-gray-300" />
+                  <BuildingIcon className="h-7 w-7 text-gray-300" />
                 </div>
               )}
+              <button onClick={() => logoInputRef.current?.click()} disabled={logoUploading}
+                className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100 cursor-pointer">
+                {logoUploading ? <Spinner className="text-white" /> : <CameraIcon className="h-5 w-5 text-white" />}
+              </button>
             </div>
+            <input ref={logoInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("logo", f); e.target.value = ""; }} />
           </div>
+        </div>
 
-          <div className="pt-14">
-            <h2 className="text-2xl font-bold text-gray-900">{profile.companyName}</h2>
-            {profile.headline && (
-              <p className="mt-1 text-base text-gray-500">{profile.headline}</p>
-            )}
-
-            {/* Meta Chips */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              {profile.industry && (
-                <MetaChip icon={<TagIcon />}>{profile.industry}</MetaChip>
-              )}
-              {profile.location && (
-                <MetaChip icon={<MapPinIcon />}>{profile.location}</MetaChip>
-              )}
-              {profile.employeeCount && (
-                <MetaChip icon={<UsersIcon />}>{profile.employeeCount}</MetaChip>
-              )}
-              {foundedText && (
-                <MetaChip icon={<CalendarIcon />}>設立 {foundedText}</MetaChip>
-              )}
-              {profile.websiteUrl && (
-                <a
-                  href={profile.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-100"
-                >
-                  <LinkIcon className="h-3.5 w-3.5 text-gray-400" />
-                  {profile.websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                </a>
-              )}
-            </div>
-          </div>
+        <div className="flex items-center justify-between px-6 pt-14 pb-5">
+          <p className="text-xs text-gray-400">JPG, PNG, WebP / 5MB以下</p>
+          {profile.logoUrl && (
+            <button onClick={() => handleImageDelete("logo")}
+              className="text-xs text-red-400 hover:text-red-500 transition-colors cursor-pointer">ロゴを削除</button>
+          )}
         </div>
       </section>
 
-      {/* Description */}
-      <section className="mt-6">
-        <SectionCard title="事業内容" icon={<DocIcon />}>
-          {profile.description ? (
-            <p className="whitespace-pre-wrap text-base leading-8 text-gray-700">{profile.description}</p>
-          ) : (
-            <EmptyPrompt>事業内容やミッション・ビジョンを記載すると、求職者が企業の魅力を理解しやすくなります</EmptyPrompt>
-          )}
-        </SectionCard>
-      </section>
-
-      {/* Gallery */}
-      <section className="mt-6">
-        <SectionCard title="写真ギャラリー" icon={<GalleryIcon />} flush={gallery.length > 0}>
-          {gallery.length > 0 ? (
-            <Gallery urls={gallery} onDelete={handleGalleryDelete} />
-          ) : (
-            <div className="px-6 py-5">
-              <EmptyPrompt>オフィスの様子やチームの雰囲気が伝わる写真を追加しましょう</EmptyPrompt>
-            </div>
-          )}
-        </SectionCard>
-      </section>
-
-      {/* Company Details */}
-      <section className="mt-6">
-        <SectionCard title="企業データ" icon={<ChartIcon />}>
-          {hasCompanyDetails ? (
-            <dl className="space-y-3">
-              {profile.representativeName && (
-                <DetailRow label="代表者" value={profile.representativeName} />
-              )}
-              {foundedText && <DetailRow label="設立" value={foundedText} />}
-              {profile.capital && <DetailRow label="資本金" value={profile.capital} />}
-              {profile.revenue && <DetailRow label="売上高" value={profile.revenue} />}
-              {profile.smokingPolicy && <DetailRow label="受動喫煙対策" value={profile.smokingPolicy} />}
-            </dl>
-            ) : (
-              <EmptyPrompt>代表者名や設立年などの企業データを追加しましょう</EmptyPrompt>
-            )}
-          </SectionCard>
-      </section>
-
-      {/* Workplace Stats */}
-      <section className="mt-6">
-        <SectionCard title="働く環境データ" icon={<EnvironmentIcon />}>
-          {hasWorkplaceData ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {profile.averageAge && (
-                <StatCard value={profile.averageAge} label="平均年齢" />
-              )}
-              {profile.averageOvertimeHours && (
-                <StatCard value={profile.averageOvertimeHours} label="月平均残業時間" />
-              )}
-              {profile.paidLeaveRate && (
-                <StatCard value={profile.paidLeaveRate} label="有給取得率" />
-              )}
-            </div>
-          ) : (
-            <EmptyPrompt>働く環境データは、求職者が企業を比較する際の重要な指標です</EmptyPrompt>
-          )}
-        </SectionCard>
-      </section>
-
-      {/* Benefits */}
-      <section className="mt-6">
-        <SectionCard title="福利厚生・待遇" icon={<HeartIcon />}>
-          {profile.benefits.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {profile.benefits.map((b) => (
-                <span key={b} className="rounded-full bg-gray-100 px-3.5 py-1.5 text-sm text-gray-700">{b}</span>
-              ))}
-            </div>
-          ) : (
-            <EmptyPrompt>福利厚生や待遇を記載すると、求職者の応募意欲が高まります</EmptyPrompt>
-          )}
-        </SectionCard>
-      </section>
-
-      {/* Contact Info */}
-      <section className="mt-6">
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
-            <span className="text-gray-400"><ContactIcon /></span>
-            <h3 className="text-base font-semibold text-gray-900">担当者・連絡先</h3>
+      {/* 基本情報 */}
+      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <SectionTitle icon={<InfoIcon />}>基本情報</SectionTitle>
+        <div className="mt-5 space-y-5">
+          <Field label="企業名" required>
+            <input name="companyName" value={form.companyName} onChange={handleChange} className="field-input" placeholder="例: 株式会社Inselfy" />
+          </Field>
+          <Field label="キャッチコピー" hint={`${form.headline.length}/100`}>
+            <input name="headline" value={form.headline} onChange={handleChange} maxLength={100} className="field-input" placeholder="例: AIで採用を変える" />
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="代表者名">
+              <input name="representativeName" value={form.representativeName} onChange={handleChange} className="field-input" placeholder="例: 山田 太郎" />
+            </Field>
+            <Field label="業種">
+              <select name="industry" value={form.industry} onChange={handleChange} className="field-input">
+                {industryOptions.map((opt) => <option key={opt} value={opt}>{opt || "選択してください"}</option>)}
+              </select>
+            </Field>
           </div>
-          <div className="flex flex-wrap items-center gap-6 px-6 py-5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50">
-                <UserIcon className="h-4 w-4 text-gray-400" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">担当者</p>
-                <p className="text-sm font-medium text-gray-900">{profile.contactPersonName || "—"}</p>
-              </div>
-            </div>
-            <div className="h-8 w-px bg-gray-100" />
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50">
-                <PhoneIcon className="h-4 w-4 text-gray-400" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">電話番号</p>
-                <p className="text-sm font-medium text-gray-900">{profile.phoneNumber || "—"}</p>
-              </div>
-            </div>
-            <div className="h-8 w-px bg-gray-100" />
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-50">
-                <MailIcon className="h-4 w-4 text-gray-400" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-400">メールアドレス</p>
-                <p className="text-sm font-medium text-gray-900">{profile.email}</p>
-              </div>
-            </div>
+          <div className="grid grid-cols-4 gap-4">
+            <Field label="設立年">
+              <select name="foundedYear" value={form.foundedYear ?? ""} onChange={handleChange} className="field-input">
+                <option value="">年</option>
+                {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                  <option key={y} value={y}>{y}年</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="設立月">
+              <select name="foundedMonth" value={form.foundedMonth ?? ""} onChange={handleChange} className="field-input">
+                {monthOptions.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+              </select>
+            </Field>
+            <Field label="資本金">
+              <input name="capital" value={form.capital} onChange={handleChange} className="field-input" placeholder="例: 1億円" />
+            </Field>
+            <Field label="売上高">
+              <input name="revenue" value={form.revenue} onChange={handleChange} className="field-input" placeholder="例: 10億円" />
+            </Field>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="従業員規模">
+              <select name="employeeCount" value={form.employeeCount} onChange={handleChange} className="field-input">
+                {employeeCountOptions.map((opt) => <option key={opt} value={opt}>{opt || "選択してください"}</option>)}
+              </select>
+            </Field>
+            <Field label="所在地">
+              <input name="location" value={form.location} onChange={handleChange} className="field-input" placeholder="例: 東京都渋谷区神宮前1-2-3" />
+            </Field>
+          </div>
+          <Field label="Webサイト">
+            <input name="websiteUrl" value={form.websiteUrl} onChange={handleChange} type="url" className="field-input" placeholder="例: https://example.com" />
+          </Field>
         </div>
       </section>
+
+      {/* 連絡先 */}
+      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <SectionTitle icon={<ContactIcon />}>担当者・連絡先</SectionTitle>
+        <div className="mt-5 space-y-5">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="担当者名">
+              <input name="contactPersonName" value={form.contactPersonName} onChange={handleChange} className="field-input" placeholder="例: 佐藤 花子" />
+            </Field>
+            <Field label="電話番号">
+              <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} type="tel" className="field-input" placeholder="例: 03-1234-5678" />
+            </Field>
+          </div>
+          <Field label="メールアドレス">
+            <input value={profile.email} disabled className="field-input bg-gray-50 text-gray-400 cursor-not-allowed" />
+          </Field>
+        </div>
+      </section>
+
+      {/* 事業内容 */}
+      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <SectionTitle icon={<DocIcon />}>事業内容</SectionTitle>
+        <div className="mt-5">
+          <Field label="事業内容・企業紹介" hint={`${form.description.length}/2000`}>
+            <textarea name="description" value={form.description} onChange={handleChange} maxLength={2000} rows={6}
+              className="field-input resize-y" placeholder="企業の事業内容やミッション・ビジョンなどを記載してください" />
+          </Field>
+        </div>
+      </section>
+
+      {/* 写真ギャラリー */}
+      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <SectionTitle icon={<GalleryIcon />}>写真ギャラリー</SectionTitle>
+        <p className="mt-1 text-xs text-gray-400">オフィスの様子やチームの雰囲気が伝わる写真を追加しましょう（最大10枚）</p>
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          {profile.galleryUrls.map((url) => (
+            <div key={url} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100">
+              <img src={url} alt="" className="h-full w-full object-cover" />
+              <button onClick={() => handleImageDelete("gallery", url)}
+                className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer">
+                <TrashIcon className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          {profile.galleryUrls.length < 10 && (
+            <button onClick={() => galleryInputRef.current?.click()} disabled={galleryUploading}
+              className="flex aspect-[4/3] flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-500 cursor-pointer">
+              {galleryUploading ? <Spinner /> : (
+                <>
+                  <PlusIcon className="h-6 w-6" />
+                  <span className="mt-1 text-xs">写真を追加</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+        <input ref={galleryInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("gallery", f); e.target.value = ""; }} />
+      </section>
+
+      {/* 福利厚生 */}
+      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <SectionTitle icon={<HeartIcon />}>福利厚生・待遇</SectionTitle>
+        <div className="mt-5">
+          <Field label="福利厚生" hint={`${form.benefits.length}件`}>
+            <TagInput
+              tags={form.benefits}
+              onChange={(tags) => { setForm((prev) => ({ ...prev, benefits: tags })); setIsDirty(true); }}
+              placeholder="入力してEnterで追加（例: 社会保険完備）"
+            />
+          </Field>
+        </div>
+      </section>
+
+      {/* 働く環境 */}
+      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <SectionTitle icon={<ChartIcon />}>働く環境データ</SectionTitle>
+        <p className="mt-1 mb-5 text-xs text-gray-400">求職者が企業を比較検討する際の重要な指標です</p>
+        <div className="space-y-5">
+          <div className="grid grid-cols-3 gap-4">
+            <Field label="平均年齢">
+              <input name="averageAge" value={form.averageAge} onChange={handleChange} className="field-input" placeholder="例: 32.5歳" />
+            </Field>
+            <Field label="月平均残業時間">
+              <input name="averageOvertimeHours" value={form.averageOvertimeHours} onChange={handleChange} className="field-input" placeholder="例: 15時間" />
+            </Field>
+            <Field label="有給取得率">
+              <input name="paidLeaveRate" value={form.paidLeaveRate} onChange={handleChange} className="field-input" placeholder="例: 80%" />
+            </Field>
+          </div>
+          <Field label="受動喫煙対策">
+            <select name="smokingPolicy" value={form.smokingPolicy} onChange={handleChange} className="field-input">
+              {smokingPolicyOptions.map((opt) => <option key={opt} value={opt}>{opt || "選択してください"}</option>)}
+            </select>
+          </Field>
+        </div>
+      </section>
+
+      {/* Sticky Save Bar */}
+      <div className={`fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur-sm transition-all duration-300 ${isDirty ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}>
+        <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-3">
+          <p className="text-sm text-gray-500">未保存の変更があります</p>
+          <div className="flex gap-3">
+            <button onClick={() => { if (profile) { setForm(toFormData(profile)); setIsDirty(false); } }}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 cursor-pointer">
+              取り消す
+            </button>
+            <button onClick={handleSave} disabled={isSaving}
+              className="rounded-lg px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:opacity-90 disabled:opacity-50 cursor-pointer"
+              style={{ backgroundColor: accent }}>
+              {isSaving ? "保存中..." : "保存する"}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-lg ${toast.type === "success" ? "bg-emerald-600" : "bg-red-600"}`}>
+        <div className={`fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all ${toast.type === "success" ? "bg-emerald-600" : "bg-red-600"}`}>
           {toast.message}
         </div>
       )}
+
+      <style>{`
+        .field-input {
+          display: block;
+          width: 100%;
+          border-radius: 0.5rem;
+          border: 1px solid #d1d5db;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.875rem;
+          line-height: 1.25rem;
+          color: #111827;
+          outline: none;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .field-input:focus {
+          border-color: ${accent};
+          box-shadow: 0 0 0 2px ${accent}20;
+        }
+        .field-input::placeholder { color: #9ca3af; }
+      `}</style>
     </div>
   );
 }
 
-/* ── Layout Components ── */
+/* ── Sub-components (Edit) ── */
 
-function SectionCard({ title, icon, children, flush }: { title: string; icon: React.ReactNode; children: React.ReactNode; flush?: boolean }) {
+function SectionTitle({ icon, children }: { icon?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
-        <span className="text-gray-400">{icon}</span>
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-      </div>
-      <div className={flush ? "" : "px-6 py-5"}>{children}</div>
-    </div>
-  );
-}
-
-function MetaChip({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 px-3 py-1.5 text-sm text-gray-600">
-      <span className="text-gray-400">{icon}</span>
+    <h2 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+      {icon && <span className="text-gray-400">{icon}</span>}
       {children}
-    </span>
+    </h2>
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between">
-      <dt className="text-sm text-gray-500">{label}</dt>
-      <dd className="text-sm font-medium text-gray-900">{value}</dd>
-    </div>
-  );
-}
-
-function StatCard({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="rounded-xl p-5 text-center" style={{ backgroundColor: `${accent}06` }}>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="mt-1 text-xs text-gray-500">{label}</p>
-    </div>
-  );
-}
-
-function EmptyPrompt({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col items-center rounded-xl border-2 border-dashed border-gray-200 py-8 text-center">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50">
-        <PlusCircleIcon className="h-5 w-5 text-gray-300" />
-      </div>
-      <p className="mt-3 max-w-xs text-sm text-gray-400">{children}</p>
-      <Link
-        href="/company/profile/edit"
-        className="mt-3 text-sm font-medium transition-colors hover:underline"
-        style={{ color: accent }}
-      >
-        編集する
-      </Link>
-    </div>
-  );
-}
-
-function Gallery({ urls, onDelete }: { urls: string[]; onDelete: (url: string) => void }) {
-  const [current, setCurrent] = useState(0);
-
-  const prev = () => setCurrent((c) => (c - 1 + urls.length) % urls.length);
-  const next = () => setCurrent((c) => (c + 1) % urls.length);
-
+function Field({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
   return (
     <div>
-      {/* Main Image */}
-      <div className="group relative overflow-hidden">
-        <img src={urls[current]} alt="" className="w-full object-cover" />
-
-        {/* Delete */}
-        <button
-          onClick={() => {
-            const url = urls[current];
-            if (current >= urls.length - 1 && current > 0) setCurrent(current - 1);
-            onDelete(url);
-          }}
-          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
-        >
-          <TrashIcon className="h-4 w-4" />
-        </button>
-
-        {/* Navigation Arrows */}
-        {urls.length > 1 && (
-          <>
-            <button
-              onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/60 cursor-pointer"
-            >
-              <ChevronLeftIcon />
-            </button>
-            <button
-              onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/60 cursor-pointer"
-            >
-              <ChevronRightIcon />
-            </button>
-          </>
-        )}
-
-        {/* Counter */}
-        {urls.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white">
-            {current + 1} / {urls.length}
-          </div>
-        )}
+      <div className="mb-1.5 flex items-baseline justify-between">
+        <label className="text-sm font-medium text-gray-700">
+          {label}{required && <span className="ml-0.5 text-red-400">*</span>}
+        </label>
+        {hint && <span className="text-xs text-gray-400">{hint}</span>}
       </div>
+      {children}
+    </div>
+  );
+}
 
-      {/* Thumbnails */}
-      {urls.length > 1 && (
-        <div className="mt-3 flex gap-2 overflow-x-auto px-4 pb-3">
-          {urls.map((url, i) => (
-            <button
-              key={url}
-              onClick={() => setCurrent(i)}
-              className={`flex-shrink-0 overflow-hidden rounded-lg cursor-pointer transition-all ${
-                i === current ? "ring-2 opacity-100" : "opacity-50 hover:opacity-80"
-              }`}
-              style={i === current ? { ringColor: accent } as React.CSSProperties : undefined}
-            >
-              <img src={url} alt="" className="h-14 w-20 object-cover" />
-            </button>
+function TagInput({ tags, onChange, placeholder }: { tags: string[]; onChange: (tags: string[]) => void; placeholder?: string }) {
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const addTag = () => {
+    const value = input.trim();
+    if (value && !tags.includes(value)) {
+      onChange([...tags, value]);
+    }
+    setInput("");
+  };
+
+  const removeTag = (index: number) => {
+    onChange(tags.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-3">
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag, i) => (
+            <span key={i} className="inline-flex items-center gap-1 rounded-full bg-gray-100 py-1.5 pl-3.5 pr-2 text-sm text-gray-700">
+              {tag}
+              <button
+                type="button"
+                onClick={() => removeTag(i)}
+                className="ml-0.5 flex h-5 w-5 items-center justify-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-600 cursor-pointer"
+              >
+                ×
+              </button>
+            </span>
           ))}
         </div>
       )}
+      <input
+        ref={inputRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") { e.preventDefault(); addTag(); }
+          if (e.key === "Backspace" && input === "" && tags.length > 0) { removeTag(tags.length - 1); }
+        }}
+        onBlur={() => { if (input.trim()) addTag(); }}
+        placeholder={placeholder}
+        className="field-input w-full text-sm"
+      />
     </div>
+  );
+}
+
+function Spinner({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`h-4 w-4 animate-spin ${className}`} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75" />
+    </svg>
   );
 }
 
 /* ── Icons ── */
 
-function ChevronLeftIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 18l-6-6 6-6" />
-    </svg>
-  );
-}
-
-function ChevronRightIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 18l6-6-6-6" />
-    </svg>
-  );
-}
-
-function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
+function EyeIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
     </svg>
   );
 }
 
-function PenIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-    </svg>
-  );
+function ImageIcon({ className }: { className?: string }) {
+  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>);
 }
-
-function BuildingIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2" /><path d="M10 22v-4h4v4" />
-    </svg>
-  );
+function CameraIcon({ className }: { className?: string }) {
+  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" /></svg>);
 }
-
-function TagIcon() {
-  return (
-    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><circle cx="7" cy="7" r="1" />
-    </svg>
-  );
+function BuildingIcon({ className }: { className?: string }) {
+  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2" /><path d="M10 22v-4h4v4" /></svg>);
 }
-
-function MapPinIcon() {
-  return (
-    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-    </svg>
-  );
+function TrashIcon({ className }: { className?: string }) {
+  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>);
 }
-
-function UsersIcon() {
-  return (
-    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
+function PlusIcon({ className }: { className?: string }) {
+  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>);
 }
-
-function CalendarIcon() {
-  return (
-    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
-    </svg>
-  );
+function InfoIcon() {
+  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2" /><path d="M10 22v-4h4v4" /></svg>);
 }
-
-function LinkIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  );
-}
-
-function DocIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
-    </svg>
-  );
-}
-
-function GalleryIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
-    </svg>
-  );
-}
-
-function ChartIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 20V10M12 20V4M6 20v-6" />
-    </svg>
-  );
-}
-
-function HeartIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  );
-}
-
-function EnvironmentIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 3v18h18" /><path d="M7 16l4-8 4 4 4-6" />
-    </svg>
-  );
-}
-
 function ContactIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-    </svg>
-  );
+  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>);
 }
-
-function UserIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-    </svg>
-  );
+function DocIcon() {
+  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>);
 }
-
-function PhoneIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-    </svg>
-  );
+function GalleryIcon() {
+  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>);
 }
-
-function MailIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="16" rx="2" /><path d="M22 7l-10 7L2 7" />
-    </svg>
-  );
+function HeartIcon() {
+  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>);
 }
-
-function PlusCircleIcon({ className = "h-5 w-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" />
-    </svg>
-  );
+function ChartIcon() {
+  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>);
 }
