@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 
@@ -29,6 +30,7 @@ type teamResponse struct {
 	CompanyID   string  `json:"company_id"`
 	Name        string  `json:"name"`
 	Description *string `json:"description"`
+	IsPublic    bool    `json:"is_public"`
 	MemberCount int     `json:"member_count"`
 	WVCompleted int     `json:"wv_completed"`
 	CICompleted int     `json:"ci_completed"`
@@ -51,6 +53,7 @@ type teamDetailResponse struct {
 	CompanyID   string           `json:"company_id"`
 	Name        string           `json:"name"`
 	Description *string          `json:"description"`
+	IsPublic    bool             `json:"is_public"`
 	Members     []memberResponse `json:"members"`
 	CreatedAt   string           `json:"created_at"`
 }
@@ -67,7 +70,7 @@ func (c *CompanyTeamController) ListTeams(ctx echo.Context) error {
 	}
 
 	rows, err := c.pool.Query(ctx.Request().Context(),
-		`SELECT t.id, t.company_id, t.name, t.description, t.created_at,
+		`SELECT t.id, t.company_id, t.name, t.description, t.is_public, t.created_at,
 			COUNT(tm.id) AS member_count,
 			COUNT(CASE WHEN tm.wv_status = 'completed' THEN 1 END) AS wv_completed,
 			COUNT(CASE WHEN tm.ci_status = 'completed' THEN 1 END) AS ci_completed
@@ -87,7 +90,7 @@ func (c *CompanyTeamController) ListTeams(ctx echo.Context) error {
 		var id, cid uuid.UUID
 		var desc *string
 		var createdAt time.Time
-		if err := rows.Scan(&id, &cid, &t.Name, &desc, &createdAt, &t.MemberCount, &t.WVCompleted, &t.CICompleted); err != nil {
+		if err := rows.Scan(&id, &cid, &t.Name, &desc, &t.IsPublic, &createdAt, &t.MemberCount, &t.WVCompleted, &t.CICompleted); err != nil {
 			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 		}
 		t.ID = id.String()
@@ -150,9 +153,9 @@ func (c *CompanyTeamController) GetTeam(ctx echo.Context, teamID string) error {
 	var tid, cid uuid.UUID
 	var createdAt time.Time
 	err = c.pool.QueryRow(ctx.Request().Context(),
-		`SELECT id, company_id, name, description, created_at FROM teams WHERE id = $1 AND company_id = $2`,
+		`SELECT id, company_id, name, description, is_public, created_at FROM teams WHERE id = $1 AND company_id = $2`,
 		parsedTeamID, companyID,
-	).Scan(&tid, &cid, &team.Name, &team.Description, &createdAt)
+	).Scan(&tid, &cid, &team.Name, &team.Description, &team.IsPublic, &createdAt)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "team not found"})
@@ -200,6 +203,7 @@ func (c *CompanyTeamController) UpdateTeam(ctx echo.Context, teamID string) erro
 	var body struct {
 		Name        string  `json:"name"`
 		Description *string `json:"description"`
+		IsPublic    *bool   `json:"is_public"`
 	}
 	if err := ctx.Bind(&body); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request"})
@@ -208,10 +212,18 @@ func (c *CompanyTeamController) UpdateTeam(ctx echo.Context, teamID string) erro
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "name is required (max 100 chars)"})
 	}
 
-	tag, err := c.pool.Exec(ctx.Request().Context(),
-		`UPDATE teams SET name = $1, description = $2, updated_at = NOW() WHERE id = $3 AND company_id = $4`,
-		body.Name, body.Description, parsedTeamID, companyID,
-	)
+	var tag pgconn.CommandTag
+	if body.IsPublic != nil {
+		tag, err = c.pool.Exec(ctx.Request().Context(),
+			`UPDATE teams SET name = $1, description = $2, is_public = $3, updated_at = NOW() WHERE id = $4 AND company_id = $5`,
+			body.Name, body.Description, *body.IsPublic, parsedTeamID, companyID,
+		)
+	} else {
+		tag, err = c.pool.Exec(ctx.Request().Context(),
+			`UPDATE teams SET name = $1, description = $2, updated_at = NOW() WHERE id = $3 AND company_id = $4`,
+			body.Name, body.Description, parsedTeamID, companyID,
+		)
+	}
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
@@ -615,4 +627,243 @@ func (c *CompanyTeamController) UnsetAceMember(ctx echo.Context, teamID string) 
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
+}
+
+type publicTeamScoreResponse struct {
+	TeamID         string              `json:"team_id"`
+	TeamName       string              `json:"team_name"`
+	WVScores       []publicScoreEntry  `json:"wv_scores"`
+	CIScores       []publicScoreEntry  `json:"ci_scores"`
+	MemberCount    int                 `json:"member_count"`
+	CompletedCount int                 `json:"completed_count"`
+}
+
+type publicScoreEntry struct {
+	ID    string  `json:"id"`
+	Score float64 `json:"score"`
+}
+
+const (
+	aceWeight            = 1.8
+	outlierWeight        = 0.15
+	wvOutlierThreshold   = 25.0
+	ciOutlierThreshold   = 1.0
+	minMembersForAverage = 3
+)
+
+var (
+	wvOrder = []string{"achievement", "status", "autonomy", "safety", "altruism", "comfort"}
+	ciOrder = []string{"R", "I", "A", "S", "E", "C"}
+)
+
+func (c *CompanyTeamController) GetPublicTeamScores(ctx echo.Context, companyID string) error {
+	parsedCompanyID, err := uuid.Parse(companyID)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+	}
+
+	reqCtx := ctx.Request().Context()
+
+	teamRows, err := c.pool.Query(reqCtx,
+		`SELECT t.id, t.name, COUNT(tm.id)
+		 FROM teams t
+		 LEFT JOIN team_members tm ON tm.team_id = t.id
+		 WHERE t.company_id = $1 AND t.is_public = TRUE
+		 GROUP BY t.id
+		 ORDER BY t.created_at ASC`, parsedCompanyID)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	defer teamRows.Close()
+
+	type teamInfo struct {
+		id          uuid.UUID
+		name        string
+		memberCount int
+	}
+	var teams []teamInfo
+	for teamRows.Next() {
+		var t teamInfo
+		if err := teamRows.Scan(&t.id, &t.name, &t.memberCount); err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		teams = append(teams, t)
+	}
+
+	result := make([]publicTeamScoreResponse, 0, len(teams))
+	for _, t := range teams {
+		memberRows, err := c.pool.Query(reqCtx,
+			`SELECT user_id, wv_status, ci_status, is_ace FROM team_members WHERE team_id = $1`,
+			t.id)
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+
+		type mInfo struct {
+			userID   uuid.UUID
+			wvStatus string
+			ciStatus string
+			isAce    bool
+		}
+		var members []mInfo
+		for memberRows.Next() {
+			var m mInfo
+			if err := memberRows.Scan(&m.userID, &m.wvStatus, &m.ciStatus, &m.isAce); err != nil {
+				memberRows.Close()
+				return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			}
+			members = append(members, m)
+		}
+		memberRows.Close()
+
+		var scoreData []memberScoreDataForAvg
+		completedCount := 0
+		for _, m := range members {
+			sd := memberScoreDataForAvg{isAce: m.isAce}
+			hasData := false
+
+			if m.wvStatus == "completed" {
+				wvRows, err := c.pool.Query(reqCtx,
+					`SELECT ws.value_id, ws.display_score
+					 FROM work_values_scores ws
+					 JOIN work_values_sessions s ON s.id = ws.session_id
+					 WHERE s.user_id = $1 AND s.status = 'completed'
+					 ORDER BY s.completed_at DESC`, m.userID)
+				if err == nil {
+					sd.wvScores = map[string]float64{}
+					for wvRows.Next() {
+						var vid string
+						var ds float64
+						if err := wvRows.Scan(&vid, &ds); err == nil {
+							if _, exists := sd.wvScores[vid]; !exists {
+								sd.wvScores[vid] = ds
+							}
+						}
+					}
+					wvRows.Close()
+					if len(sd.wvScores) > 0 {
+						hasData = true
+					}
+				}
+			}
+
+			if m.ciStatus == "completed" {
+				ciRows, err := c.pool.Query(reqCtx,
+					`SELECT ts.type_id, ts.score
+					 FROM career_interest_type_scores ts
+					 JOIN career_interest_sessions s ON s.id = ts.session_id
+					 WHERE s.user_id = $1 AND s.status = 'completed'
+					 ORDER BY s.completed_at DESC`, m.userID)
+				if err == nil {
+					sd.ciScores = map[string]float64{}
+					for ciRows.Next() {
+						var tid string
+						var sc float64
+						if err := ciRows.Scan(&tid, &sc); err == nil {
+							if _, exists := sd.ciScores[tid]; !exists {
+								sd.ciScores[tid] = sc
+							}
+						}
+					}
+					ciRows.Close()
+					if len(sd.ciScores) > 0 {
+						hasData = true
+					}
+				}
+			}
+
+			if hasData {
+				completedCount++
+			}
+			scoreData = append(scoreData, sd)
+		}
+
+		resp := publicTeamScoreResponse{
+			TeamID:         t.id.String(),
+			TeamName:       t.name,
+			MemberCount:    t.memberCount,
+			CompletedCount: completedCount,
+		}
+
+		resp.WVScores = computeWeightedAvg(scoreData, "wv", wvOrder, wvOutlierThreshold)
+		resp.CIScores = computeWeightedAvg(scoreData, "ci", ciOrder, ciOutlierThreshold)
+
+		result = append(result, resp)
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]any{"teams": result})
+}
+
+type memberScoreDataForAvg struct {
+	wvScores map[string]float64
+	ciScores map[string]float64
+	isAce    bool
+}
+
+func computeWeightedAvg(members []memberScoreDataForAvg, kind string, order []string, threshold float64) []publicScoreEntry {
+	type entry struct {
+		score float64
+		isAce bool
+	}
+
+	var completed []memberScoreDataForAvg
+	for _, m := range members {
+		if kind == "wv" && len(m.wvScores) > 0 {
+			completed = append(completed, m)
+		} else if kind == "ci" && len(m.ciScores) > 0 {
+			completed = append(completed, m)
+		}
+	}
+	if len(completed) < minMembersForAverage {
+		return nil
+	}
+
+	result := make([]publicScoreEntry, 0, len(order))
+	for _, id := range order {
+		var entries []entry
+		for _, m := range completed {
+			var s float64
+			var ok bool
+			if kind == "wv" {
+				s, ok = m.wvScores[id]
+			} else {
+				s, ok = m.ciScores[id]
+			}
+			if ok {
+				entries = append(entries, entry{score: s, isAce: m.isAce})
+			}
+		}
+		if len(entries) == 0 {
+			result = append(result, publicScoreEntry{ID: id, Score: 0})
+			continue
+		}
+
+		sum := 0.0
+		for _, e := range entries {
+			sum += e.score
+		}
+		simpleAvg := sum / float64(len(entries))
+
+		weightedSum := 0.0
+		weightTotal := 0.0
+		for _, e := range entries {
+			w := 1.0
+			if e.isAce {
+				w = aceWeight
+			} else if abs(e.score-simpleAvg) > threshold {
+				w = outlierWeight
+			}
+			weightedSum += w * e.score
+			weightTotal += w
+		}
+		result = append(result, publicScoreEntry{ID: id, Score: weightedSum / weightTotal})
+	}
+	return result
+}
+
+func abs(x float64) float64 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

@@ -4,6 +4,11 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import {
+  SingleRadarChart,
+  WV_ORDER, WV_FULL_LABELS,
+  CI_ORDER, CI_FULL_LABELS,
+} from "@/app/components/SingleRadarChart";
 
 type Member = {
   id: string;
@@ -37,6 +42,7 @@ type TeamDetail = {
   company_id: string;
   name: string;
   description: string | null;
+  is_public: boolean;
   members: Member[];
   created_at: string;
 };
@@ -156,6 +162,22 @@ export default function TeamDetailPage() {
     } catch {}
   };
 
+  const handleTogglePublic = async () => {
+    if (!team) return;
+    try {
+      await companyFetch(`/api/company/teams/${teamId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: team.name,
+          description: team.description,
+          is_public: !team.is_public,
+        }),
+      });
+      await fetchTeam();
+    } catch {}
+  };
+
   const copyInviteUrl = (token: string) => {
     const url = `${window.location.origin}/diagnose/${token}`;
     navigator.clipboard.writeText(url);
@@ -205,6 +227,15 @@ export default function TeamDetailPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{team.name}</h1>
           {team.description && <p className="mt-1 text-sm text-gray-500">{team.description}</p>}
+          <button
+            onClick={handleTogglePublic}
+            className="mt-2 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+          >
+            <div className={`relative h-5 w-9 rounded-full transition-colors ${team.is_public ? "bg-emerald-500" : "bg-gray-300"}`}>
+              <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${team.is_public ? "translate-x-4" : "translate-x-0.5"}`} />
+            </div>
+            <span>企業ページに公開</span>
+          </button>
         </div>
         <div className="relative">
           <button
@@ -656,15 +687,6 @@ function DiagnosisStatus({ done }: { done: boolean }) {
   );
 }
 
-const WV_ORDER = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"] as const;
-const WV_FULL_LABELS: Record<string, string> = {
-  achievement: "達成", status: "地位・名声", autonomy: "自主性", safety: "支援", altruism: "人間関係", comfort: "労働条件",
-};
-
-const CI_ORDER = ["R", "I", "A", "S", "E", "C"] as const;
-const CI_FULL_LABELS: Record<string, string> = {
-  R: "現実的", I: "研究的", A: "芸術的", S: "社会的", E: "企業的", C: "慣習的",
-};
 
 const OUTLIER_WEIGHT = 0.15;
 const ACE_WEIGHT = 1.8;
@@ -865,112 +887,3 @@ function TeamRadarChartSection({
   );
 }
 
-function SingleRadarChart({
-  scores,
-  order,
-  fullLabels,
-  isWV,
-}: {
-  scores: { id: string; score: number }[] | null;
-  order: readonly string[];
-  fullLabels: Record<string, string>;
-  isWV: boolean;
-}) {
-  const cx = 175;
-  const cy = 155;
-  const R = 75;
-
-  const hexPoint = (i: number, r: number) => {
-    const angle = (Math.PI / 2) + (2 * Math.PI * i) / order.length;
-    return { x: cx - Math.cos(angle) * r, y: cy - Math.sin(angle) * r };
-  };
-
-  const normalize = (score: number) => {
-    if (isWV) return score / 100;
-    return (score - 1) / 4;
-  };
-
-  const gridLevels = [0.25, 0.5, 0.75, 1.0];
-  const gridPaths = gridLevels.map((level) => {
-    const pts = order.map((_, i) => hexPoint(i, R * level));
-    return pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
-  });
-  const spokes = order.map((_, i) => hexPoint(i, R));
-
-  const gridColor = isWV ? "#d8ede2" : "#e0d4f0";
-  const fillColor = isWV ? "rgba(72,200,140,0.2)" : "rgba(160,120,220,0.2)";
-  const strokeColor = isWV ? "#48c88c" : "#a878dc";
-  const dotColor = isWV ? "#48c88c" : "#a878dc";
-  const scoreTextColor = isWV ? "#2eb872" : "#9060d0";
-
-  const scoreMap = new Map(scores?.map((s) => [s.id, s.score]) || []);
-  const dataPoints = order.map((id, i) => {
-    const val = normalize(scoreMap.get(id) || 0);
-    return hexPoint(i, R * Math.max(val, 0.05));
-  });
-  const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
-
-  const labelPositions = order.map((id, i) => {
-    const pt = hexPoint(i, R + 52);
-    const angle = (Math.PI / 2) + (2 * Math.PI * i) / order.length;
-    const cos = -Math.cos(angle);
-    let anchor: "middle" | "start" | "end" = "middle";
-    if (cos > 0.3) anchor = "start";
-    else if (cos < -0.3) anchor = "end";
-    return { id, x: pt.x, y: pt.y, anchor };
-  });
-
-  const w = 400;
-  const h = 310;
-
-  return (
-    <svg width={w} height={h} className="shrink-0">
-      {gridPaths.map((d, i) => (
-        <path key={i} d={d} fill="none" stroke={gridColor} strokeWidth={0.6} />
-      ))}
-      {spokes.map((p, i) => (
-        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={gridColor} strokeWidth={0.6} />
-      ))}
-      {scores && (
-        <>
-          <path d={dataPath} fill={fillColor} stroke={strokeColor} strokeWidth={1.2} />
-          {dataPoints.map((pt, i) => (
-            <circle key={i} cx={pt.x} cy={pt.y} r={3} fill={dotColor} />
-          ))}
-        </>
-      )}
-      {labelPositions.map((lp) => {
-        const val = scoreMap.get(lp.id);
-        const scoreStr = val != null
-          ? (isWV ? val.toFixed(0) : val.toFixed(1))
-          : "-";
-        return (
-          <g key={lp.id}>
-            <text
-              x={lp.x}
-              y={lp.y - 9}
-              textAnchor={lp.anchor}
-              dominantBaseline="auto"
-              fill="#444"
-              fontSize={15}
-              fontWeight="600"
-            >
-              {fullLabels[lp.id]}
-            </text>
-            <text
-              x={lp.x}
-              y={lp.y + 14}
-              textAnchor={lp.anchor}
-              dominantBaseline="auto"
-              fill={scoreTextColor}
-              fontSize={18}
-              fontWeight="700"
-            >
-              {scoreStr}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}

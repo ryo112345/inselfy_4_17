@@ -322,6 +322,12 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return companyProfileCtrl.GetPublicProfile(c)
 	})
 
+	// --- Company Teams (public) ---
+	publicTeamCtrl := httpcontroller.NewCompanyTeamController(pool)
+	e.GET("/api/companies/:id/teams/scores", func(c echo.Context) error {
+		return publicTeamCtrl.GetPublicTeamScores(c, c.Param("id"))
+	})
+
 	// --- Company Profile (authenticated) ---
 	companyProfileGroup := e.Group("/api/company/profile", companyJwtMW)
 	companyProfileGroup.GET("", companyProfileCtrl.GetProfile)

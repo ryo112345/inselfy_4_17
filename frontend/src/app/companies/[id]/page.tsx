@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Gallery } from "./Gallery";
 import { ExpandableText } from "./ExpandableText";
+import { TeamScoresSection } from "./TeamScoresSection";
 
 export const dynamic = "force-dynamic";
 
@@ -45,13 +46,38 @@ async function fetchCompany(id: string): Promise<CompanyProfile | null> {
   }
 }
 
+type PublicTeamScore = {
+  team_id: string;
+  team_name: string;
+  wv_scores: { id: string; score: number }[] | null;
+  ci_scores: { id: string; score: number }[] | null;
+  member_count: number;
+  completed_count: number;
+};
+
+async function fetchTeamScores(id: string): Promise<PublicTeamScore[]> {
+  try {
+    const res = await fetch(`${BACKEND}/api/companies/${id}/teams/scores`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.teams ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export default async function PublicCompanyProfilePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const company = await fetchCompany(id);
+  const [company, teamScores] = await Promise.all([
+    fetchCompany(id),
+    fetchTeamScores(id),
+  ]);
   if (!company) notFound();
 
   const foundedText = company.foundedYear
@@ -186,7 +212,7 @@ export default async function PublicCompanyProfilePage({
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="px-6 pb-2 pt-5">
               <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
-                写真ギャラリー
+                フォトギャラリー
               </h2>
             </div>
             <Gallery urls={company.galleryUrls} />
@@ -276,6 +302,9 @@ export default async function PublicCompanyProfilePage({
             </ul>
           </section>
         )}
+
+        {/* ─── Team Diagnosis ─── */}
+        <TeamScoresSection teams={teamScores} cardClass={cardClass} />
       </div>
     </div>
   );
