@@ -6,12 +6,14 @@ import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import { CompanyHeader } from "./CompanyHeader";
 
 const publicPaths = ["/company/login", "/company/register"];
+const headerlessPaths = ["/company/profile/preview"];
 
 export function CompanyAuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useCompanyAuth();
   const pathname = usePathname();
   const router = useRouter();
   const isPublicPage = publicPaths.includes(pathname);
+  const isHeaderless = headerlessPaths.includes(pathname);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && !isPublicPage) {
@@ -33,6 +35,10 @@ export function CompanyAuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return null;
+  }
+
+  if (isHeaderless) {
+    return <>{children}</>;
   }
 
   return (
