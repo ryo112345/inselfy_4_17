@@ -126,7 +126,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
           <nav className="flex-1 overflow-y-auto px-2 py-1">
             <ul className="space-y-0.5">
               {navItems.map((item) => {
-                const href = item.href ?? profileHref;
+                const href = item.href ?? (user ? profileHref : "/login");
                 return (
                   <li key={item.label}>
                     <Link
@@ -206,16 +206,28 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
           </nav>
 
           <div className="shrink-0 px-1 py-2 space-y-0.5">
-            <button
-              ref={triggerRef}
-              onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
-              className={`sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3 cursor-pointer ${open ? "w-full" : "w-11"}`}
-            >
-              <span className="flex shrink-0 w-9 h-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white leading-none">
-                {initial}
-              </span>
-              <span className="whitespace-nowrap">{myDisplayName ?? user?.username ?? username}</span>
-            </button>
+            {user ? (
+              <button
+                ref={triggerRef}
+                onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+                className={`sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3 cursor-pointer ${open ? "w-full" : "w-11"}`}
+              >
+                <span className="flex shrink-0 w-9 h-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white leading-none">
+                  {initial}
+                </span>
+                <span className="whitespace-nowrap">{myDisplayName ?? user.username}</span>
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className={`sb-item flex items-center rounded-md py-2 px-1 text-sm text-gray-700 transition-colors gap-3 ${open ? "w-full" : "w-11"}`}
+              >
+                <span className="flex shrink-0 w-9 h-9 items-center justify-center rounded-full bg-gray-300 text-sm font-bold text-white leading-none">
+                  ?
+                </span>
+                <span className="whitespace-nowrap">ログイン</span>
+              </Link>
+            )}
           </div>
         </aside>
       </div>

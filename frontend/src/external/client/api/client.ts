@@ -13,15 +13,28 @@ client.setConfig({
   },
 });
 
-client.interceptors.response.use(async (response) => {
-  if (response.status === 401 && typeof window !== "undefined") {
-    const refreshRes = await fetch("/api/auth/refresh", {
-      method: "POST",
-      credentials: "include",
+let refreshPromise: Promise<boolean> | null = null;
+
+function refreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = fetch("/api/auth/refresh", {
+    method: "POST",
+    credentials: "include",
+  })
+    .then((res) => res.ok)
+    .finally(() => {
+      refreshPromise = null;
     });
-    if (!refreshRes.ok) {
-      window.location.href = "/login";
+  return refreshPromise;
+}
+
+client.interceptors.response.use(async (response, request) => {
+  if (response.status === 401 && typeof window !== "undefined") {
+    const refreshed = await refreshToken();
+    if (refreshed) {
+      return fetch(new Request(request, { credentials: "include" }));
     }
+    window.location.href = "/login";
   }
   return response;
 });
