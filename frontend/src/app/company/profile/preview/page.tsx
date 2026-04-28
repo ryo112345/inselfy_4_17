@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { TeamScoresSection } from "@/app/companies/[id]/TeamScoresSection";
 
 type ProfileData = {
   id: string;
@@ -27,12 +28,22 @@ type ProfileData = {
   galleryUrls: string[];
 };
 
+type TeamScore = {
+  team_id: string;
+  team_name: string;
+  wv_scores: { id: string; score: number }[] | null;
+  ci_scores: { id: string; score: number }[] | null;
+  member_count: number;
+  completed_count: number;
+};
+
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
 
 export default function CompanyProfilePreviewPage() {
   const { companyFetch } = useCompanyAuth();
   const [company, setCompany] = useState<ProfileData | null>(null);
+  const [teamScores, setTeamScores] = useState<TeamScore[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +53,10 @@ export default function CompanyProfilePreviewPage() {
           const data = await res.json();
           if (!Array.isArray(data.benefits)) data.benefits = [];
           setCompany(data);
+          fetch(`/api/companies/${data.id}/teams/scores`)
+            .then((r) => r.ok ? r.json() : { teams: [] })
+            .then((d) => setTeamScores(d.teams ?? []))
+            .catch(() => {});
         }
       })
       .finally(() => setIsLoading(false));
@@ -233,6 +248,9 @@ export default function CompanyProfilePreviewPage() {
             </ul>
           </section>
         )}
+
+        {/* Team Diagnosis */}
+        <TeamScoresSection teams={teamScores} cardClass={cardClass} />
       </div>
     </div>
   );
