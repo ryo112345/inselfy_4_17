@@ -22,7 +22,7 @@ type ProfileData = {
   representativeName: string;
   capital: string;
   revenue: string;
-  benefits: string;
+  benefits: string[];
   averageAge: string;
   averageOvertimeHours: string;
   paidLeaveRate: string;
@@ -87,7 +87,7 @@ export default function CompanyProfilePage() {
     companyName: "", contactPersonName: "", phoneNumber: "", headline: "",
     description: "", industry: "", location: "", employeeCount: "",
     foundedYear: null, foundedMonth: null, websiteUrl: "",
-    representativeName: "", capital: "", revenue: "", benefits: "",
+    representativeName: "", capital: "", revenue: "", benefits: [],
     averageAge: "", averageOvertimeHours: "", paidLeaveRate: "", smokingPolicy: "",
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -113,6 +113,7 @@ export default function CompanyProfilePage() {
       .then(async (res) => {
         if (res.ok) {
           const data: ProfileData = await res.json();
+          if (!Array.isArray(data.benefits)) data.benefits = [];
           setProfile(data);
           setForm(toFormData(data));
         }
@@ -369,7 +370,7 @@ export default function CompanyProfilePage() {
         <div className="mt-5">
           <Field label="事業内容・企業紹介" hint={`${form.description.length}/2000`}>
             <textarea name="description" value={form.description} onChange={handleChange} maxLength={2000} rows={6}
-              className="field-input resize-none" placeholder="企業の事業内容やミッション・ビジョンなどを記載してください" />
+              className="field-input resize-y" placeholder="企業の事業内容やミッション・ビジョンなどを記載してください" />
           </Field>
         </div>
       </section>
@@ -408,9 +409,12 @@ export default function CompanyProfilePage() {
       <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <SectionTitle icon={<HeartIcon />}>福利厚生・待遇</SectionTitle>
         <div className="mt-5">
-          <Field label="福利厚生" hint={`${form.benefits.length}/2000`}>
-            <textarea name="benefits" value={form.benefits} onChange={handleChange} maxLength={2000} rows={5}
-              className="field-input resize-none" placeholder="社会保険完備、交通費支給、リモートワーク可、フレックスタイム制、書籍購入補助 など" />
+          <Field label="福利厚生" hint={`${form.benefits.length}件`}>
+            <TagInput
+              tags={form.benefits}
+              onChange={(tags) => { setForm((prev) => ({ ...prev, benefits: tags })); setIsDirty(true); }}
+              placeholder="入力してEnterで追加（例: 社会保険完備）"
+            />
           </Field>
         </div>
       </section>
@@ -508,6 +512,56 @@ function Field({ label, required, hint, children }: { label: string; required?: 
         {hint && <span className="text-xs text-gray-400">{hint}</span>}
       </div>
       {children}
+    </div>
+  );
+}
+
+function TagInput({ tags, onChange, placeholder }: { tags: string[]; onChange: (tags: string[]) => void; placeholder?: string }) {
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const addTag = () => {
+    const value = input.trim();
+    if (value && !tags.includes(value)) {
+      onChange([...tags, value]);
+    }
+    setInput("");
+  };
+
+  const removeTag = (index: number) => {
+    onChange(tags.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-3">
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag, i) => (
+            <span key={i} className="inline-flex items-center gap-1 rounded-full bg-gray-100 py-1.5 pl-3.5 pr-2 text-sm text-gray-700">
+              {tag}
+              <button
+                type="button"
+                onClick={() => removeTag(i)}
+                className="ml-0.5 flex h-5 w-5 items-center justify-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-600 cursor-pointer"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <input
+        ref={inputRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") { e.preventDefault(); addTag(); }
+          if (e.key === "Backspace" && input === "" && tags.length > 0) { removeTag(tags.length - 1); }
+        }}
+        onBlur={() => { if (input.trim()) addTag(); }}
+        placeholder={placeholder}
+        className="field-input w-full text-sm"
+      />
     </div>
   );
 }

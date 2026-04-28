@@ -23,7 +23,7 @@ type ProfileData = {
   representativeName: string;
   capital: string;
   revenue: string;
-  benefits: string;
+  benefits: string[];
   averageAge: string;
   averageOvertimeHours: string;
   paidLeaveRate: string;
@@ -46,7 +46,7 @@ function calcCompleteness(p: ProfileData): { percent: number; missing: string[] 
     { label: "従業員規模", filled: !!p.employeeCount },
     { label: "Webサイト", filled: !!p.websiteUrl },
     { label: "写真ギャラリー", filled: p.galleryUrls.length > 0 },
-    { label: "福利厚生", filled: !!p.benefits },
+    { label: "福利厚生", filled: p.benefits.length > 0 },
     { label: "代表者名", filled: !!p.representativeName },
     { label: "働く環境データ", filled: !!(p.averageAge || p.averageOvertimeHours || p.paidLeaveRate) },
   ];
@@ -69,7 +69,11 @@ export default function CompanyProfileViewPage() {
   useEffect(() => {
     companyFetch("/api/company/profile")
       .then(async (res) => {
-        if (res.ok) setProfile(await res.json());
+        if (res.ok) {
+            const data = await res.json();
+            if (!Array.isArray(data.benefits)) data.benefits = [];
+            setProfile(data);
+          }
       })
       .finally(() => setIsLoading(false));
   }, [companyFetch]);
@@ -115,7 +119,7 @@ export default function CompanyProfileViewPage() {
     : null;
 
   return (
-    <div className="pb-12">
+    <div className="mx-auto max-w-3xl pb-12">
       {/* Page Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -176,15 +180,15 @@ export default function CompanyProfileViewPage() {
       {/* Hero Card */}
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         {/* Cover Image */}
-        <div className="relative h-52">
+        <div className="relative">
           {profile.coverImageUrl ? (
             <img
               src={profile.coverImageUrl}
               alt="カバー画像"
-              className="h-full w-full object-cover"
+              className="w-full max-h-96 object-cover"
             />
           ) : (
-            <div className="h-full w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" />
+            <div className="h-48 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         </div>
@@ -251,38 +255,37 @@ export default function CompanyProfileViewPage() {
         </SectionCard>
       </section>
 
-      {/* Gallery + Company Details (2-column) */}
-      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* Gallery */}
-        <div className="md:col-span-2">
-          <SectionCard title="写真ギャラリー" icon={<GalleryIcon />}>
-            {gallery.length > 0 ? (
-              <Gallery urls={gallery} onDelete={handleGalleryDelete} />
-            ) : (
+      {/* Gallery */}
+      <section className="mt-6">
+        <SectionCard title="写真ギャラリー" icon={<GalleryIcon />} flush={gallery.length > 0}>
+          {gallery.length > 0 ? (
+            <Gallery urls={gallery} onDelete={handleGalleryDelete} />
+          ) : (
+            <div className="px-6 py-5">
               <EmptyPrompt>オフィスの様子やチームの雰囲気が伝わる写真を追加しましょう</EmptyPrompt>
-            )}
-          </SectionCard>
-        </div>
+            </div>
+          )}
+        </SectionCard>
+      </section>
 
-        {/* Company Details */}
-        <div>
-          <SectionCard title="企業データ" icon={<ChartIcon />}>
-            {hasCompanyDetails ? (
-              <dl className="space-y-3">
-                {profile.representativeName && (
-                  <DetailRow label="代表者" value={profile.representativeName} />
-                )}
-                {foundedText && <DetailRow label="設立" value={foundedText} />}
-                {profile.capital && <DetailRow label="資本金" value={profile.capital} />}
-                {profile.revenue && <DetailRow label="売上高" value={profile.revenue} />}
-                {profile.smokingPolicy && <DetailRow label="受動喫煙対策" value={profile.smokingPolicy} />}
-              </dl>
+      {/* Company Details */}
+      <section className="mt-6">
+        <SectionCard title="企業データ" icon={<ChartIcon />}>
+          {hasCompanyDetails ? (
+            <dl className="space-y-3">
+              {profile.representativeName && (
+                <DetailRow label="代表者" value={profile.representativeName} />
+              )}
+              {foundedText && <DetailRow label="設立" value={foundedText} />}
+              {profile.capital && <DetailRow label="資本金" value={profile.capital} />}
+              {profile.revenue && <DetailRow label="売上高" value={profile.revenue} />}
+              {profile.smokingPolicy && <DetailRow label="受動喫煙対策" value={profile.smokingPolicy} />}
+            </dl>
             ) : (
               <EmptyPrompt>代表者名や設立年などの企業データを追加しましょう</EmptyPrompt>
             )}
           </SectionCard>
-        </div>
-      </div>
+      </section>
 
       {/* Workplace Stats */}
       <section className="mt-6">
@@ -308,8 +311,12 @@ export default function CompanyProfileViewPage() {
       {/* Benefits */}
       <section className="mt-6">
         <SectionCard title="福利厚生・待遇" icon={<HeartIcon />}>
-          {profile.benefits ? (
-            <p className="whitespace-pre-wrap text-sm leading-7 text-gray-700">{profile.benefits}</p>
+          {profile.benefits.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {profile.benefits.map((b) => (
+                <span key={b} className="rounded-full bg-gray-100 px-3.5 py-1.5 text-sm text-gray-700">{b}</span>
+              ))}
+            </div>
           ) : (
             <EmptyPrompt>福利厚生や待遇を記載すると、求職者の応募意欲が高まります</EmptyPrompt>
           )}
@@ -369,14 +376,14 @@ export default function CompanyProfileViewPage() {
 
 /* ── Layout Components ── */
 
-function SectionCard({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+function SectionCard({ title, icon, children, flush }: { title: string; icon: React.ReactNode; children: React.ReactNode; flush?: boolean }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
         <span className="text-gray-400">{icon}</span>
         <h3 className="text-base font-semibold text-gray-900">{title}</h3>
       </div>
-      <div className="px-6 py-5">{children}</div>
+      <div className={flush ? "" : "px-6 py-5"}>{children}</div>
     </div>
   );
 }
@@ -427,31 +434,93 @@ function EmptyPrompt({ children }: { children: React.ReactNode }) {
 }
 
 function Gallery({ urls, onDelete }: { urls: string[]; onDelete: (url: string) => void }) {
-  const remaining = urls.length - 3;
+  const [current, setCurrent] = useState(0);
+
+  const prev = () => setCurrent((c) => (c - 1 + urls.length) % urls.length);
+  const next = () => setCurrent((c) => (c + 1) % urls.length);
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      {urls.slice(0, 3).map((url, i) => (
-        <div key={url} className={`group relative overflow-hidden rounded-xl ${i === 0 && urls.length >= 3 ? "col-span-2 row-span-2" : ""}`}>
-          <img src={url} alt="" className="aspect-[4/3] w-full object-cover" />
-          <button
-            onClick={() => onDelete(url)}
-            className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
-          >
-            <TrashIcon className="h-3.5 w-3.5" />
-          </button>
-          {i === 2 && remaining > 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
-              <span className="text-lg font-bold text-white">+{remaining}</span>
-            </div>
-          )}
+    <div>
+      {/* Main Image */}
+      <div className="group relative overflow-hidden">
+        <img src={urls[current]} alt="" className="w-full object-cover" />
+
+        {/* Delete */}
+        <button
+          onClick={() => {
+            const url = urls[current];
+            if (current >= urls.length - 1 && current > 0) setCurrent(current - 1);
+            onDelete(url);
+          }}
+          className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
+        >
+          <TrashIcon className="h-4 w-4" />
+        </button>
+
+        {/* Navigation Arrows */}
+        {urls.length > 1 && (
+          <>
+            <button
+              onClick={prev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/60 cursor-pointer"
+            >
+              <ChevronLeftIcon />
+            </button>
+            <button
+              onClick={next}
+              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/60 cursor-pointer"
+            >
+              <ChevronRightIcon />
+            </button>
+          </>
+        )}
+
+        {/* Counter */}
+        {urls.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white">
+            {current + 1} / {urls.length}
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnails */}
+      {urls.length > 1 && (
+        <div className="mt-3 flex gap-2 overflow-x-auto px-4 pb-3">
+          {urls.map((url, i) => (
+            <button
+              key={url}
+              onClick={() => setCurrent(i)}
+              className={`flex-shrink-0 overflow-hidden rounded-lg cursor-pointer transition-all ${
+                i === current ? "ring-2 opacity-100" : "opacity-50 hover:opacity-80"
+              }`}
+              style={i === current ? { ringColor: accent } as React.CSSProperties : undefined}
+            >
+              <img src={url} alt="" className="h-14 w-20 object-cover" />
+            </button>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }
 
 /* ── Icons ── */
+
+function ChevronLeftIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  );
+}
 
 function TrashIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
