@@ -316,8 +316,13 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return ciCtrl.GetResultBySessionID(c, c.Param("sessionId"))
 	})
 
-	// --- Company Profile ---
+	// --- Company Profile (public) ---
 	companyProfileCtrl := httpcontroller.NewCompanyProfileController(pool)
+	e.GET("/api/companies/:id", func(c echo.Context) error {
+		return companyProfileCtrl.GetPublicProfile(c)
+	})
+
+	// --- Company Profile (authenticated) ---
 	companyProfileGroup := e.Group("/api/company/profile", companyJwtMW)
 	companyProfileGroup.GET("", companyProfileCtrl.GetProfile)
 	companyProfileGroup.PUT("", companyProfileCtrl.UpdateProfile)

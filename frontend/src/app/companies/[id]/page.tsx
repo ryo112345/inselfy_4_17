@@ -1,0 +1,336 @@
+import { notFound } from "next/navigation";
+import { Gallery } from "./Gallery";
+import { ExpandableText } from "./ExpandableText";
+
+export const dynamic = "force-dynamic";
+
+const BACKEND = process.env.INTERNAL_API_URL ?? "http://localhost:8081";
+
+const cardClass =
+  "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
+
+type CompanyProfile = {
+  id: string;
+  companyName: string;
+  headline: string;
+  description: string;
+  industry: string;
+  location: string;
+  employeeCount: string;
+  foundedYear: number | null;
+  foundedMonth: number | null;
+  websiteUrl: string;
+  logoUrl: string;
+  coverImageUrl: string;
+  representativeName: string;
+  capital: string;
+  revenue: string;
+  benefits: string[];
+  averageAge: string;
+  averageOvertimeHours: string;
+  paidLeaveRate: string;
+  smokingPolicy: string;
+  galleryUrls: string[];
+};
+
+async function fetchCompany(id: string): Promise<CompanyProfile | null> {
+  try {
+    const res = await fetch(`${BACKEND}/api/companies/${id}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+export default async function PublicCompanyProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const company = await fetchCompany(id);
+  if (!company) notFound();
+
+  const foundedText = company.foundedYear
+    ? `${company.foundedYear}年${company.foundedMonth ? `${company.foundedMonth}月` : ""}`
+    : null;
+
+  const statItems = [
+    company.averageAge && { value: company.averageAge, label: "平均年齢" },
+    company.averageOvertimeHours && {
+      value: company.averageOvertimeHours,
+      label: "月平均残業",
+    },
+    company.paidLeaveRate && {
+      value: company.paidLeaveRate,
+      label: "有給取得率",
+    },
+  ].filter(Boolean) as { value: string; label: string }[];
+
+  const detailItems = [
+    company.representativeName && {
+      label: "代表者",
+      value: company.representativeName,
+    },
+    foundedText && { label: "設立", value: foundedText },
+    company.employeeCount && { label: "従業員数", value: company.employeeCount },
+    company.capital && { label: "資本金", value: company.capital },
+    company.revenue && { label: "売上高", value: company.revenue },
+  ].filter(Boolean) as { label: string; value: string }[];
+
+  return (
+    <div className="min-h-screen bg-[#f6f7f5]">
+      <div className="mx-auto flex max-w-3xl flex-col gap-3 px-4 pb-20 pt-8">
+        {/* ─── Hero ─── */}
+        <section className={`overflow-hidden ${cardClass}`}>
+          <div className="relative overflow-hidden">
+            {company.coverImageUrl ? (
+              <img
+                src={company.coverImageUrl}
+                alt=""
+                className="w-full"
+              />
+            ) : (
+              <div
+                className="h-44 sm:h-56"
+                style={{ background: "#3D8B6E" }}
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent" />
+          </div>
+
+          <div className="relative px-7 pb-6">
+            <div className="absolute -top-10 left-7">
+              <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
+                {company.logoUrl ? (
+                  <img
+                    src={company.logoUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="flex h-full w-full items-center justify-center"
+                    style={{ background: "#3D8B6E20" }}
+                  >
+                    <span
+                      className="text-xl font-bold"
+                      style={{ color: "#3D8B6E" }}
+                    >
+                      {company.companyName.charAt(0)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-14">
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                {company.companyName}
+              </h1>
+              {company.headline && (
+                <p className="mt-1.5 text-lg text-gray-700">
+                  {company.headline}
+                </p>
+              )}
+
+              <div className="mt-3 flex flex-wrap items-center gap-2.5 text-sm text-gray-500">
+                {company.industry && (
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+                    {company.industry}
+                  </span>
+                )}
+                {company.location && (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPinIcon />
+                    {company.location}
+                  </span>
+                )}
+              </div>
+
+              {company.websiteUrl && (
+                <a
+                  href={company.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition-colors hover:text-emerald-800"
+                >
+                  <LinkIcon />
+                  {company.websiteUrl
+                    .replace(/^https?:\/\//, "")
+                    .replace(/\/$/, "")}
+                  <ExternalIcon />
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── About ─── */}
+        {company.description && (
+          <section className={`px-6 py-5 ${cardClass}`}>
+            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">事業内容</h2>
+            <div className="mt-3">
+              <ExpandableText text={company.description} maxLines={6} />
+            </div>
+          </section>
+        )}
+
+        {/* ─── Gallery ─── */}
+        {company.galleryUrls.length > 0 && (
+          <section className={`overflow-hidden ${cardClass}`}>
+            <div className="px-6 pb-2 pt-5">
+              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+                写真ギャラリー
+              </h2>
+            </div>
+            <Gallery urls={company.galleryUrls} />
+          </section>
+        )}
+
+        {/* ─── Workplace Stats ─── */}
+        {statItems.length > 0 && (
+          <section className={`py-5 ${cardClass}`}>
+            <div className="px-6">
+              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+                数字で見る働く環境
+              </h2>
+            </div>
+            <div className="mt-5 grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              {statItems.map(({ value, label }) => (
+                <div key={label} className="px-6 py-4 text-center sm:py-2">
+                  <p
+                    className="text-3xl font-bold"
+                    style={{ color: "#3D8B6E" }}
+                  >
+                    {value}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">{label}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── Company Details ─── */}
+        {detailItems.length > 0 && (
+          <section className={`overflow-hidden py-5 ${cardClass}`}>
+            <div className="px-6">
+              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+                企業情報
+              </h2>
+            </div>
+            <dl className="mt-4">
+              {detailItems.map(({ label, value }, i) => (
+                <div
+                  key={label}
+                  className={`flex items-baseline justify-between px-6 py-3.5 ${
+                    i % 2 === 0 ? "bg-gray-50/70" : ""
+                  }`}
+                >
+                  <dt className="shrink-0 text-sm text-gray-500">{label}</dt>
+                  <dd className="text-right text-sm font-medium text-gray-900">
+                    {value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
+
+        {/* ─── Benefits ─── */}
+        {(company.benefits.length > 0 || company.smokingPolicy) && (
+          <section className={`px-6 py-5 ${cardClass}`}>
+            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">福利厚生・待遇</h2>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {company.benefits.map((b) => (
+                <li
+                  key={b}
+                  className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium"
+                  style={{
+                    borderColor: "#3D8B6E40",
+                    backgroundColor: "#3D8B6E12",
+                    color: "#3D8B6E",
+                  }}
+                >
+                  {b}
+                </li>
+              ))}
+              {company.smokingPolicy && (
+                <li
+                  className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium"
+                  style={{
+                    borderColor: "#3D8B6E40",
+                    backgroundColor: "#3D8B6E12",
+                    color: "#3D8B6E",
+                  }}
+                >
+                  {company.smokingPolicy}
+                </li>
+              )}
+            </ul>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Icons ── */
+
+function MapPinIcon() {
+  return (
+    <svg
+      className="h-[18px] w-[18px]"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function LinkIcon() {
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+function ExternalIcon() {
+  return (
+    <svg
+      className="h-3 w-3"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}

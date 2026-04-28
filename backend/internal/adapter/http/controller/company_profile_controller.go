@@ -57,6 +57,77 @@ type companyProfileResponse struct {
 	GalleryURLs          []string `json:"galleryUrls"`
 }
 
+type publicCompanyProfileResponse struct {
+	ID                   string   `json:"id"`
+	CompanyName          string   `json:"companyName"`
+	Headline             string   `json:"headline"`
+	Description          string   `json:"description"`
+	Industry             string   `json:"industry"`
+	Location             string   `json:"location"`
+	EmployeeCount        string   `json:"employeeCount"`
+	FoundedYear          *int     `json:"foundedYear"`
+	FoundedMonth         *int     `json:"foundedMonth"`
+	WebsiteURL           string   `json:"websiteUrl"`
+	LogoURL              string   `json:"logoUrl"`
+	CoverImageURL        string   `json:"coverImageUrl"`
+	RepresentativeName   string   `json:"representativeName"`
+	Capital              string   `json:"capital"`
+	Revenue              string   `json:"revenue"`
+	Benefits             []string `json:"benefits"`
+	AverageAge           string   `json:"averageAge"`
+	AverageOvertimeHours string   `json:"averageOvertimeHours"`
+	PaidLeaveRate        string   `json:"paidLeaveRate"`
+	SmokingPolicy        string   `json:"smokingPolicy"`
+	GalleryURLs          []string `json:"galleryUrls"`
+}
+
+func (c *CompanyProfileController) GetPublicProfile(ctx echo.Context) error {
+	id := ctx.Param("id")
+	parsed, err := uuid.Parse(id)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+	}
+
+	var p publicCompanyProfileResponse
+	var foundedYear, foundedMonth *int32
+	var benefitsJSON, galleryJSON []byte
+	err = c.pool.QueryRow(ctx.Request().Context(),
+		`SELECT id, company_name,
+				headline, description, industry, location, employee_count,
+				founded_year, founded_month, website_url, logo_url, cover_image_url,
+				representative_name, capital, revenue,
+				benefits, average_age, average_overtime_hours, paid_leave_rate,
+				smoking_policy, gallery_urls
+		 FROM company_accounts WHERE id = $1 AND status = 'approved'`, parsed).
+		Scan(&p.ID, &p.CompanyName,
+			&p.Headline, &p.Description, &p.Industry, &p.Location, &p.EmployeeCount,
+			&foundedYear, &foundedMonth, &p.WebsiteURL, &p.LogoURL, &p.CoverImageURL,
+			&p.RepresentativeName, &p.Capital, &p.Revenue,
+			&benefitsJSON, &p.AverageAge, &p.AverageOvertimeHours, &p.PaidLeaveRate,
+			&p.SmokingPolicy, &galleryJSON)
+	if err != nil {
+		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "company not found"})
+	}
+	if foundedYear != nil {
+		v := int(*foundedYear)
+		p.FoundedYear = &v
+	}
+	if foundedMonth != nil {
+		v := int(*foundedMonth)
+		p.FoundedMonth = &v
+	}
+	p.Benefits = []string{}
+	if len(benefitsJSON) > 0 {
+		_ = json.Unmarshal(benefitsJSON, &p.Benefits)
+	}
+	p.GalleryURLs = []string{}
+	if len(galleryJSON) > 0 {
+		_ = json.Unmarshal(galleryJSON, &p.GalleryURLs)
+	}
+
+	return ctx.JSON(http.StatusOK, p)
+}
+
 func (c *CompanyProfileController) companyID(ctx echo.Context) string {
 	return ctx.Get(authmw.CompanyIDKey).(string)
 }
