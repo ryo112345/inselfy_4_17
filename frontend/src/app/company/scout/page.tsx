@@ -4,17 +4,19 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   fetchCompanyScouts,
-  fetchCredits,
+  fetchScoutDashboard,
   fetchQualityScore,
 } from "@/features/scout/api";
 import type {
   ScoutMessage,
-  ScoutCredits,
+  ScoutDashboard,
   QualityScore,
   ScoutStatus,
 } from "@/features/scout/types";
 
 const PAGE_SIZE = 20;
+const accent = "#2979ff";
+const num = { fontFamily: "var(--font-plus-jakarta-sans)" };
 
 const STATUS_TABS: { label: string; value: ScoutStatus | "all" }[] = [
   { label: "全て", value: "all" },
@@ -43,6 +45,16 @@ const QUALITY_BADGE: Record<string, { bg: string; text: string; label: string }>
   restricted: { bg: "bg-red-50", text: "text-red-700", label: "制限中" },
 };
 
+function formatMonth(iso: string) {
+  const m = parseInt(iso.split("-")[1], 10);
+  return `${m}月`;
+}
+
+function formatReplenishDate(iso: string) {
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
@@ -52,16 +64,15 @@ function formatDate(dateStr: string | null): string {
 export default function ScoutListPage() {
   const [scouts, setScouts] = useState<ScoutMessage[]>([]);
   const [total, setTotal] = useState(0);
-  const [credits, setCredits] = useState<ScoutCredits | null>(null);
+  const [dashboard, setDashboard] = useState<ScoutDashboard | null>(null);
   const [quality, setQuality] = useState<QualityScore | null>(null);
   const [activeTab, setActiveTab] = useState<ScoutStatus | "all">("all");
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch credits and quality on mount
   useEffect(() => {
-    fetchCredits().then(setCredits).catch(() => {});
+    fetchScoutDashboard().then(setDashboard).catch(() => {});
     fetchQualityScore().then(setQuality).catch(() => {});
   }, []);
 
@@ -83,7 +94,9 @@ export default function ScoutListPage() {
   }, [activeTab, page]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const creditPercent = credits ? Math.round((credits.balance / credits.maxStock) * 100) : 0;
+  const totalCredits = dashboard ? dashboard.credits.balance + dashboard.pending.total : 0;
+  const creditPct = totalCredits > 0 ? Math.round((dashboard!.credits.balance / totalCredits) * 100) : 0;
+  const creditLow = dashboard ? dashboard.credits.balance / dashboard.credits.maxStock < 0.2 : false;
 
   return (
     <div className="space-y-6">
@@ -106,80 +119,118 @@ export default function ScoutListPage() {
         </div>
       </div>
 
-      {/* Credits + Quality */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Credit card */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-gray-500">クレジット残高</p>
-            {credits && (
-              <span className="text-xs text-gray-400">
-                月間付与: {credits.monthlyAllowance}
+      {/* Credits + Quality cards */}
+      {dashboard ? (
+        <div className="grid grid-cols-2 gap-4">
+          {/* Left card: credits + performance */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <p className="text-base font-semibold text-gray-700">送信可能</p>
+            <div className="mt-1.5 flex items-baseline gap-2">
+              <span className="text-3xl font-bold" style={{ color: creditLow ? "#ef4444" : accent, ...num }}>
+                {dashboard.credits.balance}
               </span>
-            )}
-          </div>
-          {credits ? (
-            <>
-              <div className="flex items-baseline gap-2 mb-3">
-                <span className="text-3xl font-bold text-gray-900">{credits.balance}</span>
-                <span className="text-sm text-gray-400">/ {credits.maxStock}</span>
-              </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${creditPercent}%`,
-                    backgroundColor: creditPercent > 20 ? "#2979ff" : "#ef4444",
-                  }}
-                />
-              </div>
-            </>
-          ) : (
-            <div className="h-12 flex items-center">
-              <span className="text-sm text-gray-400">読み込み中...</span>
+              <span className="text-sm font-normal text-gray-400">/ <span style={num}>{totalCredits}</span> 通</span>
             </div>
-          )}
-        </div>
+            <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-gray-100">
+              <div
+                className="h-3 rounded-full transition-all"
+                style={{ width: `${creditPct}%`, backgroundColor: creditLow ? "#ef4444" : accent }}
+              />
+            </div>
+            <p className="mt-2 text-sm text-gray-400">
+              補充: {formatReplenishDate(dashboard.credits.nextReplenishDate)}（+{Math.min(dashboard.credits.monthlyAllowance, dashboard.credits.maxStock - dashboard.credits.balance)}通 / 上限{dashboard.credits.maxStock}通）
+            </p>
 
-        {/* Quality score card */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm font-medium text-gray-500 mb-3">品質スコア（直近14日）</p>
-          {quality ? (
-            <>
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl font-bold text-gray-900">
-                  {(quality.replyRate14d * 100).toFixed(1)}%
-                </span>
-                {(() => {
-                  const badge = QUALITY_BADGE[quality.level];
-                  return badge ? (
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
-                      {badge.label}
-                    </span>
-                  ) : null;
-                })()}
+            <div className="mt-4 border-t border-gray-100 pt-4">
+              <p className="mb-2.5 text-base font-semibold text-gray-700">スカウト成果（直近90日）</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">スカウト経由応募</span>
+                  <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={num}>—</span> 件</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">応募あたり送信数</span>
+                  <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={num}>—</span> 通/件</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">返信率</span>
+                  <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={num}>{dashboard.replyRate}</span> %</span>
+                </div>
               </div>
-              <p className="text-xs text-gray-400">
-                送信: {quality.sentLast14d}件 / 返信: {quality.repliedLast14d}件
-              </p>
-              {quality.level === "temporarily_restricted" && quality.restrictionEndsAt && (
-                <p className="text-xs text-orange-600 mt-1">
-                  制限解除: {formatDate(quality.restrictionEndsAt)}（残り{quality.daysRemaining}日）
-                </p>
-              )}
-              {quality.level === "warning" && quality.daysRemaining != null && (
-                <p className="text-xs text-yellow-600 mt-1">
-                  改善期限まで残り{quality.daysRemaining}日
-                </p>
-              )}
-            </>
-          ) : (
-            <div className="h-12 flex items-center">
-              <span className="text-sm text-gray-400">読み込み中...</span>
             </div>
-          )}
+          </div>
+
+          {/* Right card: pending + quality */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="flex gap-6">
+              {/* Left: 返信待ち */}
+              <div className="flex-1">
+                <p className="text-base font-semibold text-gray-700">返信待ち</p>
+                <div className="mt-1.5 flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-gray-900" style={num}>{dashboard.pending.total}</span>
+                  <span className="text-sm font-normal text-gray-400">通</span>
+                </div>
+              </div>
+              {/* Right: 品質スコア */}
+              <div className="flex-1 text-right">
+                <p className="text-xs font-medium text-gray-400">品質スコア（14日）</p>
+                {quality ? (
+                  <>
+                    <div className="mt-1 flex items-center justify-end gap-2">
+                      <span className="text-2xl font-bold text-gray-900" style={num}>
+                        {(quality.replyRate14d * 100).toFixed(1)}%
+                      </span>
+                      {(() => {
+                        const badge = QUALITY_BADGE[quality.level];
+                        return badge ? (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+                            {badge.label}
+                          </span>
+                        ) : null;
+                      })()}
+                    </div>
+                    <p className="mt-0.5 text-xs text-gray-400">
+                      送信: {quality.sentLast14d}件 / 返信: {quality.repliedLast14d}件
+                    </p>
+                    {quality.level === "warning" && quality.daysRemaining != null && (
+                      <p className="text-xs text-yellow-600 mt-0.5">改善期限まで残り{quality.daysRemaining}日</p>
+                    )}
+                    {quality.level === "temporarily_restricted" && quality.daysRemaining != null && (
+                      <p className="text-xs text-orange-600 mt-0.5">制限解除まで残り{quality.daysRemaining}日</p>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-sm text-gray-400">-</span>
+                )}
+              </div>
+            </div>
+            <div className="mt-2.5 space-y-2">
+              {dashboard.pending.byMonth.map((m) => (
+                <div key={m.month} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">{formatMonth(m.month)}送信分</span>
+                  <span className="flex items-baseline">
+                    <span className="inline-flex items-baseline justify-end font-medium text-gray-700" style={{ width: "3.5rem" }}>
+                      <span className="text-lg font-bold" style={num}>{m.count}</span><span className="ml-1">通</span>
+                    </span>
+                    <span className={`inline-flex items-baseline justify-end ${m.daysLeft <= 14 ? "font-semibold text-red-500" : "text-gray-400"}`} style={{ width: "4.5rem" }}>
+                      残<span className="ml-1.5 text-lg font-bold" style={num}>{m.daysLeft}</span> 日
+                    </span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 flex items-center justify-between text-sm">
+              <span className="text-gray-500">平均返信日数</span>
+              <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={num}>{dashboard.avgReplyDays}</span> 日</span>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-64 animate-pulse rounded-xl border border-gray-200 bg-gray-50" />
+          <div className="h-64 animate-pulse rounded-xl border border-gray-200 bg-gray-50" />
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">
