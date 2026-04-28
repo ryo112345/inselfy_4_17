@@ -259,8 +259,8 @@ export default async function PublicCompanyProfilePage({
                     i % 2 === 0 ? "bg-gray-50/70" : ""
                   }`}
                 >
-                  <dt className="shrink-0 text-sm text-gray-500">{label}</dt>
-                  <dd className="text-right text-sm font-medium text-gray-900">
+                  <dt className="shrink-0 text-base text-gray-500">{label}</dt>
+                  <dd className="text-right text-base font-medium text-gray-900">
                     {value}
                   </dd>
                 </div>
