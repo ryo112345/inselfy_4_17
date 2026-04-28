@@ -88,7 +88,7 @@ function SectionTitle({
           {icon}
         </span>
       )}
-      <h2 className="text-xl font-bold tracking-tight text-gray-900">
+      <h2 className="text-2xl font-bold tracking-tight text-gray-900">
         {children}
       </h2>
     </div>
@@ -105,12 +105,12 @@ function StatCell({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1.5 px-4 py-4 sm:px-5">
-      <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+    <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
+      <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
         <span className="text-gray-400">{icon}</span>
         {label}
       </div>
-      <div className="text-base font-bold leading-tight text-gray-900 sm:text-lg">
+      <div className="text-xl font-bold leading-tight text-gray-900 sm:text-2xl">
         {value}
       </div>
     </div>
@@ -131,25 +131,25 @@ function HighlightCard({
   tone: { bg: string; ring: string; fg: string };
 }) {
   return (
-    <div className="flex h-full flex-col gap-3 rounded-2xl border border-gray-200/80 bg-white p-5">
-      <div className="flex items-center gap-2.5">
+    <div className="flex h-full flex-col gap-3.5 rounded-2xl border border-gray-200/80 bg-white p-6">
+      <div className="flex items-center gap-3">
         <span
-          className="flex h-10 w-10 items-center justify-center rounded-xl"
+          className="flex h-11 w-11 items-center justify-center rounded-xl"
           style={{ backgroundColor: tone.bg, color: tone.fg, boxShadow: `inset 0 0 0 1px ${tone.ring}` }}
         >
           {icon}
         </span>
         <span
-          className="text-xs font-semibold tracking-wide"
+          className="text-sm font-semibold tracking-wide"
           style={{ color: tone.fg }}
         >
           {label}
         </span>
       </div>
-      <h3 className="text-base font-bold leading-snug text-gray-900">
+      <h3 className="text-lg font-bold leading-snug text-gray-900">
         {title}
       </h3>
-      <p className="text-[13px] leading-relaxed text-gray-600 whitespace-pre-wrap">
+      <p className="text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
         {body}
       </p>
     </div>
@@ -164,14 +164,14 @@ function BenefitCell({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-gray-200/80 bg-white p-3.5">
+    <div className="flex items-center gap-3.5 rounded-xl border border-gray-200/80 bg-white p-4">
       <span
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg"
         style={{ backgroundColor: `${ACCENT}10`, color: ACCENT }}
       >
         {icon}
       </span>
-      <span className="text-sm font-medium leading-snug text-gray-800">
+      <span className="text-base font-medium leading-snug text-gray-800">
         {text}
       </span>
     </div>
@@ -188,23 +188,23 @@ function ConditionGroup({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-gray-200/80 bg-white p-5">
-      <div className="mb-3 flex items-center gap-2 border-b border-gray-100 pb-3">
+    <div className="flex flex-col rounded-2xl border border-gray-200/80 bg-white p-6">
+      <div className="mb-4 flex items-center gap-2.5 border-b border-gray-100 pb-3.5">
         <span
-          className="flex h-7 w-7 items-center justify-center rounded-md"
+          className="flex h-8 w-8 items-center justify-center rounded-md"
           style={{ backgroundColor: `${ACCENT}12`, color: ACCENT }}
         >
           {icon}
         </span>
-        <h3 className="text-sm font-bold text-gray-900">{title}</h3>
+        <h3 className="text-base font-bold text-gray-900">{title}</h3>
       </div>
-      <dl className="flex flex-col gap-2.5">
+      <dl className="flex flex-col gap-3.5">
         {rows.map((r) => (
-          <div key={r.label} className="flex flex-col gap-0.5">
-            <dt className="text-[11px] font-medium tracking-wide text-gray-500">
+          <div key={r.label} className="flex flex-col gap-1">
+            <dt className="text-xs font-medium tracking-wide text-gray-500">
               {r.label}
             </dt>
-            <dd className="text-[13px] leading-relaxed text-gray-900 whitespace-pre-wrap">
+            <dd className="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap">
               {r.value}
             </dd>
           </div>
@@ -229,9 +229,9 @@ export default function JobDetailPage() {
       value: (
         <span>
           {job.salaryMin}
-          <span className="text-sm font-medium text-gray-500">〜</span>
+          <span className="text-base font-medium text-gray-500">〜</span>
           {job.salaryMax}
-          <span className="ml-0.5 text-xs font-medium text-gray-500">
+          <span className="ml-0.5 text-sm font-medium text-gray-500">
             万円
           </span>
         </span>
@@ -307,13 +307,12 @@ export default function JobDetailPage() {
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
         {/* ─── Hero ─── */}
         <section className={`overflow-hidden ${cardClass}`}>
-          <div className="relative h-52 w-full overflow-hidden sm:h-60">
+          <div className="relative w-full overflow-hidden bg-gray-100 aspect-[16/9]">
             <img
               src="/job-cover.png"
               alt=""
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
           </div>
 
           <div className="px-6 pb-6 pt-6 sm:px-8">
@@ -338,24 +337,24 @@ export default function JobDetailPage() {
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 group-hover:underline">
+                <p className="text-base font-medium text-gray-900 group-hover:underline">
                   {company.name}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-sm text-gray-500">
                   {company.industry} / {company.location}
                 </p>
               </div>
             </Link>
 
-            <h1 className="mt-5 text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px]">
+            <h1 className="mt-5 text-3xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[32px]">
               {job.title}
             </h1>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-wrap gap-2">
               {metaBadges.map((b) => (
                 <span
                   key={b.label}
-                  className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium"
+                  className="inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium"
                   style={{
                     borderColor: `${ACCENT}40`,
                     backgroundColor: `${ACCENT}12`,
@@ -367,11 +366,11 @@ export default function JobDetailPage() {
               ))}
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-2">
               {job.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+                  className="inline-flex items-center rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700"
                 >
                   #{tag}
                 </span>
@@ -390,14 +389,14 @@ export default function JobDetailPage() {
               ))}
             </div>
 
-            <div className="mt-6 flex gap-3">
+            <div className="mt-7 flex gap-3">
               <button
-                className="flex-1 rounded-xl py-3 text-center text-sm font-bold text-white transition-colors hover:opacity-90 cursor-pointer"
+                className="flex-1 rounded-xl py-4 text-center text-base font-bold text-white transition-colors hover:opacity-90 cursor-pointer"
                 style={{ background: ACCENT }}
               >
                 この求人に応募する
               </button>
-              <button className="rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
+              <button className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
                 <BookmarkIcon />
               </button>
             </div>
@@ -407,7 +406,7 @@ export default function JobDetailPage() {
         {/* ─── Highlights (4 cards in 2x2 grid) ─── */}
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<LayersIcon />}>ハイライト</SectionTitle>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-2 text-sm text-gray-500">
             この仕事を一目で掴むための4つの視点
           </p>
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -428,13 +427,13 @@ export default function JobDetailPage() {
             >
               <div className="flex flex-col items-center gap-2">
                 <span
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl"
+                  className="flex h-16 w-16 items-center justify-center rounded-2xl"
                   style={{ backgroundColor: `${ACCENT}1f`, color: ACCENT }}
                 >
                   <PeopleIcon />
                 </span>
                 <span
-                  className="text-xs font-semibold tracking-wide"
+                  className="text-sm font-semibold tracking-wide"
                   style={{ color: ACCENT }}
                 >
                   TEAM
@@ -442,10 +441,10 @@ export default function JobDetailPage() {
               </div>
             </div>
             <div className="px-6 py-6 sm:px-7 sm:py-7">
-              <h2 className="text-lg font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-gray-900">
                 チーム紹介
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+              <p className="mt-3 text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
                 {job.teamDescription}
               </p>
             </div>
@@ -457,37 +456,37 @@ export default function JobDetailPage() {
           <SectionTitle icon={<CheckSquareIcon />}>応募要件</SectionTitle>
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div
-              className="rounded-2xl border p-5"
+              className="rounded-2xl border p-6"
               style={{
                 borderColor: `${ACCENT}40`,
                 backgroundColor: `${ACCENT}08`,
               }}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <span
-                  className="inline-flex h-6 items-center rounded-md px-2 text-xs font-bold text-white"
+                  className="inline-flex h-7 items-center rounded-md px-2.5 text-sm font-bold text-white"
                   style={{ background: ACCENT }}
                 >
                   必須
                 </span>
-                <h3 className="text-sm font-bold text-gray-900">
+                <h3 className="text-base font-bold text-gray-900">
                   これが満たせれば応募可
                 </h3>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+              <p className="mt-3.5 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
                 {job.requiredQualifications}
               </p>
             </div>
-            <div className="rounded-2xl border border-gray-200 bg-gray-50/60 p-5">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-6 items-center rounded-md bg-gray-400 px-2 text-xs font-bold text-white">
+            <div className="rounded-2xl border border-gray-200 bg-gray-50/60 p-6">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex h-7 items-center rounded-md bg-gray-400 px-2.5 text-sm font-bold text-white">
                   歓迎
                 </span>
-                <h3 className="text-sm font-bold text-gray-900">
+                <h3 className="text-base font-bold text-gray-900">
                   あれば嬉しい経験
                 </h3>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+              <p className="mt-3.5 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
                 {job.preferredQualifications}
               </p>
             </div>
@@ -536,20 +535,20 @@ export default function JobDetailPage() {
           <ol className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             {selectionSteps.map((step, i, arr) => (
               <li key={i} className="flex items-center gap-2">
-                <div className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5">
+                <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
                   <span
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
                     style={{ background: ACCENT }}
                   >
                     {i + 1}
                   </span>
-                  <span className="text-sm font-medium text-gray-800 whitespace-nowrap">
+                  <span className="text-base font-medium text-gray-800 whitespace-nowrap">
                     {step}
                   </span>
                 </div>
                 {i < arr.length - 1 && (
                   <svg
-                    className="h-4 w-4 shrink-0 text-gray-300"
+                    className="h-5 w-5 shrink-0 text-gray-300"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -589,10 +588,10 @@ export default function JobDetailPage() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-base font-bold text-gray-900 group-hover:underline">
+                <p className="text-lg font-bold text-gray-900 group-hover:underline">
                   {company.name}
                 </p>
-                <p className="text-sm text-gray-500 mt-0.5">
+                <p className="text-sm text-gray-500 mt-1">
                   {company.industry} / {company.location} / {company.employeeCount}
                 </p>
               </div>
@@ -614,18 +613,18 @@ export default function JobDetailPage() {
         <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm z-50 sm:hidden">
           <div className="mx-auto max-w-3xl flex items-center gap-3 px-4 py-3">
             <button
-              className="flex-1 rounded-xl py-3 text-center text-sm font-bold text-white cursor-pointer"
+              className="flex-1 rounded-xl py-3.5 text-center text-base font-bold text-white cursor-pointer"
               style={{ background: ACCENT }}
             >
               この求人に応募する
             </button>
-            <button className="rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 cursor-pointer">
+            <button className="rounded-xl border border-gray-300 px-4 py-3.5 text-base text-gray-700 cursor-pointer">
               <BookmarkIcon />
             </button>
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-2">
+        <p className="text-center text-sm text-gray-400 mt-2">
           {job.publishedAt} 掲載
         </p>
       </div>
