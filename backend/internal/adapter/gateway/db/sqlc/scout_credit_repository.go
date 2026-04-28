@@ -115,6 +115,18 @@ func (r *ScoutCreditRepository) SetQualityRestricted(ctx context.Context, compan
 	return q.SetQualityRestricted(ctx, pgID)
 }
 
+func (r *ScoutCreditRepository) ReplenishAll(ctx context.Context) ([]*scout.ScoutCredit, error) {
+	rows, err := r.queries.ReplenishCredits(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*scout.ScoutCredit, len(rows))
+	for i, row := range rows {
+		result[i] = scoutCreditToDomain(row)
+	}
+	return result, nil
+}
+
 func scoutCreditToDomain(row *generated.ScoutCredit) *scout.ScoutCredit {
 	return &scout.ScoutCredit{
 		ID:                uuidToString(row.ID),

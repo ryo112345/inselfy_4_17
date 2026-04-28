@@ -17,6 +17,7 @@ import (
 	driverdb "github.com/akiyama/inselfy/backend/internal/driver/db"
 	"github.com/akiyama/inselfy/backend/internal/driver/factory"
 	httpfactory "github.com/akiyama/inselfy/backend/internal/driver/factory/http"
+	"github.com/akiyama/inselfy/backend/internal/driver/scheduler"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -445,6 +446,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	scoutGroup.GET("", scoutCtrl.List)
 	scoutGroup.GET("/credits", scoutCtrl.GetCredits)
 	scoutGroup.GET("/quality", scoutCtrl.GetQualityScore)
+	scoutGroup.GET("/dashboard", scoutCtrl.GetDashboard)
 	scoutGroup.GET("/:scoutId", func(c echo.Context) error {
 		return scoutCtrl.GetDetail(c, c.Param("scoutId"))
 	})
@@ -515,6 +517,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return notifCtrl.MarkAsRead(c, c.Param("id"))
 	})
 	userNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByUser)
+
+	sched := scheduler.New(scoutMsgRepoFactory(), scoutCreditRepoFactory())
+	sched.Start(ctx)
 
 	return e, cfg, cleanup, nil
 }

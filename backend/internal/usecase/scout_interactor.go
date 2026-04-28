@@ -118,7 +118,7 @@ func (i *ScoutInteractor) Send(ctx context.Context, input scout.SendScoutInput) 
 	input.Body = scout.RenderTemplate(input.Body, vars)
 
 	now := time.Now()
-	expiresAt := now.Add(scout.ReplyGraceDays * 24 * time.Hour)
+	expiresAt := scout.CalcExpiresAt(now)
 
 	var created *scout.ScoutMessage
 	err = i.tx.WithinTransaction(ctx, func(ctx context.Context) error {
@@ -533,6 +533,69 @@ func (i *ScoutInteractor) GetScoutSettings(ctx context.Context, userID string) e
 		return err
 	}
 	return i.output.PresentScoutSettings(ctx, s)
+}
+
+func (i *ScoutInteractor) GetDashboard(ctx context.Context, companyID string) error {
+	credit, err := i.creditRepo.GetOrCreate(ctx, companyID)
+	if err != nil {
+		return err
+	}
+
+	dbPending, err := i.msgRepo.CountPendingByMonth(ctx, companyID)
+	if err != nil {
+		return err
+	}
+	countByMonth := make(map[string]int)
+	for _, p := range dbPending {
+		key := p.SentMonth.Format("2006-01")
+		countByMonth[key] = p.Count
+	}
+
+	now := time.Now()
+	pendingByMonth := make([]scout.PendingByMonth, 0, 4)
+	pendingTotal := 0
+	for offset := 3; offset >= 0; offset-- {
+		m := time.Date(now.Year(), now.Month()-time.Month(offset), 1, 0, 0, 0, 0, now.Location())
+		expiresAt := scout.CalcExpiresAt(m)
+		if expiresAt.Before(now) {
+			continue
+		}
+		key := m.Format("2006-01")
+		count := countByMonth[key]
+		pendingTotal += count
+		pendingByMonth = append(pendingByMonth, scout.PendingByMonth{
+			SentMonth: m,
+			Count:     count,
+			ExpiresAt: expiresAt,
+		})
+	}
+
+	sent90, err := i.msgRepo.CountSentLastNDays(ctx, companyID, 90)
+	if err != nil {
+		return err
+	}
+	replied90, err := i.msgRepo.CountRepliedLastNDays(ctx, companyID, 90)
+	if err != nil {
+		return err
+	}
+	var replyRate float64
+	if sent90 > 0 {
+		replyRate = float64(replied90) / float64(sent90) * 100.0
+	}
+
+	avgReplyDays, err := i.msgRepo.AvgReplyDays(ctx, companyID)
+	if err != nil {
+		return err
+	}
+
+	return i.output.PresentDashboard(ctx, &scout.DashboardStats{
+		Credits:        credit,
+		PendingTotal:   pendingTotal,
+		PendingByMonth: pendingByMonth,
+		ReplyRate:      replyRate,
+		AvgReplyDays:   avgReplyDays,
+		SentLast90d:    sent90,
+	})
 }
 
 func isNotFound(err error) bool {

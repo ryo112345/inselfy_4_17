@@ -9,7 +9,7 @@ const (
 	MaxSubjectLength       = 200
 	MaxBodyLength          = 5000
 	MaxTemplateNameLen     = 100
-	ReplyGraceDays         = 90
+	ExpiryMonthsAfterSent  = 3
 	MonthlyAllowance       = 30
 	MaxStock               = 120
 	QualityThreshold            = 0.13
@@ -107,6 +107,11 @@ func CanResend(existing *ScoutMessage) error {
 	return nil
 }
 
+func CalcExpiresAt(sentAt time.Time) time.Time {
+	y, m, _ := sentAt.Date()
+	return time.Date(y, m+time.Month(ExpiryMonthsAfterSent)+1, 0, 23, 59, 59, 0, sentAt.Location())
+}
+
 func IsExpired(m *ScoutMessage) bool {
 	if m.ExpiresAt == nil {
 		return false
@@ -142,6 +147,10 @@ func EvaluateQuality(input QualityInput) QualityResult {
 		Level:          QualityGood,
 	}
 
+	if input.Sent14d > 0 {
+		result.Score.ReplyRate14d = float64(input.Replied14d) / float64(input.Sent14d)
+	}
+
 	if input.QualityRestricted {
 		result.Score.Level = QualityRestricted
 		return result
@@ -158,8 +167,7 @@ func EvaluateQuality(input QualityInput) QualityResult {
 		return result
 	}
 
-	rate := float64(input.Replied14d) / float64(input.Sent14d)
-	result.Score.ReplyRate14d = rate
+	rate := result.Score.ReplyRate14d
 
 	if rate >= QualityThreshold {
 		if input.WarningStartedAt != nil {

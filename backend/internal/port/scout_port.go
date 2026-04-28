@@ -23,6 +23,7 @@ type ScoutInputPort interface {
 
 	UpdateScoutSettings(ctx context.Context, userID string, accepting bool) error
 	GetScoutSettings(ctx context.Context, userID string) error
+	GetDashboard(ctx context.Context, companyID string) error
 }
 
 type ScoutOutputPort interface {
@@ -33,6 +34,7 @@ type ScoutOutputPort interface {
 	PresentQualityScore(ctx context.Context, q *scout.QualityScore) error
 	PresentScoutSettings(ctx context.Context, s *scout.UserScoutSettings) error
 	PresentReceivedDetail(ctx context.Context, m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) error
+	PresentDashboard(ctx context.Context, stats *scout.DashboardStats) error
 	PresentOK(ctx context.Context) error
 }
 
@@ -51,6 +53,8 @@ type ScoutMessageRepository interface {
 	CountSentLastNDays(ctx context.Context, companyID string, days int) (int, error)
 	CountRepliedLastNDays(ctx context.Context, companyID string, days int) (int, error)
 	ExpireOverdue(ctx context.Context) (int64, error)
+	CountPendingByMonth(ctx context.Context, companyID string) ([]scout.PendingByMonth, error)
+	AvgReplyDays(ctx context.Context, companyID string) (float64, error)
 }
 
 type ScoutCreditRepository interface {
@@ -62,6 +66,7 @@ type ScoutCreditRepository interface {
 	SetTemporaryRestriction(ctx context.Context, companyID string) error
 	ClearTemporaryRestriction(ctx context.Context, companyID string) error
 	SetQualityRestricted(ctx context.Context, companyID string) error
+	ReplenishAll(ctx context.Context) ([]*scout.ScoutCredit, error)
 }
 
 type ScoutCreditLedgerRepository interface {

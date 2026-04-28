@@ -189,6 +189,23 @@ func (c *ScoutController) GetQualityScore(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, p.QualityResponse())
 }
 
+// GetDashboard handles GET /api/company/scouts/dashboard.
+func (c *ScoutController) GetDashboard(ctx echo.Context) error {
+	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
+	if !ok || companyID == "" {
+		return ctx.JSON(http.StatusUnauthorized, map[string]string{
+			"code":    "UNAUTHORIZED",
+			"message": "unauthorized",
+		})
+	}
+
+	input, p := c.newIO()
+	if err := input.GetDashboard(ctx.Request().Context(), companyID); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.JSON(http.StatusOK, p.DashboardResponse())
+}
+
 // Reply handles POST /api/company/scouts/:scoutID/replies.
 func (c *ScoutController) Reply(ctx echo.Context, scoutID string) error {
 	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)

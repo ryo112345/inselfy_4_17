@@ -1,4 +1,5 @@
 import type {
+  ScoutDashboard,
   ScoutDetail,
   ScoutListResponse,
   ScoutCredits,
@@ -81,6 +82,15 @@ export async function replyToScoutAsCompany(
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message ?? "Failed to reply to scout");
   }
+}
+
+export async function fetchScoutDashboard(): Promise<ScoutDashboard> {
+  const res = await fetch(`${BASE_URL}/api/company/scouts/dashboard`, {
+    cache: "no-store",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to fetch scout dashboard");
+  return res.json();
 }
 
 export async function fetchCredits(): Promise<ScoutCredits> {
