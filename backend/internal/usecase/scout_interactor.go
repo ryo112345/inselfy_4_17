@@ -79,7 +79,7 @@ func (i *ScoutInteractor) Send(ctx context.Context, input scout.SendScoutInput) 
 	if err := i.applyQualityTransitions(ctx, input.CompanyID, qResult); err != nil {
 		return err
 	}
-	if qResult.Score.Level == scout.QualityRestricted {
+	if qResult.Score.Level == scout.QualityRestricted || qResult.Score.Level == scout.QualityTemporarilyRestricted {
 		return scout.ErrQualityRestricted
 	}
 
@@ -259,13 +259,14 @@ func (i *ScoutInteractor) evaluateQuality(ctx context.Context, companyID string,
 	}
 
 	return scout.EvaluateQuality(scout.QualityInput{
-		Sent14d:           sent14,
-		Replied14d:        replied14,
-		Sent20d:           sent20,
-		Replied20d:        replied20,
-		WarningStartedAt:  credit.WarningStartedAt,
-		QualityRestricted: credit.QualityRestricted,
-		Now:               now,
+		Sent14d:              sent14,
+		Replied14d:           replied14,
+		Sent20d:              sent20,
+		Replied20d:           replied20,
+		WarningStartedAt:     credit.WarningStartedAt,
+		RestrictionStartedAt: credit.RestrictionStartedAt,
+		QualityRestricted:    credit.QualityRestricted,
+		Now:                  now,
 	}), nil
 }
 
@@ -275,6 +276,12 @@ func (i *ScoutInteractor) applyQualityTransitions(ctx context.Context, companyID
 	}
 	if result.ShouldClearWarning {
 		return i.creditRepo.ClearQualityWarning(ctx, companyID)
+	}
+	if result.ShouldTempRestrict {
+		return i.creditRepo.SetTemporaryRestriction(ctx, companyID)
+	}
+	if result.ShouldClearRestriction {
+		return i.creditRepo.ClearTemporaryRestriction(ctx, companyID)
 	}
 	if result.ShouldRestrict {
 		return i.creditRepo.SetQualityRestricted(ctx, companyID)

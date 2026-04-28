@@ -52,13 +52,14 @@ type creditsResponse struct {
 }
 
 type qualityScoreResponse struct {
-	ReplyRate14d     float64    `json:"replyRate14d"`
-	Level            string     `json:"level"`
-	SentLast14d      int        `json:"sentLast14d"`
-	RepliedLast14d   int        `json:"repliedLast14d"`
-	WarningStartedAt *time.Time `json:"warningStartedAt,omitempty"`
-	WarningDeadline  *time.Time `json:"warningDeadline,omitempty"`
-	DaysRemaining    *int       `json:"daysRemaining,omitempty"`
+	ReplyRate14d      float64    `json:"replyRate14d"`
+	Level             string     `json:"level"`
+	SentLast14d       int        `json:"sentLast14d"`
+	RepliedLast14d    int        `json:"repliedLast14d"`
+	WarningStartedAt  *time.Time `json:"warningStartedAt,omitempty"`
+	WarningDeadline   *time.Time `json:"warningDeadline,omitempty"`
+	DaysRemaining     *int       `json:"daysRemaining,omitempty"`
+	RestrictionEndsAt *time.Time `json:"restrictionEndsAt,omitempty"`
 }
 
 type scoutSettingsResponse struct {
@@ -126,13 +127,14 @@ func (p *ScoutPresenter) PresentCredits(_ context.Context, c *scout.ScoutCredit)
 
 func (p *ScoutPresenter) PresentQualityScore(_ context.Context, q *scout.QualityScore) error {
 	p.quality = &qualityScoreResponse{
-		ReplyRate14d:     q.ReplyRate14d,
-		Level:            string(q.Level),
-		SentLast14d:      q.SentLast14d,
-		RepliedLast14d:   q.RepliedLast14d,
-		WarningStartedAt: q.WarningStartedAt,
-		WarningDeadline:  q.WarningDeadline,
-		DaysRemaining:    q.DaysRemaining,
+		ReplyRate14d:      q.ReplyRate14d,
+		Level:             string(q.Level),
+		SentLast14d:       q.SentLast14d,
+		RepliedLast14d:    q.RepliedLast14d,
+		WarningStartedAt:  q.WarningStartedAt,
+		WarningDeadline:   q.WarningDeadline,
+		DaysRemaining:     q.DaysRemaining,
+		RestrictionEndsAt: q.RestrictionEndsAt,
 	}
 	return nil
 }

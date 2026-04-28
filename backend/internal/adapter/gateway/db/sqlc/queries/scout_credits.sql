@@ -29,9 +29,19 @@ UPDATE scout_credits
 SET warning_started_at = NULL, updated_at = NOW()
 WHERE company_id = $1;
 
+-- name: SetTemporaryRestriction :exec
+UPDATE scout_credits
+SET restriction_started_at = NOW(), warning_started_at = NULL, updated_at = NOW()
+WHERE company_id = $1;
+
+-- name: ClearTemporaryRestriction :exec
+UPDATE scout_credits
+SET restriction_started_at = NULL, updated_at = NOW()
+WHERE company_id = $1;
+
 -- name: SetQualityRestricted :exec
 UPDATE scout_credits
-SET quality_restricted = true, warning_started_at = NULL, updated_at = NOW()
+SET quality_restricted = true, warning_started_at = NULL, restriction_started_at = NULL, updated_at = NOW()
 WHERE company_id = $1;
 
 -- name: CreateScoutCreditLedger :exec

@@ -59,6 +59,8 @@ type ScoutCreditRepository interface {
 	Refund(ctx context.Context, companyID string) (*scout.ScoutCredit, error)
 	SetQualityWarning(ctx context.Context, companyID string) error
 	ClearQualityWarning(ctx context.Context, companyID string) error
+	SetTemporaryRestriction(ctx context.Context, companyID string) error
+	ClearTemporaryRestriction(ctx context.Context, companyID string) error
 	SetQualityRestricted(ctx context.Context, companyID string) error
 }
 
