@@ -11,6 +11,65 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const avgReplyDays = `-- name: AvgReplyDays :one
+SELECT COALESCE(
+    EXTRACT(EPOCH FROM avg(replied_at - sent_at)) / 86400.0,
+    0
+)::float8 AS avg_days
+FROM scout_messages
+WHERE company_id = $1
+    AND status IN ('replied', 'interested')
+    AND replied_at IS NOT NULL
+    AND sent_at IS NOT NULL
+    AND sent_at >= NOW() - INTERVAL '90 days'
+`
+
+func (q *Queries) AvgReplyDays(ctx context.Context, companyID pgtype.UUID) (float64, error) {
+	row := q.db.QueryRow(ctx, avgReplyDays, companyID)
+	var avg_days float64
+	err := row.Scan(&avg_days)
+	return avg_days, err
+}
+
+const countPendingScoutsByMonth = `-- name: CountPendingScoutsByMonth :many
+SELECT
+    date_trunc('month', sent_at)::timestamptz AS sent_month,
+    count(*)::int AS cnt,
+    expires_at::timestamptz AS expires_at
+FROM scout_messages
+WHERE company_id = $1
+    AND status IN ('sent', 'opened')
+    AND expires_at > NOW()
+GROUP BY date_trunc('month', sent_at), expires_at
+ORDER BY sent_month
+`
+
+type CountPendingScoutsByMonthRow struct {
+	SentMonth pgtype.Timestamptz `json:"sent_month"`
+	Cnt       int32              `json:"cnt"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
+}
+
+func (q *Queries) CountPendingScoutsByMonth(ctx context.Context, companyID pgtype.UUID) ([]*CountPendingScoutsByMonthRow, error) {
+	rows, err := q.db.Query(ctx, countPendingScoutsByMonth, companyID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*CountPendingScoutsByMonthRow
+	for rows.Next() {
+		var i CountPendingScoutsByMonthRow
+		if err := rows.Scan(&i.SentMonth, &i.Cnt, &i.ExpiresAt); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const countScoutMessagesByCandidateID = `-- name: CountScoutMessagesByCandidateID :one
 SELECT count(*) FROM scout_messages
 WHERE candidate_id = $1 AND status != 'draft'
@@ -45,7 +104,7 @@ const countScoutsRepliedLast14Days = `-- name: CountScoutsRepliedLast14Days :one
 SELECT count(*) FROM scout_messages
 WHERE company_id = $1
     AND sent_at >= NOW() - INTERVAL '14 days'
-    AND status IN ('replied', 'interested')
+    AND status IN ('replied', 'interested', 'declined')
 `
 
 func (q *Queries) CountScoutsRepliedLast14Days(ctx context.Context, companyID pgtype.UUID) (int64, error) {
@@ -59,7 +118,7 @@ const countScoutsRepliedLastNDays = `-- name: CountScoutsRepliedLastNDays :one
 SELECT count(*) FROM scout_messages
 WHERE company_id = $1
     AND sent_at >= NOW() - make_interval(days => $2)
-    AND status IN ('replied', 'interested')
+    AND status IN ('replied', 'interested', 'declined')
 `
 
 type CountScoutsRepliedLastNDaysParams struct {

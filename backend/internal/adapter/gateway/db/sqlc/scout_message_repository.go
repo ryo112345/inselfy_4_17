@@ -267,6 +267,36 @@ func (r *ScoutMessageRepository) ExpireOverdue(ctx context.Context) (int64, erro
 	return q.ExpireOverdueScoutMessages(ctx)
 }
 
+func (r *ScoutMessageRepository) CountPendingByMonth(ctx context.Context, companyID string) ([]scout.PendingByMonth, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgCompanyID, err := parseUUID(companyID)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+	rows, err := q.CountPendingScoutsByMonth(ctx, pgCompanyID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]scout.PendingByMonth, len(rows))
+	for i, row := range rows {
+		result[i] = scout.PendingByMonth{
+			SentMonth: row.SentMonth.Time,
+			Count:     int(row.Cnt),
+			ExpiresAt: row.ExpiresAt.Time,
+		}
+	}
+	return result, nil
+}
+
+func (r *ScoutMessageRepository) AvgReplyDays(ctx context.Context, companyID string) (float64, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgCompanyID, err := parseUUID(companyID)
+	if err != nil {
+		return 0, domainerr.ErrBadRequest
+	}
+	return q.AvgReplyDays(ctx, pgCompanyID)
+}
+
 // --- conversion helpers ---
 
 func scoutMessageToDomain(row *generated.ScoutMessage) *scout.ScoutMessage {

@@ -89,6 +89,26 @@ export interface NotificationListResponse {
   total: number;
 }
 
+export interface ScoutDashboard {
+  credits: {
+    balance: number;
+    maxStock: number;
+    monthlyAllowance: number;
+    nextReplenishDate: string;
+  };
+  pending: {
+    total: number;
+    byMonth: {
+      month: string;
+      count: number;
+      daysLeft: number;
+    }[];
+  };
+  replyRate: number;
+  avgReplyDays: number;
+  sentLast90d: number;
+}
+
 export interface JobPosting {
   id: string;
   companyId: string;

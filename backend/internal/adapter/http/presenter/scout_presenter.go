@@ -2,6 +2,7 @@ package presenter
 
 import (
 	"context"
+	"math"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
@@ -67,14 +68,37 @@ type scoutSettingsResponse struct {
 	UpdatedAt       time.Time `json:"updatedAt"`
 }
 
+type dashboardPendingByMonthResponse struct {
+	Month    string `json:"month"`
+	Count    int    `json:"count"`
+	DaysLeft int    `json:"daysLeft"`
+}
+
+type dashboardResponse struct {
+	Credits struct {
+		Balance           int       `json:"balance"`
+		MaxStock          int       `json:"maxStock"`
+		MonthlyAllowance  int       `json:"monthlyAllowance"`
+		NextReplenishDate time.Time `json:"nextReplenishDate"`
+	} `json:"credits"`
+	Pending struct {
+		Total   int                               `json:"total"`
+		ByMonth []dashboardPendingByMonthResponse  `json:"byMonth"`
+	} `json:"pending"`
+	ReplyRate    float64 `json:"replyRate"`
+	AvgReplyDays float64 `json:"avgReplyDays"`
+	SentLast90d  int     `json:"sentLast90d"`
+}
+
 type ScoutPresenter struct {
-	message  *scoutMessageResponse
-	list     *scoutListResponse
-	detail   *scoutDetailResponse
-	credits  *creditsResponse
-	quality  *qualityScoreResponse
-	settings *scoutSettingsResponse
-	ok       bool
+	message   *scoutMessageResponse
+	list      *scoutListResponse
+	detail    *scoutDetailResponse
+	credits   *creditsResponse
+	quality   *qualityScoreResponse
+	settings  *scoutSettingsResponse
+	dashboard *dashboardResponse
+	ok        bool
 }
 
 var _ port.ScoutOutputPort = (*ScoutPresenter)(nil)
@@ -151,6 +175,39 @@ func (p *ScoutPresenter) PresentReceivedDetail(_ context.Context, m *scout.Scout
 	return p.PresentScoutDetail(nil, m, replies)
 }
 
+func (p *ScoutPresenter) PresentDashboard(_ context.Context, stats *scout.DashboardStats) error {
+	last := stats.Credits.LastReplenishedAt
+	nextReplenish := time.Date(last.Year(), last.Month()+1, 1, 0, 0, 0, 0, last.Location())
+
+	byMonth := make([]dashboardPendingByMonthResponse, len(stats.PendingByMonth))
+	for i, m := range stats.PendingByMonth {
+		daysLeft := int(math.Ceil(time.Until(m.ExpiresAt).Hours() / 24))
+		if daysLeft < 0 {
+			daysLeft = 0
+		}
+		byMonth[i] = dashboardPendingByMonthResponse{
+			Month:    m.SentMonth.Format("2006-01"),
+			Count:    m.Count,
+			DaysLeft: daysLeft,
+		}
+	}
+
+	resp := &dashboardResponse{
+		ReplyRate:    math.Round(stats.ReplyRate*10) / 10,
+		AvgReplyDays: math.Round(stats.AvgReplyDays*10) / 10,
+		SentLast90d:  stats.SentLast90d,
+	}
+	resp.Credits.Balance = stats.Credits.Balance
+	resp.Credits.MaxStock = stats.Credits.MaxStock
+	resp.Credits.MonthlyAllowance = stats.Credits.MonthlyAllowance
+	resp.Credits.NextReplenishDate = nextReplenish
+	resp.Pending.Total = stats.PendingTotal
+	resp.Pending.ByMonth = byMonth
+
+	p.dashboard = resp
+	return nil
+}
+
 func (p *ScoutPresenter) PresentOK(_ context.Context) error {
 	p.ok = true
 	return nil
@@ -162,6 +219,7 @@ func (p *ScoutPresenter) DetailResponse() *scoutDetailResponse     { return p.de
 func (p *ScoutPresenter) CreditsResponse() *creditsResponse        { return p.credits }
 func (p *ScoutPresenter) QualityResponse() *qualityScoreResponse   { return p.quality }
 func (p *ScoutPresenter) SettingsResponse() *scoutSettingsResponse  { return p.settings }
+func (p *ScoutPresenter) DashboardResponse() *dashboardResponse     { return p.dashboard }
 func (p *ScoutPresenter) IsOK() bool                               { return p.ok }
 
 func toScoutMessageResponse(m *scout.ScoutMessageWithNames) *scoutMessageResponse {

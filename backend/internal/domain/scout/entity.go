@@ -126,6 +126,21 @@ type UserScoutSettings struct {
 	UpdatedAt       time.Time
 }
 
+type PendingByMonth struct {
+	SentMonth time.Time
+	Count     int
+	ExpiresAt time.Time
+}
+
+type DashboardStats struct {
+	Credits        *ScoutCredit
+	PendingTotal   int
+	PendingByMonth []PendingByMonth
+	ReplyRate      float64
+	AvgReplyDays   float64
+	SentLast90d    int
+}
+
 type QualityScore struct {
 	ReplyRate14d     float64
 	Level            QualityLevel

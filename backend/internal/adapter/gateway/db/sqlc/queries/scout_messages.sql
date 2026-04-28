@@ -91,7 +91,7 @@ WHERE company_id = $1
 SELECT count(*) FROM scout_messages
 WHERE company_id = $1
     AND sent_at >= NOW() - INTERVAL '14 days'
-    AND status IN ('replied', 'interested');
+    AND status IN ('replied', 'interested', 'declined');
 
 -- name: CountScoutsSentLastNDays :one
 SELECT count(*) FROM scout_messages
@@ -103,10 +103,34 @@ WHERE company_id = $1
 SELECT count(*) FROM scout_messages
 WHERE company_id = $1
     AND sent_at >= NOW() - make_interval(days => $2)
-    AND status IN ('replied', 'interested');
+    AND status IN ('replied', 'interested', 'declined');
 
 -- name: ExpireOverdueScoutMessages :execrows
 UPDATE scout_messages
 SET status = 'expired', updated_at = NOW()
 WHERE expires_at < NOW()
     AND status IN ('sent', 'opened');
+
+-- name: CountPendingScoutsByMonth :many
+SELECT
+    date_trunc('month', sent_at)::timestamptz AS sent_month,
+    count(*)::int AS cnt,
+    expires_at::timestamptz AS expires_at
+FROM scout_messages
+WHERE company_id = $1
+    AND status IN ('sent', 'opened')
+    AND expires_at > NOW()
+GROUP BY date_trunc('month', sent_at), expires_at
+ORDER BY sent_month;
+
+-- name: AvgReplyDays :one
+SELECT COALESCE(
+    EXTRACT(EPOCH FROM avg(replied_at - sent_at)) / 86400.0,
+    0
+)::float8 AS avg_days
+FROM scout_messages
+WHERE company_id = $1
+    AND status IN ('replied', 'interested')
+    AND replied_at IS NOT NULL
+    AND sent_at IS NOT NULL
+    AND sent_at >= NOW() - INTERVAL '90 days';

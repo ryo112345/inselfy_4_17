@@ -158,6 +158,47 @@ func (q *Queries) RefundScoutCredit(ctx context.Context, companyID pgtype.UUID) 
 	return &i, err
 }
 
+const replenishCredits = `-- name: ReplenishCredits :many
+UPDATE scout_credits
+SET balance = LEAST(balance + monthly_allowance, max_stock),
+    last_replenished_at = NOW(),
+    updated_at = NOW()
+WHERE last_replenished_at < date_trunc('month', NOW())
+RETURNING id, company_id, balance, monthly_allowance, max_stock, last_replenished_at, created_at, updated_at, warning_started_at, quality_restricted, restriction_started_at
+`
+
+func (q *Queries) ReplenishCredits(ctx context.Context) ([]*ScoutCredit, error) {
+	rows, err := q.db.Query(ctx, replenishCredits)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ScoutCredit
+	for rows.Next() {
+		var i ScoutCredit
+		if err := rows.Scan(
+			&i.ID,
+			&i.CompanyID,
+			&i.Balance,
+			&i.MonthlyAllowance,
+			&i.MaxStock,
+			&i.LastReplenishedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.WarningStartedAt,
+			&i.QualityRestricted,
+			&i.RestrictionStartedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const setQualityRestricted = `-- name: SetQualityRestricted :exec
 UPDATE scout_credits
 SET quality_restricted = true, warning_started_at = NULL, restriction_started_at = NULL, updated_at = NOW()
