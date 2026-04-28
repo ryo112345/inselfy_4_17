@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { GoogleProvider } from "@/features/auth/google-provider";
+import { UnreadScoutProvider } from "@/features/scout/unread-context";
 import "./globals.css";
 
 const notoSansJp = Noto_Sans_JP({
@@ -30,7 +31,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: 'window.addEventListener("pageshow",function(e){if(e.persisted)location.reload()});window.addEventListener("pageshow",function(){var n=performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")location.reload()})' }}
         />
         <GoogleProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <UnreadScoutProvider>{children}</UnreadScoutProvider>
+          </AuthProvider>
         </GoogleProvider>
       </body>
     </html>

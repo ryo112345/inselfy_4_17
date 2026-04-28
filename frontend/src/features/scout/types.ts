@@ -52,9 +52,11 @@ export interface ScoutCredits {
 
 export interface QualityScore {
   replyRate14d: number;
-  level: "good" | "warning" | "restricted";
+  level: "good" | "warning" | "temporarily_restricted" | "restricted";
   sentLast14d: number;
   repliedLast14d: number;
+  daysRemaining?: number;
+  restrictionEndsAt?: string;
 }
 
 export interface ScoutTemplate {

@@ -7,7 +7,8 @@
 ## 技術スタック
 - フロントエンド: Next.js 16 (App Router) + React 19 + TypeScript + Tailwind 4
 - バックエンド: Go
-- データベース: PostgreSQL
+- データベース: PostgreSQL（Docker）
+  - 接続先は `.env` の `DATABASE_URL` を参照すること（ローカルの5432ではない）
 
 ## 開発ルール
 
