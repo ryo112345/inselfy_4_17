@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createTemplate } from "@/features/scout/api";
+import { HighlightInput, HighlightTextarea } from "@/features/scout/components/VariableHighlightField";
 
 export default function TemplateNewPage() {
   const router = useRouter();
@@ -73,12 +74,10 @@ export default function TemplateNewPage() {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             件名 <span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
+          <HighlightInput
             value={subject}
-            onChange={(e) => setSubject(e.target.value)}
+            onChange={setSubject}
             placeholder="例: {{candidate_name}}様へ {{company_name}} からのスカウト"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none"
           />
         </div>
 
@@ -87,11 +86,10 @@ export default function TemplateNewPage() {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             本文 <span className="text-red-500">*</span>
           </label>
-          <textarea
+          <HighlightTextarea
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={setBody}
             placeholder="スカウトメッセージのテンプレート本文..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] text-sm resize-y outline-none"
           />
         </div>
 
