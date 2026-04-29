@@ -315,15 +315,34 @@ type CiAiReport struct {
 }
 
 type CompanyAccount struct {
-	ID                pgtype.UUID        `json:"id"`
-	Email             string             `json:"email"`
-	PasswordHash      string             `json:"password_hash"`
-	CompanyName       string             `json:"company_name"`
-	ContactPersonName string             `json:"contact_person_name"`
-	PhoneNumber       string             `json:"phone_number"`
-	Status            CompanyStatus      `json:"status"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+	ID                   pgtype.UUID        `json:"id"`
+	Email                string             `json:"email"`
+	PasswordHash         string             `json:"password_hash"`
+	CompanyName          string             `json:"company_name"`
+	ContactPersonName    string             `json:"contact_person_name"`
+	PhoneNumber          string             `json:"phone_number"`
+	Status               CompanyStatus      `json:"status"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	Description          string             `json:"description"`
+	Industry             string             `json:"industry"`
+	Location             string             `json:"location"`
+	EmployeeCount        string             `json:"employee_count"`
+	FoundedYear          pgtype.Int4        `json:"founded_year"`
+	WebsiteUrl           string             `json:"website_url"`
+	LogoUrl              string             `json:"logo_url"`
+	CoverImageUrl        string             `json:"cover_image_url"`
+	Headline             string             `json:"headline"`
+	RepresentativeName   string             `json:"representative_name"`
+	Capital              string             `json:"capital"`
+	Revenue              string             `json:"revenue"`
+	FoundedMonth         pgtype.Int4        `json:"founded_month"`
+	AverageAge           string             `json:"average_age"`
+	AverageOvertimeHours string             `json:"average_overtime_hours"`
+	PaidLeaveRate        string             `json:"paid_leave_rate"`
+	SmokingPolicy        string             `json:"smoking_policy"`
+	GalleryUrls          []byte             `json:"gallery_urls"`
+	Benefits             []byte             `json:"benefits"`
 }
 
 type CompanyRefreshToken struct {
@@ -381,15 +400,47 @@ type IntegratedReportRequest struct {
 }
 
 type JobPosting struct {
-	ID             pgtype.UUID        `json:"id"`
-	CompanyID      pgtype.UUID        `json:"company_id"`
-	Title          string             `json:"title"`
-	Description    string             `json:"description"`
-	EmploymentType string             `json:"employment_type"`
-	Location       pgtype.Text        `json:"location"`
-	IsActive       bool               `json:"is_active"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	ID                        pgtype.UUID        `json:"id"`
+	CompanyID                 pgtype.UUID        `json:"company_id"`
+	Title                     string             `json:"title"`
+	Description               string             `json:"description"`
+	EmploymentType            string             `json:"employment_type"`
+	Location                  pgtype.Text        `json:"location"`
+	IsActive                  bool               `json:"is_active"`
+	CreatedAt                 pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
+	Status                    string             `json:"status"`
+	JobCategory               string             `json:"job_category"`
+	HiringCount               string             `json:"hiring_count"`
+	AppealPoints              string             `json:"appeal_points"`
+	Challenges                string             `json:"challenges"`
+	TeamDescription           string             `json:"team_description"`
+	SkillsGained              string             `json:"skills_gained"`
+	Tags                      []string           `json:"tags"`
+	RequiredQualifications    string             `json:"required_qualifications"`
+	PreferredQualifications   string             `json:"preferred_qualifications"`
+	WorkLocation              string             `json:"work_location"`
+	WorkLocationChangeScope   string             `json:"work_location_change_scope"`
+	JobDescriptionChangeScope string             `json:"job_description_change_scope"`
+	ContractType              string             `json:"contract_type"`
+	ProbationPeriod           string             `json:"probation_period"`
+	WorkHours                 string             `json:"work_hours"`
+	BreakTime                 string             `json:"break_time"`
+	Holidays                  string             `json:"holidays"`
+	SalaryMin                 pgtype.Int4        `json:"salary_min"`
+	SalaryMax                 pgtype.Int4        `json:"salary_max"`
+	SalaryDetail              string             `json:"salary_detail"`
+	Insurance                 string             `json:"insurance"`
+	RemotePolicy              string             `json:"remote_policy"`
+	Benefits                  string             `json:"benefits"`
+	SmokingPolicy             string             `json:"smoking_policy"`
+	SelectionProcess          string             `json:"selection_process"`
+	CoverImageUrl             string             `json:"cover_image_url"`
+	HighlightTitleRole        string             `json:"highlight_title_role"`
+	HighlightTitleAppeal      string             `json:"highlight_title_appeal"`
+	HighlightTitleChallenge   string             `json:"highlight_title_challenge"`
+	HighlightTitleGrowth      string             `json:"highlight_title_growth"`
+	TeamMembers               []byte             `json:"team_members"`
 }
 
 type Notification struct {
@@ -495,6 +546,7 @@ type Team struct {
 	Description pgtype.Text        `json:"description"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	IsPublic    bool               `json:"is_public"`
 }
 
 type TeamMember struct {

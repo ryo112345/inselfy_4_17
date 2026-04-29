@@ -1,11 +1,5 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Gallery } from "../../companies/[id]/Gallery";
-import { fetchPublicJobPosting } from "@/features/job-posting/api";
-import type { JobPosting } from "@/features/scout/types";
+import { Gallery } from "../../../companies/[id]/Gallery";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
@@ -230,57 +224,8 @@ function ConditionGroup({
   );
 }
 
-type CompanyData = {
-  id: string;
-  companyName: string;
-  logoUrl: string;
-  industry: string;
-  location: string;
-  employeeCount: string;
-  benefits: string[];
-  smokingPolicy: string;
-  galleryUrls: string[];
-};
-
-export default function JobDetailPage() {
-  const params = useParams();
-  const jobId = params.jobId as string;
-  const [job, setJob] = useState<JobPosting | null>(null);
-  const [company, setCompany] = useState<CompanyData | null>(null);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    fetchPublicJobPosting(jobId)
-      .then((data) => {
-        setJob(data);
-        fetch(`/api/companies/${data.companyId}`).then(async (res) => {
-          if (res.ok) {
-            const c = await res.json();
-            if (!Array.isArray(c.benefits)) c.benefits = [];
-            setCompany(c);
-          }
-        });
-      })
-      .catch(() => setError(true));
-  }, [jobId]);
-
-  if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7f5]">
-        <div className="text-sm text-gray-500">求人が見つかりません</div>
-      </div>
-    );
-  }
-
-  if (!job) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7f5]">
-        <div className="text-sm text-gray-500">読み込み中...</div>
-      </div>
-    );
-  }
-
-  const benefitsList = job.benefits ? job.benefits.split("\n").filter(Boolean) : [];
+export default function TestJobViewPage() {
+  const { company, job, team } = MOCK;
 
   const metaBadges = [
     { label: job.employmentType },
@@ -355,13 +300,18 @@ export default function JobDetailPage() {
     { label: "試用期間", value: job.probationPeriod },
     { label: "就業場所の変更範囲", value: job.workLocationChangeScope },
     { label: "業務内容の変更範囲", value: job.jobDescriptionChangeScope },
-    { label: "受動喫煙対策", value: job.smokingPolicy || company?.smokingPolicy || "" },
+    { label: "受動喫煙対策", value: company.smokingPolicy },
   ];
 
   const selectionSteps = job.selectionProcess.split("→").map((s) => s.trim());
 
   return (
     <div className="min-h-screen bg-[#f6f7f5]">
+      {/* Prototype banner */}
+      <div className="sticky top-0 z-30 border-b border-amber-200 bg-amber-50 px-6 py-2.5 text-center text-sm text-amber-800">
+        プロトタイプ — モックデータを表示しています
+      </div>
+
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
         {/* ─── Hero ─── */}
         <section className={`overflow-hidden ${cardClass}`}>
@@ -374,7 +324,7 @@ export default function JobDetailPage() {
           </div>
 
           <div className="px-6 pb-6 pt-6 sm:px-8">
-            {company && <Link
+            <Link
               href={`/companies/${company.id}`}
               className="inline-flex items-center gap-3 group"
             >
@@ -390,19 +340,19 @@ export default function JobDetailPage() {
                     className="text-sm font-bold"
                     style={{ color: ACCENT }}
                   >
-                    {company.companyName.charAt(0)}
+                    {company.name.charAt(0)}
                   </span>
                 )}
               </div>
               <div>
                 <p className="text-base font-medium text-gray-900 group-hover:underline">
-                  {company.companyName}
+                  {company.name}
                 </p>
                 <p className="text-sm text-gray-500">
                   {company.industry} / {company.location}
                 </p>
               </div>
-            </Link>}
+            </Link>
 
             <h1 className="mt-5 text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px]">
               {job.title}
@@ -475,7 +425,7 @@ export default function JobDetailPage() {
         </section>
 
         {/* ─── Photo gallery ─── */}
-        {company && company.galleryUrls.length > 0 && (
+        {company.galleryUrls.length > 0 && (
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="px-6 pb-2 pt-6 sm:px-7">
               <SectionTitle icon={<CameraIcon />}>フォトギャラリー</SectionTitle>
@@ -486,61 +436,64 @@ export default function JobDetailPage() {
           </section>
         )}
 
-        {/* ─── Team description ─── */}
-        {(job.teamDescription || (job.teamMembers && job.teamMembers.length > 0)) && (
+        {/* ─── Team accent panel ─── */}
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
-            {job.teamMembers && job.teamMembers.length > 0 && (
-              <div
-                className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
-                style={{ background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)` }}
-              >
-                <div className="flex items-center -space-x-6">
-                  {job.teamMembers.slice(0, 5).map((m: { name: string; photoUrl?: string }, i: number) => {
-                    const colors = [
-                      { bg: "#EAF4F0", fg: "#3D8B6E" },
-                      { bg: "#EEF2FB", fg: "#3B6FCC" },
-                      { bg: "#FEF7E6", fg: "#B07914" },
-                      { bg: "#F3EEFB", fg: "#7647C5" },
-                      { bg: "#FEE", fg: "#C54747" },
-                    ];
-                    const color = colors[i % colors.length];
-                    return (
-                      <div
-                        key={i}
-                        className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
-                        style={{ backgroundColor: color.bg, color: color.fg }}
-                      >
-                        {m.photoUrl ? (
-                          <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
-                        ) : (
-                          m.name.charAt(0)
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold leading-none" style={{ color: ACCENT }}>
-                    {job.teamMembers.length}
-                  </span>
-                  <span className="text-base font-semibold" style={{ color: ACCENT }}>
-                    名のチーム
-                  </span>
-                </div>
+            <div
+              className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)`,
+              }}
+            >
+              <div className="flex items-center -space-x-6">
+                {team.members.slice(0, 5).map((m, i) => {
+                  const tone = AVATAR_TONES[i % AVATAR_TONES.length];
+                  const initial = m.name.charAt(0);
+                  return (
+                    <div
+                      key={m.name}
+                      className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm"
+                      style={{ backgroundColor: tone.bg, color: tone.fg }}
+                      title={`${m.name} / ${m.role}`}
+                    >
+                      {m.avatarUrl ? (
+                        <img
+                          src={m.avatarUrl}
+                          alt=""
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        initial
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            )}
+              <div className="flex items-baseline gap-1">
+                <span
+                  className="text-3xl font-bold leading-none"
+                  style={{ color: ACCENT }}
+                >
+                  {team.size}
+                </span>
+                <span
+                  className="text-base font-semibold"
+                  style={{ color: ACCENT }}
+                >
+                  名のチーム
+                </span>
+              </div>
+            </div>
             <div className="px-6 py-6 sm:px-7 sm:py-7">
-              <SectionTitle icon={<UsersIcon />}>チーム紹介</SectionTitle>
-              {job.teamDescription && (
-                <p className="mt-4 text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
-                  {job.teamDescription}
-                </p>
-              )}
+              <h2 className="text-lg font-bold text-gray-900">
+                チーム紹介
+              </h2>
+              <p className="mt-3 text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
+                {job.teamDescription}
+              </p>
             </div>
           </div>
         </section>
-        )}
 
         {/* ─── Conditions (3-column grouped) ─── */}
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
@@ -601,10 +554,9 @@ export default function JobDetailPage() {
           <SectionTitle icon={<GiftIcon />}>福利厚生・待遇</SectionTitle>
           <ul className="mt-5 flex flex-wrap gap-2">
             {[
-              ...benefitsList,
-              ...(company?.benefits ?? []),
-              ...(job.smokingPolicy ? [job.smokingPolicy] : []),
-            ].filter((v, i, a) => a.indexOf(v) === i).map((b) => (
+              ...company.benefits,
+              ...(company.smokingPolicy ? [company.smokingPolicy] : []),
+            ].map((b) => (
               <li
                 key={b}
                 className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-medium"
@@ -655,7 +607,6 @@ export default function JobDetailPage() {
         </section>
 
         {/* ─── Company Info Mini ─── */}
-        {company && (
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="px-6 py-6 sm:px-7">
             <SectionTitle icon={<BuildingIcon />}>企業情報</SectionTitle>
@@ -675,13 +626,13 @@ export default function JobDetailPage() {
                     className="text-lg font-bold"
                     style={{ color: ACCENT }}
                   >
-                    {company.companyName.charAt(0)}
+                    {company.name.charAt(0)}
                   </span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-lg font-bold text-gray-900 group-hover:underline">
-                  {company.companyName}
+                  {company.name}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   {company.industry} / {company.location} / {company.employeeCount}
@@ -700,7 +651,6 @@ export default function JobDetailPage() {
             </Link>
           </div>
         </section>
-        )}
 
         {/* ─── Sticky CTA (mobile) ─── */}
         <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm z-50 sm:hidden">
@@ -718,7 +668,7 @@ export default function JobDetailPage() {
         </div>
 
         <p className="text-center text-sm text-gray-400 mt-2">
-          {new Date(job.createdAt).toLocaleDateString("ja-JP")} 掲載
+          {job.publishedAt} 掲載
         </p>
       </div>
     </div>

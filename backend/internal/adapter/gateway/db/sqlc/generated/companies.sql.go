@@ -36,7 +36,7 @@ func (q *Queries) CountCompanyAccountsByStatus(ctx context.Context, status Compa
 const createCompanyAccount = `-- name: CreateCompanyAccount :one
 INSERT INTO company_accounts (email, password_hash, company_name, contact_person_name, phone_number)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at
+RETURNING id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at, description, industry, location, employee_count, founded_year, website_url, logo_url, cover_image_url, headline, representative_name, capital, revenue, founded_month, average_age, average_overtime_hours, paid_leave_rate, smoking_policy, gallery_urls, benefits
 `
 
 type CreateCompanyAccountParams struct {
@@ -66,6 +66,25 @@ func (q *Queries) CreateCompanyAccount(ctx context.Context, arg *CreateCompanyAc
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Description,
+		&i.Industry,
+		&i.Location,
+		&i.EmployeeCount,
+		&i.FoundedYear,
+		&i.WebsiteUrl,
+		&i.LogoUrl,
+		&i.CoverImageUrl,
+		&i.Headline,
+		&i.RepresentativeName,
+		&i.Capital,
+		&i.Revenue,
+		&i.FoundedMonth,
+		&i.AverageAge,
+		&i.AverageOvertimeHours,
+		&i.PaidLeaveRate,
+		&i.SmokingPolicy,
+		&i.GalleryUrls,
+		&i.Benefits,
 	)
 	return &i, err
 }
@@ -87,7 +106,7 @@ func (q *Queries) CreateCompanyRefreshToken(ctx context.Context, arg *CreateComp
 }
 
 const getCompanyAccountByEmail = `-- name: GetCompanyAccountByEmail :one
-SELECT id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at FROM company_accounts WHERE email = $1
+SELECT id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at, description, industry, location, employee_count, founded_year, website_url, logo_url, cover_image_url, headline, representative_name, capital, revenue, founded_month, average_age, average_overtime_hours, paid_leave_rate, smoking_policy, gallery_urls, benefits FROM company_accounts WHERE email = $1
 `
 
 func (q *Queries) GetCompanyAccountByEmail(ctx context.Context, email string) (*CompanyAccount, error) {
@@ -103,12 +122,31 @@ func (q *Queries) GetCompanyAccountByEmail(ctx context.Context, email string) (*
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Description,
+		&i.Industry,
+		&i.Location,
+		&i.EmployeeCount,
+		&i.FoundedYear,
+		&i.WebsiteUrl,
+		&i.LogoUrl,
+		&i.CoverImageUrl,
+		&i.Headline,
+		&i.RepresentativeName,
+		&i.Capital,
+		&i.Revenue,
+		&i.FoundedMonth,
+		&i.AverageAge,
+		&i.AverageOvertimeHours,
+		&i.PaidLeaveRate,
+		&i.SmokingPolicy,
+		&i.GalleryUrls,
+		&i.Benefits,
 	)
 	return &i, err
 }
 
 const getCompanyAccountByID = `-- name: GetCompanyAccountByID :one
-SELECT id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at FROM company_accounts WHERE id = $1
+SELECT id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at, description, industry, location, employee_count, founded_year, website_url, logo_url, cover_image_url, headline, representative_name, capital, revenue, founded_month, average_age, average_overtime_hours, paid_leave_rate, smoking_policy, gallery_urls, benefits FROM company_accounts WHERE id = $1
 `
 
 func (q *Queries) GetCompanyAccountByID(ctx context.Context, id pgtype.UUID) (*CompanyAccount, error) {
@@ -124,6 +162,25 @@ func (q *Queries) GetCompanyAccountByID(ctx context.Context, id pgtype.UUID) (*C
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Description,
+		&i.Industry,
+		&i.Location,
+		&i.EmployeeCount,
+		&i.FoundedYear,
+		&i.WebsiteUrl,
+		&i.LogoUrl,
+		&i.CoverImageUrl,
+		&i.Headline,
+		&i.RepresentativeName,
+		&i.Capital,
+		&i.Revenue,
+		&i.FoundedMonth,
+		&i.AverageAge,
+		&i.AverageOvertimeHours,
+		&i.PaidLeaveRate,
+		&i.SmokingPolicy,
+		&i.GalleryUrls,
+		&i.Benefits,
 	)
 	return &i, err
 }
@@ -148,7 +205,7 @@ func (q *Queries) GetCompanyRefreshTokenByHash(ctx context.Context, tokenHash st
 }
 
 const listAllCompanyAccounts = `-- name: ListAllCompanyAccounts :many
-SELECT id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at FROM company_accounts
+SELECT id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at, description, industry, location, employee_count, founded_year, website_url, logo_url, cover_image_url, headline, representative_name, capital, revenue, founded_month, average_age, average_overtime_hours, paid_leave_rate, smoking_policy, gallery_urls, benefits FROM company_accounts
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -177,6 +234,25 @@ func (q *Queries) ListAllCompanyAccounts(ctx context.Context, arg *ListAllCompan
 			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Description,
+			&i.Industry,
+			&i.Location,
+			&i.EmployeeCount,
+			&i.FoundedYear,
+			&i.WebsiteUrl,
+			&i.LogoUrl,
+			&i.CoverImageUrl,
+			&i.Headline,
+			&i.RepresentativeName,
+			&i.Capital,
+			&i.Revenue,
+			&i.FoundedMonth,
+			&i.AverageAge,
+			&i.AverageOvertimeHours,
+			&i.PaidLeaveRate,
+			&i.SmokingPolicy,
+			&i.GalleryUrls,
+			&i.Benefits,
 		); err != nil {
 			return nil, err
 		}
@@ -189,7 +265,7 @@ func (q *Queries) ListAllCompanyAccounts(ctx context.Context, arg *ListAllCompan
 }
 
 const listCompanyAccountsByStatus = `-- name: ListCompanyAccountsByStatus :many
-SELECT id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at FROM company_accounts
+SELECT id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at, description, industry, location, employee_count, founded_year, website_url, logo_url, cover_image_url, headline, representative_name, capital, revenue, founded_month, average_age, average_overtime_hours, paid_leave_rate, smoking_policy, gallery_urls, benefits FROM company_accounts
 WHERE status = $1
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -220,6 +296,25 @@ func (q *Queries) ListCompanyAccountsByStatus(ctx context.Context, arg *ListComp
 			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Description,
+			&i.Industry,
+			&i.Location,
+			&i.EmployeeCount,
+			&i.FoundedYear,
+			&i.WebsiteUrl,
+			&i.LogoUrl,
+			&i.CoverImageUrl,
+			&i.Headline,
+			&i.RepresentativeName,
+			&i.Capital,
+			&i.Revenue,
+			&i.FoundedMonth,
+			&i.AverageAge,
+			&i.AverageOvertimeHours,
+			&i.PaidLeaveRate,
+			&i.SmokingPolicy,
+			&i.GalleryUrls,
+			&i.Benefits,
 		); err != nil {
 			return nil, err
 		}
@@ -245,7 +340,7 @@ const updateCompanyStatus = `-- name: UpdateCompanyStatus :one
 UPDATE company_accounts
 SET status = $2, updated_at = NOW()
 WHERE id = $1
-RETURNING id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at
+RETURNING id, email, password_hash, company_name, contact_person_name, phone_number, status, created_at, updated_at, description, industry, location, employee_count, founded_year, website_url, logo_url, cover_image_url, headline, representative_name, capital, revenue, founded_month, average_age, average_overtime_hours, paid_leave_rate, smoking_policy, gallery_urls, benefits
 `
 
 type UpdateCompanyStatusParams struct {
@@ -266,6 +361,25 @@ func (q *Queries) UpdateCompanyStatus(ctx context.Context, arg *UpdateCompanySta
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Description,
+		&i.Industry,
+		&i.Location,
+		&i.EmployeeCount,
+		&i.FoundedYear,
+		&i.WebsiteUrl,
+		&i.LogoUrl,
+		&i.CoverImageUrl,
+		&i.Headline,
+		&i.RepresentativeName,
+		&i.Capital,
+		&i.Revenue,
+		&i.FoundedMonth,
+		&i.AverageAge,
+		&i.AverageOvertimeHours,
+		&i.PaidLeaveRate,
+		&i.SmokingPolicy,
+		&i.GalleryUrls,
+		&i.Benefits,
 	)
 	return &i, err
 }

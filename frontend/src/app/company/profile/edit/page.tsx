@@ -391,7 +391,7 @@ export default function CompanyProfilePage() {
           ))}
           {profile.galleryUrls.length < 10 && (
             <button onClick={() => galleryInputRef.current?.click()} disabled={galleryUploading}
-              className="flex aspect-[4/3] flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-500 cursor-pointer">
+              className="flex aspect-[4/3] flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 cursor-pointer">
               {galleryUploading ? <Spinner /> : (
                 <>
                   <PlusIcon className="h-6 w-6" />

@@ -2,6 +2,7 @@ package sqlc
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/jackc/pgx/v5"
@@ -29,12 +30,45 @@ func (r *JobPostingRepository) Create(ctx context.Context, j *jobposting.JobPost
 	if err != nil {
 		return nil, domainerr.ErrBadRequest
 	}
+	teamMembersJSON, _ := json.Marshal(j.TeamMembers)
 	row, err := q.CreateJobPosting(ctx, &generated.CreateJobPostingParams{
-		CompanyID:      companyID,
-		Title:          j.Title,
-		Description:    j.Description,
-		EmploymentType: j.EmploymentType,
-		Location:       pgText(j.Location),
+		CompanyID:                 companyID,
+		Title:                     j.Title,
+		Description:               j.Description,
+		EmploymentType:            j.EmploymentType,
+		Location:                  pgText(j.Location),
+		Status:                    j.Status,
+		JobCategory:               j.JobCategory,
+		HiringCount:               j.HiringCount,
+		AppealPoints:              j.AppealPoints,
+		Challenges:                j.Challenges,
+		TeamDescription:           j.TeamDescription,
+		TeamMembers:               teamMembersJSON,
+		SkillsGained:              j.SkillsGained,
+		Tags:                      j.Tags,
+		RequiredQualifications:    j.RequiredQualifications,
+		PreferredQualifications:   j.PreferredQualifications,
+		WorkLocation:              j.WorkLocation,
+		WorkLocationChangeScope:   j.WorkLocationChangeScope,
+		JobDescriptionChangeScope: j.JobDescriptionChangeScope,
+		ContractType:              j.ContractType,
+		ProbationPeriod:           j.ProbationPeriod,
+		WorkHours:                 j.WorkHours,
+		BreakTime:                 j.BreakTime,
+		Holidays:                  j.Holidays,
+		SalaryMin:                 pgInt4(j.SalaryMin),
+		SalaryMax:                 pgInt4(j.SalaryMax),
+		SalaryDetail:              j.SalaryDetail,
+		Insurance:                 j.Insurance,
+		RemotePolicy:              j.RemotePolicy,
+		Benefits:                  j.Benefits,
+		SmokingPolicy:             j.SmokingPolicy,
+		SelectionProcess:          j.SelectionProcess,
+		CoverImageUrl:             j.CoverImageURL,
+		HighlightTitleRole:        j.HighlightTitleRole,
+		HighlightTitleAppeal:      j.HighlightTitleAppeal,
+		HighlightTitleChallenge:   j.HighlightTitleChallenge,
+		HighlightTitleGrowth:      j.HighlightTitleGrowth,
 	})
 	if err != nil {
 		return nil, err
@@ -49,6 +83,22 @@ func (r *JobPostingRepository) GetByID(ctx context.Context, id string) (*jobpost
 		return nil, domainerr.ErrNotFound
 	}
 	row, err := q.GetJobPostingByID(ctx, pgID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domainerr.ErrNotFound
+		}
+		return nil, err
+	}
+	return jobPostingToDomain(row), nil
+}
+
+func (r *JobPostingRepository) GetPublicByID(ctx context.Context, id string) (*jobposting.JobPosting, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(id)
+	if err != nil {
+		return nil, domainerr.ErrNotFound
+	}
+	row, err := q.GetPublicJobPostingByID(ctx, pgID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, domainerr.ErrNotFound
@@ -81,13 +131,46 @@ func (r *JobPostingRepository) Update(ctx context.Context, j *jobposting.JobPost
 	if err != nil {
 		return nil, domainerr.ErrBadRequest
 	}
+	teamMembersJSON, _ := json.Marshal(j.TeamMembers)
 	row, err := q.UpdateJobPosting(ctx, &generated.UpdateJobPostingParams{
-		ID:             pgID,
-		Title:          j.Title,
-		Description:    j.Description,
-		EmploymentType: j.EmploymentType,
-		Location:       pgText(j.Location),
-		IsActive:       j.IsActive,
+		ID:                        pgID,
+		Title:                     j.Title,
+		Description:               j.Description,
+		EmploymentType:            j.EmploymentType,
+		Location:                  pgText(j.Location),
+		IsActive:                  j.IsActive,
+		Status:                    j.Status,
+		JobCategory:               j.JobCategory,
+		HiringCount:               j.HiringCount,
+		AppealPoints:              j.AppealPoints,
+		Challenges:                j.Challenges,
+		TeamDescription:           j.TeamDescription,
+		TeamMembers:               teamMembersJSON,
+		SkillsGained:              j.SkillsGained,
+		Tags:                      j.Tags,
+		RequiredQualifications:    j.RequiredQualifications,
+		PreferredQualifications:   j.PreferredQualifications,
+		WorkLocation:              j.WorkLocation,
+		WorkLocationChangeScope:   j.WorkLocationChangeScope,
+		JobDescriptionChangeScope: j.JobDescriptionChangeScope,
+		ContractType:              j.ContractType,
+		ProbationPeriod:           j.ProbationPeriod,
+		WorkHours:                 j.WorkHours,
+		BreakTime:                 j.BreakTime,
+		Holidays:                  j.Holidays,
+		SalaryMin:                 pgInt4(j.SalaryMin),
+		SalaryMax:                 pgInt4(j.SalaryMax),
+		SalaryDetail:              j.SalaryDetail,
+		Insurance:                 j.Insurance,
+		RemotePolicy:              j.RemotePolicy,
+		Benefits:                  j.Benefits,
+		SmokingPolicy:             j.SmokingPolicy,
+		SelectionProcess:          j.SelectionProcess,
+		CoverImageUrl:             j.CoverImageURL,
+		HighlightTitleRole:        j.HighlightTitleRole,
+		HighlightTitleAppeal:      j.HighlightTitleAppeal,
+		HighlightTitleChallenge:   j.HighlightTitleChallenge,
+		HighlightTitleGrowth:      j.HighlightTitleGrowth,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -108,15 +191,58 @@ func (r *JobPostingRepository) Delete(ctx context.Context, id string) error {
 }
 
 func jobPostingToDomain(row *generated.JobPosting) *jobposting.JobPosting {
+	tags := row.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	var teamMembers []jobposting.TeamMember
+	if len(row.TeamMembers) > 0 {
+		_ = json.Unmarshal(row.TeamMembers, &teamMembers)
+	}
+	if teamMembers == nil {
+		teamMembers = []jobposting.TeamMember{}
+	}
 	return &jobposting.JobPosting{
-		ID:             uuidToString(row.ID),
-		CompanyID:      uuidToString(row.CompanyID),
-		Title:          row.Title,
-		Description:    row.Description,
-		EmploymentType: row.EmploymentType,
-		Location:       textPtr(row.Location),
-		IsActive:       row.IsActive,
-		CreatedAt:      row.CreatedAt.Time,
-		UpdatedAt:      row.UpdatedAt.Time,
+		ID:                        uuidToString(row.ID),
+		CompanyID:                 uuidToString(row.CompanyID),
+		Title:                     row.Title,
+		Description:               row.Description,
+		EmploymentType:            row.EmploymentType,
+		Location:                  textPtr(row.Location),
+		IsActive:                  row.IsActive,
+		Status:                    row.Status,
+		JobCategory:               row.JobCategory,
+		HiringCount:               row.HiringCount,
+		AppealPoints:              row.AppealPoints,
+		Challenges:                row.Challenges,
+		TeamDescription:           row.TeamDescription,
+		TeamMembers:               teamMembers,
+		SkillsGained:              row.SkillsGained,
+		Tags:                      tags,
+		RequiredQualifications:    row.RequiredQualifications,
+		PreferredQualifications:   row.PreferredQualifications,
+		WorkLocation:              row.WorkLocation,
+		WorkLocationChangeScope:   row.WorkLocationChangeScope,
+		JobDescriptionChangeScope: row.JobDescriptionChangeScope,
+		ContractType:              row.ContractType,
+		ProbationPeriod:           row.ProbationPeriod,
+		WorkHours:                 row.WorkHours,
+		BreakTime:                 row.BreakTime,
+		Holidays:                  row.Holidays,
+		SalaryMin:                 int4Ptr(row.SalaryMin),
+		SalaryMax:                 int4Ptr(row.SalaryMax),
+		SalaryDetail:              row.SalaryDetail,
+		Insurance:                 row.Insurance,
+		RemotePolicy:              row.RemotePolicy,
+		Benefits:                  row.Benefits,
+		SmokingPolicy:             row.SmokingPolicy,
+		SelectionProcess:          row.SelectionProcess,
+		CoverImageURL:             row.CoverImageUrl,
+		HighlightTitleRole:        row.HighlightTitleRole,
+		HighlightTitleAppeal:      row.HighlightTitleAppeal,
+		HighlightTitleChallenge:   row.HighlightTitleChallenge,
+		HighlightTitleGrowth:      row.HighlightTitleGrowth,
+		CreatedAt:                 row.CreatedAt.Time,
+		UpdatedAt:                 row.UpdatedAt.Time,
 	}
 }

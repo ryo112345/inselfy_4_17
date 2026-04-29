@@ -27,13 +27,50 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 	input.Description = strings.TrimSpace(input.Description)
 	input.EmploymentType = strings.TrimSpace(input.EmploymentType)
 
+	status := input.Status
+	if status == "" {
+		status = "draft"
+	}
+
 	j, err := i.repo.Create(ctx, &jobposting.JobPosting{
-		CompanyID:      input.CompanyID,
-		Title:          input.Title,
-		Description:    input.Description,
-		EmploymentType: input.EmploymentType,
-		Location:       input.Location,
-		IsActive:       true,
+		CompanyID:                 input.CompanyID,
+		Title:                     input.Title,
+		Description:               input.Description,
+		EmploymentType:            input.EmploymentType,
+		Location:                  input.Location,
+		IsActive:                  status == "open",
+		Status:                    status,
+		JobCategory:               input.JobCategory,
+		HiringCount:               input.HiringCount,
+		AppealPoints:              input.AppealPoints,
+		Challenges:                input.Challenges,
+		TeamDescription:           input.TeamDescription,
+		TeamMembers:               input.TeamMembers,
+		SkillsGained:              input.SkillsGained,
+		Tags:                      input.Tags,
+		RequiredQualifications:    input.RequiredQualifications,
+		PreferredQualifications:   input.PreferredQualifications,
+		WorkLocation:              input.WorkLocation,
+		WorkLocationChangeScope:   input.WorkLocationChangeScope,
+		JobDescriptionChangeScope: input.JobDescriptionChangeScope,
+		ContractType:              input.ContractType,
+		ProbationPeriod:           input.ProbationPeriod,
+		WorkHours:                 input.WorkHours,
+		BreakTime:                 input.BreakTime,
+		Holidays:                  input.Holidays,
+		SalaryMin:                 input.SalaryMin,
+		SalaryMax:                 input.SalaryMax,
+		SalaryDetail:              input.SalaryDetail,
+		Insurance:                 input.Insurance,
+		RemotePolicy:              input.RemotePolicy,
+		Benefits:                  input.Benefits,
+		SmokingPolicy:             input.SmokingPolicy,
+		SelectionProcess:          input.SelectionProcess,
+		CoverImageURL:             input.CoverImageURL,
+		HighlightTitleRole:        input.HighlightTitleRole,
+		HighlightTitleAppeal:      input.HighlightTitleAppeal,
+		HighlightTitleChallenge:   input.HighlightTitleChallenge,
+		HighlightTitleGrowth:      input.HighlightTitleGrowth,
 	})
 	if err != nil {
 		return err
@@ -60,6 +97,14 @@ func (i *JobPostingInteractor) Get(ctx context.Context, companyID, jobID string)
 	return i.output.PresentJobPosting(ctx, j)
 }
 
+func (i *JobPostingInteractor) GetPublic(ctx context.Context, jobID string) error {
+	j, err := i.repo.GetPublicByID(ctx, jobID)
+	if err != nil {
+		return err
+	}
+	return i.output.PresentJobPosting(ctx, j)
+}
+
 func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID string, input jobposting.UpdateJobPostingInput) error {
 	existing, err := i.repo.GetByID(ctx, jobID)
 	if err != nil {
@@ -73,9 +118,39 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 	existing.Description = strings.TrimSpace(input.Description)
 	existing.EmploymentType = strings.TrimSpace(input.EmploymentType)
 	existing.Location = input.Location
-	if input.IsActive != nil {
-		existing.IsActive = *input.IsActive
-	}
+	existing.Status = input.Status
+	existing.IsActive = input.Status == "open"
+	existing.JobCategory = input.JobCategory
+	existing.HiringCount = input.HiringCount
+	existing.AppealPoints = input.AppealPoints
+	existing.Challenges = input.Challenges
+	existing.TeamDescription = input.TeamDescription
+	existing.TeamMembers = input.TeamMembers
+	existing.SkillsGained = input.SkillsGained
+	existing.Tags = input.Tags
+	existing.RequiredQualifications = input.RequiredQualifications
+	existing.PreferredQualifications = input.PreferredQualifications
+	existing.WorkLocation = input.WorkLocation
+	existing.WorkLocationChangeScope = input.WorkLocationChangeScope
+	existing.JobDescriptionChangeScope = input.JobDescriptionChangeScope
+	existing.ContractType = input.ContractType
+	existing.ProbationPeriod = input.ProbationPeriod
+	existing.WorkHours = input.WorkHours
+	existing.BreakTime = input.BreakTime
+	existing.Holidays = input.Holidays
+	existing.SalaryMin = input.SalaryMin
+	existing.SalaryMax = input.SalaryMax
+	existing.SalaryDetail = input.SalaryDetail
+	existing.Insurance = input.Insurance
+	existing.RemotePolicy = input.RemotePolicy
+	existing.Benefits = input.Benefits
+	existing.SmokingPolicy = input.SmokingPolicy
+	existing.SelectionProcess = input.SelectionProcess
+	existing.CoverImageURL = input.CoverImageURL
+	existing.HighlightTitleRole = input.HighlightTitleRole
+	existing.HighlightTitleAppeal = input.HighlightTitleAppeal
+	existing.HighlightTitleChallenge = input.HighlightTitleChallenge
+	existing.HighlightTitleGrowth = input.HighlightTitleGrowth
 
 	j, err := i.repo.Update(ctx, existing)
 	if err != nil {

@@ -489,6 +489,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	// --- Company Jobs ---
 	jobGroup := e.Group("/api/company/jobs", companyJwtMW)
+	jobGroup.POST("/team-member-photo", httpcontroller.HandleTeamMemberPhotoUpload)
 	jobGroup.POST("", jobPostingCtrl.Create)
 	jobGroup.GET("", jobPostingCtrl.List)
 	jobGroup.GET("/:jobId", func(c echo.Context) error {
@@ -499,6 +500,11 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 	jobGroup.DELETE("/:jobId", func(c echo.Context) error {
 		return jobPostingCtrl.Delete(c, c.Param("jobId"))
+	})
+
+	// --- Job Postings (public) ---
+	e.GET("/api/jobs/:jobId", func(c echo.Context) error {
+		return jobPostingCtrl.GetPublic(c, c.Param("jobId"))
 	})
 
 	// --- Company Notifications ---

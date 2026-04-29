@@ -1,139 +1,1388 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createJobPosting } from "@/features/job-posting/api";
+import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { createJobPosting, uploadTeamMemberPhoto } from "@/features/job-posting/api";
+import {
+  JOB_PREVIEW_CHANNEL,
+  type JobFormPreviewPayload,
+  type JobPreviewMessage,
+} from "@/features/job-posting/preview-channel";
+
+const ACCENT = "#3D8B6E";
+
+const cardClass =
+  "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
+
+const JOB_CATEGORIES = [
+  "エンジニア",
+  "デザイナー",
+  "プロダクトマネージャー",
+  "マーケティング",
+  "セールス",
+  "カスタマーサクセス",
+  "人事・採用",
+  "経営企画",
+  "その他",
+];
 
 const EMPLOYMENT_TYPES = [
-  { value: "full_time", label: "正社員" },
-  { value: "part_time", label: "パートタイム" },
-  { value: "contract", label: "契約社員" },
-  { value: "freelance", label: "業務委託" },
-  { value: "internship", label: "インターン" },
+  { value: "正社員", label: "正社員" },
+  { value: "契約社員", label: "契約社員" },
+  { value: "業務委託", label: "業務委託" },
+  { value: "パートタイム", label: "パートタイム" },
+  { value: "インターン", label: "インターン" },
 ];
+
+const REMOTE_POLICIES = [
+  { value: "フルリモート", label: "フルリモート" },
+  { value: "リモート可（週数回出社）", label: "リモート可（週数回出社）" },
+  { value: "原則出社", label: "原則出社" },
+  { value: "フル出社", label: "フル出社" },
+];
+
+const SMOKING_POLICIES = [
+  { value: "屋内原則禁煙（喫煙専用室あり）", label: "屋内原則禁煙（喫煙専用室あり）" },
+  { value: "屋内全面禁煙", label: "屋内全面禁煙" },
+  { value: "屋内禁煙（屋外に喫煙場所あり）", label: "屋内禁煙（屋外に喫煙場所あり）" },
+  { value: "敷地内全面禁煙", label: "敷地内全面禁煙" },
+];
+
+const EMPLOYMENT_TYPE_TO_API: Record<string, string> = {
+  "正社員": "full_time",
+  "契約社員": "contract",
+  "業務委託": "freelance",
+  "パートタイム": "part_time",
+  "インターン": "internship",
+};
+
+type CompanyProfile = {
+  id: string;
+  companyName: string;
+  industry: string;
+  location: string;
+  employeeCount: string;
+  logoUrl: string;
+  benefits: string[];
+  smokingPolicy: string;
+  galleryUrls: string[];
+};
+
+/* ── Inline editing helpers ── */
+
+function InlineInput({
+  value,
+  placeholder,
+  onChange,
+  className = "",
+}: {
+  value: string;
+  placeholder?: string;
+  onChange: (v: string) => void;
+  className?: string;
+}) {
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[${ACCENT}] transition-colors placeholder:text-gray-300 ${className}`}
+    />
+  );
+}
+
+function InlineTextarea({
+  value,
+  placeholder,
+  onChange,
+  rows = 3,
+  className = "",
+}: {
+  value: string;
+  placeholder?: string;
+  onChange: (v: string) => void;
+  rows?: number;
+  className?: string;
+}) {
+  return (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      className={`w-full bg-transparent outline-none border border-transparent rounded-lg hover:border-gray-300 focus:border-[${ACCENT}] transition-colors resize-y placeholder:text-gray-300 ${className}`}
+    />
+  );
+}
+
+function InlineSelect({
+  value,
+  options,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full max-w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors cursor-pointer text-inherit font-inherit"
+    >
+      {placeholder && (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      )}
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function InlineTagInput({
+  tags,
+  onAdd,
+  onRemove,
+}: {
+  tags: string[];
+  onAdd: (tag: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const [input, setInput] = useState("");
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && input.trim()) {
+      e.preventDefault();
+      onAdd(input.trim());
+      setInput("");
+    }
+    if (e.key === "Backspace" && !input && tags.length > 0) {
+      onRemove(tags.length - 1);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2 items-center">
+      {tags.map((tag, i) => (
+        <span
+          key={i}
+          className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700"
+        >
+          #{tag}
+          <button
+            type="button"
+            onClick={() => onRemove(i)}
+            className="hover:text-red-500 cursor-pointer ml-0.5"
+          >
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </span>
+      ))}
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="+ タグ追加"
+        className="text-sm outline-none bg-transparent text-gray-400 placeholder:text-gray-300 min-w-[80px] py-1"
+      />
+    </div>
+  );
+}
+
+function BenefitTagInput({
+  tags,
+  onAdd,
+  onRemove,
+}: {
+  tags: string[];
+  onAdd: (tag: string) => void;
+  onRemove: (index: number) => void;
+}) {
+  const [input, setInput] = useState("");
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && input.trim()) {
+      e.preventDefault();
+      onAdd(input.trim());
+      setInput("");
+    }
+    if (e.key === "Backspace" && !input && tags.length > 0) {
+      onRemove(tags.length - 1);
+    }
+  };
+
+  return (
+    <div className="mt-5 flex flex-wrap gap-2 items-center">
+      {tags.map((tag, i) => (
+        <span
+          key={i}
+          className="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-base font-medium"
+          style={{
+            borderColor: `${ACCENT}40`,
+            backgroundColor: `${ACCENT}12`,
+            color: ACCENT,
+          }}
+        >
+          {tag}
+          <button
+            type="button"
+            onClick={() => onRemove(i)}
+            className="hover:opacity-60 cursor-pointer ml-0.5"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </span>
+      ))}
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="+ 追加"
+        className="text-base outline-none bg-transparent placeholder:text-gray-300 min-w-[80px] py-1"
+        style={{ color: ACCENT }}
+      />
+    </div>
+  );
+}
+
+/* ── Section components ── */
+
+function EditableHighlightCard({
+  label,
+  title,
+  onTitleChange,
+  titlePlaceholder,
+  value,
+  onChange,
+  icon,
+  tone,
+  placeholder,
+}: {
+  label: string;
+  title: string;
+  onTitleChange: (v: string) => void;
+  titlePlaceholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  icon: React.ReactNode;
+  tone: { bg: string; ring: string; fg: string };
+  placeholder: string;
+}) {
+  return (
+    <div className="flex h-full flex-col gap-3.5 rounded-2xl border border-gray-200/80 bg-white p-6">
+      <div className="flex items-center gap-3">
+        <span
+          className="flex h-11 w-11 items-center justify-center rounded-xl"
+          style={{
+            backgroundColor: tone.bg,
+            color: tone.fg,
+            boxShadow: `inset 0 0 0 1px ${tone.ring}`,
+          }}
+        >
+          {icon}
+        </span>
+        <span
+          className="text-sm font-semibold tracking-wide"
+          style={{ color: tone.fg }}
+        >
+          {label}
+        </span>
+      </div>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => onTitleChange(e.target.value)}
+        placeholder={titlePlaceholder}
+        className="text-lg font-bold leading-snug text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+      />
+      <InlineTextarea
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        rows={4}
+        className="text-[15px] leading-relaxed text-gray-700"
+      />
+    </div>
+  );
+}
+
+function EditableConditionGroup({
+  title,
+  rows,
+  icon,
+}: {
+  title: string;
+  rows: { label: string; value: string; onChange: (v: string) => void; placeholder: string; type?: "text" | "textarea" | "select"; options?: { value: string; label: string }[]; readOnly?: boolean }[];
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col rounded-2xl border border-gray-200/80 bg-white p-6">
+      <div className="mb-4 flex items-center gap-2.5 border-b border-gray-100 pb-3.5">
+        <span
+          className="flex h-8 w-8 items-center justify-center rounded-md"
+          style={{ backgroundColor: `${ACCENT}12`, color: ACCENT }}
+        >
+          {icon}
+        </span>
+        <h3 className="text-base font-bold text-gray-900">{title}</h3>
+      </div>
+      <dl className="flex flex-col gap-3.5">
+        {rows.map((r) => (
+          <div key={r.label} className="flex flex-col gap-1">
+            <dt className="text-xs font-medium tracking-wide text-gray-500">
+              {r.label}
+            </dt>
+            <dd>
+              {r.readOnly ? (
+                <span className="text-[15px] leading-relaxed text-gray-400">
+                  {r.value || r.placeholder}
+                </span>
+              ) : r.type === "select" && r.options ? (
+                <InlineSelect
+                  value={r.value}
+                  options={r.options}
+                  onChange={r.onChange}
+                  placeholder="選択"
+                />
+              ) : r.type === "textarea" ? (
+                <InlineTextarea
+                  value={r.value}
+                  onChange={r.onChange}
+                  placeholder={r.placeholder}
+                  rows={2}
+                  className="text-[15px] leading-relaxed text-gray-900"
+                />
+              ) : (
+                <InlineInput
+                  value={r.value}
+                  onChange={r.onChange}
+                  placeholder={r.placeholder}
+                  className="text-[15px] leading-relaxed text-gray-900"
+                />
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+/* ── Main component ── */
 
 export default function JobNewPage() {
   const router = useRouter();
+  const { companyFetch } = useCompanyAuth();
+  const [company, setCompany] = useState<CompanyProfile | null>(null);
 
   const [title, setTitle] = useState("");
+  const [status, setStatus] = useState<"open" | "draft">("draft");
+  const [jobCategory, setJobCategory] = useState("");
+  const [employmentType, setEmploymentType] = useState("");
+  const [hiringCount, setHiringCount] = useState("");
   const [description, setDescription] = useState("");
-  const [employmentType, setEmploymentType] = useState("full_time");
-  const [location, setLocation] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [appealPoints, setAppealPoints] = useState("");
+  const [challenges, setChallenges] = useState("");
+  const [teamDescription, setTeamDescription] = useState("");
+  const [teamMembers, setTeamMembers] = useState<{ name: string; photoUrl?: string }[]>([]);
+  const [memberInput, setMemberInput] = useState("");
+  const [skillsGained, setSkillsGained] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [requiredQualifications, setRequiredQualifications] = useState("");
+  const [preferredQualifications, setPreferredQualifications] = useState("");
+  const [workLocation, setWorkLocation] = useState("");
+  const [workLocationChangeScope, setWorkLocationChangeScope] = useState("");
+  const [jobDescriptionChangeScope, setJobDescriptionChangeScope] = useState("");
+  const [contractType, setContractType] = useState("");
+  const [probationPeriod, setProbationPeriod] = useState("");
+  const [workHours, setWorkHours] = useState("");
+  const [breakTime, setBreakTime] = useState("");
+  const [holidays, setHolidays] = useState("");
+  const [salaryMin, setSalaryMin] = useState<number | null>(null);
+  const [salaryMax, setSalaryMax] = useState<number | null>(null);
+  const [salaryDetail, setSalaryDetail] = useState("");
+  const [insurance, setInsurance] = useState("");
+  const [smokingPolicy, setSmokingPolicy] = useState("");
+  const [benefits, setBenefits] = useState<string[]>([]);
+  const [remotePolicy, setRemotePolicy] = useState("");
+  const [selectionProcess, setSelectionProcess] = useState("");
+  const [highlightTitleRole, setHighlightTitleRole] = useState("仕事内容");
+  const [highlightTitleAppeal, setHighlightTitleAppeal] = useState("この仕事の魅力");
+  const [highlightTitleChallenge, setHighlightTitleChallenge] = useState("チャレンジ");
+  const [highlightTitleGrowth, setHighlightTitleGrowth] = useState("身につくスキル");
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [coverImageDataUrl, setCoverImageDataUrl] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
-  const handleSave = async () => {
-    if (!title.trim()) {
-      setError("タイトルは必須です");
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Fetch company profile and auto-fill benefits
+  useEffect(() => {
+    companyFetch("/api/company/profile").then(async (res) => {
+      if (res.ok) {
+        const data = await res.json();
+        if (!Array.isArray(data.benefits)) data.benefits = [];
+        setCompany({
+          id: data.id,
+          companyName: data.companyName,
+          industry: data.industry,
+          location: data.location,
+          employeeCount: data.employeeCount,
+          logoUrl: data.logoUrl,
+          benefits: data.benefits ?? [],
+          smokingPolicy: data.smokingPolicy ?? "",
+          galleryUrls: data.galleryUrls ?? [],
+        });
+        if (data.benefits && data.benefits.length > 0) {
+          setBenefits(data.benefits);
+        }
+      }
+    });
+  }, [companyFetch]);
+
+  // BroadcastChannel for preview tab sync
+  const channelRef = useRef<BroadcastChannel | null>(null);
+  const previewPayloadRef = useRef<JobFormPreviewPayload | null>(null);
+
+  useEffect(() => {
+    const ch = new BroadcastChannel(JOB_PREVIEW_CHANNEL);
+    channelRef.current = ch;
+    ch.onmessage = (e) => {
+      const msg = e.data as JobPreviewMessage;
+      if (msg?.type === "request" && previewPayloadRef.current) {
+        const reply: JobPreviewMessage = {
+          type: "data",
+          payload: previewPayloadRef.current,
+        };
+        ch.postMessage(reply);
+      }
+    };
+    return () => { ch.close(); };
+  }, []);
+
+  const previewPayload = useMemo<JobFormPreviewPayload>(
+    () => ({
+      title, jobCategory, employmentType, hiringCount, description,
+      appealPoints, challenges, teamDescription, teamMembers, skillsGained, tags,
+      requiredQualifications, preferredQualifications, workLocation,
+      workLocationChangeScope, jobDescriptionChangeScope, contractType,
+      probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
+      salaryDetail, insurance, remotePolicy,
+      benefits: benefits.join("\n"), smokingPolicy,
+      selectionProcess,
+      highlightTitleRole, highlightTitleAppeal,
+      highlightTitleChallenge, highlightTitleGrowth,
+      coverImageDataUrl,
+    }),
+    [
+      title, jobCategory, employmentType, hiringCount, description,
+      appealPoints, challenges, teamDescription, teamMembers, skillsGained, tags,
+      requiredQualifications, preferredQualifications, workLocation,
+      workLocationChangeScope, jobDescriptionChangeScope, contractType,
+      probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
+      salaryDetail, insurance, remotePolicy, benefits, smokingPolicy,
+      selectionProcess, highlightTitleRole, highlightTitleAppeal,
+      highlightTitleChallenge, highlightTitleGrowth, coverImageDataUrl,
+    ],
+  );
+
+  useEffect(() => {
+    previewPayloadRef.current = previewPayload;
+    const msg: JobPreviewMessage = { type: "data", payload: previewPayload };
+    channelRef.current?.postMessage(msg);
+  }, [previewPayload]);
+
+  const requiredOk =
+    title.trim() !== "" &&
+    jobCategory !== "" &&
+    employmentType !== "" &&
+    description.trim() !== "" &&
+    requiredQualifications.trim() !== "" &&
+    workLocation.trim() !== "";
+
+  const handleSubmit = async (publishStatus: "open" | "draft") => {
+    if (publishStatus === "open" && !requiredOk) return;
+    if (publishStatus === "draft" && !title.trim()) {
+      setSubmitError("下書き保存にもタイトルが必要です");
       return;
     }
+
     setSaving(true);
-    setError(null);
+    setSubmitError(null);
     try {
       await createJobPosting({
         title: title.trim(),
         description: description.trim(),
         employmentType,
-        location: location.trim() || undefined,
+        location: workLocation.trim() || null,
+        status: publishStatus,
+        jobCategory, hiringCount, appealPoints, challenges, teamDescription,
+        teamMembers,
+        skillsGained, tags, requiredQualifications, preferredQualifications,
+        workLocation, workLocationChangeScope, jobDescriptionChangeScope,
+        contractType, probationPeriod, workHours, breakTime, holidays,
+        salaryMin, salaryMax, salaryDetail, insurance, remotePolicy,
+        benefits: benefits.join("\n"), smokingPolicy, selectionProcess,
+        coverImageUrl: coverImage ?? "",
+        highlightTitleRole, highlightTitleAppeal, highlightTitleChallenge, highlightTitleGrowth,
       });
+      setStatus(publishStatus);
       router.push("/company/jobs");
-    } catch (e: any) {
-      setError(e.message ?? "保存に失敗しました");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "保存に失敗しました";
+      setSubmitError(msg);
     } finally {
       setSaving(false);
     }
   };
 
+  const metaBadges = [employmentType, jobCategory, remotePolicy].filter(Boolean);
+
+  const selectionSteps = selectionProcess
+    ? selectionProcess.split("→").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const statusLabel = status === "open" ? "公開予定" : "下書き";
+  const statusColor =
+    status === "open"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+      : "bg-amber-50 text-amber-700 border-amber-200";
+
   return (
-    <div className="space-y-6">
-      {/* Back link */}
-      <Link href="/company/jobs" className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1">
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-        求人一覧
-      </Link>
+    <div className="min-h-screen bg-[#f6f7f5]">
+      {/* Edit toolbar */}
+      <div className="sticky top-0 z-30 border-b border-blue-200 bg-blue-50 px-6 py-2.5">
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/company/jobs"
+              className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              求人一覧
+            </Link>
+            <span className="text-sm text-blue-800 font-medium">
+              新規作成 — 見た目そのままで編集できます
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => window.open("/company/jobs/preview", "_blank")}
+              className="inline-flex items-center gap-1.5 border border-gray-300 bg-white text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors cursor-pointer"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              プレビュー
+            </button>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${statusColor}`}>
+              <span className={`h-2 w-2 rounded-full ${status === "open" ? "bg-emerald-500" : "bg-amber-500"}`} />
+              {statusLabel}
+            </span>
+            <button
+              type="button"
+              onClick={() => handleSubmit("draft")}
+              disabled={saving}
+              className="border border-gray-300 bg-white text-gray-700 px-4 py-1.5 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              下書き保存
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSubmit("open")}
+              disabled={saving || !requiredOk}
+              className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              title={!requiredOk ? "必須項目を全て入力してください" : ""}
+            >
+              {saving ? "保存中..." : "公開する"}
+            </button>
+          </div>
+        </div>
+      </div>
 
-      <h1 className="text-2xl font-bold text-gray-900">求人を作成</h1>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-700">{error}</p>
+      {submitError && (
+        <div className="mx-auto max-w-4xl px-4 pt-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-red-700">{submitError}</p>
+          </div>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
-        {/* Title */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            タイトル <span className="text-red-500">*</span>
+      <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
+        {/* Hero */}
+        <section className={`overflow-hidden ${cardClass}`}>
+          {/* Cover image */}
+          {coverImage ? (
+            <div className="relative group">
+              <img src={coverImage} alt="" className="w-full aspect-[16/9] object-cover" />
+              <button
+                type="button"
+                onClick={() => { setCoverImage(null); setCoverImageDataUrl(null); }}
+                className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center py-10 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors">
+              <svg className="h-8 w-8 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+              </svg>
+              <span className="mt-2 text-sm text-gray-400">カバー写真を追加</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setCoverImage(URL.createObjectURL(file));
+                    const reader = new FileReader();
+                    reader.onload = () => setCoverImageDataUrl(reader.result as string);
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </label>
+          )}
+
+          <div className="px-6 pb-6 pt-6 sm:px-8">
+            {company && (
+              <div className="inline-flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
+                  {company.logoUrl ? (
+                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-bold" style={{ color: ACCENT }}>
+                      {company.companyName.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-base font-medium text-gray-900">{company.companyName}</p>
+                  <p className="text-sm text-gray-500">
+                    {company.industry} / {company.location}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <textarea
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                const el = e.target;
+                el.style.height = "auto";
+                el.style.height = el.scrollHeight + "px";
+              }}
+              onFocus={(e) => {
+                const el = e.target;
+                el.style.height = "auto";
+                el.style.height = el.scrollHeight + "px";
+              }}
+              placeholder="求人タイトルを入力（例：バックエンドエンジニア｜Go / PostgreSQL / AWS）"
+              rows={1}
+              className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-[#3D8B6E] transition-colors pb-1 resize-none overflow-hidden"
+            />
+
+            <div className="mt-5 flex flex-wrap gap-2 items-center">
+              <span
+                className="inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium"
+                style={{ borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}12`, color: ACCENT }}
+              >
+                <InlineSelect
+                  value={employmentType}
+                  options={EMPLOYMENT_TYPES}
+                  onChange={setEmploymentType}
+                  placeholder="雇用形態"
+                />
+              </span>
+              <span
+                className="inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium"
+                style={{ borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}12`, color: ACCENT }}
+              >
+                <InlineSelect
+                  value={jobCategory}
+                  options={JOB_CATEGORIES.map((c) => ({ value: c, label: c }))}
+                  onChange={setJobCategory}
+                  placeholder="職種カテゴリ"
+                />
+              </span>
+              <span
+                className="inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium"
+                style={{ borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}12`, color: ACCENT }}
+              >
+                <InlineSelect
+                  value={remotePolicy}
+                  options={REMOTE_POLICIES}
+                  onChange={setRemotePolicy}
+                  placeholder="勤務形態"
+                />
+              </span>
+            </div>
+
+            <div className="mt-3">
+              <InlineTagInput
+                tags={tags}
+                onAdd={(tag) => setTags([...tags, tag])}
+                onRemove={(i) => setTags(tags.filter((_, idx) => idx !== i))}
+              />
+            </div>
+
+            {/* Quick Facts */}
+            <div className="mt-6 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-gray-50/40 sm:grid-cols-4 sm:divide-y-0">
+              <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
+                  <span className="text-gray-400"><YenIcon /></span>
+                  想定年収
+                </div>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    value={salaryMin ?? ""}
+                    onChange={(e) => setSalaryMin(e.target.value ? Number(e.target.value) : null)}
+                    placeholder="下限"
+                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+                  />
+                  <span className="text-base font-medium text-gray-500">〜</span>
+                  <input
+                    type="number"
+                    value={salaryMax ?? ""}
+                    onChange={(e) => setSalaryMax(e.target.value ? Number(e.target.value) : null)}
+                    placeholder="上限"
+                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+                  />
+                  <span className="ml-0.5 text-sm font-medium text-gray-500">万円</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
+                  <span className="text-gray-400"><BriefcaseIcon /></span>
+                  雇用形態
+                </div>
+                <div className="text-xl font-bold leading-tight text-gray-900">
+                  {employmentType || <span className="text-sm font-normal italic text-gray-300">未選択</span>}
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
+                  <span className="text-gray-400"><UsersIcon /></span>
+                  採用人数
+                </div>
+                <InlineInput
+                  value={hiringCount}
+                  onChange={setHiringCount}
+                  placeholder="例: 1〜2名"
+                  className="text-xl font-bold leading-tight text-gray-900"
+                />
+              </div>
+              <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
+                  <span className="text-gray-400"><HomeIcon /></span>
+                  勤務形態
+                </div>
+                <div className="text-xl font-bold leading-tight text-gray-900">
+                  {remotePolicy || <span className="text-sm font-normal italic text-gray-300">未選択</span>}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-7 flex gap-3">
+              <button
+                disabled
+                className="flex-1 rounded-xl py-4 text-center text-base font-bold text-white opacity-60"
+                style={{ background: ACCENT }}
+              >
+                この求人に応募する
+              </button>
+              <button
+                disabled
+                className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 opacity-60"
+              >
+                <BookmarkIcon />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Highlights */}
+        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
+          <SectionTitle icon={<LayersIcon />}>ハイライト</SectionTitle>
+          <p className="mt-2 text-sm text-gray-500">
+            この仕事を一目で掴むための4つの視点
+          </p>
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <EditableHighlightCard
+              label="ROLE"
+              title={highlightTitleRole}
+              onTitleChange={setHighlightTitleRole}
+              titlePlaceholder="仕事内容"
+              value={description}
+              onChange={setDescription}
+              icon={<SparkIcon />}
+              tone={{ bg: "#EAF4F0", ring: "#3D8B6E33", fg: "#3D8B6E" }}
+              placeholder="この求人の仕事内容を記入..."
+            />
+            <EditableHighlightCard
+              label="APPEAL"
+              title={highlightTitleAppeal}
+              onTitleChange={setHighlightTitleAppeal}
+              titlePlaceholder="この仕事の魅力"
+              value={appealPoints}
+              onChange={setAppealPoints}
+              icon={<StarIcon />}
+              tone={{ bg: "#FEF7E6", ring: "#E0A92033", fg: "#B07914" }}
+              placeholder="この求人の魅力を記入..."
+            />
+            <EditableHighlightCard
+              label="CHALLENGE"
+              title={highlightTitleChallenge}
+              onTitleChange={setHighlightTitleChallenge}
+              titlePlaceholder="チャレンジ"
+              value={challenges}
+              onChange={setChallenges}
+              icon={<FlagIcon />}
+              tone={{ bg: "#EEF2FB", ring: "#3B82F633", fg: "#3B6FCC" }}
+              placeholder="この仕事で直面するチャレンジを記入..."
+            />
+            <EditableHighlightCard
+              label="GROWTH"
+              title={highlightTitleGrowth}
+              onTitleChange={setHighlightTitleGrowth}
+              titlePlaceholder="身につくスキル"
+              value={skillsGained}
+              onChange={setSkillsGained}
+              icon={<BoltIcon />}
+              tone={{ bg: "#F3EEFB", ring: "#8B5CF633", fg: "#7647C5" }}
+              placeholder="この求人で身につくスキルを記入..."
+            />
+          </div>
+        </section>
+
+        {/* Photo gallery */}
+        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
+          <SectionTitle icon={<CameraIcon />}>フォトギャラリー</SectionTitle>
+          {galleryImages.length > 0 && (
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {galleryImages.map((url, i) => (
+                <div key={i} className="relative group rounded-lg overflow-hidden aspect-[4/3]">
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setGalleryImages(galleryImages.filter((_, idx) => idx !== i))}
+                    className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <label className="mt-3 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-6 cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-colors">
+            <svg className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>
+            <span className="text-sm text-gray-400">写真を追加</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                if (files) {
+                  const urls = Array.from(files).map((f) => URL.createObjectURL(f));
+                  setGalleryImages((prev) => [...prev, ...urls]);
+                }
+              }}
+            />
           </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="例: バックエンドエンジニア"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none"
+        </section>
+
+        {/* Team */}
+        <section className={`overflow-hidden ${cardClass}`}>
+          <div className="px-6 py-6 sm:px-7 sm:py-7">
+            <h2 className="text-lg font-bold text-gray-900">チーム紹介</h2>
+            <div className="mt-5 flex items-start gap-6">
+              <div className="flex flex-col items-center gap-3 shrink-0">
+                <div className="flex -space-x-2">
+                  {(teamMembers.length > 0 ? teamMembers : [{ name: "" }]).map((m, i) => {
+                    const colors = [
+                      { bg: "#EAF4F0", fg: "#3D8B6E" },
+                      { bg: "#EEF2FB", fg: "#3B6FCC" },
+                      { bg: "#FEF7E6", fg: "#B07914" },
+                      { bg: "#F3EEFB", fg: "#7647C5" },
+                      { bg: "#FEE", fg: "#C54747" },
+                    ];
+                    const color = colors[i % colors.length];
+                    const isReal = teamMembers.length > 0;
+                    return (
+                      <label key={i} className={`relative ${isReal ? "cursor-pointer group" : ""}`}>
+                        <div
+                          className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white text-sm font-bold overflow-hidden"
+                          style={{ backgroundColor: color.bg, color: color.fg }}
+                        >
+                          {m.photoUrl ? (
+                            <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
+                          ) : (
+                            m.name ? m.name.charAt(0) : "?"
+                          )}
+                        </div>
+                        {isReal && !m.photoUrl && (
+                          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 group-hover:text-blue-500 group-hover:border-blue-300 transition-colors">
+                            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14" /></svg>
+                          </span>
+                        )}
+                        {isReal && m.photoUrl && (
+                          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                            </svg>
+                          </span>
+                        )}
+                        {isReal && (
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const url = await uploadTeamMemberPhoto(file);
+                                setTeamMembers((prev) =>
+                                  prev.map((member, idx) =>
+                                    idx === i ? { ...member, photoUrl: url } : member,
+                                  ),
+                                );
+                              } catch {
+                                // upload failed
+                              }
+                              e.target.value = "";
+                            }}
+                          />
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+                <span className="text-sm text-gray-500 font-medium">
+                  {teamMembers.length > 0 ? `${teamMembers.length}名のチーム` : "メンバー未登録"}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-gray-900 mb-2">チーム紹介</h3>
+                <InlineTextarea
+                  value={teamDescription}
+                  onChange={setTeamDescription}
+                  placeholder="チームの雰囲気やメンバー構成を記入..."
+                  rows={3}
+                  className="text-[15px] leading-relaxed text-gray-700"
+                />
+              </div>
+            </div>
+            <div className="mt-4 border-t border-gray-100 pt-4">
+              <h4 className="text-sm font-medium text-gray-500 mb-3">メンバー</h4>
+              <div className="flex flex-wrap gap-2 items-center">
+                {teamMembers.map((m, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-700"
+                  >
+                    {m.name}
+                    <button
+                      type="button"
+                      onClick={() => setTeamMembers(teamMembers.filter((_, idx) => idx !== i))}
+                      className="hover:text-red-500 cursor-pointer ml-0.5"
+                    >
+                      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  value={memberInput}
+                  onChange={(e) => setMemberInput(e.target.value)}
+                  placeholder="+ メンバー追加"
+                  className="text-sm outline-none bg-transparent text-gray-400 placeholder:text-gray-300 min-w-[100px] py-1"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.nativeEvent.isComposing && memberInput.trim()) {
+                      e.preventDefault();
+                      setTeamMembers([...teamMembers, { name: memberInput.trim() }]);
+                      setMemberInput("");
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Conditions */}
+        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
+          <SectionTitle icon={<DocumentIcon />}>募集要項</SectionTitle>
+          <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
+            <EditableConditionGroup
+              title="勤務情報"
+              icon={<ClockIcon />}
+              rows={[
+                { label: "勤務地", value: workLocation, onChange: setWorkLocation, placeholder: "例: 東京都渋谷区" },
+                { label: "勤務時間", value: workHours, onChange: setWorkHours, placeholder: "例: 9:00〜18:00" },
+                { label: "休憩時間", value: breakTime, onChange: setBreakTime, placeholder: "例: 60分" },
+                { label: "休日・休暇", value: holidays, onChange: setHolidays, placeholder: "休日・休暇を入力...", type: "textarea" },
+              ]}
+            />
+            <EditableConditionGroup
+              title="給与・報酬"
+              icon={<YenIcon />}
+              rows={[
+                {
+                  label: "年収レンジ",
+                  value: salaryMin != null || salaryMax != null
+                    ? `${salaryMin ?? "?"}万円 〜 ${salaryMax ?? "?"}万円`
+                    : "",
+                  onChange: () => {},
+                  placeholder: "上部の想定年収欄で入力",
+                  readOnly: true,
+                },
+                { label: "給与詳細", value: salaryDetail, onChange: setSalaryDetail, placeholder: "給与の詳細を入力...", type: "textarea" },
+                { label: "社会保険", value: insurance, onChange: setInsurance, placeholder: "例: 健康保険、厚生年金..." },
+              ]}
+            />
+            <EditableConditionGroup
+              title="契約・その他"
+              icon={<ShieldIcon />}
+              rows={[
+                { label: "契約期間", value: contractType, onChange: setContractType, placeholder: "例: 無期" },
+                { label: "試用期間", value: probationPeriod, onChange: setProbationPeriod, placeholder: "例: 入社後3ヶ月" },
+                { label: "就業場所の変更範囲", value: workLocationChangeScope, onChange: setWorkLocationChangeScope, placeholder: "例: 当面なし" },
+                { label: "業務内容の変更範囲", value: jobDescriptionChangeScope, onChange: setJobDescriptionChangeScope, placeholder: "例: 当面なし" },
+                {
+                  label: "受動喫煙対策",
+                  value: smokingPolicy,
+                  onChange: setSmokingPolicy,
+                  placeholder: "選択",
+                  type: "select",
+                  options: SMOKING_POLICIES,
+                },
+              ]}
+            />
+          </div>
+        </section>
+
+        {/* Requirements */}
+        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
+          <SectionTitle icon={<CheckSquareIcon />}>応募要件</SectionTitle>
+          <div className="mt-5 space-y-5">
+            <div>
+              <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                <span
+                  className="inline-flex h-6 items-center rounded px-2 text-sm font-bold text-white"
+                  style={{ background: ACCENT }}
+                >
+                  必須
+                </span>
+                必須要件
+              </h3>
+              <InlineTextarea
+                value={requiredQualifications}
+                onChange={setRequiredQualifications}
+                placeholder="必須の資格・経験・スキルを入力..."
+                rows={3}
+                className="mt-2.5 text-[15px] leading-relaxed text-gray-700"
+              />
+            </div>
+            <div>
+              <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                <span className="inline-flex h-6 items-center rounded bg-gray-400 px-2 text-sm font-bold text-white">
+                  歓迎
+                </span>
+                歓迎要件
+              </h3>
+              <InlineTextarea
+                value={preferredQualifications}
+                onChange={setPreferredQualifications}
+                placeholder="あると望ましい資格・経験・スキルを入力..."
+                rows={3}
+                className="mt-2.5 text-[15px] leading-relaxed text-gray-700"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits */}
+        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
+          <SectionTitle icon={<GiftIcon />}>福利厚生・待遇</SectionTitle>
+          <BenefitTagInput
+            tags={benefits}
+            onAdd={(tag) => setBenefits([...benefits, tag])}
+            onRemove={(i) => setBenefits(benefits.filter((_, idx) => idx !== i))}
           />
-        </div>
+        </section>
 
-        {/* Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">説明</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="求人の詳細説明..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] text-sm resize-y outline-none"
+        {/* Selection */}
+        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
+          <SectionTitle icon={<RouteIcon />}>選考フロー</SectionTitle>
+          <InlineInput
+            value={selectionProcess}
+            onChange={setSelectionProcess}
+            placeholder="例: 書類選考 → 技術面接 → 最終面接 → 内定"
+            className="mt-4 text-base text-gray-700"
           />
-        </div>
+          {selectionSteps.length > 0 && (
+            <ol className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              {selectionSteps.map((step, i, arr) => (
+                <li key={i} className="flex items-center gap-2">
+                  <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+                    <span
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                      style={{ background: ACCENT }}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="text-base font-medium text-gray-800 whitespace-nowrap">
+                      {step}
+                    </span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <svg className="h-5 w-5 shrink-0 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  )}
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
 
-        {/* Employment type */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">雇用形態</label>
-          <select
-            value={employmentType}
-            onChange={(e) => setEmploymentType(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white"
-          >
-            {EMPLOYMENT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Company */}
+        {company && (
+          <section className={`overflow-hidden ${cardClass}`}>
+            <div className="px-6 py-6 sm:px-7">
+              <SectionTitle icon={<BuildingIcon />}>企業情報</SectionTitle>
+              <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4">
+                <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
+                  {company.logoUrl ? (
+                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-lg font-bold" style={{ color: ACCENT }}>
+                      {company.companyName.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-lg font-bold text-gray-900">{company.companyName}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {company.industry} / {company.location} / {company.employeeCount}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
-        {/* Location */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">勤務地</label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="例: 東京都渋谷区"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none"
-          />
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-[#2979ff] text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {saving ? "保存中..." : "保存する"}
-          </button>
+        {/* Bottom save bar */}
+        <div className="pt-4 flex items-center justify-end gap-3">
           <Link
             href="/company/jobs"
             className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors"
           >
             キャンセル
           </Link>
+          <button
+            type="button"
+            onClick={() => handleSubmit("draft")}
+            disabled={saving}
+            className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            下書き保存
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSubmit("open")}
+            disabled={saving || !requiredOk}
+            className="bg-[#2979ff] text-white px-5 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {saving ? "保存中..." : "公開する"}
+          </button>
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── Shared section title ── */
+
+function SectionTitle({
+  children,
+  icon,
+}: {
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      {icon && (
+        <span
+          className="flex h-9 w-9 items-center justify-center rounded-lg"
+          style={{ backgroundColor: `${ACCENT}14`, color: ACCENT }}
+        >
+          {icon}
+        </span>
+      )}
+      <h2 className="text-xl font-bold tracking-tight text-gray-900">
+        {children}
+      </h2>
+    </div>
+  );
+}
+
+/* ── Icons ── */
+
+function BookmarkIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+function YenIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 4l7 9 7-9" /><path d="M7 13h10" /><path d="M7 17h10" /><path d="M12 13v7" />
+    </svg>
+  );
+}
+function BriefcaseIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" /><path d="M3 13h18" />
+    </svg>
+  );
+}
+function UsersIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+function HomeIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" />
+    </svg>
+  );
+}
+function LayersIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2 2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+    </svg>
+  );
+}
+function SparkIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3v4" /><path d="M12 17v4" /><path d="M3 12h4" /><path d="M17 12h4" /><path d="M5.6 5.6l2.8 2.8" /><path d="M15.6 15.6l2.8 2.8" /><path d="M5.6 18.4l2.8-2.8" /><path d="M15.6 8.4l2.8-2.8" />
+    </svg>
+  );
+}
+function StarIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2l2.9 6.9L22 10l-5.5 4.7L18 22l-6-3.6L6 22l1.5-7.3L2 10l7.1-1.1z" />
+    </svg>
+  );
+}
+function FlagIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 22V4" /><path d="M4 4h13l-2 4 2 4H4" />
+    </svg>
+  );
+}
+function BoltIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M13 2L3 14h7l-1 8 11-13h-7z" />
+    </svg>
+  );
+}
+function CheckSquareIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 11l3 3 8-8" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </svg>
+  );
+}
+function GiftIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13" /><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" /><path d="M8 8a2.5 2.5 0 0 1 0-5C10 3 12 5 12 8" /><path d="M16 8a2.5 2.5 0 0 0 0-5C14 3 12 5 12 8" />
+    </svg>
+  );
+}
+function CameraIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><circle cx="12" cy="13" r="4" />
+    </svg>
+  );
+}
+function DocumentIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" />
+    </svg>
+  );
+}
+function ClockIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+function ShieldIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z" />
+    </svg>
+  );
+}
+function RouteIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="6" cy="19" r="3" /><circle cx="18" cy="5" r="3" /><path d="M6 16V8a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4" />
+    </svg>
+  );
+}
+function BuildingIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="3" width="16" height="18" rx="1" /><path d="M9 8h.01" /><path d="M14 8h.01" /><path d="M9 12h.01" /><path d="M14 12h.01" /><path d="M9 16h.01" /><path d="M14 16h.01" />
+    </svg>
   );
 }

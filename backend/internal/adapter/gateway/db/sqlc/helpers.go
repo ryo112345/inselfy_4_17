@@ -106,3 +106,18 @@ func timestamptzToTimePtr(t pgtype.Timestamptz) *time.Time {
 	}
 	return nil
 }
+
+func pgInt4(v *int32) pgtype.Int4 {
+	if v == nil {
+		return pgtype.Int4{}
+	}
+	return pgtype.Int4{Int32: *v, Valid: true}
+}
+
+func int4Ptr(v pgtype.Int4) *int32 {
+	if !v.Valid {
+		return nil
+	}
+	n := v.Int32
+	return &n
+}

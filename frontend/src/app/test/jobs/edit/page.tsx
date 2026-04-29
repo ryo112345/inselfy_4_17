@@ -1,15 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
-import { type JobPostingBody, uploadTeamMemberPhoto } from "@/features/job-posting/api";
-import {
-  JOB_PREVIEW_CHANNEL,
-  type JobFormPreviewPayload,
-  type JobPreviewMessage,
-} from "@/features/job-posting/preview-channel";
 
 const ACCENT = "#3D8B6E";
 
@@ -50,48 +42,54 @@ const SMOKING_POLICIES = [
   { value: "敷地内全面禁煙", label: "敷地内全面禁煙" },
 ];
 
-const DEFAULTS = {
-  title: "",
-  status: "draft" as const,
-  jobCategory: "",
-  employmentType: "",
-  hiringCount: "",
-  description: "",
-  appealPoints: "",
-  challenges: "",
-  teamDescription: "",
-  skillsGained: "",
-  tags: [] as string[],
-  requiredQualifications: "",
-  preferredQualifications: "",
-  workLocation: "",
-  workLocationChangeScope: "",
-  jobDescriptionChangeScope: "",
-  contractType: "",
-  probationPeriod: "",
-  workHours: "",
-  breakTime: "",
-  holidays: "",
-  salaryMin: null as number | null,
-  salaryMax: null as number | null,
-  salaryDetail: "",
-  insurance: "",
-  smokingPolicy: "",
-  benefits: [] as string[],
-  remotePolicy: "",
-  selectionProcess: "",
+const MOCK_DATA = {
+  title: "バックエンドエンジニア｜Go / PostgreSQL / AWS でプロダクト基盤を設計",
+  status: "open" as const,
+  jobCategory: "エンジニア",
+  employmentType: "正社員",
+  hiringCount: "1〜2名",
+  description:
+    "inselfyの価値観マッチングエンジンを支えるAPI基盤の設計・開発をリードしていただきます。Bradley-Terryモデルによるスコアリング、pgvectorを活用したベクトル検索、リアルタイム推薦アルゴリズムなど、データと密接に結びついたバックエンド開発が中心です。",
+  appealPoints:
+    "独自の価値観診断アルゴリズムとマッチングエンジンの開発に携われます。少人数チームのため、技術選定からアーキテクチャ設計まで裁量を持って取り組める環境です。フルリモート・フルフレックスで、自律的に働ける文化を大切にしています。",
+  challenges:
+    "急成長フェーズのプロダクトで、スケーラビリティとパフォーマンスの両立が求められます。統計モデルの実装やベクトル検索の最適化など、一般的なCRUD開発とは異なる技術的チャレンジがあります。",
+  teamDescription:
+    "現在エンジニア5名のチームで、全員がフルスタック志向を持ちながらもバックエンドに強みを持つメンバーが揃っています。コードレビューを重視し、技術的な議論を日常的に行うカルチャーです。",
+  skillsGained:
+    "Go言語での大規模API設計スキル、統計モデルの実装経験、ベクトルデータベースの運用知識、AWSインフラの設計・構築スキルが身につきます。",
+  tags: ["Go", "PostgreSQL", "AWS", "pgvector", "API設計", "マッチングアルゴリズム"],
+  requiredQualifications:
+    "Go言語でのWebアプリケーション開発経験3年以上。RDBMSを用いたバックエンド開発の実務経験。",
+  preferredQualifications:
+    "PostgreSQLの運用・チューニング経験。AWSでのインフラ構築経験。統計学やデータサイエンスへの興味。OSS活動やテックブログでの発信経験。",
+  workLocation: "東京都渋谷区（フルリモート勤務可）",
+  workLocationChangeScope: "当面なし",
+  jobDescriptionChangeScope: "当面なし",
+  contractType: "無期",
+  probationPeriod: "入社後3ヶ月（条件変更なし）",
+  workHours: "フレックスタイム制（コアタイムなし）標準労働時間8時間",
+  breakTime: "60分",
+  holidays:
+    "完全週休2日制（土日祝）、年末年始休暇、有給休暇（入社半年後10日付与）、慶弔休暇、産前産後休暇、育児休暇",
+  salaryMin: 600,
+  salaryMax: 1000,
+  salaryDetail:
+    "月給50万円〜83万円（固定残業代45時間分を含む）。経験・能力を考慮の上決定。",
+  insurance: "健康保険、厚生年金、雇用保険、労災保険",
+  smokingPolicy: "屋内原則禁煙（喫煙専用室あり）",
+  benefits: ["リモートワーク手当月3万円", "書籍購入費全額補助", "カンファレンス参加費補助", "副業OK"],
+  remotePolicy: "フルリモート",
+  selectionProcess:
+    "書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定",
 };
 
-type CompanyProfile = {
-  id: string;
-  companyName: string;
-  industry: string;
-  location: string;
-  employeeCount: string;
-  logoUrl: string;
-  benefits: string[];
-  smokingPolicy: string;
-  galleryUrls: string[];
+const MOCK_COMPANY = {
+  companyName: "inselfy株式会社",
+  industry: "HRテック",
+  location: "東京都渋谷区",
+  employeeCount: "10〜30名",
+  logoUrl: "",
 };
 
 /* ── Inline editing helpers ── */
@@ -352,7 +350,7 @@ function EditableConditionGroup({
   icon,
 }: {
   title: string;
-  rows: { label: string; value: string; onChange: (v: string) => void; placeholder: string; type?: "text" | "textarea" | "select"; options?: { value: string; label: string }[]; readOnly?: boolean }[];
+  rows: { label: string; value: string; onChange: (v: string) => void; placeholder: string; type?: "text" | "textarea" | "select"; options?: { value: string; label: string }[] }[];
   icon: React.ReactNode;
 }) {
   return (
@@ -373,11 +371,7 @@ function EditableConditionGroup({
               {r.label}
             </dt>
             <dd>
-              {r.readOnly ? (
-                <span className="text-[15px] leading-relaxed text-gray-400">
-                  {r.value || r.placeholder}
-                </span>
-              ) : r.type === "select" && r.options ? (
+              {r.type === "select" && r.options ? (
                 <InlineSelect
                   value={r.value}
                   options={r.options}
@@ -410,225 +404,44 @@ function EditableConditionGroup({
 
 /* ── Main component ── */
 
-export default function JobEditPage() {
-  const { companyFetch } = useCompanyAuth();
-  const router = useRouter();
-  const params = useParams();
-  const jobId = params.jobId as string;
-  const [company, setCompany] = useState<CompanyProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+export default function TestJobEditPage() {
+  const company = MOCK_COMPANY;
 
-  const [title, setTitle] = useState(DEFAULTS.title);
-  const [status, setStatus] = useState<"open" | "draft">(DEFAULTS.status);
-  const [jobCategory, setJobCategory] = useState(DEFAULTS.jobCategory);
-  const [employmentType, setEmploymentType] = useState(DEFAULTS.employmentType);
-  const [hiringCount, setHiringCount] = useState(DEFAULTS.hiringCount);
-  const [description, setDescription] = useState(DEFAULTS.description);
-  const [appealPoints, setAppealPoints] = useState(DEFAULTS.appealPoints);
-  const [challenges, setChallenges] = useState(DEFAULTS.challenges);
-  const [teamDescription, setTeamDescription] = useState(DEFAULTS.teamDescription);
-  const [skillsGained, setSkillsGained] = useState(DEFAULTS.skillsGained);
-  const [tags, setTags] = useState(DEFAULTS.tags);
-  const [requiredQualifications, setRequiredQualifications] = useState(DEFAULTS.requiredQualifications);
-  const [preferredQualifications, setPreferredQualifications] = useState(DEFAULTS.preferredQualifications);
-  const [workLocation, setWorkLocation] = useState(DEFAULTS.workLocation);
-  const [workLocationChangeScope, setWorkLocationChangeScope] = useState(DEFAULTS.workLocationChangeScope);
-  const [jobDescriptionChangeScope, setJobDescriptionChangeScope] = useState(DEFAULTS.jobDescriptionChangeScope);
-  const [contractType, setContractType] = useState(DEFAULTS.contractType);
-  const [probationPeriod, setProbationPeriod] = useState(DEFAULTS.probationPeriod);
-  const [workHours, setWorkHours] = useState(DEFAULTS.workHours);
-  const [breakTime, setBreakTime] = useState(DEFAULTS.breakTime);
-  const [holidays, setHolidays] = useState(DEFAULTS.holidays);
-  const [salaryMin, setSalaryMin] = useState<number | null>(DEFAULTS.salaryMin);
-  const [salaryMax, setSalaryMax] = useState<number | null>(DEFAULTS.salaryMax);
-  const [salaryDetail, setSalaryDetail] = useState(DEFAULTS.salaryDetail);
-  const [insurance, setInsurance] = useState(DEFAULTS.insurance);
-  const [smokingPolicy, setSmokingPolicy] = useState(DEFAULTS.smokingPolicy);
-  const [benefits, setBenefits] = useState(DEFAULTS.benefits);
-  const [remotePolicy, setRemotePolicy] = useState(DEFAULTS.remotePolicy);
-  const [selectionProcess, setSelectionProcess] = useState(DEFAULTS.selectionProcess);
+  const [title, setTitle] = useState(MOCK_DATA.title);
+  const [status, setStatus] = useState<"open" | "draft">(MOCK_DATA.status);
+  const [jobCategory, setJobCategory] = useState(MOCK_DATA.jobCategory);
+  const [employmentType, setEmploymentType] = useState(MOCK_DATA.employmentType);
+  const [hiringCount, setHiringCount] = useState(MOCK_DATA.hiringCount);
+  const [description, setDescription] = useState(MOCK_DATA.description);
+  const [appealPoints, setAppealPoints] = useState(MOCK_DATA.appealPoints);
+  const [challenges, setChallenges] = useState(MOCK_DATA.challenges);
+  const [teamDescription, setTeamDescription] = useState(MOCK_DATA.teamDescription);
+  const [skillsGained, setSkillsGained] = useState(MOCK_DATA.skillsGained);
+  const [tags, setTags] = useState(MOCK_DATA.tags);
+  const [requiredQualifications, setRequiredQualifications] = useState(MOCK_DATA.requiredQualifications);
+  const [preferredQualifications, setPreferredQualifications] = useState(MOCK_DATA.preferredQualifications);
+  const [workLocation, setWorkLocation] = useState(MOCK_DATA.workLocation);
+  const [workLocationChangeScope, setWorkLocationChangeScope] = useState(MOCK_DATA.workLocationChangeScope);
+  const [jobDescriptionChangeScope, setJobDescriptionChangeScope] = useState(MOCK_DATA.jobDescriptionChangeScope);
+  const [contractType, setContractType] = useState(MOCK_DATA.contractType);
+  const [probationPeriod, setProbationPeriod] = useState(MOCK_DATA.probationPeriod);
+  const [workHours, setWorkHours] = useState(MOCK_DATA.workHours);
+  const [breakTime, setBreakTime] = useState(MOCK_DATA.breakTime);
+  const [holidays, setHolidays] = useState(MOCK_DATA.holidays);
+  const [salaryMin, setSalaryMin] = useState<number | null>(MOCK_DATA.salaryMin);
+  const [salaryMax, setSalaryMax] = useState<number | null>(MOCK_DATA.salaryMax);
+  const [salaryDetail, setSalaryDetail] = useState(MOCK_DATA.salaryDetail);
+  const [insurance, setInsurance] = useState(MOCK_DATA.insurance);
+  const [smokingPolicy, setSmokingPolicy] = useState(MOCK_DATA.smokingPolicy);
+  const [benefits, setBenefits] = useState(MOCK_DATA.benefits);
+  const [remotePolicy, setRemotePolicy] = useState(MOCK_DATA.remotePolicy);
+  const [selectionProcess, setSelectionProcess] = useState(MOCK_DATA.selectionProcess);
   const [highlightTitleRole, setHighlightTitleRole] = useState("仕事内容");
   const [highlightTitleAppeal, setHighlightTitleAppeal] = useState("この仕事の魅力");
   const [highlightTitleChallenge, setHighlightTitleChallenge] = useState("チャレンジ");
   const [highlightTitleGrowth, setHighlightTitleGrowth] = useState("身につくスキル");
-  const [teamMembers, setTeamMembers] = useState<{ name: string; photoUrl?: string }[]>([]);
-  const [memberInput, setMemberInput] = useState("");
   const [coverImage, setCoverImage] = useState<string | null>(null);
-  const [coverImageDataUrl, setCoverImageDataUrl] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
-
-  useEffect(() => {
-    companyFetch(`/api/company/jobs/${jobId}`).then(async (res) => {
-      if (res.ok) {
-        const d = await res.json();
-        setTitle(d.title ?? "");
-        setStatus(d.status === "open" ? "open" : "draft");
-        setJobCategory(d.jobCategory ?? "");
-        setEmploymentType(d.employmentType ?? "");
-        setHiringCount(d.hiringCount ?? "");
-        setDescription(d.description ?? "");
-        setAppealPoints(d.appealPoints ?? "");
-        setChallenges(d.challenges ?? "");
-        setTeamDescription(d.teamDescription ?? "");
-        setSkillsGained(d.skillsGained ?? "");
-        setTags(d.tags ?? []);
-        setRequiredQualifications(d.requiredQualifications ?? "");
-        setPreferredQualifications(d.preferredQualifications ?? "");
-        setWorkLocation(d.workLocation ?? "");
-        setWorkLocationChangeScope(d.workLocationChangeScope ?? "");
-        setJobDescriptionChangeScope(d.jobDescriptionChangeScope ?? "");
-        setContractType(d.contractType ?? "");
-        setProbationPeriod(d.probationPeriod ?? "");
-        setWorkHours(d.workHours ?? "");
-        setBreakTime(d.breakTime ?? "");
-        setHolidays(d.holidays ?? "");
-        setSalaryMin(d.salaryMin ?? null);
-        setSalaryMax(d.salaryMax ?? null);
-        setSalaryDetail(d.salaryDetail ?? "");
-        setInsurance(d.insurance ?? "");
-        setSmokingPolicy(d.smokingPolicy ?? "");
-        setBenefits(d.benefits ? d.benefits.split("\n").filter(Boolean) : []);
-        setRemotePolicy(d.remotePolicy ?? "");
-        setSelectionProcess(d.selectionProcess ?? "");
-        setHighlightTitleRole(d.highlightTitleRole || "仕事内容");
-        setHighlightTitleAppeal(d.highlightTitleAppeal || "この仕事の魅力");
-        setHighlightTitleChallenge(d.highlightTitleChallenge || "チャレンジ");
-        setHighlightTitleGrowth(d.highlightTitleGrowth || "身につくスキル");
-        setTeamMembers(d.teamMembers ?? []);
-        if (d.coverImageUrl) setCoverImage(d.coverImageUrl);
-      }
-    }).finally(() => setIsLoading(false));
-  }, [companyFetch, jobId]);
-
-  useEffect(() => {
-    companyFetch("/api/company/profile").then(async (res) => {
-      if (res.ok) {
-        const data = await res.json();
-        if (!Array.isArray(data.benefits)) data.benefits = [];
-        setCompany({
-          id: data.id,
-          companyName: data.companyName,
-          industry: data.industry,
-          location: data.location,
-          employeeCount: data.employeeCount,
-          logoUrl: data.logoUrl,
-          benefits: data.benefits ?? [],
-          smokingPolicy: data.smokingPolicy ?? "",
-          galleryUrls: data.galleryUrls ?? [],
-        });
-      }
-    });
-  }, [companyFetch]);
-
-  // BroadcastChannel for preview tab sync
-  const channelRef = useRef<BroadcastChannel | null>(null);
-  const previewPayloadRef = useRef<JobFormPreviewPayload | null>(null);
-
-  useEffect(() => {
-    const ch = new BroadcastChannel(JOB_PREVIEW_CHANNEL);
-    channelRef.current = ch;
-    ch.onmessage = (e) => {
-      const msg = e.data as JobPreviewMessage;
-      if (msg?.type === "request" && previewPayloadRef.current) {
-        const reply: JobPreviewMessage = {
-          type: "data",
-          payload: previewPayloadRef.current,
-        };
-        ch.postMessage(reply);
-      }
-    };
-    return () => { ch.close(); };
-  }, []);
-
-  const previewPayload = useMemo<JobFormPreviewPayload>(
-    () => ({
-      title, jobCategory, employmentType, hiringCount, description,
-      appealPoints, challenges, teamDescription, teamMembers, skillsGained, tags,
-      requiredQualifications, preferredQualifications, workLocation,
-      workLocationChangeScope, jobDescriptionChangeScope, contractType,
-      probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
-      salaryDetail, insurance, remotePolicy,
-      benefits: benefits.join("\n"), smokingPolicy,
-      selectionProcess,
-      highlightTitleRole, highlightTitleAppeal,
-      highlightTitleChallenge, highlightTitleGrowth,
-      coverImageDataUrl,
-    }),
-    [
-      title, jobCategory, employmentType, hiringCount, description,
-      appealPoints, challenges, teamDescription, teamMembers, skillsGained, tags,
-      requiredQualifications, preferredQualifications, workLocation,
-      workLocationChangeScope, jobDescriptionChangeScope, contractType,
-      probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
-      salaryDetail, insurance, remotePolicy, benefits, smokingPolicy,
-      selectionProcess, highlightTitleRole, highlightTitleAppeal,
-      highlightTitleChallenge, highlightTitleGrowth, coverImageDataUrl,
-    ],
-  );
-
-  useEffect(() => {
-    previewPayloadRef.current = previewPayload;
-    const msg: JobPreviewMessage = { type: "data", payload: previewPayload };
-    channelRef.current?.postMessage(msg);
-  }, [previewPayload]);
-
-  const handleSave = useCallback(async () => {
-    setSaving(true);
-    try {
-      const body: JobPostingBody = {
-        title, description, employmentType, location: null, status,
-        jobCategory, hiringCount, appealPoints, challenges, teamDescription,
-        teamMembers,
-        skillsGained, tags, requiredQualifications, preferredQualifications,
-        workLocation, workLocationChangeScope, jobDescriptionChangeScope,
-        contractType, probationPeriod, workHours, breakTime, holidays,
-        salaryMin, salaryMax, salaryDetail, insurance, remotePolicy,
-        benefits: benefits.join("\n"), smokingPolicy, selectionProcess,
-        coverImageUrl: coverImage ?? "",
-        highlightTitleRole, highlightTitleAppeal, highlightTitleChallenge, highlightTitleGrowth,
-      };
-      const res = await companyFetch(`/api/company/jobs/${jobId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message ?? "保存に失敗しました");
-      }
-    } finally {
-      setSaving(false);
-    }
-  }, [
-    companyFetch, jobId, title, description, employmentType, status,
-    jobCategory, hiringCount, appealPoints, challenges, teamDescription, teamMembers,
-    skillsGained, tags, requiredQualifications, preferredQualifications,
-    workLocation, workLocationChangeScope, jobDescriptionChangeScope,
-    contractType, probationPeriod, workHours, breakTime, holidays,
-    salaryMin, salaryMax, salaryDetail, insurance, remotePolicy,
-    benefits, smokingPolicy, selectionProcess, coverImage,
-    highlightTitleRole, highlightTitleAppeal, highlightTitleChallenge, highlightTitleGrowth,
-  ]);
-
-  const handleDelete = useCallback(async () => {
-    if (!confirm("この求人を削除しますか？この操作は元に戻せません。")) return;
-    setDeleting(true);
-    try {
-      const res = await companyFetch(`/api/company/jobs/${jobId}`, { method: "DELETE" });
-      if (res.ok) {
-        router.push("/company/jobs");
-      } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message ?? "削除に失敗しました");
-      }
-    } finally {
-      setDeleting(false);
-    }
-  }, [companyFetch, jobId, router]);
-
-  const metaBadges = [employmentType, jobCategory, remotePolicy].filter(Boolean);
 
   const selectionSteps = selectionProcess
     ? selectionProcess.split("→").map((s) => s.trim()).filter(Boolean)
@@ -640,14 +453,6 @@ export default function JobEditPage() {
       ? "bg-emerald-50 text-emerald-700 border-emerald-200"
       : "bg-amber-50 text-amber-700 border-amber-200";
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f7f5]">
-        <div className="text-sm text-gray-500">読み込み中...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#f6f7f5]">
       {/* Edit toolbar */}
@@ -655,7 +460,7 @@ export default function JobEditPage() {
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
-              href="/company/jobs"
+              href="/test/jobs"
               className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -664,32 +469,10 @@ export default function JobEditPage() {
               求人一覧
             </Link>
             <span className="text-sm text-blue-800 font-medium">
-              編集中 — 見た目そのままで編集できます
+              プロトタイプ — 編集中（データは保存されません）
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={deleting}
-              className="inline-flex items-center gap-1.5 border border-red-200 bg-white text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-              </svg>
-              {deleting ? "削除中..." : "削除"}
-            </button>
-<button
-              type="button"
-              onClick={() => window.open("/company/jobs/preview", "_blank")}
-              className="inline-flex items-center gap-1.5 border border-gray-300 bg-white text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors cursor-pointer"
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              プレビュー
-            </button>
             <button
               type="button"
               onClick={() => setStatus(status === "open" ? "draft" : "open")}
@@ -698,12 +481,8 @@ export default function JobEditPage() {
               <span className={`h-2 w-2 rounded-full ${status === "open" ? "bg-emerald-500" : "bg-amber-500"}`} />
               {statusLabel}
             </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {saving ? "保存中..." : "保存する"}
+            <button className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors cursor-pointer">
+              保存する
             </button>
           </div>
         </div>
@@ -718,7 +497,7 @@ export default function JobEditPage() {
               <img src={coverImage} alt="" className="w-full aspect-[16/9] object-cover" />
               <button
                 type="button"
-                onClick={() => { setCoverImage(null); setCoverImageDataUrl(null); }}
+                onClick={() => setCoverImage(null)}
                 className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -736,55 +515,34 @@ export default function JobEditPage() {
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) {
-                    setCoverImage(URL.createObjectURL(file));
-                    const reader = new FileReader();
-                    reader.onload = () => setCoverImageDataUrl(reader.result as string);
-                    reader.readAsDataURL(file);
-                  }
+                  if (file) setCoverImage(URL.createObjectURL(file));
                 }}
               />
             </label>
           )}
 
           <div className="px-6 pb-6 pt-6 sm:px-8">
-            {company && (
-              <div className="inline-flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
-                  {company.logoUrl ? (
-                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-sm font-bold" style={{ color: ACCENT }}>
-                      {company.companyName.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <p className="text-base font-medium text-gray-900">{company.companyName}</p>
-                  <p className="text-sm text-gray-500">
-                    {company.industry} / {company.location}
-                  </p>
-                </div>
+            <div className="inline-flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
+                <span className="text-sm font-bold" style={{ color: ACCENT }}>
+                  {company.companyName.charAt(0)}
+                </span>
               </div>
-            )}
+              <div>
+                <p className="text-base font-medium text-gray-900">{company.companyName}</p>
+                <p className="text-sm text-gray-500">
+                  {company.industry} / {company.location}
+                </p>
+              </div>
+            </div>
 
             {/* Editable title */}
-            <textarea
+            <input
+              type="text"
               value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                e.target.style.height = "auto";
-                e.target.style.height = `${e.target.scrollHeight}px`;
-              }}
-              ref={(el) => {
-                if (el) {
-                  el.style.height = "auto";
-                  el.style.height = `${el.scrollHeight}px`;
-                }
-              }}
-              rows={1}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="求人タイトルを入力..."
-              className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-[#3D8B6E] transition-colors pb-1 resize-none overflow-hidden"
+              className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-[#3D8B6E] transition-colors pb-1"
             />
 
             {/* Meta badges — editable selects */}
@@ -1005,120 +763,13 @@ export default function JobEditPage() {
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="px-6 py-6 sm:px-7 sm:py-7">
             <h2 className="text-lg font-bold text-gray-900">チーム紹介</h2>
-            <div className="mt-5 flex items-start gap-6">
-              <div className="flex flex-col items-center gap-3 shrink-0">
-                <div className="flex -space-x-2">
-                  {(teamMembers.length > 0 ? teamMembers : [{ name: "" }]).map((m, i) => {
-                    const colors = [
-                      { bg: "#EAF4F0", fg: "#3D8B6E" },
-                      { bg: "#EEF2FB", fg: "#3B6FCC" },
-                      { bg: "#FEF7E6", fg: "#B07914" },
-                      { bg: "#F3EEFB", fg: "#7647C5" },
-                      { bg: "#FEE", fg: "#C54747" },
-                    ];
-                    const color = colors[i % colors.length];
-                    const isReal = teamMembers.length > 0;
-                    return (
-                      <label key={i} className={`relative ${isReal ? "cursor-pointer group" : ""}`}>
-                        <div
-                          className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white text-sm font-bold overflow-hidden"
-                          style={{ backgroundColor: color.bg, color: color.fg }}
-                        >
-                          {m.photoUrl ? (
-                            <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
-                          ) : (
-                            m.name ? m.name.charAt(0) : "?"
-                          )}
-                        </div>
-                        {isReal && !m.photoUrl && (
-                          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 group-hover:text-blue-500 group-hover:border-blue-300 transition-colors">
-                            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14" /></svg>
-                          </span>
-                        )}
-                        {isReal && m.photoUrl && (
-                          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                            </svg>
-                          </span>
-                        )}
-                        {isReal && (
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              try {
-                                const url = await uploadTeamMemberPhoto(file);
-                                setTeamMembers((prev) =>
-                                  prev.map((member, idx) =>
-                                    idx === i ? { ...member, photoUrl: url } : member,
-                                  ),
-                                );
-                              } catch {
-                                // upload failed
-                              }
-                              e.target.value = "";
-                            }}
-                          />
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-                <span className="text-sm text-gray-500 font-medium">
-                  {teamMembers.length > 0 ? `${teamMembers.length}名のチーム` : "メンバー未登録"}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-gray-900 mb-2">チーム紹介</h3>
-                <InlineTextarea
-                  value={teamDescription}
-                  onChange={setTeamDescription}
-                  placeholder="チームの雰囲気やメンバー構成を記入..."
-                  rows={3}
-                  className="text-[15px] leading-relaxed text-gray-700"
-                />
-              </div>
-            </div>
-            <div className="mt-4 border-t border-gray-100 pt-4">
-              <h4 className="text-sm font-medium text-gray-500 mb-3">メンバー</h4>
-              <div className="flex flex-wrap gap-2 items-center">
-                {teamMembers.map((m, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-700"
-                  >
-                    {m.name}
-                    <button
-                      type="button"
-                      onClick={() => setTeamMembers(teamMembers.filter((_, idx) => idx !== i))}
-                      className="hover:text-red-500 cursor-pointer ml-0.5"
-                    >
-                      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </span>
-                ))}
-                <input
-                  type="text"
-                  value={memberInput}
-                  onChange={(e) => setMemberInput(e.target.value)}
-                  placeholder="+ メンバー追加"
-                  className="text-sm outline-none bg-transparent text-gray-400 placeholder:text-gray-300 min-w-[100px] py-1"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.nativeEvent.isComposing && memberInput.trim()) {
-                      e.preventDefault();
-                      setTeamMembers([...teamMembers, { name: memberInput.trim() }]);
-                      setMemberInput("");
-                    }
-                  }}
-                />
-              </div>
-            </div>
+            <InlineTextarea
+              value={teamDescription}
+              onChange={setTeamDescription}
+              placeholder="チームの雰囲気やメンバー構成を記入..."
+              rows={4}
+              className="mt-3 text-base leading-relaxed text-gray-700"
+            />
           </div>
         </section>
 
@@ -1131,7 +782,7 @@ export default function JobEditPage() {
               icon={<ClockIcon />}
               rows={[
                 { label: "勤務地", value: workLocation, onChange: setWorkLocation, placeholder: "例: 東京都渋谷区" },
-                { label: "勤務時間", value: workHours, onChange: setWorkHours, placeholder: "例: 9:00〜18:00" },
+                { label: "勤務時間", value: workHours, onChange: setWorkHours, placeholder: "例: フレックスタイム制" },
                 { label: "休憩時間", value: breakTime, onChange: setBreakTime, placeholder: "例: 60分" },
                 { label: "休日・休暇", value: holidays, onChange: setHolidays, placeholder: "休日・休暇を入力...", type: "textarea" },
               ]}
@@ -1146,8 +797,7 @@ export default function JobEditPage() {
                     ? `${salaryMin ?? "?"}万円 〜 ${salaryMax ?? "?"}万円`
                     : "",
                   onChange: () => {},
-                  placeholder: "上部の想定年収欄で入力",
-                  readOnly: true,
+                  placeholder: "ヒーロー欄で入力済み",
                 },
                 { label: "給与詳細", value: salaryDetail, onChange: setSalaryDetail, placeholder: "給与の詳細を入力...", type: "textarea" },
                 { label: "社会保険", value: insurance, onChange: setInsurance, placeholder: "例: 健康保険、厚生年金..." },
@@ -1260,30 +910,24 @@ export default function JobEditPage() {
         </section>
 
         {/* Company */}
-        {company && (
-          <section className={`overflow-hidden ${cardClass}`}>
-            <div className="px-6 py-6 sm:px-7">
-              <SectionTitle icon={<BuildingIcon />}>企業情報</SectionTitle>
-              <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4">
-                <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
-                  {company.logoUrl ? (
-                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-lg font-bold" style={{ color: ACCENT }}>
-                      {company.companyName.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-lg font-bold text-gray-900">{company.companyName}</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {company.industry} / {company.location} / {company.employeeCount}
-                  </p>
-                </div>
+        <section className={`overflow-hidden ${cardClass}`}>
+          <div className="px-6 py-6 sm:px-7">
+            <SectionTitle icon={<BuildingIcon />}>企業情報</SectionTitle>
+            <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4">
+              <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
+                <span className="text-lg font-bold" style={{ color: ACCENT }}>
+                  {company.companyName.charAt(0)}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-lg font-bold text-gray-900">{company.companyName}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {company.industry} / {company.location} / {company.employeeCount}
+                </p>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
       </div>
     </div>
   );

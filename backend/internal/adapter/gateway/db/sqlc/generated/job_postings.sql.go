@@ -12,17 +12,69 @@ import (
 )
 
 const createJobPosting = `-- name: CreateJobPosting :one
-INSERT INTO job_postings (company_id, title, description, employment_type, location)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, company_id, title, description, employment_type, location, is_active, created_at, updated_at
+INSERT INTO job_postings (
+    company_id, title, description, employment_type, location, status,
+    job_category, hiring_count, appeal_points, challenges, team_description,
+    team_members,
+    skills_gained, tags, required_qualifications, preferred_qualifications,
+    work_location, work_location_change_scope, job_description_change_scope,
+    contract_type, probation_period, work_hours, break_time, holidays,
+    salary_min, salary_max, salary_detail, insurance, remote_policy,
+    benefits, smoking_policy, selection_process, cover_image_url,
+    highlight_title_role, highlight_title_appeal, highlight_title_challenge, highlight_title_growth
+)
+VALUES (
+    $1, $2, $3, $4, $5, $6,
+    $7, $8, $9, $10, $11,
+    $12,
+    $13, $14, $15, $16,
+    $17, $18, $19,
+    $20, $21, $22, $23, $24,
+    $25, $26, $27, $28, $29,
+    $30, $31, $32, $33,
+    $34, $35, $36, $37
+)
+RETURNING id, company_id, title, description, employment_type, location, is_active, created_at, updated_at, status, job_category, hiring_count, appeal_points, challenges, team_description, team_members, skills_gained, tags, required_qualifications, preferred_qualifications, work_location, work_location_change_scope, job_description_change_scope, contract_type, probation_period, work_hours, break_time, holidays, salary_min, salary_max, salary_detail, insurance, remote_policy, benefits, smoking_policy, selection_process, cover_image_url, highlight_title_role, highlight_title_appeal, highlight_title_challenge, highlight_title_growth
 `
 
 type CreateJobPostingParams struct {
-	CompanyID      pgtype.UUID `json:"company_id"`
-	Title          string      `json:"title"`
-	Description    string      `json:"description"`
-	EmploymentType string      `json:"employment_type"`
-	Location       pgtype.Text `json:"location"`
+	CompanyID                 pgtype.UUID `json:"company_id"`
+	Title                     string      `json:"title"`
+	Description               string      `json:"description"`
+	EmploymentType            string      `json:"employment_type"`
+	Location                  pgtype.Text `json:"location"`
+	Status                    string      `json:"status"`
+	JobCategory               string      `json:"job_category"`
+	HiringCount               string      `json:"hiring_count"`
+	AppealPoints              string      `json:"appeal_points"`
+	Challenges                string      `json:"challenges"`
+	TeamDescription           string      `json:"team_description"`
+	TeamMembers               []byte      `json:"team_members"`
+	SkillsGained              string      `json:"skills_gained"`
+	Tags                      []string    `json:"tags"`
+	RequiredQualifications    string      `json:"required_qualifications"`
+	PreferredQualifications   string      `json:"preferred_qualifications"`
+	WorkLocation              string      `json:"work_location"`
+	WorkLocationChangeScope   string      `json:"work_location_change_scope"`
+	JobDescriptionChangeScope string      `json:"job_description_change_scope"`
+	ContractType              string      `json:"contract_type"`
+	ProbationPeriod           string      `json:"probation_period"`
+	WorkHours                 string      `json:"work_hours"`
+	BreakTime                 string      `json:"break_time"`
+	Holidays                  string      `json:"holidays"`
+	SalaryMin                 pgtype.Int4 `json:"salary_min"`
+	SalaryMax                 pgtype.Int4 `json:"salary_max"`
+	SalaryDetail              string      `json:"salary_detail"`
+	Insurance                 string      `json:"insurance"`
+	RemotePolicy              string      `json:"remote_policy"`
+	Benefits                  string      `json:"benefits"`
+	SmokingPolicy             string      `json:"smoking_policy"`
+	SelectionProcess          string      `json:"selection_process"`
+	CoverImageUrl             string      `json:"cover_image_url"`
+	HighlightTitleRole        string      `json:"highlight_title_role"`
+	HighlightTitleAppeal      string      `json:"highlight_title_appeal"`
+	HighlightTitleChallenge   string      `json:"highlight_title_challenge"`
+	HighlightTitleGrowth      string      `json:"highlight_title_growth"`
 }
 
 func (q *Queries) CreateJobPosting(ctx context.Context, arg *CreateJobPostingParams) (*JobPosting, error) {
@@ -32,6 +84,38 @@ func (q *Queries) CreateJobPosting(ctx context.Context, arg *CreateJobPostingPar
 		arg.Description,
 		arg.EmploymentType,
 		arg.Location,
+		arg.Status,
+		arg.JobCategory,
+		arg.HiringCount,
+		arg.AppealPoints,
+		arg.Challenges,
+		arg.TeamDescription,
+		arg.TeamMembers,
+		arg.SkillsGained,
+		arg.Tags,
+		arg.RequiredQualifications,
+		arg.PreferredQualifications,
+		arg.WorkLocation,
+		arg.WorkLocationChangeScope,
+		arg.JobDescriptionChangeScope,
+		arg.ContractType,
+		arg.ProbationPeriod,
+		arg.WorkHours,
+		arg.BreakTime,
+		arg.Holidays,
+		arg.SalaryMin,
+		arg.SalaryMax,
+		arg.SalaryDetail,
+		arg.Insurance,
+		arg.RemotePolicy,
+		arg.Benefits,
+		arg.SmokingPolicy,
+		arg.SelectionProcess,
+		arg.CoverImageUrl,
+		arg.HighlightTitleRole,
+		arg.HighlightTitleAppeal,
+		arg.HighlightTitleChallenge,
+		arg.HighlightTitleGrowth,
 	)
 	var i JobPosting
 	err := row.Scan(
@@ -44,6 +128,38 @@ func (q *Queries) CreateJobPosting(ctx context.Context, arg *CreateJobPostingPar
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Status,
+		&i.JobCategory,
+		&i.HiringCount,
+		&i.AppealPoints,
+		&i.Challenges,
+		&i.TeamDescription,
+		&i.TeamMembers,
+		&i.SkillsGained,
+		&i.Tags,
+		&i.RequiredQualifications,
+		&i.PreferredQualifications,
+		&i.WorkLocation,
+		&i.WorkLocationChangeScope,
+		&i.JobDescriptionChangeScope,
+		&i.ContractType,
+		&i.ProbationPeriod,
+		&i.WorkHours,
+		&i.BreakTime,
+		&i.Holidays,
+		&i.SalaryMin,
+		&i.SalaryMax,
+		&i.SalaryDetail,
+		&i.Insurance,
+		&i.RemotePolicy,
+		&i.Benefits,
+		&i.SmokingPolicy,
+		&i.SelectionProcess,
+		&i.CoverImageUrl,
+		&i.HighlightTitleRole,
+		&i.HighlightTitleAppeal,
+		&i.HighlightTitleChallenge,
+		&i.HighlightTitleGrowth,
 	)
 	return &i, err
 }
@@ -58,7 +174,7 @@ func (q *Queries) DeleteJobPosting(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getJobPostingByID = `-- name: GetJobPostingByID :one
-SELECT id, company_id, title, description, employment_type, location, is_active, created_at, updated_at FROM job_postings WHERE id = $1
+SELECT id, company_id, title, description, employment_type, location, is_active, created_at, updated_at, status, job_category, hiring_count, appeal_points, challenges, team_description, team_members, skills_gained, tags, required_qualifications, preferred_qualifications, work_location, work_location_change_scope, job_description_change_scope, contract_type, probation_period, work_hours, break_time, holidays, salary_min, salary_max, salary_detail, insurance, remote_policy, benefits, smoking_policy, selection_process, cover_image_url, highlight_title_role, highlight_title_appeal, highlight_title_challenge, highlight_title_growth FROM job_postings WHERE id = $1
 `
 
 func (q *Queries) GetJobPostingByID(ctx context.Context, id pgtype.UUID) (*JobPosting, error) {
@@ -74,12 +190,97 @@ func (q *Queries) GetJobPostingByID(ctx context.Context, id pgtype.UUID) (*JobPo
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Status,
+		&i.JobCategory,
+		&i.HiringCount,
+		&i.AppealPoints,
+		&i.Challenges,
+		&i.TeamDescription,
+		&i.TeamMembers,
+		&i.SkillsGained,
+		&i.Tags,
+		&i.RequiredQualifications,
+		&i.PreferredQualifications,
+		&i.WorkLocation,
+		&i.WorkLocationChangeScope,
+		&i.JobDescriptionChangeScope,
+		&i.ContractType,
+		&i.ProbationPeriod,
+		&i.WorkHours,
+		&i.BreakTime,
+		&i.Holidays,
+		&i.SalaryMin,
+		&i.SalaryMax,
+		&i.SalaryDetail,
+		&i.Insurance,
+		&i.RemotePolicy,
+		&i.Benefits,
+		&i.SmokingPolicy,
+		&i.SelectionProcess,
+		&i.CoverImageUrl,
+		&i.HighlightTitleRole,
+		&i.HighlightTitleAppeal,
+		&i.HighlightTitleChallenge,
+		&i.HighlightTitleGrowth,
+	)
+	return &i, err
+}
+
+const getPublicJobPostingByID = `-- name: GetPublicJobPostingByID :one
+SELECT id, company_id, title, description, employment_type, location, is_active, created_at, updated_at, status, job_category, hiring_count, appeal_points, challenges, team_description, team_members, skills_gained, tags, required_qualifications, preferred_qualifications, work_location, work_location_change_scope, job_description_change_scope, contract_type, probation_period, work_hours, break_time, holidays, salary_min, salary_max, salary_detail, insurance, remote_policy, benefits, smoking_policy, selection_process, cover_image_url, highlight_title_role, highlight_title_appeal, highlight_title_challenge, highlight_title_growth FROM job_postings WHERE id = $1 AND status = 'open'
+`
+
+func (q *Queries) GetPublicJobPostingByID(ctx context.Context, id pgtype.UUID) (*JobPosting, error) {
+	row := q.db.QueryRow(ctx, getPublicJobPostingByID, id)
+	var i JobPosting
+	err := row.Scan(
+		&i.ID,
+		&i.CompanyID,
+		&i.Title,
+		&i.Description,
+		&i.EmploymentType,
+		&i.Location,
+		&i.IsActive,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Status,
+		&i.JobCategory,
+		&i.HiringCount,
+		&i.AppealPoints,
+		&i.Challenges,
+		&i.TeamDescription,
+		&i.TeamMembers,
+		&i.SkillsGained,
+		&i.Tags,
+		&i.RequiredQualifications,
+		&i.PreferredQualifications,
+		&i.WorkLocation,
+		&i.WorkLocationChangeScope,
+		&i.JobDescriptionChangeScope,
+		&i.ContractType,
+		&i.ProbationPeriod,
+		&i.WorkHours,
+		&i.BreakTime,
+		&i.Holidays,
+		&i.SalaryMin,
+		&i.SalaryMax,
+		&i.SalaryDetail,
+		&i.Insurance,
+		&i.RemotePolicy,
+		&i.Benefits,
+		&i.SmokingPolicy,
+		&i.SelectionProcess,
+		&i.CoverImageUrl,
+		&i.HighlightTitleRole,
+		&i.HighlightTitleAppeal,
+		&i.HighlightTitleChallenge,
+		&i.HighlightTitleGrowth,
 	)
 	return &i, err
 }
 
 const listJobPostingsByCompanyID = `-- name: ListJobPostingsByCompanyID :many
-SELECT id, company_id, title, description, employment_type, location, is_active, created_at, updated_at FROM job_postings
+SELECT id, company_id, title, description, employment_type, location, is_active, created_at, updated_at, status, job_category, hiring_count, appeal_points, challenges, team_description, team_members, skills_gained, tags, required_qualifications, preferred_qualifications, work_location, work_location_change_scope, job_description_change_scope, contract_type, probation_period, work_hours, break_time, holidays, salary_min, salary_max, salary_detail, insurance, remote_policy, benefits, smoking_policy, selection_process, cover_image_url, highlight_title_role, highlight_title_appeal, highlight_title_challenge, highlight_title_growth FROM job_postings
 WHERE company_id = $1
 ORDER BY created_at DESC
 `
@@ -103,6 +304,38 @@ func (q *Queries) ListJobPostingsByCompanyID(ctx context.Context, companyID pgty
 			&i.IsActive,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Status,
+			&i.JobCategory,
+			&i.HiringCount,
+			&i.AppealPoints,
+			&i.Challenges,
+			&i.TeamDescription,
+			&i.TeamMembers,
+			&i.SkillsGained,
+			&i.Tags,
+			&i.RequiredQualifications,
+			&i.PreferredQualifications,
+			&i.WorkLocation,
+			&i.WorkLocationChangeScope,
+			&i.JobDescriptionChangeScope,
+			&i.ContractType,
+			&i.ProbationPeriod,
+			&i.WorkHours,
+			&i.BreakTime,
+			&i.Holidays,
+			&i.SalaryMin,
+			&i.SalaryMax,
+			&i.SalaryDetail,
+			&i.Insurance,
+			&i.RemotePolicy,
+			&i.Benefits,
+			&i.SmokingPolicy,
+			&i.SelectionProcess,
+			&i.CoverImageUrl,
+			&i.HighlightTitleRole,
+			&i.HighlightTitleAppeal,
+			&i.HighlightTitleChallenge,
+			&i.HighlightTitleGrowth,
 		); err != nil {
 			return nil, err
 		}
@@ -121,18 +354,82 @@ SET title = $2,
     employment_type = $4,
     location = $5,
     is_active = $6,
+    status = $7,
+    job_category = $8,
+    hiring_count = $9,
+    appeal_points = $10,
+    challenges = $11,
+    team_description = $12,
+    team_members = $13,
+    skills_gained = $14,
+    tags = $15,
+    required_qualifications = $16,
+    preferred_qualifications = $17,
+    work_location = $18,
+    work_location_change_scope = $19,
+    job_description_change_scope = $20,
+    contract_type = $21,
+    probation_period = $22,
+    work_hours = $23,
+    break_time = $24,
+    holidays = $25,
+    salary_min = $26,
+    salary_max = $27,
+    salary_detail = $28,
+    insurance = $29,
+    remote_policy = $30,
+    benefits = $31,
+    smoking_policy = $32,
+    selection_process = $33,
+    cover_image_url = $34,
+    highlight_title_role = $35,
+    highlight_title_appeal = $36,
+    highlight_title_challenge = $37,
+    highlight_title_growth = $38,
     updated_at = NOW()
 WHERE id = $1
-RETURNING id, company_id, title, description, employment_type, location, is_active, created_at, updated_at
+RETURNING id, company_id, title, description, employment_type, location, is_active, created_at, updated_at, status, job_category, hiring_count, appeal_points, challenges, team_description, team_members, skills_gained, tags, required_qualifications, preferred_qualifications, work_location, work_location_change_scope, job_description_change_scope, contract_type, probation_period, work_hours, break_time, holidays, salary_min, salary_max, salary_detail, insurance, remote_policy, benefits, smoking_policy, selection_process, cover_image_url, highlight_title_role, highlight_title_appeal, highlight_title_challenge, highlight_title_growth
 `
 
 type UpdateJobPostingParams struct {
-	ID             pgtype.UUID `json:"id"`
-	Title          string      `json:"title"`
-	Description    string      `json:"description"`
-	EmploymentType string      `json:"employment_type"`
-	Location       pgtype.Text `json:"location"`
-	IsActive       bool        `json:"is_active"`
+	ID                        pgtype.UUID `json:"id"`
+	Title                     string      `json:"title"`
+	Description               string      `json:"description"`
+	EmploymentType            string      `json:"employment_type"`
+	Location                  pgtype.Text `json:"location"`
+	IsActive                  bool        `json:"is_active"`
+	Status                    string      `json:"status"`
+	JobCategory               string      `json:"job_category"`
+	HiringCount               string      `json:"hiring_count"`
+	AppealPoints              string      `json:"appeal_points"`
+	Challenges                string      `json:"challenges"`
+	TeamDescription           string      `json:"team_description"`
+	TeamMembers               []byte      `json:"team_members"`
+	SkillsGained              string      `json:"skills_gained"`
+	Tags                      []string    `json:"tags"`
+	RequiredQualifications    string      `json:"required_qualifications"`
+	PreferredQualifications   string      `json:"preferred_qualifications"`
+	WorkLocation              string      `json:"work_location"`
+	WorkLocationChangeScope   string      `json:"work_location_change_scope"`
+	JobDescriptionChangeScope string      `json:"job_description_change_scope"`
+	ContractType              string      `json:"contract_type"`
+	ProbationPeriod           string      `json:"probation_period"`
+	WorkHours                 string      `json:"work_hours"`
+	BreakTime                 string      `json:"break_time"`
+	Holidays                  string      `json:"holidays"`
+	SalaryMin                 pgtype.Int4 `json:"salary_min"`
+	SalaryMax                 pgtype.Int4 `json:"salary_max"`
+	SalaryDetail              string      `json:"salary_detail"`
+	Insurance                 string      `json:"insurance"`
+	RemotePolicy              string      `json:"remote_policy"`
+	Benefits                  string      `json:"benefits"`
+	SmokingPolicy             string      `json:"smoking_policy"`
+	SelectionProcess          string      `json:"selection_process"`
+	CoverImageUrl             string      `json:"cover_image_url"`
+	HighlightTitleRole        string      `json:"highlight_title_role"`
+	HighlightTitleAppeal      string      `json:"highlight_title_appeal"`
+	HighlightTitleChallenge   string      `json:"highlight_title_challenge"`
+	HighlightTitleGrowth      string      `json:"highlight_title_growth"`
 }
 
 func (q *Queries) UpdateJobPosting(ctx context.Context, arg *UpdateJobPostingParams) (*JobPosting, error) {
@@ -143,6 +440,38 @@ func (q *Queries) UpdateJobPosting(ctx context.Context, arg *UpdateJobPostingPar
 		arg.EmploymentType,
 		arg.Location,
 		arg.IsActive,
+		arg.Status,
+		arg.JobCategory,
+		arg.HiringCount,
+		arg.AppealPoints,
+		arg.Challenges,
+		arg.TeamDescription,
+		arg.TeamMembers,
+		arg.SkillsGained,
+		arg.Tags,
+		arg.RequiredQualifications,
+		arg.PreferredQualifications,
+		arg.WorkLocation,
+		arg.WorkLocationChangeScope,
+		arg.JobDescriptionChangeScope,
+		arg.ContractType,
+		arg.ProbationPeriod,
+		arg.WorkHours,
+		arg.BreakTime,
+		arg.Holidays,
+		arg.SalaryMin,
+		arg.SalaryMax,
+		arg.SalaryDetail,
+		arg.Insurance,
+		arg.RemotePolicy,
+		arg.Benefits,
+		arg.SmokingPolicy,
+		arg.SelectionProcess,
+		arg.CoverImageUrl,
+		arg.HighlightTitleRole,
+		arg.HighlightTitleAppeal,
+		arg.HighlightTitleChallenge,
+		arg.HighlightTitleGrowth,
 	)
 	var i JobPosting
 	err := row.Scan(
@@ -155,6 +484,38 @@ func (q *Queries) UpdateJobPosting(ctx context.Context, arg *UpdateJobPostingPar
 		&i.IsActive,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Status,
+		&i.JobCategory,
+		&i.HiringCount,
+		&i.AppealPoints,
+		&i.Challenges,
+		&i.TeamDescription,
+		&i.TeamMembers,
+		&i.SkillsGained,
+		&i.Tags,
+		&i.RequiredQualifications,
+		&i.PreferredQualifications,
+		&i.WorkLocation,
+		&i.WorkLocationChangeScope,
+		&i.JobDescriptionChangeScope,
+		&i.ContractType,
+		&i.ProbationPeriod,
+		&i.WorkHours,
+		&i.BreakTime,
+		&i.Holidays,
+		&i.SalaryMin,
+		&i.SalaryMax,
+		&i.SalaryDetail,
+		&i.Insurance,
+		&i.RemotePolicy,
+		&i.Benefits,
+		&i.SmokingPolicy,
+		&i.SelectionProcess,
+		&i.CoverImageUrl,
+		&i.HighlightTitleRole,
+		&i.HighlightTitleAppeal,
+		&i.HighlightTitleChallenge,
+		&i.HighlightTitleGrowth,
 	)
 	return &i, err
 }
