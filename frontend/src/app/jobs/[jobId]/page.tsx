@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Gallery } from "../../companies/[id]/Gallery";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
@@ -13,6 +14,26 @@ const MOCK = {
     industry: "HRテック",
     location: "東京都渋谷区",
     employeeCount: "10〜30名",
+    benefits: [
+      "完全週休二日制（土日祝）",
+      "年間休日125日",
+      "フレックスタイム制",
+      "リモートワーク可（週2出社）",
+      "交通費全額支給",
+      "社会保険完備",
+      "書籍購入補助",
+      "カンファレンス参加費補助",
+      "副業OK",
+      "ストックオプション制度",
+      "引越し手当",
+      "ウェルカムランチ制度",
+    ],
+    smokingPolicy: "敷地内禁煙（喫煙場所あり）",
+    galleryUrls: [
+      "/api/uploads/company-images/9418ca2b-5033-4403-b366-790dbc9a911c_gallery_6ffde7f7.jpg",
+      "/api/uploads/company-images/9418ca2b-5033-4403-b366-790dbc9a911c_gallery_0d55bb87.jpg",
+      "/api/uploads/company-images/9418ca2b-5033-4403-b366-790dbc9a911c_gallery_7937c6cc.jpg",
+    ],
   },
   job: {
     title:
@@ -57,19 +78,30 @@ const MOCK = {
     salaryDetail:
       "月給50万円〜83万円（固定残業代45時間分を含む）。経験・能力を考慮の上決定。",
     insurance: "健康保険、厚生年金、雇用保険、労災保険",
-    smokingPolicy: "屋内原則禁煙（喫煙専用室あり）",
-    benefits: [
-      "リモートワーク手当月3万円",
-      "書籍購入費全額補助",
-      "カンファレンス参加費補助",
-      "副業OK",
-    ],
     remotePolicy: "フルリモート",
     selectionProcess:
       "書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定",
     publishedAt: "2026-04-15",
   },
+  team: {
+    size: 5,
+    members: [
+      { name: "山田 太郎", role: "テックリード", avatarUrl: "" },
+      { name: "佐藤 花子", role: "シニアエンジニア", avatarUrl: "" },
+      { name: "鈴木 一郎", role: "シニアエンジニア", avatarUrl: "" },
+      { name: "田中 美咲", role: "エンジニア", avatarUrl: "" },
+      { name: "高橋 健", role: "エンジニア", avatarUrl: "" },
+    ],
+  },
 };
+
+const AVATAR_TONES = [
+  { bg: "#EAF4F0", fg: "#3D8B6E" },
+  { bg: "#FEF7E6", fg: "#B07914" },
+  { bg: "#EEF2FB", fg: "#3B6FCC" },
+  { bg: "#F3EEFB", fg: "#7647C5" },
+  { bg: "#EEF3F4", fg: "#5A6B7B" },
+];
 
 function SectionTitle({
   children,
@@ -88,7 +120,7 @@ function SectionTitle({
           {icon}
         </span>
       )}
-      <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+      <h2 className="text-xl font-bold tracking-tight text-gray-900">
         {children}
       </h2>
     </div>
@@ -156,28 +188,6 @@ function HighlightCard({
   );
 }
 
-function BenefitCell({
-  text,
-  icon,
-}: {
-  text: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-3.5 rounded-xl border border-gray-200/80 bg-white p-4">
-      <span
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg"
-        style={{ backgroundColor: `${ACCENT}10`, color: ACCENT }}
-      >
-        {icon}
-      </span>
-      <span className="text-base font-medium leading-snug text-gray-800">
-        {text}
-      </span>
-    </div>
-  );
-}
-
 function ConditionGroup({
   title,
   rows,
@@ -215,7 +225,7 @@ function ConditionGroup({
 }
 
 export default function JobDetailPage() {
-  const { company, job } = MOCK;
+  const { company, job, team } = MOCK;
 
   const metaBadges = [
     { label: job.employmentType },
@@ -274,13 +284,6 @@ export default function JobDetailPage() {
     },
   ];
 
-  const benefitIcons: React.ReactNode[] = [
-    <HomeIcon key="h" />,
-    <BookIcon key="b" />,
-    <TicketIcon key="t" />,
-    <SideIcon key="s" />,
-  ];
-
   const workConditions = [
     { label: "勤務地", value: job.workLocation },
     { label: "勤務時間", value: job.workHours },
@@ -297,7 +300,7 @@ export default function JobDetailPage() {
     { label: "試用期間", value: job.probationPeriod },
     { label: "就業場所の変更範囲", value: job.workLocationChangeScope },
     { label: "業務内容の変更範囲", value: job.jobDescriptionChangeScope },
-    { label: "受動喫煙対策", value: job.smokingPolicy },
+    { label: "受動喫煙対策", value: company.smokingPolicy },
   ];
 
   const selectionSteps = job.selectionProcess.split("→").map((s) => s.trim());
@@ -346,7 +349,7 @@ export default function JobDetailPage() {
               </div>
             </Link>
 
-            <h1 className="mt-5 text-3xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[32px]">
+            <h1 className="mt-5 text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px]">
               {job.title}
             </h1>
 
@@ -416,94 +419,74 @@ export default function JobDetailPage() {
           </div>
         </section>
 
+        {/* ─── Photo gallery ─── */}
+        {company.galleryUrls.length > 0 && (
+          <section className={`overflow-hidden ${cardClass}`}>
+            <div className="px-6 pb-2 pt-6 sm:px-7">
+              <SectionTitle icon={<CameraIcon />}>フォトギャラリー</SectionTitle>
+            </div>
+            <div className="mt-3">
+              <Gallery urls={company.galleryUrls} />
+            </div>
+          </section>
+        )}
+
         {/* ─── Team accent panel ─── */}
         <section className={`overflow-hidden ${cardClass}`}>
-          <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr]">
+          <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
             <div
-              className="flex items-center justify-center px-6 py-6 sm:py-8"
+              className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
               style={{
                 background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)`,
               }}
             >
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center -space-x-6">
+                {team.members.slice(0, 5).map((m, i) => {
+                  const tone = AVATAR_TONES[i % AVATAR_TONES.length];
+                  const initial = m.name.charAt(0);
+                  return (
+                    <div
+                      key={m.name}
+                      className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm"
+                      style={{ backgroundColor: tone.bg, color: tone.fg }}
+                      title={`${m.name} / ${m.role}`}
+                    >
+                      {m.avatarUrl ? (
+                        <img
+                          src={m.avatarUrl}
+                          alt=""
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      ) : (
+                        initial
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex items-baseline gap-1">
                 <span
-                  className="flex h-16 w-16 items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: `${ACCENT}1f`, color: ACCENT }}
-                >
-                  <PeopleIcon />
-                </span>
-                <span
-                  className="text-sm font-semibold tracking-wide"
+                  className="text-3xl font-bold leading-none"
                   style={{ color: ACCENT }}
                 >
-                  TEAM
+                  {team.size}
+                </span>
+                <span
+                  className="text-base font-semibold"
+                  style={{ color: ACCENT }}
+                >
+                  名のチーム
                 </span>
               </div>
             </div>
             <div className="px-6 py-6 sm:px-7 sm:py-7">
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-lg font-bold text-gray-900">
                 チーム紹介
               </h2>
               <p className="mt-3 text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
                 {job.teamDescription}
               </p>
             </div>
-          </div>
-        </section>
-
-        {/* ─── Requirements (2-column compare) ─── */}
-        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
-          <SectionTitle icon={<CheckSquareIcon />}>応募要件</SectionTitle>
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div
-              className="rounded-2xl border p-6"
-              style={{
-                borderColor: `${ACCENT}40`,
-                backgroundColor: `${ACCENT}08`,
-              }}
-            >
-              <div className="flex items-center gap-2.5">
-                <span
-                  className="inline-flex h-7 items-center rounded-md px-2.5 text-sm font-bold text-white"
-                  style={{ background: ACCENT }}
-                >
-                  必須
-                </span>
-                <h3 className="text-base font-bold text-gray-900">
-                  これが満たせれば応募可
-                </h3>
-              </div>
-              <p className="mt-3.5 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
-                {job.requiredQualifications}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-gray-200 bg-gray-50/60 p-6">
-              <div className="flex items-center gap-2.5">
-                <span className="inline-flex h-7 items-center rounded-md bg-gray-400 px-2.5 text-sm font-bold text-white">
-                  歓迎
-                </span>
-                <h3 className="text-base font-bold text-gray-900">
-                  あれば嬉しい経験
-                </h3>
-              </div>
-              <p className="mt-3.5 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
-                {job.preferredQualifications}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── Benefits (icon grid) ─── */}
-        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
-          <SectionTitle icon={<GiftIcon />}>福利厚生</SectionTitle>
-          <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            {job.benefits.map((b, i) => (
-              <BenefitCell
-                key={b}
-                text={b}
-                icon={benefitIcons[i % benefitIcons.length]}
-              />
-            ))}
           </div>
         </section>
 
@@ -527,6 +510,61 @@ export default function JobDetailPage() {
               icon={<ShieldIcon />}
             />
           </div>
+        </section>
+
+        {/* ─── Requirements ─── */}
+        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
+          <SectionTitle icon={<CheckSquareIcon />}>応募要件</SectionTitle>
+          <div className="mt-5 space-y-5">
+            <div>
+              <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                <span
+                  className="inline-flex h-6 items-center rounded px-2 text-sm font-bold text-white"
+                  style={{ background: ACCENT }}
+                >
+                  必須
+                </span>
+                必須要件
+              </h3>
+              <p className="mt-2.5 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
+                {job.requiredQualifications}
+              </p>
+            </div>
+            <div>
+              <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                <span className="inline-flex h-6 items-center rounded bg-gray-400 px-2 text-sm font-bold text-white">
+                  歓迎
+                </span>
+                歓迎要件
+              </h3>
+              <p className="mt-2.5 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
+                {job.preferredQualifications}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Benefits (pills, matches company page) ─── */}
+        <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
+          <SectionTitle icon={<GiftIcon />}>福利厚生・待遇</SectionTitle>
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {[
+              ...company.benefits,
+              ...(company.smokingPolicy ? [company.smokingPolicy] : []),
+            ].map((b) => (
+              <li
+                key={b}
+                className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-medium"
+                style={{
+                  borderColor: `${ACCENT}40`,
+                  backgroundColor: `${ACCENT}12`,
+                  color: ACCENT,
+                }}
+              >
+                {b}
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* ─── Selection Process ─── */}
@@ -805,25 +843,6 @@ function BoltIcon() {
   );
 }
 
-function PeopleIcon() {
-  return (
-    <svg
-      className="h-7 w-7"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="9" cy="8" r="3" />
-      <circle cx="17" cy="9" r="2.5" />
-      <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-      <path d="M15 20c0-2.4 1.7-4.5 4-5" />
-    </svg>
-  );
-}
-
 function CheckSquareIcon() {
   return (
     <svg
@@ -857,59 +876,6 @@ function GiftIcon() {
       <path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
       <path d="M8 8a2.5 2.5 0 0 1 0-5C10 3 12 5 12 8" />
       <path d="M16 8a2.5 2.5 0 0 0 0-5C14 3 12 5 12 8" />
-    </svg>
-  );
-}
-
-function BookIcon() {
-  return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z" />
-      <path d="M4 17a3 3 0 0 1 3-3h12" />
-    </svg>
-  );
-}
-
-function TicketIcon() {
-  return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z" />
-      <path d="M9 6v12" strokeDasharray="2 2" />
-    </svg>
-  );
-}
-
-function SideIcon() {
-  return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="9" />
-      <path d="M3 12h18" />
-      <path d="M12 3a14 14 0 0 1 0 18" />
-      <path d="M12 3a14 14 0 0 0 0 18" />
     </svg>
   );
 }
@@ -1002,6 +968,23 @@ function BuildingIcon() {
       <path d="M14 12h.01" />
       <path d="M9 16h.01" />
       <path d="M14 16h.01" />
+    </svg>
+  );
+}
+
+function CameraIcon() {
+  return (
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <circle cx="12" cy="13" r="4" />
     </svg>
   );
 }
