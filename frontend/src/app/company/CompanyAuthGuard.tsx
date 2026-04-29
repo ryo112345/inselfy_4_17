@@ -6,7 +6,7 @@ import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import { CompanyHeader } from "./CompanyHeader";
 
 const publicPaths = ["/company/login", "/company/register"];
-const headerlessPaths = ["/company/profile/preview"];
+const headerlessPaths = ["/company/profile/preview", "/company/jobs/preview"];
 
 export function CompanyAuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useCompanyAuth();
