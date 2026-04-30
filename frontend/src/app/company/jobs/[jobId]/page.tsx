@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
-import { type JobPostingBody, uploadTeamMemberPhoto } from "@/features/job-posting/api";
+import { type JobPostingBody, uploadTeamMemberPhoto, uploadGalleryImage, uploadCoverImage } from "@/features/job-posting/api";
 import {
   JOB_PREVIEW_CHANNEL,
   type JobFormPreviewPayload,
@@ -418,7 +418,7 @@ export default function JobEditPage() {
   const jobId = params.jobId as string;
   const [company, setCompany] = useState<CompanyProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingAction, setSavingAction] = useState<"save" | "publish" | "unpublish" | null>(null);
   const [saved, setSaved] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -599,15 +599,21 @@ export default function JobEditPage() {
     workLocationChangeScope.trim() !== "" &&
     jobDescriptionChangeScope.trim() !== "";
 
-  const handleSave = useCallback(async () => {
-    if (status === "open" && !requiredOk) {
+  const handleSave = useCallback(async (saveStatus?: "open" | "draft") => {
+    const effectiveStatus = saveStatus ?? status;
+    if (effectiveStatus === "open" && !requiredOk) {
       alert("公開するには必須項目をすべて入力してください");
       return;
     }
-    setSaving(true);
+    const isStatusChange = saveStatus != null && saveStatus !== status;
+    setSavingAction(
+      isStatusChange
+        ? saveStatus === "open" ? "publish" : "unpublish"
+        : "save",
+    );
     try {
       const body: JobPostingBody = {
-        title, description, employmentType, location: null, status,
+        title, description, employmentType, location: null, status: effectiveStatus,
         jobCategory, hiringCount, appealPoints, challenges, teamDescription,
         teamMembers, teamLabel,
         skillsGained, tags, requiredQualifications, preferredQualifications,
@@ -627,12 +633,14 @@ export default function JobEditPage() {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         alert(err.message ?? "保存に失敗しました");
+      } else if (isStatusChange) {
+        setStatus(effectiveStatus);
       } else {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
       }
     } finally {
-      setSaving(false);
+      setSavingAction(null);
     }
   }, [
     companyFetch, jobId, title, description, employmentType, status,
@@ -643,7 +651,7 @@ export default function JobEditPage() {
     salaryMin, salaryMax, salaryDetail, insurance, remotePolicy,
     benefits, smokingPolicy, selectionProcess, coverImage,
     highlightTitleRole, highlightTitleAppeal, highlightTitleChallenge, highlightTitleGrowth,
-    galleryImages,
+    galleryImages, requiredOk,
   ]);
 
   const handleDelete = useCallback(async () => {
@@ -683,7 +691,7 @@ export default function JobEditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f7f5]">
+    <div className="-mx-6 -mt-8 min-h-screen bg-[#f6f7f5]">
       {/* Edit toolbar */}
       <div className="sticky top-0 z-30 border-b border-blue-200 bg-blue-50 px-6 py-2.5">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
@@ -698,7 +706,7 @@ export default function JobEditPage() {
               求人一覧
             </Link>
             <span className="text-sm text-blue-800 font-medium">
-              編集中 — 見た目そのままで編集できます
+              編集中
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -724,21 +732,56 @@ export default function JobEditPage() {
               </svg>
               プレビュー
             </button>
-            <button
-              type="button"
-              onClick={() => setStatus(status === "open" ? "draft" : "open")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer transition-colors ${statusColor}`}
-            >
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${statusColor}`}>
               <span className={`h-2 w-2 rounded-full ${status === "open" ? "bg-emerald-500" : "bg-amber-500"}`} />
               {statusLabel}
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className={`${saved ? "bg-emerald-500 hover:bg-emerald-600" : "bg-[#2979ff] hover:bg-blue-700"} text-white px-5 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50`}
-            >
-              {saving ? "保存中..." : saved ? "✓ 保存しました" : "保存する"}
-            </button>
+            </span>
+            {status === "draft" ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleSave()}
+                  disabled={savingAction !== null}
+                  className={`${saved ? "bg-emerald-500 hover:bg-emerald-600 text-white" : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"} px-4 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50`}
+                >
+                  {savingAction === "save" ? "保存中..." : saved ? "✓ 保存しました" : "下書き保存"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!confirm("この求人を公開しますか？求職者に表示されるようになります。")) return;
+                    handleSave("open");
+                  }}
+                  disabled={savingAction !== null || !requiredOk}
+                  className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                  title={!requiredOk ? "必須項目を全て入力してください" : ""}
+                >
+                  {savingAction === "publish" ? "公開中..." : "公開する"}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!confirm("この求人を非公開にしますか？求職者から見えなくなります。")) return;
+                    handleSave("draft");
+                  }}
+                  disabled={savingAction !== null}
+                  className="border border-gray-300 bg-white text-gray-700 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {savingAction === "unpublish" ? "処理中..." : "非公開にする"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSave()}
+                  disabled={savingAction !== null}
+                  className={`${saved ? "bg-emerald-500 hover:bg-emerald-600" : "bg-[#2979ff] hover:bg-blue-700"} text-white px-5 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50`}
+                >
+                  {savingAction === "save" ? "保存中..." : saved ? "✓ 保存しました" : "保存する"}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -768,14 +811,17 @@ export default function JobEditPage() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const file = e.target.files?.[0];
-                  if (file) {
-                    setCoverImage(URL.createObjectURL(file));
-                    const reader = new FileReader();
-                    reader.onload = () => setCoverImageDataUrl(reader.result as string);
-                    reader.readAsDataURL(file);
+                  if (!file) return;
+                  try {
+                    const url = await uploadCoverImage(file);
+                    setCoverImage(url);
+                    setCoverImageDataUrl(null);
+                  } catch {
+                    // upload failed
                   }
+                  e.target.value = "";
                 }}
               />
             </label>
@@ -1026,12 +1072,18 @@ export default function JobEditPage() {
               accept="image/*"
               multiple
               className="hidden"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const files = e.target.files;
-                if (files) {
-                  const urls = Array.from(files).map((f) => URL.createObjectURL(f));
-                  setGalleryImages((prev) => [...prev, ...urls]);
+                if (!files) return;
+                for (const file of Array.from(files)) {
+                  try {
+                    const url = await uploadGalleryImage(file);
+                    setGalleryImages((prev) => [...prev, url]);
+                  } catch {
+                    // upload failed
+                  }
                 }
+                e.target.value = "";
               }}
             />
           </label>

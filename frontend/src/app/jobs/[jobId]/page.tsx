@@ -365,13 +365,15 @@ export default function JobDetailPage() {
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
         {/* ─── Hero ─── */}
         <section className={`overflow-hidden ${cardClass}`}>
-          <div className="relative w-full overflow-hidden bg-gray-100 aspect-[16/9]">
-            <img
-              src="/job-cover.png"
-              alt=""
-              className="h-full w-full object-contain"
-            />
-          </div>
+          {job.coverImageUrl && (
+            <div className="relative w-full overflow-hidden bg-gray-100 aspect-[16/9]">
+              <img
+                src={job.coverImageUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
 
           <div className="px-6 pb-6 pt-6 sm:px-8">
             {company && <Link

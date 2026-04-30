@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
-import { createJobPosting, uploadTeamMemberPhoto } from "@/features/job-posting/api";
+import { createJobPosting, uploadTeamMemberPhoto, uploadGalleryImage, uploadCoverImage } from "@/features/job-posting/api";
 import {
   JOB_PREVIEW_CHANNEL,
   type JobFormPreviewPayload,
@@ -668,14 +668,17 @@ export default function JobNewPage() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const file = e.target.files?.[0];
-                  if (file) {
-                    setCoverImage(URL.createObjectURL(file));
-                    const reader = new FileReader();
-                    reader.onload = () => setCoverImageDataUrl(reader.result as string);
-                    reader.readAsDataURL(file);
+                  if (!file) return;
+                  try {
+                    const url = await uploadCoverImage(file);
+                    setCoverImage(url);
+                    setCoverImageDataUrl(null);
+                  } catch {
+                    // upload failed
                   }
+                  e.target.value = "";
                 }}
               />
             </label>
@@ -923,12 +926,18 @@ export default function JobNewPage() {
               accept="image/*"
               multiple
               className="hidden"
-              onChange={(e) => {
+              onChange={async (e) => {
                 const files = e.target.files;
-                if (files) {
-                  const urls = Array.from(files).map((f) => URL.createObjectURL(f));
-                  setGalleryImages((prev) => [...prev, ...urls]);
+                if (!files) return;
+                for (const file of Array.from(files)) {
+                  try {
+                    const url = await uploadGalleryImage(file);
+                    setGalleryImages((prev) => [...prev, url]);
+                  } catch {
+                    // upload failed
+                  }
                 }
+                e.target.value = "";
               }}
             />
           </label>

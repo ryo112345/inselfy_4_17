@@ -307,3 +307,85 @@ func HandleTeamMemberPhotoUpload(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]string{"url": "/api/uploads/team-member-photos/" + filename})
 }
+
+// HandleGalleryImageUpload handles POST /api/company/jobs/gallery-image.
+func HandleGalleryImageUpload(ctx echo.Context) error {
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "file is required"})
+	}
+	if file.Size > 5*1024*1024 {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "ファイルサイズは5MB以下にしてください"})
+	}
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "JPG、PNG、WebP形式のみ対応しています"})
+	}
+
+	dir := "./uploads/gallery-images"
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to create upload dir"})
+	}
+
+	filename := fmt.Sprintf("%s%s", uuid.New().String()[:8], ext)
+	dst := filepath.Join(dir, filename)
+
+	src, err := file.Open()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to open file"})
+	}
+	defer src.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to save file"})
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, src); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to write file"})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]string{"url": "/api/uploads/gallery-images/" + filename})
+}
+
+// HandleCoverImageUpload handles POST /api/company/jobs/cover-image.
+func HandleCoverImageUpload(ctx echo.Context) error {
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "file is required"})
+	}
+	if file.Size > 5*1024*1024 {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "ファイルサイズは5MB以下にしてください"})
+	}
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "JPG、PNG、WebP形式のみ対応しています"})
+	}
+
+	dir := "./uploads/cover-images"
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to create upload dir"})
+	}
+
+	filename := fmt.Sprintf("%s%s", uuid.New().String()[:8], ext)
+	dst := filepath.Join(dir, filename)
+
+	src, err := file.Open()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to open file"})
+	}
+	defer src.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to save file"})
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, src); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to write file"})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]string{"url": "/api/uploads/cover-images/" + filename})
+}
