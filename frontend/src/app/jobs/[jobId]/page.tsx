@@ -496,7 +496,7 @@ export default function JobDetailPage() {
                 style={{ background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)` }}
               >
                 {job.teamMembers && job.teamMembers.length > 0 && (
-                  <div className="flex items-center -space-x-6">
+                  <div className="flex items-center -space-x-[18px]">
                     {job.teamMembers.map((m: { name: string; photoUrl?: string }, i: number) => {
                       const colors = [
                         { bg: "#EAF4F0", fg: "#3D8B6E" },
@@ -515,7 +515,9 @@ export default function JobDetailPage() {
                           {m.photoUrl ? (
                             <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
                           ) : (
-                            m.name.charAt(0)
+                            <span className={m.name.length >= 5 ? "text-xs" : m.name.length === 4 ? "text-sm" : m.name.length === 3 ? "text-base" : m.name.length === 2 ? "text-xl" : "text-2xl"}>
+                              {m.name.slice(0, 5)}
+                            </span>
                           )}
                         </div>
                       );
