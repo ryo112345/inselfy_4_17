@@ -158,7 +158,7 @@ function InlineSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors cursor-pointer text-inherit font-inherit"
+      className="w-full max-w-full truncate bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors cursor-pointer text-inherit font-inherit"
     >
       {placeholder && (
         <option value="" disabled>
@@ -419,6 +419,7 @@ export default function JobEditPage() {
   const [company, setCompany] = useState<CompanyProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const [title, setTitle] = useState(DEFAULTS.title);
@@ -500,6 +501,7 @@ export default function JobEditPage() {
         setHighlightTitleChallenge(d.highlightTitleChallenge || "チャレンジ");
         setHighlightTitleGrowth(d.highlightTitleGrowth || "身につくスキル");
         setTeamMembers(d.teamMembers ?? []);
+        setGalleryImages(d.galleryUrls ?? []);
         if (d.coverImageUrl) setCoverImage(d.coverImageUrl);
       }
     }).finally(() => setIsLoading(false));
@@ -558,6 +560,8 @@ export default function JobEditPage() {
       highlightTitleRole, highlightTitleAppeal,
       highlightTitleChallenge, highlightTitleGrowth,
       coverImageDataUrl,
+      coverImageUrl: coverImage,
+      galleryUrls: galleryImages,
     }),
     [
       title, jobCategory, employmentType, hiringCount, description,
@@ -567,7 +571,7 @@ export default function JobEditPage() {
       probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
       salaryDetail, insurance, remotePolicy, benefits, smokingPolicy,
       selectionProcess, highlightTitleRole, highlightTitleAppeal,
-      highlightTitleChallenge, highlightTitleGrowth, coverImageDataUrl,
+      highlightTitleChallenge, highlightTitleGrowth, coverImageDataUrl, coverImage, galleryImages,
     ],
   );
 
@@ -613,6 +617,7 @@ export default function JobEditPage() {
         benefits: benefits.join("\n"), smokingPolicy, selectionProcess,
         coverImageUrl: coverImage ?? "",
         highlightTitleRole, highlightTitleAppeal, highlightTitleChallenge, highlightTitleGrowth,
+        galleryUrls: galleryImages,
       };
       const res = await companyFetch(`/api/company/jobs/${jobId}`, {
         method: "PUT",
@@ -622,6 +627,9 @@ export default function JobEditPage() {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         alert(err.message ?? "保存に失敗しました");
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
       }
     } finally {
       setSaving(false);
@@ -635,6 +643,7 @@ export default function JobEditPage() {
     salaryMin, salaryMax, salaryDetail, insurance, remotePolicy,
     benefits, smokingPolicy, selectionProcess, coverImage,
     highlightTitleRole, highlightTitleAppeal, highlightTitleChallenge, highlightTitleGrowth,
+    galleryImages,
   ]);
 
   const handleDelete = useCallback(async () => {
@@ -726,9 +735,9 @@ export default function JobEditPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+              className={`${saved ? "bg-emerald-500 hover:bg-emerald-600" : "bg-[#2979ff] hover:bg-blue-700"} text-white px-5 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50`}
             >
-              {saving ? "保存中..." : "保存する"}
+              {saving ? "保存中..." : saved ? "✓ 保存しました" : "保存する"}
             </button>
           </div>
         </div>
@@ -869,7 +878,8 @@ export default function JobEditPage() {
                   <input
                     type="number"
                     value={salaryMin ?? ""}
-                    onChange={(e) => setSalaryMin(e.target.value ? Number(e.target.value) : null)}
+                    onChange={(e) => setSalaryMin(e.target.value ? Math.min(Number(e.target.value), 9999) : null)}
+                    max={9999}
                     placeholder="下限"
                     className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
                   />
@@ -877,7 +887,8 @@ export default function JobEditPage() {
                   <input
                     type="number"
                     value={salaryMax ?? ""}
-                    onChange={(e) => setSalaryMax(e.target.value ? Number(e.target.value) : null)}
+                    onChange={(e) => setSalaryMax(e.target.value ? Math.min(Number(e.target.value), 9999) : null)}
+                    max={9999}
                     placeholder="上限"
                     className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
                   />
@@ -1147,6 +1158,7 @@ export default function JobEditPage() {
                   </button>
                 </span>
               ))}
+              {teamMembers.length < 5 && (
               <input
                 type="text"
                 value={memberInput}
@@ -1161,6 +1173,7 @@ export default function JobEditPage() {
                   }
                 }}
               />
+              )}
             </div>
           </div>
         </section>

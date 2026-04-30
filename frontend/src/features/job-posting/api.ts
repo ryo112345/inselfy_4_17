@@ -43,6 +43,7 @@ export type JobPostingBody = {
   highlightTitleAppeal: string;
   highlightTitleChallenge: string;
   highlightTitleGrowth: string;
+  galleryUrls: string[];
 };
 
 export async function createJobPosting(

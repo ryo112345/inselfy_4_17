@@ -49,6 +49,7 @@ type jobPostingResponse struct {
 	HighlightTitleAppeal      string    `json:"highlightTitleAppeal"`
 	HighlightTitleChallenge   string    `json:"highlightTitleChallenge"`
 	HighlightTitleGrowth      string    `json:"highlightTitleGrowth"`
+	GalleryURLs               []string  `json:"galleryUrls"`
 	CreatedAt                 time.Time `json:"createdAt"`
 	UpdatedAt                 time.Time `json:"updatedAt"`
 }
@@ -85,6 +86,10 @@ func toJobPostingResponse(j *jobposting.JobPosting) *jobPostingResponse {
 	tags := j.Tags
 	if tags == nil {
 		tags = []string{}
+	}
+	galleryURLs := j.GalleryURLs
+	if galleryURLs == nil {
+		galleryURLs = []string{}
 	}
 	return &jobPostingResponse{
 		ID:                        j.ID,
@@ -127,6 +132,7 @@ func toJobPostingResponse(j *jobposting.JobPosting) *jobPostingResponse {
 		HighlightTitleAppeal:      j.HighlightTitleAppeal,
 		HighlightTitleChallenge:   j.HighlightTitleChallenge,
 		HighlightTitleGrowth:      j.HighlightTitleGrowth,
+		GalleryURLs:               galleryURLs,
 		CreatedAt:                 j.CreatedAt,
 		UpdatedAt:                 j.UpdatedAt,
 	}

@@ -475,13 +475,13 @@ export default function JobDetailPage() {
         </section>
 
         {/* ─── Photo gallery ─── */}
-        {company && company.galleryUrls.length > 0 && (
+        {job.galleryUrls && job.galleryUrls.length > 0 && (
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="px-6 pb-2 pt-6 sm:px-7">
               <SectionTitle icon={<CameraIcon />}>フォトギャラリー</SectionTitle>
             </div>
             <div className="mt-3">
-              <Gallery urls={company.galleryUrls} />
+              <Gallery urls={job.galleryUrls} />
             </div>
           </section>
         )}
