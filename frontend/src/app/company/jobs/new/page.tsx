@@ -401,6 +401,7 @@ export default function JobNewPage() {
   const [challenges, setChallenges] = useState("");
   const [teamDescription, setTeamDescription] = useState("");
   const [teamMembers, setTeamMembers] = useState<{ name: string; photoUrl?: string }[]>([]);
+  const [teamLabel, setTeamLabel] = useState("");
   const [memberInput, setMemberInput] = useState("");
   const [skillsGained, setSkillsGained] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -480,7 +481,7 @@ export default function JobNewPage() {
   const previewPayload = useMemo<JobFormPreviewPayload>(
     () => ({
       title, jobCategory, employmentType, hiringCount, description,
-      appealPoints, challenges, teamDescription, teamMembers, skillsGained, tags,
+      appealPoints, challenges, teamDescription, teamMembers, teamLabel, skillsGained, tags,
       requiredQualifications, preferredQualifications, workLocation,
       workLocationChangeScope, jobDescriptionChangeScope, contractType,
       probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
@@ -493,7 +494,7 @@ export default function JobNewPage() {
     }),
     [
       title, jobCategory, employmentType, hiringCount, description,
-      appealPoints, challenges, teamDescription, teamMembers, skillsGained, tags,
+      appealPoints, challenges, teamDescription, teamMembers, teamLabel, skillsGained, tags,
       requiredQualifications, preferredQualifications, workLocation,
       workLocationChangeScope, jobDescriptionChangeScope, contractType,
       probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
@@ -534,7 +535,7 @@ export default function JobNewPage() {
         location: workLocation.trim() || null,
         status: publishStatus,
         jobCategory, hiringCount, appealPoints, challenges, teamDescription,
-        teamMembers,
+        teamMembers, teamLabel,
         skillsGained, tags, requiredQualifications, preferredQualifications,
         workLocation, workLocationChangeScope, jobDescriptionChangeScope,
         contractType, probationPeriod, workHours, breakTime, holidays,
@@ -920,106 +921,113 @@ export default function JobNewPage() {
 
         {/* Team */}
         <section className={`overflow-hidden ${cardClass}`}>
-          <div className="px-6 py-6 sm:px-7 sm:py-7">
-            <h2 className="text-lg font-bold text-gray-900">チーム紹介</h2>
-            <div className="mt-5 flex items-start gap-6">
-              <div className="flex flex-col items-center gap-3 shrink-0">
-                <div className="flex -space-x-2">
-                  {(teamMembers.length > 0 ? teamMembers : [{ name: "" }]).map((m, i) => {
-                    const colors = [
-                      { bg: "#EAF4F0", fg: "#3D8B6E" },
-                      { bg: "#EEF2FB", fg: "#3B6FCC" },
-                      { bg: "#FEF7E6", fg: "#B07914" },
-                      { bg: "#F3EEFB", fg: "#7647C5" },
-                      { bg: "#FEE", fg: "#C54747" },
-                    ];
-                    const color = colors[i % colors.length];
-                    const isReal = teamMembers.length > 0;
-                    return (
-                      <label key={i} className={`relative ${isReal ? "cursor-pointer group" : ""}`}>
-                        <div
-                          className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white text-sm font-bold overflow-hidden"
-                          style={{ backgroundColor: color.bg, color: color.fg }}
-                        >
-                          {m.photoUrl ? (
-                            <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
-                          ) : (
-                            m.name ? m.name.charAt(0) : "?"
-                          )}
-                        </div>
-                        {isReal && !m.photoUrl && (
-                          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 group-hover:text-blue-500 group-hover:border-blue-300 transition-colors">
-                            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14" /></svg>
-                          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
+            <div
+              className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
+              style={{ background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)` }}
+            >
+                {teamMembers.length > 0 && (
+                <div className="flex items-center -space-x-6 pb-1">
+                {teamMembers.map((m, i) => {
+                  const colors = [
+                    { bg: "#EAF4F0", fg: "#3D8B6E" },
+                    { bg: "#EEF2FB", fg: "#3B6FCC" },
+                    { bg: "#FEF7E6", fg: "#B07914" },
+                    { bg: "#F3EEFB", fg: "#7647C5" },
+                    { bg: "#FEE", fg: "#C54747" },
+                  ];
+                  const color = colors[i % colors.length];
+                  return (
+                    <label key={i} className="relative cursor-pointer group">
+                      <div
+                        className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
+                        style={{ backgroundColor: color.bg, color: color.fg }}
+                      >
+                        {m.photoUrl ? (
+                          <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
+                        ) : (
+                          m.name.charAt(0)
                         )}
-                        {isReal && m.photoUrl && (
-                          <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                            </svg>
-                          </span>
-                        )}
-                        {isReal && (
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              try {
-                                const url = await uploadTeamMemberPhoto(file);
-                                setTeamMembers((prev) =>
-                                  prev.map((member, idx) =>
-                                    idx === i ? { ...member, photoUrl: url } : member,
-                                  ),
-                                );
-                              } catch {
-                                // upload failed
-                              }
-                              e.target.value = "";
-                            }}
-                          />
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-                <span className="text-sm text-gray-500 font-medium">
-                  {teamMembers.length > 0 ? `${teamMembers.length}名のチーム` : "メンバー未登録"}
-                </span>
+                      </div>
+                      {!m.photoUrl && (
+                        <span className="absolute bottom-0 left-0 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 group-hover:text-blue-500 group-hover:border-blue-300 transition-colors">
+                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14" /></svg>
+                        </span>
+                      )}
+                      {m.photoUrl && (
+                        <span className="absolute bottom-0 left-0 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                          </svg>
+                        </span>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const url = await uploadTeamMemberPhoto(file);
+                            setTeamMembers((prev) =>
+                              prev.map((member, idx) =>
+                                idx === i ? { ...member, photoUrl: url } : member,
+                              ),
+                            );
+                          } catch {
+                            // upload failed
+                          }
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  );
+                })}
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-gray-900 mb-2">チーム紹介</h3>
+                )}
+              <input
+                type="text"
+                value={teamLabel}
+                onChange={(e) => setTeamLabel(e.target.value)}
+                placeholder="例: 少数精鋭の営業チーム"
+                className="w-52 text-center text-base font-semibold bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors placeholder:text-gray-300"
+                style={{ color: ACCENT }}
+              />
+            </div>
+            <div className="px-6 py-6 sm:px-7 sm:py-7 flex flex-col">
+              <h2 className="text-lg font-bold text-gray-900">チーム紹介</h2>
+              <div className="mt-3 flex-1 flex">
                 <InlineTextarea
                   value={teamDescription}
                   onChange={setTeamDescription}
                   placeholder="チームの雰囲気やメンバー構成を記入..."
-                  rows={3}
-                  className="text-[15px] leading-relaxed text-gray-700"
+                  className="text-[15px] leading-relaxed text-gray-700 flex-1"
                 />
               </div>
             </div>
-            <div className="mt-4 border-t border-gray-100 pt-4">
-              <h4 className="text-sm font-medium text-gray-500 mb-3">メンバー</h4>
-              <div className="flex flex-wrap gap-2 items-center">
-                {teamMembers.map((m, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-700"
+          </div>
+          <div className="border-t border-gray-200 px-6 py-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-2">メンバー</h4>
+            <div className="flex flex-wrap gap-2 items-center">
+              {teamMembers.map((m, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700"
+                >
+                  {m.name}
+                  <button
+                    type="button"
+                    onClick={() => setTeamMembers(teamMembers.filter((_, idx) => idx !== i))}
+                    className="hover:text-red-500 cursor-pointer ml-0.5"
                   >
-                    {m.name}
-                    <button
-                      type="button"
-                      onClick={() => setTeamMembers(teamMembers.filter((_, idx) => idx !== i))}
-                      className="hover:text-red-500 cursor-pointer ml-0.5"
-                    >
-                      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </span>
-                ))}
+                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              ))}
+              {teamMembers.length < 5 && (
                 <input
                   type="text"
                   value={memberInput}
@@ -1034,7 +1042,7 @@ export default function JobNewPage() {
                     }
                   }}
                 />
-              </div>
+              )}
             </div>
           </div>
         </section>

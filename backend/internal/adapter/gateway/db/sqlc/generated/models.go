@@ -441,6 +441,7 @@ type JobPosting struct {
 	HighlightTitleChallenge   string             `json:"highlight_title_challenge"`
 	HighlightTitleGrowth      string             `json:"highlight_title_growth"`
 	TeamMembers               []byte             `json:"team_members"`
+	TeamLabel                 string             `json:"team_label"`
 }
 
 type Notification struct {

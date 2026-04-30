@@ -22,6 +22,7 @@ type JobPosting struct {
 	Challenges                string
 	TeamDescription           string
 	TeamMembers               []TeamMember
+	TeamLabel                 string
 	SkillsGained              string
 	Tags                      []string
 	RequiredQualifications    string
@@ -64,6 +65,7 @@ type CreateJobPostingInput struct {
 	Challenges                string
 	TeamDescription           string
 	TeamMembers               []TeamMember
+	TeamLabel                 string
 	SkillsGained              string
 	Tags                      []string
 	RequiredQualifications    string
@@ -103,6 +105,7 @@ type UpdateJobPostingInput struct {
 	Challenges                string
 	TeamDescription           string
 	TeamMembers               []TeamMember
+	TeamLabel                 string
 	SkillsGained              string
 	Tags                      []string
 	RequiredQualifications    string
