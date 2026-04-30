@@ -9,6 +9,11 @@ import {
   type JobFormPreviewPayload,
   type JobPreviewMessage,
 } from "@/features/job-posting/preview-channel";
+import {
+  SingleRadarChart,
+  WV_ORDER, WV_FULL_LABELS,
+  CI_ORDER, CI_FULL_LABELS,
+} from "@/app/components/SingleRadarChart";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
@@ -38,6 +43,9 @@ const EMPTY_FORM: JobFormPreviewPayload = {
   teamDescription: "",
   teamMembers: [],
   teamLabel: "",
+  teamId: null,
+  teamWVScores: null,
+  teamCIScores: null,
   skillsGained: "",
   tags: [],
   requiredQualifications: "",
@@ -535,7 +543,7 @@ export default function CompanyJobPreviewPage() {
         )}
 
         {/* Team */}
-        {(job.teamDescription || job.teamMembers.length > 0 || job.teamLabel) && (
+        {(job.teamDescription || job.teamMembers.length > 0 || job.teamLabel || job.teamWVScores || job.teamCIScores) && (
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
               {(job.teamMembers.length > 0 || job.teamLabel) && (
@@ -588,6 +596,41 @@ export default function CompanyJobPreviewPage() {
                 )}
               </div>
             </div>
+            {(job.teamWVScores || job.teamCIScores) && (
+              <div className="border-t border-gray-200 px-6 py-5">
+                <h3 className="border-l-[3px] border-emerald-600 pl-3 text-lg font-bold text-gray-900 mb-4">
+                  チーム診断結果
+                </h3>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="flex flex-col items-center">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Work Values</h4>
+                    {job.teamWVScores ? (
+                      <SingleRadarChart
+                        scores={job.teamWVScores}
+                        order={WV_ORDER}
+                        fullLabels={WV_FULL_LABELS}
+                        isWV={true}
+                      />
+                    ) : (
+                      <div className="py-10 text-sm text-gray-400">データ準備中</div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Career Interest</h4>
+                    {job.teamCIScores ? (
+                      <SingleRadarChart
+                        scores={job.teamCIScores}
+                        order={CI_ORDER}
+                        fullLabels={CI_FULL_LABELS}
+                        isWV={false}
+                      />
+                    ) : (
+                      <div className="py-10 text-sm text-gray-400">データ準備中</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
         )}
 

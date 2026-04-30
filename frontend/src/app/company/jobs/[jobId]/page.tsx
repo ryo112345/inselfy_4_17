@@ -10,6 +10,24 @@ import {
   type JobFormPreviewPayload,
   type JobPreviewMessage,
 } from "@/features/job-posting/preview-channel";
+import {
+  SingleRadarChart,
+  WV_ORDER, WV_FULL_LABELS,
+  CI_ORDER, CI_FULL_LABELS,
+} from "@/app/components/SingleRadarChart";
+
+type TeamListItem = {
+  id: string;
+  name: string;
+  member_count: number;
+  wv_completed: number;
+  ci_completed: number;
+};
+
+type TeamScores = {
+  wv_scores: { id: string; score: number }[] | null;
+  ci_scores: { id: string; score: number }[] | null;
+};
 
 const ACCENT = "#3D8B6E";
 
@@ -458,6 +476,9 @@ export default function JobEditPage() {
   const [highlightTitleGrowth, setHighlightTitleGrowth] = useState("身につくスキル");
   const [teamMembers, setTeamMembers] = useState<{ name: string; photoUrl?: string }[]>([]);
   const [memberInput, setMemberInput] = useState("");
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [teamsList, setTeamsList] = useState<TeamListItem[]>([]);
+  const [teamScores, setTeamScores] = useState<TeamScores | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [coverImageDataUrl, setCoverImageDataUrl] = useState<string | null>(null);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -501,6 +522,7 @@ export default function JobEditPage() {
         setHighlightTitleChallenge(d.highlightTitleChallenge || "チャレンジ");
         setHighlightTitleGrowth(d.highlightTitleGrowth || "身につくスキル");
         setTeamMembers(d.teamMembers ?? []);
+        setTeamId(d.teamId ?? null);
         setGalleryImages(d.galleryUrls ?? []);
         if (d.coverImageUrl) setCoverImage(d.coverImageUrl);
       }
@@ -527,6 +549,44 @@ export default function JobEditPage() {
     });
   }, [companyFetch]);
 
+  useEffect(() => {
+    companyFetch("/api/company/teams").then(async (res) => {
+      if (res.ok) {
+        const data = await res.json();
+        setTeamsList(data.teams ?? []);
+      }
+    });
+  }, [companyFetch]);
+
+  useEffect(() => {
+    if (!teamId) {
+      setTeamScores(null);
+      return;
+    }
+    companyFetch(`/api/company/teams/${teamId}/scores`).then(async (res) => {
+      if (!res.ok) { setTeamScores(null); return; }
+      const data = await res.json();
+      const members: { wv_scores?: { id: string; display_score: number }[]; ci_scores?: { id: string; display_score: number }[] }[] = data.members ?? [];
+      const wvAgg = new Map<string, number[]>();
+      const ciAgg = new Map<string, number[]>();
+      for (const m of members) {
+        if (m.wv_scores) for (const s of m.wv_scores) {
+          if (!wvAgg.has(s.id)) wvAgg.set(s.id, []);
+          wvAgg.get(s.id)!.push(s.display_score);
+        }
+        if (m.ci_scores) for (const s of m.ci_scores) {
+          if (!ciAgg.has(s.id)) ciAgg.set(s.id, []);
+          ciAgg.get(s.id)!.push(s.display_score);
+        }
+      }
+      const avg = (map: Map<string, number[]>) =>
+        map.size > 0
+          ? Array.from(map.entries()).map(([id, vals]) => ({ id, score: vals.reduce((a, b) => a + b, 0) / vals.length }))
+          : null;
+      setTeamScores({ wv_scores: avg(wvAgg), ci_scores: avg(ciAgg) });
+    });
+  }, [companyFetch, teamId]);
+
   // BroadcastChannel for preview tab sync
   const channelRef = useRef<BroadcastChannel | null>(null);
   const previewPayloadRef = useRef<JobFormPreviewPayload | null>(null);
@@ -550,7 +610,9 @@ export default function JobEditPage() {
   const previewPayload = useMemo<JobFormPreviewPayload>(
     () => ({
       title, jobCategory, employmentType, hiringCount, description,
-      appealPoints, challenges, teamDescription, teamMembers, teamLabel, skillsGained, tags,
+      appealPoints, challenges, teamDescription, teamMembers, teamLabel,
+      teamId, teamWVScores: teamScores?.wv_scores ?? null, teamCIScores: teamScores?.ci_scores ?? null,
+      skillsGained, tags,
       requiredQualifications, preferredQualifications, workLocation,
       workLocationChangeScope, jobDescriptionChangeScope, contractType,
       probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
@@ -565,7 +627,9 @@ export default function JobEditPage() {
     }),
     [
       title, jobCategory, employmentType, hiringCount, description,
-      appealPoints, challenges, teamDescription, teamMembers, teamLabel, skillsGained, tags,
+      appealPoints, challenges, teamDescription, teamMembers, teamLabel,
+      teamId, teamScores,
+      skillsGained, tags,
       requiredQualifications, preferredQualifications, workLocation,
       workLocationChangeScope, jobDescriptionChangeScope, contractType,
       probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
@@ -615,7 +679,7 @@ export default function JobEditPage() {
       const body: JobPostingBody = {
         title, description, employmentType, location: null, status: effectiveStatus,
         jobCategory, hiringCount, appealPoints, challenges, teamDescription,
-        teamMembers, teamLabel,
+        teamMembers, teamLabel, teamId,
         skillsGained, tags, requiredQualifications, preferredQualifications,
         workLocation, workLocationChangeScope, jobDescriptionChangeScope,
         contractType, probationPeriod, workHours, breakTime, holidays,
@@ -644,7 +708,7 @@ export default function JobEditPage() {
     }
   }, [
     companyFetch, jobId, title, description, employmentType, status,
-    jobCategory, hiringCount, appealPoints, challenges, teamDescription, teamMembers, teamLabel,
+    jobCategory, hiringCount, appealPoints, challenges, teamDescription, teamMembers, teamLabel, teamId,
     skillsGained, tags, requiredQualifications, preferredQualifications,
     workLocation, workLocationChangeScope, jobDescriptionChangeScope,
     contractType, probationPeriod, workHours, breakTime, holidays,
@@ -1091,6 +1155,72 @@ export default function JobEditPage() {
 
         {/* Team */}
         <section className={`overflow-hidden ${cardClass}`}>
+          {/* Team selector + Members */}
+          <div className="border-b border-gray-200 px-6 py-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="shrink-0">
+                <h4 className="text-sm font-medium text-gray-500 mb-1.5">チームを選択</h4>
+                <select
+                  value={teamId ?? ""}
+                  onChange={(e) => setTeamId(e.target.value || null)}
+                  className="w-56 truncate rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-[#3D8B6E] focus:ring-1 focus:ring-[#3D8B6E] transition-colors cursor-pointer"
+                >
+                  <option value="">選択してください</option>
+                  {teamsList.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}（{t.member_count}名）
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-medium text-gray-500 mb-1.5">メンバー</h4>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {teamMembers.map((m, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700"
+                    >
+                      {m.name}
+                      <button
+                        type="button"
+                        onClick={() => setTeamMembers(teamMembers.filter((_, idx) => idx !== i))}
+                        className="hover:text-red-500 cursor-pointer ml-0.5"
+                      >
+                        <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </span>
+                  ))}
+                  {teamMembers.length < 5 && (
+                    <input
+                      type="text"
+                      value={memberInput}
+                      onChange={(e) => setMemberInput(e.target.value)}
+                      placeholder="+ メンバー追加"
+                      className="text-sm outline-none bg-transparent text-gray-400 placeholder:text-gray-300 min-w-[100px] py-1"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.nativeEvent.isComposing && memberInput.trim()) {
+                          e.preventDefault();
+                          setTeamMembers([...teamMembers, { name: memberInput.trim() }]);
+                          setMemberInput("");
+                        }
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+            {teamsList.length === 0 && (
+              <p className="mt-2 text-xs text-gray-400">
+                チームが未作成です。
+                <Link href="/company/teams" className="text-[#3D8B6E] hover:underline ml-1">チーム管理</Link>
+                で作成してください。
+              </p>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
             <div
               className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
@@ -1190,44 +1320,46 @@ export default function JobEditPage() {
               </div>
             </div>
           </div>
-          <div className="border-t border-gray-200 px-6 py-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-2">メンバー</h4>
-            <div className="flex flex-wrap gap-2 items-center">
-              {teamMembers.map((m, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700"
-                >
-                  {m.name}
-                  <button
-                    type="button"
-                    onClick={() => setTeamMembers(teamMembers.filter((_, idx) => idx !== i))}
-                    className="hover:text-red-500 cursor-pointer ml-0.5"
-                  >
-                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
-                  </button>
-                </span>
-              ))}
-              {teamMembers.length < 5 && (
-              <input
-                type="text"
-                value={memberInput}
-                onChange={(e) => setMemberInput(e.target.value)}
-                placeholder="+ メンバー追加"
-                className="text-sm outline-none bg-transparent text-gray-400 placeholder:text-gray-300 min-w-[100px] py-1"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.nativeEvent.isComposing && memberInput.trim()) {
-                    e.preventDefault();
-                    setTeamMembers([...teamMembers, { name: memberInput.trim() }]);
-                    setMemberInput("");
-                  }
-                }}
-              />
+          {/* Team diagnostic results */}
+          {teamId && (
+            <div className="border-t border-gray-200 px-6 py-5">
+              <h4 className="text-sm font-medium text-gray-500 mb-3">チーム診断結果</h4>
+              {teamScores && (teamScores.wv_scores || teamScores.ci_scores) ? (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="flex flex-col items-center">
+                    <h5 className="text-sm font-medium text-gray-500 mb-1">Work Values</h5>
+                    {teamScores.wv_scores ? (
+                      <SingleRadarChart
+                        scores={teamScores.wv_scores}
+                        order={WV_ORDER}
+                        fullLabels={WV_FULL_LABELS}
+                        isWV={true}
+                      />
+                    ) : (
+                      <div className="py-10 text-sm text-gray-400">データ準備中</div>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h5 className="text-sm font-medium text-gray-500 mb-1">Career Interest</h5>
+                    {teamScores.ci_scores ? (
+                      <SingleRadarChart
+                        scores={teamScores.ci_scores}
+                        order={CI_ORDER}
+                        fullLabels={CI_FULL_LABELS}
+                        isWV={false}
+                      />
+                    ) : (
+                      <div className="py-10 text-sm text-gray-400">データ準備中</div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="py-6 text-center text-sm text-gray-400">
+                  診断データがまだありません。チームメンバーが診断を完了すると表示されます。
+                </div>
               )}
             </div>
-          </div>
+          )}
         </section>
 
         {/* Conditions */}

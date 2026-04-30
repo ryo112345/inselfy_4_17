@@ -11,6 +11,8 @@ import (
 type jobPostingResponse struct {
 	ID                        string    `json:"id"`
 	CompanyID                 string    `json:"companyId"`
+	CompanyName               string    `json:"companyName,omitempty"`
+	CompanyLogoURL            string    `json:"companyLogoUrl,omitempty"`
 	Title                     string    `json:"title"`
 	Description               string    `json:"description"`
 	EmploymentType            string    `json:"employmentType"`
@@ -24,6 +26,7 @@ type jobPostingResponse struct {
 	TeamDescription           string                    `json:"teamDescription"`
 	TeamMembers               []jobposting.TeamMember   `json:"teamMembers"`
 	TeamLabel                 string                    `json:"teamLabel"`
+	TeamID                    *string                   `json:"teamId"`
 	SkillsGained              string                    `json:"skillsGained"`
 	Tags                      []string  `json:"tags"`
 	RequiredQualifications    string    `json:"requiredQualifications"`
@@ -94,6 +97,8 @@ func toJobPostingResponse(j *jobposting.JobPosting) *jobPostingResponse {
 	return &jobPostingResponse{
 		ID:                        j.ID,
 		CompanyID:                 j.CompanyID,
+		CompanyName:               j.CompanyName,
+		CompanyLogoURL:            j.CompanyLogoURL,
 		Title:                     j.Title,
 		Description:               j.Description,
 		EmploymentType:            j.EmploymentType,
@@ -107,6 +112,7 @@ func toJobPostingResponse(j *jobposting.JobPosting) *jobPostingResponse {
 		TeamDescription:           j.TeamDescription,
 		TeamMembers:               j.TeamMembers,
 		TeamLabel:                 j.TeamLabel,
+		TeamID:                    j.TeamID,
 		SkillsGained:              j.SkillsGained,
 		Tags:                      tags,
 		RequiredQualifications:    j.RequiredQualifications,

@@ -10,6 +10,8 @@ type TeamMember struct {
 type JobPosting struct {
 	ID                        string
 	CompanyID                 string
+	CompanyName               string
+	CompanyLogoURL            string
 	Title                     string
 	Description               string
 	EmploymentType            string
@@ -23,6 +25,7 @@ type JobPosting struct {
 	TeamDescription           string
 	TeamMembers               []TeamMember
 	TeamLabel                 string
+	TeamID                    *string
 	SkillsGained              string
 	Tags                      []string
 	RequiredQualifications    string
@@ -67,6 +70,7 @@ type CreateJobPostingInput struct {
 	TeamDescription           string
 	TeamMembers               []TeamMember
 	TeamLabel                 string
+	TeamID                    *string
 	SkillsGained              string
 	Tags                      []string
 	RequiredQualifications    string
@@ -108,6 +112,7 @@ type UpdateJobPostingInput struct {
 	TeamDescription           string
 	TeamMembers               []TeamMember
 	TeamLabel                 string
+	TeamID                    *string
 	SkillsGained              string
 	Tags                      []string
 	RequiredQualifications    string

@@ -46,6 +46,7 @@ func (r *JobPostingRepository) Create(ctx context.Context, j *jobposting.JobPost
 		TeamDescription:           j.TeamDescription,
 		TeamMembers:               teamMembersJSON,
 		TeamLabel:                 j.TeamLabel,
+		TeamID:                    optionalUUID(j.TeamID),
 		SkillsGained:              j.SkillsGained,
 		Tags:                      j.Tags,
 		RequiredQualifications:    j.RequiredQualifications,
@@ -151,6 +152,7 @@ func (r *JobPostingRepository) Update(ctx context.Context, j *jobposting.JobPost
 		TeamDescription:           j.TeamDescription,
 		TeamMembers:               teamMembersJSON,
 		TeamLabel:                 j.TeamLabel,
+		TeamID:                    optionalUUID(j.TeamID),
 		SkillsGained:              j.SkillsGained,
 		Tags:                      j.Tags,
 		RequiredQualifications:    j.RequiredQualifications,
@@ -196,6 +198,88 @@ func (r *JobPostingRepository) Delete(ctx context.Context, id string) error {
 	return q.DeleteJobPosting(ctx, pgID)
 }
 
+func (r *JobPostingRepository) ListPublic(ctx context.Context) ([]*jobposting.JobPosting, error) {
+	q := queriesForContext(ctx, r.queries)
+	rows, err := q.ListPublicJobPostings(ctx)
+	if err != nil {
+		return nil, err
+	}
+	postings := make([]*jobposting.JobPosting, len(rows))
+	for i, row := range rows {
+		postings[i] = publicJobPostingToDomain(row)
+	}
+	return postings, nil
+}
+
+func publicJobPostingToDomain(row *generated.ListPublicJobPostingsRow) *jobposting.JobPosting {
+	tags := row.Tags
+	if tags == nil {
+		tags = []string{}
+	}
+	var teamMembers []jobposting.TeamMember
+	if len(row.TeamMembers) > 0 {
+		_ = json.Unmarshal(row.TeamMembers, &teamMembers)
+	}
+	if teamMembers == nil {
+		teamMembers = []jobposting.TeamMember{}
+	}
+	var galleryURLs []string
+	if len(row.GalleryUrls) > 0 {
+		_ = json.Unmarshal(row.GalleryUrls, &galleryURLs)
+	}
+	if galleryURLs == nil {
+		galleryURLs = []string{}
+	}
+	return &jobposting.JobPosting{
+		ID:                        uuidToString(row.ID),
+		CompanyID:                 uuidToString(row.CompanyID),
+		CompanyName:               row.CompanyName,
+		CompanyLogoURL:            row.CompanyLogoUrl,
+		Title:                     row.Title,
+		Description:               row.Description,
+		EmploymentType:            row.EmploymentType,
+		Location:                  textPtr(row.Location),
+		IsActive:                  row.IsActive,
+		Status:                    row.Status,
+		JobCategory:               row.JobCategory,
+		HiringCount:               row.HiringCount,
+		AppealPoints:              row.AppealPoints,
+		Challenges:                row.Challenges,
+		TeamDescription:           row.TeamDescription,
+		TeamMembers:               teamMembers,
+		TeamLabel:                 row.TeamLabel,
+		TeamID:                    uuidPtr(row.TeamID),
+		SkillsGained:              row.SkillsGained,
+		Tags:                      tags,
+		RequiredQualifications:    row.RequiredQualifications,
+		PreferredQualifications:   row.PreferredQualifications,
+		WorkLocation:              row.WorkLocation,
+		WorkLocationChangeScope:   row.WorkLocationChangeScope,
+		JobDescriptionChangeScope: row.JobDescriptionChangeScope,
+		ContractType:              row.ContractType,
+		ProbationPeriod:           row.ProbationPeriod,
+		WorkHours:                 row.WorkHours,
+		BreakTime:                 row.BreakTime,
+		Holidays:                  row.Holidays,
+		SalaryMin:                 int4Ptr(row.SalaryMin),
+		SalaryMax:                 int4Ptr(row.SalaryMax),
+		SalaryDetail:              row.SalaryDetail,
+		Insurance:                 row.Insurance,
+		RemotePolicy:              row.RemotePolicy,
+		Benefits:                  row.Benefits,
+		SmokingPolicy:             row.SmokingPolicy,
+		SelectionProcess:          row.SelectionProcess,
+		CoverImageURL:             row.CoverImageUrl,
+		HighlightTitleRole:        row.HighlightTitleRole,
+		HighlightTitleAppeal:      row.HighlightTitleAppeal,
+		HighlightTitleChallenge:   row.HighlightTitleChallenge,
+		HighlightTitleGrowth:      row.HighlightTitleGrowth,
+		GalleryURLs:               galleryURLs,
+		CreatedAt:                 row.CreatedAt.Time,
+		UpdatedAt:                 row.UpdatedAt.Time,
+	}
+}
+
 func jobPostingToDomain(row *generated.JobPosting) *jobposting.JobPosting {
 	tags := row.Tags
 	if tags == nil {
@@ -231,6 +315,7 @@ func jobPostingToDomain(row *generated.JobPosting) *jobposting.JobPosting {
 		TeamDescription:           row.TeamDescription,
 		TeamMembers:               teamMembers,
 		TeamLabel:                 row.TeamLabel,
+		TeamID:                    uuidPtr(row.TeamID),
 		SkillsGained:              row.SkillsGained,
 		Tags:                      tags,
 		RequiredQualifications:    row.RequiredQualifications,

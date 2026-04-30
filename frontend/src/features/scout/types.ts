@@ -125,6 +125,7 @@ export interface JobPosting {
   teamDescription: string;
   teamMembers: { name: string; photoUrl?: string }[];
   teamLabel: string;
+  teamId: string | null;
   skillsGained: string;
   tags: string[];
   requiredQualifications: string;

@@ -50,6 +50,7 @@ type jobPostingRequest struct {
 	TeamDescription           string                    `json:"teamDescription"`
 	TeamMembers               []jobposting.TeamMember   `json:"teamMembers"`
 	TeamLabel                 string                    `json:"teamLabel"`
+	TeamID                    *string                   `json:"teamId"`
 	SkillsGained              string                    `json:"skillsGained"`
 	Tags                      []string `json:"tags"`
 	RequiredQualifications    string   `json:"requiredQualifications"`
@@ -108,6 +109,7 @@ func (c *JobPostingController) Create(ctx echo.Context) error {
 		TeamDescription:           body.TeamDescription,
 		TeamMembers:               body.TeamMembers,
 		TeamLabel:                 body.TeamLabel,
+		TeamID:                    body.TeamID,
 		SkillsGained:              body.SkillsGained,
 		Tags:                      body.Tags,
 		RequiredQualifications:    body.RequiredQualifications,
@@ -174,6 +176,15 @@ func (c *JobPostingController) Get(ctx echo.Context, jobID string) error {
 	return ctx.JSON(http.StatusOK, p.SingleResponse())
 }
 
+// ListPublic handles GET /api/jobs (no auth).
+func (c *JobPostingController) ListPublic(ctx echo.Context) error {
+	input, p := c.newIO()
+	if err := input.ListPublic(ctx.Request().Context()); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.JSON(http.StatusOK, p.ListResponse())
+}
+
 // GetPublic handles GET /api/jobs/:jobId (no auth).
 func (c *JobPostingController) GetPublic(ctx echo.Context, jobID string) error {
 	input, p := c.newIO()
@@ -212,6 +223,7 @@ func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 		TeamDescription:           body.TeamDescription,
 		TeamMembers:               body.TeamMembers,
 		TeamLabel:                 body.TeamLabel,
+		TeamID:                    body.TeamID,
 		SkillsGained:              body.SkillsGained,
 		Tags:                      body.Tags,
 		RequiredQualifications:    body.RequiredQualifications,

@@ -1,0 +1,1 @@
+ALTER TABLE job_postings ADD COLUMN team_id UUID REFERENCES teams(id) ON DELETE SET NULL;
