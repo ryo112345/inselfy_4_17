@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from "react";
 import Link from "next/link";
+import { useAuth } from "@/features/auth/auth-context";
 import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/WorkValuesContent";
 import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/CareerInterestContent";
 import { IntegratedReportContent } from "@/app/integrated-report/[requestId]/IntegratedReportContent";
@@ -24,7 +25,9 @@ type Props = {
   initialPanel?: number;
 };
 
-export function PanelNavigator({ children, username, displayName = username, wvSessionId, ciSessionId, wvResult, ciResult, wvHasReport, ciHasReport, intReportRequestId, intReportHasReport, isOwner = true, initialPanel = 0 }: Props) {
+export function PanelNavigator({ children, username, displayName = username, wvSessionId, ciSessionId, wvResult, ciResult, wvHasReport, ciHasReport, intReportRequestId, intReportHasReport, isOwner: serverIsOwner = true, initialPanel = 0 }: Props) {
+  const { user } = useAuth();
+  const isOwner = serverIsOwner || user?.username === username;
   const showWvResult = !!wvSessionId && (isOwner || !!wvHasReport);
   const showCiResult = !!ciSessionId && (isOwner || !!ciHasReport);
   const showIntReport = !!intReportRequestId && (isOwner || !!intReportHasReport);

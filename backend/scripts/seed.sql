@@ -14353,7 +14353,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'B0000000-0000-0000-0000-000000000001',
   'afd20f1c-b6a8-4809-bc8f-b3f41263b511',
@@ -14385,7 +14386,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月3万円\n書籍購入費全額補助\nカンファレンス参加費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"中村大輔"},{"name":"伊藤美咲"},{"name":"小林翔"},{"name":"渡辺健太"},{"name":"高橋悠太"}]'::jsonb,
+  'エンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 8-2. フロントエンドエンジニア（React / TypeScript）
@@ -14397,7 +14400,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'B0000000-0000-0000-0000-000000000002',
   'afd20f1c-b6a8-4809-bc8f-b3f41263b511',
@@ -14429,7 +14433,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月3万円\n書籍購入費全額補助\nカンファレンス参加費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（ポートフォリオレビュー含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（ポートフォリオレビュー含む） → 最終面接 → 内定',
+  '[{"name":"中村大輔"},{"name":"伊藤美咲"},{"name":"小林翔"},{"name":"渡辺健太"},{"name":"高橋悠太"}]'::jsonb,
+  'エンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 8-3. プロダクトデザイナー（UI/UX）
@@ -14441,7 +14447,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'B0000000-0000-0000-0000-000000000003',
   'afd20f1c-b6a8-4809-bc8f-b3f41263b511',
@@ -14473,7 +14480,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月3万円\n書籍購入費全額補助\nカンファレンス参加費補助\n副業OK',
   'フルリモート',
-  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定'
+  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定',
+  '[{"name":"井上萌"},{"name":"加藤彩花"},{"name":"松本蓮"}]'::jsonb,
+  'デザインチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 8-4. コミュニケーションデザイナー
@@ -14485,7 +14494,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'B0000000-0000-0000-0000-000000000004',
   'afd20f1c-b6a8-4809-bc8f-b3f41263b511',
@@ -14517,7 +14527,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月3万円\n書籍購入費全額補助\nカンファレンス参加費補助\n副業OK',
   'フルリモート',
-  '書類選考 → ポートフォリオレビュー → 最終面接 → 内定'
+  '書類選考 → ポートフォリオレビュー → 最終面接 → 内定',
+  '[{"name":"井上萌"},{"name":"加藤彩花"},{"name":"松本蓮"}]'::jsonb,
+  'デザインチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 8-5. フィールドセールス
@@ -14529,7 +14541,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'B0000000-0000-0000-0000-000000000005',
   'afd20f1c-b6a8-4809-bc8f-b3f41263b511',
@@ -14560,8 +14573,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月3万円\n書籍購入費全額補助\n交通費支給\n副業OK',
-  'リモート併用（週2〜3日出社）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"山口智也"},{"name":"木村拓也"},{"name":"林真理子"},{"name":"清水恵"}]'::jsonb,
+  'ビジネスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 8-6. カスタマーサクセス
@@ -14573,7 +14588,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'B0000000-0000-0000-0000-000000000006',
   'afd20f1c-b6a8-4809-bc8f-b3f41263b511',
@@ -14604,8 +14620,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月3万円\n書籍購入費全額補助\n交通費支給\n副業OK',
-  'リモート併用（週2〜3日出社）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"山口智也"},{"name":"木村拓也"},{"name":"林真理子"},{"name":"清水恵"}]'::jsonb,
+  'ビジネスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -14630,7 +14648,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0010000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000001',
@@ -14661,8 +14680,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ストックオプション制度\n書籍・学習費用月1万円補助\n健康診断オプション全額負担\n副業OK（届出制）\nリモートワーク可（週2出社推奨）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 技術面接（コーディングテスト含む） → チームフィット面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（コーディングテスト含む） → チームフィット面接 → 最終面接 → 内定',
+  '[{"name":"岡田祐介"},{"name":"藤原拓海"},{"name":"西田美穂"}]'::jsonb,
+  'プロダクト開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 01-2. セールス
@@ -14674,7 +14695,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0010000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000001',
@@ -14705,8 +14727,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ストックオプション制度\n書籍・学習費用月1万円補助\n交通費全額支給\n副業OK（届出制）',
-  '出社（週1リモート可）',
-  '書類選考 → 一次面接 → ロールプレイ面接 → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 一次面接 → ロールプレイ面接 → 最終面接 → 内定',
+  '[{"name":"前田壮一"},{"name":"福田麻衣"},{"name":"長谷川雄大"}]'::jsonb,
+  'セールスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 01-3. PM
@@ -14718,7 +14742,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0010000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000001',
@@ -14749,8 +14774,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ストックオプション制度\n書籍・学習費用月1万円補助\n健康診断オプション全額負担\n副業OK（届出制）\nリモートワーク可（週2出社推奨）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定',
+  '[{"name":"岡田祐介"},{"name":"藤原拓海"},{"name":"西田美穂"}]'::jsonb,
+  'プロダクト開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 01-4. カスタマーサクセス（SaaS特有）
@@ -14762,7 +14789,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0010000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000001',
@@ -14793,8 +14821,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ストックオプション制度\n書籍・学習費用月1万円補助\n健康診断オプション全額負担\n副業OK（届出制）\nリモートワーク可（週2出社推奨）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 一次面接 → ケーススタディ面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ケーススタディ面接 → 最終面接 → 内定',
+  '[{"name":"三浦沙織"},{"name":"原田航平"},{"name":"石川由美"}]'::jsonb,
+  'カスタマーサクセスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -14811,7 +14841,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0020000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000002',
@@ -14842,8 +14873,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'リモートワーク手当月2万円\n農場訪問時の交通費・宿泊費全額支給\n書籍購入費補助\n農産物の社員割引購入制度\n副業OK',
-  'リモート併用（月1回農場訪問）',
-  '書類選考 → 技術面接 → 農場見学（任意） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接 → 農場見学（任意） → 最終面接 → 内定',
+  '[{"name":"太田亮"},{"name":"杉山裕子"},{"name":"村上健司"}]'::jsonb,
+  'IoTエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 02-2. セールス
@@ -14855,7 +14888,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0020000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000002',
@@ -14886,8 +14920,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'出張手当\n交通費全額支給\n農産物の社員割引購入制度\n書籍購入費補助\n副業OK',
-  'リモート併用（出張・現地訪問あり）',
-  '書類選考 → 一次面接 → 事業計画ディスカッション → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 事業計画ディスカッション → 最終面接 → 内定',
+  '[{"name":"川口達也"},{"name":"平井雅人"},{"name":"野田晴香"}]'::jsonb,
+  '事業開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 02-3. 企画
@@ -14899,7 +14935,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0020000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000002',
@@ -14930,8 +14967,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'リモートワーク手当月2万円\n農場訪問時の交通費・宿泊費全額支給\n書籍購入費補助\n農産物の社員割引購入制度\n副業OK',
-  'リモート併用（月2回農場訪問）',
-  '書類選考 → 一次面接 → 企画課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 企画課題 → 最終面接 → 内定',
+  '[{"name":"太田亮"},{"name":"杉山裕子"},{"name":"村上健司"}]'::jsonb,
+  'IoTエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 02-4. フィールドオペレーション（農業テック特有）
@@ -14943,7 +14982,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0020000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000002',
@@ -14974,8 +15014,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'社用車貸与\n農場訪問時の交通費・宿泊費全額支給\n防寒具・作業着支給\n農産物の社員割引購入制度\n副業OK',
-  '出社・フィールドワーク中心',
-  '書類選考 → 一次面接 → 農場同行体験（半日） → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → 農場同行体験（半日） → 最終面接 → 内定',
+  '[{"name":"中島大地"},{"name":"佐々木理恵"},{"name":"吉村春菜"}]'::jsonb,
+  'フィールドオペレーションチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -14992,7 +15034,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0030000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000003',
@@ -15023,8 +15066,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'学会・カンファレンス参加費全額補助\n論文投稿費用補助\n書籍購入費月2万円補助\n健康診断フルコース無料\nリモートワーク手当月3万円',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 技術面接（ケーススタディ含む） → 論文・ポートフォリオレビュー → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（ケーススタディ含む） → 論文・ポートフォリオレビュー → 最終面接 → 内定',
+  '[{"name":"上田翔太"},{"name":"内田康介"},{"name":"森本彩"}]'::jsonb,
+  'データサイエンスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 03-2. セールス
@@ -15036,7 +15081,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0030000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000003',
@@ -15067,8 +15113,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'健康診断フルコース無料\n交通費全額支給\n書籍購入費補助\n学会参加費補助\n副業OK（届出制）',
-  '出社（リモート週1可）',
-  '書類選考 → 一次面接 → ケーススタディ面接 → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 一次面接 → ケーススタディ面接 → 最終面接 → 内定',
+  '[{"name":"望月菜々子"},{"name":"荒木陽子"},{"name":"高田誠"}]'::jsonb,
+  '医療連携チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 03-3. PM
@@ -15080,7 +15128,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0030000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000003',
@@ -15111,8 +15160,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'学会・カンファレンス参加費全額補助\n書籍購入費月2万円補助\n健康診断フルコース無料\nリモートワーク手当月3万円\n副業OK（届出制）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定',
+  '[{"name":"大西勇気"},{"name":"安田真由"},{"name":"島田慎一"}]'::jsonb,
+  'プロダクトマネジメントチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 03-4. 医療情報管理（ヘルステック特有）
@@ -15124,7 +15175,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0030000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000003',
@@ -15155,8 +15207,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'資格取得支援制度\n学会・カンファレンス参加費補助\n書籍購入費補助\n健康診断フルコース無料\n副業OK（届出制）',
-  '出社（リモート週1可）',
-  '書類選考 → 一次面接 → セキュリティケーススタディ → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 一次面接 → セキュリティケーススタディ → 最終面接 → 内定',
+  '[{"name":"望月菜々子"},{"name":"荒木陽子"},{"name":"高田誠"}]'::jsonb,
+  '医療連携チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -15173,7 +15227,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0040000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000004',
@@ -15204,8 +15259,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'デザインツール・ソフトウェア費用全額負担\n書籍購入費月1万円補助\nカンファレンス参加費補助\n副業OK\nリモートワーク可（週2出社推奨）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → ポートフォリオレビュー → 技術面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオレビュー → 技術面接 → 最終面接 → 内定',
+  '[{"name":"橋本絵里"},{"name":"水野楓"},{"name":"近藤大樹"}]'::jsonb,
+  'UIデザインチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 04-2. セールス
@@ -15217,7 +15274,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0040000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000004',
@@ -15248,8 +15306,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'デザインツール・ソフトウェア費用全額負担\nカンファレンス参加費補助\n書籍購入費月1万円補助\n副業OK\n交通費全額支給',
-  '出社（クライアント訪問あり）',
-  '書類選考 → 一次面接 → 提案課題 → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → 提案課題 → 最終面接 → 内定',
+  '[{"name":"今井千尋"},{"name":"坂本莉子"},{"name":"阿部智哉"}]'::jsonb,
+  'クリエイティブディレクションチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 04-3. デザイナー
@@ -15261,7 +15321,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0040000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000004',
@@ -15292,8 +15353,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'デザインツール・ソフトウェア費用全額負担\n書籍購入費月1万円補助\nカンファレンス・アワード応募費用補助\n副業OK\nリモートワーク可（週2出社推奨）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定',
+  '[{"name":"橋本絵里"},{"name":"水野楓"},{"name":"近藤大樹"}]'::jsonb,
+  'UIデザインチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 04-4. ブランドストラテジスト（デザインファーム特有）
@@ -15305,7 +15368,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0040000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000004',
@@ -15336,8 +15400,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'デザインツール・ソフトウェア費用全額負担\n書籍購入費月1万円補助\nカンファレンス・セミナー参加費補助\n副業OK\n交通費全額支給',
-  '出社（クライアント訪問あり）',
-  '書類選考 → ポートフォリオ・実績レビュー → 戦略課題プレゼンテーション → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → ポートフォリオ・実績レビュー → 戦略課題プレゼンテーション → 最終面接 → 内定',
+  '[{"name":"小川紗英"},{"name":"松田凌"},{"name":"遠藤隼人"}]'::jsonb,
+  'ブランディングチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -15354,7 +15420,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0050000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000005',
@@ -15385,8 +15452,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ストックオプション制度\n資格取得支援（受験費用全額負担）\n書籍購入費月2万円補助\nリモートワーク手当月3万円\n副業OK（届出制）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 技術面接（セキュリティ設計ディスカッション含む） → コーディングテスト → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（セキュリティ設計ディスカッション含む） → コーディングテスト → 最終面接 → 内定',
+  '[{"name":"山本将也"},{"name":"田村真帆"},{"name":"鈴木一馬"}]'::jsonb,
+  'バックエンドエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 05-2. セールス
@@ -15398,7 +15467,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0050000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000005',
@@ -15429,8 +15499,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ストックオプション制度\n書籍購入費月1万円補助\n交通費全額支給\n副業OK（届出制）',
-  '出社（リモート週1可）',
-  '書類選考 → 一次面接 → ケーススタディ面接 → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 一次面接 → ケーススタディ面接 → 最終面接 → 内定',
+  '[{"name":"宮崎悠斗"},{"name":"渡部美月"},{"name":"黒田浩一"}]'::jsonb,
+  'ビジネス開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 05-3. PM
@@ -15442,7 +15514,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0050000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000005',
@@ -15473,8 +15546,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ストックオプション制度\n書籍購入費月2万円補助\nカンファレンス参加費全額補助\nリモートワーク手当月3万円\n副業OK（届出制）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 一次面接 → プロダクト戦略ディスカッション → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → プロダクト戦略ディスカッション → 最終面接 → 内定',
+  '[{"name":"山本将也"},{"name":"田村真帆"},{"name":"鈴木一馬"}]'::jsonb,
+  'バックエンドエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 05-4. コンプライアンス（フィンテック特有）
@@ -15486,7 +15561,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0050000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000005',
@@ -15517,8 +15593,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'資格取得支援（受験費用全額負担）\n書籍購入費月2万円補助\nセミナー参加費補助\n副業OK（届出制）\n交通費全額支給',
-  '出社',
-  '書類選考 → 一次面接 → 規制対応ケーススタディ → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → 規制対応ケーススタディ → 最終面接 → 内定',
+  '[{"name":"中山さくら"},{"name":"河野明日香"},{"name":"竹内俊介"}]'::jsonb,
+  'コンプライアンスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -15535,7 +15613,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0060000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000006',
@@ -15566,8 +15645,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'資格取得支援（一級建築士等の受験費用補助）\n書籍購入費月1万円補助\n技術カンファレンス参加費補助\nリモートワーク可（週2出社推奨）\n副業OK（届出制）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 技術面接 → コーディングテスト → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接 → コーディングテスト → 最終面接 → 内定',
+  '[{"name":"古川翼"},{"name":"吉田あかり"},{"name":"柴田美咲"}]'::jsonb,
+  'BIM開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 06-2. セールス
@@ -15579,7 +15660,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0060000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000006',
@@ -15610,8 +15692,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'資格取得支援\n書籍購入費補助\n展示会・セミナー参加費全額負担\n交通費全額支給\n副業OK（届出制）',
-  '出社（顧客訪問あり）',
-  '書類選考 → 一次面接 → 営業戦略プレゼンテーション → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → 営業戦略プレゼンテーション → 最終面接 → 内定',
+  '[{"name":"北村拓真"},{"name":"土屋裕太"},{"name":"白石奈緒"}]'::jsonb,
+  '営業企画チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 06-3. デザイナー
@@ -15623,7 +15707,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0060000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000006',
@@ -15654,8 +15739,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'デザインツール費用全額負担\n資格取得支援\n書籍購入費月1万円補助\nリモートワーク可（週2出社推奨）\n副業OK（届出制）',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定',
+  '[{"name":"古川翼"},{"name":"吉田あかり"},{"name":"柴田美咲"}]'::jsonb,
+  'BIM開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 06-4. 構造解析エンジニア（建設テック特有）
@@ -15667,7 +15754,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0060000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000006',
@@ -15698,8 +15786,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'学会参加費・論文投稿費全額補助\n資格取得支援（一級建築士等）\n書籍購入費月2万円補助\n学位取得支援制度\n副業OK（届出制）',
-  '出社（リモート週1可）',
-  '書類選考 → 技術面接（専門知識ディスカッション） → コーディングテスト → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 技術面接（専門知識ディスカッション） → コーディングテスト → 最終面接 → 内定',
+  '[{"name":"永井達人"},{"name":"片山由紀"},{"name":"関口大輔"}]'::jsonb,
+  '構造解析エンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -15716,7 +15806,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0070000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000007',
@@ -15747,8 +15838,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'リモートワーク手当月2万円\n書籍・オンライン学習費用月1万円補助\n自社プラットフォームの全コース無料受講\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 技術面接（ポートフォリオレビュー含む） → コーディングテスト → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（ポートフォリオレビュー含む） → コーディングテスト → 最終面接 → 内定',
+  '[{"name":"丸山陽介"},{"name":"新井愛"},{"name":"横山瑠奈"}]'::jsonb,
+  'フロントエンドチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 07-2. マーケティング
@@ -15760,7 +15853,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0070000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000007',
@@ -15791,8 +15885,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'リモートワーク手当月2万円\n書籍・オンライン学習費用月1万円補助\n自社プラットフォームの全コース無料受講\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 一次面接 → マーケティング課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → マーケティング課題 → 最終面接 → 内定',
+  '[{"name":"宮本瞳"},{"name":"服部涼太"},{"name":"池田健"}]'::jsonb,
+  'マーケティングチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 07-3. 企画
@@ -15804,7 +15900,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0070000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000007',
@@ -15835,8 +15932,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'リモートワーク手当月2万円\n書籍・オンライン学習費用月1万円補助\n自社プラットフォームの全コース無料受講\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 一次面接 → カリキュラム設計課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → カリキュラム設計課題 → 最終面接 → 内定',
+  '[{"name":"斎藤歩"},{"name":"浜田奈々"},{"name":"菅原圭太"}]'::jsonb,
+  'カリキュラム開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 07-4. カリキュラムアドバイザー（EdTech特有）
@@ -15848,7 +15947,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0070000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000007',
@@ -15879,8 +15979,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'自社プラットフォームの全コース無料受講\n書籍・オンライン学習費用月1万円補助\n交通費全額支給\n資格取得支援\n副業OK',
-  '出社（顧客訪問あり）',
-  '書類選考 → 一次面接 → 研修設計課題プレゼンテーション → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → 研修設計課題プレゼンテーション → 最終面接 → 内定',
+  '[{"name":"斎藤歩"},{"name":"浜田奈々"},{"name":"菅原圭太"}]'::jsonb,
+  'カリキュラム開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -15897,7 +15999,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0080000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000008',
@@ -15928,8 +16031,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'学会参加費・論文投稿費全額補助\n書籍購入費月2万円補助\nリモートワーク手当月2万円\n物流現場見学ツアー\n副業OK',
-  'リモート併用（週1出社推奨）',
-  '書類選考 → 技術面接（アルゴリズム設計ディスカッション） → コーディングテスト → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（アルゴリズム設計ディスカッション） → コーディングテスト → 最終面接 → 内定',
+  '[{"name":"久保田梨花"},{"name":"金子翔平"},{"name":"須藤誠"}]'::jsonb,
+  'ルート最適化エンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 08-2. セールス
@@ -15941,7 +16046,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0080000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000008',
@@ -15972,8 +16078,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'交通費全額支給\n物流現場見学ツアー\n書籍購入費補助\n副業OK（届出制）',
-  '出社（顧客訪問あり）',
-  '書類選考 → 一次面接 → ケーススタディ面接 → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → ケーススタディ面接 → 最終面接 → 内定',
+  '[{"name":"小野寺剛"},{"name":"星野恵理"},{"name":"桑原直樹"}]'::jsonb,
+  'アカウントマネジメントチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 08-3. PM
@@ -15985,7 +16093,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0080000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000008',
@@ -16016,8 +16125,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'リモートワーク手当月2万円\n物流現場見学ツアー\n書籍購入費月1万円補助\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週1出社推奨）',
-  '書類選考 → 一次面接 → プロダクト戦略ディスカッション → 物流現場見学 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → プロダクト戦略ディスカッション → 物流現場見学 → 最終面接 → 内定',
+  '[{"name":"久保田梨花"},{"name":"金子翔平"},{"name":"須藤誠"}]'::jsonb,
+  'ルート最適化エンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 08-4. 倉庫オペレーション設計（物流特有）
@@ -16029,7 +16140,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0080000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000008',
@@ -16060,8 +16172,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'社用車貸与\n安全靴・作業着支給\n交通費全額支給\n資格取得支援\n副業OK（届出制）',
-  '出社・現場訪問中心',
-  '書類選考 → 一次面接 → 倉庫見学＆ケーススタディ → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → 倉庫見学＆ケーススタディ → 最終面接 → 内定',
+  '[{"name":"奥村拓人"},{"name":"栗原千夏"},{"name":"沢田志保"}]'::jsonb,
+  '倉庫管理オペレーションチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -16078,7 +16192,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0090000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000009',
@@ -16109,8 +16224,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'リモートワーク手当月2万円\n資格取得支援（電気主任技術者等）\n書籍購入費月1万円補助\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週1出社推奨）',
-  '書類選考 → 技術面接 → コーディングテスト → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接 → コーディングテスト → 最終面接 → 内定',
+  '[{"name":"中川洋平"},{"name":"堀内拓馬"},{"name":"藤井香織"}]'::jsonb,
+  '電力システムエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 09-2. セールス
@@ -16122,7 +16239,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0090000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000009',
@@ -16153,8 +16271,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'社用車貸与\n交通費全額支給\n資格取得支援\n書籍購入費補助\n副業OK（届出制）',
-  '出社（顧客訪問中心）',
-  '書類選考 → 一次面接 → 提案プレゼンテーション → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → 提案プレゼンテーション → 最終面接 → 内定',
+  '[{"name":"富田祐樹"},{"name":"岩本絵美"},{"name":"松井大介"}]'::jsonb,
+  '法人営業チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 09-3. 企画
@@ -16166,7 +16286,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0090000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000009',
@@ -16197,8 +16318,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'リモートワーク手当月2万円\n学会・セミナー参加費補助\n資格取得支援\n書籍購入費補助\n副業OK',
-  'リモート併用（出張あり）',
-  '書類選考 → 一次面接 → ケーススタディ → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ケーススタディ → 最終面接 → 内定',
+  '[{"name":"佐久間聡"},{"name":"相馬美羽"},{"name":"谷口文香"}]'::jsonb,
+  'サステナビリティ推進チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 09-4. 発電設備管理（エネルギー業界特有）
@@ -16210,7 +16333,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0090000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000009',
@@ -16241,8 +16365,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙',
   E'社用車貸与\n安全装備・作業着支給\n資格取得支援（受験費用全額負担）\n交通費全額支給\n副業OK（届出制）',
-  '出社・現場訪問中心',
-  '書類選考 → 一次面接 → 現場見学（発電所） → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → 現場見学（発電所） → 最終面接 → 内定',
+  '[{"name":"中川洋平"},{"name":"堀内拓馬"},{"name":"藤井香織"}]'::jsonb,
+  '電力システムエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -16259,7 +16385,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00a0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000000a',
@@ -16290,8 +16417,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費月1万円補助\nカンファレンス参加費補助\n副業OK\n資格取得支援',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 技術面接（コーディングテスト含む） → プロダクト面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（コーディングテスト含む） → プロダクト面接 → 最終面接 → 内定',
+  '[{"name":"千葉優太"},{"name":"大塚涼介"},{"name":"高木彩音"}]'::jsonb,
+  'プロダクトエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0a-2. セールス
@@ -16303,7 +16432,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00a0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000000a',
@@ -16334,8 +16464,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'交通費全額支給\n書籍購入費補助\n資格取得支援\n副業OK（届出制）',
-  '出社（パートナー訪問あり）',
-  '書類選考 → 一次面接 → パートナー戦略ディスカッション → 最終面接 → 内定'
+  'フル出社',
+  '書類選考 → 一次面接 → パートナー戦略ディスカッション → 最終面接 → 内定',
+  '[{"name":"広瀬太一"},{"name":"成田龍馬"},{"name":"秋元茜"}]'::jsonb,
+  'パートナーセールスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0a-3. PM
@@ -16347,7 +16479,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00a0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000000a',
@@ -16378,8 +16511,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費月1万円補助\nカンファレンス参加費補助\n副業OK\n資格取得支援',
-  'リモート併用（週2出社推奨）',
-  '書類選考 → 一次面接 → プロダクト戦略ケース面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → プロダクト戦略ケース面接 → 最終面接 → 内定',
+  '[{"name":"千葉優太"},{"name":"大塚涼介"},{"name":"高木彩音"}]'::jsonb,
+  'プロダクトエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0a-4. キャリアアドバイザー（HR業界特有）
@@ -16391,7 +16526,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00a0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000000a',
@@ -16422,8 +16558,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'キャリアコンサルタント資格取得支援（受験費用全額負担）\n書籍購入費補助\n交通費全額支給\n副業OK（届出制）',
-  'リモート併用（週3出社推奨）',
-  '書類選考 → 一次面接 → ロールプレイ面接（キャリアカウンセリング） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ロールプレイ面接（キャリアカウンセリング） → 最終面接 → 内定',
+  '[{"name":"大森早紀"},{"name":"小島真央"},{"name":"福島康平"}]'::jsonb,
+  'キャリアアドバイザーチーム'
 ) ON CONFLICT DO NOTHING;
 
 
@@ -16444,7 +16582,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00b0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000000b',
@@ -16475,8 +16614,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費補助（年5万円）\n社員割引制度\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"岡田拓真"},{"name":"藤原瑞希"},{"name":"西村航平"}]'::jsonb,
+  'ECプラットフォーム開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0b-2: データアナリスト
@@ -16488,7 +16629,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00b0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000000b',
@@ -16519,8 +16661,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費補助（年5万円）\n社員割引制度\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 分析課題 → 面接（2回） → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 分析課題 → 面接（2回） → 内定',
+  '[{"name":"三浦由紀"},{"name":"原田翼"},{"name":"吉川麻衣"}]'::jsonb,
+  'マーケティングチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0b-3: プロダクトマネージャー
@@ -16532,7 +16676,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00b0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000000b',
@@ -16563,8 +16708,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費補助（年5万円）\n社員割引制度\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定',
+  '[{"name":"三浦由紀"},{"name":"原田翼"},{"name":"吉川麻衣"}]'::jsonb,
+  'マーケティングチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0b-4: カスタマーサクセス
@@ -16576,7 +16723,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00b0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000000b',
@@ -16607,8 +16755,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費補助（年5万円）\n社員割引制度\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"石橋大地"},{"name":"福田健一"},{"name":"長谷川未来"}]'::jsonb,
+  'カスタマーサクセスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -16624,7 +16774,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00c0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000000c',
@@ -16656,7 +16807,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'フルリモート手当月3万円\nゲーム購入費補助（月5,000円）\nカンファレンス参加費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（システム設計課題） → 最終面接 → 内定'
+  '書類選考 → 技術面接（システム設計課題） → 最終面接 → 内定',
+  '[{"name":"上田ひかり"},{"name":"安藤涼介"},{"name":"金子悠人"}]'::jsonb,
+  'ゲーム開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0c-2: UIデザイナー
@@ -16668,7 +16821,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00c0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000000c',
@@ -16699,8 +16853,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'フルリモート手当月3万円\nゲーム購入費補助（月5,000円）\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週1日出社）',
-  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定',
+  '[{"name":"宮崎奈々"},{"name":"杉山隼人"},{"name":"田辺彩乃"}]'::jsonb,
+  'ゲームデザインチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0c-3: マーケティング
@@ -16712,7 +16868,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00c0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000000c',
@@ -16743,8 +16900,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'フルリモート手当月3万円\nゲーム購入費補助（月5,000円）\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週1日出社）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"久保田亮"},{"name":"内田真帆"},{"name":"野口俊樹"}]'::jsonb,
+  'プロデュースチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0c-4: 企画（ゲームプランナー）
@@ -16756,7 +16915,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00c0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000000c',
@@ -16787,8 +16947,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'フルリモート手当月3万円\nゲーム購入費補助（月5,000円）\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週1日出社）',
-  '書類選考 → 企画課題 → 面接（2回） → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 企画課題 → 面接（2回） → 内定',
+  '[{"name":"宮崎奈々"},{"name":"杉山隼人"},{"name":"田辺彩乃"}]'::jsonb,
+  'ゲームデザインチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -16804,7 +16966,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00d0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000000d',
@@ -16836,7 +16999,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'社宅制度（転居を伴う場合）\n退職金制度\n財形貯蓄\n社員食堂あり\n資格取得支援制度',
   '原則出社',
-  '書類選考 → 適性検査 → 技術面接 → 最終面接 → 内定'
+  '書類選考 → 適性検査 → 技術面接 → 最終面接 → 内定',
+  '[{"name":"中島千尋"},{"name":"佐々木雄大"},{"name":"河野正樹"}]'::jsonb,
+  '生産技術チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0d-2: 生産技術エンジニア
@@ -16848,7 +17013,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00d0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000000d',
@@ -16880,7 +17046,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'社宅制度（転居を伴う場合）\n退職金制度\n財形貯蓄\n社員食堂あり\n資格取得支援制度',
   '原則出社',
-  '書類選考 → 適性検査 → 面接（2回） → 工場見学 → 内定'
+  '書類選考 → 適性検査 → 面接（2回） → 工場見学 → 内定',
+  '[{"name":"前田亜美"},{"name":"村上和代"},{"name":"竹内敦"}]'::jsonb,
+  '品質管理チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0d-3: 社内SE
@@ -16892,7 +17060,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00d0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000000d',
@@ -16923,8 +17092,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'社宅制度（転居を伴う場合）\n退職金制度\n財形貯蓄\n社員食堂あり\n資格取得支援制度',
-  '原則出社（週1日在宅勤務可）',
-  '書類選考 → 適性検査 → 面接（2回） → 内定'
+  '原則出社',
+  '書類選考 → 適性検査 → 面接（2回） → 内定',
+  '[{"name":"中島千尋"},{"name":"佐々木雄大"},{"name":"河野正樹"}]'::jsonb,
+  '生産技術チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0d-4: 人事
@@ -16936,7 +17107,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00d0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000000d',
@@ -16967,8 +17139,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'社宅制度（転居を伴う場合）\n退職金制度\n財形貯蓄\n社員食堂あり\n資格取得支援制度',
-  '原則出社（週1日在宅勤務可）',
-  '書類選考 → 面接（2回） → 内定'
+  '原則出社',
+  '書類選考 → 面接（2回） → 内定',
+  '[{"name":"森本沙織"},{"name":"池田慶太"},{"name":"黒田浩司"}]'::jsonb,
+  '営業チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -16984,7 +17158,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00e0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000000e',
@@ -17015,8 +17190,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n旅行体験手当（年10万円）\n書籍購入費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 技術面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接 → 最終面接 → 内定',
+  '[{"name":"松浦結衣"},{"name":"永井あかね"},{"name":"高木誠一"}]'::jsonb,
+  'トラベルプランニングチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0e-2: デザイナー
@@ -17028,7 +17205,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00e0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000000e',
@@ -17059,8 +17237,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n旅行体験手当（年10万円）\n書籍購入費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定',
+  '[{"name":"土屋拓馬"},{"name":"堀江大輝"},{"name":"菅原梨花"}]'::jsonb,
+  'システム開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0e-3: セールス
@@ -17072,7 +17252,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00e0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000000e',
@@ -17103,8 +17284,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n旅行体験手当（年10万円）\n交通費全額支給\n副業OK',
-  'リモート併用（外勤中心）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"大野恵子"},{"name":"平野直樹"},{"name":"須藤絵里"}]'::jsonb,
+  'セールスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0e-4: マーケティング
@@ -17116,7 +17299,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00e0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000000e',
@@ -17147,8 +17331,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n旅行体験手当（年10万円）\n書籍購入費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → ポートフォリオ・実績提出 → 面接（2回） → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオ・実績提出 → 面接（2回） → 内定',
+  '[{"name":"大野恵子"},{"name":"平野直樹"},{"name":"須藤絵里"}]'::jsonb,
+  'セールスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -17164,7 +17350,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00f0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000000f',
@@ -17195,8 +17382,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'セキュリティ資格取得費全額補助\nCTF・カンファレンス参加費補助\n書籍購入費全額補助\n副業OK',
-  'リモート併用（週1〜2日出社）',
-  '書類選考 → 技術面接（CTF形式の課題含む） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（CTF形式の課題含む） → 最終面接 → 内定',
+  '[{"name":"新井裕也"},{"name":"望月陽太"},{"name":"片岡美優"}]'::jsonb,
+  'セキュリティリサーチチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0f-2: セキュリティコンサルタント
@@ -17208,7 +17397,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00f0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000000f',
@@ -17239,8 +17429,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'セキュリティ資格取得費全額補助\nカンファレンス参加費補助\n書籍購入費全額補助\n副業OK',
-  'リモート併用（週1〜2日出社）',
-  '書類選考 → ケース面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ケース面接 → 最終面接 → 内定',
+  '[{"name":"今井葵"},{"name":"大塚健"},{"name":"柴田理恵"}]'::jsonb,
+  'SOCチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0f-3: SOCアナリスト
@@ -17252,7 +17444,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00f0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000000f',
@@ -17283,8 +17476,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'セキュリティ資格取得費全額補助\nカンファレンス参加費補助\n書籍購入費全額補助\n深夜勤務手当',
-  '原則出社（SOC勤務）',
-  '書類選考 → 技術面接 → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 技術面接 → 最終面接 → 内定',
+  '[{"name":"新井裕也"},{"name":"望月陽太"},{"name":"片岡美優"}]'::jsonb,
+  'セキュリティリサーチチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 0f-4: セールス
@@ -17296,7 +17491,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd00f0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000000f',
@@ -17327,8 +17523,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'セキュリティ資格取得費補助\n書籍購入費全額補助\n交通費全額支給\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"坂本龍太"},{"name":"奥村壮太"},{"name":"横山千春"}]'::jsonb,
+  'コンサルティングチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -17344,7 +17542,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0100000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000010',
@@ -17375,8 +17574,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n食事補助（提携飲食店で社割）\n書籍購入費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 技術面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接 → 最終面接 → 内定',
+  '[{"name":"小川紗也"},{"name":"武田一真"},{"name":"藤井康介"}]'::jsonb,
+  'R&Dチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 10-2: デザイナー
@@ -17388,7 +17589,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0100000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000010',
@@ -17419,8 +17621,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n食事補助（提携飲食店で社割）\n書籍購入費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定',
+  '[{"name":"北村香織"},{"name":"清水遥"},{"name":"渋谷純平"}]'::jsonb,
+  'プロダクト開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 10-3: セールス
@@ -17432,7 +17636,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0100000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000010',
@@ -17463,8 +17668,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n食事補助（提携飲食店で社割）\n交通費全額支給\n副業OK',
-  'リモート併用（外勤中心）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"丸山志穂"},{"name":"谷口大樹"},{"name":"関口拓也"}]'::jsonb,
+  '事業開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 10-4: 企画
@@ -17476,7 +17683,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0100000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000010',
@@ -17507,8 +17715,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n食事補助（提携飲食店で社割）\n書籍購入費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定',
+  '[{"name":"北村香織"},{"name":"清水遥"},{"name":"渋谷純平"}]'::jsonb,
+  'プロダクト開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -17524,7 +17734,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0110000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000011',
@@ -17555,8 +17766,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\nカンファレンス・学会参加費補助\n書籍購入費全額補助\n引越し支援金',
-  'リモート併用（週3日出社・テスト日は出社必須）',
-  '書類選考 → 技術面接（コーディング課題含む） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（コーディング課題含む） → 最終面接 → 内定',
+  '[{"name":"山下智弘"},{"name":"川崎莉子"},{"name":"浜田修一"}]'::jsonb,
+  '自動運転開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 11-2: PM
@@ -17568,7 +17781,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0110000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000011',
@@ -17599,8 +17813,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\nカンファレンス参加費補助\n書籍購入費補助\n引越し支援金',
-  'リモート併用（週3日出社）',
-  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定',
+  '[{"name":"古賀美帆"},{"name":"白石七海"},{"name":"篠原大介"}]'::jsonb,
+  'ハードウェア設計チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 11-3: マーケティング
@@ -17612,7 +17828,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0110000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000011',
@@ -17643,8 +17860,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\nカンファレンス参加費補助\n書籍購入費補助\n引越し支援金',
-  'リモート併用（週2日出社）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"増田将人"},{"name":"宮田悠斗"},{"name":"川上真理"}]'::jsonb,
+  'パートナーシップチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 11-4: カスタマーサクセス（MaaS）
@@ -17656,7 +17875,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0110000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000011',
@@ -17687,8 +17907,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n出張手当\n書籍購入費補助\n引越し支援金',
-  'リモート併用（週2日出社・出張あり）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"増田将人"},{"name":"宮田悠斗"},{"name":"川上真理"}]'::jsonb,
+  'パートナーシップチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -17704,7 +17926,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0120000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000012',
@@ -17735,8 +17958,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費全額補助\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 技術面接（コーディング課題含む） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（コーディング課題含む） → 最終面接 → 内定',
+  '[{"name":"中野拓海"},{"name":"石田彩華"},{"name":"遠藤詩織"}]'::jsonb,
+  '編集チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 12-2: 編集者
@@ -17748,7 +17973,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0120000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000012',
@@ -17779,8 +18005,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費全額補助\nカンファレンス・イベント参加費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 編集課題 → 面接（2回） → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 編集課題 → 面接（2回） → 内定',
+  '[{"name":"岩本浩太"},{"name":"服部陸"},{"name":"高田美咲"}]'::jsonb,
+  'デジタルマーケチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 12-3: セールス（広告営業）
@@ -17792,7 +18020,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0120000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000012',
@@ -17823,8 +18052,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費全額補助\n交通費全額支給\n副業OK',
-  'リモート併用（外勤・出社併用）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"五十嵐雅"},{"name":"水野有紀"},{"name":"近藤隆志"}]'::jsonb,
+  '広告営業チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 12-4: デザイナー
@@ -17836,7 +18067,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0120000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000012',
@@ -17867,8 +18099,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費全額補助\nカンファレンス参加費補助\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → ポートフォリオレビュー → 面接（2回） → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオレビュー → 面接（2回） → 内定',
+  '[{"name":"岩本浩太"},{"name":"服部陸"},{"name":"高田美咲"}]'::jsonb,
+  'デジタルマーケチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -17884,7 +18118,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0130000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000013',
@@ -17915,8 +18150,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\nジム利用無料（社内ジム）\nウェルネス手当（月1万円）\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 技術面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接 → 最終面接 → 内定',
+  '[{"name":"太田健吾"},{"name":"小松龍之介"},{"name":"本田さくら"}]'::jsonb,
+  'トレーナーチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 13-2: PM
@@ -17928,7 +18165,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0130000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000013',
@@ -17959,8 +18197,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\nジム利用無料（社内ジム）\nウェルネス手当（月1万円）\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → ケース面接 → 最終面接 → 内定',
+  '[{"name":"島田優花"},{"name":"沢田啓介"},{"name":"田村明日香"}]'::jsonb,
+  'サービス開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 13-3: セールス
@@ -17972,7 +18212,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0130000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000013',
@@ -18003,8 +18244,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\nジム利用無料（社内ジム）\nウェルネス手当（月1万円）\n交通費全額支給',
-  'リモート併用（外勤中心）',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"富田裕介"},{"name":"栗原真紀"},{"name":"阿部勇気"}]'::jsonb,
+  'マーケティング戦略チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 13-4: デザイナー
@@ -18016,7 +18259,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0130000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000013',
@@ -18047,8 +18291,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\nジム利用無料（社内ジム）\nウェルネス手当（月1万円）\n副業OK',
-  'リモート併用（週2日出社）',
-  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定',
+  '[{"name":"島田優花"},{"name":"沢田啓介"},{"name":"田村明日香"}]'::jsonb,
+  'サービス開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -18064,7 +18310,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0140000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000014',
@@ -18096,7 +18343,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'フルリモート手当月3万円\n書籍購入費全額補助\nカンファレンス参加費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（システム設計課題含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（システム設計課題含む） → 最終面接 → 内定',
+  '[{"name":"佐藤陽一"},{"name":"吉田茜"},{"name":"桜井優斗"}]'::jsonb,
+  'リーガルAI開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 14-2: デザイナー
@@ -18108,7 +18357,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0140000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000014',
@@ -18140,7 +18390,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'フルリモート手当月3万円\n書籍購入費全額補助\nカンファレンス参加費補助\n副業OK',
   'フルリモート',
-  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定'
+  '書類選考 → ポートフォリオレビュー → デザイン課題 → 最終面接 → 内定',
+  '[{"name":"山田里奈"},{"name":"田中雄一郎"},{"name":"鈴木美波"}]'::jsonb,
+  '法務コンサルチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 14-3: カスタマーサクセス
@@ -18152,7 +18404,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0140000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000014',
@@ -18184,7 +18437,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'フルリモート手当月3万円\n書籍購入費全額補助\n資格取得費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"伊東翔太"},{"name":"斉藤春香"},{"name":"渡部啓太"}]'::jsonb,
+  'カスタマーサポートチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 14-4: セールス
@@ -18196,7 +18451,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0140000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000014',
@@ -18228,7 +18484,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'フルリモート手当月3万円\n書籍購入費全額補助\n資格取得費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 一次面接 → 最終面接 → 内定'
+  '書類選考 → 一次面接 → 最終面接 → 内定',
+  '[{"name":"伊東翔太"},{"name":"斉藤春香"},{"name":"渡部啓太"}]'::jsonb,
+  'カスタマーサポートチーム'
 ) ON CONFLICT DO NOTHING;
 
 
@@ -18249,7 +18507,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0150000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000015',
@@ -18280,8 +18539,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'社員割引制度（自社ブランド50%OFF）\n展示会出張手当\nスキルアップ研修費補助\n副業OK',
-  '週2日リモート可',
-  '書類選考（ポートフォリオ必須） → デザイン課題 → 面接（2回） → 内定'
+  'リモート可（週数回出社）',
+  '書類選考（ポートフォリオ必須） → デザイン課題 → 面接（2回） → 内定',
+  '[{"name":"上野翔太"},{"name":"相川莉子"},{"name":"藤原陽菜"}]'::jsonb,
+  'デザイナーチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 15-2. MD・バイヤー
@@ -18293,7 +18554,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0150000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000015',
@@ -18324,8 +18586,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'社員割引制度（自社ブランド50%OFF）\n出張手当\nスキルアップ研修費補助\n副業OK',
-  '原則出社（出張あり）',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"原田圭介"},{"name":"片山瑞希"},{"name":"西村美月"}]'::jsonb,
+  'MD・バイヤーチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 15-3. フルスタックエンジニア
@@ -18337,7 +18601,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0150000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000015',
@@ -18369,7 +18634,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費補助\nカンファレンス参加費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"三浦彩乃"},{"name":"久保田亮"},{"name":"野口拓実"}]'::jsonb,
+  'エンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 15-4. マーケティング
@@ -18381,7 +18648,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0150000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000015',
@@ -18412,8 +18680,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'社員割引制度（自社ブランド50%OFF）\n書籍購入費補助\nカンファレンス参加費補助\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"原田圭介"},{"name":"片山瑞希"},{"name":"西村美月"}]'::jsonb,
+  'MD・バイヤーチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -18429,7 +18699,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0160000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000016',
@@ -18460,8 +18731,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'アクチュアリー試験受験料・教材費全額補助\n合格祝い金制度\n書籍購入費補助\n副業OK',
-  '週2日リモート可',
-  '書類選考 → 技術面接（数理テスト含む） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（数理テスト含む） → 最終面接 → 内定',
+  '[{"name":"岡田真一"},{"name":"森田啓太"},{"name":"長谷川由紀"}]'::jsonb,
+  'アクチュアリーチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 16-2. セールス（営業企画）
@@ -18473,7 +18746,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0160000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000016',
@@ -18504,8 +18778,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'営業インセンティブ制度\n保険資格取得支援\n書籍購入費補助\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"内田沙織"},{"name":"平野美咲"},{"name":"杉本大地"}]'::jsonb,
+  '営業企画チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 16-3. システムエンジニア
@@ -18517,7 +18793,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0160000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000016',
@@ -18549,7 +18826,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費全額補助\nカンファレンス参加費補助\n資格取得支援制度\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"村上雄大"},{"name":"池田恵美"},{"name":"石井翔平"}]'::jsonb,
+  'システム開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 16-4. カスタマーサクセス
@@ -18561,7 +18840,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0160000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000016',
@@ -18592,8 +18872,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'保険資格取得支援\n書籍購入費補助\nスキルアップ研修制度\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"内田沙織"},{"name":"平野美咲"},{"name":"杉本大地"}]'::jsonb,
+  '営業企画チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -18609,7 +18891,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0170000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000017',
@@ -18640,8 +18923,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'学会参加費補助\n論文発表奨励金\n引越し手当（入社時）\n副業OK',
-  '原則出社（打ち上げ前後はリモート不可）',
-  '書類選考 → 技術面接 → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 技術面接 → 最終面接 → 内定',
+  '[{"name":"大西航平"},{"name":"小松崎遥"},{"name":"河野誠一郎"}]'::jsonb,
+  '衛星開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 17-2. フライトソフトウェアエンジニア
@@ -18653,7 +18938,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0170000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000017',
@@ -18684,8 +18970,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'学会参加費補助\n論文発表奨励金\n引越し手当（入社時）\n副業OK',
-  '原則出社（一部リモート相談可）',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"松岡大樹"},{"name":"渡部千夏"},{"name":"白石凛"}]'::jsonb,
+  'フライトソフトウェアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 17-3. 事業開発
@@ -18697,7 +18985,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0170000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000017',
@@ -18728,8 +19017,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'出張手当\nカンファレンス参加費補助\n書籍購入費補助\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"安田光太郎"},{"name":"金子達也"},{"name":"高木美穂"}]'::jsonb,
+  '事業開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 17-4. PM
@@ -18741,7 +19032,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0170000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000017',
@@ -18773,7 +19065,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'出張手当\nカンファレンス参加費補助\n書籍購入費補助\n副業OK',
   '原則出社',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"安田光太郎"},{"name":"金子達也"},{"name":"高木美穂"}]'::jsonb,
+  '事業開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -18789,7 +19083,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0180000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000018',
@@ -18820,8 +19115,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ペット同伴出勤可（週1日）\nペット関連サービス割引\n書籍購入費補助\n副業OK',
-  '週2日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"川島葵"},{"name":"永井理沙"},{"name":"福島健吾"}]'::jsonb,
+  '獣医サポートチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 18-2. フロントエンドエンジニア
@@ -18833,7 +19130,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0180000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000018',
@@ -18865,7 +19163,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\nペット同伴出勤可（週1日）\n書籍購入費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"前田侑希"},{"name":"吉岡悠真"},{"name":"太田明日香"}]'::jsonb,
+  'プロダクト開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 18-3. カスタマーサクセス
@@ -18877,7 +19177,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0180000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000018',
@@ -18908,8 +19209,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ペット同伴出勤可（週1日）\nペット関連サービス割引\n書籍購入費補助\n副業OK',
-  '週2日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"堀内七海"},{"name":"望月結衣"},{"name":"関口隼人"}]'::jsonb,
+  'カスタマーサクセスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 18-4. マーケティング
@@ -18921,7 +19224,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0180000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000018',
@@ -18952,8 +19256,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'ペット同伴出勤可（週1日）\nペット関連サービス割引\n書籍購入費補助\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"堀内七海"},{"name":"望月結衣"},{"name":"関口隼人"}]'::jsonb,
+  'カスタマーサクセスチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -18969,7 +19275,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0190000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-000000000019',
@@ -19001,7 +19308,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費補助\n介護関連資格取得支援\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"土屋香織"},{"name":"浜田将太"},{"name":"菅原洋平"}]'::jsonb,
+  '介護DXチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 19-2. ケアマネ支援プロダクト企画
@@ -19013,7 +19322,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0190000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-000000000019',
@@ -19044,8 +19354,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'介護関連資格取得支援\n施設見学・研修制度\n書籍購入費補助\n副業OK',
-  '週2日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"大塚真由"},{"name":"宮崎さくら"},{"name":"小野寺拓哉"}]'::jsonb,
+  'ケアマネ支援チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 19-3. セールス
@@ -19057,7 +19369,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0190000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-000000000019',
@@ -19088,8 +19401,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'営業インセンティブ制度\n介護関連資格取得支援\n社用車貸与\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"五十嵐瞳"},{"name":"新井慎太郎"},{"name":"横山康平"}]'::jsonb,
+  '経営企画チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 19-4. 人事
@@ -19101,7 +19416,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd0190000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-000000000019',
@@ -19132,8 +19448,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'介護関連資格取得支援\n書籍購入費補助\n研修参加費補助\n副業OK',
-  '週2日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"五十嵐瞳"},{"name":"新井慎太郎"},{"name":"横山康平"}]'::jsonb,
+  '経営企画チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -19149,7 +19467,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01a0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000001a',
@@ -19180,8 +19499,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'楽器・音楽機材購入補助\n学会参加費補助\n論文発表奨励金\n副業OK',
-  '週2日リモート可',
-  '書類選考 → 技術面接（実技テスト含む） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（実技テスト含む） → 最終面接 → 内定',
+  '[{"name":"佐々木遼"},{"name":"小川美羽"},{"name":"柴田龍一"}]'::jsonb,
+  'サウンドエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1a-2. アーティストリレーション
@@ -19193,7 +19514,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01a0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000001a',
@@ -19224,8 +19546,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'楽器・音楽機材購入補助\nイベント参加費補助\nライブ鑑賞チケット補助\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"中島あかり"},{"name":"坂本蒼太"},{"name":"藤井紗和"}]'::jsonb,
+  'アーティストリレーションチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1a-3. フルスタックエンジニア
@@ -19237,7 +19561,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01a0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000001a',
@@ -19269,7 +19594,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n楽器・音楽機材購入補助\n書籍購入費補助\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"古川瑠花"},{"name":"遠藤智哉"},{"name":"高山颯人"}]'::jsonb,
+  'プロダクト開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1a-4. UIデザイナー
@@ -19281,7 +19608,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01a0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000001a',
@@ -19312,8 +19640,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'楽器・音楽機材購入補助\n書籍購入費補助\nデザインカンファレンス参加費補助\n副業OK',
-  '週2日リモート可',
-  '書類選考（ポートフォリオ必須） → デザイン課題 → 面接（2回） → 内定'
+  'リモート可（週数回出社）',
+  '書類選考（ポートフォリオ必須） → デザイン課題 → 面接（2回） → 内定',
+  '[{"name":"古川瑠花"},{"name":"遠藤智哉"},{"name":"高山颯人"}]'::jsonb,
+  'プロダクト開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -19329,7 +19659,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01b0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000001b',
@@ -19360,8 +19691,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'学会参加費補助\n論文発表奨励金\n引越し手当（入社時）\n副業OK',
-  '原則出社（一部リモート相談可）',
-  '書類選考 → 技術面接 → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 技術面接 → 最終面接 → 内定',
+  '[{"name":"丸山大輝"},{"name":"和田健太郎"},{"name":"黒田優奈"}]'::jsonb,
+  '農機開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1b-2. フィールドエンジニア
@@ -19373,7 +19706,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01b0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000001b',
@@ -19404,8 +19738,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'出張手当\n社用車貸与\n工具・機材購入補助\n副業OK',
-  '原則出社（出張中心）',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"尾崎翠"},{"name":"島田梨花"},{"name":"竹内裕也"}]'::jsonb,
+  'フィールドエンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1b-3. 営業
@@ -19417,7 +19753,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01b0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000001b',
@@ -19448,8 +19785,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'営業インセンティブ制度\n社用車貸与\n出張手当\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"奥村俊介"},{"name":"根本拓馬"},{"name":"福田桃子"}]'::jsonb,
+  '営業チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1b-4. データサイエンティスト
@@ -19461,7 +19800,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01b0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000001b',
@@ -19493,7 +19833,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n学会参加費補助\n論文発表奨励金\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（分析課題含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（分析課題含む） → 最終面接 → 内定',
+  '[{"name":"丸山大輝"},{"name":"和田健太郎"},{"name":"黒田優奈"}]'::jsonb,
+  '農機開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -19509,7 +19851,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01c0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000001c',
@@ -19540,8 +19883,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'学会参加費補助\n論文発表奨励金\n書籍購入費全額補助\n副業OK',
-  '週2日リモート可',
-  '書類選考 → 技術面接（分析課題含む） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 技術面接（分析課題含む） → 最終面接 → 内定',
+  '[{"name":"栗原康介"},{"name":"江口菜月"},{"name":"田村晃太"}]'::jsonb,
+  '防災AIチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1c-2. 組み込みエンジニア（防災IoT）
@@ -19553,7 +19898,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01c0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000001c',
@@ -19584,8 +19930,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'学会参加費補助\n工具・計測機器購入補助\n引越し手当（入社時）\n副業OK',
-  '原則出社（一部リモート相談可）',
-  '書類選考 → 技術面接 → 最終面接 → 内定'
+  '原則出社',
+  '書類選考 → 技術面接 → 最終面接 → 内定',
+  '[{"name":"今井亮太"},{"name":"本田紗季"},{"name":"水野啓吾"}]'::jsonb,
+  'ハードウェア開発チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1c-3. 自治体連携営業
@@ -19597,7 +19945,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01c0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000001c',
@@ -19628,8 +19977,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'出張手当\n防災士資格取得支援\n書籍購入費補助\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"工藤誠"},{"name":"沢田ひかり"},{"name":"近藤美佳"}]'::jsonb,
+  '自治体連携チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1c-4. プロダクトマネージャー
@@ -19641,7 +19992,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01c0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000001c',
@@ -19672,8 +20024,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'防災士資格取得支援\n書籍購入費補助\nカンファレンス参加費補助\n副業OK',
-  '週2日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"工藤誠"},{"name":"沢田ひかり"},{"name":"近藤美佳"}]'::jsonb,
+  '自治体連携チーム'
 ) ON CONFLICT DO NOTHING;
 
 -- ============================================================
@@ -19689,7 +20043,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01d0000-0000-0000-0000-000000000001',
   'b0000000-0000-0000-0000-00000000001d',
@@ -19720,8 +20075,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'地方出張手当\n書籍購入費補助\nワーケーション制度\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"中西拓斗"},{"name":"吉村雅人"},{"name":"石原彩音"}]'::jsonb,
+  'まちづくりプランナーチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1d-2. フルスタックエンジニア
@@ -19733,7 +20090,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01d0000-0000-0000-0000-000000000002',
   'b0000000-0000-0000-0000-00000000001d',
@@ -19765,7 +20123,9 @@ INSERT INTO job_postings (
   '屋内原則禁煙（喫煙専用室あり）',
   E'リモートワーク手当月2万円\n書籍購入費補助\nカンファレンス参加費補助\nワーケーション制度\n副業OK',
   'フルリモート',
-  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定'
+  '書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定',
+  '[{"name":"北村悠斗"},{"name":"松井咲良"},{"name":"荒木大智"}]'::jsonb,
+  'エンジニアチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1d-3. コミュニティマネージャー
@@ -19777,7 +20137,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01d0000-0000-0000-0000-000000000003',
   'b0000000-0000-0000-0000-00000000001d',
@@ -19808,8 +20169,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'地方出張手当\nワーケーション制度\n地域体験プログラム参加費補助\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"岩崎千晶"},{"name":"川上みなみ"},{"name":"野村慶太"}]'::jsonb,
+  'コミュニティマネージャーチーム'
 ) ON CONFLICT DO NOTHING;
 
 -- 1d-4. マーケティング
@@ -19821,7 +20184,8 @@ INSERT INTO job_postings (
   work_location, work_location_change_scope, job_description_change_scope,
   contract_type, probation_period, work_hours, break_time, holidays,
   salary_min, salary_max, salary_detail, insurance, smoking_policy,
-  benefits, remote_policy, selection_process
+  benefits, remote_policy, selection_process,
+  team_members, team_label
 ) VALUES (
   'd01d0000-0000-0000-0000-000000000004',
   'b0000000-0000-0000-0000-00000000001d',
@@ -19852,8 +20216,10 @@ INSERT INTO job_postings (
   '健康保険、厚生年金、雇用保険、労災保険',
   '屋内原則禁煙（喫煙専用室あり）',
   E'地方出張手当\nワーケーション制度\nクリエイティブツール利用費補助\n副業OK',
-  '週1日リモート可',
-  '書類選考 → 面接（2回） → 最終面接 → 内定'
+  'リモート可（週数回出社）',
+  '書類選考 → 面接（2回） → 最終面接 → 内定',
+  '[{"name":"岩崎千晶"},{"name":"川上みなみ"},{"name":"野村慶太"}]'::jsonb,
+  'コミュニティマネージャーチーム'
 ) ON CONFLICT DO NOTHING;
 
 COMMIT;
