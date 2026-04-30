@@ -23,6 +23,7 @@ type jobPostingResponse struct {
 	Challenges                string    `json:"challenges"`
 	TeamDescription           string                    `json:"teamDescription"`
 	TeamMembers               []jobposting.TeamMember   `json:"teamMembers"`
+	TeamLabel                 string                    `json:"teamLabel"`
 	SkillsGained              string                    `json:"skillsGained"`
 	Tags                      []string  `json:"tags"`
 	RequiredQualifications    string    `json:"requiredQualifications"`
@@ -100,6 +101,7 @@ func toJobPostingResponse(j *jobposting.JobPosting) *jobPostingResponse {
 		Challenges:                j.Challenges,
 		TeamDescription:           j.TeamDescription,
 		TeamMembers:               j.TeamMembers,
+		TeamLabel:                 j.TeamLabel,
 		SkillsGained:              j.SkillsGained,
 		Tags:                      tags,
 		RequiredQualifications:    j.RequiredQualifications,

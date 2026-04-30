@@ -37,6 +37,7 @@ const EMPTY_FORM: JobFormPreviewPayload = {
   challenges: "",
   teamDescription: "",
   teamMembers: [],
+  teamLabel: "",
   skillsGained: "",
   tags: [],
   requiredQualifications: "",
@@ -532,47 +533,46 @@ export default function CompanyJobPreviewPage() {
         )}
 
         {/* Team */}
-        {(job.teamDescription || job.teamMembers.length > 0) && (
+        {(job.teamDescription || job.teamMembers.length > 0 || job.teamLabel) && (
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
-              {job.teamMembers.length > 0 && (
+              {(job.teamMembers.length > 0 || job.teamLabel) && (
                 <div
                   className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
                   style={{ background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)` }}
                 >
-                  <div className="flex items-center -space-x-6">
-                    {job.teamMembers.slice(0, 5).map((m, i) => {
-                      const colors = [
-                        { bg: "#EAF4F0", fg: "#3D8B6E" },
-                        { bg: "#EEF2FB", fg: "#3B6FCC" },
-                        { bg: "#FEF7E6", fg: "#B07914" },
-                        { bg: "#F3EEFB", fg: "#7647C5" },
-                        { bg: "#FEE", fg: "#C54747" },
-                      ];
-                      const color = colors[i % colors.length];
-                      return (
-                        <div
-                          key={i}
-                          className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
-                          style={{ backgroundColor: color.bg, color: color.fg }}
-                        >
-                          {m.photoUrl ? (
-                            <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
-                          ) : (
-                            m.name.charAt(0)
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold leading-none" style={{ color: ACCENT }}>
-                      {job.teamMembers.length}
-                    </span>
+                  {job.teamMembers.length > 0 && (
+                    <div className="flex items-center -space-x-6">
+                      {job.teamMembers.map((m, i) => {
+                        const colors = [
+                          { bg: "#EAF4F0", fg: "#3D8B6E" },
+                          { bg: "#EEF2FB", fg: "#3B6FCC" },
+                          { bg: "#FEF7E6", fg: "#B07914" },
+                          { bg: "#F3EEFB", fg: "#7647C5" },
+                          { bg: "#FEE", fg: "#C54747" },
+                        ];
+                        const color = colors[i % colors.length];
+                        return (
+                          <div
+                            key={i}
+                            className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
+                            style={{ backgroundColor: color.bg, color: color.fg }}
+                          >
+                            {m.photoUrl ? (
+                              <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
+                            ) : (
+                              m.name.charAt(0)
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {job.teamLabel && (
                     <span className="text-base font-semibold" style={{ color: ACCENT }}>
-                      名のチーム
+                      {job.teamLabel}
                     </span>
-                  </div>
+                  )}
                 </div>
               )}
               <div className="px-6 py-6 sm:px-7 sm:py-7">

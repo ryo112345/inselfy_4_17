@@ -1,0 +1,1 @@
+ALTER TABLE job_postings ADD COLUMN team_label TEXT NOT NULL DEFAULT '';

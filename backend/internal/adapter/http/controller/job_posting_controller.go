@@ -49,6 +49,7 @@ type jobPostingRequest struct {
 	Challenges                string   `json:"challenges"`
 	TeamDescription           string                    `json:"teamDescription"`
 	TeamMembers               []jobposting.TeamMember   `json:"teamMembers"`
+	TeamLabel                 string                    `json:"teamLabel"`
 	SkillsGained              string                    `json:"skillsGained"`
 	Tags                      []string `json:"tags"`
 	RequiredQualifications    string   `json:"requiredQualifications"`
@@ -105,6 +106,7 @@ func (c *JobPostingController) Create(ctx echo.Context) error {
 		Challenges:                body.Challenges,
 		TeamDescription:           body.TeamDescription,
 		TeamMembers:               body.TeamMembers,
+		TeamLabel:                 body.TeamLabel,
 		SkillsGained:              body.SkillsGained,
 		Tags:                      body.Tags,
 		RequiredQualifications:    body.RequiredQualifications,
@@ -207,6 +209,7 @@ func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 		Challenges:                body.Challenges,
 		TeamDescription:           body.TeamDescription,
 		TeamMembers:               body.TeamMembers,
+		TeamLabel:                 body.TeamLabel,
 		SkillsGained:              body.SkillsGained,
 		Tags:                      body.Tags,
 		RequiredQualifications:    body.RequiredQualifications,

@@ -10,6 +10,7 @@ export type JobFormPreviewPayload = {
   challenges: string;
   teamDescription: string;
   teamMembers: { name: string; photoUrl?: string }[];
+  teamLabel: string;
   skillsGained: string;
   tags: string[];
   requiredQualifications: string;

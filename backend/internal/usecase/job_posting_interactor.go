@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
+	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobposting"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -27,6 +29,10 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 	input.Description = strings.TrimSpace(input.Description)
 	input.EmploymentType = strings.TrimSpace(input.EmploymentType)
 
+	if len(input.TeamMembers) > 5 {
+		return fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
+	}
+
 	status := input.Status
 	if status == "" {
 		status = "draft"
@@ -46,6 +52,7 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 		Challenges:                input.Challenges,
 		TeamDescription:           input.TeamDescription,
 		TeamMembers:               input.TeamMembers,
+		TeamLabel:                 input.TeamLabel,
 		SkillsGained:              input.SkillsGained,
 		Tags:                      input.Tags,
 		RequiredQualifications:    input.RequiredQualifications,
@@ -114,6 +121,10 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 		return port.ErrForbidden
 	}
 
+	if len(input.TeamMembers) > 5 {
+		return fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
+	}
+
 	existing.Title = strings.TrimSpace(input.Title)
 	existing.Description = strings.TrimSpace(input.Description)
 	existing.EmploymentType = strings.TrimSpace(input.EmploymentType)
@@ -126,6 +137,7 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 	existing.Challenges = input.Challenges
 	existing.TeamDescription = input.TeamDescription
 	existing.TeamMembers = input.TeamMembers
+	existing.TeamLabel = input.TeamLabel
 	existing.SkillsGained = input.SkillsGained
 	existing.Tags = input.Tags
 	existing.RequiredQualifications = input.RequiredQualifications
