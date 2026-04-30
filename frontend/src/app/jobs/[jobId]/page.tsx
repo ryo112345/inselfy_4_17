@@ -6,6 +6,11 @@ import Link from "next/link";
 import { Gallery } from "../../companies/[id]/Gallery";
 import { fetchPublicJobPosting } from "@/features/job-posting/api";
 import type { JobPosting } from "@/features/scout/types";
+import {
+  SingleRadarChart,
+  WV_ORDER, WV_FULL_LABELS,
+  CI_ORDER, CI_FULL_LABELS,
+} from "@/app/components/SingleRadarChart";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
@@ -248,6 +253,8 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<JobPosting | null>(null);
   const [company, setCompany] = useState<CompanyData | null>(null);
   const [error, setError] = useState(false);
+  const [teamWVScores, setTeamWVScores] = useState<{ id: string; score: number }[] | null>(null);
+  const [teamCIScores, setTeamCIScores] = useState<{ id: string; score: number }[] | null>(null);
 
   useEffect(() => {
     fetchPublicJobPosting(jobId)
@@ -260,6 +267,17 @@ export default function JobDetailPage() {
             setCompany(c);
           }
         });
+        if (data.teamId) {
+          fetch(`/api/companies/${data.companyId}/teams/scores`).then(async (res) => {
+            if (!res.ok) return;
+            const d = await res.json();
+            const team = (d.teams ?? []).find((t: { team_id: string }) => t.team_id === data.teamId);
+            if (team) {
+              setTeamWVScores(team.wv_scores ?? null);
+              setTeamCIScores(team.ci_scores ?? null);
+            }
+          });
+        }
       })
       .catch(() => setError(true));
   }, [jobId]);
@@ -489,7 +507,7 @@ export default function JobDetailPage() {
         )}
 
         {/* ─── Team description ─── */}
-        {(job.teamDescription || (job.teamMembers && job.teamMembers.length > 0) || job.teamLabel) && (
+        {(job.teamDescription || (job.teamMembers && job.teamMembers.length > 0) || job.teamLabel || teamWVScores || teamCIScores) && (
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
             {((job.teamMembers && job.teamMembers.length > 0) || job.teamLabel) && (
@@ -542,6 +560,41 @@ export default function JobDetailPage() {
               )}
             </div>
           </div>
+          {(teamWVScores || teamCIScores) && (
+            <div className="border-t border-gray-200 px-6 py-5">
+              <h3 className="border-l-[3px] border-emerald-600 pl-3 text-lg font-bold text-gray-900 mb-4">
+                チーム診断結果
+              </h3>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="flex flex-col items-center">
+                  <h4 className="text-sm font-medium text-gray-500 mb-1">Work Values</h4>
+                  {teamWVScores ? (
+                    <SingleRadarChart
+                      scores={teamWVScores}
+                      order={WV_ORDER}
+                      fullLabels={WV_FULL_LABELS}
+                      isWV={true}
+                    />
+                  ) : (
+                    <div className="py-10 text-sm text-gray-400">データ準備中</div>
+                  )}
+                </div>
+                <div className="flex flex-col items-center">
+                  <h4 className="text-sm font-medium text-gray-500 mb-1">Career Interest</h4>
+                  {teamCIScores ? (
+                    <SingleRadarChart
+                      scores={teamCIScores}
+                      order={CI_ORDER}
+                      fullLabels={CI_FULL_LABELS}
+                      isWV={false}
+                    />
+                  ) : (
+                    <div className="py-10 text-sm text-gray-400">データ準備中</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </section>
         )}
 
