@@ -9,6 +9,8 @@ import { Gallery } from "../companies/[id]/Gallery";
 import { useAuth } from "@/features/auth/auth-context";
 import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
+import { VALUE_NEEDS } from "@/features/work-values/lib/needs";
+import type { ValueId } from "@/features/work-values/lib/needs";
 import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 
@@ -24,7 +26,7 @@ type TeamScores = {
   ci_scores: TeamScoreEntry[] | null;
 };
 
-type MatchScores = { overall: number; culture: number; aptitude: number };
+type MatchScores = { overall: number; culture: number; aptitude: number; commonPoints: string[] };
 
 async function fetchTeamScores(companyId: string): Promise<TeamScores[]> {
   const res = await fetch(`/api/companies/${companyId}/teams/scores`);
@@ -82,7 +84,20 @@ function computeMatchScores(
       ? Math.round((culture + aptitude) / 2)
       : culture ?? aptitude!;
 
-  return { overall, culture: culture ?? overall, aptitude: aptitude ?? overall };
+  let commonPoints: string[] = [];
+  if (userWv && teamScores.wv_scores && teamScores.wv_scores.length > 0) {
+    const teamMap = new Map(teamScores.wv_scores.map((s) => [s.id, s.score]));
+    const highValueIds = WV_ORDER.filter((id) => (teamMap.get(id) ?? 0) >= 50) as ValueId[];
+    const highNeedIds = new Set(highValueIds.flatMap((vid) => VALUE_NEEDS[vid] ?? []));
+    const needLabelMap = new Map(userWv.needs.map((n) => [n.need_id, n.label]));
+    commonPoints = userWv.needs
+      .filter((n) => n.display_score >= 55 && highNeedIds.has(n.need_id as any))
+      .sort((a, b) => b.display_score - a.display_score)
+      .slice(0, 3)
+      .map((n) => needLabelMap.get(n.need_id) ?? n.need_id);
+  }
+
+  return { overall, culture: culture ?? overall, aptitude: aptitude ?? overall, commonPoints };
 }
 
 function formatSalary(min: number | null, max: number | null): string | null {
@@ -216,6 +231,12 @@ export default function JobsPage() {
     return result;
   }, [jobs, search, category, employment, remote, sort]);
 
+  useEffect(() => {
+    if (filtered.length > 0 && (!selectedId || !filtered.some((j) => j.id === selectedId))) {
+      setSelectedId(filtered[0].id);
+    }
+  }, [filtered]);
+
   const selectedJob = useMemo(
     () => (selectedId ? jobs.find((j) => j.id === selectedId) ?? null : null),
     [jobs, selectedId],
@@ -297,7 +318,7 @@ export default function JobsPage() {
         {/* Right Panel - Detail (hidden on mobile) */}
         <div className="hidden lg:flex flex-1 min-h-0 bg-gray-100">
           {selectedJob ? (
-            <JobDetail job={selectedJob} />
+            <JobDetail job={selectedJob} matchScores={selectedJob ? matchScoresMap.get(selectedJob.id) ?? null : null} />
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
               <EmptyDetailIcon />
@@ -501,10 +522,19 @@ function CardInner({
 
         {/* Diagnosis CTA or match score */}
         {hasDiagnosis && matchScores ? (
-          <div className="mt-3 flex items-center gap-3">
-            <MatchBadge label="総合" value={matchScores.overall} />
-            <MatchBadge label="文化" value={matchScores.culture} />
-            <MatchBadge label="適正" value={matchScores.aptitude} />
+          <div className="mt-3">
+            <div className="flex items-center gap-3">
+              <MatchBadge label="総合" value={matchScores.overall} />
+              <MatchBadge label="文化" value={matchScores.culture} />
+              <MatchBadge label="適職" value={matchScores.aptitude} />
+            </div>
+            {matchScores.commonPoints.length > 0 && (
+              <div className="mt-1.5 flex items-center gap-1 text-sm" style={{ color: ACCENT }}>
+                <SparklesIcon />
+                <span className="font-medium">あなたとの共通点:</span>
+                <span>{matchScores.commonPoints.join(", ")}</span>
+              </div>
+            )}
           </div>
         ) : hasDiagnosis ? (
           <div
@@ -591,7 +621,7 @@ function DetailConditionGroup({
   );
 }
 
-function JobDetail({ job }: { job: JobPostingWithCompany }) {
+function JobDetail({ job, matchScores }: { job: JobPostingWithCompany; matchScores: MatchScores | null }) {
   const quickFacts = [
     {
       label: "想定年収",
@@ -683,6 +713,24 @@ function JobDetail({ job }: { job: JobPostingWithCompany }) {
           </div>
         )}
 
+        {/* Match Scores */}
+        {matchScores && (
+          <div className="mt-4 flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-3">
+              <MatchBadge label="総合" value={matchScores.overall} />
+              <MatchBadge label="文化" value={matchScores.culture} />
+              <MatchBadge label="適職" value={matchScores.aptitude} />
+            </div>
+            {matchScores.commonPoints.length > 0 && (
+              <div className="flex items-center gap-1" style={{ color: ACCENT }}>
+                <SparklesIcon />
+                <span className="font-medium">共通点:</span>
+                <span>{matchScores.commonPoints.join(", ")}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Quick Facts */}
         {quickFacts.length > 0 && (
           <div className="mt-5 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200/80 bg-gray-50/60 sm:grid-cols-4 sm:divide-y-0">
@@ -722,6 +770,18 @@ function JobDetail({ job }: { job: JobPostingWithCompany }) {
           <DetailSectionHeader icon={<DetailCameraIcon />} title="フォトギャラリー" />
           <div className="mt-3 overflow-hidden rounded-xl">
             <Gallery urls={job.galleryUrls} />
+          </div>
+        </div>
+      )}
+
+      {/* 仕事内容 */}
+      {job.description && (
+        <div className="mt-8 max-w-4xl mx-auto px-7">
+          <DetailSectionHeader icon={<DetailDocumentIcon />} title="仕事内容" />
+          <div className="mt-4 rounded-xl border border-gray-200/80 bg-white p-5">
+            <p className="text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
+              {job.description}
+            </p>
           </div>
         </div>
       )}
