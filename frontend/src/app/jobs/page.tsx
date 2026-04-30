@@ -9,10 +9,12 @@ import { Gallery } from "../companies/[id]/Gallery";
 import { useAuth } from "@/features/auth/auth-context";
 import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
-import { VALUE_NEEDS } from "@/features/work-values/lib/needs";
-import type { ValueId } from "@/features/work-values/lib/needs";
+import { VALUE_NEEDS, NEED_IDS } from "@/features/work-values/lib/needs";
+import type { ValueId, NeedId } from "@/features/work-values/lib/needs";
 import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
+import { ValuesFilterDrawer } from "@/features/work-values/ValuesFilterDrawer";
+import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
 
 const ACCENT = "#3D8B6E";
 
@@ -23,6 +25,7 @@ type TeamScoreEntry = { id: string; score: number };
 type TeamScores = {
   team_id: string;
   wv_scores: TeamScoreEntry[] | null;
+  wn_scores: TeamScoreEntry[] | null;
   ci_scores: TeamScoreEntry[] | null;
 };
 
@@ -149,6 +152,10 @@ export default function JobsPage() {
   const [employment, setEmployment] = useState("すべて");
   const [remote, setRemote] = useState("すべて");
   const [sort, setSort] = useState<SortKey>("newest");
+  const [valuesFilterOpen, setValuesFilterOpen] = useState(false);
+  const [filterMode, setFilterMode] = useState<FilterMode>("values");
+  const [valueThresholds, setValueThresholds] = useState<Record<string, number>>({});
+  const [needThresholds, setNeedThresholds] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (user) {
@@ -206,6 +213,11 @@ export default function JobsPage() {
     return map;
   }, [hasDiagnosis, jobs, teamScoresMap, userWv, userCi]);
 
+  const activeThresholds = useMemo(() => {
+    const src = filterMode === "values" ? valueThresholds : needThresholds;
+    return Object.entries(src).filter(([, v]) => v > 0);
+  }, [filterMode, valueThresholds, needThresholds]);
+
   const filtered = useMemo(() => {
     let result = jobs;
 
@@ -229,6 +241,38 @@ export default function JobsPage() {
       result = result.filter((j) => j.remotePolicy === remote);
     }
 
+    if (activeThresholds.length > 0) {
+      result = result.filter((j) => {
+        if (!j.teamId) return false;
+        const team = teamScoresMap.get(j.teamId);
+        if (!team) return false;
+        const wvMap = new Map((team.wv_scores ?? []).map((s) => [s.id, s.score]));
+        if (wvMap.size === 0) return false;
+
+        if (filterMode === "values") {
+          return activeThresholds.every(([id, minScore]) => {
+            const score = wvMap.get(id);
+            return score != null && score >= minScore;
+          });
+        }
+
+        // needs mode: use wn_scores if available, otherwise approximate from parent value
+        const wnMap = new Map((team.wn_scores ?? []).map((s) => [s.id, s.score]));
+        return activeThresholds.every(([id, minScore]) => {
+          let score = wnMap.get(id);
+          if (score == null) {
+            for (const [vid, needIds] of Object.entries(VALUE_NEEDS)) {
+              if ((needIds as readonly string[]).includes(id)) {
+                score = wvMap.get(vid);
+                break;
+              }
+            }
+          }
+          return score != null && score >= minScore;
+        });
+      });
+    }
+
     result = [...result].sort((a, b) => {
       if (sort === "salary") {
         return (b.salaryMax ?? b.salaryMin ?? 0) - (a.salaryMax ?? a.salaryMin ?? 0);
@@ -237,7 +281,7 @@ export default function JobsPage() {
     });
 
     return result;
-  }, [jobs, search, category, employment, remote, sort]);
+  }, [jobs, search, category, employment, remote, sort, activeThresholds, filterMode, teamScoresMap]);
 
   useEffect(() => {
     if (filtered.length > 0 && (!selectedId || !filtered.some((j) => j.id === selectedId))) {
@@ -271,6 +315,31 @@ export default function JobsPage() {
           <FilterSelect label="職種" value={category} onChange={setCategory} options={JOB_CATEGORIES} />
           <FilterSelect label="雇用形態" value={employment} onChange={setEmployment} options={EMPLOYMENT_TYPES} />
           <FilterSelect label="リモート" value={remote} onChange={setRemote} options={REMOTE_OPTIONS} />
+
+          {/* Values Filter Button */}
+          {hasDiagnosis && (
+            <button
+              type="button"
+              onClick={() => setValuesFilterOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors cursor-pointer"
+              style={
+                activeThresholds.length > 0
+                  ? { borderColor: ACCENT, color: ACCENT, backgroundColor: `${ACCENT}08` }
+                  : { borderColor: "#e5e7eb", color: "#374151" }
+              }
+            >
+              <ValuesFilterIcon />
+              価値観
+              {activeThresholds.length > 0 && (
+                <span
+                  className="ml-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full text-xs font-bold text-white"
+                  style={{ backgroundColor: ACCENT }}
+                >
+                  {activeThresholds.length}
+                </span>
+              )}
+            </button>
+          )}
 
           {/* Spacer + count + sort */}
           <div className="flex items-center gap-3 ml-auto">
@@ -338,7 +407,31 @@ export default function JobsPage() {
           )}
         </div>
       </div>
+
+      <ValuesFilterDrawer
+        open={valuesFilterOpen}
+        onClose={() => setValuesFilterOpen(false)}
+        userNeeds={userWv?.needs ?? null}
+        userValues={userWv?.values ?? null}
+        filterMode={filterMode}
+        onFilterModeChange={setFilterMode}
+        thresholds={filterMode === "values" ? valueThresholds : needThresholds}
+        onThresholdsChange={filterMode === "values" ? setValueThresholds : setNeedThresholds}
+        matchingCount={filtered.length}
+      />
     </div>
+  );
+}
+
+function ValuesFilterIcon() {
+  return (
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
+      <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
+      <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" />
+      <line x1="17" y1="16" x2="23" y2="16" />
+    </svg>
   );
 }
 

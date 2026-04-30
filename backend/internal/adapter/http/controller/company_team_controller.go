@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 
@@ -633,6 +635,7 @@ type publicTeamScoreResponse struct {
 	TeamID         string              `json:"team_id"`
 	TeamName       string              `json:"team_name"`
 	WVScores       []publicScoreEntry  `json:"wv_scores"`
+	WNScores       []publicScoreEntry  `json:"wn_scores"`
 	CIScores       []publicScoreEntry  `json:"ci_scores"`
 	MemberCount    int                 `json:"member_count"`
 	CompletedCount int                 `json:"completed_count"`
@@ -653,6 +656,12 @@ const (
 
 var (
 	wvOrder = []string{"achievement", "status", "autonomy", "safety", "altruism", "comfort"}
+	wnOrder = []string{
+		"ability_utilization", "achievement", "activity", "advancement", "authority", "autonomy",
+		"company_policies", "compensation", "co_workers", "creativity", "independence", "moral_values",
+		"recognition", "responsibility", "security", "social_service", "social_status",
+		"supervision_hr", "supervision_technical", "variety", "working_conditions",
+	}
 	ciOrder = []string{"R", "I", "A", "S", "E", "C"}
 )
 
@@ -745,6 +754,24 @@ func (c *CompanyTeamController) GetPublicTeamScores(ctx echo.Context, companyID 
 						hasData = true
 					}
 				}
+
+				wnRow := c.pool.QueryRow(reqCtx,
+					`SELECT ns.mu
+					 FROM work_needs_scores ns
+					 JOIN work_values_sessions s ON s.id = ns.session_id
+					 WHERE s.user_id = $1 AND s.status = 'completed'
+					 ORDER BY s.completed_at DESC
+					 LIMIT 1`, m.userID)
+				var muJSON []byte
+				if err := wnRow.Scan(&muJSON); err == nil {
+					var mu map[string]float64
+					if err := json.Unmarshal(muJSON, &mu); err == nil {
+						sd.wnScores = make(map[string]float64, len(mu))
+						for k, v := range mu {
+							sd.wnScores[k] = 100.0 / (1.0 + math.Exp(-v))
+						}
+					}
+				}
 			}
 
 			if m.ciStatus == "completed" {
@@ -786,6 +813,7 @@ func (c *CompanyTeamController) GetPublicTeamScores(ctx echo.Context, companyID 
 		}
 
 		resp.WVScores = computeWeightedAvg(scoreData, "wv", wvOrder, wvOutlierThreshold)
+		resp.WNScores = computeWeightedAvg(scoreData, "wn", wnOrder, wvOutlierThreshold)
 		resp.CIScores = computeWeightedAvg(scoreData, "ci", ciOrder, ciOutlierThreshold)
 
 		result = append(result, resp)
@@ -796,6 +824,7 @@ func (c *CompanyTeamController) GetPublicTeamScores(ctx echo.Context, companyID 
 
 type memberScoreDataForAvg struct {
 	wvScores map[string]float64
+	wnScores map[string]float64
 	ciScores map[string]float64
 	isAce    bool
 }
@@ -808,10 +837,19 @@ func computeWeightedAvg(members []memberScoreDataForAvg, kind string, order []st
 
 	var completed []memberScoreDataForAvg
 	for _, m := range members {
-		if kind == "wv" && len(m.wvScores) > 0 {
-			completed = append(completed, m)
-		} else if kind == "ci" && len(m.ciScores) > 0 {
-			completed = append(completed, m)
+		switch kind {
+		case "wv":
+			if len(m.wvScores) > 0 {
+				completed = append(completed, m)
+			}
+		case "wn":
+			if len(m.wnScores) > 0 {
+				completed = append(completed, m)
+			}
+		case "ci":
+			if len(m.ciScores) > 0 {
+				completed = append(completed, m)
+			}
 		}
 	}
 	if len(completed) < minMembersForAverage {
@@ -824,9 +862,12 @@ func computeWeightedAvg(members []memberScoreDataForAvg, kind string, order []st
 		for _, m := range completed {
 			var s float64
 			var ok bool
-			if kind == "wv" {
+			switch kind {
+			case "wv":
 				s, ok = m.wvScores[id]
-			} else {
+			case "wn":
+				s, ok = m.wnScores[id]
+			case "ci":
 				s, ok = m.ciScores[id]
 			}
 			if ok {

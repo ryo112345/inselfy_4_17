@@ -73,6 +73,30 @@ export const VALUE_ENGLISH_NAMES: Record<ValueId, string> = {
   autonomy: "Independence",
 };
 
+export const NEED_LABELS: Record<NeedId, string> = {
+  ability_utilization: "能力活用",
+  achievement: "達成感",
+  activity: "活動性",
+  advancement: "昇進",
+  authority: "権限",
+  autonomy: "自律性",
+  company_policies: "会社方針",
+  compensation: "報酬",
+  co_workers: "同僚関係",
+  creativity: "創造性",
+  independence: "独立性",
+  moral_values: "道徳的価値",
+  recognition: "評価",
+  responsibility: "責任",
+  security: "安定性",
+  social_service: "社会貢献",
+  social_status: "社会的地位",
+  supervision_hr: "上司との人間関係",
+  supervision_technical: "上司の技術的指導",
+  variety: "多様性",
+  working_conditions: "作業環境",
+};
+
 export const VALUE_NEEDS: Record<ValueId, NeedId[]> = {
   achievement: ["ability_utilization", "achievement"],
   comfort: ["activity", "independence", "variety", "compensation", "security", "working_conditions"],
