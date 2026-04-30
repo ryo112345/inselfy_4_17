@@ -35,6 +35,13 @@ async function fetchTeamScores(companyId: string): Promise<TeamScores[]> {
   return data.teams ?? [];
 }
 
+const SIGMA_WV = 18;
+const SIGMA_CI = 0.7;
+const GEOMEAN_FLOOR = 0.001;
+function gauss(diff: number, sigma: number) {
+  return Math.exp(-(diff * diff) / (2 * sigma * sigma));
+}
+
 function computeMatchScores(
   userWv: WvResultDTO | null,
   userCi: CiResultDTO | null,
@@ -48,33 +55,34 @@ function computeMatchScores(
   if (userWv && teamScores.wv_scores && teamScores.wv_scores.length > 0) {
     const userMap = new Map(userWv.values.map((v) => [v.value_id, v.display_score]));
     const teamMap = new Map(teamScores.wv_scores.map((s) => [s.id, s.score]));
-    let totalCloseness = 0;
-    let count = 0;
+    let logSum = 0;
+    let weightTotal = 0;
     for (const id of WV_ORDER) {
       const u = userMap.get(id);
       const t = teamMap.get(id);
       if (u != null && t != null) {
-        totalCloseness += 1 - Math.abs(u - t) / 100;
-        count++;
+        const closeness = gauss(Math.abs(u - t), SIGMA_WV);
+        logSum += u * Math.log(closeness + GEOMEAN_FLOOR);
+        weightTotal += u;
       }
     }
-    if (count > 0) culture = Math.round((totalCloseness / count) * 100);
+    if (weightTotal > 0) culture = Math.round(Math.exp(logSum / weightTotal) * 100);
   }
 
   if (userCi && teamScores.ci_scores && teamScores.ci_scores.length > 0) {
     const userMap = new Map(userCi.type_scores.map((s) => [s.type_id, s.score]));
     const teamMap = new Map(teamScores.ci_scores.map((s) => [s.id, s.score]));
-    let totalCloseness = 0;
+    let logSum = 0;
     let count = 0;
     for (const id of CI_ORDER) {
       const u = userMap.get(id);
       const t = teamMap.get(id);
       if (u != null && t != null) {
-        totalCloseness += 1 - Math.abs(u - t) / 4;
+        logSum += Math.log(gauss(Math.abs(u - t), SIGMA_CI) + GEOMEAN_FLOOR);
         count++;
       }
     }
-    if (count > 0) aptitude = Math.round((totalCloseness / count) * 100);
+    if (count > 0) aptitude = Math.round(Math.exp(logSum / count) * 100);
   }
 
   if (culture == null && aptitude == null) return null;

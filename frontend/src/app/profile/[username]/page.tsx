@@ -48,7 +48,10 @@ export default async function ProfilePage({
     getCurrentUsername(cookieHeader),
   ]);
   if (!data) notFound();
-  const isOwner = currentUsername === data.username;
+  const usernameFromCookie = cookieStore.get("username")?.value
+    ? decodeURIComponent(cookieStore.get("username")!.value)
+    : null;
+  const isOwner = (currentUsername ?? usernameFromCookie) === data.username;
 
   const profileColor = data.user.profileColor ?? "#3D8B6E";
 
