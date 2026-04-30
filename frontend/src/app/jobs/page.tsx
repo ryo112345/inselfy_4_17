@@ -141,7 +141,7 @@ export default function JobsPage() {
       {/* Main Content */}
       <div className="flex flex-1 min-h-0">
         {/* Left Panel - Job List */}
-        <div className="w-full lg:w-[420px] lg:shrink-0 border-r border-gray-200 overflow-y-auto overscroll-contain bg-white">
+        <div className="w-full lg:w-[440px] lg:shrink-0 border-r border-gray-200 overflow-y-auto overscroll-contain bg-[var(--background)]">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-[var(--accent)]" />
@@ -218,6 +218,12 @@ function FilterSelect({
   );
 }
 
+function isNewPosting(dateStr: string): boolean {
+  const d = new Date(dateStr);
+  const now = new Date();
+  return now.getTime() - d.getTime() < 7 * 24 * 60 * 60 * 1000;
+}
+
 function JobCard({
   job,
   isSelected,
@@ -227,28 +233,17 @@ function JobCard({
   isSelected: boolean;
   onSelect: () => void;
 }) {
-  const salary = formatSalary(job.salaryMin, job.salaryMax);
-  const visibleTags = job.tags.slice(0, 3);
-  const overflowCount = job.tags.length - 3;
-
   return (
     <>
-      {/* On mobile, clicking goes to detail page; on desktop, selects in panel */}
-      <Link
-        href={`/jobs/${job.id}`}
-        className="lg:hidden"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        <CardInner job={job} salary={salary} visibleTags={visibleTags} overflowCount={overflowCount} isSelected={false} />
+      <Link href={`/jobs/${job.id}`} className="lg:hidden">
+        <CardInner job={job} isSelected={false} />
       </Link>
       <button
         type="button"
         onClick={onSelect}
         className="hidden lg:block w-full text-left cursor-pointer"
       >
-        <CardInner job={job} salary={salary} visibleTags={visibleTags} overflowCount={overflowCount} isSelected={isSelected} />
+        <CardInner job={job} isSelected={isSelected} />
       </button>
     </>
   );
@@ -256,109 +251,145 @@ function JobCard({
 
 function CardInner({
   job,
-  salary,
-  visibleTags,
-  overflowCount,
   isSelected,
 }: {
   job: JobPostingWithCompany;
-  salary: string | null;
-  visibleTags: string[];
-  overflowCount: number;
   isSelected: boolean;
 }) {
-  const badges: { label: string; className: string }[] = [];
-  if (job.employmentType) badges.push({ label: job.employmentType, className: "bg-gray-100 text-gray-700" });
-  if (job.remotePolicy) badges.push({ label: job.remotePolicy, className: "bg-blue-50 text-blue-700" });
-  if (job.jobCategory) badges.push({ label: job.jobCategory, className: "bg-amber-50 text-amber-700" });
+  const salary = formatSalary(job.salaryMin, job.salaryMax);
+  const isNew = isNewPosting(job.createdAt);
+
+  const metaBadges: string[] = [];
+  if (job.employmentType) metaBadges.push(job.employmentType);
+  if (job.remotePolicy) metaBadges.push(job.remotePolicy);
+  if (job.jobCategory) metaBadges.push(job.jobCategory);
 
   return (
-    <div
-      className={`border-b border-gray-100 px-5 py-4 transition-colors ${
-        isSelected
-          ? "border-l-4 bg-[var(--accent-light)]/40"
-          : "border-l-4 border-l-transparent hover:bg-gray-50"
-      }`}
-      style={isSelected ? { borderLeftColor: ACCENT } : undefined}
-    >
-      {/* Title */}
-      <h3 className="text-[15px] font-bold leading-snug text-gray-900 line-clamp-2">
-        {job.title}
-      </h3>
-
-      {/* Cover image */}
-      {job.coverImageUrl && (
-        <div className="mt-2.5 overflow-hidden rounded-lg">
-          <img
-            src={job.coverImageUrl}
-            alt=""
-            className="w-full aspect-[16/9] object-cover"
-            loading="lazy"
-          />
-        </div>
-      )}
-
-      {/* Company + date */}
-      <div className="mt-2.5 flex items-center gap-2 text-xs text-gray-500">
-        {job.companyLogoUrl ? (
-          <img src={job.companyLogoUrl} alt="" className="h-4 w-4 rounded-sm object-cover" />
-        ) : (
-          <span
-            className="flex h-4 w-4 items-center justify-center rounded-sm text-[8px] font-bold text-white"
-            style={{ backgroundColor: ACCENT }}
+    <div className={`px-4 py-3 ${isSelected ? "" : ""}`}>
+      <div
+        className={`rounded-2xl border bg-white p-4 transition-shadow ${
+          isSelected
+            ? "border-[var(--accent)] shadow-[0_0_0_1px_var(--accent),0_4px_12px_-4px_rgba(61,139,110,0.15)]"
+            : "border-gray-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_4px_12px_-6px_rgba(16,24,40,0.06)] hover:shadow-[0_1px_3px_rgba(16,24,40,0.06),0_8px_20px_-8px_rgba(16,24,40,0.1)]"
+        }`}
+      >
+        {/* Title + Bookmark */}
+        <div className="flex items-start gap-2">
+          <h3 className="flex-1 text-[15px] font-bold leading-snug text-gray-900 line-clamp-2">
+            {job.title}
+          </h3>
+          <button
+            type="button"
+            className="shrink-0 mt-0.5 text-gray-300 hover:text-gray-500 transition-colors"
+            onClick={(e) => e.stopPropagation()}
           >
-            {job.companyName.charAt(0)}
-          </span>
-        )}
-        <span className="truncate font-medium text-gray-700">{job.companyName}</span>
-        <span className="shrink-0">{formatDate(job.createdAt)}</span>
-      </div>
-
-      {/* Badges */}
-      {badges.length > 0 && (
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {badges.map((b) => (
-            <span key={b.label} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${b.className}`}>
-              {b.label}
-            </span>
-          ))}
+            <BookmarkOutlineIcon />
+          </button>
         </div>
-      )}
 
-      {/* Skill tags */}
-      {visibleTags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {visibleTags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full px-2.5 py-0.5 text-xs font-medium"
-              style={{ backgroundColor: `${ACCENT}12`, color: ACCENT }}
-            >
-              {tag}
+        {/* Cover image */}
+        {job.coverImageUrl && (
+          <div className="mt-3 overflow-hidden rounded-xl bg-gray-100">
+            <img
+              src={job.coverImageUrl}
+              alt=""
+              className="w-full aspect-[16/9] object-cover"
+              loading="lazy"
+            />
+          </div>
+        )}
+
+        {/* Status badges + Company + date */}
+        <div className="mt-3 flex items-center gap-1.5 text-xs">
+          {isNew && (
+            <span className="rounded-md bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
+              新着
             </span>
-          ))}
-          {overflowCount > 0 && (
-            <span className="rounded-full px-2 py-0.5 text-xs text-gray-400">
-              +{overflowCount}
+          )}
+          <span className="shrink-0">
+            {job.companyLogoUrl ? (
+              <img src={job.companyLogoUrl} alt="" className="h-4 w-4 rounded-sm object-cover" />
+            ) : (
+              <span
+                className="flex h-4 w-4 items-center justify-center rounded-sm text-[8px] font-bold text-white"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {job.companyName.charAt(0)}
+              </span>
+            )}
+          </span>
+          <span className="truncate font-medium text-gray-700">{job.companyName}</span>
+          <span className="shrink-0 text-gray-400 ml-auto">{formatDate(job.createdAt)}</span>
+        </div>
+
+        {/* Meta badges (employment type, remote, category) */}
+        {metaBadges.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {metaBadges.map((label) => (
+              <span
+                key={label}
+                className="rounded-full border border-gray-200 px-2.5 py-1 text-xs text-gray-700"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Skill tags (all visible) */}
+        {job.tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {job.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-gray-200 px-2.5 py-1 text-xs text-gray-700"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Match insight */}
+        <p className="mt-3 flex items-center gap-1 text-xs font-medium" style={{ color: ACCENT }}>
+          <SparklesIcon />
+          あなたとの共通点: 責任, 創造性, 自律性
+        </p>
+
+        {/* Location + salary */}
+        <div className="mt-2.5 flex items-center gap-3 text-xs text-gray-500">
+          {job.workLocation && (
+            <span className="flex items-center gap-1 truncate">
+              <LocationIcon />
+              <span className="truncate">{job.workLocation}</span>
+            </span>
+          )}
+          {salary && (
+            <span className="flex items-center gap-1 shrink-0 text-sm font-bold" style={{ color: ACCENT }}>
+              <SalaryIcon />
+              {salary}
             </span>
           )}
         </div>
-      )}
 
-      {/* Location + salary */}
-      <div className="mt-2.5 flex items-center gap-3 text-xs text-gray-500">
-        {job.workLocation && (
-          <span className="flex items-center gap-1 truncate">
-            <LocationIcon />
-            <span className="truncate">{job.workLocation}</span>
+        {/* Match score bar */}
+        <div
+          className="mt-3 flex items-center gap-3 rounded-lg px-3 py-1.5 text-xs"
+          style={{ backgroundColor: `${ACCENT}0a` }}
+        >
+          <span>
+            <span className="text-gray-500">総合 </span>
+            <span className="font-bold" style={{ color: ACCENT }}>0%</span>
           </span>
-        )}
-        {salary && (
-          <span className="flex items-center gap-1 shrink-0 font-medium text-gray-700">
-            <SalaryIcon />
-            {salary}
+          <span>
+            <span className="text-gray-500">文化 </span>
+            <span className="font-bold text-gray-600">0%</span>
           </span>
-        )}
+          <span>
+            <span className="text-gray-500">適性 </span>
+            <span className="font-bold text-gray-600">0%</span>
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -532,6 +563,14 @@ function EmptyDetailIcon() {
     <svg width={64} height={64} viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth={1} strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="3" width="20" height="18" rx="2" />
       <path d="M8 7h8M8 11h5M8 15h8" />
+    </svg>
+  );
+}
+
+function SparklesIcon() {
+  return (
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z" />
     </svg>
   );
 }
