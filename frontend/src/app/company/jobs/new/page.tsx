@@ -516,7 +516,17 @@ export default function JobNewPage() {
     employmentType !== "" &&
     description.trim() !== "" &&
     requiredQualifications.trim() !== "" &&
-    workLocation.trim() !== "";
+    workLocation.trim() !== "" &&
+    contractType.trim() !== "" &&
+    probationPeriod.trim() !== "" &&
+    workHours.trim() !== "" &&
+    breakTime.trim() !== "" &&
+    holidays.trim() !== "" &&
+    (salaryMin != null || salaryMax != null || salaryDetail.trim() !== "") &&
+    insurance.trim() !== "" &&
+    smokingPolicy !== "" &&
+    workLocationChangeScope.trim() !== "" &&
+    jobDescriptionChangeScope.trim() !== "";
 
   const handleSubmit = async (publishStatus: "open" | "draft") => {
     if (publishStatus === "open" && !requiredOk) return;
@@ -927,7 +937,7 @@ export default function JobNewPage() {
               style={{ background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)` }}
             >
                 {teamMembers.length > 0 && (
-                <div className="flex items-center -space-x-6 pb-1">
+                <div className="flex items-center -space-x-[18px] pb-1">
                 {teamMembers.map((m, i) => {
                   const colors = [
                     { bg: "#EAF4F0", fg: "#3D8B6E" },
@@ -946,7 +956,9 @@ export default function JobNewPage() {
                         {m.photoUrl ? (
                           <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
                         ) : (
-                          m.name.charAt(0)
+                          <span className={m.name.length >= 5 ? "text-xs" : m.name.length === 4 ? "text-sm" : m.name.length === 3 ? "text-base" : m.name.length === 2 ? "text-xl" : "text-2xl"}>
+                            {m.name.slice(0, 5)}
+                          </span>
                         )}
                       </div>
                       {!m.photoUrl && (

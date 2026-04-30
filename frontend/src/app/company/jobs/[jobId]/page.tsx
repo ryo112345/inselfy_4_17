@@ -577,7 +577,29 @@ export default function JobEditPage() {
     channelRef.current?.postMessage(msg);
   }, [previewPayload]);
 
+  const requiredOk =
+    title.trim() !== "" &&
+    jobCategory !== "" &&
+    employmentType !== "" &&
+    description.trim() !== "" &&
+    requiredQualifications.trim() !== "" &&
+    workLocation.trim() !== "" &&
+    contractType.trim() !== "" &&
+    probationPeriod.trim() !== "" &&
+    workHours.trim() !== "" &&
+    breakTime.trim() !== "" &&
+    holidays.trim() !== "" &&
+    (salaryMin != null || salaryMax != null || salaryDetail.trim() !== "") &&
+    insurance.trim() !== "" &&
+    smokingPolicy !== "" &&
+    workLocationChangeScope.trim() !== "" &&
+    jobDescriptionChangeScope.trim() !== "";
+
   const handleSave = useCallback(async () => {
+    if (status === "open" && !requiredOk) {
+      alert("公開するには必須項目をすべて入力してください");
+      return;
+    }
     setSaving(true);
     try {
       const body: JobPostingBody = {
@@ -1017,7 +1039,7 @@ export default function JobEditPage() {
                   const rows: typeof items[] = [];
                   for (let r = 0; r < items.length; r += 5) rows.push(items.slice(r, r + 5));
                   return rows.map((row, rowIdx) => (
-                    <div key={rowIdx} className="flex items-center -space-x-6" style={{ paddingLeft: rowIdx % 2 === 1 ? '1.75rem' : 0 }}>
+                    <div key={rowIdx} className="flex items-center -space-x-[18px]" style={{ paddingLeft: rowIdx % 2 === 1 ? '1.75rem' : 0 }}>
                       {row.map((m, colIdx) => {
                         const i = rowIdx * 5 + colIdx;
                         const colors = [
@@ -1038,7 +1060,9 @@ export default function JobEditPage() {
                         {m.photoUrl ? (
                           <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
                         ) : (
-                          m.name ? m.name.charAt(0) : "?"
+                          <span className={!m.name ? "text-2xl" : m.name.length >= 5 ? "text-xs" : m.name.length === 4 ? "text-sm" : m.name.length === 3 ? "text-base" : m.name.length === 2 ? "text-xl" : "text-2xl"}>
+                            {m.name ? m.name.slice(0, 5) : "?"}
+                          </span>
                         )}
                       </div>
                       {isReal && !m.photoUrl && (
