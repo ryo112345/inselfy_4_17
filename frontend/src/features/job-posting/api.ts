@@ -1,5 +1,10 @@
 import type { JobPosting } from "../scout/types";
 
+export type JobPostingWithCompany = JobPosting & {
+  companyName: string;
+  companyLogoUrl: string;
+};
+
 const BASE_URL =
   typeof window === "undefined"
     ? process.env.INTERNAL_API_URL ?? "http://localhost:8081"
@@ -18,6 +23,7 @@ export type JobPostingBody = {
   teamDescription: string;
   teamMembers: { name: string; photoUrl?: string }[];
   teamLabel: string;
+  teamId: string | null;
   skillsGained: string;
   tags: string[];
   requiredQualifications: string;
@@ -103,6 +109,12 @@ export async function deleteJobPosting(id: string): Promise<void> {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to delete job posting");
+}
+
+export async function fetchPublicJobPostings(): Promise<JobPostingWithCompany[]> {
+  const res = await fetch(`${BASE_URL}/api/jobs`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch public job postings");
+  return res.json();
 }
 
 export async function fetchPublicJobPosting(

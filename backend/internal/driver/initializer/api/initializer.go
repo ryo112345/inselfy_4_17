@@ -505,6 +505,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 
 	// --- Job Postings (public) ---
+	e.GET("/api/jobs", jobPostingCtrl.ListPublic)
 	e.GET("/api/jobs/:jobId", func(c echo.Context) error {
 		return jobPostingCtrl.GetPublic(c, c.Param("jobId"))
 	})

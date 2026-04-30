@@ -56,6 +56,7 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 		TeamDescription:           input.TeamDescription,
 		TeamMembers:               input.TeamMembers,
 		TeamLabel:                 input.TeamLabel,
+		TeamID:                    input.TeamID,
 		SkillsGained:              input.SkillsGained,
 		Tags:                      input.Tags,
 		RequiredQualifications:    input.RequiredQualifications,
@@ -116,6 +117,14 @@ func (i *JobPostingInteractor) GetPublic(ctx context.Context, jobID string) erro
 	return i.output.PresentJobPosting(ctx, j)
 }
 
+func (i *JobPostingInteractor) ListPublic(ctx context.Context) error {
+	js, err := i.repo.ListPublic(ctx)
+	if err != nil {
+		return err
+	}
+	return i.output.PresentJobPostings(ctx, js)
+}
+
 func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID string, input jobposting.UpdateJobPostingInput) error {
 	existing, err := i.repo.GetByID(ctx, jobID)
 	if err != nil {
@@ -145,6 +154,7 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 	existing.TeamDescription = input.TeamDescription
 	existing.TeamMembers = input.TeamMembers
 	existing.TeamLabel = input.TeamLabel
+	existing.TeamID = input.TeamID
 	existing.SkillsGained = input.SkillsGained
 	existing.Tags = input.Tags
 	existing.RequiredQualifications = input.RequiredQualifications

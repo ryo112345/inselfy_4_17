@@ -11,6 +11,9 @@ export type JobFormPreviewPayload = {
   teamDescription: string;
   teamMembers: { name: string; photoUrl?: string }[];
   teamLabel: string;
+  teamId: string | null;
+  teamWVScores: { id: string; score: number }[] | null;
+  teamCIScores: { id: string; score: number }[] | null;
   skillsGained: string;
   tags: string[];
   requiredQualifications: string;

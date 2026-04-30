@@ -105,7 +105,6 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
     <div>
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <h1 className="text-xl font-bold text-gray-900 shrink-0">よむ</h1>
         <div className="flex-1 relative max-w-md">
           <svg
             width={16}

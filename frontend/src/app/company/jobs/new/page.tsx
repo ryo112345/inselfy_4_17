@@ -481,7 +481,9 @@ export default function JobNewPage() {
   const previewPayload = useMemo<JobFormPreviewPayload>(
     () => ({
       title, jobCategory, employmentType, hiringCount, description,
-      appealPoints, challenges, teamDescription, teamMembers, teamLabel, skillsGained, tags,
+      appealPoints, challenges, teamDescription, teamMembers, teamLabel,
+      teamId: null, teamWVScores: null, teamCIScores: null,
+      skillsGained, tags,
       requiredQualifications, preferredQualifications, workLocation,
       workLocationChangeScope, jobDescriptionChangeScope, contractType,
       probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
@@ -547,7 +549,7 @@ export default function JobNewPage() {
         location: workLocation.trim() || null,
         status: publishStatus,
         jobCategory, hiringCount, appealPoints, challenges, teamDescription,
-        teamMembers, teamLabel,
+        teamMembers, teamLabel, teamId: null,
         skillsGained, tags, requiredQualifications, preferredQualifications,
         workLocation, workLocationChangeScope, jobDescriptionChangeScope,
         contractType, probationPeriod, workHours, breakTime, holidays,
