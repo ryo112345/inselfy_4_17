@@ -1,12 +1,89 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { fetchPublicJobPostings } from "@/features/job-posting/api";
 import type { JobPostingWithCompany } from "@/features/job-posting/api";
 import { Gallery } from "../companies/[id]/Gallery";
+import { useAuth } from "@/features/auth/auth-context";
+import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
+import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
+import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
+import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 
 const ACCENT = "#3D8B6E";
+
+const WV_ORDER = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"];
+const CI_ORDER = ["R", "I", "A", "S", "E", "C"];
+
+type TeamScoreEntry = { id: string; score: number };
+type TeamScores = {
+  team_id: string;
+  wv_scores: TeamScoreEntry[] | null;
+  ci_scores: TeamScoreEntry[] | null;
+};
+
+type MatchScores = { overall: number; culture: number; aptitude: number };
+
+async function fetchTeamScores(companyId: string): Promise<TeamScores[]> {
+  const res = await fetch(`/api/companies/${companyId}/teams/scores`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.teams ?? [];
+}
+
+function computeMatchScores(
+  userWv: WvResultDTO | null,
+  userCi: CiResultDTO | null,
+  teamScores: TeamScores | undefined,
+): MatchScores | null {
+  if (!teamScores) return null;
+
+  let culture: number | null = null;
+  let aptitude: number | null = null;
+
+  if (userWv && teamScores.wv_scores && teamScores.wv_scores.length > 0) {
+    const userMap = new Map(userWv.values.map((v) => [v.value_id, v.display_score]));
+    const teamMap = new Map(teamScores.wv_scores.map((s) => [s.id, s.score]));
+    let totalCloseness = 0;
+    let count = 0;
+    for (const id of WV_ORDER) {
+      const u = userMap.get(id);
+      const t = teamMap.get(id);
+      if (u != null && t != null) {
+        totalCloseness += 1 - Math.abs(u - t) / 100;
+        count++;
+      }
+    }
+    if (count > 0) culture = Math.round((totalCloseness / count) * 100);
+  }
+
+  if (userCi && teamScores.ci_scores && teamScores.ci_scores.length > 0) {
+    const userMap = new Map(userCi.type_scores.map((s) => [s.type_id, s.score]));
+    const teamMap = new Map(teamScores.ci_scores.map((s) => [s.id, s.score]));
+    let totalCloseness = 0;
+    let count = 0;
+    for (const id of CI_ORDER) {
+      const u = userMap.get(id);
+      const t = teamMap.get(id);
+      if (u != null && t != null) {
+        totalCloseness += 1 - Math.abs(u - t) / 4;
+        count++;
+      }
+    }
+    if (count > 0) aptitude = Math.round((totalCloseness / count) * 100);
+  }
+
+  if (culture == null && aptitude == null) return null;
+
+  const overall =
+    culture != null && aptitude != null
+      ? Math.round((culture + aptitude) / 2)
+      : culture ?? aptitude!;
+
+  return { overall, culture: culture ?? overall, aptitude: aptitude ?? overall };
+}
 
 function formatSalary(min: number | null, max: number | null): string | null {
   if (min == null && max == null) return null;
@@ -34,16 +111,36 @@ const REMOTE_OPTIONS = ["すべて", "フルリモート", "一部リモート",
 type SortKey = "newest" | "salary";
 
 export default function JobsPage() {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState<JobPostingWithCompany[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hasDiagnosis, setHasDiagnosis] = useState<boolean | null>(null);
+  const [userWv, setUserWv] = useState<WvResultDTO | null>(null);
+  const [userCi, setUserCi] = useState<CiResultDTO | null>(null);
+  const [teamScoresMap, setTeamScoresMap] = useState<Map<string, TeamScores>>(new Map());
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("すべて");
   const [employment, setEmployment] = useState("すべて");
   const [remote, setRemote] = useState("すべて");
   const [sort, setSort] = useState<SortKey>("newest");
+
+  useEffect(() => {
+    if (user) {
+      Promise.all([
+        getLatestWvResult(user.id).catch(() => null),
+        getLatestCiResult(user.id).catch(() => null),
+      ]).then(([wv, ci]) => {
+        setUserWv(wv);
+        setUserCi(ci);
+        setHasDiagnosis(wv !== null || ci !== null);
+      });
+    } else {
+      setHasDiagnosis(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,6 +160,28 @@ export default function JobsPage() {
       });
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    if (!hasDiagnosis || jobs.length === 0) return;
+    const companyIds = [...new Set(jobs.map((j) => j.companyId))];
+    Promise.all(companyIds.map((id) => fetchTeamScores(id))).then((results) => {
+      const map = new Map<string, TeamScores>();
+      results.flat().forEach((t) => map.set(t.team_id, t));
+      setTeamScoresMap(map);
+    });
+  }, [hasDiagnosis, jobs]);
+
+  const matchScoresMap = useMemo(() => {
+    if (!hasDiagnosis || teamScoresMap.size === 0) return new Map<string, MatchScores>();
+    const map = new Map<string, MatchScores>();
+    for (const job of jobs) {
+      if (!job.teamId) continue;
+      const team = teamScoresMap.get(job.teamId);
+      const scores = computeMatchScores(userWv, userCi, team);
+      if (scores) map.set(job.id, scores);
+    }
+    return map;
+  }, [hasDiagnosis, jobs, teamScoresMap, userWv, userCi]);
 
   const filtered = useMemo(() => {
     let result = jobs;
@@ -166,6 +285,8 @@ export default function JobsPage() {
                     job={job}
                     isSelected={selectedId === job.id}
                     onSelect={() => setSelectedId(job.id)}
+                    hasDiagnosis={hasDiagnosis === true}
+                    matchScores={matchScoresMap.get(job.id) ?? null}
                   />
                 </li>
               ))}
@@ -229,22 +350,26 @@ function JobCard({
   job,
   isSelected,
   onSelect,
+  hasDiagnosis,
+  matchScores,
 }: {
   job: JobPostingWithCompany;
   isSelected: boolean;
   onSelect: () => void;
+  hasDiagnosis: boolean;
+  matchScores: MatchScores | null;
 }) {
   return (
     <>
       <Link href={`/jobs/${job.id}`} className="lg:hidden">
-        <CardInner job={job} isSelected={false} />
+        <CardInner job={job} isSelected={false} hasDiagnosis={hasDiagnosis} matchScores={matchScores} />
       </Link>
       <button
         type="button"
         onClick={onSelect}
         className="hidden lg:block w-full text-left cursor-pointer"
       >
-        <CardInner job={job} isSelected={isSelected} />
+        <CardInner job={job} isSelected={isSelected} hasDiagnosis={hasDiagnosis} matchScores={matchScores} />
       </button>
     </>
   );
@@ -253,10 +378,15 @@ function JobCard({
 function CardInner({
   job,
   isSelected,
+  hasDiagnosis,
+  matchScores,
 }: {
   job: JobPostingWithCompany;
   isSelected: boolean;
+  hasDiagnosis: boolean;
+  matchScores: MatchScores | null;
 }) {
+  const router = useRouter();
   const salary = formatSalary(job.salaryMin, job.salaryMax);
   const isNew = isNewPosting(job.createdAt);
 
@@ -276,21 +406,23 @@ function CardInner({
       >
         {/* Title + Bookmark */}
         <div className="flex items-start gap-2">
-          <h3 className="flex-1 text-[15px] font-bold leading-snug text-gray-900 line-clamp-2">
+          <h3 className="flex-1 text-base font-bold leading-snug text-gray-900 line-clamp-2">
             {job.title}
           </h3>
-          <button
-            type="button"
-            className="shrink-0 mt-0.5 text-gray-300 hover:text-gray-500 transition-colors"
+          <div
+            role="button"
+            tabIndex={0}
+            className="shrink-0 mt-0.5 text-gray-300 hover:text-gray-500 transition-colors cursor-pointer"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => { if (e.key === "Enter") e.stopPropagation(); }}
           >
             <BookmarkOutlineIcon />
-          </button>
+          </div>
         </div>
 
         {/* Cover image */}
         {job.coverImageUrl && (
-          <div className="mt-3 overflow-hidden rounded-xl bg-gray-100">
+          <div className="-mx-4 mt-3 overflow-hidden bg-gray-100">
             <img
               src={job.coverImageUrl}
               alt=""
@@ -301,18 +433,18 @@ function CardInner({
         )}
 
         {/* Status badges + Company + date */}
-        <div className="mt-3 flex items-center gap-1.5 text-xs">
+        <div className="mt-3 flex items-center gap-1.5 text-sm">
           {isNew && (
-            <span className="rounded-md bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
+            <span className="rounded-md bg-[var(--accent)] px-1.5 py-0.5 text-xs font-bold text-white leading-none">
               新着
             </span>
           )}
           <span className="shrink-0">
             {job.companyLogoUrl ? (
-              <img src={job.companyLogoUrl} alt="" className="h-4 w-4 rounded-sm object-cover" />
+              <img src={job.companyLogoUrl} alt="" className="h-5 w-5 rounded-sm object-cover" />
             ) : (
               <span
-                className="flex h-4 w-4 items-center justify-center rounded-sm text-[8px] font-bold text-white"
+                className="flex h-5 w-5 items-center justify-center rounded-sm text-[9px] font-bold text-white"
                 style={{ backgroundColor: ACCENT }}
               >
                 {job.companyName.charAt(0)}
@@ -329,7 +461,7 @@ function CardInner({
             {metaBadges.map((label) => (
               <span
                 key={label}
-                className="rounded-full border border-gray-200 px-2.5 py-1 text-xs text-gray-700"
+                className="rounded-full border border-gray-200 px-2.5 py-1 text-sm text-gray-700"
               >
                 {label}
               </span>
@@ -343,7 +475,7 @@ function CardInner({
             {job.tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-gray-200 px-2.5 py-1 text-xs text-gray-700"
+                className="rounded-full border border-gray-200 px-2.5 py-1 text-sm text-gray-700"
               >
                 {tag}
               </span>
@@ -351,14 +483,8 @@ function CardInner({
           </div>
         )}
 
-        {/* Match insight */}
-        <p className="mt-3 flex items-center gap-1 text-xs font-medium" style={{ color: ACCENT }}>
-          <SparklesIcon />
-          あなたとの共通点: 責任, 創造性, 自律性
-        </p>
-
         {/* Location + salary */}
-        <div className="mt-2.5 flex items-center gap-3 text-xs text-gray-500">
+        <div className="mt-2.5 flex items-center gap-3 text-sm text-gray-500">
           {job.workLocation && (
             <span className="flex items-center gap-1 truncate">
               <LocationIcon />
@@ -366,31 +492,44 @@ function CardInner({
             </span>
           )}
           {salary && (
-            <span className="flex items-center gap-1 shrink-0 text-sm font-bold" style={{ color: ACCENT }}>
+            <span className="flex items-center gap-1 shrink-0 text-base font-bold" style={{ color: ACCENT }}>
               <SalaryIcon />
               {salary}
             </span>
           )}
         </div>
 
-        {/* Match score bar */}
-        <div
-          className="mt-3 flex items-center gap-3 rounded-lg px-3 py-1.5 text-xs"
-          style={{ backgroundColor: `${ACCENT}0a` }}
-        >
-          <span>
-            <span className="text-gray-500">総合 </span>
-            <span className="font-bold" style={{ color: ACCENT }}>0%</span>
-          </span>
-          <span>
-            <span className="text-gray-500">文化 </span>
-            <span className="font-bold text-gray-600">0%</span>
-          </span>
-          <span>
-            <span className="text-gray-500">適性 </span>
-            <span className="font-bold text-gray-600">0%</span>
-          </span>
-        </div>
+        {/* Diagnosis CTA or match score */}
+        {hasDiagnosis && matchScores ? (
+          <div className="mt-3 flex items-center gap-3">
+            <MatchBadge label="総合" value={matchScores.overall} />
+            <MatchBadge label="文化" value={matchScores.culture} />
+            <MatchBadge label="適正" value={matchScores.aptitude} />
+          </div>
+        ) : hasDiagnosis ? (
+          <div
+            className="mt-3 flex items-center gap-1 text-sm font-medium"
+            style={{ color: ACCENT }}
+          >
+            <SparklesIcon />
+            マッチ度を確認できます
+          </div>
+        ) : (
+          <div
+            role="link"
+            tabIndex={0}
+            className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer"
+            style={{ backgroundColor: `${ACCENT}0a` }}
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); router.push("/work_values/start"); }}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); router.push("/work_values/start"); } }}
+          >
+            <SparklesIcon />
+            <span className="text-gray-600">診断を受けると</span>
+            <span className="font-semibold" style={{ color: ACCENT }}>マッチ度</span>
+            <span className="text-gray-600">がわかります</span>
+          </div>
+        )}
+
       </div>
     </div>
   );
@@ -407,11 +546,11 @@ function DetailStatCell({
 }) {
   return (
     <div className="flex flex-col gap-1.5 px-4 py-4">
-      <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+      <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
         <span className="text-gray-400">{icon}</span>
         {label}
       </div>
-      <div className="text-lg font-bold leading-tight text-gray-900">
+      <div className="text-xl font-bold leading-tight text-gray-900">
         {value}
       </div>
     </div>
@@ -438,13 +577,13 @@ function DetailConditionGroup({
         >
           {icon}
         </span>
-        <h4 className="text-sm font-bold text-gray-900">{title}</h4>
+        <h4 className="text-base font-bold text-gray-900">{title}</h4>
       </div>
       <dl className="flex flex-col gap-3">
         {filtered.map((r) => (
           <div key={r.label} className="flex flex-col gap-0.5">
-            <dt className="text-xs font-medium text-gray-500">{r.label}</dt>
-            <dd className="text-sm leading-relaxed text-gray-900 whitespace-pre-wrap">{r.value}</dd>
+            <dt className="text-sm font-medium text-gray-500">{r.label}</dt>
+            <dd className="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap">{r.value}</dd>
           </div>
         ))}
       </dl>
@@ -493,10 +632,10 @@ function JobDetail({ job }: { job: JobPostingWithCompany }) {
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto overscroll-contain">
-      {/* Cover image */}
+    <div className="flex-1 overflow-y-auto overscroll-contain bg-white">
+      {/* Cover image with gradient fade */}
       {job.coverImageUrl && (
-        <div className="w-full overflow-hidden bg-gray-100">
+        <div className="relative w-full overflow-hidden bg-gray-100">
           <img
             src={job.coverImageUrl}
             alt=""
@@ -505,92 +644,93 @@ function JobDetail({ job }: { job: JobPostingWithCompany }) {
         </div>
       )}
 
-      <div className="bg-white">
-        <div className="max-w-3xl mx-auto px-6 py-6">
-          {/* Company */}
-          <div className="flex items-center gap-3">
+      <div className="max-w-4xl mx-auto px-7">
+        {/* Company */}
+        <div className="flex items-center gap-3 mt-6">
+          <div className="h-12 w-12 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
             {job.companyLogoUrl ? (
-              <img src={job.companyLogoUrl} alt="" className="h-10 w-10 rounded-lg object-cover" />
+              <img src={job.companyLogoUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <span
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold text-white"
-                style={{ backgroundColor: ACCENT }}
-              >
+              <span className="text-sm font-bold" style={{ color: ACCENT }}>
                 {job.companyName.charAt(0)}
               </span>
             )}
-            <div>
-              <p className="text-sm font-medium text-gray-900">{job.companyName}</p>
-              {job.location && (
-                <p className="text-xs text-gray-500">{job.location}</p>
-              )}
-            </div>
           </div>
-
-          {/* Title */}
-          <h2 className="mt-4 text-2xl font-bold tracking-tight text-gray-900 leading-tight">
-            {job.title}
-          </h2>
-
-          {/* Tags */}
-          {job.tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {job.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full px-3 py-1 text-xs font-medium"
-                  style={{ backgroundColor: `${ACCENT}14`, color: ACCENT }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Quick Facts */}
-          {quickFacts.length > 0 && (
-            <div className="mt-5 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-gray-50/40 sm:grid-cols-4 sm:divide-y-0">
-              {quickFacts.map((f) => (
-                <DetailStatCell key={f.label} label={f.label} value={f.value!} icon={f.icon} />
-              ))}
-            </div>
-          )}
-
-          {/* CTA */}
-          <div className="mt-6 flex items-center gap-3">
-            <Link
-              href={`/jobs/${job.id}`}
-              className="flex-1 inline-flex items-center justify-center rounded-xl py-3 text-sm font-semibold text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: ACCENT }}
-            >
-              詳細を見る
-            </Link>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-            >
-              <BookmarkOutlineIcon />
-              <span className="ml-2">気になる</span>
-            </button>
+          <div>
+            <p className="text-base font-semibold text-gray-900">{job.companyName}</p>
+            {job.location && (
+              <p className="text-sm text-gray-500">{job.location}</p>
+            )}
           </div>
+        </div>
+
+        {/* Title */}
+        <h2 className="mt-4 text-2xl font-bold tracking-tight text-gray-900 leading-snug">
+          {job.title}
+        </h2>
+
+        {/* Tags */}
+        {job.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {job.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-md bg-gray-100 px-2.5 py-1 text-sm font-medium text-gray-700"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Quick Facts */}
+        {quickFacts.length > 0 && (
+          <div className="mt-5 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200/80 bg-gray-50/60 sm:grid-cols-4 sm:divide-y-0">
+            {quickFacts.map((f) => (
+              <DetailStatCell key={f.label} label={f.label} value={f.value!} icon={f.icon} />
+            ))}
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="mt-6 flex items-center gap-3">
+          <button
+            type="button"
+            className="flex-1 inline-flex items-center justify-center rounded-xl py-3.5 text-base font-bold text-white transition-colors hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: ACCENT }}
+          >
+            応募する
+          </button>
+          <Link
+            href={`/jobs/${job.id}`}
+            className="flex-1 inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white py-3.5 text-base font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          >
+            詳細を見る
+          </Link>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-5 py-3.5 text-base font-medium text-gray-700 transition-colors hover:bg-gray-50 cursor-pointer"
+          >
+            <BookmarkOutlineIcon />
+          </button>
         </div>
       </div>
 
       {/* Photo Gallery */}
       {job.galleryUrls && job.galleryUrls.length > 0 && (
-        <div className="bg-white mt-2">
-          <div className="max-w-3xl mx-auto px-6 py-5">
-            <h3 className="text-base font-bold text-gray-900 mb-3">フォトギャラリー</h3>
+        <div className="mt-8 max-w-4xl mx-auto px-7">
+          <DetailSectionHeader icon={<DetailCameraIcon />} title="フォトギャラリー" />
+          <div className="mt-3 overflow-hidden rounded-xl">
+            <Gallery urls={job.galleryUrls} />
           </div>
-          <Gallery urls={job.galleryUrls} />
         </div>
       )}
 
       {/* 募集要項 */}
-      <div className="bg-white mt-2">
-        <div className="max-w-3xl mx-auto px-6 py-6">
-          <h3 className="text-base font-bold text-gray-900 mb-4">募集要項</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="mt-8">
+        <div className="max-w-4xl mx-auto px-7">
+          <DetailSectionHeader icon={<DetailDocumentIcon />} title="募集要項" />
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
             <DetailConditionGroup
               title="勤務情報"
               rows={workConditions}
@@ -612,13 +752,13 @@ function JobDetail({ job }: { job: JobPostingWithCompany }) {
 
       {/* 応募要件 */}
       {(job.requiredQualifications || job.preferredQualifications) && (
-        <div className="bg-white mt-2">
-          <div className="max-w-3xl mx-auto px-6 py-6">
-            <h3 className="text-base font-bold text-gray-900 mb-4">応募要件</h3>
-            <div className="space-y-4">
+        <div className="mt-8">
+          <div className="max-w-4xl mx-auto px-7">
+            <DetailSectionHeader icon={<DetailCheckIcon />} title="応募要件" />
+            <div className="mt-4 space-y-5">
               {job.requiredQualifications && (
-                <div>
-                  <h4 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <div className="rounded-xl border border-gray-200/80 bg-white p-5">
+                  <h4 className="flex items-center gap-2 text-base font-bold text-gray-900">
                     <span
                       className="inline-flex h-5 items-center rounded px-1.5 text-xs font-bold text-white"
                       style={{ background: ACCENT }}
@@ -627,20 +767,20 @@ function JobDetail({ job }: { job: JobPostingWithCompany }) {
                     </span>
                     必須要件
                   </h4>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                  <p className="mt-3 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
                     {job.requiredQualifications}
                   </p>
                 </div>
               )}
               {job.preferredQualifications && (
-                <div>
-                  <h4 className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <div className="rounded-xl border border-gray-200/80 bg-white p-5">
+                  <h4 className="flex items-center gap-2 text-base font-bold text-gray-900">
                     <span className="inline-flex h-5 items-center rounded bg-gray-400 px-1.5 text-xs font-bold text-white">
                       歓迎
                     </span>
                     歓迎要件
                   </h4>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                  <p className="mt-3 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
                     {job.preferredQualifications}
                   </p>
                 </div>
@@ -649,6 +789,37 @@ function JobDetail({ job }: { job: JobPostingWithCompany }) {
           </div>
         </div>
       )}
+
+      {/* Bottom spacer */}
+      <div className="h-10" />
+    </div>
+  );
+}
+
+function matchScoreColor(score: number): string {
+  if (score >= 80) return "#149470";
+  if (score >= 55) return "#10b77f";
+  if (score >= 30) return "#8aa3d6";
+  return "#cfd0cd";
+}
+
+function MatchBadge({ label, value }: { label: string; value: number }) {
+  const color = matchScoreColor(value);
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-xs font-medium text-gray-700">{label}</span>
+      <span
+        className="text-sm font-bold tabular-nums"
+        style={{ color }}
+      >
+        {value}%
+      </span>
+      <div className="w-12 h-[6px] rounded-full bg-gray-200 overflow-hidden">
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${value}%`, backgroundColor: color }}
+        />
+      </div>
     </div>
   );
 }
@@ -717,6 +888,20 @@ function EmptySearchIcon() {
   );
 }
 
+function DetailSectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span
+        className="flex h-8 w-8 items-center justify-center rounded-lg"
+        style={{ backgroundColor: `${ACCENT}14`, color: ACCENT }}
+      >
+        {icon}
+      </span>
+      <h3 className="text-lg font-bold tracking-tight text-gray-900">{title}</h3>
+    </div>
+  );
+}
+
 function DetailYenIcon() {
   return (
     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -761,6 +946,33 @@ function DetailShieldIcon() {
   return (
     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z" />
+    </svg>
+  );
+}
+
+function DetailCameraIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  );
+}
+
+function DetailDocumentIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" />
+    </svg>
+  );
+}
+
+function DetailCheckIcon() {
+  return (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 11l3 3 8-8" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
     </svg>
   );
 }

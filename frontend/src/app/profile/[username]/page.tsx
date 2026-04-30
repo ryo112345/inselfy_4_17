@@ -18,8 +18,16 @@ async function getCurrentUsername(cookieHeader: string): Promise<string | null> 
     const res = await fetch(`${BACKEND}/api/auth/me`, {
       headers: { Cookie: cookieHeader },
     });
-    if (!res.ok) return null;
-    const data = await res.json();
+    if (res.ok) {
+      const data = await res.json();
+      return data.username ?? null;
+    }
+    const refreshRes = await fetch(`${BACKEND}/api/auth/refresh`, {
+      method: "POST",
+      headers: { Cookie: cookieHeader },
+    });
+    if (!refreshRes.ok) return null;
+    const data = await refreshRes.json();
     return data.username ?? null;
   } catch {
     return null;
