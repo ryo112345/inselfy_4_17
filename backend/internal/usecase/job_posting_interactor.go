@@ -32,6 +32,9 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 	if len(input.TeamMembers) > 5 {
 		return fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
 	}
+	if err := validateSalary(input.SalaryMin, input.SalaryMax); err != nil {
+		return err
+	}
 
 	status := input.Status
 	if status == "" {
@@ -78,6 +81,7 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 		HighlightTitleAppeal:      input.HighlightTitleAppeal,
 		HighlightTitleChallenge:   input.HighlightTitleChallenge,
 		HighlightTitleGrowth:      input.HighlightTitleGrowth,
+		GalleryURLs:               input.GalleryURLs,
 	})
 	if err != nil {
 		return err
@@ -124,6 +128,9 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 	if len(input.TeamMembers) > 5 {
 		return fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
 	}
+	if err := validateSalary(input.SalaryMin, input.SalaryMax); err != nil {
+		return err
+	}
 
 	existing.Title = strings.TrimSpace(input.Title)
 	existing.Description = strings.TrimSpace(input.Description)
@@ -163,6 +170,7 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 	existing.HighlightTitleAppeal = input.HighlightTitleAppeal
 	existing.HighlightTitleChallenge = input.HighlightTitleChallenge
 	existing.HighlightTitleGrowth = input.HighlightTitleGrowth
+	existing.GalleryURLs = input.GalleryURLs
 
 	j, err := i.repo.Update(ctx, existing)
 	if err != nil {
@@ -180,4 +188,15 @@ func (i *JobPostingInteractor) Delete(ctx context.Context, companyID, jobID stri
 		return port.ErrForbidden
 	}
 	return i.repo.Delete(ctx, jobID)
+}
+
+func validateSalary(min, max *int32) error {
+	const maxSalary = 9999
+	if min != nil && *min > maxSalary {
+		return fmt.Errorf("%w: salary_min must be 9999 or less (万円)", domainerr.ErrBadRequest)
+	}
+	if max != nil && *max > maxSalary {
+		return fmt.Errorf("%w: salary_max must be 9999 or less (万円)", domainerr.ErrBadRequest)
+	}
+	return nil
 }

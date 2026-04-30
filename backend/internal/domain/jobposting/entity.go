@@ -48,6 +48,7 @@ type JobPosting struct {
 	HighlightTitleAppeal      string
 	HighlightTitleChallenge   string
 	HighlightTitleGrowth      string
+	GalleryURLs               []string
 	CreatedAt                 time.Time
 	UpdatedAt                 time.Time
 }
@@ -91,6 +92,7 @@ type CreateJobPostingInput struct {
 	HighlightTitleAppeal      string
 	HighlightTitleChallenge   string
 	HighlightTitleGrowth      string
+	GalleryURLs               []string
 }
 
 type UpdateJobPostingInput struct {
@@ -131,4 +133,5 @@ type UpdateJobPostingInput struct {
 	HighlightTitleAppeal      string
 	HighlightTitleChallenge   string
 	HighlightTitleGrowth      string
+	GalleryURLs               []string
 }

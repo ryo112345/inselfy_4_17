@@ -63,6 +63,8 @@ const EMPTY_FORM: JobFormPreviewPayload = {
   highlightTitleChallenge: "チャレンジ",
   highlightTitleGrowth: "身につくスキル",
   coverImageDataUrl: null,
+  coverImageUrl: null,
+  galleryUrls: [],
 };
 
 function SectionTitle({
@@ -402,8 +404,8 @@ export default function CompanyJobPreviewPage() {
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
         {/* Hero */}
         <section className={`overflow-hidden ${cardClass}`}>
-          {form.coverImageDataUrl && (
-            <img src={form.coverImageDataUrl} alt="" className="w-full aspect-[16/9] object-cover" />
+          {(form.coverImageDataUrl || form.coverImageUrl) && (
+            <img src={form.coverImageDataUrl ?? form.coverImageUrl!} alt="" className="w-full aspect-[16/9] object-cover" />
           )}
           <div className="px-6 pb-6 pt-6 sm:px-8">
             {company && (
@@ -519,7 +521,7 @@ export default function CompanyJobPreviewPage() {
         </section>
 
         {/* Photo gallery */}
-        {company && company.galleryUrls.length > 0 && (
+        {job.galleryUrls.length > 0 && (
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="px-6 pb-2 pt-6 sm:px-7">
               <SectionTitle icon={<CameraIcon />}>
@@ -527,7 +529,7 @@ export default function CompanyJobPreviewPage() {
               </SectionTitle>
             </div>
             <div className="mt-3">
-              <Gallery urls={company.galleryUrls} />
+              <Gallery urls={job.galleryUrls} />
             </div>
           </section>
         )}
@@ -542,7 +544,7 @@ export default function CompanyJobPreviewPage() {
                   style={{ background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)` }}
                 >
                   {job.teamMembers.length > 0 && (
-                    <div className="flex items-center -space-x-6">
+                    <div className="flex items-center -space-x-[18px]">
                       {job.teamMembers.map((m, i) => {
                         const colors = [
                           { bg: "#EAF4F0", fg: "#3D8B6E" },
@@ -561,7 +563,9 @@ export default function CompanyJobPreviewPage() {
                             {m.photoUrl ? (
                               <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
                             ) : (
-                              m.name.charAt(0)
+                              <span className={m.name.length >= 5 ? "text-xs" : m.name.length === 4 ? "text-sm" : m.name.length === 3 ? "text-base" : m.name.length === 2 ? "text-xl" : "text-2xl"}>
+                                {m.name.slice(0, 5)}
+                              </span>
                             )}
                           </div>
                         );

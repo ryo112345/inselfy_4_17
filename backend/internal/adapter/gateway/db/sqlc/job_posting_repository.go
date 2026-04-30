@@ -31,6 +31,7 @@ func (r *JobPostingRepository) Create(ctx context.Context, j *jobposting.JobPost
 		return nil, domainerr.ErrBadRequest
 	}
 	teamMembersJSON, _ := json.Marshal(j.TeamMembers)
+	galleryURLsJSON, _ := json.Marshal(j.GalleryURLs)
 	row, err := q.CreateJobPosting(ctx, &generated.CreateJobPostingParams{
 		CompanyID:                 companyID,
 		Title:                     j.Title,
@@ -70,6 +71,7 @@ func (r *JobPostingRepository) Create(ctx context.Context, j *jobposting.JobPost
 		HighlightTitleAppeal:      j.HighlightTitleAppeal,
 		HighlightTitleChallenge:   j.HighlightTitleChallenge,
 		HighlightTitleGrowth:      j.HighlightTitleGrowth,
+		GalleryUrls:               galleryURLsJSON,
 	})
 	if err != nil {
 		return nil, err
@@ -133,6 +135,7 @@ func (r *JobPostingRepository) Update(ctx context.Context, j *jobposting.JobPost
 		return nil, domainerr.ErrBadRequest
 	}
 	teamMembersJSON, _ := json.Marshal(j.TeamMembers)
+	galleryURLsJSON, _ := json.Marshal(j.GalleryURLs)
 	row, err := q.UpdateJobPosting(ctx, &generated.UpdateJobPostingParams{
 		ID:                        pgID,
 		Title:                     j.Title,
@@ -173,6 +176,7 @@ func (r *JobPostingRepository) Update(ctx context.Context, j *jobposting.JobPost
 		HighlightTitleAppeal:      j.HighlightTitleAppeal,
 		HighlightTitleChallenge:   j.HighlightTitleChallenge,
 		HighlightTitleGrowth:      j.HighlightTitleGrowth,
+		GalleryUrls:               galleryURLsJSON,
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -203,6 +207,13 @@ func jobPostingToDomain(row *generated.JobPosting) *jobposting.JobPosting {
 	}
 	if teamMembers == nil {
 		teamMembers = []jobposting.TeamMember{}
+	}
+	var galleryURLs []string
+	if len(row.GalleryUrls) > 0 {
+		_ = json.Unmarshal(row.GalleryUrls, &galleryURLs)
+	}
+	if galleryURLs == nil {
+		galleryURLs = []string{}
 	}
 	return &jobposting.JobPosting{
 		ID:                        uuidToString(row.ID),
@@ -245,6 +256,7 @@ func jobPostingToDomain(row *generated.JobPosting) *jobposting.JobPosting {
 		HighlightTitleAppeal:      row.HighlightTitleAppeal,
 		HighlightTitleChallenge:   row.HighlightTitleChallenge,
 		HighlightTitleGrowth:      row.HighlightTitleGrowth,
+		GalleryURLs:               galleryURLs,
 		CreatedAt:                 row.CreatedAt.Time,
 		UpdatedAt:                 row.UpdatedAt.Time,
 	}

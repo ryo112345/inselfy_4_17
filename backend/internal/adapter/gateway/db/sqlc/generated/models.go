@@ -442,6 +442,7 @@ type JobPosting struct {
 	HighlightTitleGrowth      string             `json:"highlight_title_growth"`
 	TeamMembers               []byte             `json:"team_members"`
 	TeamLabel                 string             `json:"team_label"`
+	GalleryUrls               []byte             `json:"gallery_urls"`
 }
 
 type Notification struct {

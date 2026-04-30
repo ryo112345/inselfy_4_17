@@ -75,6 +75,7 @@ type jobPostingRequest struct {
 	HighlightTitleAppeal      string   `json:"highlightTitleAppeal"`
 	HighlightTitleChallenge   string   `json:"highlightTitleChallenge"`
 	HighlightTitleGrowth      string   `json:"highlightTitleGrowth"`
+	GalleryURLs               []string `json:"galleryUrls"`
 }
 
 // Create handles POST /api/company/jobs.
@@ -132,6 +133,7 @@ func (c *JobPostingController) Create(ctx echo.Context) error {
 		HighlightTitleAppeal:      body.HighlightTitleAppeal,
 		HighlightTitleChallenge:   body.HighlightTitleChallenge,
 		HighlightTitleGrowth:      body.HighlightTitleGrowth,
+		GalleryURLs:               body.GalleryURLs,
 	}); err != nil {
 		return handleError(ctx, err)
 	}
@@ -235,6 +237,7 @@ func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 		HighlightTitleAppeal:      body.HighlightTitleAppeal,
 		HighlightTitleChallenge:   body.HighlightTitleChallenge,
 		HighlightTitleGrowth:      body.HighlightTitleGrowth,
+		GalleryURLs:               body.GalleryURLs,
 	}); err != nil {
 		return handleError(ctx, err)
 	}

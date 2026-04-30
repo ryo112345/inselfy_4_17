@@ -36,6 +36,8 @@ export type JobFormPreviewPayload = {
   highlightTitleChallenge: string;
   highlightTitleGrowth: string;
   coverImageDataUrl: string | null;
+  coverImageUrl: string | null;
+  galleryUrls: string[];
 };
 
 // プレビュータブが「現在の状態を送って」と要求するためのメッセージ。

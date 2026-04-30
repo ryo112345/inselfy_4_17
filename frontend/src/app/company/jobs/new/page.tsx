@@ -133,7 +133,7 @@ function InlineSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full max-w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors cursor-pointer text-inherit font-inherit"
+      className="w-full max-w-full truncate bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors cursor-pointer text-inherit font-inherit"
     >
       {placeholder && (
         <option value="" disabled>
@@ -491,6 +491,8 @@ export default function JobNewPage() {
       highlightTitleRole, highlightTitleAppeal,
       highlightTitleChallenge, highlightTitleGrowth,
       coverImageDataUrl,
+      coverImageUrl: coverImage,
+      galleryUrls: galleryImages,
     }),
     [
       title, jobCategory, employmentType, hiringCount, description,
@@ -500,7 +502,7 @@ export default function JobNewPage() {
       probationPeriod, workHours, breakTime, holidays, salaryMin, salaryMax,
       salaryDetail, insurance, remotePolicy, benefits, smokingPolicy,
       selectionProcess, highlightTitleRole, highlightTitleAppeal,
-      highlightTitleChallenge, highlightTitleGrowth, coverImageDataUrl,
+      highlightTitleChallenge, highlightTitleGrowth, coverImageDataUrl, coverImage, galleryImages,
     ],
   );
 
@@ -553,6 +555,7 @@ export default function JobNewPage() {
         benefits: benefits.join("\n"), smokingPolicy, selectionProcess,
         coverImageUrl: coverImage ?? "",
         highlightTitleRole, highlightTitleAppeal, highlightTitleChallenge, highlightTitleGrowth,
+        galleryUrls: galleryImages,
       });
       setStatus(publishStatus);
       router.push("/company/jobs");
@@ -772,7 +775,8 @@ export default function JobNewPage() {
                   <input
                     type="number"
                     value={salaryMin ?? ""}
-                    onChange={(e) => setSalaryMin(e.target.value ? Number(e.target.value) : null)}
+                    onChange={(e) => setSalaryMin(e.target.value ? Math.min(Number(e.target.value), 9999) : null)}
+                    max={9999}
                     placeholder="下限"
                     className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
                   />
@@ -780,7 +784,8 @@ export default function JobNewPage() {
                   <input
                     type="number"
                     value={salaryMax ?? ""}
-                    onChange={(e) => setSalaryMax(e.target.value ? Number(e.target.value) : null)}
+                    onChange={(e) => setSalaryMax(e.target.value ? Math.min(Number(e.target.value), 9999) : null)}
+                    max={9999}
                     placeholder="上限"
                     className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
                   />
