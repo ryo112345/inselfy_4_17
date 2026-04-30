@@ -490,6 +490,8 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// --- Company Jobs ---
 	jobGroup := e.Group("/api/company/jobs", companyJwtMW)
 	jobGroup.POST("/team-member-photo", httpcontroller.HandleTeamMemberPhotoUpload)
+	jobGroup.POST("/gallery-image", httpcontroller.HandleGalleryImageUpload)
+	jobGroup.POST("/cover-image", httpcontroller.HandleCoverImageUpload)
 	jobGroup.POST("", jobPostingCtrl.Create)
 	jobGroup.GET("", jobPostingCtrl.List)
 	jobGroup.GET("/:jobId", func(c echo.Context) error {

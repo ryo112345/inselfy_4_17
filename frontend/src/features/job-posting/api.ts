@@ -129,3 +129,33 @@ export async function uploadTeamMemberPhoto(
   const data = await res.json();
   return data.url;
 }
+
+export async function uploadCoverImage(
+  file: File,
+): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${BASE_URL}/api/company/jobs/cover-image`, {
+    method: "POST",
+    credentials: "include",
+    body: form,
+  });
+  if (!res.ok) throw new Error("Failed to upload cover image");
+  const data = await res.json();
+  return data.url;
+}
+
+export async function uploadGalleryImage(
+  file: File,
+): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${BASE_URL}/api/company/jobs/gallery-image`, {
+    method: "POST",
+    credentials: "include",
+    body: form,
+  });
+  if (!res.ok) throw new Error("Failed to upload gallery image");
+  const data = await res.json();
+  return data.url;
+}

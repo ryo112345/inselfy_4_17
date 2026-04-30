@@ -150,6 +150,7 @@ export interface JobPosting {
   highlightTitleAppeal: string;
   highlightTitleChallenge: string;
   highlightTitleGrowth: string;
+  galleryUrls: string[];
   createdAt: string;
   updatedAt: string;
 }
