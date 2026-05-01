@@ -516,16 +516,16 @@ function BasicInterestRow({ bid, score, colors, badge, showDivider = false }: { 
           {score.rank}位
         </span>
 
-        <div className="flex items-center gap-0.5 shrink-0">
-          <span className="text-[14px]" style={{ color: badge.needLabelColor, fontWeight: badge.needLabelWeight }}>
+        <div className="flex items-center gap-0.5 min-w-0">
+          <span className="text-[14px] truncate" style={{ color: badge.needLabelColor, fontWeight: badge.needLabelWeight }}>
             {BASIC_INTEREST_LABELS[bid]}
           </span>
-          {medal && <span className="text-[13px]">{medal}</span>}
+          {medal && <span className="text-[13px] shrink-0">{medal}</span>}
         </div>
 
         <div className="flex-1 min-w-0" />
 
-        <div className="w-[72px] shrink-0">
+        <div className="w-[48px] shrink-0">
           <div className="h-[5px] rounded-full bg-gray-200 overflow-hidden">
             <div
               className="h-full rounded-full"
