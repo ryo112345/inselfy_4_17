@@ -45,7 +45,7 @@ export function AboutCard({ user, isOwner = true }: Props) {
   };
 
   return (
-    <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+    <section className="rounded-2xl border border-gray-200/80 bg-white px-4 md:px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900">自己紹介</h2>
         {isOwner && !isEditing && (

@@ -59,7 +59,7 @@ export function EducationCard({ username, educations, isOwner = true }: Props) {
   const editingId = formState.mode === "edit" ? formState.education.id : null;
 
   return (
-    <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+    <section className="rounded-2xl border border-gray-200/80 bg-white px-4 md:px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900">
           <CapIcon className="h-6 w-6 text-gray-900" />
@@ -105,23 +105,15 @@ export function EducationCard({ username, educations, isOwner = true }: Props) {
                   onClose={() => setFormState({ mode: "closed" })}
                 />
               ) : (
-                <div className="group flex items-start gap-3">
+                <div className="flex items-start gap-3">
                   <SchoolBadge name={e.school} />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-lg font-bold tracking-tight text-gray-900">
-                          {e.school}
-                        </h3>
-                        {e.degree ? (
-                          <p className="mt-0.5 text-base text-gray-700">{e.degree}</p>
-                        ) : null}
-                        <p className="mt-0.5 text-sm text-gray-500">
-                          {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
-                        </p>
-                      </div>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="min-w-0 text-lg font-bold tracking-tight text-gray-900">
+                        {e.school}
+                      </h3>
                       {isOwner && formState.mode === "closed" && (
-                        <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+                        <div className="flex shrink-0 items-center gap-1">
                           <button
                             type="button"
                             aria-label="編集"
@@ -142,6 +134,12 @@ export function EducationCard({ username, educations, isOwner = true }: Props) {
                         </div>
                       )}
                     </div>
+                    {e.degree ? (
+                      <p className="mt-0.5 text-base text-gray-700">{e.degree}</p>
+                    ) : null}
+                    <p className="mt-0.5 text-sm text-gray-500">
+                      {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
+                    </p>
                   </div>
                 </div>
               )}
@@ -219,8 +217,8 @@ function EducationForm({ username, mode, education, onClose }: FormProps) {
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
         />
       </Field>
-      <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[140px]">
+      <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+        <div className="md:flex-1 md:min-w-[140px]">
           <Field label="入学年">
             <select
               value={startYear ?? ""}
@@ -234,7 +232,7 @@ function EducationForm({ username, mode, education, onClose }: FormProps) {
             </select>
           </Field>
         </div>
-        <div className="flex-1 min-w-[140px]">
+        <div className="md:flex-1 md:min-w-[140px]">
           <Field label="卒業年">
             <select
               value={endYear ?? ""}

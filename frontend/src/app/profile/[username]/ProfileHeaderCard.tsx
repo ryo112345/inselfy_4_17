@@ -81,7 +81,7 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
   return (
     <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
       <div
-        className="absolute inset-x-0 top-0 h-44"
+        className="absolute inset-x-0 top-0 h-32 md:h-44"
         style={{ background: headerColor }}
       >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
@@ -96,12 +96,12 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
         )}
       </div>
 
-      <div className="relative px-7 pb-6">
-        <div className="h-36" />
-        <div className="absolute top-20 left-6">
+      <div className="relative px-4 md:px-7 pb-6">
+        <div className="h-24 md:h-36" />
+        <div className="absolute top-14 md:top-20 left-4 md:left-6">
           <div className="relative">
-            <div className="group flex h-36 w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
-              <FaceIcon className="h-20 w-20" style={{ color: headerColor }} />
+            <div className="group flex h-24 w-24 md:h-36 md:w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
+              <FaceIcon className="h-14 w-14 md:h-20 md:w-20" style={{ color: headerColor }} />
             </div>
             {isOwner && (
               <button
@@ -121,7 +121,7 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
             type="button"
             aria-label="プロフィールを編集"
             onClick={() => setIsEditing(true)}
-            className="absolute right-4 top-[188px] flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white transition hover:opacity-80"
+            className="absolute right-4 top-[148px] md:top-[188px] flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white transition hover:opacity-80"
           style={{ borderColor: headerColor, color: headerColor }}
           >
             <PencilIcon className="h-[18px] w-[18px]" />
@@ -129,9 +129,9 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
         )}
 
         {isEditing ? (
-          <div className="mt-20">
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[140px]">
+          <div className="mt-12 md:mt-20">
+            <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+              <div className="md:flex-1 md:min-w-[140px]">
                 <Field label="表示名" required>
                   <input
                     type="text"
@@ -142,7 +142,7 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
                   />
                 </Field>
               </div>
-              <div className="w-[160px] shrink-0">
+              <div className="md:w-[160px] md:shrink-0">
                 <Field label="スカウト">
                   <select
                     value={jobSeekingStatus}
@@ -166,8 +166,8 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
                 className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
               />
             </Field>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[140px]">
+            <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+              <div className="md:flex-1 md:min-w-[140px]">
                 <Field label="居住地">
                   <select
                     value={location}
@@ -226,7 +226,7 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
                   </select>
                 </Field>
               </div>
-              <div className="flex-1 min-w-[160px]">
+              <div className="md:flex-1 md:min-w-[160px]">
                 <Field label="業界">
                   <select
                     value={industry}
@@ -266,7 +266,7 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
                   </select>
                 </Field>
               </div>
-              <div className="flex-1 min-w-[160px]">
+              <div className="md:flex-1 md:min-w-[160px]">
                 <Field label="職種">
                   <select
                     value={jobType}
@@ -398,10 +398,10 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
             </div>
           </div>
         ) : (
-          <div className="mt-24 flex items-end justify-between gap-4">
+          <div className="mt-14 md:mt-24 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                <h1 className="text-xl md:text-2xl font-bold tracking-tight text-gray-900">
                   {user.displayName || user.name}
                 </h1>
                 {jobStatus ? (
@@ -434,7 +434,7 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
                 ) : null}
               </div>
             </div>
-            <div className="flex shrink-0 items-center gap-5 pb-2 text-base text-gray-500">
+            <div className="flex shrink-0 items-center gap-5 text-base text-gray-500 md:pb-2">
               <span className="inline-flex items-baseline gap-1.5">
                 <span className="text-lg font-bold text-gray-900">
                   {experienceCount}

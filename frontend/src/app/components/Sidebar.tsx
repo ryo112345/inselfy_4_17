@@ -98,13 +98,13 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
       `}</style>
       {open && (
         <div
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-40 hidden md:block"
           onClick={() => setOpen(false)}
         />
       )}
       <div
         data-sidebar
-        className={`fixed top-0 left-0 z-50 h-screen overflow-hidden ${initialRender.current ? "" : "transition-[width] duration-200 ease-in-out"} ${open ? "w-72" : "w-[50px]"}`}
+        className={`fixed top-0 left-0 z-50 h-screen overflow-hidden hidden md:block ${initialRender.current ? "" : "transition-[width] duration-200 ease-in-out"} ${open ? "w-72" : "w-[50px]"}`}
       >
         <button
           onClick={(e) => { e.stopPropagation(); setOpen(!open); }}

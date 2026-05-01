@@ -31,11 +31,11 @@ export function PostsTabs({ posts = [] }: Props) {
               key={tab.key}
               type="button"
               onClick={() => setActive(tab.key)}
-              className="relative py-4 text-base font-semibold text-gray-900 transition"
+              className="relative py-3 md:py-4 text-sm md:text-base font-semibold text-gray-900 transition"
             >
               {tab.label}
               {isActive && (
-                <span className="absolute inset-x-12 bottom-0 h-[3px] rounded-full bg-emerald-700" />
+                <span className="absolute inset-x-4 md:inset-x-12 bottom-0 h-[3px] rounded-full bg-emerald-700" />
               )}
             </button>
           );

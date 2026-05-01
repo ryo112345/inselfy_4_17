@@ -25,14 +25,14 @@ export function ResumeUploadCard() {
       <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e5ede7] text-emerald-700">
         <DocumentIcon className="h-8 w-8" />
       </div>
-      <h2 className="relative mt-4 text-xl font-bold leading-snug tracking-tight text-gray-900">
+      <h2 className="relative mt-4 text-lg md:text-xl font-bold leading-snug tracking-tight text-gray-900">
         職務経歴書をアップロードするだけで、
-        <br />
+        <br className="hidden md:inline" />
         プロフィールが完成します
       </h2>
-      <p className="relative mx-auto mt-3 max-w-lg text-base leading-relaxed text-gray-500">
+      <p className="relative mx-auto mt-3 max-w-lg text-sm md:text-base leading-relaxed text-gray-500">
         PDF形式の職務経歴書をお持ちなら、アップロードするだけ。
-        <br />
+        <br className="hidden md:inline" />
         職歴・スキル・自己紹介を自動で反映します。
       </p>
       <button
