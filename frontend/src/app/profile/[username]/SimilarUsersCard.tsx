@@ -25,9 +25,10 @@ type SimilarUser = {
 type Props = {
   userId: string;
   visible: boolean;
+  className?: string;
 };
 
-export function SimilarUsersCard({ userId, visible }: Props) {
+export function SimilarUsersCard({ userId, visible, className }: Props) {
   const [users, setUsers] = useState<SimilarUser[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -51,7 +52,7 @@ export function SimilarUsersCard({ userId, visible }: Props) {
   if (!loading && users.length === 0) return null;
 
   return (
-    <div className="w-full max-w-[320px] ml-auto">
+    <div className={className ?? "w-full max-w-[320px] ml-auto"}>
       <div className="rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)] overflow-hidden">
         <div className="px-5 pt-5 pb-3">
           <h3 className="text-[15px] font-bold text-gray-900">
