@@ -114,9 +114,9 @@ export function PanelNavigator({ children, userId, username, displayName = usern
     <div className="relative px-0 md:px-4 overflow-hidden h-[calc(100vh-1rem)]">
       {showSimilar && (
         <div
-          className="absolute top-0 h-full overflow-y-auto z-10 transition-opacity duration-300 hidden xl:block scrollbar-hide"
+          className="absolute top-0 h-full overflow-y-auto z-10 transition-opacity duration-300 hidden xl:block scrollbar-hide pl-3"
           style={{
-            width: `calc(50% - ${desktopPanelPx / 2}px - 24px)`,
+            width: `calc(50% - ${desktopPanelPx / 2}px - ${gapPx}px)`,
             left: 0,
             opacity: activeIndex === 0 && !expanded ? 1 : 0,
             pointerEvents: activeIndex === 0 && !expanded ? "auto" : "none",
