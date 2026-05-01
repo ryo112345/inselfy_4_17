@@ -42,6 +42,24 @@ const DEFAULT_BADGE = {
 
 type BadgeColors = typeof DEFAULT_BADGE;
 
+const BADGE_STYLES = [
+  {
+    background: "linear-gradient(170deg, #98e0f0 0%, #6ad0e0 30%, #4ac0d4 60%, #58c0b8 100%)",
+    boxShadow: "0 6px 14px rgba(70,180,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+    border: "1px solid rgba(255,255,255,0.25)",
+  },
+  {
+    background: "linear-gradient(170deg, #90dcd6 0%, #64d0c4 30%, #48c0b4 60%, #50bca8 100%)",
+    boxShadow: "0 6px 14px rgba(70,180,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+    border: "1px solid rgba(255,255,255,0.25)",
+  },
+  {
+    background: "linear-gradient(170deg, #94dcc4 0%, #6cd0ac 30%, #54c498 60%, #4cbc90 100%)",
+    boxShadow: "0 6px 14px rgba(90,180,140,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+    border: "1px solid rgba(255,255,255,0.25)",
+  },
+];
+
 export function WorkValuesResultContent({ sessionId, initialData, isOwner = true }: { sessionId: string; initialData?: ResultDTO | null; isOwner?: boolean }) {
   const [result, setResult] = useState<ResultDTO | null>(initialData ?? null);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +110,7 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
 
   return (
     <section
-      className="mb-6 text-center px-6 pt-10 pb-6 relative overflow-hidden -mx-6 -mt-5 rounded-t-2xl"
+      className="mb-6 text-center px-6 pt-14 pb-6 relative overflow-hidden -mx-6 -mt-5 rounded-t-2xl"
       style={{ backgroundColor: "#F5FBF8" }}
     >
       <style>{`
@@ -201,7 +219,8 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
       <p className="relative text-[14px] mb-5 tracking-wide" style={{ color: "#8a9e94" }}>
         {persona.subtitle}
       </p>
-      <div className="relative grid grid-cols-3 items-center -mt-11">
+      {/* Desktop: 3-column grid */}
+      <div className="relative hidden md:grid grid-cols-3 items-center -mt-11">
         <div className="flex flex-col items-end gap-1 pr-4 justify-self-center translate-x-2">
           {top3.map((v) => (
             <span key={v.value_id} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
@@ -218,28 +237,11 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
                 { size: "52px", text: "text-xl", radius: "rounded-xl" },
               ];
               const s = sizes[i];
-              const badgeStyles = [
-                {
-                  background: "linear-gradient(170deg, #98e0f0 0%, #6ad0e0 30%, #4ac0d4 60%, #58c0b8 100%)",
-                  boxShadow: "0 6px 14px rgba(70,180,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
-                  border: "1px solid rgba(255,255,255,0.25)",
-                },
-                {
-                  background: "linear-gradient(170deg, #90dcd6 0%, #64d0c4 30%, #48c0b4 60%, #50bca8 100%)",
-                  boxShadow: "0 6px 14px rgba(70,180,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
-                  border: "1px solid rgba(255,255,255,0.25)",
-                },
-                {
-                  background: "linear-gradient(170deg, #94dcc4 0%, #6cd0ac 30%, #54c498 60%, #4cbc90 100%)",
-                  boxShadow: "0 6px 14px rgba(90,180,140,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
-                  border: "1px solid rgba(255,255,255,0.25)",
-                },
-              ];
               return (
                 <span
                   key={vid}
                   className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center wv-badge-text wv-badge-glow wv-badge-float-${i + 1} shrink-0`}
-                  style={{ ...badgeStyles[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
+                  style={{ ...BADGE_STYLES[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
                 >
                   {VALUE_ABBREVIATIONS[vid]}
                 </span>
@@ -249,6 +251,37 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
         <div className="flex justify-start pl-4">
           <ValuesRadarChart values={values} badge={badge} />
         </div>
+      </div>
+      {/* Mobile: stacked layout */}
+      <div className="relative flex flex-col items-center gap-4 md:hidden">
+        <div className="flex items-end justify-center gap-2.5">
+          {top3.map((v, i) => {
+            const vid = v.value_id as ValueId;
+            const sizes = [
+              { size: "72px", text: "text-2xl", radius: "rounded-2xl" },
+              { size: "58px", text: "text-xl", radius: "rounded-2xl" },
+              { size: "48px", text: "text-lg", radius: "rounded-xl" },
+            ];
+            const s = sizes[i];
+            return (
+              <span
+                key={vid}
+                className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center wv-badge-text wv-badge-glow wv-badge-float-${i + 1} shrink-0`}
+                style={{ ...BADGE_STYLES[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
+              >
+                {VALUE_ABBREVIATIONS[vid]}
+              </span>
+            );
+          })}
+        </div>
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-0.5">
+          {top3.map((v) => (
+            <span key={v.value_id} className="text-[14px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+              {VALUE_ENGLISH_NAMES[v.value_id as ValueId]}
+            </span>
+          ))}
+        </div>
+        <ValuesRadarChart values={values} badge={badge} />
       </div>
     </section>
   );
@@ -362,8 +395,8 @@ function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"];
               <div className="flex items-center gap-2">
                 <ValueBadge valueId={vid} variant="outline" badge={badge} />
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-1.5">
+                <div className="flex-1 min-w-0 overflow-visible">
+                  <div className="flex items-baseline gap-1.5 whitespace-nowrap w-max">
                     <span className="text-[15px] font-bold" style={{ color: badge.labelColor }}>
                       {VALUE_LABELS[vid]}
                     </span>
@@ -373,17 +406,17 @@ function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"];
                   </div>
                 </div>
 
-                <p className="text-[14px] font-medium leading-relaxed max-w-[220px] text-left" style={{ color: badge.descColor }}>
+                <p className="hidden md:block text-[14px] font-medium leading-relaxed max-w-[220px] text-left" style={{ color: badge.descColor }}>
                   {VALUE_DESCRIPTIONS[vid]}
                 </p>
 
-                <span className="text-[22px] font-bold tabular-nums ml-1 w-16 text-right shrink-0" style={{ color: barColor }}>
+                <span className="pl-2 text-[22px] font-bold tabular-nums ml-1 w-16 text-right shrink-0" style={{ color: barColor }}>
                   {v.display_score.toFixed(1)}
                 </span>
 
                 <button
                   onClick={() => toggle(vid)}
-                  className="text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
+                  className="relative z-10 bg-white text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
                 >
                   <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
                     <ChevronIcon size={14} />
@@ -496,10 +529,10 @@ function NeedRow({ score, colors, badge, showDivider = false }: { score: NeedSco
         {medal && <span className="text-[13px]">{medal}</span>}
       </div>
 
-      {/* description */}
-      <p className="flex-1 text-[13px] font-medium leading-snug min-w-0" style={{ color: badge.descColor }}>
+      <p className="hidden md:block flex-1 text-[13px] font-medium leading-snug min-w-0" style={{ color: badge.descColor }}>
         {score.description_ja}
       </p>
+      <div className="flex-1 md:hidden" />
 
       {/* score bar */}
       <div className="w-[72px] shrink-0">
