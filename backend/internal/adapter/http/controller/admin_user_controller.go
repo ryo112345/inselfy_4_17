@@ -24,7 +24,6 @@ type adminUserItem struct {
 	ID          string  `json:"id"`
 	Username    string  `json:"username"`
 	Name        string  `json:"name"`
-	DisplayName *string `json:"display_name"`
 	Email       *string `json:"email"`
 	AvatarURL   *string `json:"avatar_url"`
 	CreatedAt   string  `json:"created_at"`
@@ -135,7 +134,6 @@ func toItemsFromList(rows []*generated.ListUsersRow) []adminUserItem {
 			ID:          pgUUIDToString(r.ID),
 			Username:    r.Username,
 			Name:        r.Name,
-			DisplayName: textToPtr(r.DisplayName),
 			Email:       textToPtr(r.Email),
 			AvatarURL:   textToPtr(r.AvatarUrl),
 			CreatedAt:   r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
@@ -151,7 +149,6 @@ func toItemsFromSearch(rows []*generated.SearchUsersRow) []adminUserItem {
 			ID:          pgUUIDToString(r.ID),
 			Username:    r.Username,
 			Name:        r.Name,
-			DisplayName: textToPtr(r.DisplayName),
 			Email:       textToPtr(r.Email),
 			AvatarURL:   textToPtr(r.AvatarUrl),
 			CreatedAt:   r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),

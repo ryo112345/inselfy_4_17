@@ -14,7 +14,6 @@ type AuthUser = {
   id: string;
   username: string;
   name: string;
-  displayName?: string | null;
   avatarUrl?: string | null;
   email?: string | null;
   needsSetup?: boolean;

@@ -112,9 +112,6 @@ func decodeUpdateProfile(raw map[string]json.RawMessage) (user.UpdateProfileInpu
 		}
 		input.Name = s
 	}
-	if err := decodeNullableString(raw, "displayName", &input.DisplayName); err != nil {
-		return input, err
-	}
 	if err := decodeNullableString(raw, "headline", &input.Headline); err != nil {
 		return input, err
 	}

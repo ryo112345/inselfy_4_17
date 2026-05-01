@@ -344,10 +344,6 @@ export type ModelsUpdateUserProfileRequest = {
      */
     name?: string;
     /**
-     * 表記名（日本語などのフル表示名）
-     */
-    displayName?: string | null;
-    /**
      * ヘッドライン（肩書き・一言）
      */
     headline?: string | null;
@@ -397,10 +393,6 @@ export type ModelsUserResponse = {
      * 表示名
      */
     name: string;
-    /**
-     * フル表示名
-     */
-    displayName?: string | null;
     /**
      * ヘッドライン
      */

@@ -67,15 +67,15 @@ export default async function ProfilePage({
     <ProfileColorContext value={profileColor}>
       <Sidebar
         username={data.username}
-        displayName={data.user.displayName}
+        displayName={data.user.name}
         diagnostics={data.diagnostics}
         defaultOpen={sidebarOpen}
       />
-      <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 md:ml-[50px]">
+      <main className="min-h-dvh bg-[#f6f7f5] pt-2 pb-8 md:ml-[50px]">
         <PanelNavigator
           userId={data.user.id}
           username={data.username}
-          displayName={data.user.displayName || data.user.name}
+          displayName={data.user.name}
           wvSessionId={data.wvSessionId}
           ciSessionId={data.ciSessionId}
           wvResult={data.wvResult}

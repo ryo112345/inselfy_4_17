@@ -9,7 +9,6 @@ import (
 // Length caps derived from the seed schema (`backend/scripts/seed_schema.md`).
 const (
 	MaxNameLength             = 100
-	MaxDisplayNameLength      = 100
 	MaxHeadlineLength         = 255
 	MaxLocationLength         = 100
 	MaxAboutLength            = 2000
@@ -27,8 +26,6 @@ var (
 	ErrNameRequired = errors.New("name is required")
 	// ErrNameTooLong indicates the name exceeds MaxNameLength.
 	ErrNameTooLong = errors.New("name must be 100 characters or fewer")
-	// ErrDisplayNameTooLong indicates the display_name exceeds MaxDisplayNameLength.
-	ErrDisplayNameTooLong = errors.New("display_name must be 100 characters or fewer")
 	// ErrHeadlineTooLong indicates the headline exceeds MaxHeadlineLength.
 	ErrHeadlineTooLong = errors.New("headline must be 255 characters or fewer")
 	// ErrLocationTooLong indicates the location exceeds MaxLocationLength.
@@ -53,17 +50,6 @@ func ValidateName(name string) error {
 	}
 	if runeLen(trimmed) > MaxNameLength {
 		return ErrNameTooLong
-	}
-	return nil
-}
-
-// ValidateDisplayName validates the optional display_name.
-func ValidateDisplayName(s *string) error {
-	if s == nil {
-		return nil
-	}
-	if runeLen(*s) > MaxDisplayNameLength {
-		return ErrDisplayNameTooLong
 	}
 	return nil
 }
@@ -153,9 +139,6 @@ func Validate(u User) error {
 	if u.Username == "" {
 		return ErrInvalidUsername
 	}
-	if err := ValidateDisplayName(u.DisplayName); err != nil {
-		return err
-	}
 	if err := ValidateHeadline(u.Headline); err != nil {
 		return err
 	}
@@ -185,11 +168,6 @@ func Validate(u User) error {
 func ValidateUpdateProfile(input UpdateProfileInput) error {
 	if input.Name != nil {
 		if err := ValidateName(*input.Name); err != nil {
-			return err
-		}
-	}
-	if input.DisplayName != nil {
-		if err := ValidateDisplayName(*input.DisplayName); err != nil {
 			return err
 		}
 	}

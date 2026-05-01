@@ -13,7 +13,7 @@ type Experience = {
 type SimilarUser = {
   user_id: string;
   username: string;
-  display_name: string | null;
+  name: string;
   headline: string | null;
   avatar_url: string | null;
   profile_color: string | null;
@@ -97,7 +97,7 @@ function SimilarUserRow({ user }: { user: SimilarUser }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-[14px] font-semibold text-gray-900 truncate group-hover:underline">
-            {user.display_name ?? user.username}
+            {user.name}
           </span>
           <span className={`shrink-0 text-[13px] font-bold px-1.5 py-0.5 rounded-full ${simColor}`}>
             {user.similarity}%

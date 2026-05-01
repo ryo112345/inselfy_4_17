@@ -321,9 +321,6 @@ type ModelsUpdateUserProfileRequest struct {
 	// About 自己紹介
 	About *string `json:"about,omitempty"`
 
-	// DisplayName 表記名（日本語などのフル表示名）
-	DisplayName *string `json:"displayName,omitempty"`
-
 	// Headline ヘッドライン（肩書き・一言）
 	Headline *string `json:"headline,omitempty"`
 
@@ -356,9 +353,6 @@ type ModelsUserResponse struct {
 
 	// CreatedAt 作成日時
 	CreatedAt time.Time `json:"createdAt"`
-
-	// DisplayName フル表示名
-	DisplayName *string `json:"displayName,omitempty"`
 
 	// Headline ヘッドライン
 	Headline *string `json:"headline,omitempty"`

@@ -91,5 +91,38 @@ JOIN company_accounts ca ON ca.id = jp.company_id
 WHERE jp.status = 'open'
 ORDER BY jp.created_at DESC;
 
+-- name: SearchPublicJobPostings :many
+SELECT jp.*,
+       ca.company_name,
+       ca.logo_url AS company_logo_url
+FROM job_postings jp
+JOIN company_accounts ca ON ca.id = jp.company_id
+WHERE jp.status = 'open'
+  AND (sqlc.narg('search_term')::text IS NULL
+       OR jp.title ILIKE '%' || sqlc.narg('search_term') || '%'
+       OR jp.description ILIKE '%' || sqlc.narg('search_term') || '%'
+       OR ca.company_name ILIKE '%' || sqlc.narg('search_term') || '%'
+       OR EXISTS(SELECT 1 FROM unnest(jp.tags) t WHERE t ILIKE '%' || sqlc.narg('search_term') || '%'))
+  AND (sqlc.narg('job_category')::text IS NULL OR jp.job_category = sqlc.narg('job_category'))
+  AND (sqlc.narg('employment_type')::text IS NULL OR jp.employment_type = sqlc.narg('employment_type'))
+  AND (sqlc.narg('remote_policy')::text IS NULL OR jp.remote_policy = sqlc.narg('remote_policy'))
+ORDER BY
+  CASE WHEN @sort_by_salary::bool THEN COALESCE(jp.salary_max, jp.salary_min, 0) ELSE 0 END DESC,
+  jp.created_at DESC
+LIMIT @limit_val OFFSET @offset_val;
+
+-- name: CountPublicJobPostings :one
+SELECT count(*) FROM job_postings jp
+JOIN company_accounts ca ON ca.id = jp.company_id
+WHERE jp.status = 'open'
+  AND (sqlc.narg('search_term')::text IS NULL
+       OR jp.title ILIKE '%' || sqlc.narg('search_term') || '%'
+       OR jp.description ILIKE '%' || sqlc.narg('search_term') || '%'
+       OR ca.company_name ILIKE '%' || sqlc.narg('search_term') || '%'
+       OR EXISTS(SELECT 1 FROM unnest(jp.tags) t WHERE t ILIKE '%' || sqlc.narg('search_term') || '%'))
+  AND (sqlc.narg('job_category')::text IS NULL OR jp.job_category = sqlc.narg('job_category'))
+  AND (sqlc.narg('employment_type')::text IS NULL OR jp.employment_type = sqlc.narg('employment_type'))
+  AND (sqlc.narg('remote_policy')::text IS NULL OR jp.remote_policy = sqlc.narg('remote_policy'));
+
 -- name: DeleteJobPosting :exec
 DELETE FROM job_postings WHERE id = $1;

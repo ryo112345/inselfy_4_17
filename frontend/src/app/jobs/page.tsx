@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { fetchPublicJobPostings } from "@/features/job-posting/api";
+import { searchPublicJobPostings } from "@/features/job-posting/api";
 import type { JobPostingWithCompany } from "@/features/job-posting/api";
 import { Gallery } from "../companies/[id]/Gallery";
 import { useAuth } from "@/features/auth/auth-context";
 import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
-import { VALUE_NEEDS, NEED_IDS } from "@/features/work-values/lib/needs";
-import type { ValueId, NeedId } from "@/features/work-values/lib/needs";
+import { VALUE_NEEDS } from "@/features/work-values/lib/needs";
+import type { ValueId } from "@/features/work-values/lib/needs";
 import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 import { ValuesFilterDrawer } from "@/features/work-values/ValuesFilterDrawer";
@@ -139,9 +139,14 @@ type SortKey = "newest" | "salary";
 export default function JobsPage() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<JobPostingWithCompany[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const PAGE_SIZE = 20;
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const fetchingRef = useRef(false);
   const [hasDiagnosis, setHasDiagnosis] = useState<boolean | null>(null);
   const [userWv, setUserWv] = useState<WvResultDTO | null>(null);
   const [userCi, setUserCi] = useState<CiResultDTO | null>(null);
@@ -172,24 +177,77 @@ export default function JobsPage() {
     }
   }, [user]);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    fetchPublicJobPostings()
-      .then((data) => {
-        if (!cancelled) {
-          setJobs(data);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err.message);
-          setLoading(false);
-        }
+  const valueFiltersParam = useMemo(() => {
+    const src = filterMode === "values" ? valueThresholds : needThresholds;
+    const pairs = Object.entries(src).filter(([, v]) => v > 0);
+    if (pairs.length === 0) return "";
+    return pairs.map(([id, score]) => `${id}:${score}`).join(",");
+  }, [filterMode, valueThresholds, needThresholds]);
+
+  const fetchJobs = useCallback(async (reset: boolean, currentOffset: number) => {
+    if (!reset && fetchingRef.current) return;
+    fetchingRef.current = true;
+    if (reset) {
+      setLoading(true);
+      setError(null);
+    } else {
+      setLoadingMore(true);
+    }
+    try {
+      const data = await searchPublicJobPostings({
+        search: search.trim() || undefined,
+        category: category !== "すべて" ? category : undefined,
+        employmentType: employment !== "すべて" ? employment : undefined,
+        remotePolicy: remote !== "すべて" ? remote : undefined,
+        sort,
+        limit: PAGE_SIZE,
+        offset: currentOffset,
+        valueFilters: valueFiltersParam || undefined,
+        filterMode: valueFiltersParam ? filterMode : undefined,
       });
-    return () => { cancelled = true; };
-  }, []);
+      if (reset) {
+        setJobs(data.items);
+      } else {
+        setJobs((prev) => {
+          const existingIds = new Set(prev.map((j) => j.id));
+          const newItems = data.items.filter((j) => !existingIds.has(j.id));
+          return [...prev, ...newItems];
+        });
+      }
+      setTotal(data.total);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+      fetchingRef.current = false;
+    }
+  }, [search, category, employment, remote, sort, valueFiltersParam, filterMode]);
+
+  useEffect(() => {
+    const needsDebounce = search.trim() || valueFiltersParam;
+    const timeout = setTimeout(() => {
+      fetchJobs(true, 0);
+    }, needsDebounce ? 300 : 0);
+    return () => clearTimeout(timeout);
+  }, [fetchJobs]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const hasMore = jobs.length < total;
+    if (!hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore) {
+          fetchJobs(false, jobs.length);
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [jobs.length, total, loadingMore, fetchJobs]);
 
   useEffect(() => {
     if (!hasDiagnosis || jobs.length === 0) return;
@@ -213,81 +271,16 @@ export default function JobsPage() {
     return map;
   }, [hasDiagnosis, jobs, teamScoresMap, userWv, userCi]);
 
-  const activeThresholds = useMemo(() => {
+  const activeFilterCount = useMemo(() => {
     const src = filterMode === "values" ? valueThresholds : needThresholds;
-    return Object.entries(src).filter(([, v]) => v > 0);
+    return Object.values(src).filter((v) => v > 0).length;
   }, [filterMode, valueThresholds, needThresholds]);
 
-  const filtered = useMemo(() => {
-    let result = jobs;
-
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      result = result.filter(
-        (j) =>
-          j.title.toLowerCase().includes(q) ||
-          j.companyName.toLowerCase().includes(q) ||
-          j.tags.some((t) => t.toLowerCase().includes(q)) ||
-          j.description.toLowerCase().includes(q),
-      );
-    }
-    if (category !== "すべて") {
-      result = result.filter((j) => j.jobCategory === category);
-    }
-    if (employment !== "すべて") {
-      result = result.filter((j) => j.employmentType === employment);
-    }
-    if (remote !== "すべて") {
-      result = result.filter((j) => j.remotePolicy === remote);
-    }
-
-    if (activeThresholds.length > 0) {
-      result = result.filter((j) => {
-        if (!j.teamId) return false;
-        const team = teamScoresMap.get(j.teamId);
-        if (!team) return false;
-        const wvMap = new Map((team.wv_scores ?? []).map((s) => [s.id, s.score]));
-        if (wvMap.size === 0) return false;
-
-        if (filterMode === "values") {
-          return activeThresholds.every(([id, minScore]) => {
-            const score = wvMap.get(id);
-            return score != null && score >= minScore;
-          });
-        }
-
-        // needs mode: use wn_scores if available, otherwise approximate from parent value
-        const wnMap = new Map((team.wn_scores ?? []).map((s) => [s.id, s.score]));
-        return activeThresholds.every(([id, minScore]) => {
-          let score = wnMap.get(id);
-          if (score == null) {
-            for (const [vid, needIds] of Object.entries(VALUE_NEEDS)) {
-              if ((needIds as readonly string[]).includes(id)) {
-                score = wvMap.get(vid);
-                break;
-              }
-            }
-          }
-          return score != null && score >= minScore;
-        });
-      });
-    }
-
-    result = [...result].sort((a, b) => {
-      if (sort === "salary") {
-        return (b.salaryMax ?? b.salaryMin ?? 0) - (a.salaryMax ?? a.salaryMin ?? 0);
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-
-    return result;
-  }, [jobs, search, category, employment, remote, sort, activeThresholds, filterMode, teamScoresMap]);
-
   useEffect(() => {
-    if (filtered.length > 0 && (!selectedId || !filtered.some((j) => j.id === selectedId))) {
-      setSelectedId(filtered[0].id);
+    if (jobs.length > 0 && (!selectedId || !jobs.some((j) => j.id === selectedId))) {
+      setSelectedId(jobs[0].id);
     }
-  }, [filtered]);
+  }, [jobs]);
 
   const selectedJob = useMemo(
     () => (selectedId ? jobs.find((j) => j.id === selectedId) ?? null : null),
@@ -323,19 +316,19 @@ export default function JobsPage() {
               onClick={() => setValuesFilterOpen(true)}
               className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors cursor-pointer"
               style={
-                activeThresholds.length > 0
+                activeFilterCount > 0
                   ? { borderColor: ACCENT, color: ACCENT, backgroundColor: `${ACCENT}08` }
                   : { borderColor: "#e5e7eb", color: "#374151" }
               }
             >
               <ValuesFilterIcon />
               価値観
-              {activeThresholds.length > 0 && (
+              {activeFilterCount > 0 && (
                 <span
                   className="ml-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full text-xs font-bold text-white"
                   style={{ backgroundColor: ACCENT }}
                 >
-                  {activeThresholds.length}
+                  {activeFilterCount}
                 </span>
               )}
             </button>
@@ -343,7 +336,7 @@ export default function JobsPage() {
 
           {/* Spacer + count + sort */}
           <div className="flex items-center gap-3 ml-auto">
-            <span className="text-sm text-gray-500">{filtered.length}件</span>
+            <span className="text-sm text-gray-500">{total}件</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
@@ -369,26 +362,35 @@ export default function JobsPage() {
               <p className="text-sm text-gray-500">求人の読み込みに失敗しました</p>
               <p className="mt-1 text-xs text-gray-400">{error}</p>
             </div>
-          ) : filtered.length === 0 ? (
+          ) : jobs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
               <EmptySearchIcon />
               <p className="mt-4 text-sm font-medium text-gray-700">該当する求人がありません</p>
               <p className="mt-1 text-xs text-gray-400">検索条件を変更してお試しください</p>
             </div>
           ) : (
-            <ul>
-              {filtered.map((job) => (
-                <li key={job.id}>
-                  <JobCard
-                    job={job}
-                    isSelected={selectedId === job.id}
-                    onSelect={() => setSelectedId(job.id)}
-                    hasDiagnosis={hasDiagnosis === true}
-                    matchScores={matchScoresMap.get(job.id) ?? null}
-                  />
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul>
+                {jobs.map((job) => (
+                  <li key={job.id}>
+                    <JobCard
+                      job={job}
+                      isSelected={selectedId === job.id}
+                      onSelect={() => setSelectedId(job.id)}
+                      hasDiagnosis={hasDiagnosis === true}
+                      matchScores={matchScoresMap.get(job.id) ?? null}
+                    />
+                  </li>
+                ))}
+              </ul>
+              {jobs.length < total && (
+                <div ref={sentinelRef} className="flex justify-center py-4">
+                  {loadingMore && (
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[var(--accent)]" />
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -417,7 +419,7 @@ export default function JobsPage() {
         onFilterModeChange={setFilterMode}
         thresholds={filterMode === "values" ? valueThresholds : needThresholds}
         onThresholdsChange={filterMode === "values" ? setValueThresholds : setNeedThresholds}
-        matchingCount={filtered.length}
+        matchingCount={total}
       />
     </div>
   );

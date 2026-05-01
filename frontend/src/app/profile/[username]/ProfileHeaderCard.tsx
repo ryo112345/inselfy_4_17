@@ -402,7 +402,7 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl md:text-2xl font-bold tracking-tight text-gray-900">
-                  {user.displayName || user.name}
+                  {user.name}
                 </h1>
                 {jobStatus ? (
                   <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${jobStatus.color}`}>

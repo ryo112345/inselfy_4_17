@@ -106,7 +106,6 @@ func (r *UserRepository) UpdateProfile(ctx context.Context, id string, input use
 		Name:     pgText(input.Name),
 		IsPublic: pgBool(input.IsPublic),
 	}
-	setTextField(&params.DisplayNameSet, &params.DisplayName, input.DisplayName)
 	setTextField(&params.HeadlineSet, &params.Headline, input.Headline)
 	setTextField(&params.LocationSet, &params.Location, input.Location)
 	setTextField(&params.AboutSet, &params.About, input.About)
@@ -160,7 +159,6 @@ func toDomainUser(u *generated.User) (*user.User, error) {
 		ID:               uuidToString(u.ID),
 		Username:         username,
 		Name:             u.Name,
-		DisplayName:      textPtr(u.DisplayName),
 		Headline:         textPtr(u.Headline),
 		Location:         textPtr(u.Location),
 		About:            textPtr(u.About),

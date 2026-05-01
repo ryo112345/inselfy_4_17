@@ -154,20 +154,20 @@ SELECT
     r.created_at,
     r.viewed_at,
     u.username,
-    u.display_name
+    u.name
 FROM ci_ai_reports r
 JOIN users u ON u.id = r.user_id
 ORDER BY r.created_at DESC
 `
 
 type ListCIAIReportsRow struct {
-	ID          pgtype.UUID        `json:"id"`
-	SessionID   pgtype.UUID        `json:"session_id"`
-	UserID      pgtype.UUID        `json:"user_id"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	ViewedAt    pgtype.Timestamptz `json:"viewed_at"`
-	Username    string             `json:"username"`
-	DisplayName pgtype.Text        `json:"display_name"`
+	ID        pgtype.UUID        `json:"id"`
+	SessionID pgtype.UUID        `json:"session_id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ViewedAt  pgtype.Timestamptz `json:"viewed_at"`
+	Username  string             `json:"username"`
+	Name      string             `json:"name"`
 }
 
 func (q *Queries) ListCIAIReports(ctx context.Context) ([]*ListCIAIReportsRow, error) {
@@ -186,7 +186,7 @@ func (q *Queries) ListCIAIReports(ctx context.Context) ([]*ListCIAIReportsRow, e
 			&i.CreatedAt,
 			&i.ViewedAt,
 			&i.Username,
-			&i.DisplayName,
+			&i.Name,
 		); err != nil {
 			return nil, err
 		}
@@ -203,7 +203,7 @@ SELECT
     s.id AS session_id,
     s.user_id,
     u.username,
-    u.display_name,
+    u.name,
     s.completed_at
 FROM career_interest_sessions s
 JOIN users u ON u.id = s.user_id
@@ -216,7 +216,7 @@ type ListCISessionsWithoutReportRow struct {
 	SessionID   pgtype.UUID        `json:"session_id"`
 	UserID      pgtype.UUID        `json:"user_id"`
 	Username    string             `json:"username"`
-	DisplayName pgtype.Text        `json:"display_name"`
+	Name        string             `json:"name"`
 	CompletedAt pgtype.Timestamptz `json:"completed_at"`
 }
 
@@ -233,7 +233,7 @@ func (q *Queries) ListCISessionsWithoutReport(ctx context.Context) ([]*ListCISes
 			&i.SessionID,
 			&i.UserID,
 			&i.Username,
-			&i.DisplayName,
+			&i.Name,
 			&i.CompletedAt,
 		); err != nil {
 			return nil, err

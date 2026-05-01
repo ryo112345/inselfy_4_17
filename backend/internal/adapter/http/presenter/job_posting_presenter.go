@@ -57,9 +57,15 @@ type jobPostingResponse struct {
 	UpdatedAt                 time.Time `json:"updatedAt"`
 }
 
+type jobPostingListResponse struct {
+	Items []*jobPostingResponse `json:"items"`
+	Total int                   `json:"total"`
+}
+
 type JobPostingPresenter struct {
-	single *jobPostingResponse
-	list   []*jobPostingResponse
+	single        *jobPostingResponse
+	list          []*jobPostingResponse
+	paginatedList *jobPostingListResponse
 }
 
 var _ port.JobPostingOutputPort = (*JobPostingPresenter)(nil)
@@ -82,8 +88,18 @@ func (p *JobPostingPresenter) PresentJobPostings(_ context.Context, js []*jobpos
 	return nil
 }
 
-func (p *JobPostingPresenter) SingleResponse() *jobPostingResponse { return p.single }
-func (p *JobPostingPresenter) ListResponse() []*jobPostingResponse { return p.list }
+func (p *JobPostingPresenter) SingleResponse() *jobPostingResponse   { return p.single }
+func (p *JobPostingPresenter) ListResponse() []*jobPostingResponse   { return p.list }
+func (p *JobPostingPresenter) PaginatedResponse() *jobPostingListResponse { return p.paginatedList }
+
+func (p *JobPostingPresenter) PresentJobPostingsPaginated(_ context.Context, js []*jobposting.JobPosting, total int) error {
+	items := make([]*jobPostingResponse, len(js))
+	for i, j := range js {
+		items[i] = toJobPostingResponse(j)
+	}
+	p.paginatedList = &jobPostingListResponse{Items: items, Total: total}
+	return nil
+}
 
 func toJobPostingResponse(j *jobposting.JobPosting) *jobPostingResponse {
 	tags := j.Tags

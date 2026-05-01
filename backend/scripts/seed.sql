@@ -11,13 +11,13 @@ TRUNCATE skills CASCADE;
 -- ============================================================
 -- 2. 候補者ユーザー（3名）
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-000000000001', 'taro_yamada', '山田太郎', 'taro@example.com', '山田太郎', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000001', 'taro_yamada', 'taro@example.com', '山田太郎', true, '#3D8B6E',
    'バックエンドエンジニア', '東京都', 'GoとTypeScriptでWebアプリケーションを開発しています。マイクロサービスアーキテクチャとクラウドインフラに興味があります。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000002', 'hanako_sato', '佐藤花子', 'hanako@example.com', '佐藤花子', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000002', 'hanako_sato', 'hanako@example.com', '佐藤花子', true, '#6B8BD6',
    'UIデザイナー / フロントエンドエンジニア', '大阪府', 'デザインとフロントエンド開発の両方を担当しています。ユーザー中心設計を大切にしています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000003', 'jiro_tanaka', '田中次郎', 'jiro@example.com', '田中次郎', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000003', 'jiro_tanaka', 'jiro@example.com', '田中次郎', true, '#D68B6B',
    'プロダクトマネージャー', '福岡県', 'BtoB SaaSのプロダクトマネジメントに5年従事。データドリブンな意思決定を重視しています。', 'IT・通信', 'フルタイム', 'not_seeking')
 ON CONFLICT (username) DO NOTHING;
 
@@ -171,37 +171,37 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 -- 候補者ユーザー 10名 (NN=04〜0d)
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
   -- User04: フロントエンドエンジニア
-  ('10000000-0000-0000-0000-000000000004', 'yuki_kobayashi', '小林優希', 'yuki.kobayashi@example.com', '小林優希', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000004', 'yuki_kobayashi', 'yuki.kobayashi@example.com', '小林優希', true, '#6B8BD6',
    'フロントエンドエンジニア', '東京都', 'ReactとTypeScriptを中心にモダンフロントエンド開発に取り組んでいます。パフォーマンス最適化とアクセシビリティに関心があります。', 'IT・通信', 'フルタイム', 'active'),
   -- User05: インフラエンジニア
-  ('10000000-0000-0000-0000-000000000005', 'kenji_watanabe', '渡辺健二', 'kenji.watanabe@example.com', '渡辺健二', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000005', 'kenji_watanabe', 'kenji.watanabe@example.com', '渡辺健二', true, '#D68B6B',
    'インフラエンジニア / SRE', '北海道', 'AWSとTerraformを使ったクラウドインフラの設計・運用を専門としています。可用性99.99%を目標にSRE活動を推進中。', 'IT・通信', 'フルタイム', 'open'),
   -- User06: データサイエンティスト
-  ('10000000-0000-0000-0000-000000000006', 'mika_ito', '伊藤美香', 'mika.ito@example.com', '伊藤美香', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-000000000006', 'mika_ito', 'mika.ito@example.com', '伊藤美香', true, '#9B6BD6',
    'データサイエンティスト', '愛知県', 'PythonとSQLを駆使してデータ分析基盤の構築から機械学習モデルの開発まで幅広く担当。ビジネスインパクトのある分析を心がけています。', 'IT・通信', 'フルタイム', 'active'),
   -- User07: バックエンドエンジニア
-  ('10000000-0000-0000-0000-000000000007', 'takeshi_nakamura', '中村剛', 'takeshi.nakamura@example.com', '中村剛', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000007', 'takeshi_nakamura', 'takeshi.nakamura@example.com', '中村剛', true, '#3D8B6E',
    'バックエンドエンジニア', '大阪府', 'GoとKubernetesを活用したマイクロサービス開発に従事。大規模トラフィックを捌くシステム設計が得意です。', 'IT・通信', 'フルタイム', 'not_seeking'),
   -- User08: UXデザイナー
-  ('10000000-0000-0000-0000-000000000008', 'ayaka_suzuki', '鈴木彩花', 'ayaka.suzuki@example.com', '鈴木彩花', true, '#D6C16B',
+  ('10000000-0000-0000-0000-000000000008', 'ayaka_suzuki', 'ayaka.suzuki@example.com', '鈴木彩花', true, '#D6C16B',
    'UXデザイナー', '京都府', 'ユーザーリサーチからプロトタイピングまで一貫して担当。定量・定性の両面からユーザー体験の向上に取り組んでいます。', 'デザイン・広告', 'フルタイム', 'open'),
   -- User09: グラフィックデザイナー
-  ('10000000-0000-0000-0000-000000000009', 'rena_yoshida', '吉田玲奈', 'rena.yoshida@example.com', '吉田玲奈', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-000000000009', 'rena_yoshida', 'rena.yoshida@example.com', '吉田玲奈', true, '#6BD6B8',
    'グラフィックデザイナー', '神奈川県', 'ブランドアイデンティティの策定からWebデザイン、印刷物まで幅広く制作。クライアントのビジョンをビジュアルで表現することを大切にしています。', 'デザイン・広告', 'フルタイム', 'active'),
   -- User10: 事業開発
-  ('10000000-0000-0000-0000-00000000000a', 'daichi_yamamoto', '山本大地', 'daichi.yamamoto@example.com', '山本大地', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-00000000000a', 'daichi_yamamoto', 'daichi.yamamoto@example.com', '山本大地', true, '#3D8B6E',
    '事業開発マネージャー', '福岡県', 'BtoB SaaSの新規事業立ち上げを複数経験。市場分析からアライアンス構築まで、事業成長に必要なプロセスを一貫して推進しています。', 'IT・通信', 'フルタイム', 'open'),
   -- User11: セールス
-  ('10000000-0000-0000-0000-00000000000b', 'saki_morita', '森田咲', 'saki.morita@example.com', '森田咲', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-00000000000b', 'saki_morita', 'saki.morita@example.com', '森田咲', true, '#6B8BD6',
    'エンタープライズセールス', '東京都', '大手企業向けのSaaSセールスに7年従事。顧客課題の深掘りからソリューション提案、クロージングまで一気通貫で対応しています。', 'IT・通信', 'フルタイム', 'active'),
   -- User12: プロダクトマネージャー
-  ('10000000-0000-0000-0000-00000000000c', 'shota_hasegawa', '長谷川翔太', 'shota.hasegawa@example.com', '長谷川翔太', true, '#D68B6B',
+  ('10000000-0000-0000-0000-00000000000c', 'shota_hasegawa', 'shota.hasegawa@example.com', '長谷川翔太', true, '#D68B6B',
    'プロダクトマネージャー', '宮城県', 'FinTech領域のプロダクトマネジメントを担当。ユーザーインタビューとデータ分析を組み合わせた仮説検証型の開発プロセスを推進。', 'IT・通信', 'フルタイム', 'not_seeking'),
   -- User13: マーケティング
-  ('10000000-0000-0000-0000-00000000000d', 'nao_fujita', '藤田奈央', 'nao.fujita@example.com', '藤田奈央', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-00000000000d', 'nao_fujita', 'nao.fujita@example.com', '藤田奈央', true, '#9B6BD6',
    'デジタルマーケター', '広島県', 'SEOとコンテンツマーケティングを軸にBtoBリード獲得戦略を設計・実行。データドリブンなPDCAでCVR改善に注力しています。', 'IT・通信', 'フルタイム', 'open')
 ON CONFLICT (username) DO NOTHING;
 
@@ -882,27 +882,27 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 -- 候補者ユーザー14〜23
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-00000000000e', 'yuki_morita', '森田悠希', 'morita@example.com', '森田悠希', true, '#7B68EE',
+  ('10000000-0000-0000-0000-00000000000e', 'yuki_morita', 'morita@example.com', '森田悠希', true, '#7B68EE',
    'データサイエンティスト', '北海道札幌市', '統計学とPythonを駆使したデータ分析基盤の構築に従事。機械学習モデルの設計からMLOpsまで幅広く対応しています。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000000f', 'rina_fujita', '藤田里奈', 'fujita@example.com', '藤田里奈', true, '#E8827C',
+  ('10000000-0000-0000-0000-00000000000f', 'rina_fujita', 'fujita@example.com', '藤田里奈', true, '#E8827C',
    'フロントエンドエンジニア', '愛知県名古屋市', 'ReactとNext.jsを中心としたモダンフロントエンド開発が得意です。アクセシビリティとパフォーマンス最適化に力を入れています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000010', 'kenji_ogawa', '小川健二', 'ogawa.k@example.com', '小川健二', true, '#4CAF50',
+  ('10000000-0000-0000-0000-000000000010', 'kenji_ogawa', 'ogawa.k@example.com', '小川健二', true, '#4CAF50',
    'インフラエンジニア / SRE', '東京都', 'AWSとKubernetesを活用したクラウドインフラの設計・運用を8年経験。可用性99.99%のシステム基盤を構築してきました。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000011', 'mao_nakamura', '中村真央', 'nakamura.m@example.com', '中村真央', true, '#FF8F00',
+  ('10000000-0000-0000-0000-000000000011', 'mao_nakamura', 'nakamura.m@example.com', '中村真央', true, '#FF8F00',
    'UXリサーチャー / サービスデザイナー', '京都府京都市', 'ユーザーインタビューと定量分析を組み合わせたUXリサーチを専門としています。人間中心設計の考え方でプロダクト改善を推進してきました。', 'デザイン・広告', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000012', 'takuya_ito', '伊藤拓也', 'ito.t@example.com', '伊藤拓也', true, '#5C6BC0',
+  ('10000000-0000-0000-0000-000000000012', 'takuya_ito', 'ito.t@example.com', '伊藤拓也', true, '#5C6BC0',
    'セキュリティエンジニア', '東京都千代田区', 'Webアプリケーションの脆弱性診断とセキュリティアーキテクチャ設計を専門としています。CISSP保持。金融系システムのセキュリティ強化に多く携わってきました。', '金融・フィンテック', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-000000000013', 'ayaka_shimizu', '清水彩花', 'shimizu@example.com', '清水彩花', true, '#26A69A',
+  ('10000000-0000-0000-0000-000000000013', 'ayaka_shimizu', 'shimizu@example.com', '清水彩花', true, '#26A69A',
    'iOSエンジニア', '福岡県福岡市', 'SwiftUIを使ったiOSアプリ開発に4年従事。ヘルスケア領域のアプリを中心に、ユーザー体験にこだわった開発を続けています。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000014', 'daiki_watanabe', '渡辺大樹', 'watanabe.d@example.com', '渡辺大樹', true, '#8D6E63',
+  ('10000000-0000-0000-0000-000000000014', 'daiki_watanabe', 'watanabe.d@example.com', '渡辺大樹', true, '#8D6E63',
    'QAエンジニア / テストアーキテクト', '大阪府大阪市', 'テスト自動化フレームワークの設計と品質プロセスの改善をリードしています。E2Eテスト基盤の構築とCI/CDパイプラインへの統合が得意です。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000015', 'saki_honda', '本田咲', 'honda@example.com', '本田咲', true, '#AB47BC',
+  ('10000000-0000-0000-0000-000000000015', 'saki_honda', 'honda@example.com', '本田咲', true, '#AB47BC',
    'マーケティングストラテジスト', '東京都渋谷区', 'BtoB SaaSのデジタルマーケティング戦略立案と実行を担当。コンテンツマーケティングとリードジェネレーションの仕組みづくりに強みがあります。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000016', 'ryota_matsuda', '松田涼太', 'matsuda@example.com', '松田涼太', true, '#00897B',
+  ('10000000-0000-0000-0000-000000000016', 'ryota_matsuda', 'matsuda@example.com', '松田涼太', true, '#00897B',
    '組み込みソフトウェアエンジニア', '静岡県浜松市', 'C/C++による組み込みシステム開発を12年経験。自動車のECUソフトウェアからIoTデバイスのファームウェアまで幅広く対応しています。', '製造業・ものづくり', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-000000000017', 'haruka_aoki', '青木遥', 'aoki@example.com', '青木遥', true, '#EF5350',
+  ('10000000-0000-0000-0000-000000000017', 'haruka_aoki', 'aoki@example.com', '青木遥', true, '#EF5350',
    'カスタマーサクセスマネージャー', '神奈川県横浜市', 'SaaSプロダクトのオンボーディング設計からチャーン防止施策まで、カスタマーサクセスの仕組みを一貫して構築してきました。NPS改善とアップセル戦略が得意です。', 'IT・通信', 'フルタイム', 'open')
 ON CONFLICT (username) DO NOTHING;
 
@@ -1584,27 +1584,27 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 -- 候補者ユーザー24〜33（10名）
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-000000000018', 'yuki_morita2', '森田悠希', 'yuki.morita@example.com', '森田悠希', true, '#4A9E8F',
+  ('10000000-0000-0000-0000-000000000018', 'yuki_morita2', 'yuki.morita@example.com', '森田悠希', true, '#4A9E8F',
    'SREエンジニア', '東京都', 'クラウドインフラの設計・運用を専門とし、大規模サービスの信頼性向上に取り組んでいます。Kubernetes と Terraform によるインフラ自動化が得意です。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000019', 'mio_nakamura', '中村澪', 'mio.nakamura@example.com', '中村澪', true, '#D47FA6',
+  ('10000000-0000-0000-0000-000000000019', 'mio_nakamura', 'mio.nakamura@example.com', '中村澪', true, '#D47FA6',
    'UXリサーチャー', '京都府', 'ユーザーリサーチの設計から分析までを一貫して担当しています。定性調査と定量分析を組み合わせたインサイト抽出を得意としています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000001a', 'kenji_ogawa2', '小川健二', 'kenji.ogawa@example.com', '小川健二', true, '#7B8EC9',
+  ('10000000-0000-0000-0000-00000000001a', 'kenji_ogawa2', 'kenji.ogawa@example.com', '小川健二', true, '#7B8EC9',
    'データエンジニア', '愛知県', 'ビッグデータ基盤の構築と運用を担当しています。Apache Spark や dbt を使ったデータパイプラインの設計・最適化に6年の経験があります。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000001b', 'sakura_ito', '伊藤さくら', 'sakura.ito@example.com', '伊藤さくら', true, '#E8A87C',
+  ('10000000-0000-0000-0000-00000000001b', 'sakura_ito', 'sakura.ito@example.com', '伊藤さくら', true, '#E8A87C',
    'カスタマーサクセスマネージャー', '大阪府', 'BtoB SaaS のカスタマーサクセス部門で、オンボーディング設計からチャーン防止施策まで幅広く担当。顧客のビジネス成果にコミットする姿勢を大切にしています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000001c', 'takeru_honda', '本田武', 'takeru.honda@example.com', '本田武', true, '#5C9E5C',
+  ('10000000-0000-0000-0000-00000000001c', 'takeru_honda', 'takeru.honda@example.com', '本田武', true, '#5C9E5C',
    '組み込みエンジニア', '静岡県', 'IoT デバイスのファームウェア開発を担当しています。C/C++ によるリアルタイム制御と通信プロトコル実装の経験が豊富です。', '製造業', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000001d', 'ayaka_shimizu2', '清水彩花', 'ayaka.shimizu@example.com', '清水彩花', true, '#C47EC4',
+  ('10000000-0000-0000-0000-00000000001d', 'ayaka_shimizu2', 'ayaka.shimizu@example.com', '清水彩花', true, '#C47EC4',
    'マーケティングストラテジスト', '福岡県', 'デジタルマーケティング戦略の立案と実行を担当。SEO・コンテンツマーケティング・広告運用を横断的にマネジメントし、リード獲得の最大化に貢献しています。', 'IT・通信', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-00000000001e', 'ryota_matsuda2', '松田良太', 'ryota.matsuda@example.com', '松田良太', true, '#8B6B3D',
+  ('10000000-0000-0000-0000-00000000001e', 'ryota_matsuda2', 'ryota.matsuda@example.com', '松田良太', true, '#8B6B3D',
    '機械学習エンジニア', '北海道', 'レコメンドシステムや自然言語処理モデルの開発・運用を担当しています。PyTorch と MLflow を使った MLOps の構築にも取り組んでいます。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000001f', 'hana_yoshida', '吉田花', 'hana.yoshida@example.com', '吉田花', true, '#6BAED6',
+  ('10000000-0000-0000-0000-00000000001f', 'hana_yoshida', 'hana.yoshida@example.com', '吉田花', true, '#6BAED6',
    '法務・コンプライアンス担当', '東京都', 'IT企業で契約審査や個人情報保護法対応を担当しています。事業部門と連携しながらリスクを最小化する実務的な法務支援を心がけています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000020', 'sho_aoki', '青木翔', 'sho.aoki@example.com', '青木翔', true, '#D6856B',
+  ('10000000-0000-0000-0000-000000000020', 'sho_aoki', 'sho.aoki@example.com', '青木翔', true, '#D6856B',
    'モバイルエンジニア', '神奈川県', 'iOS / Android のネイティブアプリ開発に7年従事。SwiftとKotlinを中心に、UI設計からパフォーマンス最適化まで一貫して手がけています。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000021', 'rina_takahashi', '高橋里奈', 'rina.takahashi@example.com', '高橋里奈', true, '#9E7BB5',
+  ('10000000-0000-0000-0000-000000000021', 'rina_takahashi', 'rina.takahashi@example.com', '高橋里奈', true, '#9E7BB5',
    '人事企画・組織開発', '広島県', '採用戦略の設計から組織開発施策の推進まで、人事領域を幅広く担当しています。エンゲージメントサーベイの導入・分析を通じた組織改善が得意です。', '人材・教育', 'フルタイム', 'open')
 ON CONFLICT (username) DO NOTHING;
 
@@ -2310,27 +2310,27 @@ ON CONFLICT (name) DO NOTHING;
 -- ============================================================
 -- 候補者ユーザー 34〜43
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-000000000022', 'yosuke_nishimura', '西村洋介', 'nishimura_y@example.com', '西村洋介', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000022', 'yosuke_nishimura', 'nishimura_y@example.com', '西村洋介', true, '#3D8B6E',
    'SREエンジニア', '東京都', 'クラウドインフラの設計と運用自動化に従事。大規模サービスの可用性向上とコスト最適化が得意です。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000023', 'ayaka_honda', '本田彩花', 'honda_a@example.com', '本田彩花', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000023', 'ayaka_honda', 'honda_a@example.com', '本田彩花', true, '#6B8BD6',
    'データアナリスト', '名古屋市', 'BIツールを活用したデータ分析と可視化が専門。経営層向けのダッシュボード構築と意思決定支援に携わっています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000024', 'takumi_ogawa', '小川匠', 'ogawa_t@example.com', '小川匠', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000024', 'takumi_ogawa', 'ogawa_t@example.com', '小川匠', true, '#D68B6B',
    'ゲームエンジニア', '大阪府', 'UnityとC#を用いたモバイルゲーム開発に5年以上従事。パフォーマンスチューニングとシェーダー開発に強み。', 'ゲーム・エンタメ', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000025', 'misaki_aoki', '青木美咲', 'aoki_m@example.com', '青木美咲', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-000000000025', 'misaki_aoki', 'aoki_m@example.com', '青木美咲', true, '#9B6BD6',
    'モバイルエンジニア', '福岡県', 'FlutterによるクロスプラットフォームアプリとネイティブiOS開発の両方に対応。UIアニメーションの実装が得意です。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000026', 'ryusei_matsuda', '松田龍星', 'matsuda_r@example.com', '松田龍星', true, '#D6C16B',
+  ('10000000-0000-0000-0000-000000000026', 'ryusei_matsuda', 'matsuda_r@example.com', '松田龍星', true, '#D6C16B',
    'Webエンジニア', '札幌市', 'RubyとRailsを中心としたWebアプリケーション開発が専門。新規事業の立ち上げフェーズでの開発経験が豊富です。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000027', 'kanako_yoshimura', '吉村加奈子', 'yoshimura_k@example.com', '吉村加奈子', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-000000000027', 'kanako_yoshimura', 'yoshimura_k@example.com', '吉村加奈子', true, '#6BD6B8',
    '情報アーキテクト / IAデザイナー', '京都府', 'Webサービスの情報設計とユーザビリティ改善に携わっています。サイトマップ設計からワイヤーフレーム制作まで一貫して対応。', 'IT・通信', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-000000000028', 'shun_harada', '原田駿', 'harada_s@example.com', '原田駿', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000028', 'shun_harada', 'harada_s@example.com', '原田駿', true, '#3D8B6E',
    'バックエンドエンジニア', '広島市', 'PHPとLaravelを用いたEC基盤の開発に従事。決済・在庫管理システムの設計と大規模トラフィック対応が強み。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000029', 'emi_kubo', '久保恵美', 'kubo_e@example.com', '久保恵美', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000029', 'emi_kubo', 'kubo_e@example.com', '久保恵美', true, '#6B8BD6',
    'マーケティングマネージャー', '東京都', 'BtoB SaaSのマーケティング戦略立案からMA運用まで幅広く担当。リード獲得からナーチャリングまでのファネル最適化に強み。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000002a', 'kosei_yamashita', '山下航生', 'yamashita_k@example.com', '山下航生', true, '#D68B6B',
+  ('10000000-0000-0000-0000-00000000002a', 'kosei_yamashita', 'yamashita_k@example.com', '山下航生', true, '#D68B6B',
    'フロントエンドエンジニア', '神戸市', 'Vue.jsとTypeScriptでのSPA開発が得意。コンポーネント設計とアクセシビリティの改善に注力しています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000002b', 'saya_inoue', '井上沙也', 'inoue_s@example.com', '井上沙也', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-00000000002b', 'saya_inoue', 'inoue_s@example.com', '井上沙也', true, '#9B6BD6',
    'セールスエンジニア / プリセールス', '東京都', 'SaaS製品の技術的な提案と導入支援を担当。顧客の課題をヒアリングし、最適なソリューションを設計・提案する役割を担っています。', 'IT・通信', 'フルタイム', 'active')
 ON CONFLICT (username) DO NOTHING;
 
@@ -2996,27 +2996,27 @@ ON CONFLICT (name) DO NOTHING;
 -- ============================================================
 -- 候補者ユーザー 44〜53
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-00000000002c', 'kazuya_morimoto', '森本和也', 'morimoto_k@example.com', '森本和也', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-00000000002c', 'kazuya_morimoto', 'morimoto_k@example.com', '森本和也', true, '#3D8B6E',
    'Rustエンジニア', '東京都', 'システムプログラミングとWebAssemblyに注力。高パフォーマンスなバックエンドサービスの設計・開発が得意です。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000002d', 'mio_fujita', '藤田美緒', 'fujita_m@example.com', '藤田美緒', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-00000000002d', 'mio_fujita', 'fujita_m@example.com', '藤田美緒', true, '#6B8BD6',
    'データサイエンティスト', '大阪府', '機械学習モデルの構築と本番運用に従事。需要予測や推薦システムの開発経験が豊富です。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000002e', 'sho_nakamura', '中村翔', 'nakamura_s@example.com', '中村翔', true, '#D68B6B',
+  ('10000000-0000-0000-0000-00000000002e', 'sho_nakamura', 'nakamura_s@example.com', '中村翔', true, '#D68B6B',
    'Androidエンジニア', '名古屋市', 'KotlinによるAndroidアプリ開発に5年以上従事。Jetpack Composeを用いたモダンUI開発とCI/CD整備が強み。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000002f', 'haruka_shimizu', '清水遥', 'shimizu_h@example.com', '清水遥', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-00000000002f', 'haruka_shimizu', 'shimizu_h@example.com', '清水遥', true, '#9B6BD6',
    'UXリサーチャー / デザイナー', '福岡県', 'ユーザーリサーチからプロトタイピングまで一貫して担当。定量・定性の両面から改善提案を行っています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000030', 'tatsuki_endo', '遠藤竜輝', 'endo_t@example.com', '遠藤竜輝', true, '#D6C16B',
+  ('10000000-0000-0000-0000-000000000030', 'tatsuki_endo', 'endo_t@example.com', '遠藤竜輝', true, '#D6C16B',
    'プラットフォームエンジニア', '札幌市', 'KubernetesとTerraformを用いた開発者プラットフォームの構築・運用が専門。社内の開発生産性向上に貢献しています。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000031', 'natsuki_okada', '岡田夏希', 'okada_n@example.com', '岡田夏希', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-000000000031', 'natsuki_okada', 'okada_n@example.com', '岡田夏希', true, '#6BD6B8',
    'フルスタックエンジニア', '京都府', 'Next.jsとGoを組み合わせたWebアプリケーション開発に従事。フロントからインフラまで幅広く対応できます。', 'IT・通信', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-000000000032', 'yuto_takahashi', '高橋悠人', 'takahashi_y@example.com', '高橋悠人', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000032', 'yuto_takahashi', 'takahashi_y@example.com', '高橋悠人', true, '#3D8B6E',
    'セキュリティエンジニア', '東京都', 'Webアプリケーションの脆弱性診断とセキュリティ設計を専門としています。ISMS構築支援やインシデントレスポンスの経験も豊富です。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000033', 'aoi_sasaki', '佐々木葵', 'sasaki_a@example.com', '佐々木葵', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000033', 'aoi_sasaki', 'sasaki_a@example.com', '佐々木葵', true, '#6B8BD6',
    'データエンジニア', '仙台市', 'BigQueryとdbtを用いたデータ基盤の構築・運用に携わっています。データパイプラインの設計と品質管理が得意です。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000034', 'kenji_watanabe52', '渡辺健二郎', 'watanabe_k52@example.com', '渡辺健二郎', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000034', 'kenji_watanabe52', 'watanabe_k52@example.com', '渡辺健二郎', true, '#D68B6B',
    'Javaエンジニア / アーキテクト', '広島市', 'Spring Bootを用いた大規模業務システムの設計・開発に10年以上従事。マイクロサービス化とレガシー刷新が強みです。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000035', 'rina_kato', '加藤里奈', 'kato_r@example.com', '加藤里奈', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-000000000035', 'rina_kato', 'kato_r@example.com', '加藤里奈', true, '#9B6BD6',
    'QAエンジニア / テストリード', '神戸市', 'テスト自動化とCI/CDパイプラインへの品質ゲート組み込みが専門。E2Eテスト戦略の立案からチームへの浸透まで一貫して担当しています。', 'IT・通信', 'フルタイム', 'active')
 ON CONFLICT (username) DO NOTHING;
 
@@ -3734,57 +3734,57 @@ ON CONFLICT (name) DO NOTHING;
 -- ============================================================
 -- 候補者ユーザー 54〜78
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-000000000036', 'kenji_morita', '森田健二', 'morita_k@example.com', '森田健二', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000036', 'kenji_morita', 'morita_k@example.com', '森田健二', true, '#3D8B6E',
    'バックエンドエンジニア', '東京都', 'Goを中心にマイクロサービスの設計・開発に従事。大規模トラフィックのシステム運用経験あり。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000037', 'yui_nakamura', '中村結衣', 'nakamura_y@example.com', '中村結衣', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000037', 'yui_nakamura', 'nakamura_y@example.com', '中村結衣', true, '#6B8BD6',
    'フロントエンドエンジニア', '大阪府', 'React/Next.jsでのSPA開発が得意。アクセシビリティとパフォーマンス最適化に関心があります。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000038', 'mio_fujita2', '藤田美桜', 'fujita_m3@example.com', '藤田美桜', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000038', 'mio_fujita2', 'fujita_m3@example.com', '藤田美桜', true, '#D68B6B',
    'UIデザイナー', '京都府', 'BtoB SaaSのUIデザインを専門とし、ユーザーリサーチからプロトタイピングまで一貫して担当しています。', 'デザイン・広告', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000039', 'takuya_ito2', '伊藤拓也', 'ito_t@example.com', '伊藤拓也', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-000000000039', 'takuya_ito2', 'ito_t@example.com', '伊藤拓也', true, '#9B6BD6',
    'プロダクトマネージャー', '東京都', 'HR Tech領域でのプロダクトマネジメント経験が豊富。データドリブンな意思決定とアジャイル開発の推進が得意。', 'IT・通信', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-00000000003a', 'rina_watanabe', '渡辺里奈', 'watanabe_r@example.com', '渡辺里奈', true, '#D6C16B',
+  ('10000000-0000-0000-0000-00000000003a', 'rina_watanabe', 'watanabe_r@example.com', '渡辺里奈', true, '#D6C16B',
    'データサイエンティスト', '東京都', '機械学習モデルの構築と運用に5年以上従事。推薦システムと自然言語処理が専門分野。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000003b', 'shota_kimura', '木村翔太', 'kimura_s@example.com', '木村翔太', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-00000000003b', 'shota_kimura', 'kimura_s@example.com', '木村翔太', true, '#6BD6B8',
    'インフラエンジニア / SRE', '福岡県', 'AWSを中心としたクラウドインフラの設計・運用が得意。Kubernetes環境でのマイクロサービス運用経験あり。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000003c', 'haruka_ogawa', '小川遥', 'ogawa_h@example.com', '小川遥', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-00000000003c', 'haruka_ogawa', 'ogawa_h@example.com', '小川遥', true, '#3D8B6E',
    'デジタルマーケター', '東京都', 'BtoB SaaSのデジタルマーケティング全般を担当。SEO/SEM、コンテンツマーケティング、MA運用に強み。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000003d', 'ryota_saito', '齋藤涼太', 'saito_r@example.com', '齋藤涼太', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-00000000003d', 'ryota_saito', 'saito_r@example.com', '齋藤涼太', true, '#6B8BD6',
    'iOSエンジニア', '東京都', 'SwiftでのiOSアプリ開発が専門。UIKitからSwiftUIへの移行経験、CI/CD構築にも精通。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000003e', 'mai_takahashi', '高橋舞', 'takahashi_m@example.com', '高橋舞', true, '#D68B6B',
+  ('10000000-0000-0000-0000-00000000003e', 'mai_takahashi', 'takahashi_m@example.com', '高橋舞', true, '#D68B6B',
    '事業開発 / BizDev', '東京都', 'SaaS企業でのパートナーシップ構築と新規事業開発に従事。戦略立案からエグゼキューションまで。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000003f', 'daiki_yamamoto', '山本大輝', 'yamamoto_d@example.com', '山本大輝', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-00000000003f', 'daiki_yamamoto', 'yamamoto_d@example.com', '山本大輝', true, '#9B6BD6',
    'DevOpsエンジニア', '名古屋市', 'CI/CDパイプラインの構築とインフラの自動化が専門。GitHub ActionsとTerraformを活用した開発基盤の整備に注力。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000040', 'aoi_suzuki', '鈴木葵', 'suzuki_a@example.com', '鈴木葵', true, '#D6C16B',
+  ('10000000-0000-0000-0000-000000000040', 'aoi_suzuki', 'suzuki_a@example.com', '鈴木葵', true, '#D6C16B',
    'UXリサーチャー', '東京都', '定性・定量の両面からユーザーリサーチを実施。インタビュー設計からデータ分析まで一貫して対応。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000041', 'soma_hayashi', '林壮馬', 'hayashi_s@example.com', '林壮馬', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-000000000041', 'soma_hayashi', 'hayashi_s@example.com', '林壮馬', true, '#6BD6B8',
    'フルスタックエンジニア', '札幌市', 'フロントからバックエンドまで幅広く対応。TypeScriptとGoを中心にWebアプリケーション全般を開発。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000042', 'yuki_endo', '遠藤悠希', 'endo_y@example.com', '遠藤悠希', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000042', 'yuki_endo', 'endo_y@example.com', '遠藤悠希', true, '#3D8B6E',
    '経営企画', '東京都', 'スタートアップの経営企画に従事。事業計画策定、資金調達支援、KPI管理の実績あり。', 'IT・通信', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-000000000043', 'nana_kato', '加藤七海', 'kato_n@example.com', '加藤七海', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000043', 'nana_kato', 'kato_n@example.com', '加藤七海', true, '#6B8BD6',
    'QAエンジニア', '横浜市', 'テスト自動化とQAプロセスの改善に注力。Playwrightを用いたE2Eテスト基盤の構築経験あり。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000044', 'hiroto_nakajima', '中島大翔', 'nakajima_h@example.com', '中島大翔', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000044', 'hiroto_nakajima', 'nakajima_h@example.com', '中島大翔', true, '#D68B6B',
    'Androidエンジニア', '大阪府', 'Kotlin/Jetpack ComposeでのAndroidアプリ開発が得意。クリーンアーキテクチャの実践者。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000045', 'sakura_matsumoto', '松本さくら', 'matsumoto_s@example.com', '松本さくら', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-000000000045', 'sakura_matsumoto', 'matsumoto_s@example.com', '松本さくら', true, '#9B6BD6',
    '人事 / リクルーター', '東京都', 'スタートアップの採用戦略立案と実行に従事。エンジニア採用を中心に年間50名以上の採用を実現。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000046', 'riku_taniguchi', '谷口陸', 'taniguchi_r@example.com', '谷口陸', true, '#D6C16B',
+  ('10000000-0000-0000-0000-000000000046', 'riku_taniguchi', 'taniguchi_r@example.com', '谷口陸', true, '#D6C16B',
    'セキュリティエンジニア', '東京都', 'Webアプリケーションのセキュリティ診断と対策が専門。脆弱性診断ツールの開発経験もあり。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000047', 'kaito_ueda', '上田海斗', 'ueda_k@example.com', '上田海斗', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-000000000047', 'kaito_ueda', 'ueda_k@example.com', '上田海斗', true, '#6BD6B8',
    'バックエンドエンジニア', '神戸市', 'Javaを中心としたエンタープライズ系バックエンド開発が得意。Spring Bootでのマイクロサービス構築に従事。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000048', 'hina_shimizu', '清水陽菜', 'shimizu_h3@example.com', '清水陽菜', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000048', 'hina_shimizu', 'shimizu_h3@example.com', '清水陽菜', true, '#3D8B6E',
    'グラフィックデザイナー', '福岡県', 'ブランディングとグラフィックデザインが専門。ロゴ、名刺、Webサイトまでトータルでのデザインワークが得意。', 'デザイン・広告', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000049', 'sho_arai', '新井翔', 'arai_s@example.com', '新井翔', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000049', 'sho_arai', 'arai_s@example.com', '新井翔', true, '#6B8BD6',
    'カスタマーサクセス', '東京都', 'BtoB SaaSのカスタマーサクセスに4年従事。オンボーディング設計とチャーン防止施策に強み。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000004a', 'kenta_mori', '森健太', 'mori_k@example.com', '森健太', true, '#D68B6B',
+  ('10000000-0000-0000-0000-00000000004a', 'kenta_mori', 'mori_k@example.com', '森健太', true, '#D68B6B',
    'MLエンジニア', '東京都', '機械学習モデルの本番環境への実装と運用が専門。MLOpsパイプラインの構築に注力。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000004b', 'miku_yoshida', '吉田美空', 'yoshida_m@example.com', '吉田美空', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-00000000004b', 'miku_yoshida', 'yoshida_m@example.com', '吉田美空', true, '#9B6BD6',
    'テクニカルライター', '東京都', '開発者向けドキュメントの執筆が専門。API仕様書、チュートリアル、ナレッジベースの構築に従事。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000004c', 'tatsuki_ishikawa', '石川龍希', 'ishikawa_t@example.com', '石川龍希', true, '#D6C16B',
+  ('10000000-0000-0000-0000-00000000004c', 'tatsuki_ishikawa', 'ishikawa_t@example.com', '石川龍希', true, '#D6C16B',
    'データエンジニア', '広島市', 'BigQueryとdbtを用いたデータ基盤構築が得意。データウェアハウスの設計から可視化まで一貫して対応。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000004d', 'miyu_okada', '岡田美優', 'okada_m@example.com', '岡田美優', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-00000000004d', 'miyu_okada', 'okada_m@example.com', '岡田美優', true, '#6BD6B8',
    'コンテンツストラテジスト', '仙台市', 'オウンドメディアのコンテンツ戦略立案と編集を担当。SEOコンテンツの企画から制作ディレクションまで。', 'メディア・出版', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000004e', 'yuto_maeda', '前田悠斗', 'maeda_y@example.com', '前田悠斗', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-00000000004e', 'yuto_maeda', 'maeda_y@example.com', '前田悠斗', true, '#3D8B6E',
    'バックエンドエンジニア', '京都府', 'Rustを用いた高パフォーマンスなシステム開発が得意。WebAssemblyやシステムプログラミングにも関心。', 'IT・通信', 'フルタイム', 'open')
 ON CONFLICT (username) DO NOTHING;
 
@@ -5300,29 +5300,29 @@ ON CONFLICT (name) DO NOTHING;
 -- ============================================================
 -- 候補者ユーザー 79〜89
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-00000000004f', 'ami_hasegawa', '長谷川亜美', 'hasegawa_a@example.com', '長谷川亜美', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-00000000004f', 'ami_hasegawa', 'hasegawa_a@example.com', '長谷川亜美', true, '#3D8B6E',
    'フロントエンドエンジニア', '名古屋市', 'Vue.js/Nuxt.jsを中心としたフロントエンド開発に従事。コンポーネント設計とパフォーマンス最適化に注力しています。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000050', 'yusuke_honda', '本田裕介', 'honda_y@example.com', '本田裕介', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000050', 'yusuke_honda', 'honda_y@example.com', '本田裕介', true, '#6B8BD6',
    'バックエンドエンジニア', '東京都', 'Ruby on RailsとGoを用いたAPI開発が得意。決済システムや認証基盤の設計経験が豊富です。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000051', 'misaki_inoue', '井上美咲', 'inoue_m@example.com', '井上美咲', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000051', 'misaki_inoue', 'inoue_m@example.com', '井上美咲', true, '#D68B6B',
    'モバイルエンジニア', '大阪府', 'FlutterによるクロスプラットフォームアプリGCP開発が専門。UI実装からCI/CD構築まで一貫して対応します。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000052', 'takeshi_nishimura', '西村武志', 'nishimura_t@example.com', '西村武志', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-000000000052', 'takeshi_nishimura', 'nishimura_t@example.com', '西村武志', true, '#9B6BD6',
    'ゲームエンジニア', '福岡県', 'Unityを用いたモバイルゲーム開発に6年従事。3Dグラフィックスとゲームロジックの最適化が得意。', 'ゲーム・エンタメ', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000053', 'kanako_murata', '村田佳奈子', 'murata_k@example.com', '村田佳奈子', true, '#D6C16B',
+  ('10000000-0000-0000-0000-000000000053', 'kanako_murata', 'murata_k@example.com', '村田佳奈子', true, '#D6C16B',
    'データアナリスト', '札幌市', 'SQLとTableauを活用したデータ分析が得意。経営指標のダッシュボード構築と意思決定支援に従事しています。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000054', 'kouki_aoki', '青木光希', 'aoki_k@example.com', '青木光希', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-000000000054', 'kouki_aoki', 'aoki_k@example.com', '青木光希', true, '#6BD6B8',
    '法務 / リーガルテック', '東京都', 'IT企業の法務担当として契約審査やコンプライアンス体制構築に従事。リーガルテックツールの導入推進も経験。', '法務・コンプライアンス', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-000000000055', 'risa_yamashita', '山下理沙', 'yamashita_r@example.com', '山下理沙', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000055', 'risa_yamashita', 'yamashita_r@example.com', '山下理沙', true, '#3D8B6E',
    'セールスエンジニア / プリセールス', '東京都', 'SaaS企業のプリセールスとして技術提案からPoCまで一貫して対応。年間30件以上の大型案件を支援。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000056', 'tomoya_fujimoto', '藤本智也', 'fujimoto_t@example.com', '藤本智也', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000056', 'tomoya_fujimoto', 'fujimoto_t@example.com', '藤本智也', true, '#6B8BD6',
    'SREエンジニア', '広島市', 'GCPを中心としたクラウドネイティブなインフラ運用が専門。Terraformによるインフラコード化とオブザーバビリティの向上に注力。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000057', 'chihiro_nomura', '野村千尋', 'nomura_c@example.com', '野村千尋', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000057', 'chihiro_nomura', 'nomura_c@example.com', '野村千尋', true, '#D68B6B',
    'モーションデザイナー', '京都府', 'After EffectsとFigmaを活用したUIアニメーションと映像制作が得意。プロダクトの体験設計にモーションの力で貢献します。', 'デザイン・広告', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000058', 'shin_okamoto', '岡本慎', 'okamoto_s@example.com', '岡本慎', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-000000000058', 'shin_okamoto', 'okamoto_s@example.com', '岡本慎', true, '#9B6BD6',
    'フルスタックエンジニア', '仙台市', 'TypeScriptとGoによるWebアプリケーション開発。GraphQLを活用したAPI設計とReactフロントエンドの構築が得意。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000059', 'eri_kawaguchi', '川口絵理', 'kawaguchi_e@example.com', '川口絵理', true, '#D6C16B',
+  ('10000000-0000-0000-0000-000000000059', 'eri_kawaguchi', 'kawaguchi_e@example.com', '川口絵理', true, '#D6C16B',
    'リサーチャー / 統計解析', '神戸市', 'RとPythonを用いた統計解析とリサーチデザインが専門。アンケート調査設計からレポーティングまで対応。', '調査・コンサルティング', 'フルタイム', 'open')
 ON CONFLICT (username) DO NOTHING;
 
@@ -6064,29 +6064,29 @@ ON CONFLICT (name) DO NOTHING;
 -- ============================================================
 -- 候補者ユーザー 90〜100
 -- ============================================================
-INSERT INTO users (id, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-00000000005a', 'takeshi_morimoto', '森本剛', 'morimoto_t@example.com', '森本剛', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-00000000005a', 'takeshi_morimoto', 'morimoto_t@example.com', '森本剛', true, '#3D8B6E',
    'データエンジニア / データ基盤アーキテクト', '東京都', 'ScalaとApache Sparkを用いた大規模データ基盤の設計・構築に従事。リアルタイムデータパイプラインの構築とデータガバナンスの整備が得意です。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000005b', 'chihiro_nishida', '西田千尋', 'nishida_c@example.com', '西田千尋', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-00000000005b', 'chihiro_nishida', 'nishida_c@example.com', '西田千尋', true, '#6B8BD6',
    'データアナリスト', '札幌市', 'Rと統計手法を活用したデータ分析が専門。マーケティングリサーチとユーザー行動分析を中心に、意思決定を支援するレポーティングに携わっています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000005c', 'kazuya_honda', '本田和也', 'honda_k@example.com', '本田和也', true, '#D68B6B',
+  ('10000000-0000-0000-0000-00000000005c', 'kazuya_honda', 'honda_k@example.com', '本田和也', true, '#D68B6B',
    '情シス / コーポレートITマネージャー', '名古屋市', '社内ITインフラの企画・運用を統括。ゼロトラストセキュリティの導入やSaaS管理の最適化を推進してきました。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000005d', 'mayu_ueno', '上野真由', 'ueno_m@example.com', '上野真由', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-00000000005d', 'mayu_ueno', 'ueno_m@example.com', '上野真由', true, '#9B6BD6',
    'Webディレクター', '大阪府', 'Webサイトの企画・設計からプロジェクト管理までをトータルで担当。CMS導入とコンテンツ設計に強みを持っています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-00000000005e', 'sora_ikeda', '池田蒼', 'ikeda_s@example.com', '池田蒼', true, '#D6C16B',
+  ('10000000-0000-0000-0000-00000000005e', 'sora_ikeda', 'ikeda_s@example.com', '池田蒼', true, '#D6C16B',
    'モーションデザイナー', '福岡県', 'After Effectsを中心としたモーションデザインとUI アニメーション制作が専門。ブランドムービーからプロダクトUIまで幅広く対応しています。', 'デザイン・広告', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-00000000005f', 'yuka_shimada', '島田悠花', 'shimada_y@example.com', '島田悠花', true, '#6BD6B8',
+  ('10000000-0000-0000-0000-00000000005f', 'yuka_shimada', 'shimada_y@example.com', '島田悠花', true, '#6BD6B8',
    'リーガルテック / 法務', '東京都', 'スタートアップの法務全般に従事。契約書レビュー、知的財産戦略、コンプライアンス体制の構築を担当しています。', 'IT・通信', 'フルタイム', 'not_seeking'),
-  ('10000000-0000-0000-0000-000000000060', 'hayato_fujimoto', '藤本隼人', 'fujimoto_h@example.com', '藤本隼人', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000060', 'hayato_fujimoto', 'fujimoto_h@example.com', '藤本隼人', true, '#3D8B6E',
    'フルスタックエンジニア', '仙台市', 'Node.jsとReactを組み合わせたWebアプリケーション開発に従事。GraphQL APIの設計とフロントエンド実装の両方を担当しています。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000061', 'risa_okamoto', '岡本理沙', 'okamoto_r@example.com', '岡本理沙', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000061', 'risa_okamoto', 'okamoto_r@example.com', '岡本理沙', true, '#6B8BD6',
    'プロダクトデザイナー', '京都府', 'ユーザーリサーチからUIデザインまで一気通貫で担当。デザインシステムの構築とプロトタイピングに強みがあります。', 'デザイン・広告', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000062', 'tomoya_inoue', '井上智也', 'inoue_t@example.com', '井上智也', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000062', 'tomoya_inoue', 'inoue_t@example.com', '井上智也', true, '#D68B6B',
    'SREエンジニア', '広島市', 'AWSとTerraformを用いたインフラ自動化が専門。大規模サービスの信頼性向上とコスト最適化に取り組んでいます。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000063', 'aiko_kawaguchi', '川口愛子', 'kawaguchi_a@example.com', '川口愛子', true, '#9B6BD6',
+  ('10000000-0000-0000-0000-000000000063', 'aiko_kawaguchi', 'kawaguchi_a@example.com', '川口愛子', true, '#9B6BD6',
    '品質管理 / ISMSコンサルタント', '神戸市', '情報セキュリティマネジメントシステムの構築と運用支援が専門。ISMS認証取得のコンサルティング経験が豊富です。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000064', 'daichi_murakami', '村上大地', 'murakami_d@example.com', '村上大地', true, '#D6C16B',
+  ('10000000-0000-0000-0000-000000000064', 'daichi_murakami', 'murakami_d@example.com', '村上大地', true, '#D6C16B',
    'バックエンドエンジニア', '横浜市', 'GoとPostgreSQLを中心としたAPI開発に従事。マイクロサービスアーキテクチャの設計と性能チューニングが得意です。', 'IT・通信', 'フルタイム', 'open')
 ON CONFLICT (username) DO NOTHING;
 

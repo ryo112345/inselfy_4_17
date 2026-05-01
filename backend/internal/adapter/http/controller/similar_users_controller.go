@@ -33,7 +33,7 @@ type similarUserExperience struct {
 type similarUserItem struct {
 	UserID       string                 `json:"user_id"`
 	Username     string                 `json:"username"`
-	DisplayName  *string                `json:"display_name"`
+	Name         string                 `json:"name"`
 	Headline     *string                `json:"headline"`
 	AvatarURL    *string                `json:"avatar_url"`
 	ProfileColor *string                `json:"profile_color"`
@@ -56,7 +56,7 @@ func (c *SimilarUsersController) GetSimilarUsers(ctx echo.Context, userID string
 	rows, err := c.pool.Query(ctx.Request().Context(),
 		`SELECT DISTINCT ON (wns.user_id)
 			wns.user_id, wns.mu,
-			u.username, u.display_name, u.headline, u.avatar_url, u.profile_color
+			u.username, u.name, u.headline, u.avatar_url, u.profile_color
 		FROM work_needs_scores wns
 		JOIN users u ON u.id = wns.user_id
 		WHERE wns.user_id != $1 AND u.is_public = true
@@ -72,10 +72,10 @@ func (c *SimilarUsersController) GetSimilarUsers(ctx echo.Context, userID string
 	for rows.Next() {
 		var uid pgtype.UUID
 		var muJSON []byte
-		var username string
-		var displayName, headline, avatarURL, profileColor pgtype.Text
+		var username, name string
+		var headline, avatarURL, profileColor pgtype.Text
 
-		if err := rows.Scan(&uid, &muJSON, &username, &displayName, &headline, &avatarURL, &profileColor); err != nil {
+		if err := rows.Scan(&uid, &muJSON, &username, &name, &headline, &avatarURL, &profileColor); err != nil {
 			continue
 		}
 
@@ -94,11 +94,9 @@ func (c *SimilarUsersController) GetSimilarUsers(ctx echo.Context, userID string
 		item := similarUserItem{
 			UserID:     pgUUIDToString(uid),
 			Username:   username,
+			Name:       name,
 			Similarity: math.Round(sim*1000) / 10,
 			TopNeeds:   needLabels(top3),
-		}
-		if displayName.Valid {
-			item.DisplayName = &displayName.String
 		}
 		if headline.Valid {
 			item.Headline = &headline.String

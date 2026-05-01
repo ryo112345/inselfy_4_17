@@ -43,7 +43,7 @@ export default async function IntegratedReportPage({
     <ProfileColorContext value={profileColor}>
       <Sidebar
         username={data.username}
-        displayName={data.user.displayName}
+        displayName={data.user.name}
         diagnostics={data.diagnostics}
         defaultOpen={sidebarOpen}
       />

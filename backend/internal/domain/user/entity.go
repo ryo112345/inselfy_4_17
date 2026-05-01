@@ -11,7 +11,6 @@ type User struct {
 	ID               string
 	Username         Username
 	Name             string
-	DisplayName      *string
 	Headline         *string
 	Location         *string
 	About            *string
@@ -40,7 +39,6 @@ type CreateUserInput struct {
 type UpdateProfileInput struct {
 	Username         *string
 	Name             *string
-	DisplayName      **string
 	Headline         **string
 	Location         **string
 	About            **string
