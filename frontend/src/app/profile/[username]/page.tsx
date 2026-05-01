@@ -73,6 +73,7 @@ export default async function ProfilePage({
       />
       <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 ml-[50px]">
         <PanelNavigator
+          userId={data.user.id}
           username={data.username}
           displayName={data.user.displayName || data.user.name}
           wvSessionId={data.wvSessionId}

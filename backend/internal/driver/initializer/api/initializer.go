@@ -193,6 +193,12 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return userCtrl.GetByID(c, c.Param("id"))
 	})
 
+	// --- Similar Users ---
+	similarUsersCtrl := httpcontroller.NewSimilarUsersController(pool)
+	e.GET("/api/users/id/:id/similar", func(c echo.Context) error {
+		return similarUsersCtrl.GetSimilarUsers(c, c.Param("id"))
+	})
+
 	// --- Experiences ---
 	e.GET("/api/users/:username/experiences", func(c echo.Context) error {
 		return experienceCtrl.List(c, c.Param("username"))

@@ -8,9 +8,11 @@ import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/C
 import { IntegratedReportContent } from "@/app/integrated-report/[requestId]/IntegratedReportContent";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
+import { SimilarUsersCard } from "./SimilarUsersCard";
 
 type Props = {
   children: ReactNode;
+  userId?: string;
   username: string;
   displayName?: string;
   wvSessionId: string | null;
@@ -25,7 +27,7 @@ type Props = {
   initialPanel?: number;
 };
 
-export function PanelNavigator({ children, username, displayName = username, wvSessionId, ciSessionId, wvResult, ciResult, wvHasReport, ciHasReport, intReportRequestId, intReportHasReport, isOwner: serverIsOwner = true, initialPanel = 0 }: Props) {
+export function PanelNavigator({ children, userId, username, displayName = username, wvSessionId, ciSessionId, wvResult, ciResult, wvHasReport, ciHasReport, intReportRequestId, intReportHasReport, isOwner: serverIsOwner = true, initialPanel = 0 }: Props) {
   const { user } = useAuth();
   const isOwner = serverIsOwner || user?.username === username;
   const showWvResult = !!wvSessionId && (isOwner || !!wvHasReport);
@@ -88,8 +90,24 @@ export function PanelNavigator({ children, username, displayName = username, wvS
   const focusedTransform = `calc(50% - ${panelPx / 2}px - ${activeIndex * (panelPx + gapPx)}px)`;
   const expandedTransform = `-${activeIndex * (panelPx + gapPx)}px`;
 
+  const showSimilar = !!wvSessionId && !!userId;
+
   return (
     <div className="relative px-4 overflow-hidden h-[calc(100vh-1rem)]">
+      {showSimilar && (
+        <div
+          className="absolute top-0 h-full overflow-y-auto z-10 transition-opacity duration-300 hidden xl:block scrollbar-hide"
+          style={{
+            width: `calc(50% - ${panelPx / 2}px - 24px)`,
+            left: 0,
+            opacity: activeIndex === 0 && !expanded ? 1 : 0,
+            pointerEvents: activeIndex === 0 && !expanded ? "auto" : "none",
+          }}
+        >
+          <SimilarUsersCard userId={userId!} visible={activeIndex === 0} />
+        </div>
+      )}
+
       <div
         className="flex items-stretch h-full transition-all duration-300 ease-in-out"
         style={{
