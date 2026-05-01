@@ -84,21 +84,36 @@ export function PanelNavigator({ children, userId, username, displayName = usern
     );
   };
 
-  const panelPx = 672;
+  const desktopPanelPx = 672;
   const gapPx = 12;
 
-  const focusedTransform = `calc(50% - ${panelPx / 2}px - ${activeIndex * (panelPx + gapPx)}px)`;
-  const expandedTransform = `-${activeIndex * (panelPx + gapPx)}px`;
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const panelPx = isMobile ? (typeof window !== "undefined" ? window.innerWidth : 375) : desktopPanelPx;
+  const mobileGap = 0;
+  const currentGap = isMobile ? mobileGap : gapPx;
+
+  const focusedTransform = isMobile
+    ? `-${activeIndex * panelPx}px`
+    : `calc(50% - ${desktopPanelPx / 2}px - ${activeIndex * (desktopPanelPx + gapPx)}px)`;
+  const expandedTransform = `-${activeIndex * (panelPx + currentGap)}px`;
 
   const showSimilar = !!wvSessionId && !!userId;
 
   return (
-    <div className="relative px-4 overflow-hidden h-[calc(100vh-1rem)]">
+    <div className="relative px-0 md:px-4 overflow-hidden h-[calc(100vh-1rem)]">
       {showSimilar && (
         <div
           className="absolute top-0 h-full overflow-y-auto z-10 transition-opacity duration-300 hidden xl:block scrollbar-hide"
           style={{
-            width: `calc(50% - ${panelPx / 2}px - 24px)`,
+            width: `calc(50% - ${desktopPanelPx / 2}px - 24px)`,
             left: 0,
             opacity: activeIndex === 0 && !expanded ? 1 : 0,
             pointerEvents: activeIndex === 0 && !expanded ? "auto" : "none",
@@ -111,13 +126,13 @@ export function PanelNavigator({ children, userId, username, displayName = usern
       <div
         className="flex items-stretch h-full transition-all duration-300 ease-in-out"
         style={{
-          gap: `${gapPx}px`,
+          gap: `${currentGap}px`,
           transform: `translateX(${expanded ? expandedTransform : focusedTransform})`,
         }}
       >
-        <div className="shrink-0 overflow-y-auto scrollbar-hide" style={{ width: `${panelPx}px` }}>{children}</div>
+        <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-auto" style={isMobile ? undefined : { width: `${desktopPanelPx}px` }}>{children}</div>
 
-        <div className="shrink-0 overflow-y-auto scrollbar-hide" style={{ width: `${panelPx}px` }}>
+        <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-auto" style={isMobile ? undefined : { width: `${desktopPanelPx}px` }}>
           {showIntReport ? (
             <IntegratedReportContent requestId={intReportRequestId!} isOwner={isOwner} />
           ) : (
@@ -125,7 +140,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
           )}
         </div>
 
-        <div className="shrink-0 overflow-y-auto scrollbar-hide" style={{ width: `${panelPx}px` }}>
+        <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-auto" style={isMobile ? undefined : { width: `${desktopPanelPx}px` }}>
           {showWvResult ? (
             <WorkValuesResultContent sessionId={wvSessionId!} initialData={wvResult} isOwner={isOwner} />
           ) : (
@@ -133,7 +148,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
           )}
         </div>
 
-        <div className="shrink-0 overflow-y-auto scrollbar-hide" style={{ width: `${panelPx}px` }}>
+        <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-auto" style={isMobile ? undefined : { width: `${desktopPanelPx}px` }}>
           {showCiResult ? (
             <CareerInterestResultContent sessionId={ciSessionId!} initialData={ciResult} isOwner={isOwner} />
           ) : (
@@ -142,7 +157,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
         </div>
       </div>
 
-      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-1">
+      <div className="fixed bottom-6 right-4 md:right-6 z-40 flex items-center gap-1">
         <button
           data-testid="panel-prev"
           onClick={() => goTo(activeIndex - 1)}

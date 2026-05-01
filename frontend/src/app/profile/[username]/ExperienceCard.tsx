@@ -65,7 +65,7 @@ export function ExperienceCard({ username, experiences, isOwner = true }: Props)
   };
 
   return (
-    <section className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
+    <section className="rounded-2xl border border-gray-200/80 bg-white px-4 md:px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900">
           <BriefcaseIcon className="h-6 w-6 text-gray-900" />
@@ -104,12 +104,13 @@ export function ExperienceCard({ username, experiences, isOwner = true }: Props)
           {groups.map((group, idx) => {
             const isLast = idx === groups.length - 1;
             const editingId = formState.mode === "edit" ? formState.experience.id : null;
+            const isEditing = group.items.some((it) => it.id === editingId);
             return (
               <li
                 key={group.items[0].id}
                 className="relative pt-4 pb-3"
               >
-                <TimelineRail isLast={isLast} />
+                {!isEditing && <TimelineRail isLast={isLast} />}
                 {group.items.length === 1 ? (
                   editingId === group.items[0].id ? (
                     <ExperienceForm
@@ -274,7 +275,7 @@ function RowActions({
   disabled: boolean;
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-1 opacity-0 transition group-hover:opacity-100 focus-within:opacity-100">
+    <div className="flex shrink-0 items-center gap-1">
       <button
         type="button"
         aria-label="編集"
@@ -335,32 +336,30 @@ function SingleExperience({
 }) {
   const e = experience;
   return (
-    <div className="group flex items-start gap-3">
+    <div className="flex items-start gap-3">
       <CompanyBadge name={e.companyName} />
       <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-bold tracking-tight text-gray-900">
-              {e.companyName}
-            </h3>
-            <div className="relative mt-1">
-              <RoleRail isLast />
-              <p className="flex flex-wrap items-center gap-x-2 text-base font-medium text-gray-700">
-                <RoleDot />
-                <span>{e.title}</span>
-                {e.isCurrent ? <CurrentBadge /> : null}
-              </p>
-              <PeriodLine experience={e} />
-              {e.description ? (
-                <p className="mt-2.5 whitespace-pre-wrap pl-5 text-base leading-relaxed text-gray-800">
-                  {e.description}
-                </p>
-              ) : null}
-            </div>
-          </div>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="min-w-0 text-lg font-bold tracking-tight text-gray-900">
+            {e.companyName}
+          </h3>
           {showActions && (
             <RowActions onEdit={onEdit} onDelete={onDelete} disabled={pending} />
           )}
+        </div>
+        <div className="relative mt-1">
+          <RoleRail isLast />
+          <p className="flex items-center gap-x-2 text-base font-medium text-gray-700">
+            <RoleDot />
+            <span>{e.title}</span>
+          </p>
+          {e.isCurrent ? <div className="pl-5 mt-0.5"><CurrentBadge /></div> : null}
+          <PeriodLine experience={e} />
+          {e.description ? (
+            <p className="mt-2.5 whitespace-pre-wrap pl-5 text-base leading-relaxed text-gray-800">
+              {e.description}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
@@ -444,17 +443,13 @@ function GroupedExperience({
               );
             }
             return (
-              <li key={e.id} className="group relative">
+              <li key={e.id} className="relative">
                 <RoleRail isLast={isLastRole} />
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h4 className="flex flex-wrap items-center gap-x-2 text-base font-semibold text-gray-900">
-                      <RoleDot />
-                      <span>{e.title}</span>
-                      {e.isCurrent ? <CurrentBadge /> : null}
-                    </h4>
-                    <PeriodLine experience={e} />
-                  </div>
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="flex min-w-0 items-center gap-x-2 text-base font-semibold text-gray-900">
+                    <RoleDot />
+                    <span>{e.title}</span>
+                  </h4>
                   {showActions && (
                     <RowActions
                       onEdit={() => onEdit(e)}
@@ -463,6 +458,8 @@ function GroupedExperience({
                     />
                   )}
                 </div>
+                {e.isCurrent ? <div className="pl-5 mt-0.5"><CurrentBadge /></div> : null}
+                <PeriodLine experience={e} />
                 {e.description ? (
                   <p className="mt-2 whitespace-pre-wrap pl-5 text-base leading-relaxed text-gray-800">
                     {e.description}
@@ -601,8 +598,8 @@ function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none"
         />
       </Field>
-      <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[200px]">
+      <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+        <div className="md:flex-1 md:min-w-[200px]">
           <Field label="開始年月" required>
             <YearMonthSelect
               year={startYear}
@@ -612,7 +609,7 @@ function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
             />
           </Field>
         </div>
-        <div className="flex-1 min-w-[200px]">
+        <div className="md:flex-1 md:min-w-[200px]">
           <Field label="終了年月">
             <YearMonthSelect
               year={endYear}

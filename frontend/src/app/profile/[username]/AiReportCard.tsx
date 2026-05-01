@@ -50,7 +50,7 @@ export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReport
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-[#fae9b2] px-8 pt-11 pb-6 shadow-[0_1px_2px_rgba(120,80,20,0.05),0_10px_24px_-14px_rgba(160,110,20,0.3)]">
+      <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-[#fae9b2] px-4 md:px-8 pt-11 pb-6 shadow-[0_1px_2px_rgba(120,80,20,0.05),0_10px_24px_-14px_rgba(160,110,20,0.3)]">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[url('/ai-report-wave.png')] bg-[length:100%_100%] bg-no-repeat opacity-45"
@@ -69,7 +69,7 @@ export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReport
             診断結果と経歴をAIが分析し、あなた自身も気づいていない特性を言語化します。
           </p>
 
-          <ul className="mt-5 flex items-center justify-center gap-6 text-[15px] font-medium text-gray-500/70">
+          <ul className="mt-5 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 text-[15px] font-medium text-gray-500/70">
             {steps.map((step) => (
               <li key={step.label} className="flex items-center gap-1.5">
                 <span
