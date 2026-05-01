@@ -93,7 +93,7 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
 
   return (
     <section
-      className="mb-6 text-center px-6 pt-10 pb-6 relative overflow-hidden -mx-6 -mt-5 rounded-t-2xl"
+      className="mb-6 text-center px-6 pt-14 pb-6 relative overflow-hidden -mx-6 -mt-5 rounded-t-2xl"
       style={{ backgroundColor: "#F8F3FD" }}
     >
       <style>{`
@@ -202,7 +202,8 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
       <p className="relative text-[14px] mb-5 tracking-wide" style={{ color: "#9a8aaa" }}>
         {persona.subtitle}
       </p>
-      <div className="relative grid grid-cols-3 items-center -mt-11">
+      {/* Desktop: 3-column grid */}
+      <div className="relative hidden md:grid grid-cols-3 items-center -mt-11">
         <div className="flex flex-col items-end gap-1 pr-4 justify-self-center translate-x-2">
           {top3.map((t) => (
             <span key={t.type_id} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
@@ -250,6 +251,54 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
         <div className="flex justify-start pl-4">
           <RIASECRadarChart types={types} />
         </div>
+      </div>
+      {/* Mobile: stacked layout */}
+      <div className="relative flex flex-col items-center gap-4 md:hidden">
+        <div className="flex items-end justify-center gap-2.5">
+          {top3.map((t, i) => {
+            const tid = t.type_id as TypeId;
+            const sizes = [
+              { size: "72px", text: "text-2xl", radius: "rounded-2xl" },
+              { size: "58px", text: "text-xl", radius: "rounded-2xl" },
+              { size: "48px", text: "text-lg", radius: "rounded-xl" },
+            ];
+            const s = sizes[i];
+            const badgeStyles = [
+              {
+                background: "linear-gradient(170deg, #C49CF0 0%, #A87DE0 30%, #8B5CC8 60%, #7B4BAF 100%)",
+                boxShadow: "0 6px 14px rgba(120,70,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                border: "1px solid rgba(255,255,255,0.25)",
+              },
+              {
+                background: "linear-gradient(170deg, #B890E8 0%, #9C70DC 30%, #8858C8 60%, #7A50B8 100%)",
+                boxShadow: "0 6px 14px rgba(110,70,190,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                border: "1px solid rgba(255,255,255,0.25)",
+              },
+              {
+                background: "linear-gradient(170deg, #B088DC 0%, #9668C8 30%, #8058B8 60%, #7450A8 100%)",
+                boxShadow: "0 6px 14px rgba(100,70,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                border: "1px solid rgba(255,255,255,0.25)",
+              },
+            ];
+            return (
+              <span
+                key={tid}
+                className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center ci-badge-text ci-badge-glow ci-badge-float-${i + 1} shrink-0`}
+                style={{ ...badgeStyles[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
+              >
+                {TYPE_ABBREVIATIONS[tid]}
+              </span>
+            );
+          })}
+        </div>
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-0.5">
+          {top3.map((t) => (
+            <span key={t.type_id} className="text-[14px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+              {TYPE_ENGLISH_NAMES[t.type_id as TypeId]}
+            </span>
+          ))}
+        </div>
+        <RIASECRadarChart types={types} />
       </div>
     </section>
   );
