@@ -20222,4 +20222,121 @@ INSERT INTO job_postings (
   'コミュニティマネージャーチーム'
 ) ON CONFLICT DO NOTHING;
 
+-- ============================================================
+-- work_needs_scores の自動生成
+-- work_values_scores (6 Values) から work_needs_scores (21 Needs) を導出する
+-- similar users 機能が work_needs_scores を参照するため必要
+-- ============================================================
+DO $$
+DECLARE
+  sess RECORD;
+  val RECORD;
+  needs_mu JSONB := '{}'::JSONB;
+  needs_se JSONB := '{}'::JSONB;
+  responses JSONB := '[]'::JSONB;
+  base_mu FLOAT;
+  spread FLOAT;
+  need_id TEXT;
+  need_count INT;
+  all_needs TEXT[] := ARRAY[
+    'ability_utilization', 'achievement', 'activity', 'advancement', 'authority',
+    'autonomy', 'co_workers', 'compensation', 'creativity', 'independence',
+    'moral_values', 'recognition', 'responsibility', 'security', 'social_service',
+    'social_status', 'supervision_hr', 'supervision_technical', 'variety', 'working_conditions'
+  ];
+  val_to_needs JSONB := '{
+    "achievement": ["ability_utilization", "achievement"],
+    "comfort": ["activity", "independence", "variety", "compensation", "security", "working_conditions"],
+    "status": ["advancement", "authority", "recognition", "social_status"],
+    "altruism": ["co_workers", "moral_values", "social_service"],
+    "safety": ["company_policies", "supervision_hr", "supervision_technical"],
+    "autonomy": ["autonomy", "creativity", "responsibility"]
+  }'::JSONB;
+  i INT;
+  j INT;
+  q INT;
+  mu_a FLOAT;
+  mu_b FLOAT;
+BEGIN
+  FOR sess IN
+    SELECT wvs.id AS session_id, wvs.user_id
+    FROM work_values_sessions wvs
+    WHERE wvs.status = 'completed'
+      AND NOT EXISTS (SELECT 1 FROM work_needs_scores wns WHERE wns.session_id = wvs.id)
+  LOOP
+    needs_mu := '{}'::JSONB;
+    needs_se := '{}'::JSONB;
+
+    FOR val IN
+      SELECT value_id, mu FROM work_values_scores WHERE session_id = sess.session_id
+    LOOP
+      need_count := jsonb_array_length(val_to_needs->val.value_id);
+      FOR i IN 0..need_count-1 LOOP
+        need_id := val_to_needs->val.value_id->>i;
+        spread := (random() - 0.5) * 0.6;
+        base_mu := val.mu + spread;
+        needs_mu := needs_mu || jsonb_build_object(need_id, round(base_mu::numeric, 4));
+        needs_se := needs_se || jsonb_build_object(need_id, round((0.7 + random() * 0.3)::numeric, 4));
+      END LOOP;
+    END LOOP;
+
+    -- 21 needs に company_policies が含まれていない場合は safety 系から補完
+    IF NOT needs_mu ? 'company_policies' THEN
+      needs_mu := needs_mu || jsonb_build_object('company_policies', 0.0);
+      needs_se := needs_se || jsonb_build_object('company_policies', 0.85);
+    END IF;
+
+    responses := '[]'::JSONB;
+    q := 1;
+    FOR i IN 1..array_length(all_needs, 1) LOOP
+      FOR j IN i+1..array_length(all_needs, 1) LOOP
+        EXIT WHEN q > 70;
+        mu_a := COALESCE((needs_mu->>all_needs[i])::float, 0.0);
+        mu_b := COALESCE((needs_mu->>all_needs[j])::float, 0.0);
+        IF mu_a >= mu_b THEN
+          responses := responses || jsonb_build_array(jsonb_build_object(
+            'need_a', all_needs[i], 'need_b', all_needs[j],
+            'winner', all_needs[i], 'question_number', q
+          ));
+        ELSE
+          responses := responses || jsonb_build_array(jsonb_build_object(
+            'need_a', all_needs[i], 'need_b', all_needs[j],
+            'winner', all_needs[j], 'question_number', q
+          ));
+        END IF;
+        q := q + 1;
+      END LOOP;
+      EXIT WHEN q > 70;
+    END LOOP;
+
+    INSERT INTO work_needs_scores (
+      id, session_id, user_id, responses, mu, se,
+      consistency_coefficient, consistency_level, question_count, created_at
+    ) VALUES (
+      gen_random_uuid(), sess.session_id, sess.user_id,
+      responses, needs_mu, needs_se,
+      0.80 + random() * 0.15, 'high', 70, now()
+    );
+  END LOOP;
+END;
+$$;
+
+-- ============================================================
+-- ダミーAIレポートの自動生成
+-- 他ユーザーのプロフィールで診断結果を表示するにはレポートが必要
+-- ============================================================
+INSERT INTO ai_reports (session_id, user_id, content)
+SELECT wvs.id, wvs.user_id, 'このレポートはシステムにより自動生成されたサンプルです。'
+FROM work_values_sessions wvs
+WHERE wvs.status = 'completed'
+  AND NOT EXISTS (SELECT 1 FROM ai_reports ar WHERE ar.session_id = wvs.id)
+ON CONFLICT (session_id) DO NOTHING;
+
+INSERT INTO ci_ai_reports (session_id, user_id, content)
+SELECT cis.id, cis.user_id, 'このレポートはシステムにより自動生成されたサンプルです。'
+FROM career_interest_sessions cis
+WHERE cis.status = 'completed'
+  AND NOT EXISTS (SELECT 1 FROM ci_ai_reports cr WHERE cr.session_id = cis.id)
+ON CONFLICT (session_id) DO NOTHING;
+
 COMMIT;
