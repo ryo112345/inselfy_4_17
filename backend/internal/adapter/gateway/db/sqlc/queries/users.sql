@@ -24,7 +24,7 @@ FROM users
 WHERE id = $1;
 
 -- name: ListUsers :many
-SELECT id, username, name, display_name, email, avatar_url, created_at
+SELECT id, username, name, email, avatar_url, created_at
 FROM users
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
@@ -33,11 +33,10 @@ LIMIT $1 OFFSET $2;
 SELECT count(*) FROM users;
 
 -- name: SearchUsers :many
-SELECT id, username, name, display_name, email, avatar_url, created_at
+SELECT id, username, name, email, avatar_url, created_at
 FROM users
 WHERE username ILIKE '%' || $1 || '%'
    OR name ILIKE '%' || $1 || '%'
-   OR display_name::text ILIKE '%' || $1 || '%'
    OR email::text ILIKE '%' || $1 || '%'
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3;
@@ -47,7 +46,6 @@ SELECT count(*)
 FROM users
 WHERE username ILIKE '%' || $1 || '%'
    OR name ILIKE '%' || $1 || '%'
-   OR display_name::text ILIKE '%' || $1 || '%'
    OR email::text ILIKE '%' || $1 || '%';
 
 -- name: DeleteUser :exec
@@ -58,7 +56,6 @@ UPDATE users
 SET
     username = COALESCE(sqlc.narg('username'), username),
     name = COALESCE(sqlc.narg('name'), name),
-    display_name = CASE WHEN sqlc.arg('display_name_set')::bool THEN sqlc.narg('display_name') ELSE display_name END,
     headline = CASE WHEN sqlc.arg('headline_set')::bool THEN sqlc.narg('headline') ELSE headline END,
     location = CASE WHEN sqlc.arg('location_set')::bool THEN sqlc.narg('location') ELSE location END,
     about = CASE WHEN sqlc.arg('about_set')::bool THEN sqlc.narg('about') ELSE about END,

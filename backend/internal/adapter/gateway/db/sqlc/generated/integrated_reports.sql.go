@@ -169,20 +169,20 @@ SELECT
     r.created_at,
     r.viewed_at,
     u.username,
-    u.display_name
+    u.name
 FROM integrated_reports r
 JOIN users u ON u.id = r.user_id
 ORDER BY r.created_at DESC
 `
 
 type ListIntegratedReportsRow struct {
-	ID          pgtype.UUID        `json:"id"`
-	RequestID   pgtype.UUID        `json:"request_id"`
-	UserID      pgtype.UUID        `json:"user_id"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	ViewedAt    pgtype.Timestamptz `json:"viewed_at"`
-	Username    string             `json:"username"`
-	DisplayName pgtype.Text        `json:"display_name"`
+	ID        pgtype.UUID        `json:"id"`
+	RequestID pgtype.UUID        `json:"request_id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ViewedAt  pgtype.Timestamptz `json:"viewed_at"`
+	Username  string             `json:"username"`
+	Name      string             `json:"name"`
 }
 
 func (q *Queries) ListIntegratedReports(ctx context.Context) ([]*ListIntegratedReportsRow, error) {
@@ -201,7 +201,7 @@ func (q *Queries) ListIntegratedReports(ctx context.Context) ([]*ListIntegratedR
 			&i.CreatedAt,
 			&i.ViewedAt,
 			&i.Username,
-			&i.DisplayName,
+			&i.Name,
 		); err != nil {
 			return nil, err
 		}
@@ -223,7 +223,7 @@ SELECT
     req.free_text,
     req.created_at,
     u.username,
-    u.display_name
+    u.name
 FROM integrated_report_requests req
 JOIN users u ON u.id = req.user_id
 LEFT JOIN integrated_reports r ON r.request_id = req.id
@@ -232,15 +232,15 @@ ORDER BY req.created_at DESC
 `
 
 type ListIntegratedRequestsWithoutReportRow struct {
-	RequestID   pgtype.UUID        `json:"request_id"`
-	UserID      pgtype.UUID        `json:"user_id"`
-	Topic1      int16              `json:"topic1"`
-	Topic2      int16              `json:"topic2"`
-	Topic3      int16              `json:"topic3"`
-	FreeText    string             `json:"free_text"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	Username    string             `json:"username"`
-	DisplayName pgtype.Text        `json:"display_name"`
+	RequestID pgtype.UUID        `json:"request_id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	Topic1    int16              `json:"topic1"`
+	Topic2    int16              `json:"topic2"`
+	Topic3    int16              `json:"topic3"`
+	FreeText  string             `json:"free_text"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	Username  string             `json:"username"`
+	Name      string             `json:"name"`
 }
 
 func (q *Queries) ListIntegratedRequestsWithoutReport(ctx context.Context) ([]*ListIntegratedRequestsWithoutReportRow, error) {
@@ -261,7 +261,7 @@ func (q *Queries) ListIntegratedRequestsWithoutReport(ctx context.Context) ([]*L
 			&i.FreeText,
 			&i.CreatedAt,
 			&i.Username,
-			&i.DisplayName,
+			&i.Name,
 		); err != nil {
 			return nil, err
 		}

@@ -11,6 +11,39 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countPublicJobPostings = `-- name: CountPublicJobPostings :one
+SELECT count(*) FROM job_postings jp
+JOIN company_accounts ca ON ca.id = jp.company_id
+WHERE jp.status = 'open'
+  AND ($1::text IS NULL
+       OR jp.title ILIKE '%' || $1 || '%'
+       OR jp.description ILIKE '%' || $1 || '%'
+       OR ca.company_name ILIKE '%' || $1 || '%'
+       OR EXISTS(SELECT 1 FROM unnest(jp.tags) t WHERE t ILIKE '%' || $1 || '%'))
+  AND ($2::text IS NULL OR jp.job_category = $2)
+  AND ($3::text IS NULL OR jp.employment_type = $3)
+  AND ($4::text IS NULL OR jp.remote_policy = $4)
+`
+
+type CountPublicJobPostingsParams struct {
+	SearchTerm     pgtype.Text `json:"search_term"`
+	JobCategory    pgtype.Text `json:"job_category"`
+	EmploymentType pgtype.Text `json:"employment_type"`
+	RemotePolicy   pgtype.Text `json:"remote_policy"`
+}
+
+func (q *Queries) CountPublicJobPostings(ctx context.Context, arg *CountPublicJobPostingsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countPublicJobPostings,
+		arg.SearchTerm,
+		arg.JobCategory,
+		arg.EmploymentType,
+		arg.RemotePolicy,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createJobPosting = `-- name: CreateJobPosting :one
 INSERT INTO job_postings (
     company_id, title, description, employment_type, location, status,
@@ -435,6 +468,161 @@ func (q *Queries) ListPublicJobPostings(ctx context.Context) ([]*ListPublicJobPo
 	var items []*ListPublicJobPostingsRow
 	for rows.Next() {
 		var i ListPublicJobPostingsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CompanyID,
+			&i.Title,
+			&i.Description,
+			&i.EmploymentType,
+			&i.Location,
+			&i.IsActive,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Status,
+			&i.JobCategory,
+			&i.HiringCount,
+			&i.AppealPoints,
+			&i.Challenges,
+			&i.TeamDescription,
+			&i.SkillsGained,
+			&i.Tags,
+			&i.RequiredQualifications,
+			&i.PreferredQualifications,
+			&i.WorkLocation,
+			&i.WorkLocationChangeScope,
+			&i.JobDescriptionChangeScope,
+			&i.ContractType,
+			&i.ProbationPeriod,
+			&i.WorkHours,
+			&i.BreakTime,
+			&i.Holidays,
+			&i.SalaryMin,
+			&i.SalaryMax,
+			&i.SalaryDetail,
+			&i.Insurance,
+			&i.RemotePolicy,
+			&i.Benefits,
+			&i.SmokingPolicy,
+			&i.SelectionProcess,
+			&i.CoverImageUrl,
+			&i.HighlightTitleRole,
+			&i.HighlightTitleAppeal,
+			&i.HighlightTitleChallenge,
+			&i.HighlightTitleGrowth,
+			&i.TeamMembers,
+			&i.TeamLabel,
+			&i.GalleryUrls,
+			&i.TeamID,
+			&i.CompanyName,
+			&i.CompanyLogoUrl,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchPublicJobPostings = `-- name: SearchPublicJobPostings :many
+SELECT jp.id, jp.company_id, jp.title, jp.description, jp.employment_type, jp.location, jp.is_active, jp.created_at, jp.updated_at, jp.status, jp.job_category, jp.hiring_count, jp.appeal_points, jp.challenges, jp.team_description, jp.skills_gained, jp.tags, jp.required_qualifications, jp.preferred_qualifications, jp.work_location, jp.work_location_change_scope, jp.job_description_change_scope, jp.contract_type, jp.probation_period, jp.work_hours, jp.break_time, jp.holidays, jp.salary_min, jp.salary_max, jp.salary_detail, jp.insurance, jp.remote_policy, jp.benefits, jp.smoking_policy, jp.selection_process, jp.cover_image_url, jp.highlight_title_role, jp.highlight_title_appeal, jp.highlight_title_challenge, jp.highlight_title_growth, jp.team_members, jp.team_label, jp.gallery_urls, jp.team_id,
+       ca.company_name,
+       ca.logo_url AS company_logo_url
+FROM job_postings jp
+JOIN company_accounts ca ON ca.id = jp.company_id
+WHERE jp.status = 'open'
+  AND ($1::text IS NULL
+       OR jp.title ILIKE '%' || $1 || '%'
+       OR jp.description ILIKE '%' || $1 || '%'
+       OR ca.company_name ILIKE '%' || $1 || '%'
+       OR EXISTS(SELECT 1 FROM unnest(jp.tags) t WHERE t ILIKE '%' || $1 || '%'))
+  AND ($2::text IS NULL OR jp.job_category = $2)
+  AND ($3::text IS NULL OR jp.employment_type = $3)
+  AND ($4::text IS NULL OR jp.remote_policy = $4)
+ORDER BY
+  CASE WHEN $5::bool THEN COALESCE(jp.salary_max, jp.salary_min, 0) ELSE 0 END DESC,
+  jp.created_at DESC
+LIMIT $7 OFFSET $6
+`
+
+type SearchPublicJobPostingsParams struct {
+	SearchTerm     pgtype.Text `json:"search_term"`
+	JobCategory    pgtype.Text `json:"job_category"`
+	EmploymentType pgtype.Text `json:"employment_type"`
+	RemotePolicy   pgtype.Text `json:"remote_policy"`
+	SortBySalary   bool        `json:"sort_by_salary"`
+	OffsetVal      int32       `json:"offset_val"`
+	LimitVal       int32       `json:"limit_val"`
+}
+
+type SearchPublicJobPostingsRow struct {
+	ID                        pgtype.UUID        `json:"id"`
+	CompanyID                 pgtype.UUID        `json:"company_id"`
+	Title                     string             `json:"title"`
+	Description               string             `json:"description"`
+	EmploymentType            string             `json:"employment_type"`
+	Location                  pgtype.Text        `json:"location"`
+	IsActive                  bool               `json:"is_active"`
+	CreatedAt                 pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
+	Status                    string             `json:"status"`
+	JobCategory               string             `json:"job_category"`
+	HiringCount               string             `json:"hiring_count"`
+	AppealPoints              string             `json:"appeal_points"`
+	Challenges                string             `json:"challenges"`
+	TeamDescription           string             `json:"team_description"`
+	SkillsGained              string             `json:"skills_gained"`
+	Tags                      []string           `json:"tags"`
+	RequiredQualifications    string             `json:"required_qualifications"`
+	PreferredQualifications   string             `json:"preferred_qualifications"`
+	WorkLocation              string             `json:"work_location"`
+	WorkLocationChangeScope   string             `json:"work_location_change_scope"`
+	JobDescriptionChangeScope string             `json:"job_description_change_scope"`
+	ContractType              string             `json:"contract_type"`
+	ProbationPeriod           string             `json:"probation_period"`
+	WorkHours                 string             `json:"work_hours"`
+	BreakTime                 string             `json:"break_time"`
+	Holidays                  string             `json:"holidays"`
+	SalaryMin                 pgtype.Int4        `json:"salary_min"`
+	SalaryMax                 pgtype.Int4        `json:"salary_max"`
+	SalaryDetail              string             `json:"salary_detail"`
+	Insurance                 string             `json:"insurance"`
+	RemotePolicy              string             `json:"remote_policy"`
+	Benefits                  string             `json:"benefits"`
+	SmokingPolicy             string             `json:"smoking_policy"`
+	SelectionProcess          string             `json:"selection_process"`
+	CoverImageUrl             string             `json:"cover_image_url"`
+	HighlightTitleRole        string             `json:"highlight_title_role"`
+	HighlightTitleAppeal      string             `json:"highlight_title_appeal"`
+	HighlightTitleChallenge   string             `json:"highlight_title_challenge"`
+	HighlightTitleGrowth      string             `json:"highlight_title_growth"`
+	TeamMembers               []byte             `json:"team_members"`
+	TeamLabel                 string             `json:"team_label"`
+	GalleryUrls               []byte             `json:"gallery_urls"`
+	TeamID                    pgtype.UUID        `json:"team_id"`
+	CompanyName               string             `json:"company_name"`
+	CompanyLogoUrl            string             `json:"company_logo_url"`
+}
+
+func (q *Queries) SearchPublicJobPostings(ctx context.Context, arg *SearchPublicJobPostingsParams) ([]*SearchPublicJobPostingsRow, error) {
+	rows, err := q.db.Query(ctx, searchPublicJobPostings,
+		arg.SearchTerm,
+		arg.JobCategory,
+		arg.EmploymentType,
+		arg.RemotePolicy,
+		arg.SortBySalary,
+		arg.OffsetVal,
+		arg.LimitVal,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*SearchPublicJobPostingsRow
+	for rows.Next() {
+		var i SearchPublicJobPostingsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CompanyID,

@@ -51,7 +51,7 @@ SELECT
     r.created_at,
     r.viewed_at,
     u.username,
-    u.display_name
+    u.name
 FROM integrated_reports r
 JOIN users u ON u.id = r.user_id
 ORDER BY r.created_at DESC;
@@ -66,7 +66,7 @@ SELECT
     req.free_text,
     req.created_at,
     u.username,
-    u.display_name
+    u.name
 FROM integrated_report_requests req
 JOIN users u ON u.id = req.user_id
 LEFT JOIN integrated_reports r ON r.request_id = req.id

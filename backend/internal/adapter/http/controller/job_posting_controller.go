@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -178,6 +179,55 @@ func (c *JobPostingController) Get(ctx echo.Context, jobID string) error {
 
 // ListPublic handles GET /api/jobs (no auth).
 func (c *JobPostingController) ListPublic(ctx echo.Context) error {
+	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
+	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
+
+	if limit > 0 {
+		var params jobposting.SearchPublicParams
+		params.Limit = limit
+		params.Offset = offset
+		if s := ctx.QueryParam("search"); s != "" {
+			params.Search = &s
+		}
+		if v := ctx.QueryParam("category"); v != "" {
+			params.JobCategory = &v
+		}
+		if v := ctx.QueryParam("employmentType"); v != "" {
+			params.EmploymentType = &v
+		}
+		if v := ctx.QueryParam("remotePolicy"); v != "" {
+			params.RemotePolicy = &v
+		}
+		params.SortBySalary = ctx.QueryParam("sort") == "salary"
+
+		if vf := ctx.QueryParam("valueFilters"); vf != "" {
+			params.FilterMode = ctx.QueryParam("filterMode")
+			if params.FilterMode == "" {
+				params.FilterMode = "values"
+			}
+			for _, pair := range strings.Split(vf, ",") {
+				parts := strings.SplitN(pair, ":", 2)
+				if len(parts) != 2 {
+					continue
+				}
+				score, err := strconv.ParseFloat(parts[1], 64)
+				if err != nil || score <= 0 {
+					continue
+				}
+				params.ValueFilters = append(params.ValueFilters, jobposting.ValueFilter{
+					ID:       parts[0],
+					MinScore: score,
+				})
+			}
+		}
+
+		input, p := c.newIO()
+		if err := input.SearchPublic(ctx.Request().Context(), params); err != nil {
+			return handleError(ctx, err)
+		}
+		return ctx.JSON(http.StatusOK, p.PaginatedResponse())
+	}
+
 	input, p := c.newIO()
 	if err := input.ListPublic(ctx.Request().Context()); err != nil {
 		return handleError(ctx, err)

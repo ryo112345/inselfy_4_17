@@ -24,10 +24,6 @@ model UpdateUserProfileRequest {
   @maxLength(100)
   name?: string;
 
-  /** 表記名（日本語などのフル表示名） */
-  @maxLength(100)
-  displayName?: string | null;
-
   /** ヘッドライン（肩書き・一言） */
   @maxLength(255)
   headline?: string | null;
@@ -70,9 +66,6 @@ model UserResponse {
 
   /** 表示名 */
   name: string;
-
-  /** フル表示名 */
-  displayName?: string | null;
 
   /** ヘッドライン */
   headline?: string | null;

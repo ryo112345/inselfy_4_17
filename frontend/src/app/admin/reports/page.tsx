@@ -7,7 +7,7 @@ interface PendingSession {
   session_id: string;
   user_id: string;
   username: string;
-  display_name: string | null;
+  name: string;
   completed_at: string | null;
 }
 
@@ -15,7 +15,7 @@ interface IntegratedRequest {
   request_id: string;
   user_id: string;
   username: string;
-  display_name?: string | null;
+  name: string;
   topic1: number;
   topic2: number;
   topic3: number;
@@ -28,7 +28,7 @@ interface Report {
   session_id: string;
   user_id: string;
   username: string;
-  display_name?: string | null;
+  name: string;
   created_at: string;
   viewed_at: string | null;
 }
@@ -38,7 +38,7 @@ interface IntegratedReport {
   request_id: string;
   user_id: string;
   username: string;
-  display_name?: string | null;
+  name: string;
   created_at: string;
   viewed_at: string | null;
 }
@@ -292,7 +292,7 @@ export default function AdminReportsPage() {
                     <div className="flex items-center justify-between">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-900">
-                          {r.display_name ?? r.username}
+                          {r.name}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">
                           @{r.username}
@@ -332,7 +332,7 @@ export default function AdminReportsPage() {
                   <div className="flex items-center justify-between">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-gray-900">
-                        {r.display_name ?? r.username}
+                        {r.name}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         @{r.username}
@@ -383,7 +383,7 @@ export default function AdminReportsPage() {
                     <div className="flex items-center justify-between p-4">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-900">
-                          {r.display_name ?? r.username}
+                          {r.name}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">
                           @{r.username}
@@ -458,7 +458,7 @@ export default function AdminReportsPage() {
                   <div className="flex items-center justify-between p-4">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-gray-900">
-                        {s.display_name ?? s.username}
+                        {s.name}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         @{s.username}

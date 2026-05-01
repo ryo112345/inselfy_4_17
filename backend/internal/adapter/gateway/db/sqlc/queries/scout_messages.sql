@@ -9,7 +9,7 @@ RETURNING *;
 -- name: GetScoutMessageByID :one
 SELECT sm.*,
     ca.company_name,
-    COALESCE(u.display_name, u.name) AS candidate_name,
+    u.name AS candidate_name,
     jp.title AS job_title
 FROM scout_messages sm
 JOIN company_accounts ca ON ca.id = sm.company_id
@@ -20,7 +20,7 @@ WHERE sm.id = $1;
 -- name: ListScoutMessagesByCompanyID :many
 SELECT sm.*,
     ca.company_name,
-    COALESCE(u.display_name, u.name) AS candidate_name,
+    u.name AS candidate_name,
     jp.title AS job_title
 FROM scout_messages sm
 JOIN company_accounts ca ON ca.id = sm.company_id
@@ -39,7 +39,7 @@ WHERE company_id = @company_id
 -- name: ListScoutMessagesByCandidateID :many
 SELECT sm.*,
     ca.company_name,
-    COALESCE(u.display_name, u.name) AS candidate_name,
+    u.name AS candidate_name,
     jp.title AS job_title
 FROM scout_messages sm
 JOIN company_accounts ca ON ca.id = sm.company_id

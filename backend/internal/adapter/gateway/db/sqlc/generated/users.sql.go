@@ -16,7 +16,6 @@ SELECT count(*)
 FROM users
 WHERE username ILIKE '%' || $1 || '%'
    OR name ILIKE '%' || $1 || '%'
-   OR display_name::text ILIKE '%' || $1 || '%'
    OR email::text ILIKE '%' || $1 || '%'
 `
 
@@ -41,7 +40,7 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, name)
 VALUES ($1, $2)
-RETURNING id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
+RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 `
 
 type CreateUserParams struct {
@@ -58,7 +57,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (*User,
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DisplayName,
 		&i.Headline,
 		&i.Location,
 		&i.About,
@@ -78,7 +76,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (*User,
 const createUserWithOAuth = `-- name: CreateUserWithOAuth :one
 INSERT INTO users (username, name, email, oauth_provider, oauth_provider_id, avatar_url)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
+RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 `
 
 type CreateUserWithOAuthParams struct {
@@ -106,7 +104,6 @@ func (q *Queries) CreateUserWithOAuth(ctx context.Context, arg *CreateUserWithOA
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DisplayName,
 		&i.Headline,
 		&i.Location,
 		&i.About,
@@ -133,7 +130,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
+SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 FROM users
 WHERE id = $1
 `
@@ -147,7 +144,6 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (*User, error
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DisplayName,
 		&i.Headline,
 		&i.Location,
 		&i.About,
@@ -165,7 +161,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (*User, error
 }
 
 const getUserByOAuthProvider = `-- name: GetUserByOAuthProvider :one
-SELECT id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
+SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 FROM users
 WHERE oauth_provider = $1 AND oauth_provider_id = $2
 `
@@ -184,7 +180,6 @@ func (q *Queries) GetUserByOAuthProvider(ctx context.Context, arg *GetUserByOAut
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DisplayName,
 		&i.Headline,
 		&i.Location,
 		&i.About,
@@ -202,7 +197,7 @@ func (q *Queries) GetUserByOAuthProvider(ctx context.Context, arg *GetUserByOAut
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
+SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 FROM users
 WHERE username = $1
 `
@@ -216,7 +211,6 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (*User
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DisplayName,
 		&i.Headline,
 		&i.Location,
 		&i.About,
@@ -234,7 +228,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (*User
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, username, name, display_name, email, avatar_url, created_at
+SELECT id, username, name, email, avatar_url, created_at
 FROM users
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
@@ -246,13 +240,12 @@ type ListUsersParams struct {
 }
 
 type ListUsersRow struct {
-	ID          pgtype.UUID        `json:"id"`
-	Username    string             `json:"username"`
-	Name        string             `json:"name"`
-	DisplayName pgtype.Text        `json:"display_name"`
-	Email       pgtype.Text        `json:"email"`
-	AvatarUrl   pgtype.Text        `json:"avatar_url"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ID        pgtype.UUID        `json:"id"`
+	Username  string             `json:"username"`
+	Name      string             `json:"name"`
+	Email     pgtype.Text        `json:"email"`
+	AvatarUrl pgtype.Text        `json:"avatar_url"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) ListUsers(ctx context.Context, arg *ListUsersParams) ([]*ListUsersRow, error) {
@@ -268,7 +261,6 @@ func (q *Queries) ListUsers(ctx context.Context, arg *ListUsersParams) ([]*ListU
 			&i.ID,
 			&i.Username,
 			&i.Name,
-			&i.DisplayName,
 			&i.Email,
 			&i.AvatarUrl,
 			&i.CreatedAt,
@@ -284,11 +276,10 @@ func (q *Queries) ListUsers(ctx context.Context, arg *ListUsersParams) ([]*ListU
 }
 
 const searchUsers = `-- name: SearchUsers :many
-SELECT id, username, name, display_name, email, avatar_url, created_at
+SELECT id, username, name, email, avatar_url, created_at
 FROM users
 WHERE username ILIKE '%' || $1 || '%'
    OR name ILIKE '%' || $1 || '%'
-   OR display_name::text ILIKE '%' || $1 || '%'
    OR email::text ILIKE '%' || $1 || '%'
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -301,13 +292,12 @@ type SearchUsersParams struct {
 }
 
 type SearchUsersRow struct {
-	ID          pgtype.UUID        `json:"id"`
-	Username    string             `json:"username"`
-	Name        string             `json:"name"`
-	DisplayName pgtype.Text        `json:"display_name"`
-	Email       pgtype.Text        `json:"email"`
-	AvatarUrl   pgtype.Text        `json:"avatar_url"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ID        pgtype.UUID        `json:"id"`
+	Username  string             `json:"username"`
+	Name      string             `json:"name"`
+	Email     pgtype.Text        `json:"email"`
+	AvatarUrl pgtype.Text        `json:"avatar_url"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) SearchUsers(ctx context.Context, arg *SearchUsersParams) ([]*SearchUsersRow, error) {
@@ -323,7 +313,6 @@ func (q *Queries) SearchUsers(ctx context.Context, arg *SearchUsersParams) ([]*S
 			&i.ID,
 			&i.Username,
 			&i.Name,
-			&i.DisplayName,
 			&i.Email,
 			&i.AvatarUrl,
 			&i.CreatedAt,
@@ -343,25 +332,22 @@ UPDATE users
 SET
     username = COALESCE($1, username),
     name = COALESCE($2, name),
-    display_name = CASE WHEN $3::bool THEN $4 ELSE display_name END,
-    headline = CASE WHEN $5::bool THEN $6 ELSE headline END,
-    location = CASE WHEN $7::bool THEN $8 ELSE location END,
-    about = CASE WHEN $9::bool THEN $10 ELSE about END,
-    industry = CASE WHEN $11::bool THEN $12 ELSE industry END,
-    job_type = CASE WHEN $13::bool THEN $14 ELSE job_type END,
-    job_seeking_status = CASE WHEN $15::bool THEN $16 ELSE job_seeking_status END,
-    profile_color = CASE WHEN $17::bool THEN $18 ELSE profile_color END,
-    is_public = COALESCE($19, is_public),
+    headline = CASE WHEN $3::bool THEN $4 ELSE headline END,
+    location = CASE WHEN $5::bool THEN $6 ELSE location END,
+    about = CASE WHEN $7::bool THEN $8 ELSE about END,
+    industry = CASE WHEN $9::bool THEN $10 ELSE industry END,
+    job_type = CASE WHEN $11::bool THEN $12 ELSE job_type END,
+    job_seeking_status = CASE WHEN $13::bool THEN $14 ELSE job_seeking_status END,
+    profile_color = CASE WHEN $15::bool THEN $16 ELSE profile_color END,
+    is_public = COALESCE($17, is_public),
     updated_at = NOW()
-WHERE id = $20
-RETURNING id, username, name, created_at, updated_at, display_name, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
+WHERE id = $18
+RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url
 `
 
 type UpdateUserProfileParams struct {
 	Username            pgtype.Text `json:"username"`
 	Name                pgtype.Text `json:"name"`
-	DisplayNameSet      bool        `json:"display_name_set"`
-	DisplayName         pgtype.Text `json:"display_name"`
 	HeadlineSet         bool        `json:"headline_set"`
 	Headline            pgtype.Text `json:"headline"`
 	LocationSet         bool        `json:"location_set"`
@@ -384,8 +370,6 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg *UpdateUserProfileP
 	row := q.db.QueryRow(ctx, updateUserProfile,
 		arg.Username,
 		arg.Name,
-		arg.DisplayNameSet,
-		arg.DisplayName,
 		arg.HeadlineSet,
 		arg.Headline,
 		arg.LocationSet,
@@ -410,7 +394,6 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg *UpdateUserProfileP
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DisplayName,
 		&i.Headline,
 		&i.Location,
 		&i.About,

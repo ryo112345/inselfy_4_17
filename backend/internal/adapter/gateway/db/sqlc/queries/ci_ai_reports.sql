@@ -24,7 +24,7 @@ SELECT
     r.created_at,
     r.viewed_at,
     u.username,
-    u.display_name
+    u.name
 FROM ci_ai_reports r
 JOIN users u ON u.id = r.user_id
 ORDER BY r.created_at DESC;
@@ -41,7 +41,7 @@ SELECT
     s.id AS session_id,
     s.user_id,
     u.username,
-    u.display_name,
+    u.name,
     s.completed_at
 FROM career_interest_sessions s
 JOIN users u ON u.id = s.user_id

@@ -310,7 +310,7 @@ func (q *Queries) GetLatestScoutByCompanyAndCandidate(ctx context.Context, arg *
 const getScoutMessageByID = `-- name: GetScoutMessageByID :one
 SELECT sm.id, sm.company_id, sm.candidate_id, sm.job_posting_id, sm.template_id, sm.subject, sm.body, sm.status, sm.sent_at, sm.opened_at, sm.replied_at, sm.expires_at, sm.resend_count, sm.created_at, sm.updated_at,
     ca.company_name,
-    COALESCE(u.display_name, u.name) AS candidate_name,
+    u.name AS candidate_name,
     jp.title AS job_title
 FROM scout_messages sm
 JOIN company_accounts ca ON ca.id = sm.company_id
@@ -369,7 +369,7 @@ func (q *Queries) GetScoutMessageByID(ctx context.Context, id pgtype.UUID) (*Get
 const listScoutMessagesByCandidateID = `-- name: ListScoutMessagesByCandidateID :many
 SELECT sm.id, sm.company_id, sm.candidate_id, sm.job_posting_id, sm.template_id, sm.subject, sm.body, sm.status, sm.sent_at, sm.opened_at, sm.replied_at, sm.expires_at, sm.resend_count, sm.created_at, sm.updated_at,
     ca.company_name,
-    COALESCE(u.display_name, u.name) AS candidate_name,
+    u.name AS candidate_name,
     jp.title AS job_title
 FROM scout_messages sm
 JOIN company_accounts ca ON ca.id = sm.company_id
@@ -450,7 +450,7 @@ func (q *Queries) ListScoutMessagesByCandidateID(ctx context.Context, arg *ListS
 const listScoutMessagesByCompanyID = `-- name: ListScoutMessagesByCompanyID :many
 SELECT sm.id, sm.company_id, sm.candidate_id, sm.job_posting_id, sm.template_id, sm.subject, sm.body, sm.status, sm.sent_at, sm.opened_at, sm.replied_at, sm.expires_at, sm.resend_count, sm.created_at, sm.updated_at,
     ca.company_name,
-    COALESCE(u.display_name, u.name) AS candidate_name,
+    u.name AS candidate_name,
     jp.title AS job_title
 FROM scout_messages sm
 JOIN company_accounts ca ON ca.id = sm.company_id

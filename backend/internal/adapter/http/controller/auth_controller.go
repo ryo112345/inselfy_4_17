@@ -129,9 +129,7 @@ func setUserInfoCookies(ctx echo.Context, user *presenter.AuthUserResponse, secu
 	}
 	setCookie("userId", user.ID)
 	setCookie("username", user.Username)
-	if user.DisplayName != nil {
-		setCookie("displayName", *user.DisplayName)
-	}
+	setCookie("displayName", user.Name)
 }
 
 func clearAuthCookies(ctx echo.Context) {

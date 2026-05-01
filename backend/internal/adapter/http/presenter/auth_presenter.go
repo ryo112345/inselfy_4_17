@@ -24,7 +24,6 @@ type AuthUserResponse struct {
 	ID          string    `json:"id"`
 	Username    string    `json:"username"`
 	Name        string    `json:"name"`
-	DisplayName *string   `json:"displayName,omitempty"`
 	AvatarURL   *string   `json:"avatarUrl,omitempty"`
 	Email       *string   `json:"email,omitempty"`
 	NeedsSetup  bool      `json:"needsSetup"`
@@ -66,7 +65,6 @@ func toAuthUserResponse(u *user.User) *AuthUserResponse {
 		ID:          u.ID,
 		Username:    username,
 		Name:        u.Name,
-		DisplayName: u.DisplayName,
 		AvatarURL:   u.AvatarURL,
 		Email:       u.Email,
 		NeedsSetup:  needsSetup,

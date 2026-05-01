@@ -56,6 +56,23 @@ type JobPosting struct {
 	UpdatedAt                 time.Time
 }
 
+type ValueFilter struct {
+	ID       string
+	MinScore float64
+}
+
+type SearchPublicParams struct {
+	Search         *string
+	JobCategory    *string
+	EmploymentType *string
+	RemotePolicy   *string
+	SortBySalary   bool
+	Limit          int
+	Offset         int
+	ValueFilters   []ValueFilter
+	FilterMode     string // "values" or "needs"
+}
+
 type CreateJobPostingInput struct {
 	CompanyID                 string
 	Title                     string

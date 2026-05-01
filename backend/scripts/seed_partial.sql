@@ -15,13 +15,13 @@ ON CONFLICT (email) DO NOTHING;
 -- ============================================================
 -- 2. 候補者ユーザー（3名）
 -- ============================================================
-INSERT INTO users (id, line_id, auth_type, username, display_name, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
+INSERT INTO users (id, line_id, auth_type, username, email, name, is_public, profile_color, headline, location, about, industry, job_type, job_seeking_status)
 VALUES
-  ('10000000-0000-0000-0000-000000000001', 'line_user_001', 'line', 'taro_yamada', '山田太郎', 'taro@example.com', '山田太郎', true, '#3D8B6E',
+  ('10000000-0000-0000-0000-000000000001', 'line_user_001', 'line', 'taro_yamada', 'taro@example.com', '山田太郎', true, '#3D8B6E',
    'バックエンドエンジニア', '東京都', 'GoとTypeScriptでWebアプリケーションを開発しています。マイクロサービスアーキテクチャとクラウドインフラに興味があります。', 'IT・通信', 'フルタイム', 'active'),
-  ('10000000-0000-0000-0000-000000000002', 'line_user_002', 'line', 'hanako_sato', '佐藤花子', 'hanako@example.com', '佐藤花子', true, '#6B8BD6',
+  ('10000000-0000-0000-0000-000000000002', 'line_user_002', 'line', 'hanako_sato', 'hanako@example.com', '佐藤花子', true, '#6B8BD6',
    'UIデザイナー / フロントエンドエンジニア', '大阪府', 'デザインとフロントエンド開発の両方を担当しています。ユーザー中心設計を大切にしています。', 'IT・通信', 'フルタイム', 'open'),
-  ('10000000-0000-0000-0000-000000000003', 'line_user_003', 'line', 'jiro_tanaka', '田中次郎', 'jiro@example.com', '田中次郎', true, '#D68B6B',
+  ('10000000-0000-0000-0000-000000000003', 'line_user_003', 'line', 'jiro_tanaka', 'jiro@example.com', '田中次郎', true, '#D68B6B',
    'プロダクトマネージャー', '福岡県', 'BtoB SaaSのプロダクトマネジメントに5年従事。データドリブンな意思決定を重視しています。', 'IT・通信', 'フルタイム', 'not_seeking')
 ON CONFLICT (line_id) DO NOTHING;
 

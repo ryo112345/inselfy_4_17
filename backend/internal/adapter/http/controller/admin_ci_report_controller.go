@@ -33,7 +33,7 @@ func (c *AdminCIReportController) ListPending(ctx echo.Context) error {
 			SessionID:   pgUUIDToString(r.SessionID),
 			UserID:      pgUUIDToString(r.UserID),
 			Username:    r.Username,
-			DisplayName: textToPtr(r.DisplayName),
+			Name:        r.Name,
 		}
 		if r.CompletedAt.Valid {
 			t := r.CompletedAt.Time.Format("2006-01-02T15:04:05Z")
@@ -135,9 +135,7 @@ func (c *AdminCIReportController) ListReports(ctx echo.Context) error {
 			"created_at": r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 			"viewed_at":  nil,
 		}
-		if r.DisplayName.Valid {
-			item["display_name"] = r.DisplayName.String
-		}
+		item["name"] = r.Name
 		if r.ViewedAt.Valid {
 			item["viewed_at"] = r.ViewedAt.Time.Format("2006-01-02T15:04:05Z")
 		}

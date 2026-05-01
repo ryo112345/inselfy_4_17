@@ -125,6 +125,20 @@ func (i *JobPostingInteractor) ListPublic(ctx context.Context) error {
 	return i.output.PresentJobPostings(ctx, js)
 }
 
+func (i *JobPostingInteractor) SearchPublic(ctx context.Context, params jobposting.SearchPublicParams) error {
+	if params.Limit <= 0 || params.Limit > 50 {
+		params.Limit = 20
+	}
+	if params.Offset < 0 {
+		params.Offset = 0
+	}
+	js, total, err := i.repo.SearchPublic(ctx, params)
+	if err != nil {
+		return err
+	}
+	return i.output.PresentJobPostingsPaginated(ctx, js, total)
+}
+
 func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID string, input jobposting.UpdateJobPostingInput) error {
 	existing, err := i.repo.GetByID(ctx, jobID)
 	if err != nil {

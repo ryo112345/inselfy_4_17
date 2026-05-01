@@ -94,9 +94,7 @@ func (ctrl *AdminIntegratedReportController) ListPending(ctx echo.Context) error
 			"free_text":  r.FreeText,
 			"created_at": r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 		}
-		if r.DisplayName.Valid {
-			item["display_name"] = r.DisplayName.String
-		}
+		item["name"] = r.Name
 		items = append(items, item)
 	}
 
@@ -264,9 +262,7 @@ func (ctrl *AdminIntegratedReportController) ListReports(ctx echo.Context) error
 			"created_at": r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 			"viewed_at":  nil,
 		}
-		if r.DisplayName.Valid {
-			item["display_name"] = r.DisplayName.String
-		}
+		item["name"] = r.Name
 		if r.ViewedAt.Valid {
 			item["viewed_at"] = r.ViewedAt.Time.Format("2006-01-02T15:04:05Z")
 		}

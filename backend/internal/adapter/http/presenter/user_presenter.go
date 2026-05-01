@@ -27,7 +27,6 @@ func (p *UserPresenter) PresentUser(_ context.Context, u *user.User) error {
 		Id:               u.ID,
 		Username:         u.Username.String(),
 		Name:             u.Name,
-		DisplayName:      u.DisplayName,
 		Headline:         u.Headline,
 		Location:         u.Location,
 		About:            u.About,

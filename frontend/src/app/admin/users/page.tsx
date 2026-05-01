@@ -7,7 +7,6 @@ interface AdminUser {
   id: string;
   username: string;
   name: string;
-  display_name: string | null;
   email: string | null;
   avatar_url: string | null;
   created_at: string;
@@ -156,12 +155,12 @@ export default function AdminUsersPage() {
                             />
                           ) : (
                             <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm font-medium">
-                              {(user.display_name || user.name).charAt(0)}
+                              {user.name.charAt(0)}
                             </div>
                           )}
                           <div>
                             <div className="text-sm font-medium">
-                              {user.display_name || user.name}
+                              {user.name}
                             </div>
                             <div className="text-xs text-[var(--muted)]">
                               @{user.username}

@@ -107,13 +107,8 @@ func (i *ScoutInteractor) Send(ctx context.Context, input scout.SendScoutInput) 
 	if err != nil {
 		return err
 	}
-	candidateName := candidate.Name
-	if candidate.DisplayName != nil {
-		candidateName = *candidate.DisplayName
-	}
-
 	vars := map[string]string{
-		"candidate_name": candidateName,
+		"candidate_name": candidate.Name,
 	}
 	input.Body = scout.RenderTemplate(input.Body, vars)
 

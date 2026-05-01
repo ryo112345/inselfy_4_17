@@ -65,7 +65,6 @@ func isBadRequest(err error) bool {
 	case errors.Is(err, user.ErrInvalidUsername),
 		errors.Is(err, user.ErrNameRequired),
 		errors.Is(err, user.ErrNameTooLong),
-		errors.Is(err, user.ErrDisplayNameTooLong),
 		errors.Is(err, user.ErrHeadlineTooLong),
 		errors.Is(err, user.ErrLocationTooLong),
 		errors.Is(err, user.ErrAboutTooLong),

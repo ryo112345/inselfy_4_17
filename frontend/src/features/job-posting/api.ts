@@ -117,6 +117,42 @@ export async function fetchPublicJobPostings(): Promise<JobPostingWithCompany[]>
   return res.json();
 }
 
+export type JobSearchParams = {
+  search?: string;
+  category?: string;
+  employmentType?: string;
+  remotePolicy?: string;
+  sort?: "newest" | "salary";
+  limit?: number;
+  offset?: number;
+  valueFilters?: string;
+  filterMode?: "values" | "needs";
+};
+
+export type PaginatedJobPostingsResponse = {
+  items: JobPostingWithCompany[];
+  total: number;
+};
+
+export async function searchPublicJobPostings(
+  params: JobSearchParams = {},
+): Promise<PaginatedJobPostingsResponse> {
+  const query = new URLSearchParams();
+  if (params.search) query.set("search", params.search);
+  if (params.category) query.set("category", params.category);
+  if (params.employmentType) query.set("employmentType", params.employmentType);
+  if (params.remotePolicy) query.set("remotePolicy", params.remotePolicy);
+  if (params.sort) query.set("sort", params.sort);
+  if (params.valueFilters) query.set("valueFilters", params.valueFilters);
+  if (params.filterMode) query.set("filterMode", params.filterMode);
+  query.set("limit", String(params.limit ?? 20));
+  query.set("offset", String(params.offset ?? 0));
+
+  const res = await fetch(`${BASE_URL}/api/jobs?${query.toString()}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch public job postings");
+  return res.json();
+}
+
 export async function fetchPublicJobPosting(
   id: string,
 ): Promise<JobPosting> {

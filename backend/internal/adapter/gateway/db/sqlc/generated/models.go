@@ -572,7 +572,6 @@ type User struct {
 	Name             string             `json:"name"`
 	CreatedAt        pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	DisplayName      pgtype.Text        `json:"display_name"`
 	Headline         pgtype.Text        `json:"headline"`
 	Location         pgtype.Text        `json:"location"`
 	About            pgtype.Text        `json:"about"`
