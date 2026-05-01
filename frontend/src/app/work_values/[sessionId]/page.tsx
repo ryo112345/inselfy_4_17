@@ -40,7 +40,7 @@ export default async function WorkValuesResultPage({
         diagnostics={data.diagnostics}
         defaultOpen={sidebarOpen}
       />
-      <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 ml-[50px]">
+      <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 md:ml-[50px]">
         <PanelNavigator
           username={data.username}
           wvSessionId={data.wvSessionId}

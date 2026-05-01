@@ -363,7 +363,7 @@ function TypesSection({ types, colors, badge }: { types: ResultDTO["type_scores"
                   </div>
                 </div>
 
-                <p className="text-[14px] font-medium leading-relaxed max-w-[280px] text-left" style={{ color: badge.descColor }}>
+                <p className="hidden md:block text-[14px] font-medium leading-relaxed max-w-[280px] text-left" style={{ color: badge.descColor }}>
                   {TYPE_PERSONALITIES[tid]}
                 </p>
 
