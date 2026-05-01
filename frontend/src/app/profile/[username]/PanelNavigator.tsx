@@ -75,12 +75,12 @@ export function PanelNavigator({ children, userId, username, displayName = usern
   }, [urlToIndex]);
 
   const goTo = (index: number) => {
-    if (index < 0 || index >= panelCount) return;
+    if (index < minIndex || index >= panelCount) return;
     setActiveIndex(index);
     window.history.pushState(
       { ...window.history.state, panelIndex: index },
       "",
-      urls[index],
+      urls[Math.max(0, index)],
     );
   };
 
@@ -100,12 +100,15 @@ export function PanelNavigator({ children, userId, username, displayName = usern
   const mobileGap = 0;
   const currentGap = isMobile ? mobileGap : gapPx;
 
-  const focusedTransform = isMobile
-    ? `-${activeIndex * panelPx}px`
-    : `calc(50% - ${desktopPanelPx / 2}px - ${activeIndex * (desktopPanelPx + gapPx)}px)`;
-  const expandedTransform = `-${activeIndex * (panelPx + currentGap)}px`;
-
   const showSimilar = !!wvSessionId && !!userId;
+  const canGoSimilar = isMobile && showSimilar;
+  const displayOffset = canGoSimilar ? 1 : 0;
+  const minIndex = canGoSimilar ? -1 : 0;
+
+  const focusedTransform = isMobile
+    ? `-${(activeIndex + displayOffset) * panelPx}px`
+    : `calc(50% - ${desktopPanelPx / 2}px - ${activeIndex * (desktopPanelPx + gapPx)}px)`;
+  const expandedTransform = `-${(activeIndex + displayOffset) * (panelPx + currentGap)}px`;
 
   return (
     <div className="relative px-0 md:px-4 overflow-hidden h-[calc(100vh-1rem)]">
@@ -130,6 +133,12 @@ export function PanelNavigator({ children, userId, username, displayName = usern
           transform: `translateX(${expanded ? expandedTransform : focusedTransform})`,
         }}
       >
+        {canGoSimilar && (
+          <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen px-4 pt-4">
+            <SimilarUsersCard userId={userId!} visible={true} className="w-full" />
+          </div>
+        )}
+
         <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-auto" style={isMobile ? undefined : { width: `${desktopPanelPx}px` }}>{children}</div>
 
         <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-auto" style={isMobile ? undefined : { width: `${desktopPanelPx}px` }}>
@@ -161,7 +170,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
         <button
           data-testid="panel-prev"
           onClick={() => goTo(activeIndex - 1)}
-          disabled={activeIndex === 0}
+          disabled={activeIndex === minIndex}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-md transition hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
         >
           <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
