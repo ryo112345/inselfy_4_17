@@ -93,7 +93,7 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
 
   return (
     <section
-      className="mb-6 text-center px-6 pt-10 pb-6 relative overflow-hidden -mx-6 -mt-5"
+      className="mb-6 text-center px-6 pt-10 pb-6 relative overflow-hidden -mx-6 -mt-5 rounded-t-2xl"
       style={{ backgroundColor: "#F8F3FD" }}
     >
       <style>{`

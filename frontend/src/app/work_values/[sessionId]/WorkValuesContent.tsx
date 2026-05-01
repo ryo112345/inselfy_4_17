@@ -92,7 +92,7 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
 
   return (
     <section
-      className="mb-6 text-center px-6 pt-10 pb-6 relative overflow-hidden -mx-6 -mt-5"
+      className="mb-6 text-center px-6 pt-10 pb-6 relative overflow-hidden -mx-6 -mt-5 rounded-t-2xl"
       style={{ backgroundColor: "#F5FBF8" }}
     >
       <style>{`

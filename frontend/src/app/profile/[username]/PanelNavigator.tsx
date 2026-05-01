@@ -115,9 +115,9 @@ export function PanelNavigator({ children, userId, username, displayName = usern
           transform: `translateX(${expanded ? expandedTransform : focusedTransform})`,
         }}
       >
-        <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>{children}</div>
+        <div className="shrink-0 overflow-y-auto scrollbar-hide" style={{ width: `${panelPx}px` }}>{children}</div>
 
-        <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
+        <div className="shrink-0 overflow-y-auto scrollbar-hide" style={{ width: `${panelPx}px` }}>
           {showIntReport ? (
             <IntegratedReportContent requestId={intReportRequestId!} isOwner={isOwner} />
           ) : (
@@ -125,7 +125,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
           )}
         </div>
 
-        <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
+        <div className="shrink-0 overflow-y-auto scrollbar-hide" style={{ width: `${panelPx}px` }}>
           {showWvResult ? (
             <WorkValuesResultContent sessionId={wvSessionId!} initialData={wvResult} isOwner={isOwner} />
           ) : (
@@ -133,7 +133,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
           )}
         </div>
 
-        <div className="shrink-0 overflow-y-auto" style={{ width: `${panelPx}px` }}>
+        <div className="shrink-0 overflow-y-auto scrollbar-hide" style={{ width: `${panelPx}px` }}>
           {showCiResult ? (
             <CareerInterestResultContent sessionId={ciSessionId!} initialData={ciResult} isOwner={isOwner} />
           ) : (
