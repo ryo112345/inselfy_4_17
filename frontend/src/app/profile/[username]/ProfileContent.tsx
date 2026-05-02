@@ -24,12 +24,14 @@ type Props = {
   posts?: PostItem[];
   isOwner?: boolean;
   intReportRequestId?: string | null;
+  followersCount?: number;
+  followingCount?: number;
 };
 
-export function ProfileContent({ user, username, experiences, educations, skills, posts, isOwner = true, intReportRequestId }: Props) {
+export function ProfileContent({ user, username, experiences, educations, skills, posts, isOwner = true, intReportRequestId, followersCount = 0, followingCount = 0 }: Props) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 md:px-0">
-      <ProfileHeaderCard user={user} experienceCount={experiences.length} isOwner={isOwner} />
+      <ProfileHeaderCard user={user} experienceCount={experiences.length} followersCount={followersCount} followingCount={followingCount} isOwner={isOwner} />
       {isOwner && (
         <AiReportCard
           hasExperience={experiences.length > 0}

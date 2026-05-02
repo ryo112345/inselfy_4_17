@@ -7,6 +7,7 @@ import type { ModelsUserResponse } from "@/external/client/api/generated";
 
 import { updateProfile, type ApiError } from "./api";
 import { CameraIcon, FaceIcon, MapPinIcon, PencilIcon, PlusIcon } from "./Icons";
+import { FollowButton } from "./FollowButton";
 import { Field, PrimaryButton, SecondaryButton } from "./Modal";
 
 const PRESET_COLORS = [
@@ -25,10 +26,12 @@ const JOB_SEEKING_LABELS: Record<string, { label: string; color: string }> = {
 type Props = {
   user: ModelsUserResponse;
   experienceCount: number;
+  followersCount: number;
+  followingCount: number;
   isOwner?: boolean;
 };
 
-export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Props) {
+export function ProfileHeaderCard({ user, experienceCount, followersCount, followingCount, isOwner = true }: Props) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user.name);
@@ -437,14 +440,17 @@ export function ProfileHeaderCard({ user, experienceCount, isOwner = true }: Pro
             <div className="flex shrink-0 items-center gap-5 text-base text-gray-500 md:pb-2">
               <span className="inline-flex items-baseline gap-1.5">
                 <span className="text-lg font-bold text-gray-900">
-                  {experienceCount}
+                  {followingCount}
                 </span>
                 フォロー
               </span>
               <span className="inline-flex items-baseline gap-1.5">
-                <span className="text-lg font-bold text-gray-900">0</span>
+                <span className="text-lg font-bold text-gray-900">{followersCount}</span>
                 フォロワー
               </span>
+              {!isOwner && (
+                <FollowButton username={user.username} profileColor={headerColor} />
+              )}
             </div>
           </div>
         )}

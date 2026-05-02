@@ -380,6 +380,12 @@ type Experience struct {
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
+type Follow struct {
+	FollowerID  pgtype.UUID        `json:"follower_id"`
+	FollowingID pgtype.UUID        `json:"following_id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
 type IntegratedReport struct {
 	ID        pgtype.UUID        `json:"id"`
 	RequestID pgtype.UUID        `json:"request_id"`
@@ -584,6 +590,8 @@ type User struct {
 	OauthProvider    pgtype.Text        `json:"oauth_provider"`
 	OauthProviderID  pgtype.Text        `json:"oauth_provider_id"`
 	AvatarUrl        pgtype.Text        `json:"avatar_url"`
+	FollowersCount   int32              `json:"followers_count"`
+	FollowingCount   int32              `json:"following_count"`
 }
 
 type UserScoutSetting struct {
