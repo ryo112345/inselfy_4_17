@@ -77,6 +77,19 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
     document.cookie = `sidebar-open=${open}; path=/; max-age=31536000; SameSite=Lax`;
   }, [open]);
 
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
   const { hasUnread: hasUnreadScouts } = useUnreadScout();
 
   const profileHref = `/profile/${user?.username ?? username}`;
@@ -96,13 +109,8 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
         [data-sidebar] .sb-divider { border-color: var(--sidebar-border); }
         [data-sidebar] .sb-item:hover { background-color: var(--sidebar-hover); }
       `}</style>
-      {open && (
-        <div
-          className="fixed inset-0 z-40 hidden md:block"
-          onClick={() => setOpen(false)}
-        />
-      )}
       <div
+        ref={sidebarRef}
         data-sidebar
         className={`fixed top-0 left-0 z-50 h-screen overflow-hidden hidden md:block ${initialRender.current ? "" : "transition-[width] duration-200 ease-in-out"} ${open ? "w-72" : "w-[50px]"}`}
       >
