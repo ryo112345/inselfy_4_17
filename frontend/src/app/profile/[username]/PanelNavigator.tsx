@@ -193,7 +193,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
 
         <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen md:w-[672px] pb-24 md:pb-0">
           {showIntReport ? (
-            <IntegratedReportContent requestId={intReportRequestId!} isOwner={isOwner} />
+            <IntegratedReportContent requestId={intReportRequestId!} isOwner={isOwner} wvResult={wvResult ?? null} ciResult={ciResult ?? null} />
           ) : (
             <IntegratedReportPlaceholder isOwner={isOwner} displayName={displayName} />
           )}
