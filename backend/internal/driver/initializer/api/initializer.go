@@ -408,6 +408,12 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return teamCtrl.UnsetAceMember(c, c.Param("teamId"))
 	})
 
+	// --- Talent Search ---
+	talentCtrl := httpcontroller.NewTalentSearchController(pool)
+	talentGroup := e.Group("/api/company/talents", companyJwtMW)
+	talentGroup.GET("/search", talentCtrl.Search)
+	talentGroup.GET("/search/diagnostic", talentCtrl.DiagnosticSearch)
+
 	// --- Team Diagnose (public) ---
 	diagCtrl := httpcontroller.NewTeamDiagnoseController(pool)
 	e.GET("/api/team-diagnose/:token", func(c echo.Context) error {
@@ -639,7 +645,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	relay := ws.NewRelay(wsHub, pgBroker, convRepoForRelay)
 	go relay.Start(ctx)
 
-	wsCtrl := httpcontroller.NewWSController(wsHub, jwtService)
+	wsTickets := ws.NewTicketStore()
+	wsCtrl := httpcontroller.NewWSController(wsHub, jwtService, wsTickets)
+	e.GET("/api/ws/ticket", wsCtrl.IssueTicket)
 	e.GET("/api/ws", wsCtrl.HandleWS)
 
 	sched := scheduler.New(scoutMsgRepoFactory(), scoutCreditRepoFactory())
