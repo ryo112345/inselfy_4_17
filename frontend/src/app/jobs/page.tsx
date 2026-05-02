@@ -162,6 +162,27 @@ export default function JobsPage() {
   const [valueThresholds, setValueThresholds] = useState<Record<string, number>>({});
   const [needThresholds, setNeedThresholds] = useState<Record<string, number>>({});
 
+  const [filterBarVisible, setFilterBarVisible] = useState(true);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const lastScrollLeftRef = useRef(0);
+  const lastScrollRightRef = useRef(0);
+
+  const makeScrollHandler = useCallback(
+    (lastRef: React.MutableRefObject<number>) =>
+      (e: React.UIEvent<HTMLDivElement>) => {
+        const scrollTop = e.currentTarget.scrollTop;
+        const delta = scrollTop - lastRef.current;
+        if (delta > 8) setFilterBarVisible(false);
+        else if (delta < -8) setFilterBarVisible(true);
+        lastRef.current = scrollTop;
+      },
+    [],
+  );
+
+  const handleLeftScroll = useMemo(() => makeScrollHandler(lastScrollLeftRef), [makeScrollHandler]);
+  const handleRightScroll = useMemo(() => makeScrollHandler(lastScrollRightRef), [makeScrollHandler]);
+
   useEffect(() => {
     if (user) {
       Promise.all([
@@ -288,23 +309,42 @@ export default function JobsPage() {
   );
 
   return (
-    <div className="h-screen md:pl-[50px] flex flex-col bg-[var(--background)]">
+    <div className="h-screen md:pl-[50px] flex flex-col bg-[var(--background)] overflow-hidden">
       {/* Filter Bar */}
-      <div className="shrink-0 border-b border-gray-200 bg-white px-6 py-3">
-        <div className="flex items-center gap-4 flex-wrap">
+      <div
+        ref={filterRef}
+        className="shrink-0 border-b border-gray-200 bg-white px-4 py-2.5 md:px-6 md:py-3 transition-[margin-top] duration-300 ease-in-out"
+        style={{ marginTop: filterBarVisible ? 0 : -(filterRef.current?.offsetHeight ?? 200) }}
+      >
+        <div className="flex items-center gap-2 md:gap-4 flex-wrap">
           {/* Search */}
-          <div className="relative flex-1 min-w-[240px] max-w-[480px]">
+          <div className="relative flex-1 min-w-0 md:min-w-[240px] md:max-w-[480px]">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="職種、キーワード、会社名で検索"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-10 pr-4 text-sm outline-none transition-colors focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
             />
           </div>
 
-          {/* Filters */}
+          {/* Spacer + count + sort (desktop) */}
+          <div className="hidden md:flex items-center gap-3 ml-auto">
+            <span className="text-sm text-gray-500">{total}件</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+            >
+              <option value="newest">新着順</option>
+              <option value="salary">年収順</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Filter row */}
+        <div className="flex items-center gap-2 md:gap-3 mt-2 overflow-x-auto">
           <FilterSelect label="職種" value={category} onChange={setCategory} options={JOB_CATEGORIES} />
           <FilterSelect label="雇用形態" value={employment} onChange={setEmployment} options={EMPLOYMENT_TYPES} />
           <FilterSelect label="リモート" value={remote} onChange={setRemote} options={REMOTE_OPTIONS} />
@@ -314,7 +354,7 @@ export default function JobsPage() {
             <button
               type="button"
               onClick={() => setValuesFilterOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 shrink-0 rounded-lg border px-2.5 py-1.5 text-sm font-medium transition-colors cursor-pointer"
               style={
                 activeFilterCount > 0
                   ? { borderColor: ACCENT, color: ACCENT, backgroundColor: `${ACCENT}08` }
@@ -334,13 +374,12 @@ export default function JobsPage() {
             </button>
           )}
 
-          {/* Spacer + count + sort */}
-          <div className="flex items-center gap-3 ml-auto">
-            <span className="text-sm text-gray-500">{total}件</span>
+          <div className="flex items-center gap-2 ml-auto shrink-0">
+            <span className="text-xs text-gray-500">{total}件</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+              className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 outline-none cursor-pointer"
             >
               <option value="newest">新着順</option>
               <option value="salary">年収順</option>
@@ -352,7 +391,7 @@ export default function JobsPage() {
       {/* Main Content */}
       <div className="flex flex-1 min-h-0">
         {/* Left Panel - Job List */}
-        <div className="w-full lg:w-[440px] lg:shrink-0 border-r border-gray-200 overflow-y-auto overscroll-contain bg-[var(--background)]">
+        <div ref={listRef} onScroll={handleLeftScroll} className="w-full lg:w-[440px] lg:shrink-0 border-r border-gray-200 overflow-y-auto overscroll-contain bg-[var(--background)]">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-[var(--accent)]" />
@@ -397,7 +436,7 @@ export default function JobsPage() {
         {/* Right Panel - Detail (hidden on mobile) */}
         <div className="hidden lg:flex flex-1 min-h-0 bg-gray-100">
           {selectedJob ? (
-            <JobDetail job={selectedJob} matchScores={selectedJob ? matchScoresMap.get(selectedJob.id) ?? null : null} />
+            <JobDetail job={selectedJob} matchScores={selectedJob ? matchScoresMap.get(selectedJob.id) ?? null : null} onScroll={handleRightScroll} />
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
               <EmptyDetailIcon />
@@ -449,12 +488,12 @@ function FilterSelect({
   options: string[];
 }) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1 shrink-0">
       <span className="text-xs font-medium text-gray-500">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-700 outline-none cursor-pointer"
+        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 outline-none cursor-pointer"
       >
         {options.map((opt) => (
           <option key={opt} value={opt}>{opt}</option>
@@ -724,7 +763,7 @@ function DetailConditionGroup({
   );
 }
 
-function JobDetail({ job, matchScores }: { job: JobPostingWithCompany; matchScores: MatchScores | null }) {
+function JobDetail({ job, matchScores, onScroll }: { job: JobPostingWithCompany; matchScores: MatchScores | null; onScroll?: React.UIEventHandler<HTMLDivElement> }) {
   const quickFacts = [
     {
       label: "想定年収",
@@ -765,7 +804,7 @@ function JobDetail({ job, matchScores }: { job: JobPostingWithCompany; matchScor
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto overscroll-contain bg-white">
+    <div onScroll={onScroll} className="flex-1 overflow-y-auto overscroll-contain bg-white">
       {/* Cover image with gradient fade */}
       {job.coverImageUrl && (
         <div className="relative w-full overflow-hidden bg-gray-100">
