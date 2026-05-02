@@ -178,7 +178,7 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
 
             {hasCharts && (
               <div className="mb-5">
-                <div className="grid grid-cols-2 gap-1">
+                <div className="grid grid-cols-2 gap-1 -mx-5 md:mx-0">
                   <div className="flex flex-col items-center">
                     <span className="text-[11px] font-semibold text-gray-400 tracking-wider">Work Values</span>
                     {wvScores ? (
