@@ -198,3 +198,9 @@ func NewSkillInputFactory() func(
 		return usecase.NewSkillInteractor(repo, userRepo, tx, output)
 	}
 }
+
+func NewFollowInputFactory() func(repo port.FollowRepository, userRepo port.UserRepository, output port.FollowOutputPort) port.FollowInputPort {
+	return func(repo port.FollowRepository, userRepo port.UserRepository, output port.FollowOutputPort) port.FollowInputPort {
+		return usecase.NewFollowInteractor(repo, userRepo, output)
+	}
+}

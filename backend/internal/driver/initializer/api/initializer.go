@@ -99,6 +99,10 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	notificationOutputFactory := httpfactory.NewNotificationOutputFactory()
 	jobPostingOutputFactory := httpfactory.NewJobPostingOutputFactory()
 
+	followRepoFactory := factory.NewFollowRepoFactory(pool)
+	followInputFactory := factory.NewFollowInputFactory()
+	followOutputFactory := httpfactory.NewFollowOutputFactory()
+
 	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
 	authCtrl := httpcontroller.NewAuthController(authInputFactory, authOutputFactory, userRepoFactory, refreshTokenRepoFactory)
 	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
@@ -141,6 +145,10 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	)
 	jobPostingCtrl := httpcontroller.NewJobPostingController(
 		jobPostingInputFactory, jobPostingOutputFactory, jobPostingRepoFactory,
+	)
+
+	followCtrl := httpcontroller.NewFollowController(
+		followInputFactory, followOutputFactory, followRepoFactory, userRepoFactory,
 	)
 
 	companyAuthCtrl := httpcontroller.NewCompanyAuthController(
@@ -236,6 +244,23 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	}, jwtMW)
 	e.DELETE("/api/users/:username/skills/:name", func(c echo.Context) error {
 		return skillCtrl.Detach(c, c.Param("username"), c.Param("name"))
+	}, jwtMW)
+
+	// --- Follow ---
+	e.POST("/api/users/:username/follow", func(c echo.Context) error {
+		return followCtrl.Follow(c, c.Param("username"))
+	}, jwtMW)
+	e.DELETE("/api/users/:username/follow", func(c echo.Context) error {
+		return followCtrl.Unfollow(c, c.Param("username"))
+	}, jwtMW)
+	e.GET("/api/users/:username/followers", func(c echo.Context) error {
+		return followCtrl.GetFollowers(c, c.Param("username"))
+	})
+	e.GET("/api/users/:username/following", func(c echo.Context) error {
+		return followCtrl.GetFollowing(c, c.Param("username"))
+	})
+	e.GET("/api/users/:username/follow-status", func(c echo.Context) error {
+		return followCtrl.GetFollowStatus(c, c.Param("username"))
 	}, jwtMW)
 
 	// --- Static uploads ---

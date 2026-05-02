@@ -23,6 +23,11 @@ export type DiagnosticSummary = {
   href: string;
 };
 
+export type FollowCounts = {
+  followersCount: number;
+  followingCount: number;
+};
+
 export type PanelData = {
   user: ModelsUserResponse;
   username: string;
@@ -38,6 +43,7 @@ export type PanelData = {
   intReportRequestId: string | null;
   intReportHasReport: boolean;
   diagnostics: DiagnosticSummary[];
+  followCounts: FollowCounts;
 };
 
 export async function fetchPanelDataByUsername(username: string): Promise<PanelData | null> {
@@ -98,14 +104,29 @@ async function fetchLatestIntegratedRequest(userId: string): Promise<{ requestId
   }
 }
 
+async function fetchFollowCounts(username: string): Promise<FollowCounts> {
+  try {
+    const [followersRes, followingRes] = await Promise.all([
+      fetch(`${INTERNAL_API}/api/users/${username}/followers?limit=1`),
+      fetch(`${INTERNAL_API}/api/users/${username}/following?limit=1`),
+    ]);
+    const followers = followersRes.ok ? await followersRes.json() : { total: 0 };
+    const following = followingRes.ok ? await followingRes.json() : { total: 0 };
+    return { followersCount: followers.total ?? 0, followingCount: following.total ?? 0 };
+  } catch {
+    return { followersCount: 0, followingCount: 0 };
+  }
+}
+
 async function fetchRest(user: ModelsUserResponse, username: string): Promise<PanelData> {
-  const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult, intRequest] = await Promise.all([
+  const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult, intRequest, followCounts] = await Promise.all([
     experiencesListExperiences({ path: { username } }),
     educationsListEducations({ path: { username } }),
     skillsListSkills({ path: { username } }),
     getLatestWvResult(user.id).catch(() => null),
     getLatestCiResult(user.id).catch(() => null),
     fetchLatestIntegratedRequest(user.id),
+    fetchFollowCounts(username),
   ]);
 
   const [wvHasReport, ciHasReport] = await Promise.all([
@@ -155,5 +176,6 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
     intReportRequestId: intRequest?.requestId ?? null,
     intReportHasReport: intRequest?.hasReport ?? false,
     diagnostics,
+    followCounts,
   };
 }

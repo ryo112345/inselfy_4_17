@@ -167,14 +167,34 @@ export default function JobsPage() {
   const listRef = useRef<HTMLDivElement>(null);
   const lastScrollLeftRef = useRef(0);
   const lastScrollRightRef = useRef(0);
+  const toggleCooldownRef = useRef(0);
+  const [filterHeight, setFilterHeight] = useState(0);
+
+  useEffect(() => {
+    const el = filterRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setFilterHeight(el.offsetHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const makeScrollHandler = useCallback(
     (lastRef: React.MutableRefObject<number>) =>
       (e: React.UIEvent<HTMLDivElement>) => {
         const scrollTop = e.currentTarget.scrollTop;
+        const now = Date.now();
+        if (now - toggleCooldownRef.current < 400) {
+          lastRef.current = scrollTop;
+          return;
+        }
         const delta = scrollTop - lastRef.current;
-        if (delta > 8) setFilterBarVisible(false);
-        else if (delta < -8) setFilterBarVisible(true);
+        if (delta > 8) {
+          setFilterBarVisible(false);
+          toggleCooldownRef.current = now;
+        } else if (delta < -8) {
+          setFilterBarVisible(true);
+          toggleCooldownRef.current = now;
+        }
         lastRef.current = scrollTop;
       },
     [],
@@ -313,8 +333,11 @@ export default function JobsPage() {
       {/* Filter Bar */}
       <div
         ref={filterRef}
-        className="shrink-0 border-b border-gray-200 bg-white px-4 py-2.5 md:px-6 md:py-3 transition-[margin-top] duration-300 ease-in-out"
-        style={{ marginTop: filterBarVisible ? 0 : -(filterRef.current?.offsetHeight ?? 200) }}
+        className="shrink-0 border-b border-gray-200 bg-white px-4 py-2.5 md:px-6 md:py-3 transition-[transform,margin-bottom] duration-300 ease-in-out will-change-transform"
+        style={{
+          transform: filterBarVisible ? 'none' : 'translateY(-100%)',
+          marginBottom: filterBarVisible ? 0 : -filterHeight,
+        }}
       >
         <div className="flex items-center gap-2 md:gap-4 flex-wrap">
           {/* Search */}

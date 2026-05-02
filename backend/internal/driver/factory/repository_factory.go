@@ -170,3 +170,9 @@ func NewJobPostingRepoFactory(pool *pgxpool.Pool) func() port.JobPostingReposito
 		return sqlcgw.NewJobPostingRepository(pool)
 	}
 }
+
+func NewFollowRepoFactory(pool *pgxpool.Pool) func() port.FollowRepository {
+	return func() port.FollowRepository {
+		return sqlcgw.NewFollowRepository(pool)
+	}
+}

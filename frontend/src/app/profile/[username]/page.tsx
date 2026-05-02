@@ -96,6 +96,8 @@ export default async function ProfilePage({
             posts={posts}
             isOwner={isOwner}
             intReportRequestId={data.intReportRequestId}
+            followersCount={data.followCounts.followersCount}
+            followingCount={data.followCounts.followingCount}
           />
         </PanelNavigator>
       </main>

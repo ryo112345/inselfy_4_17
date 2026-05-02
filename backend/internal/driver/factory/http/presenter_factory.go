@@ -94,3 +94,9 @@ func NewJobPostingOutputFactory() func() *presenter.JobPostingPresenter {
 		return presenter.NewJobPostingPresenter()
 	}
 }
+
+func NewFollowOutputFactory() func() *presenter.FollowPresenter {
+	return func() *presenter.FollowPresenter {
+		return presenter.NewFollowPresenter()
+	}
+}
