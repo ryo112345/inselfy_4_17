@@ -176,3 +176,21 @@ func NewFollowRepoFactory(pool *pgxpool.Pool) func() port.FollowRepository {
 		return sqlcgw.NewFollowRepository(pool)
 	}
 }
+
+func NewConversationRepoFactory(pool *pgxpool.Pool) func() port.ConversationRepository {
+	return func() port.ConversationRepository {
+		return sqlcgw.NewConversationRepository(pool)
+	}
+}
+
+func NewMessageRepoFactory(pool *pgxpool.Pool) func() port.MessageRepository {
+	return func() port.MessageRepository {
+		return sqlcgw.NewMessageRepository(pool)
+	}
+}
+
+func NewConversationParticipantRepoFactory(pool *pgxpool.Pool) func() port.ConversationParticipantRepository {
+	return func() port.ConversationParticipantRepository {
+		return sqlcgw.NewConversationParticipantRepository(pool)
+	}
+}

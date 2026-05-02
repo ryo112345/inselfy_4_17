@@ -354,6 +354,22 @@ type CompanyRefreshToken struct {
 	RevokedAt pgtype.Timestamptz `json:"revoked_at"`
 }
 
+type Conversation struct {
+	ID            pgtype.UUID        `json:"id"`
+	CompanyID     pgtype.UUID        `json:"company_id"`
+	CandidateID   pgtype.UUID        `json:"candidate_id"`
+	LastMessageAt pgtype.Timestamptz `json:"last_message_at"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+}
+
+type ConversationParticipant struct {
+	ID              pgtype.UUID        `json:"id"`
+	ConversationID  pgtype.UUID        `json:"conversation_id"`
+	ParticipantType string             `json:"participant_type"`
+	ParticipantID   pgtype.UUID        `json:"participant_id"`
+	LastReadAt      pgtype.Timestamptz `json:"last_read_at"`
+}
+
 type Education struct {
 	ID        pgtype.UUID        `json:"id"`
 	UserID    pgtype.UUID        `json:"user_id"`
@@ -450,6 +466,15 @@ type JobPosting struct {
 	TeamLabel                 string             `json:"team_label"`
 	GalleryUrls               []byte             `json:"gallery_urls"`
 	TeamID                    pgtype.UUID        `json:"team_id"`
+}
+
+type Message struct {
+	ID             pgtype.UUID        `json:"id"`
+	ConversationID pgtype.UUID        `json:"conversation_id"`
+	SenderType     string             `json:"sender_type"`
+	SenderID       pgtype.UUID        `json:"sender_id"`
+	Body           string             `json:"body"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 type Notification struct {

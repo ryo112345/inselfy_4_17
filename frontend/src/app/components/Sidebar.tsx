@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
 import { useUnreadScout } from "@/features/scout/unread-context";
+import { useUnreadMessaging } from "@/features/messaging/unread-context";
 import type { DiagnosticSummary } from "@/features/profile/fetchPanelData";
 
 type Props = {
@@ -91,6 +92,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
   }, [open]);
 
   const { hasUnread: hasUnreadScouts } = useUnreadScout();
+  const { unreadCount: unreadMessages } = useUnreadMessaging();
 
   const profileHref = `/profile/${user?.username ?? username}`;
   const myDisplayName = user?.name ?? displayName;
@@ -178,6 +180,12 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
                         <span className="absolute -top-1.5 -right-2 flex h-2 w-2">
                           <span className="absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-60 animate-[ping_2.5s_ease-in-out_infinite]" />
                           <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_4px_1px_rgba(59,130,246,0.35)]" />
+                        </span>
+                      )}
+                      {item.label === "メッセージ" && unreadMessages > 0 && (
+                        <span className="absolute -top-1.5 -right-2 flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-[ping_2.5s_ease-in-out_infinite]" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_4px_1px_rgba(16,185,129,0.35)]" />
                         </span>
                       )}
                     </span>

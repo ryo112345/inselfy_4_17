@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -10,14 +11,17 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
+	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type AdminUserController struct {
-	queries *generated.Queries
+	queries    *generated.Queries
+	jwtService port.JWTService
 }
 
-func NewAdminUserController(pool *pgxpool.Pool) *AdminUserController {
-	return &AdminUserController{queries: generated.New(pool)}
+func NewAdminUserController(pool *pgxpool.Pool, jwtService port.JWTService) *AdminUserController {
+	return &AdminUserController{queries: generated.New(pool), jwtService: jwtService}
 }
 
 type adminUserItem struct {
@@ -155,4 +159,58 @@ func toItemsFromSearch(rows []*generated.SearchUsersRow) []adminUserItem {
 		})
 	}
 	return items
+}
+
+func (c *AdminUserController) BypassLogin(ctx echo.Context, id string) error {
+	parsed, err := uuid.Parse(id)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid user id"})
+	}
+	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
+
+	u, err := c.queries.GetUserByID(ctx.Request().Context(), pgID)
+	if err != nil {
+		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "user not found"})
+	}
+
+	accessToken, err := c.jwtService.GenerateAccessToken(pgUUIDToString(u.ID))
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to generate token"})
+	}
+
+	rawRefresh, err := c.jwtService.GenerateRefreshToken()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to generate token"})
+	}
+
+	if err := c.queries.CreateRefreshToken(ctx.Request().Context(), &generated.CreateRefreshTokenParams{
+		UserID:    u.ID,
+		TokenHash: c.jwtService.HashRefreshToken(rawRefresh),
+		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(7 * 24 * time.Hour), Valid: true},
+	}); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to store refresh token"})
+	}
+
+	userResp := &presenter.AuthUserResponse{
+		ID:       pgUUIDToString(u.ID),
+		Username: u.Username,
+		Name:     u.Name,
+	}
+	if u.AvatarUrl.Valid {
+		userResp.AvatarURL = &u.AvatarUrl.String
+	}
+	if u.Email.Valid {
+		userResp.Email = &u.Email.String
+	}
+
+	setAuthCookies(ctx, &presenter.AuthTokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: rawRefresh,
+		User:         userResp,
+	})
+
+	return ctx.JSON(http.StatusOK, map[string]string{
+		"message":  "ok",
+		"username": u.Username,
+	})
 }

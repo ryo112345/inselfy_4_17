@@ -34,6 +34,7 @@ export default function AdminCompaniesPage() {
   const [statusFilter, setStatusFilter] = useState("pending");
   const [page, setPage] = useState(1);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [loggingInId, setLoggingInId] = useState<string | null>(null);
 
   const fetchCompanies = useCallback(async () => {
     setLoading(true);
@@ -49,6 +50,17 @@ export default function AdminCompaniesPage() {
   useEffect(() => {
     fetchCompanies();
   }, [fetchCompanies]);
+
+  const handleBypassLogin = async (companyId: string) => {
+    setLoggingInId(companyId);
+    const res = await fetch(`/api/admin/companies/${companyId}/bypass-login`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      window.open("/company", "_blank");
+    }
+    setLoggingInId(null);
+  };
 
   const handleStatusChange = async (id: string, status: "approved" | "rejected") => {
     setActionId(id);
@@ -181,6 +193,13 @@ export default function AdminCompaniesPage() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => handleBypassLogin(c.id)}
+                            disabled={loggingInId === c.id}
+                            className="px-3 py-1.5 text-xs text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50 cursor-pointer"
+                          >
+                            {loggingInId === c.id ? "ログイン中..." : "ログイン"}
+                          </button>
                           {c.status === "pending" && (
                             <>
                               <button

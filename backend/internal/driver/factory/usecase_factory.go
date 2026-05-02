@@ -204,3 +204,21 @@ func NewFollowInputFactory() func(repo port.FollowRepository, userRepo port.User
 		return usecase.NewFollowInteractor(repo, userRepo, output)
 	}
 }
+
+func NewMessagingInputFactory() func(
+	convRepo port.ConversationRepository,
+	msgRepo port.MessageRepository,
+	participantRepo port.ConversationParticipantRepository,
+	tx port.TxManager,
+	output port.MessagingOutputPort,
+) port.MessagingInputPort {
+	return func(
+		convRepo port.ConversationRepository,
+		msgRepo port.MessageRepository,
+		participantRepo port.ConversationParticipantRepository,
+		tx port.TxManager,
+		output port.MessagingOutputPort,
+	) port.MessagingInputPort {
+		return usecase.NewMessagingInteractor(convRepo, msgRepo, participantRepo, tx, output)
+	}
+}

@@ -13,6 +13,7 @@ import (
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
+	ws "github.com/akiyama/inselfy/backend/internal/adapter/ws"
 	"github.com/akiyama/inselfy/backend/internal/driver/config"
 	driverdb "github.com/akiyama/inselfy/backend/internal/driver/db"
 	"github.com/akiyama/inselfy/backend/internal/driver/factory"
@@ -103,6 +104,12 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	followInputFactory := factory.NewFollowInputFactory()
 	followOutputFactory := httpfactory.NewFollowOutputFactory()
 
+	conversationRepoFactory := factory.NewConversationRepoFactory(pool)
+	messageRepoFactory := factory.NewMessageRepoFactory(pool)
+	participantRepoFactory := factory.NewConversationParticipantRepoFactory(pool)
+	messagingInputFactory := factory.NewMessagingInputFactory()
+	messagingOutputFactory := httpfactory.NewMessagingOutputFactory()
+
 	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
 	authCtrl := httpcontroller.NewAuthController(authInputFactory, authOutputFactory, userRepoFactory, refreshTokenRepoFactory)
 	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
@@ -149,6 +156,11 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	followCtrl := httpcontroller.NewFollowController(
 		followInputFactory, followOutputFactory, followRepoFactory, userRepoFactory,
+	)
+
+	messagingCtrl := httpcontroller.NewMessagingController(
+		messagingInputFactory, messagingOutputFactory,
+		conversationRepoFactory, messageRepoFactory, participantRepoFactory, tx,
 	)
 
 	companyAuthCtrl := httpcontroller.NewCompanyAuthController(
@@ -406,17 +418,23 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 
 	// --- Admin ---
-	adminUserCtrl := httpcontroller.NewAdminUserController(pool)
+	adminUserCtrl := httpcontroller.NewAdminUserController(pool, jwtService)
 	adminReportCtrl := httpcontroller.NewAdminReportController(pool)
-	adminCompanyCtrl := httpcontroller.NewAdminCompanyController(pool)
+	adminCompanyCtrl := httpcontroller.NewAdminCompanyController(pool, jwtService)
 	adminGroup := e.Group("/api/admin")
 	adminGroup.GET("/users", adminUserCtrl.List)
 	adminGroup.GET("/companies", adminCompanyCtrl.List)
 	adminGroup.PATCH("/companies/:id/status", func(c echo.Context) error {
 		return adminCompanyCtrl.UpdateStatus(c, c.Param("id"))
 	})
+	adminGroup.POST("/companies/:id/bypass-login", func(c echo.Context) error {
+		return adminCompanyCtrl.BypassLogin(c, c.Param("id"))
+	})
 	adminGroup.DELETE("/users/:id", func(c echo.Context) error {
 		return adminUserCtrl.Delete(c, c.Param("id"))
+	})
+	adminGroup.POST("/users/:id/bypass-login", func(c echo.Context) error {
+		return adminUserCtrl.BypassLogin(c, c.Param("id"))
 	})
 	adminGroup.GET("/reports/pending", adminReportCtrl.ListPending)
 	adminGroup.GET("/reports/list", adminReportCtrl.ListReports)
@@ -576,6 +594,53 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return notifCtrl.MarkAsRead(c, c.Param("id"))
 	})
 	userNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByUser)
+
+	// --- Candidate Messages ---
+	candidateMsgGroup := e.Group("/api/messages", jwtMW)
+	candidateMsgGroup.GET("/conversations", messagingCtrl.ListConversationsByCandidate)
+	candidateMsgGroup.GET("/conversations/:conversationId", func(c echo.Context) error {
+		return messagingCtrl.GetConversationAsCandidate(c, c.Param("conversationId"))
+	})
+	candidateMsgGroup.GET("/conversations/:conversationId/messages", func(c echo.Context) error {
+		return messagingCtrl.ListMessagesAsCandidate(c, c.Param("conversationId"))
+	})
+	candidateMsgGroup.POST("/conversations/:conversationId/messages", func(c echo.Context) error {
+		return messagingCtrl.SendMessageAsCandidate(c, c.Param("conversationId"))
+	})
+	candidateMsgGroup.POST("/conversations/:conversationId/read", func(c echo.Context) error {
+		return messagingCtrl.MarkReadAsCandidate(c, c.Param("conversationId"))
+	})
+	candidateMsgGroup.GET("/unread-count", messagingCtrl.CountUnreadByCandidate)
+
+	// --- Company Messages ---
+	companyMsgGroup := e.Group("/api/company/messages", companyJwtMW)
+	companyMsgGroup.POST("/conversations", messagingCtrl.StartConversation)
+	companyMsgGroup.GET("/conversations", messagingCtrl.ListConversationsByCompany)
+	companyMsgGroup.GET("/conversations/:conversationId", func(c echo.Context) error {
+		return messagingCtrl.GetConversationAsCompany(c, c.Param("conversationId"))
+	})
+	companyMsgGroup.GET("/conversations/:conversationId/messages", func(c echo.Context) error {
+		return messagingCtrl.ListMessagesAsCompany(c, c.Param("conversationId"))
+	})
+	companyMsgGroup.POST("/conversations/:conversationId/messages", func(c echo.Context) error {
+		return messagingCtrl.SendMessageAsCompany(c, c.Param("conversationId"))
+	})
+	companyMsgGroup.POST("/conversations/:conversationId/read", func(c echo.Context) error {
+		return messagingCtrl.MarkReadAsCompany(c, c.Param("conversationId"))
+	})
+	companyMsgGroup.GET("/unread-count", messagingCtrl.CountUnreadByCompany)
+
+	// --- WebSocket ---
+	wsHub := ws.NewHub()
+	go wsHub.Run()
+
+	pgBroker := ws.NewPgMessageBroker(pool)
+	convRepoForRelay := conversationRepoFactory()
+	relay := ws.NewRelay(wsHub, pgBroker, convRepoForRelay)
+	go relay.Start(ctx)
+
+	wsCtrl := httpcontroller.NewWSController(wsHub, jwtService)
+	e.GET("/api/ws", wsCtrl.HandleWS)
 
 	sched := scheduler.New(scoutMsgRepoFactory(), scoutCreditRepoFactory())
 	sched.Start(ctx)

@@ -100,3 +100,9 @@ func NewFollowOutputFactory() func() *presenter.FollowPresenter {
 		return presenter.NewFollowPresenter()
 	}
 }
+
+func NewMessagingOutputFactory() func() *presenter.MessagingPresenter {
+	return func() *presenter.MessagingPresenter {
+		return presenter.NewMessagingPresenter()
+	}
+}
