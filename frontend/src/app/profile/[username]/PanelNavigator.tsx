@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, useCallback, useMemo, type ReactNode } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { useAuth } from "@/features/auth/auth-context";
 import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/WorkValuesContent";
@@ -109,15 +109,58 @@ export function PanelNavigator({ children, userId, username, displayName = usern
   const displayOffset = canGoSimilar ? 1 : 0;
   const minIndex = canGoSimilar ? -1 : 0;
 
+  const trackRef = useRef<HTMLDivElement>(null);
+  const touchRef = useRef<{ x: number; y: number; swiping: boolean | null } | null>(null);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchRef.current = { x: t.clientX, y: t.clientY, swiping: null };
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchRef.current) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchRef.current.x;
+    const dy = t.clientY - touchRef.current.y;
+    if (touchRef.current.swiping === null) {
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+        touchRef.current.swiping = Math.abs(dx) > Math.abs(dy);
+        if (touchRef.current.swiping) setDragging(true);
+      }
+      return;
+    }
+    if (!touchRef.current.swiping) return;
+    setDragX(dx);
+  }, []);
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    const touch = touchRef.current;
+    touchRef.current = null;
+    setDragX(0);
+    setDragging(false);
+    if (!touch || !touch.swiping) return;
+    const dx = e.changedTouches[0].clientX - touch.x;
+    const vw = window.innerWidth;
+    if (dx < -vw * 0.2) goTo(activeIndex + 1);
+    else if (dx > vw * 0.2) goTo(activeIndex - 1);
+  }, [activeIndex, goTo]);
+
   const focusedTransform = isMobile
-    ? `calc(${-(activeIndex + displayOffset)} * 100vw)`
+    ? `calc(${-(activeIndex + displayOffset)} * 100vw + ${dragX}px)`
     : `calc(50% - ${desktopPanelPx / 2}px - ${activeIndex * (desktopPanelPx + gapPx)}px)`;
   const expandedTransform = isMobile
-    ? `calc(${-(activeIndex + displayOffset)} * 100vw)`
+    ? `calc(${-(activeIndex + displayOffset)} * 100vw + ${dragX}px)`
     : `-${(activeIndex + displayOffset) * (desktopPanelPx + gapPx)}px`;
 
   return (
-    <div className="relative px-0 md:px-4 overflow-hidden h-[calc(100dvh-1rem)]">
+    <div
+      className="relative px-0 md:px-4 overflow-hidden h-[calc(100dvh-1rem)]"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {showSimilar && (
         <div
           className="absolute top-0 h-full overflow-y-auto z-10 transition-opacity duration-300 hidden xl:block scrollbar-hide pl-3"
@@ -133,20 +176,21 @@ export function PanelNavigator({ children, userId, username, displayName = usern
       )}
 
       <div
-        className={`flex items-stretch h-full md:gap-[12px]${transitionReady ? ' transition-all duration-300 ease-in-out' : ''}`}
+        ref={trackRef}
+        className={`flex items-stretch h-full md:gap-[12px]${transitionReady && !dragging ? ' transition-all duration-300 ease-in-out' : ''}`}
         style={hydrated ? {
           transform: `translateX(${expanded ? expandedTransform : focusedTransform})`,
         } : undefined}
       >
         {canGoSimilar && (
-          <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen px-4 pt-4">
+          <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen px-4 pt-4 pb-24 md:pb-0">
             <SimilarUsersCard userId={userId!} visible={true} className="w-full" />
           </div>
         )}
 
-        <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-[672px]">{children}</div>
+        <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen md:w-[672px] pb-24 md:pb-0">{children}</div>
 
-        <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-[672px]">
+        <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen md:w-[672px] pb-24 md:pb-0">
           {showIntReport ? (
             <IntegratedReportContent requestId={intReportRequestId!} isOwner={isOwner} />
           ) : (
@@ -154,7 +198,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
           )}
         </div>
 
-        <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-[672px]">
+        <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen md:w-[672px] pb-24 md:pb-0">
           {showWvResult ? (
             <WorkValuesResultContent sessionId={wvSessionId!} initialData={wvResult} isOwner={isOwner} />
           ) : (
@@ -162,7 +206,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
           )}
         </div>
 
-        <div className="shrink-0 overflow-y-auto scrollbar-hide w-screen md:w-[672px]">
+        <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen md:w-[672px] pb-24 md:pb-0">
           {showCiResult ? (
             <CareerInterestResultContent sessionId={ciSessionId!} initialData={ciResult} isOwner={isOwner} />
           ) : (
@@ -171,7 +215,19 @@ export function PanelNavigator({ children, userId, username, displayName = usern
         </div>
       </div>
 
-      <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex items-center gap-1">
+      <div className="fixed bottom-[76px] left-0 right-0 z-40 flex justify-center items-center gap-1.5 md:hidden">
+        {Array.from({ length: panelCount - minIndex }, (_, i) => i + minIndex).map((idx) => (
+          <button
+            key={idx}
+            onClick={() => goTo(idx)}
+            className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+              idx === activeIndex ? "w-5 bg-gray-700" : "w-1.5 bg-gray-300"
+            }`}
+          />
+        ))}
+      </div>
+
+      <div className="hidden md:flex fixed bottom-6 right-6 z-40 items-center gap-1">
         <button
           data-testid="panel-prev"
           onClick={() => goTo(activeIndex - 1)}

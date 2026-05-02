@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
@@ -24,6 +24,8 @@ export function MobileFooter() {
   const prevIndex = useRef(activeIndex);
   const [displayIndex, setDisplayIndex] = useState(activeIndex);
   const [animate, setAnimate] = useState(false);
+  const [shrunk, setShrunk] = useState(false);
+  const lastY = useRef(0);
 
   useEffect(() => {
     if (prevIndex.current !== activeIndex) {
@@ -33,14 +35,54 @@ export function MobileFooter() {
     }
   }, [activeIndex]);
 
-  const pillLeft = `calc(${(displayIndex + 0.5) * 100 / count}% - 26px)`;
+  const lastTarget = useRef<EventTarget | null>(null);
+
+  const handleScroll = useCallback((e: Event) => {
+    const target = e.target;
+    const el = target === document ? document.documentElement : target as HTMLElement;
+    const y = el.scrollTop ?? 0;
+    if (target !== lastTarget.current) {
+      lastTarget.current = target;
+      lastY.current = y;
+      return;
+    }
+    if (y <= 8) {
+      setShrunk(false);
+      lastY.current = y;
+    } else if (y > lastY.current + 8) {
+      setShrunk(true);
+      lastY.current = y;
+    } else if (y < lastY.current - 8) {
+      setShrunk(false);
+      lastY.current = y;
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+    return () => document.removeEventListener("scroll", handleScroll, { capture: true });
+  }, [handleScroll]);
+
+  const pillLeft = `calc(${(displayIndex + 0.5) * 100 / count}% - ${shrunk ? 18 : 26}px)`;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <nav className="relative mx-3 mb-4 flex items-center justify-around rounded-[28px] h-[52px] bg-white/10 backdrop-blur-[2px] backdrop-saturate-125 border border-white/50 shadow-[0_2px_20px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.5)]">
+      <nav
+        className="relative flex items-center justify-around bg-white/10 backdrop-blur-[2px] backdrop-saturate-125 border border-white/50 shadow-[0_2px_20px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.5)] transition-all duration-300 ease-in-out"
+        style={{
+          height: shrunk ? 36 : 52,
+          borderRadius: shrunk ? 18 : 28,
+          margin: shrunk ? "0 24px 16px" : "0 12px 16px",
+        }}
+      >
         <span
-          className={`absolute top-1/2 h-9 w-[52px] rounded-full bg-gray-500/30 ${animate ? "transition-[left] duration-500 ease-in-out" : ""}`}
-          style={{ left: pillLeft, transform: "translateY(-50%)" }}
+          className={`absolute top-1/2 rounded-full bg-gray-500/30 transition-all duration-300 ease-in-out ${animate ? "transition-[left,width,height] duration-500" : ""}`}
+          style={{
+            left: pillLeft,
+            width: shrunk ? 36 : 52,
+            height: shrunk ? 26 : 36,
+            transform: "translateY(-50%)",
+          }}
           onTransitionEnd={() => setAnimate(false)}
         />
         {navItems.map((item) => (
@@ -49,7 +91,7 @@ export function MobileFooter() {
             href={item.href === "__profile__" ? profileHref : item.href}
             className="relative z-10 flex items-center justify-center flex-1 h-full"
           >
-            <Icons id={item.href} />
+            <Icons id={item.href} size={shrunk ? 18 : 26} />
           </Link>
         ))}
       </nav>
@@ -57,8 +99,8 @@ export function MobileFooter() {
   );
 }
 
-function Icons({ id }: { id: string }) {
-  const s = { width: 26, height: 26, viewBox: "0 0 24 24", fill: "none", stroke: "#6b7280", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+function Icons({ id, size }: { id: string; size: number }) {
+  const s = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "#6b7280", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, className: "transition-all duration-300 ease-in-out" };
   switch (id) {
     case "/": return (
       <svg {...s}><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" /><path d="M9 21V12h6v9" /></svg>
