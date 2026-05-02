@@ -288,7 +288,7 @@ export default function JobsPage() {
   );
 
   return (
-    <div className="h-screen pl-[50px] flex flex-col bg-[var(--background)]">
+    <div className="h-screen md:pl-[50px] flex flex-col bg-[var(--background)]">
       {/* Filter Bar */}
       <div className="shrink-0 border-b border-gray-200 bg-white px-6 py-3">
         <div className="flex items-center gap-4 flex-wrap">

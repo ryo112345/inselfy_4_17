@@ -24,7 +24,7 @@ export default async function ArticlesPage() {
         displayName={displayName}
         defaultOpen={sidebarOpen}
       />
-      <div className="min-h-screen pl-[50px] bg-white">
+      <div className="min-h-screen md:pl-[50px] bg-white">
         <div className="max-w-[1100px] mx-auto px-6 py-6">
           {articles ? (
             <ArticlesPageClient

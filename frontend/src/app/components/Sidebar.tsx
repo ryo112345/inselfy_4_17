@@ -250,6 +250,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
           onLogout={handleLogout}
         />
       )}
+
     </>
   );
 }
@@ -639,3 +640,4 @@ function DownloadIcon() {
     </svg>
   );
 }
+

@@ -26,7 +26,7 @@ export default async function HomePage() {
         displayName={displayName}
         defaultOpen={sidebarOpen}
       />
-      <div className="flex justify-center min-h-screen pl-[50px]">
+      <div className="flex justify-center min-h-screen md:pl-[50px]">
         <main className="w-full max-w-[600px] bg-white border-x border-gray-200/80">
           <FeedTabs />
           <PostForm userId={userId} username={username} displayName={displayName} />

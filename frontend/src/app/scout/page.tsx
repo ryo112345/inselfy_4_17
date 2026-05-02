@@ -141,7 +141,7 @@ export default function ScoutListPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen pl-[50px] bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen md:pl-[50px] bg-gray-50 flex items-center justify-center">
         <p className="text-gray-400 text-sm">読み込み中...</p>
       </div>
     );
@@ -149,14 +149,14 @@ export default function ScoutListPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen pl-[50px] bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen md:pl-[50px] bg-gray-50 flex items-center justify-center">
         <p className="text-gray-500 text-sm">ログインしてください</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pl-[50px] bg-gray-50">
+    <div className="min-h-screen md:pl-[50px] bg-gray-50">
       <div className="max-w-[900px] mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
