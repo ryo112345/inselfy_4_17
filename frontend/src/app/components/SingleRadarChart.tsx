@@ -20,8 +20,8 @@ export function SingleRadarChart({
   isWV: boolean;
 }) {
   const cx = 210;
-  const cy = 170;
-  const R = 75;
+  const cy = 190;
+  const R = 115;
 
   const hexPoint = (i: number, r: number) => {
     const angle = (Math.PI / 2) + (2 * Math.PI * i) / order.length;
@@ -40,7 +40,7 @@ export function SingleRadarChart({
   });
   const spokes = order.map((_, i) => hexPoint(i, R));
 
-  const gridColor = isWV ? "#d8ede2" : "#e0d4f0";
+  const gridColor = "#d5d5d5";
   const fillColor = isWV ? "rgba(72,200,140,0.2)" : "rgba(160,120,220,0.2)";
   const strokeColor = isWV ? "#48c88c" : "#a878dc";
   const dotColor = isWV ? "#48c88c" : "#a878dc";
@@ -54,7 +54,7 @@ export function SingleRadarChart({
   const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
 
   const labelPositions = order.map((id, i) => {
-    const pt = hexPoint(i, R + 60);
+    const pt = hexPoint(i, R + 30);
     const angle = (Math.PI / 2) + (2 * Math.PI * i) / order.length;
     const cos = -Math.cos(angle);
     let anchor: "middle" | "start" | "end" = "middle";
@@ -64,10 +64,10 @@ export function SingleRadarChart({
   });
 
   const w = 420;
-  const h = 340;
+  const h = 380;
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full">
+    <svg viewBox={`0 0 ${w} ${h}`} overflow="visible" className="w-full">
       {gridPaths.map((d, i) => (
         <path key={i} d={d} fill="none" stroke={gridColor} strokeWidth={0.6} />
       ))}

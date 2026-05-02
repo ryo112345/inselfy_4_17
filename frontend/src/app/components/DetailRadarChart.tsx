@@ -1,3 +1,5 @@
+"use client";
+
 import { VALUE_NEEDS, VALUE_LABELS, type ValueId } from "@/features/work-values/lib/needs";
 import { TYPE_BASIC_INTERESTS, TYPE_LABELS, type TypeId } from "@/features/career-interest/lib/types";
 
@@ -168,7 +170,7 @@ export function DetailRadarChart({
           </g>
         ))}
       </svg>
-      <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 -mt-3 px-2">
+      <div className="grid grid-cols-3 justify-center md:flex md:flex-wrap md:justify-center gap-x-3 gap-y-1 -mt-3 px-2 w-fit mx-auto md:w-auto">
         {groups.map((g, i) => (
           <span key={i} className="flex items-center gap-1 text-[10px] text-gray-500">
             <span className="inline-block w-2.5 h-1 rounded-full" style={{ backgroundColor: g.color, opacity: 0.7 }} />
