@@ -124,8 +124,8 @@ export function DetailRadarChart({
   });
 
   return (
-    <div>
-      <svg viewBox="0 0 560 440" className="w-full">
+    <div className="-mx-6 md:mx-0">
+      <svg viewBox="65 57 430 335" className="w-full">
         {gridPaths.map((d, i) => (
           <path key={i} d={d} fill="none" stroke="#e5e5e5" strokeWidth={0.5} />
         ))}
