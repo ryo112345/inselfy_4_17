@@ -79,8 +79,8 @@ export function DetailRadarChart({
 
   const axisAngle = (i: number) => (Math.PI / 2) + (2 * Math.PI * i) / n;
   const pt = (angle: number, r: number) => ({
-    x: cx - Math.cos(angle) * r,
-    y: cy - Math.sin(angle) * r,
+    x: Math.round((cx - Math.cos(angle) * r) * 1e6) / 1e6,
+    y: Math.round((cy - Math.sin(angle) * r) * 1e6) / 1e6,
   });
 
   const gridLevels = [0.25, 0.5, 0.75, 1.0];
