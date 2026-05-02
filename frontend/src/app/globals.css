@@ -26,6 +26,12 @@ body {
   box-sizing: border-box;
 }
 
+@media (width < 48rem) {
+  body {
+    padding-bottom: 68px;
+  }
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

@@ -171,7 +171,7 @@ export function PanelNavigator({ children, userId, username, displayName = usern
         </div>
       </div>
 
-      <div className="fixed bottom-6 right-4 md:right-6 z-40 flex items-center gap-1">
+      <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex items-center gap-1">
         <button
           data-testid="panel-prev"
           onClick={() => goTo(activeIndex - 1)}

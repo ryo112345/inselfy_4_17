@@ -117,7 +117,7 @@ export default function ScoutDetailPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen pl-[50px] bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen md:pl-[50px] bg-gray-50 flex items-center justify-center">
         <p className="text-gray-400 text-sm">読み込み中...</p>
       </div>
     );
@@ -125,7 +125,7 @@ export default function ScoutDetailPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen pl-[50px] bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen md:pl-[50px] bg-gray-50 flex items-center justify-center">
         <p className="text-gray-500 text-sm">ログインしてください</p>
       </div>
     );
@@ -133,7 +133,7 @@ export default function ScoutDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pl-[50px] bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen md:pl-[50px] bg-gray-50 flex items-center justify-center">
         <p className="text-gray-400 text-sm">読み込み中...</p>
       </div>
     );
@@ -141,7 +141,7 @@ export default function ScoutDetailPage() {
 
   if (error || !detail) {
     return (
-      <div className="min-h-screen pl-[50px] bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen md:pl-[50px] bg-gray-50 flex items-center justify-center">
         <p className="text-red-500 text-sm">{error ?? "データが見つかりません"}</p>
       </div>
     );
@@ -154,7 +154,7 @@ export default function ScoutDetailPage() {
   const canReply = message.status !== "expired";
 
   return (
-    <div className="min-h-screen pl-[50px] bg-gray-50">
+    <div className="min-h-screen md:pl-[50px] bg-gray-50">
       <div className="max-w-[800px] mx-auto px-6 py-8">
         {/* Back link */}
         <button
