@@ -40,6 +40,15 @@ const VALUE_LABELS: Record<string, string> = {
   autonomy: "自律",
 };
 
+const CI_TYPE_LABELS: Record<string, string> = {
+  R: "現実的",
+  I: "研究的",
+  A: "芸術的",
+  S: "社会的",
+  E: "企業的",
+  C: "慣習的",
+};
+
 export default function TalentsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -72,6 +81,10 @@ export default function TalentsPage() {
   const [customWeights, setCustomWeights] = useState<Record<string, number>>({
     achievement: 50, comfort: 50, status: 50, altruism: 50, safety: 50, autonomy: 50,
   });
+  const [diagnosticType, setDiagnosticType] = useState<"wv" | "ci" | "integrated">("wv");
+  const [customCIWeights, setCustomCIWeights] = useState<Record<string, number>>({
+    R: 50, I: 50, A: 50, S: 50, E: 50, C: 50,
+  });
 
   useEffect(() => {
     companyFetch("/api/company/teams")
@@ -101,19 +114,34 @@ export default function TalentsPage() {
     return params;
   }, [keyword, skills, location, industry, seekingStatus, jobType]);
 
+  const getDiagnosticEndpoint = useCallback(() => {
+    switch (diagnosticType) {
+      case "ci": return "/api/company/talents/search/diagnostic/ci";
+      case "integrated": return "/api/company/talents/search/diagnostic/integrated";
+      default: return "/api/company/talents/search/diagnostic";
+    }
+  }, [diagnosticType]);
+
   const buildDiagnosticParams = useCallback((offset: number) => {
     const params = new URLSearchParams();
     if (diagnosticMode === "team" && selectedTeamId) {
       params.set("team_id", selectedTeamId);
     } else if (diagnosticMode === "custom") {
-      for (const [k, v] of Object.entries(customWeights)) {
-        params.set(`wv_${k}`, String(v));
+      if (diagnosticType === "wv" || diagnosticType === "integrated") {
+        for (const [k, v] of Object.entries(customWeights)) {
+          params.set(`wv_${k}`, String(v));
+        }
+      }
+      if (diagnosticType === "ci" || diagnosticType === "integrated") {
+        for (const [k, v] of Object.entries(customCIWeights)) {
+          params.set(`ci_${k}`, String(v));
+        }
       }
     }
     params.set("limit", String(PAGE_SIZE));
     params.set("offset", String(offset));
     return params;
-  }, [diagnosticMode, selectedTeamId, customWeights]);
+  }, [diagnosticMode, diagnosticType, selectedTeamId, customWeights, customCIWeights]);
 
   const fetchTalents = useCallback(async (endpoint: string, params: URLSearchParams, append: boolean) => {
     if (append) {
@@ -142,17 +170,17 @@ export default function TalentsPage() {
 
   const handleDiagnosticSearch = useCallback(() => {
     if (diagnosticMode === "team" && !selectedTeamId) return;
-    fetchTalents("/api/company/talents/search/diagnostic", buildDiagnosticParams(0), false);
-  }, [fetchTalents, buildDiagnosticParams, diagnosticMode, selectedTeamId]);
+    fetchTalents(getDiagnosticEndpoint(), buildDiagnosticParams(0), false);
+  }, [fetchTalents, getDiagnosticEndpoint, buildDiagnosticParams, diagnosticMode, selectedTeamId]);
 
   const handleLoadMore = useCallback(() => {
     const offset = users.length;
     if (tab === "condition") {
       fetchTalents("/api/company/talents/search", buildConditionParams(offset), true);
     } else {
-      fetchTalents("/api/company/talents/search/diagnostic", buildDiagnosticParams(offset), true);
+      fetchTalents(getDiagnosticEndpoint(), buildDiagnosticParams(offset), true);
     }
-  }, [tab, users.length, fetchTalents, buildConditionParams, buildDiagnosticParams]);
+  }, [tab, users.length, fetchTalents, buildConditionParams, getDiagnosticEndpoint, buildDiagnosticParams]);
 
   const handleSearch = tab === "condition" ? handleConditionSearch : handleDiagnosticSearch;
 
@@ -343,6 +371,21 @@ export default function TalentsPage() {
       {tab === "diagnostic" && (
         <div className="rounded-xl border border-gray-200 bg-white p-5 mb-6">
           <div className="space-y-5">
+            {/* Diagnostic type selector */}
+            <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
+              {([["wv", "Work Values"], ["ci", "Career Interest"], ["integrated", "総合"]] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setDiagnosticType(key)}
+                  className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+                    diagnosticType === key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
             {/* Mode selector */}
             <div className="flex gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -380,16 +423,22 @@ export default function TalentsPage() {
                   ))}
                 </select>
                 <p className="mt-1.5 text-xs text-gray-400">
-                  チームメンバーのWork Values平均スコアに近い候補者を検索します
+                  {diagnosticType === "ci"
+                    ? "チームメンバーのCareer Interest平均スコアに近い候補者を検索します"
+                    : diagnosticType === "integrated"
+                    ? "チームメンバーのWV・CI両方の平均スコアに近い候補者を検索します"
+                    : "チームメンバーのWork Values平均スコアに近い候補者を検索します"}
                 </p>
               </div>
             )}
 
-            {diagnosticMode === "custom" && (
+            {diagnosticMode === "custom" && (diagnosticType === "wv" || diagnosticType === "integrated") && (
               <div className="space-y-3">
-                <p className="text-xs text-gray-500">
-                  求める人材の価値観を0〜100で設定してください
-                </p>
+                {diagnosticType === "integrated" ? (
+                  <p className="text-xs font-medium text-gray-600">Work Values</p>
+                ) : (
+                  <p className="text-xs text-gray-500">求める人材の価値観を0〜100で設定してください</p>
+                )}
                 {Object.entries(VALUE_LABELS).map(([key, label]) => (
                   <div key={key} className="flex items-center gap-3">
                     <span className="w-16 text-sm text-gray-600 shrink-0">{label}</span>
@@ -402,6 +451,30 @@ export default function TalentsPage() {
                       className="flex-1 accent-blue-600 cursor-pointer"
                     />
                     <span className="w-8 text-right text-sm font-mono text-gray-500">{customWeights[key]}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {diagnosticMode === "custom" && (diagnosticType === "ci" || diagnosticType === "integrated") && (
+              <div className="space-y-3">
+                {diagnosticType === "integrated" ? (
+                  <p className="text-xs font-medium text-gray-600">Career Interest</p>
+                ) : (
+                  <p className="text-xs text-gray-500">求める人材の興味傾向を0〜100で設定してください</p>
+                )}
+                {Object.entries(CI_TYPE_LABELS).map(([key, label]) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <span className="w-16 text-sm text-gray-600 shrink-0">{label}</span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={customCIWeights[key]}
+                      onChange={(e) => setCustomCIWeights({ ...customCIWeights, [key]: Number(e.target.value) })}
+                      className="flex-1 accent-purple-600 cursor-pointer"
+                    />
+                    <span className="w-8 text-right text-sm font-mono text-gray-500">{customCIWeights[key]}</span>
                   </div>
                 ))}
               </div>

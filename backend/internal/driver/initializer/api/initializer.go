@@ -413,6 +413,8 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	talentGroup := e.Group("/api/company/talents", companyJwtMW)
 	talentGroup.GET("/search", talentCtrl.Search)
 	talentGroup.GET("/search/diagnostic", talentCtrl.DiagnosticSearch)
+	talentGroup.GET("/search/diagnostic/ci", talentCtrl.CIDiagnosticSearch)
+	talentGroup.GET("/search/diagnostic/integrated", talentCtrl.IntegratedDiagnosticSearch)
 
 	// --- Team Diagnose (public) ---
 	diagCtrl := httpcontroller.NewTeamDiagnoseController(pool)

@@ -272,43 +272,7 @@ LIMIT $2 OFFSET $3`
 	}
 	defer rows.Close()
 
-	var users []talentCard
-	for rows.Next() {
-		var uid pgtype.UUID
-		var username, name string
-		var headline, avatarURL, profileColor, seekingStatus pgtype.Text
-		var simPct pgtype.Numeric
-
-		if err := rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus, &simPct); err != nil {
-			continue
-		}
-
-		card := talentCard{
-			UserID:   pgUUIDToString(uid),
-			Username: username,
-			Name:     name,
-		}
-		if headline.Valid {
-			card.Headline = &headline.String
-		}
-		if avatarURL.Valid {
-			card.AvatarURL = &avatarURL.String
-		}
-		if profileColor.Valid {
-			card.ProfileColor = &profileColor.String
-		}
-		if seekingStatus.Valid {
-			card.JobSeekingStatus = &seekingStatus.String
-		}
-		if simPct.Valid {
-			f, _ := simPct.Float64Value()
-			if f.Valid {
-				card.Similarity = &f.Float64
-			}
-		}
-
-		users = append(users, card)
-	}
+	users := scanSimilarityCards(rows)
 
 	var total int
 	_ = c.pool.QueryRow(reqCtx,
@@ -548,4 +512,396 @@ func (c *TalentSearchController) parseCustomWeights(ctx echo.Context) map[string
 		}
 	}
 	return mu
+}
+
+var ciTypeIDs = [6]string{"R", "I", "A", "S", "E", "C"}
+
+func scanSimilarityCards(rows pgx.Rows) []talentCard {
+	var cards []talentCard
+	for rows.Next() {
+		var uid pgtype.UUID
+		var username, name string
+		var headline, avatarURL, profileColor, seekingStatus pgtype.Text
+		var simPct pgtype.Numeric
+
+		if err := rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus, &simPct); err != nil {
+			continue
+		}
+
+		card := talentCard{
+			UserID:   pgUUIDToString(uid),
+			Username: username,
+			Name:     name,
+		}
+		if headline.Valid {
+			card.Headline = &headline.String
+		}
+		if avatarURL.Valid {
+			card.AvatarURL = &avatarURL.String
+		}
+		if profileColor.Valid {
+			card.ProfileColor = &profileColor.String
+		}
+		if seekingStatus.Valid {
+			card.JobSeekingStatus = &seekingStatus.String
+		}
+		if simPct.Valid {
+			f, _ := simPct.Float64Value()
+			if f.Valid {
+				card.Similarity = &f.Float64
+			}
+		}
+
+		cards = append(cards, card)
+	}
+	return cards
+}
+
+func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
+	companyID := ctx.Get(authmw.CompanyIDKey).(string)
+	teamID := ctx.QueryParam("team_id")
+	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
+	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
+
+	if limit < 1 || limit > 50 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	reqCtx := ctx.Request().Context()
+	var target [6]float64
+
+	if teamID != "" {
+		scores, err := c.getTeamAverageCIScores(reqCtx, companyID, teamID)
+		if err != nil {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team not found or no completed CI data"})
+		}
+		target = scores
+	} else {
+		scores, ok := c.parseCustomCIWeights(ctx)
+		if !ok {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team_id or custom ci_ weights required"})
+		}
+		target = scores
+	}
+
+	query := `
+WITH latest_ci AS (
+  SELECT DISTINCT ON (s.user_id) s.user_id, s.id AS session_id
+  FROM career_interest_sessions s
+  WHERE s.status = 'completed'
+  ORDER BY s.user_id, s.completed_at DESC
+),
+ci_vectors AS (
+  SELECT lc.user_id,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'R' THEN ts.score END), 0) AS score_r,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'I' THEN ts.score END), 0) AS score_i,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'A' THEN ts.score END), 0) AS score_a,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'S' THEN ts.score END), 0) AS score_s,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'E' THEN ts.score END), 0) AS score_e,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'C' THEN ts.score END), 0) AS score_c
+  FROM latest_ci lc
+  JOIN career_interest_type_scores ts ON ts.session_id = lc.session_id
+  GROUP BY lc.user_id
+),
+target_ci AS (
+  SELECT $1::float8 AS r, $2::float8 AS i, $3::float8 AS a,
+         $4::float8 AS s, $5::float8 AS e, $6::float8 AS c
+),
+similarity AS (
+  SELECT cv.user_id,
+    (
+      SELECT
+        CASE WHEN norm_a = 0 OR norm_b = 0 THEN 0
+        ELSE (dot / (SQRT(norm_a) * SQRT(norm_b)) + 1.0) / 2.0
+        END
+      FROM (
+        SELECT
+          cv.score_r*tc.r + cv.score_i*tc.i + cv.score_a*tc.a +
+          cv.score_s*tc.s + cv.score_e*tc.e + cv.score_c*tc.c AS dot,
+          cv.score_r*cv.score_r + cv.score_i*cv.score_i + cv.score_a*cv.score_a +
+          cv.score_s*cv.score_s + cv.score_e*cv.score_e + cv.score_c*cv.score_c AS norm_a,
+          tc.r*tc.r + tc.i*tc.i + tc.a*tc.a + tc.s*tc.s + tc.e*tc.e + tc.c*tc.c AS norm_b
+        FROM target_ci tc
+      ) calc
+    ) AS sim
+  FROM ci_vectors cv
+)
+SELECT
+  u.id, u.username, u.name, u.headline, u.avatar_url, u.profile_color, u.job_seeking_status,
+  ROUND((s.sim * 100)::numeric, 1) AS similarity_pct
+FROM similarity s
+JOIN users u ON u.id = s.user_id
+WHERE u.is_public = true
+ORDER BY s.sim DESC
+LIMIT $7 OFFSET $8`
+
+	rows, err := c.pool.Query(reqCtx, query,
+		target[0], target[1], target[2], target[3], target[4], target[5],
+		limit, offset)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	defer rows.Close()
+
+	users := scanSimilarityCards(rows)
+
+	var total int
+	_ = c.pool.QueryRow(reqCtx,
+		`SELECT COUNT(DISTINCT s.user_id)
+		 FROM career_interest_sessions s
+		 JOIN users u ON u.id = s.user_id
+		 WHERE s.status = 'completed' AND u.is_public = true`,
+	).Scan(&total)
+
+	if len(users) > 0 {
+		c.enrichCards(reqCtx, users)
+	}
+
+	if users == nil {
+		users = []talentCard{}
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]any{
+		"users": users,
+		"total": total,
+	})
+}
+
+func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) error {
+	companyID := ctx.Get(authmw.CompanyIDKey).(string)
+	teamID := ctx.QueryParam("team_id")
+	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
+	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
+
+	if limit < 1 || limit > 50 {
+		limit = 20
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	reqCtx := ctx.Request().Context()
+
+	var targetMu map[string]float64
+	var targetCI [6]float64
+
+	if teamID != "" {
+		mu, errWV := c.getTeamAverageMu(reqCtx, companyID, teamID)
+		ci, errCI := c.getTeamAverageCIScores(reqCtx, companyID, teamID)
+		if errWV != nil && errCI != nil {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team not found or no completed diagnostic data"})
+		}
+		if errWV != nil {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team has no completed WV data"})
+		}
+		if errCI != nil {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team has no completed CI data"})
+		}
+		targetMu = mu
+		targetCI = ci
+	} else {
+		targetMu = c.parseCustomWeights(ctx)
+		ci, hasCI := c.parseCustomCIWeights(ctx)
+		if targetMu == nil || !hasCI {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "both wv_ and ci_ weights required"})
+		}
+		targetCI = ci
+	}
+
+	targetJSON, err := json.Marshal(targetMu)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	query := `
+WITH latest_wv AS (
+  SELECT DISTINCT ON (wns.user_id) wns.user_id, wns.mu
+  FROM work_needs_scores wns
+  ORDER BY wns.user_id, wns.created_at DESC
+),
+target_wv AS (
+  SELECT $1::jsonb AS mu
+),
+wv_sim AS (
+  SELECT
+    lw.user_id,
+    (
+      SELECT
+        CASE WHEN norm_a = 0 OR norm_b = 0 THEN 0
+        ELSE (dot / (SQRT(norm_a) * SQRT(norm_b)) + 1.0) / 2.0
+        END
+      FROM (
+        SELECT
+          SUM(a_val * b_val) AS dot,
+          SUM(a_val * a_val) AS norm_a,
+          SUM(b_val * b_val) AS norm_b
+        FROM jsonb_each_text(lw.mu) AS a(key, val)
+        JOIN jsonb_each_text((SELECT mu FROM target_wv)) AS b(key, val) ON a.key = b.key
+        CROSS JOIN LATERAL (SELECT a.val::float8 AS a_val, b.val::float8 AS b_val) v
+      ) inner_calc
+    ) AS sim
+  FROM latest_wv lw
+),
+latest_ci AS (
+  SELECT DISTINCT ON (s.user_id) s.user_id, s.id AS session_id
+  FROM career_interest_sessions s
+  WHERE s.status = 'completed'
+  ORDER BY s.user_id, s.completed_at DESC
+),
+ci_vectors AS (
+  SELECT lc.user_id,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'R' THEN ts.score END), 0) AS score_r,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'I' THEN ts.score END), 0) AS score_i,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'A' THEN ts.score END), 0) AS score_a,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'S' THEN ts.score END), 0) AS score_s,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'E' THEN ts.score END), 0) AS score_e,
+    COALESCE(MAX(CASE WHEN ts.type_id = 'C' THEN ts.score END), 0) AS score_c
+  FROM latest_ci lc
+  JOIN career_interest_type_scores ts ON ts.session_id = lc.session_id
+  GROUP BY lc.user_id
+),
+target_ci AS (
+  SELECT $2::float8 AS r, $3::float8 AS i, $4::float8 AS a,
+         $5::float8 AS s, $6::float8 AS e, $7::float8 AS c
+),
+ci_sim AS (
+  SELECT cv.user_id,
+    (
+      SELECT
+        CASE WHEN norm_a = 0 OR norm_b = 0 THEN 0
+        ELSE (dot / (SQRT(norm_a) * SQRT(norm_b)) + 1.0) / 2.0
+        END
+      FROM (
+        SELECT
+          cv.score_r*tc.r + cv.score_i*tc.i + cv.score_a*tc.a +
+          cv.score_s*tc.s + cv.score_e*tc.e + cv.score_c*tc.c AS dot,
+          cv.score_r*cv.score_r + cv.score_i*cv.score_i + cv.score_a*cv.score_a +
+          cv.score_s*cv.score_s + cv.score_e*cv.score_e + cv.score_c*cv.score_c AS norm_a,
+          tc.r*tc.r + tc.i*tc.i + tc.a*tc.a + tc.s*tc.s + tc.e*tc.e + tc.c*tc.c AS norm_b
+        FROM target_ci tc
+      ) calc
+    ) AS sim
+  FROM ci_vectors cv
+),
+combined AS (
+  SELECT ws.user_id, (ws.sim + cs.sim) / 2.0 AS sim
+  FROM wv_sim ws
+  INNER JOIN ci_sim cs ON ws.user_id = cs.user_id
+)
+SELECT
+  u.id, u.username, u.name, u.headline, u.avatar_url, u.profile_color, u.job_seeking_status,
+  ROUND((c.sim * 100)::numeric, 1) AS similarity_pct
+FROM combined c
+JOIN users u ON u.id = c.user_id
+WHERE u.is_public = true
+ORDER BY c.sim DESC
+LIMIT $8 OFFSET $9`
+
+	rows, err := c.pool.Query(reqCtx, query,
+		targetJSON,
+		targetCI[0], targetCI[1], targetCI[2], targetCI[3], targetCI[4], targetCI[5],
+		limit, offset)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	defer rows.Close()
+
+	users := scanSimilarityCards(rows)
+
+	var total int
+	_ = c.pool.QueryRow(reqCtx,
+		`SELECT COUNT(*)
+		FROM (
+			SELECT DISTINCT wns.user_id
+			FROM work_needs_scores wns
+			JOIN users u ON u.id = wns.user_id
+			WHERE u.is_public = true
+		) wv
+		INNER JOIN (
+			SELECT DISTINCT s.user_id
+			FROM career_interest_sessions s
+			JOIN users u ON u.id = s.user_id
+			WHERE s.status = 'completed' AND u.is_public = true
+		) ci ON wv.user_id = ci.user_id`,
+	).Scan(&total)
+
+	if len(users) > 0 {
+		c.enrichCards(reqCtx, users)
+	}
+
+	if users == nil {
+		users = []talentCard{}
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]any{
+		"users": users,
+		"total": total,
+	})
+}
+
+func (c *TalentSearchController) getTeamAverageCIScores(ctx context.Context, companyID, teamID string) ([6]float64, error) {
+	var ownerID pgtype.UUID
+	teamUUID := pgUUID(teamID)
+	err := c.pool.QueryRow(ctx,
+		`SELECT company_id FROM teams WHERE id = $1`, teamUUID,
+	).Scan(&ownerID)
+	if err != nil {
+		return [6]float64{}, err
+	}
+	if pgUUIDToString(ownerID) != companyID {
+		return [6]float64{}, pgx.ErrNoRows
+	}
+
+	rows, err := c.pool.Query(ctx,
+		`SELECT ts.type_id, AVG(ts.score) AS avg_score
+		FROM career_interest_type_scores ts
+		JOIN (
+			SELECT DISTINCT ON (s.user_id) s.id AS session_id
+			FROM career_interest_sessions s
+			JOIN team_members tm ON tm.user_id = s.user_id
+			WHERE tm.team_id = $1 AND tm.ci_status = 'completed' AND s.status = 'completed'
+			ORDER BY s.user_id, s.completed_at DESC
+		) latest ON ts.session_id = latest.session_id
+		GROUP BY ts.type_id`, teamUUID)
+	if err != nil {
+		return [6]float64{}, err
+	}
+	defer rows.Close()
+
+	typeIndex := map[string]int{"R": 0, "I": 1, "A": 2, "S": 3, "E": 4, "C": 5}
+	var scores [6]float64
+	count := 0
+	for rows.Next() {
+		var typeID string
+		var avgScore float64
+		if err := rows.Scan(&typeID, &avgScore); err == nil {
+			if idx, ok := typeIndex[typeID]; ok {
+				scores[idx] = avgScore
+				count++
+			}
+		}
+	}
+	if count == 0 {
+		return [6]float64{}, pgx.ErrNoRows
+	}
+	return scores, nil
+}
+
+func (c *TalentSearchController) parseCustomCIWeights(ctx echo.Context) ([6]float64, bool) {
+	var scores [6]float64
+	hasAny := false
+	for i, tid := range ciTypeIDs {
+		param := ctx.QueryParam("ci_" + tid)
+		if param != "" {
+			v, err := strconv.ParseFloat(param, 64)
+			if err == nil {
+				scores[i] = v
+				hasAny = true
+			}
+		}
+	}
+	return scores, hasAny
 }

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -111,11 +112,11 @@ func (c *WSController) HandleWS(ctx echo.Context) error {
 	}
 
 	key := fmt.Sprintf("%s:%s", participantType, id)
-	client := ws.NewClient(ctx.Request().Context(), c.hub, conn, key)
+	client := ws.NewClient(context.Background(), c.hub, conn, key)
 	c.hub.Register(client)
 
 	go client.WritePump()
-	go client.ReadPump()
+	client.ReadPump() // blocks until connection closes
 
 	return nil
 }
