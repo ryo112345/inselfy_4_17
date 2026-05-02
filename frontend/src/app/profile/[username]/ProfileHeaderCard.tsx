@@ -100,7 +100,7 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
       </div>
 
       <div className="relative px-4 md:px-7 pb-6">
-        <div className="h-24 md:h-36" />
+        <div className="h-[120px] md:h-36" />
         <div className="absolute top-14 md:top-20 left-4 md:left-6">
           <div className="relative">
             <div className="group flex h-24 w-24 md:h-36 md:w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
@@ -110,10 +110,10 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
               <button
                 type="button"
                 aria-label="アバターを追加"
-                className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white shadow-sm transition hover:opacity-80"
+                className="absolute bottom-0 right-0 flex h-7 w-7 md:h-10 md:w-10 items-center justify-center rounded-full border-2 bg-white shadow-sm transition hover:opacity-80"
                 style={{ borderColor: headerColor, color: headerColor }}
               >
-                <PlusIcon className="h-[22px] w-[22px]" />
+                <PlusIcon className="h-4 w-4 md:h-[22px] md:w-[22px]" />
               </button>
             )}
           </div>
@@ -129,6 +129,11 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
           >
             <PencilIcon className="h-[18px] w-[18px]" />
           </button>
+        )}
+        {!isOwner && !isEditing && (
+          <div className="absolute right-4 top-[136px] md:top-[188px]">
+            <FollowButton username={user.username} profileColor={headerColor} />
+          </div>
         )}
 
         {isEditing ? (
@@ -401,7 +406,8 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
             </div>
           </div>
         ) : (
-          <div className="mt-14 md:mt-24 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="mt-14 md:mt-24">
+            {/* 名前行 */}
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl md:text-2xl font-bold tracking-tight text-gray-900">
@@ -418,39 +424,38 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
               ) : isOwner ? (
                 <p className="mt-2 text-lg text-gray-400">ヘッドラインを追加</p>
               ) : null}
-              <div className="mt-2.5 flex flex-wrap items-center gap-3 text-base text-gray-500">
-                {user.location ? (
-                  <span className="inline-flex items-center gap-1">
-                    <MapPinIcon className="h-[18px] w-[18px]" />
-                    {user.location}
-                  </span>
-                ) : null}
-                {user.industry ? (
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-                    {user.industry}
-                  </span>
-                ) : null}
-                {user.jobType ? (
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-                    {user.jobType}
-                  </span>
-                ) : null}
-              </div>
             </div>
-            <div className="flex shrink-0 items-center gap-5 text-base text-gray-500 md:pb-2">
-              <span className="inline-flex items-baseline gap-1.5">
-                <span className="text-lg font-bold text-gray-900">
-                  {followingCount}
+
+            {/* タグ行 */}
+            <div className="mt-2.5 flex flex-wrap items-center gap-3 text-base text-gray-500">
+              {user.location ? (
+                <span className="inline-flex items-center gap-1">
+                  <MapPinIcon className="h-[18px] w-[18px]" />
+                  {user.location}
                 </span>
+              ) : null}
+              {user.industry ? (
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+                  {user.industry}
+                </span>
+              ) : null}
+              {user.jobType ? (
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
+                  {user.jobType}
+                </span>
+              ) : null}
+            </div>
+
+            {/* 統計行 */}
+            <div className="mt-4 flex items-center gap-5 border-t border-gray-100 pt-4 text-base text-gray-500">
+              <span className="inline-flex items-baseline gap-1.5">
+                <span className="text-lg font-bold text-gray-900">{followingCount}</span>
                 フォロー
               </span>
               <span className="inline-flex items-baseline gap-1.5">
                 <span className="text-lg font-bold text-gray-900">{followersCount}</span>
                 フォロワー
               </span>
-              {!isOwner && (
-                <FollowButton username={user.username} profileColor={headerColor} />
-              )}
             </div>
           </div>
         )}
