@@ -3,6 +3,7 @@ import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { GoogleProvider } from "@/features/auth/google-provider";
 import { UnreadScoutProvider } from "@/features/scout/unread-context";
+import { UnreadMessagingProvider } from "@/features/messaging/unread-context";
 import { MobileFooter } from "@/app/components/MobileFooter";
 import "./globals.css";
 
@@ -34,8 +35,10 @@ export default function RootLayout({
         <GoogleProvider>
           <AuthProvider>
             <UnreadScoutProvider>
-              {children}
-              <MobileFooter />
+              <UnreadMessagingProvider>
+                {children}
+                <MobileFooter />
+              </UnreadMessagingProvider>
             </UnreadScoutProvider>
           </AuthProvider>
         </GoogleProvider>

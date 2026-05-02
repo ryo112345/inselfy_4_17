@@ -28,6 +28,7 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [loggingInId, setLoggingInId] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -48,6 +49,17 @@ export default function AdminUsersPage() {
     e.preventDefault();
     setPage(1);
     setSearch(searchInput);
+  };
+
+  const handleBypassLogin = async (userId: string, username: string) => {
+    setLoggingInId(userId);
+    const res = await fetch(`/api/admin/users/${userId}/bypass-login`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      window.open(`/profile/${username}`, "_blank");
+    }
+    setLoggingInId(null);
   };
 
   const handleDelete = async (userId: string) => {
@@ -180,6 +192,13 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleBypassLogin(user.id, user.username)}
+                            disabled={loggingInId === user.id}
+                            className="px-3 py-1.5 text-xs text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50"
+                          >
+                            {loggingInId === user.id ? "ログイン中..." : "ログイン"}
+                          </button>
                           <Link
                             href={`/profile/${user.username}`}
                             target="_blank"

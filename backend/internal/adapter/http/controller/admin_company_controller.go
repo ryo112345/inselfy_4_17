@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -10,14 +11,17 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
+	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type AdminCompanyController struct {
-	queries *generated.Queries
+	queries    *generated.Queries
+	jwtService port.JWTService
 }
 
-func NewAdminCompanyController(pool *pgxpool.Pool) *AdminCompanyController {
-	return &AdminCompanyController{queries: generated.New(pool)}
+func NewAdminCompanyController(pool *pgxpool.Pool, jwtService port.JWTService) *AdminCompanyController {
+	return &AdminCompanyController{queries: generated.New(pool), jwtService: jwtService}
 }
 
 type adminCompanyItem struct {
@@ -152,4 +156,55 @@ func buildCompanyListResponse(companies []adminCompanyItem, total int64, page, p
 		PerPage:    perPage,
 		TotalPages: totalPages,
 	}
+}
+
+func (c *AdminCompanyController) BypassLogin(ctx echo.Context, id string) error {
+	parsed, err := uuid.Parse(id)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+	}
+	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
+
+	ca, err := c.queries.GetCompanyAccountByID(ctx.Request().Context(), pgID)
+	if err != nil {
+		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "company not found"})
+	}
+
+	companyID := pgUUIDToString(ca.ID)
+	accessToken, err := c.jwtService.GenerateCompanyAccessToken(companyID)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to generate token"})
+	}
+
+	rawRefresh, err := c.jwtService.GenerateRefreshToken()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to generate token"})
+	}
+
+	if err := c.queries.CreateCompanyRefreshToken(ctx.Request().Context(), &generated.CreateCompanyRefreshTokenParams{
+		CompanyID: ca.ID,
+		TokenHash: c.jwtService.HashRefreshToken(rawRefresh),
+		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(7 * 24 * time.Hour), Valid: true},
+	}); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to store refresh token"})
+	}
+
+	setCompanyAuthCookies(ctx, &presenter.CompanyAuthTokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: rawRefresh,
+		Company: &presenter.CompanyResponse{
+			ID:                companyID,
+			Email:             ca.Email,
+			CompanyName:       ca.CompanyName,
+			ContactPersonName: ca.ContactPersonName,
+			PhoneNumber:       ca.PhoneNumber,
+			Status:            string(ca.Status),
+			CreatedAt:         ca.CreatedAt.Time,
+		},
+	})
+
+	return ctx.JSON(http.StatusOK, map[string]string{
+		"message":     "ok",
+		"companyName": ca.CompanyName,
+	})
 }
