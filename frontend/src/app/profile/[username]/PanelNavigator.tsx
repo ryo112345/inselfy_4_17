@@ -177,8 +177,9 @@ export function PanelNavigator({ children, userId, username, displayName = usern
 
       <div
         ref={trackRef}
-        className={`flex items-stretch h-full md:gap-[12px]${transitionReady && !dragging ? ' transition-all duration-300 ease-in-out' : ''}`}
+        className={`flex items-stretch h-full${transitionReady && !dragging ? ' transition-all duration-300 ease-in-out' : ''}`}
         style={hydrated ? {
+          gap: isMobile ? undefined : `${gapPx}px`,
           transform: `translateX(${expanded ? expandedTransform : focusedTransform})`,
         } : undefined}
       >

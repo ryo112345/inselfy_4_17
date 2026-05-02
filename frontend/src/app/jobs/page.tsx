@@ -374,7 +374,7 @@ export default function JobsPage() {
             </button>
           )}
 
-          <div className="flex items-center gap-2 ml-auto shrink-0">
+          <div className="flex md:hidden items-center gap-2 ml-auto shrink-0">
             <span className="text-xs text-gray-500">{total}件</span>
             <select
               value={sort}
