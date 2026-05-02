@@ -31,10 +31,9 @@ export function MessageInput({ onSend, disabled }: Props) {
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        handleSend();
       }
     },
-    [handleSend],
+    [],
   );
 
   const handleInput = useCallback(() => {

@@ -85,7 +85,7 @@ export function MessageThread({
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-[#f6f7f5] px-4 py-4">
+      <div className="flex-1 overflow-y-auto bg-[#C8E8F5] px-4 py-4">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />

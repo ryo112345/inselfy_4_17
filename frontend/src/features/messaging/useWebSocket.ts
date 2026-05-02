@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 
-const WS_URL =
+const WS_BASE =
   process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8081/api/ws";
 
 type WSMessage = {
@@ -16,6 +16,19 @@ type Options = {
   onMessage?: (msg: WSMessage) => void;
 };
 
+async function fetchTicket(type: string): Promise<string | null> {
+  try {
+    const res = await fetch(`/api/ws/ticket?type=${type}`, {
+      credentials: "include",
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.ticket ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function useMessagingWebSocket({ type, enabled = true, onMessage }: Options) {
   const wsRef = useRef<WebSocket | null>(null);
   const onMessageRef = useRef(onMessage);
@@ -25,10 +38,19 @@ export function useMessagingWebSocket({ type, enabled = true, onMessage }: Optio
   const reconnectDelay = useRef(1000);
   const mountedRef = useRef(true);
 
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     if (!mountedRef.current) return;
 
-    const url = `${WS_URL}?type=${type}`;
+    const ticket = await fetchTicket(type);
+    if (!ticket || !mountedRef.current) {
+      reconnectTimer.current = setTimeout(() => {
+        reconnectDelay.current = Math.min(reconnectDelay.current * 2, 30000);
+        connect();
+      }, reconnectDelay.current);
+      return;
+    }
+
+    const url = `${WS_BASE}?ticket=${ticket}`;
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
