@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
@@ -19,6 +19,9 @@ type TalentCard = {
   top_wv_labels: string[];
   top_ci_labels: string[];
   similarity?: number;
+  wv_similarity?: number;
+  ci_similarity?: number;
+  integrated_similarity?: number;
 };
 
 type Team = {
@@ -66,31 +69,55 @@ export default function TalentsPage() {
   const [searched, setSearched] = useState(false);
   const PAGE_SIZE = 20;
 
-  // Condition filters
-  const [keyword, setKeyword] = useState("");
+  // Condition filters — restore from URL
+  const [keyword, setKeyword] = useState(searchParams.get("q") ?? "");
   const [skillInput, setSkillInput] = useState("");
-  const [skills, setSkills] = useState<string[]>([]);
-  const [location, setLocation] = useState("");
-  const [industry, setIndustry] = useState("");
-  const [seekingStatus, setSeekingStatus] = useState("");
-  const [jobType, setJobType] = useState("");
+  const [skills, setSkills] = useState<string[]>(() => {
+    const s = searchParams.get("skills");
+    return s ? s.split(",").filter(Boolean) : [];
+  });
+  const [location, setLocation] = useState(searchParams.get("location") ?? "");
+  const [industry, setIndustry] = useState(searchParams.get("industry") ?? "");
+  const [seekingStatus, setSeekingStatus] = useState(searchParams.get("job_seeking_status") ?? "");
+  const [jobType, setJobType] = useState(searchParams.get("job_type") ?? "");
 
   // Detail panel (diagnostic split view)
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(searchParams.get("selected") ?? null);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
   const [detailWv, setDetailWv] = useState<{ id: string; score: number }[] | null>(null);
   const [detailCi, setDetailCi] = useState<{ id: string; score: number }[] | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailExperiences, setDetailExperiences] = useState<{ companyName: string; title: string; startYear: number; startMonth: number; endYear?: number | null; endMonth?: number | null; isCurrent: boolean; description?: string }[]>([]);
+  const [detailSkills, setDetailSkills] = useState<string[]>([]);
+  const [detailAbout, setDetailAbout] = useState<string | null>(null);
 
-  // Diagnostic filters
-  const [diagnosticMode, setDiagnosticMode] = useState<"team" | "custom">(initialTeamId ? "team" : "team");
+  // Diagnostic filters — restore from URL
+  const [diagnosticMode, setDiagnosticMode] = useState<"team" | "custom">(() => {
+    const m = searchParams.get("mode");
+    return m === "custom" ? "custom" : "team";
+  });
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState(initialTeamId);
-  const [customWeights, setCustomWeights] = useState<Record<string, number>>({
-    achievement: 50, comfort: 50, status: 50, altruism: 50, safety: 50, autonomy: 50,
+  const [customWeights, setCustomWeights] = useState<Record<string, number>>(() => {
+    const defaults: Record<string, number> = { achievement: 50, comfort: 50, status: 50, altruism: 50, safety: 50, autonomy: 50 };
+    for (const k of Object.keys(defaults)) {
+      const v = searchParams.get(`wv_${k}`);
+      if (v) defaults[k] = Number(v);
+    }
+    return defaults;
   });
-  const [diagnosticType, setDiagnosticType] = useState<"wv" | "ci" | "integrated">("wv");
-  const [customCIWeights, setCustomCIWeights] = useState<Record<string, number>>({
-    R: 50, I: 50, A: 50, S: 50, E: 50, C: 50,
+  const [diagnosticType, setDiagnosticType] = useState<"wv" | "ci" | "integrated">(() => {
+    const dt = searchParams.get("dtype");
+    if (dt === "ci" || dt === "integrated") return dt;
+    return "wv";
+  });
+  const [customCIWeights, setCustomCIWeights] = useState<Record<string, number>>(() => {
+    const defaults: Record<string, number> = { R: 50, I: 50, A: 50, S: 50, E: 50, C: 50 };
+    for (const k of Object.keys(defaults)) {
+      const v = searchParams.get(`ci_${k}`);
+      if (v) defaults[k] = Number(v);
+    }
+    return defaults;
   });
 
   // Team average scores for compare overlay
@@ -170,10 +197,24 @@ export default function TalentsPage() {
 
   const compareDisplayLabel = diagnosticMode === "team" ? teamName : "目標値";
 
-  // Auto-search when coming from team page
+  // Auto-search on mount: restore from URL or from team page link
+  const didRestoreRef = useRef(false);
   useEffect(() => {
-    if (initialTab === "diagnostic" && initialTeamId) {
-      handleDiagnosticSearch();
+    if (didRestoreRef.current) return;
+    didRestoreRef.current = true;
+
+    const wasSearched = searchParams.get("searched") === "1";
+    const savedCount = sessionStorage.getItem("talents_loaded_count");
+    const restoreLimit = savedCount ? Number(savedCount) : undefined;
+    sessionStorage.removeItem("talents_loaded_count");
+
+    if (initialTab === "diagnostic" && (initialTeamId || wasSearched)) {
+      if (diagnosticMode === "team" && !selectedTeamId) return;
+      syncFiltersToURL();
+      fetchTalents(getDiagnosticEndpoint(), buildDiagnosticParams(0, restoreLimit), false);
+    } else if (initialTab === "condition" && wasSearched) {
+      syncFiltersToURL();
+      fetchTalents("/api/company/talents/search", buildConditionParams(0, restoreLimit), false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -185,13 +226,18 @@ export default function TalentsPage() {
     }
   }, [users, tab, selectedUserId]);
 
-  // Fetch WV/CI scores when a user is selected in diagnostic mode
+  // Fetch WV/CI scores + full experiences/skills when a user is selected in diagnostic mode
   useEffect(() => {
     if (!selectedUserId || tab !== "diagnostic") {
       setDetailWv(null);
       setDetailCi(null);
+      setDetailExperiences([]);
+      setDetailSkills([]);
+      setDetailAbout(null);
       return;
     }
+    const user = users.find((u) => u.user_id === selectedUserId);
+    if (!user) return;
     setDetailLoading(true);
     Promise.all([
       fetch(`/api/work-values/users/${selectedUserId}/results/latest`)
@@ -200,24 +246,127 @@ export default function TalentsPage() {
       fetch(`/api/career-interest/users/${selectedUserId}/results/latest`)
         .then((r) => (r.ok ? r.json() : null))
         .catch(() => null),
+      fetch(`/api/users/${user.username}/experiences`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`/api/users/${user.username}/skills`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`/api/users/${user.username}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
     ])
-      .then(([wvData, ciData]) => {
+      .then(([wvData, ciData, expData, skillData, profileData]) => {
         setDetailWv(
           wvData?.values?.map((v: { value_id: string; display_score: number }) => ({ id: v.value_id, score: v.display_score })) ?? null,
         );
         setDetailCi(
           ciData?.type_scores?.map((s: { type_id: string; score: number }) => ({ id: s.type_id, score: s.score })) ?? null,
         );
+        setDetailExperiences(
+          (expData?.items ?? []).map((e: { companyName: string; title: string; startYear: number; startMonth: number; endYear?: number | null; endMonth?: number | null; isCurrent: boolean; description?: string }) => ({
+            companyName: e.companyName, title: e.title, startYear: e.startYear, startMonth: e.startMonth,
+            endYear: e.endYear, endMonth: e.endMonth, isCurrent: e.isCurrent, description: e.description,
+          })),
+        );
+        setDetailSkills((skillData?.items ?? []).map((s: { name: string }) => s.name));
+        setDetailAbout(profileData?.about ?? null);
       })
       .finally(() => setDetailLoading(false));
-  }, [selectedUserId, tab]);
+  }, [selectedUserId, tab, users]);
 
   const selectedUser = useMemo(
     () => (selectedUserId ? users.find((u) => u.user_id === selectedUserId) ?? null : null),
     [users, selectedUserId],
   );
 
-  const buildConditionParams = useCallback((offset: number) => {
+  const buildURLParams = useCallback(() => {
+    const params = new URLSearchParams();
+    params.set("tab", tab);
+    if (tab === "condition") {
+      if (keyword) params.set("q", keyword);
+      if (skills.length > 0) params.set("skills", skills.join(","));
+      if (location) params.set("location", location);
+      if (industry) params.set("industry", industry);
+      if (seekingStatus) params.set("job_seeking_status", seekingStatus);
+      if (jobType) params.set("job_type", jobType);
+    } else {
+      params.set("mode", diagnosticMode);
+      params.set("dtype", diagnosticType);
+      if (diagnosticMode === "team" && selectedTeamId) {
+        params.set("team", selectedTeamId);
+      } else if (diagnosticMode === "custom") {
+        if (diagnosticType === "wv" || diagnosticType === "integrated") {
+          for (const [k, v] of Object.entries(customWeights)) params.set(`wv_${k}`, String(v));
+        }
+        if (diagnosticType === "ci" || diagnosticType === "integrated") {
+          for (const [k, v] of Object.entries(customCIWeights)) params.set(`ci_${k}`, String(v));
+        }
+      }
+    }
+    params.set("searched", "1");
+    return params;
+  }, [tab, keyword, skills, location, industry, seekingStatus, jobType, diagnosticMode, diagnosticType, selectedTeamId, customWeights, customCIWeights]);
+
+  const syncFiltersToURL = useCallback((overrideSelected?: string | null) => {
+    const params = buildURLParams();
+    const sel = overrideSelected !== undefined ? overrideSelected : selectedUserId;
+    if (sel) params.set("selected", sel);
+    router.replace(`/company/talents?${params}`, { scroll: false });
+  }, [buildURLParams, selectedUserId, router]);
+
+  // Sync selectedUserId to URL when it changes (after search)
+  useEffect(() => {
+    if (!searched) return;
+    syncFiltersToURL();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUserId]);
+
+  const restoredScrollRef = useRef(false);
+
+  // Continuously save scroll positions and loaded count so values are always fresh
+  useEffect(() => {
+    const panel = leftPanelRef.current;
+    const onPanelScroll = () => {
+      if (panel) sessionStorage.setItem("talents_scroll_left", String(panel.scrollTop));
+    };
+    const onPageScroll = () => {
+      sessionStorage.setItem("talents_scroll_page", String(window.scrollY));
+    };
+    panel?.addEventListener("scroll", onPanelScroll, { passive: true });
+    window.addEventListener("scroll", onPageScroll, { passive: true });
+    if (users.length > PAGE_SIZE) {
+      sessionStorage.setItem("talents_loaded_count", String(users.length));
+    } else {
+      sessionStorage.removeItem("talents_loaded_count");
+    }
+    return () => {
+      panel?.removeEventListener("scroll", onPanelScroll);
+      window.removeEventListener("scroll", onPageScroll);
+    };
+  }, [users]);
+
+  // Restore scroll positions once after results load
+  useEffect(() => {
+    if (users.length === 0 || restoredScrollRef.current) return;
+    restoredScrollRef.current = true;
+    requestAnimationFrame(() => {
+      if (tab === "diagnostic") {
+        const saved = sessionStorage.getItem("talents_scroll_left");
+        if (saved && leftPanelRef.current) {
+          leftPanelRef.current.scrollTop = Number(saved);
+        }
+      }
+      const savedPage = sessionStorage.getItem("talents_scroll_page");
+      if (savedPage) {
+        window.scrollTo(0, Number(savedPage));
+      }
+      sessionStorage.removeItem("talents_scroll_left");
+      sessionStorage.removeItem("talents_scroll_page");
+    });
+  }, [users, tab]);
+
+  const buildConditionParams = useCallback((offset: number, limit?: number) => {
     const params = new URLSearchParams();
     if (keyword) params.set("q", keyword);
     if (skills.length > 0) params.set("skills", skills.join(","));
@@ -225,7 +374,7 @@ export default function TalentsPage() {
     if (industry) params.set("industry", industry);
     if (seekingStatus) params.set("job_seeking_status", seekingStatus);
     if (jobType) params.set("job_type", jobType);
-    params.set("limit", String(PAGE_SIZE));
+    params.set("limit", String(limit ?? PAGE_SIZE));
     params.set("offset", String(offset));
     return params;
   }, [keyword, skills, location, industry, seekingStatus, jobType]);
@@ -238,7 +387,7 @@ export default function TalentsPage() {
     }
   }, [diagnosticType]);
 
-  const buildDiagnosticParams = useCallback((offset: number) => {
+  const buildDiagnosticParams = useCallback((offset: number, limit?: number) => {
     const params = new URLSearchParams();
     if (diagnosticMode === "team" && selectedTeamId) {
       params.set("team_id", selectedTeamId);
@@ -254,7 +403,7 @@ export default function TalentsPage() {
         }
       }
     }
-    params.set("limit", String(PAGE_SIZE));
+    params.set("limit", String(limit ?? PAGE_SIZE));
     params.set("offset", String(offset));
     return params;
   }, [diagnosticMode, diagnosticType, selectedTeamId, customWeights, customCIWeights]);
@@ -281,13 +430,15 @@ export default function TalentsPage() {
   }, [companyFetch]);
 
   const handleConditionSearch = useCallback(() => {
+    syncFiltersToURL();
     fetchTalents("/api/company/talents/search", buildConditionParams(0), false);
-  }, [fetchTalents, buildConditionParams]);
+  }, [fetchTalents, buildConditionParams, syncFiltersToURL]);
 
   const handleDiagnosticSearch = useCallback(() => {
     if (diagnosticMode === "team" && !selectedTeamId) return;
+    syncFiltersToURL();
     fetchTalents(getDiagnosticEndpoint(), buildDiagnosticParams(0), false);
-  }, [fetchTalents, getDiagnosticEndpoint, buildDiagnosticParams, diagnosticMode, selectedTeamId]);
+  }, [fetchTalents, getDiagnosticEndpoint, buildDiagnosticParams, diagnosticMode, selectedTeamId, syncFiltersToURL]);
 
   const handleLoadMore = useCallback(() => {
     const offset = users.length;
@@ -299,6 +450,37 @@ export default function TalentsPage() {
   }, [tab, users.length, fetchTalents, buildConditionParams, getDiagnosticEndpoint, buildDiagnosticParams]);
 
   const handleSearch = tab === "condition" ? handleConditionSearch : handleDiagnosticSearch;
+
+  const hasMore = users.length > 0 && users.length < total;
+  const pageSentinelObserver = useRef<IntersectionObserver | null>(null);
+  const panelSentinelObserver = useRef<IntersectionObserver | null>(null);
+
+  const pageSentinelRef: RefCallback<HTMLDivElement> = useCallback(
+    (node) => {
+      if (pageSentinelObserver.current) pageSentinelObserver.current.disconnect();
+      if (!node || !hasMore) return;
+      pageSentinelObserver.current = new IntersectionObserver(
+        (entries) => { if (entries[0].isIntersecting && !loadingMore) handleLoadMore(); },
+        { rootMargin: "200px" },
+      );
+      pageSentinelObserver.current.observe(node);
+    },
+    [hasMore, loadingMore, handleLoadMore],
+  );
+
+  const panelSentinelRef: RefCallback<HTMLDivElement> = useCallback(
+    (node) => {
+      if (panelSentinelObserver.current) panelSentinelObserver.current.disconnect();
+      if (!node || !hasMore) return;
+      const scrollParent = node.closest(".overflow-y-auto");
+      panelSentinelObserver.current = new IntersectionObserver(
+        (entries) => { if (entries[0].isIntersecting && !loadingMore) handleLoadMore(); },
+        { root: scrollParent, rootMargin: "200px" },
+      );
+      panelSentinelObserver.current.observe(node);
+    },
+    [hasMore, loadingMore, handleLoadMore],
+  );
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -669,28 +851,24 @@ export default function TalentsPage() {
               <CandidateCard key={u.user_id} user={u} showSimilarity={false} />
             ))}
           </div>
-          {users.length < total && (
-            <div className="flex justify-center mt-6">
-              <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="rounded-lg border border-gray-200 bg-white px-8 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                {loadingMore ? "読み込み中..." : "もっと見る"}
-              </button>
+          {hasMore && (
+            <div ref={pageSentinelRef} className="flex justify-center mt-6 py-4">
+              {loadingMore && (
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
+              )}
             </div>
           )}
         </>
       )}
 
-      {/* Diagnostic tab: split layout */}
+      {/* Diagnostic tab: split layout — break out of parent max-w-5xl px-6 */}
       {!loading && tab === "diagnostic" && users.length > 0 && (
         <div
-          className="flex rounded-xl border border-gray-200 bg-white overflow-hidden"
-          style={{ height: "calc(100vh - 340px)", minHeight: 500 }}
+          className="relative left-1/2 -translate-x-1/2 flex rounded-xl border border-gray-200 bg-white overflow-hidden"
+          style={{ width: "calc(100vw - 48px)", height: "calc(100vh - 340px)", minHeight: 500 }}
         >
           {/* Left Panel - candidate list */}
-          <div className="w-full lg:w-[400px] lg:shrink-0 lg:border-r border-gray-100 overflow-y-auto">
+          <div ref={leftPanelRef} className="w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 overflow-y-auto bg-gray-50/60">
             <ul className="p-2 space-y-1">
               {users.map((u) => (
                 <li key={u.user_id}>
@@ -702,15 +880,11 @@ export default function TalentsPage() {
                 </li>
               ))}
             </ul>
-            {users.length < total && (
-              <div className="flex justify-center py-4">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={loadingMore}
-                  className="rounded-lg border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  {loadingMore ? "読み込み中..." : "もっと見る"}
-                </button>
+            {hasMore && (
+              <div ref={panelSentinelRef} className="flex justify-center py-4">
+                {loadingMore && (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
+                )}
               </div>
             )}
           </div>
@@ -726,6 +900,10 @@ export default function TalentsPage() {
                 compareWv={compareWv}
                 compareCi={compareCi}
                 compareLabel={compareDisplayLabel}
+                allExperiences={detailExperiences}
+                allSkills={detailSkills}
+                about={detailAbout}
+                diagnosticType={diagnosticType}
               />
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center text-center px-6">
@@ -855,6 +1033,43 @@ function CandidateCard({ user: u, showSimilarity }: { user: TalentCard; showSimi
   );
 }
 
+function SimilarityRing({ value, size = 44 }: { value: number; size?: number }) {
+  const r = (size - 6) / 2;
+  const circumference = 2 * Math.PI * r;
+  const filled = (value / 100) * circumference;
+  const color = value >= 80 ? "#2563eb" : value >= 60 ? "#60a5fa" : "#d1d5db";
+  const bgColor = value >= 80 ? "#dbeafe" : value >= 60 ? "#eff6ff" : "#f9fafb";
+
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} fill={bgColor} stroke="#e5e7eb" strokeWidth={2.5} />
+        <circle
+          cx={size / 2} cy={size / 2} r={r}
+          fill="none" stroke={color} strokeWidth={2.5}
+          strokeDasharray={circumference} strokeDashoffset={circumference - filled}
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-xs font-bold text-gray-700">{Math.round(value)}</span>
+      </div>
+    </div>
+  );
+}
+
+function SeekingDot({ status }: { status: string }) {
+  const cfg = SEEKING_STATUS_MAP[status];
+  if (!cfg) return null;
+  const dotColor = status === "actively_looking" ? "bg-emerald-400" : status === "open" ? "bg-amber-400" : "bg-gray-300";
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span className={`inline-block h-1.5 w-1.5 rounded-full ${dotColor}`} />
+      <span className={`text-[10px] leading-none ${cfg.text}`}>{cfg.label}</span>
+    </span>
+  );
+}
+
 function DiagnosticCandidateCard({
   user: u,
   isSelected,
@@ -866,54 +1081,68 @@ function DiagnosticCandidateCard({
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
   const avatarBg = u.profile_color ?? "#94a3b8";
+  const recentExps = u.experiences.slice(0, 2);
+  const topSkills = u.skills.slice(0, 3);
+  const extraSkillCount = u.skills.length - 3;
 
   const inner = (
     <div
-      className={`rounded-xl p-3.5 transition-all ${
+      className={`rounded-xl p-3 transition-all ${
         isSelected
-          ? "bg-blue-50/80 border border-blue-200"
-          : "hover:bg-gray-50 border border-transparent"
+          ? "bg-white ring-1 ring-blue-200 shadow-sm"
+          : "hover:bg-white/60"
       }`}
     >
-      <div className="flex items-center gap-3">
-        {u.avatar_url ? (
-          <img src={u.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover shrink-0" />
-        ) : (
-          <div
-            className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-            style={{ backgroundColor: avatarBg }}
-          >
-            {initials}
-          </div>
-        )}
+      <div className="flex gap-3">
+        {/* Match ring */}
+        {u.similarity != null && <SimilarityRing value={u.similarity} />}
+
+        {/* Main content */}
         <div className="flex-1 min-w-0">
+          {/* Name row */}
           <div className="flex items-center gap-2">
-            <p className={`text-sm font-semibold truncate ${isSelected ? "text-blue-700" : "text-gray-900"}`}>
+            {u.avatar_url ? (
+              <img src={u.avatar_url} alt="" className="h-5 w-5 rounded-full object-cover shrink-0" />
+            ) : (
+              <div
+                className="h-5 w-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0"
+                style={{ backgroundColor: avatarBg }}
+              >
+                {initials}
+              </div>
+            )}
+            <p className={`text-[13px] font-semibold truncate ${isSelected ? "text-gray-900" : "text-gray-800"}`}>
               {u.name}
             </p>
-            {u.similarity != null && (
-              <span
-                className="shrink-0 rounded-full px-2 py-0.5 text-xs font-bold text-white"
-                style={{ backgroundColor: u.similarity >= 80 ? "#2979ff" : u.similarity >= 60 ? "#64b5f6" : "#9ca3af" }}
-              >
-                {Math.round(u.similarity)}%
-              </span>
-            )}
           </div>
-          {u.headline && (
-            <p className="text-xs text-gray-500 truncate mt-0.5">{u.headline}</p>
+
+          {/* Experiences */}
+          {recentExps.length > 0 && (
+            <div className="mt-1.5 space-y-0.5">
+              {recentExps.map((exp, i) => (
+                <p key={i} className="text-[11px] leading-snug truncate">
+                  <span className="text-gray-700 font-medium">{exp.company_name}</span>
+                  <span className="text-gray-300 mx-1">—</span>
+                  <span className="text-gray-500">{exp.title}</span>
+                </p>
+              ))}
+            </div>
           )}
-          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-            {u.top_wv_labels.length > 0 && (
-              <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-600">
-                {u.top_wv_labels.join("・")}
+
+          {/* Skills + Status row */}
+          <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+            {topSkills.map((s) => (
+              <span key={s} className="rounded-md bg-gray-100 px-1.5 py-[3px] text-[10px] font-medium text-gray-600 leading-none">
+                {s}
               </span>
+            ))}
+            {extraSkillCount > 0 && (
+              <span className="text-[10px] text-gray-400 leading-none">+{extraSkillCount}</span>
             )}
-            {u.top_ci_labels.length > 0 && (
-              <span className="rounded-full bg-purple-50 px-1.5 py-0.5 text-[10px] text-purple-600">
-                {u.top_ci_labels.join("・")}
-              </span>
+            {u.job_seeking_status && topSkills.length > 0 && (
+              <span className="text-gray-200 text-[10px]">|</span>
             )}
+            {u.job_seeking_status && <SeekingDot status={u.job_seeking_status} />}
           </div>
         </div>
       </div>
@@ -936,6 +1165,59 @@ function DiagnosticCandidateCard({
   );
 }
 
+function matchColor(v: number) {
+  return v >= 80 ? "#2563eb" : v >= 60 ? "#60a5fa" : "#9ca3af";
+}
+
+function MatchBadges({ user: u, diagnosticType }: { user: TalentCard; diagnosticType: "wv" | "ci" | "integrated" }) {
+  type Entry = { label: string; value: number; primary: boolean };
+  const entries: Entry[] = [];
+
+  if (diagnosticType === "wv") {
+    if (u.wv_similarity != null) entries.push({ label: "価値観", value: u.wv_similarity, primary: true });
+    if (u.ci_similarity != null) entries.push({ label: "適職", value: u.ci_similarity, primary: false });
+    if (u.integrated_similarity != null) entries.push({ label: "総合", value: u.integrated_similarity, primary: false });
+  } else if (diagnosticType === "ci") {
+    if (u.ci_similarity != null) entries.push({ label: "適職", value: u.ci_similarity, primary: true });
+    if (u.wv_similarity != null) entries.push({ label: "価値観", value: u.wv_similarity, primary: false });
+    if (u.integrated_similarity != null) entries.push({ label: "総合", value: u.integrated_similarity, primary: false });
+  } else {
+    if (u.integrated_similarity != null) entries.push({ label: "総合", value: u.integrated_similarity, primary: true });
+    if (u.wv_similarity != null) entries.push({ label: "価値観", value: u.wv_similarity, primary: false });
+    if (u.ci_similarity != null) entries.push({ label: "適職", value: u.ci_similarity, primary: false });
+  }
+
+  if (entries.length === 0 && u.similarity != null) {
+    const label = diagnosticType === "wv" ? "価値観" : diagnosticType === "ci" ? "適職" : "総合";
+    entries.push({ label, value: u.similarity, primary: true });
+  }
+
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 shrink-0">
+      {entries.map((e) => (
+        <span
+          key={e.label}
+          className={`rounded-full px-2.5 py-0.5 text-xs font-bold leading-snug ${
+            e.primary ? "text-white" : "bg-gray-100 text-gray-600"
+          }`}
+          style={e.primary ? { backgroundColor: matchColor(e.value) } : undefined}
+        >
+          {e.label} {Math.round(e.value)}%
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function formatPeriod(startYear: number, startMonth: number, endYear?: number | null, endMonth?: number | null, isCurrent?: boolean) {
+  const start = `${startYear}年${startMonth}月`;
+  if (isCurrent) return `${start} — 現在`;
+  if (endYear && endMonth) return `${start} — ${endYear}年${endMonth}月`;
+  return start;
+}
+
 function CandidateDetail({
   user: u,
   wvScores,
@@ -944,6 +1226,10 @@ function CandidateDetail({
   compareWv,
   compareCi,
   compareLabel,
+  allExperiences,
+  allSkills,
+  about,
+  diagnosticType,
 }: {
   user: TalentCard;
   wvScores: { id: string; score: number }[] | null;
@@ -952,103 +1238,130 @@ function CandidateDetail({
   compareWv?: { id: string; score: number }[] | null;
   compareCi?: { id: string; score: number }[] | null;
   compareLabel?: string;
+  allExperiences: { companyName: string; title: string; startYear: number; startMonth: number; endYear?: number | null; endMonth?: number | null; isCurrent: boolean; description?: string }[];
+  allSkills: string[];
+  about: string | null;
+  diagnosticType: "wv" | "ci" | "integrated";
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
   const avatarBg = u.profile_color ?? "#94a3b8";
   const status = u.job_seeking_status ? SEEKING_STATUS_MAP[u.job_seeking_status] : null;
 
+  const experiences = allExperiences.length > 0 ? allExperiences : u.experiences.map((e) => ({ companyName: e.company_name, title: e.title, startYear: 0, startMonth: 0, endYear: null as number | null, endMonth: null as number | null, isCurrent: false, description: undefined as string | undefined }));
+  const skillList = allSkills.length > 0 ? allSkills : u.skills;
+
+  const [aboutExpanded, setAboutExpanded] = useState(false);
+  const aboutNeedsExpand = about ? about.length > 200 : false;
+
   return (
-    <div className="flex-1 p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-start gap-4">
+    <div className="flex-1 p-8 space-y-0">
+      {/* ── Header ── */}
+      <div className="flex items-start gap-4 pb-6">
         {u.avatar_url ? (
-          <img src={u.avatar_url} alt="" className="h-16 w-16 rounded-full object-cover shrink-0" />
+          <img src={u.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm" />
         ) : (
           <div
-            className="h-16 w-16 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0"
+            className="h-14 w-14 rounded-full flex items-center justify-center text-white text-base font-bold shrink-0 ring-2 ring-white shadow-sm"
             style={{ backgroundColor: avatarBg }}
           >
             {initials}
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-gray-900 truncate">{u.name}</h2>
-            {u.similarity != null && (
-              <span
-                className="shrink-0 rounded-full px-3 py-1 text-sm font-bold text-white"
-                style={{ backgroundColor: u.similarity >= 80 ? "#2979ff" : u.similarity >= 60 ? "#64b5f6" : "#9ca3af" }}
-              >
-                {Math.round(u.similarity)}% マッチ
-              </span>
-            )}
-          </div>
-          {u.headline && <p className="text-sm text-gray-600 mt-0.5">{u.headline}</p>}
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
+        <div className="flex-1 min-w-0 pt-0.5">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="text-xl font-bold text-gray-900 truncate leading-tight">{u.name}</h2>
             {status && (
-              <span className={`rounded-full px-2.5 py-0.5 text-xs ${status.bg} ${status.text}`}>
+              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}>
+                <span className={`inline-block h-1.5 w-1.5 rounded-full ${
+                  u.job_seeking_status === "actively_looking" ? "bg-emerald-400" : u.job_seeking_status === "open" ? "bg-amber-400" : "bg-gray-300"
+                }`} />
                 {status.label}
               </span>
             )}
           </div>
+          {u.headline && <p className="text-sm text-gray-500 mt-1">{u.headline}</p>}
+          <div className="flex items-center gap-1.5 mt-2.5">
+            <MatchBadges user={u} diagnosticType={diagnosticType} />
+          </div>
         </div>
+        <Link
+          href={`/profile/${u.username}`}
+          className="shrink-0 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+        >
+          プロフィール →
+        </Link>
       </div>
 
-      {/* Radar Charts */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          {/* WV Chart */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Work Values</h3>
-            {wvScores ? (
-              <SingleRadarChart scores={wvScores} order={WV_ORDER} fullLabels={WV_FULL_LABELS} isWV={true} compareScores={compareWv} compareLabel={compareLabel} />
-            ) : (
-              <div className="flex items-center justify-center py-10 text-sm text-gray-400">未受験</div>
-            )}
-          </div>
-          {/* CI Chart */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Career Interest</h3>
-            {ciScores ? (
-              <SingleRadarChart scores={ciScores} order={CI_ORDER} fullLabels={CI_FULL_LABELS} isWV={false} compareScores={compareCi} compareLabel={compareLabel} />
-            ) : (
-              <div className="flex items-center justify-center py-10 text-sm text-gray-400">未受験</div>
-            )}
-          </div>
+      <div className="border-t border-gray-100" />
+
+      {/* ── About ── */}
+      {about && (
+        <div className="py-5">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">自己紹介</h3>
+          <p className={`text-sm text-gray-600 whitespace-pre-line leading-relaxed ${!aboutExpanded && aboutNeedsExpand ? "line-clamp-3" : ""}`}>
+            {about}
+          </p>
+          {aboutNeedsExpand && (
+            <button
+              type="button"
+              onClick={() => setAboutExpanded(!aboutExpanded)}
+              className="text-xs text-blue-500 hover:text-blue-600 mt-1 cursor-pointer"
+            >
+              {aboutExpanded ? "閉じる" : "もっと見る"}
+            </button>
+          )}
         </div>
       )}
 
-      {/* Experiences */}
-      {u.experiences.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">職歴</h3>
-          <div className="space-y-1.5">
-            {u.experiences.map((exp, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                <svg className="shrink-0 text-gray-400" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <rect x="3" y="7" width="18" height="14" rx="2" />
-                  <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                </svg>
-                <span>{exp.company_name}</span>
-                <span className="text-gray-300">·</span>
-                <span className="text-gray-500">{exp.title}</span>
+      {about && <div className="border-t border-gray-100" />}
+
+      {/* ── Experiences ── */}
+      {experiences.length > 0 && (
+        <div className="py-5">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">職歴</h3>
+          <div className="space-y-0">
+            {experiences.map((exp, i) => (
+              <div key={i} className="flex gap-3 group">
+                <div className="flex flex-col items-center w-4 shrink-0">
+                  <div className={`mt-1.5 h-2.5 w-2.5 rounded-full border-2 shrink-0 ${
+                    exp.isCurrent
+                      ? "border-blue-500 bg-blue-500"
+                      : "border-gray-300 bg-white group-hover:border-gray-400"
+                  }`} />
+                  {i < experiences.length - 1 && <div className="w-px flex-1 bg-gray-200 my-0.5" />}
+                </div>
+                <div className="flex-1 min-w-0 pb-4">
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-sm font-semibold text-gray-900">{exp.title}</p>
+                    {exp.isCurrent && (
+                      <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 leading-none">現職</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-0.5">{exp.companyName}</p>
+                  {exp.startYear > 0 && (
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {formatPeriod(exp.startYear, exp.startMonth, exp.endYear, exp.endMonth, exp.isCurrent)}
+                    </p>
+                  )}
+                  {exp.description && (
+                    <p className="text-xs text-gray-500 mt-1.5 leading-relaxed line-clamp-2">{exp.description}</p>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Skills */}
-      {u.skills.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">スキル</h3>
+      {experiences.length > 0 && <div className="border-t border-gray-100" />}
+
+      {/* ── Skills ── */}
+      {skillList.length > 0 && (
+        <div className="py-5">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5">スキル</h3>
           <div className="flex flex-wrap gap-1.5">
-            {u.skills.map((s) => (
-              <span key={s} className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700">
+            {skillList.map((s) => (
+              <span key={s} className="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
                 {s}
               </span>
             ))}
@@ -1056,16 +1369,46 @@ function CandidateDetail({
         </div>
       )}
 
-      {/* Profile link */}
-      <Link
-        href={`/profile/${u.username}`}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-      >
-        プロフィールを見る
-        <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
-      </Link>
+      {skillList.length > 0 && <div className="border-t border-gray-100" />}
+
+      {/* ── Diagnostic Charts ── */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
+        </div>
+      ) : (
+        <div className="py-5">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">診断結果</h3>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-gray-150 bg-white p-4">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-sm font-semibold text-gray-700">Work Values</h4>
+                {u.wv_similarity != null && (
+                  <span className="text-xs text-gray-400">{Math.round(u.wv_similarity)}% match</span>
+                )}
+              </div>
+              {wvScores ? (
+                <SingleRadarChart scores={wvScores} order={WV_ORDER} fullLabels={WV_FULL_LABELS} isWV={true} compareScores={compareWv} compareLabel={compareLabel} />
+              ) : (
+                <div className="flex items-center justify-center py-10 text-sm text-gray-400">未受験</div>
+              )}
+            </div>
+            <div className="rounded-xl border border-gray-150 bg-white p-4">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-sm font-semibold text-gray-700">Career Interest</h4>
+                {u.ci_similarity != null && (
+                  <span className="text-xs text-gray-400">{Math.round(u.ci_similarity)}% match</span>
+                )}
+              </div>
+              {ciScores ? (
+                <SingleRadarChart scores={ciScores} order={CI_ORDER} fullLabels={CI_FULL_LABELS} isWV={false} compareScores={compareCi} compareLabel={compareLabel} />
+              ) : (
+                <div className="flex items-center justify-center py-10 text-sm text-gray-400">未受験</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
