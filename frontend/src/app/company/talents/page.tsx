@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { SingleRadarChart, WV_ORDER, WV_FULL_LABELS, CI_ORDER, CI_FULL_LABELS } from "@/app/components/SingleRadarChart";
 
 type TalentCard = {
   user_id: string;
@@ -74,6 +75,12 @@ export default function TalentsPage() {
   const [seekingStatus, setSeekingStatus] = useState("");
   const [jobType, setJobType] = useState("");
 
+  // Detail panel (diagnostic split view)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [detailWv, setDetailWv] = useState<{ id: string; score: number }[] | null>(null);
+  const [detailCi, setDetailCi] = useState<{ id: string; score: number }[] | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
   // Diagnostic filters
   const [diagnosticMode, setDiagnosticMode] = useState<"team" | "custom">(initialTeamId ? "team" : "team");
   const [teams, setTeams] = useState<Team[]>([]);
@@ -86,12 +93,82 @@ export default function TalentsPage() {
     R: 50, I: 50, A: 50, S: 50, E: 50, C: 50,
   });
 
+  // Team average scores for compare overlay
+  const [teamWvAvg, setTeamWvAvg] = useState<{ id: string; score: number }[] | null>(null);
+  const [teamCiAvg, setTeamCiAvg] = useState<{ id: string; score: number }[] | null>(null);
+  const [teamName, setTeamName] = useState<string>("");
+
   useEffect(() => {
     companyFetch("/api/company/teams")
       .then((r) => r.json())
       .then((data) => setTeams(data.teams ?? []))
       .catch(() => {});
   }, [companyFetch]);
+
+  // Fetch team scores for comparison overlay
+  useEffect(() => {
+    if (!selectedTeamId || diagnosticMode !== "team") {
+      setTeamWvAvg(null);
+      setTeamCiAvg(null);
+      setTeamName("");
+      return;
+    }
+    const team = teams.find((t) => t.id === selectedTeamId);
+    setTeamName(team?.name ?? "チーム");
+
+    companyFetch(`/api/company/teams/${selectedTeamId}/scores`)
+      .then((r) => r.json())
+      .then((data) => {
+        const members: { wv_scores?: { id: string; display_score: number }[]; ci_scores?: { id: string; display_score: number }[] }[] = data.members ?? [];
+        // Compute WV averages
+        const wvAccum: Record<string, { sum: number; count: number }> = {};
+        const ciAccum: Record<string, { sum: number; count: number }> = {};
+        for (const m of members) {
+          if (m.wv_scores) {
+            for (const s of m.wv_scores) {
+              if (!wvAccum[s.id]) wvAccum[s.id] = { sum: 0, count: 0 };
+              wvAccum[s.id].sum += s.display_score;
+              wvAccum[s.id].count++;
+            }
+          }
+          if (m.ci_scores) {
+            for (const s of m.ci_scores) {
+              if (!ciAccum[s.id]) ciAccum[s.id] = { sum: 0, count: 0 };
+              ciAccum[s.id].sum += s.display_score;
+              ciAccum[s.id].count++;
+            }
+          }
+        }
+        const wvAvg = Object.entries(wvAccum).map(([id, { sum, count }]) => ({ id, score: sum / count }));
+        const ciAvg = Object.entries(ciAccum).map(([id, { sum, count }]) => ({ id, score: sum / count }));
+        setTeamWvAvg(wvAvg.length > 0 ? wvAvg : null);
+        setTeamCiAvg(ciAvg.length > 0 ? ciAvg : null);
+      })
+      .catch(() => {
+        setTeamWvAvg(null);
+        setTeamCiAvg(null);
+      });
+  }, [selectedTeamId, diagnosticMode, teams, companyFetch]);
+
+  // Effective compare scores: from team averages or custom weights
+  const compareWv = useMemo(() => {
+    if (diagnosticMode === "team") return teamWvAvg;
+    if (diagnosticType === "wv" || diagnosticType === "integrated") {
+      return Object.entries(customWeights).map(([id, score]) => ({ id, score }));
+    }
+    return null;
+  }, [diagnosticMode, diagnosticType, teamWvAvg, customWeights]);
+
+  const compareCi = useMemo(() => {
+    if (diagnosticMode === "team") return teamCiAvg;
+    if (diagnosticType === "ci" || diagnosticType === "integrated") {
+      // Convert 0-100 slider to 1-5 RIASEC scale for the radar chart
+      return Object.entries(customCIWeights).map(([id, score]) => ({ id, score: 1 + (score / 100) * 4 }));
+    }
+    return null;
+  }, [diagnosticMode, diagnosticType, teamCiAvg, customCIWeights]);
+
+  const compareDisplayLabel = diagnosticMode === "team" ? teamName : "目標値";
 
   // Auto-search when coming from team page
   useEffect(() => {
@@ -100,6 +177,45 @@ export default function TalentsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-select first user when diagnostic results load
+  useEffect(() => {
+    if (tab === "diagnostic" && users.length > 0 && (!selectedUserId || !users.some((u) => u.user_id === selectedUserId))) {
+      setSelectedUserId(users[0].user_id);
+    }
+  }, [users, tab, selectedUserId]);
+
+  // Fetch WV/CI scores when a user is selected in diagnostic mode
+  useEffect(() => {
+    if (!selectedUserId || tab !== "diagnostic") {
+      setDetailWv(null);
+      setDetailCi(null);
+      return;
+    }
+    setDetailLoading(true);
+    Promise.all([
+      fetch(`/api/work-values/users/${selectedUserId}/results/latest`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`/api/career-interest/users/${selectedUserId}/results/latest`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+    ])
+      .then(([wvData, ciData]) => {
+        setDetailWv(
+          wvData?.values?.map((v: { value_id: string; display_score: number }) => ({ id: v.value_id, score: v.display_score })) ?? null,
+        );
+        setDetailCi(
+          ciData?.type_scores?.map((s: { type_id: string; score: number }) => ({ id: s.type_id, score: s.score })) ?? null,
+        );
+      })
+      .finally(() => setDetailLoading(false));
+  }, [selectedUserId, tab]);
+
+  const selectedUser = useMemo(
+    () => (selectedUserId ? users.find((u) => u.user_id === selectedUserId) ?? null : null),
+    [users, selectedUserId],
+  );
 
   const buildConditionParams = useCallback((offset: number) => {
     const params = new URLSearchParams();
@@ -199,6 +315,7 @@ export default function TalentsPage() {
     setUsers([]);
     setTotal(0);
     setSearched(false);
+    setSelectedUserId(null);
     const params = new URLSearchParams(searchParams);
     params.set("tab", t);
     if (t !== "diagnostic") params.delete("team");
@@ -503,8 +620,8 @@ export default function TalentsPage() {
         </div>
       )}
 
-      {/* Loading skeleton */}
-      {loading && (
+      {/* Loading skeleton (condition tab) */}
+      {loading && tab === "condition" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 animate-pulse">
@@ -522,15 +639,36 @@ export default function TalentsPage() {
         </div>
       )}
 
-      {/* Results grid */}
-      {!loading && users.length > 0 && (
+      {/* Loading skeleton (diagnostic tab) */}
+      {loading && tab === "diagnostic" && (
+        <div className="flex rounded-xl border border-gray-200 bg-white overflow-hidden" style={{ height: "calc(100vh - 340px)", minHeight: 500 }}>
+          <div className="w-full lg:w-[400px] lg:shrink-0 lg:border-r border-gray-200 p-3 space-y-3 animate-pulse">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="rounded-xl bg-gray-100 p-4">
+                <div className="flex gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gray-200" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-28 rounded bg-gray-200" />
+                    <div className="h-3 w-40 rounded bg-gray-200" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden lg:flex flex-1 items-center justify-center animate-pulse">
+            <div className="h-64 w-64 rounded-full bg-gray-100" />
+          </div>
+        </div>
+      )}
+
+      {/* Condition tab: grid layout */}
+      {!loading && tab === "condition" && users.length > 0 && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {users.map((u) => (
-              <CandidateCard key={u.user_id} user={u} showSimilarity={tab === "diagnostic"} />
+              <CandidateCard key={u.user_id} user={u} showSimilarity={false} />
             ))}
           </div>
-
           {users.length < total && (
             <div className="flex justify-center mt-6">
               <button
@@ -543,6 +681,65 @@ export default function TalentsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Diagnostic tab: split layout */}
+      {!loading && tab === "diagnostic" && users.length > 0 && (
+        <div
+          className="flex rounded-xl border border-gray-200 bg-white overflow-hidden"
+          style={{ height: "calc(100vh - 340px)", minHeight: 500 }}
+        >
+          {/* Left Panel - candidate list */}
+          <div className="w-full lg:w-[400px] lg:shrink-0 lg:border-r border-gray-100 overflow-y-auto">
+            <ul className="p-2 space-y-1">
+              {users.map((u) => (
+                <li key={u.user_id}>
+                  <DiagnosticCandidateCard
+                    user={u}
+                    isSelected={selectedUserId === u.user_id}
+                    onSelect={() => setSelectedUserId(u.user_id)}
+                  />
+                </li>
+              ))}
+            </ul>
+            {users.length < total && (
+              <div className="flex justify-center py-4">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="rounded-lg border border-gray-200 bg-white px-6 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {loadingMore ? "読み込み中..." : "もっと見る"}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel - detail with radar charts */}
+          <div className="hidden lg:flex flex-1 min-h-0 overflow-y-auto bg-gray-50/50">
+            {selectedUser ? (
+              <CandidateDetail
+                user={selectedUser}
+                wvScores={detailWv}
+                ciScores={detailCi}
+                loading={detailLoading}
+                compareWv={compareWv}
+                compareCi={compareCi}
+                compareLabel={compareDisplayLabel}
+              />
+            ) : (
+              <div className="flex flex-1 flex-col items-center justify-center text-center px-6">
+                <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+                  <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={1.5}>
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500">候補者を選択してください</p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Empty state */}
@@ -655,5 +852,220 @@ function CandidateCard({ user: u, showSimilarity }: { user: TalentCard; showSimi
         )}
       </div>
     </Link>
+  );
+}
+
+function DiagnosticCandidateCard({
+  user: u,
+  isSelected,
+  onSelect,
+}: {
+  user: TalentCard;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
+  const avatarBg = u.profile_color ?? "#94a3b8";
+
+  const inner = (
+    <div
+      className={`rounded-xl p-3.5 transition-all ${
+        isSelected
+          ? "bg-blue-50/80 border border-blue-200"
+          : "hover:bg-gray-50 border border-transparent"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        {u.avatar_url ? (
+          <img src={u.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover shrink-0" />
+        ) : (
+          <div
+            className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+            style={{ backgroundColor: avatarBg }}
+          >
+            {initials}
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className={`text-sm font-semibold truncate ${isSelected ? "text-blue-700" : "text-gray-900"}`}>
+              {u.name}
+            </p>
+            {u.similarity != null && (
+              <span
+                className="shrink-0 rounded-full px-2 py-0.5 text-xs font-bold text-white"
+                style={{ backgroundColor: u.similarity >= 80 ? "#2979ff" : u.similarity >= 60 ? "#64b5f6" : "#9ca3af" }}
+              >
+                {Math.round(u.similarity)}%
+              </span>
+            )}
+          </div>
+          {u.headline && (
+            <p className="text-xs text-gray-500 truncate mt-0.5">{u.headline}</p>
+          )}
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            {u.top_wv_labels.length > 0 && (
+              <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-600">
+                {u.top_wv_labels.join("・")}
+              </span>
+            )}
+            {u.top_ci_labels.length > 0 && (
+              <span className="rounded-full bg-purple-50 px-1.5 py-0.5 text-[10px] text-purple-600">
+                {u.top_ci_labels.join("・")}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <Link href={`/profile/${u.username}`} className="lg:hidden block">
+        {inner}
+      </Link>
+      <button
+        type="button"
+        onClick={onSelect}
+        className="hidden lg:block w-full text-left cursor-pointer"
+      >
+        {inner}
+      </button>
+    </>
+  );
+}
+
+function CandidateDetail({
+  user: u,
+  wvScores,
+  ciScores,
+  loading,
+  compareWv,
+  compareCi,
+  compareLabel,
+}: {
+  user: TalentCard;
+  wvScores: { id: string; score: number }[] | null;
+  ciScores: { id: string; score: number }[] | null;
+  loading: boolean;
+  compareWv?: { id: string; score: number }[] | null;
+  compareCi?: { id: string; score: number }[] | null;
+  compareLabel?: string;
+}) {
+  const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
+  const avatarBg = u.profile_color ?? "#94a3b8";
+  const status = u.job_seeking_status ? SEEKING_STATUS_MAP[u.job_seeking_status] : null;
+
+  return (
+    <div className="flex-1 p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-start gap-4">
+        {u.avatar_url ? (
+          <img src={u.avatar_url} alt="" className="h-16 w-16 rounded-full object-cover shrink-0" />
+        ) : (
+          <div
+            className="h-16 w-16 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0"
+            style={{ backgroundColor: avatarBg }}
+          >
+            {initials}
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold text-gray-900 truncate">{u.name}</h2>
+            {u.similarity != null && (
+              <span
+                className="shrink-0 rounded-full px-3 py-1 text-sm font-bold text-white"
+                style={{ backgroundColor: u.similarity >= 80 ? "#2979ff" : u.similarity >= 60 ? "#64b5f6" : "#9ca3af" }}
+              >
+                {Math.round(u.similarity)}% マッチ
+              </span>
+            )}
+          </div>
+          {u.headline && <p className="text-sm text-gray-600 mt-0.5">{u.headline}</p>}
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            {status && (
+              <span className={`rounded-full px-2.5 py-0.5 text-xs ${status.bg} ${status.text}`}>
+                {status.label}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Radar Charts */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {/* WV Chart */}
+          <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Work Values</h3>
+            {wvScores ? (
+              <SingleRadarChart scores={wvScores} order={WV_ORDER} fullLabels={WV_FULL_LABELS} isWV={true} compareScores={compareWv} compareLabel={compareLabel} />
+            ) : (
+              <div className="flex items-center justify-center py-10 text-sm text-gray-400">未受験</div>
+            )}
+          </div>
+          {/* CI Chart */}
+          <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Career Interest</h3>
+            {ciScores ? (
+              <SingleRadarChart scores={ciScores} order={CI_ORDER} fullLabels={CI_FULL_LABELS} isWV={false} compareScores={compareCi} compareLabel={compareLabel} />
+            ) : (
+              <div className="flex items-center justify-center py-10 text-sm text-gray-400">未受験</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Experiences */}
+      {u.experiences.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">職歴</h3>
+          <div className="space-y-1.5">
+            {u.experiences.map((exp, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                <svg className="shrink-0 text-gray-400" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <rect x="3" y="7" width="18" height="14" rx="2" />
+                  <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                </svg>
+                <span>{exp.company_name}</span>
+                <span className="text-gray-300">·</span>
+                <span className="text-gray-500">{exp.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Skills */}
+      {u.skills.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">スキル</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {u.skills.map((s) => (
+              <span key={s} className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700">
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Profile link */}
+      <Link
+        href={`/profile/${u.username}`}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        プロフィールを見る
+        <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </Link>
+    </div>
   );
 }

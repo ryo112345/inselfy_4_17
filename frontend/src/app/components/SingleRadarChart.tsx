@@ -13,11 +13,15 @@ export function SingleRadarChart({
   order,
   fullLabels,
   isWV,
+  compareScores,
+  compareLabel,
 }: {
   scores: { id: string; score: number }[] | null;
   order: readonly string[];
   fullLabels: Record<string, string>;
   isWV: boolean;
+  compareScores?: { id: string; score: number }[] | null;
+  compareLabel?: string;
 }) {
   const cx = 210;
   const cy = 190;
@@ -46,12 +50,26 @@ export function SingleRadarChart({
   const dotColor = isWV ? "#48c88c" : "#a878dc";
   const scoreTextColor = isWV ? "#2eb872" : "#9060d0";
 
+  const compareStrokeColor = "#f59e0b";
+  const compareFillColor = "rgba(245,158,11,0.08)";
+
   const scoreMap = new Map(scores?.map((s) => [s.id, s.score]) || []);
   const dataPoints = order.map((id, i) => {
     const val = normalize(scoreMap.get(id) || 0);
     return hexPoint(i, R * Math.max(val, 0.05));
   });
   const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+
+  const compareMap = new Map(compareScores?.map((s) => [s.id, s.score]) || []);
+  const comparePoints = compareScores
+    ? order.map((id, i) => {
+        const val = normalize(compareMap.get(id) || 0);
+        return hexPoint(i, R * Math.max(val, 0.05));
+      })
+    : null;
+  const comparePath = comparePoints
+    ? comparePoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z"
+    : null;
 
   const labelPositions = order.map((id, i) => {
     const pt = hexPoint(i, R + 30);
@@ -63,8 +81,9 @@ export function SingleRadarChart({
     return { id, x: pt.x, y: pt.y, anchor };
   });
 
+  const hasCompare = comparePath && compareScores && compareScores.length > 0;
   const w = 420;
-  const h = 380;
+  const h = hasCompare ? 410 : 380;
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`} overflow="visible" className="w-full">
@@ -74,6 +93,15 @@ export function SingleRadarChart({
       {spokes.map((p, i) => (
         <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={gridColor} strokeWidth={0.6} />
       ))}
+      {/* Compare overlay (team) — rendered first so it appears behind */}
+      {hasCompare && (
+        <>
+          <path d={comparePath} fill={compareFillColor} stroke={compareStrokeColor} strokeWidth={1.2} strokeDasharray="6 3" />
+          {comparePoints!.map((pt, i) => (
+            <circle key={i} cx={pt.x} cy={pt.y} r={2.5} fill={compareStrokeColor} opacity={0.7} />
+          ))}
+        </>
+      )}
       {scores && (
         <>
           <path d={dataPath} fill={fillColor} stroke={strokeColor} strokeWidth={1.2} />
@@ -114,6 +142,17 @@ export function SingleRadarChart({
           </g>
         );
       })}
+      {/* Legend */}
+      {hasCompare && (
+        <g transform={`translate(${cx - 100}, ${cy + R + 50})`}>
+          <line x1={0} y1={6} x2={20} y2={6} stroke={strokeColor} strokeWidth={2} />
+          <circle cx={10} cy={6} r={2.5} fill={dotColor} />
+          <text x={26} y={10} fill="#555" fontSize={12} fontWeight="500">候補者</text>
+          <line x1={90} y1={6} x2={110} y2={6} stroke={compareStrokeColor} strokeWidth={2} strokeDasharray="4 2" />
+          <circle cx={100} cy={6} r={2} fill={compareStrokeColor} />
+          <text x={116} y={10} fill="#555" fontSize={12} fontWeight="500">{compareLabel ?? "チーム"}</text>
+        </g>
+      )}
     </svg>
   );
 }
