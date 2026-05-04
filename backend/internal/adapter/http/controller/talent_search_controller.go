@@ -38,6 +38,9 @@ type talentCard struct {
 	TopWVLabels      []string   `json:"top_wv_labels"`
 	TopCILabels      []string   `json:"top_ci_labels"`
 	Similarity       *float64   `json:"similarity,omitempty"`
+	WVSimilarity     *float64   `json:"wv_similarity,omitempty"`
+	CISimilarity     *float64   `json:"ci_similarity,omitempty"`
+	IntSimilarity    *float64   `json:"integrated_similarity,omitempty"`
 }
 
 type talentExp struct {
@@ -55,7 +58,7 @@ func (c *TalentSearchController) Search(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	if limit < 1 || limit > 50 {
+	if limit < 1 || limit > 200 {
 		limit = 20
 	}
 	if offset < 0 {
@@ -197,7 +200,7 @@ func (c *TalentSearchController) DiagnosticSearch(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	if limit < 1 || limit > 50 {
+	if limit < 1 || limit > 200 {
 		limit = 20
 	}
 	if offset < 0 {
@@ -273,6 +276,9 @@ LIMIT $2 OFFSET $3`
 	defer rows.Close()
 
 	users := scanSimilarityCards(rows)
+	for i := range users {
+		users[i].WVSimilarity = users[i].Similarity
+	}
 
 	var total int
 	_ = c.pool.QueryRow(reqCtx,
@@ -517,14 +523,28 @@ func (c *TalentSearchController) parseCustomWeights(ctx echo.Context) map[string
 var ciTypeIDs = [6]string{"R", "I", "A", "S", "E", "C"}
 
 func scanSimilarityCards(rows pgx.Rows) []talentCard {
+	return scanCards(rows, false)
+}
+
+func scanIntegratedCards(rows pgx.Rows) []talentCard {
+	return scanCards(rows, true)
+}
+
+func scanCards(rows pgx.Rows, hasBreakdown bool) []talentCard {
 	var cards []talentCard
 	for rows.Next() {
 		var uid pgtype.UUID
 		var username, name string
 		var headline, avatarURL, profileColor, seekingStatus pgtype.Text
-		var simPct pgtype.Numeric
+		var simPct, wvPct, ciPct pgtype.Numeric
 
-		if err := rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus, &simPct); err != nil {
+		var err error
+		if hasBreakdown {
+			err = rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus, &simPct, &wvPct, &ciPct)
+		} else {
+			err = rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus, &simPct)
+		}
+		if err != nil {
 			continue
 		}
 
@@ -551,6 +571,21 @@ func scanSimilarityCards(rows pgx.Rows) []talentCard {
 				card.Similarity = &f.Float64
 			}
 		}
+		if hasBreakdown {
+			if wvPct.Valid {
+				f, _ := wvPct.Float64Value()
+				if f.Valid {
+					card.WVSimilarity = &f.Float64
+				}
+			}
+			if ciPct.Valid {
+				f, _ := ciPct.Float64Value()
+				if f.Valid {
+					card.CISimilarity = &f.Float64
+				}
+			}
+			card.IntSimilarity = card.Similarity
+		}
 
 		cards = append(cards, card)
 	}
@@ -563,7 +598,7 @@ func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	if limit < 1 || limit > 50 {
+	if limit < 1 || limit > 200 {
 		limit = 20
 	}
 	if offset < 0 {
@@ -647,6 +682,9 @@ LIMIT $7 OFFSET $8`
 	defer rows.Close()
 
 	users := scanSimilarityCards(rows)
+	for i := range users {
+		users[i].CISimilarity = users[i].Similarity
+	}
 
 	var total int
 	_ = c.pool.QueryRow(reqCtx,
@@ -676,7 +714,7 @@ func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) er
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	if limit < 1 || limit > 50 {
+	if limit < 1 || limit > 200 {
 		limit = 20
 	}
 	if offset < 0 {
@@ -787,13 +825,15 @@ ci_sim AS (
   FROM ci_vectors cv
 ),
 combined AS (
-  SELECT ws.user_id, (ws.sim + cs.sim) / 2.0 AS sim
+  SELECT ws.user_id, (ws.sim + cs.sim) / 2.0 AS sim, ws.sim AS wv_sim, cs.sim AS ci_sim
   FROM wv_sim ws
   INNER JOIN ci_sim cs ON ws.user_id = cs.user_id
 )
 SELECT
   u.id, u.username, u.name, u.headline, u.avatar_url, u.profile_color, u.job_seeking_status,
-  ROUND((c.sim * 100)::numeric, 1) AS similarity_pct
+  ROUND((c.sim * 100)::numeric, 1) AS similarity_pct,
+  ROUND((c.wv_sim * 100)::numeric, 1) AS wv_similarity_pct,
+  ROUND((c.ci_sim * 100)::numeric, 1) AS ci_similarity_pct
 FROM combined c
 JOIN users u ON u.id = c.user_id
 WHERE u.is_public = true
@@ -809,7 +849,7 @@ LIMIT $8 OFFSET $9`
 	}
 	defer rows.Close()
 
-	users := scanSimilarityCards(rows)
+	users := scanIntegratedCards(rows)
 
 	var total int
 	_ = c.pool.QueryRow(reqCtx,
