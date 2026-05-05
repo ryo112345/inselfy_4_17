@@ -21,6 +21,7 @@ type CareerInterestOutputPort interface {
 type CareerInterestSessionRepository interface {
 	Create(ctx context.Context, s *careerinterest.Session) (*careerinterest.Session, error)
 	GetByID(ctx context.Context, id string) (*careerinterest.Session, error)
+	GetLatestCompletedByUserID(ctx context.Context, userID string) (*careerinterest.Session, error)
 	UpdateStatus(ctx context.Context, id, status string) error
 }
 

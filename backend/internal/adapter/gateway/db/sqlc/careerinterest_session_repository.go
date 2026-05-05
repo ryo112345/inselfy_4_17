@@ -84,6 +84,32 @@ func (r *CareerInterestSessionRepository) GetByID(ctx context.Context, id string
 	return &s, nil
 }
 
+func (r *CareerInterestSessionRepository) GetLatestCompletedByUserID(ctx context.Context, userID string) (*careerinterest.Session, error) {
+	uid, err := parseUUID(userID)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+
+	var s careerinterest.Session
+	var completedAt *time.Time
+	err = r.pool.QueryRow(ctx,
+		`SELECT id, user_id, status, created_at, completed_at
+		 FROM career_interest_sessions
+		 WHERE user_id = $1 AND status = 'completed'
+		 ORDER BY completed_at DESC
+		 LIMIT 1`,
+		uid,
+	).Scan(&s.ID, &s.UserID, &s.Status, &s.CreatedAt, &completedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domainerr.ErrNotFound
+		}
+		return nil, err
+	}
+	s.CompletedAt = completedAt
+	return &s, nil
+}
+
 func (r *CareerInterestSessionRepository) UpdateStatus(ctx context.Context, id, status string) error {
 	uuid, err := parseUUID(id)
 	if err != nil {
