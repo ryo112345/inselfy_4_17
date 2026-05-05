@@ -85,7 +85,6 @@ export default function TalentsPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(searchParams.get("selected") ?? null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const splitPanelRef = useRef<HTMLDivElement>(null);
-  const [panelStuck, setPanelStuck] = useState(false);
   const [detailWv, setDetailWv] = useState<{ id: string; score: number }[] | null>(null);
   const [detailCi, setDetailCi] = useState<{ id: string; score: number }[] | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -209,7 +208,6 @@ export default function TalentsPage() {
       const stuck = rect.top <= 29;
       if (stuck !== panelStuckRef.current) {
         panelStuckRef.current = stuck;
-        setPanelStuck(stuck);
       }
     };
     window.addEventListener("scroll", checkStuck, { passive: true });
@@ -217,18 +215,19 @@ export default function TalentsPage() {
     return () => window.removeEventListener("scroll", checkStuck);
   }, [users, loading, tab]);
 
-  // When panel is not yet stuck, intercept wheel events on the split panel and forward to page scroll
+  // Forward wheel events to page scroll until header is hidden, then let panel scroll natively
   useEffect(() => {
     const panel = splitPanelRef.current;
     if (!panel) return;
     const handler = (e: WheelEvent) => {
       if (panelStuckRef.current) return;
       e.preventDefault();
-      window.scrollBy({ top: e.deltaY, left: 0 });
+      window.scrollTo(0, window.scrollY + e.deltaY);
     };
     panel.addEventListener("wheel", handler, { passive: false });
     return () => panel.removeEventListener("wheel", handler);
   }, [users, loading, tab]);
+
 
   // Auto-search on mount: restore from URL or from team page link
   const didRestoreRef = useRef(false);
@@ -878,11 +877,11 @@ export default function TalentsPage() {
         <div
           ref={splitPanelRef}
           data-testid="diagnostic-split-panel"
-          className="sticky top-[28px] ml-[50%] -translate-x-1/2 flex border-t border-gray-200 bg-white overflow-hidden"
+          className="sticky top-[28px] ml-[50%] -translate-x-1/2 flex border-t border-gray-200 bg-white overflow-clip"
           style={{ width: "calc(100vw - 48px)", height: "calc(100vh - 28px)" }}
         >
           {/* Left Panel - candidate list */}
-          <div ref={leftPanelRef} className={`w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 bg-gray-50/60 ${panelStuck ? "overflow-y-auto" : "overflow-y-hidden"}`}>
+          <div ref={leftPanelRef} className="w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 bg-gray-50/60 overflow-y-auto">
             <ul className="p-2 space-y-1">
               {users.map((u) => (
                 <li key={u.user_id}>
@@ -904,7 +903,7 @@ export default function TalentsPage() {
           </div>
 
           {/* Right Panel - detail with radar charts */}
-          <div className={`hidden lg:flex flex-1 min-h-0 bg-gray-50/50 ${panelStuck ? "overflow-y-auto" : "overflow-y-hidden"}`}>
+          <div className="hidden lg:flex flex-1 min-h-0 bg-gray-50/50 overflow-y-auto">
             {selectedUser ? (
               <CandidateDetail
                 user={selectedUser}
