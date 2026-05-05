@@ -84,6 +84,8 @@ export default function TalentsPage() {
   // Detail panel (diagnostic split view)
   const [selectedUserId, setSelectedUserId] = useState<string | null>(searchParams.get("selected") ?? null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
+  const splitPanelRef = useRef<HTMLDivElement>(null);
+  const [panelStuck, setPanelStuck] = useState(false);
   const [detailWv, setDetailWv] = useState<{ id: string; score: number }[] | null>(null);
   const [detailCi, setDetailCi] = useState<{ id: string; score: number }[] | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -196,6 +198,37 @@ export default function TalentsPage() {
   }, [diagnosticMode, diagnosticType, teamCiAvg, customCIWeights]);
 
   const compareDisplayLabel = diagnosticMode === "team" ? teamName : "目標値";
+
+  // Detect when split panel becomes sticky (header/search scrolled out of view)
+  const panelStuckRef = useRef(false);
+  useEffect(() => {
+    const panel = splitPanelRef.current;
+    if (!panel) return;
+    const checkStuck = () => {
+      const rect = panel.getBoundingClientRect();
+      const stuck = rect.top <= 29;
+      if (stuck !== panelStuckRef.current) {
+        panelStuckRef.current = stuck;
+        setPanelStuck(stuck);
+      }
+    };
+    window.addEventListener("scroll", checkStuck, { passive: true });
+    checkStuck();
+    return () => window.removeEventListener("scroll", checkStuck);
+  }, [users, loading, tab]);
+
+  // When panel is not yet stuck, intercept wheel events on the split panel and forward to page scroll
+  useEffect(() => {
+    const panel = splitPanelRef.current;
+    if (!panel) return;
+    const handler = (e: WheelEvent) => {
+      if (panelStuckRef.current) return;
+      e.preventDefault();
+      window.scrollBy({ top: e.deltaY, left: 0 });
+    };
+    panel.addEventListener("wheel", handler, { passive: false });
+    return () => panel.removeEventListener("wheel", handler);
+  }, [users, loading, tab]);
 
   // Auto-search on mount: restore from URL or from team page link
   const didRestoreRef = useRef(false);
@@ -321,6 +354,7 @@ export default function TalentsPage() {
     syncFiltersToURL();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUserId]);
+
 
   const restoredScrollRef = useRef(false);
 
@@ -508,108 +542,105 @@ export default function TalentsPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">人材を探す</h1>
-        <p className="text-sm text-gray-500">条件やチームの診断傾向から候補者を検索できます</p>
-      </div>
-
-      {/* Segmented Control */}
-      <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 mb-6">
-        <button
-          onClick={() => switchTab("condition")}
-          className={`rounded-md px-5 py-2 text-sm font-medium transition-all cursor-pointer ${
-            tab === "condition" ? "text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
-          }`}
-          style={tab === "condition" ? { backgroundColor: accentColor } : {}}
-        >
-          条件検索
-        </button>
-        <button
-          onClick={() => switchTab("diagnostic")}
-          className={`rounded-md px-5 py-2 text-sm font-medium transition-all cursor-pointer ${
-            tab === "diagnostic" ? "text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
-          }`}
-          style={tab === "diagnostic" ? { backgroundColor: accentColor } : {}}
-        >
-          診断検索
-        </button>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-bold text-gray-900">人材を探す</h1>
+        <div className="inline-flex rounded-lg border border-gray-200 bg-white p-0.5">
+          <button
+            onClick={() => switchTab("condition")}
+            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all cursor-pointer ${
+              tab === "condition" ? "text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
+            }`}
+            style={tab === "condition" ? { backgroundColor: accentColor } : {}}
+          >
+            条件検索
+          </button>
+          <button
+            onClick={() => switchTab("diagnostic")}
+            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all cursor-pointer ${
+              tab === "diagnostic" ? "text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
+            }`}
+            style={tab === "diagnostic" ? { backgroundColor: accentColor } : {}}
+          >
+            診断検索
+          </button>
+        </div>
       </div>
 
       {/* Condition Search Filters */}
       {tab === "condition" && (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 mb-6">
-          <div className="space-y-4">
-            {/* Keyword */}
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                width={16} height={16} viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth={2}
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-              <input
-                type="text"
-                placeholder="キーワード（名前・肩書き・自己紹介）"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="w-full rounded-lg border border-gray-200 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-colors"
-              />
-            </div>
-
-            {/* Skills */}
-            <div>
-              <div className="flex gap-2">
+        <div className="rounded-xl border border-gray-200 bg-white p-3 mb-4">
+          <div className="space-y-2.5">
+            {/* Keyword + Skills row */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  width={14} height={14} viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth={2}
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
                 <input
                   type="text"
-                  placeholder="スキルを追加（例: Go, React）"
+                  placeholder="キーワード（名前・肩書き・自己紹介）"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-colors"
+                />
+              </div>
+              <div className="flex gap-1.5">
+                <input
+                  type="text"
+                  placeholder="スキル追加"
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") { e.preventDefault(); addSkill(); }
                   }}
-                  className="flex-1 rounded-lg border border-gray-200 py-2 px-3 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-colors"
+                  className="w-32 rounded-lg border border-gray-200 py-1.5 px-2.5 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-colors"
                 />
                 <button
                   onClick={addSkill}
-                  className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   追加
                 </button>
               </div>
-              {skills.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {skills.map((s) => (
-                    <span
-                      key={s}
-                      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700"
-                    >
-                      {s}
-                      <button onClick={() => removeSkill(s)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
-                        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                          <path d="M18 6L6 18M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </span>
-                  ))}
-                  <button
-                    onClick={() => setSkills([])}
-                    className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    すべてクリア
-                  </button>
-                </div>
-              )}
             </div>
 
-            {/* Dropdowns row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Skills chips */}
+            {skills.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {skills.map((s) => (
+                  <span
+                    key={s}
+                    className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-700"
+                  >
+                    {s}
+                    <button onClick={() => removeSkill(s)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+                      <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <path d="M18 6L6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                ))}
+                <button
+                  onClick={() => setSkills([])}
+                  className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  クリア
+                </button>
+              </div>
+            )}
+
+            {/* Dropdowns + search button row */}
+            <div className="flex items-center gap-2">
               <select
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
+                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
               >
                 <option value="">勤務地</option>
                 <option value="東京">東京</option>
@@ -621,7 +652,7 @@ export default function TalentsPage() {
               <select
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
-                className="rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
+                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
               >
                 <option value="">業界</option>
                 <option value="IT">IT</option>
@@ -633,7 +664,7 @@ export default function TalentsPage() {
               <select
                 value={seekingStatus}
                 onChange={(e) => setSeekingStatus(e.target.value)}
-                className="rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
+                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
               >
                 <option value="">転職意欲</option>
                 <option value="actively_looking">積極的に探している</option>
@@ -643,7 +674,7 @@ export default function TalentsPage() {
               <select
                 value={jobType}
                 onChange={(e) => setJobType(e.target.value)}
-                className="rounded-lg border border-gray-200 py-2 px-3 text-sm text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
+                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
               >
                 <option value="">職種</option>
                 <option value="エンジニア">エンジニア</option>
@@ -652,31 +683,30 @@ export default function TalentsPage() {
                 <option value="営業">営業</option>
                 <option value="マーケティング">マーケティング</option>
               </select>
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                className="rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer ml-auto"
+                style={{ backgroundColor: accentColor }}
+              >
+                {loading ? "検索中..." : "検索する"}
+              </button>
             </div>
-
-            <button
-              onClick={handleSearch}
-              disabled={loading}
-              className="rounded-lg px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
-              style={{ backgroundColor: accentColor }}
-            >
-              {loading ? "検索中..." : "検索する"}
-            </button>
           </div>
         </div>
       )}
 
       {/* Diagnostic Search Filters */}
       {tab === "diagnostic" && (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 mb-6">
-          <div className="space-y-5">
-            {/* Diagnostic type selector */}
-            <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
+        <div className="rounded-xl border border-gray-200 bg-white p-3 mb-4">
+          {/* Toolbar row: type tabs + mode + team/custom selector + search button */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex gap-0.5 rounded-lg bg-gray-100 p-0.5">
               {([["wv", "Work Values"], ["ci", "Career Interest"], ["integrated", "総合"]] as const).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setDiagnosticType(key)}
-                  className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
                     diagnosticType === key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
@@ -685,109 +715,88 @@ export default function TalentsPage() {
               ))}
             </div>
 
-            {/* Mode selector */}
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="diag-mode"
-                  checked={diagnosticMode === "team"}
-                  onChange={() => setDiagnosticMode("team")}
-                  className="accent-blue-600"
-                />
-                <span className="text-sm text-gray-700">チームから選択</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="diag-mode"
-                  checked={diagnosticMode === "custom"}
-                  onChange={() => setDiagnosticMode("custom")}
-                  className="accent-blue-600"
-                />
-                <span className="text-sm text-gray-700">カスタム設定</span>
-              </label>
-            </div>
+            <div className="h-5 w-px bg-gray-200" />
+
+            <select
+              value={diagnosticMode}
+              onChange={(e) => setDiagnosticMode(e.target.value as "team" | "custom")}
+              className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
+            >
+              <option value="team">チームから選択</option>
+              <option value="custom">カスタム設定</option>
+            </select>
 
             {diagnosticMode === "team" && (
-              <div>
-                <select
-                  value={selectedTeamId}
-                  onChange={(e) => setSelectedTeamId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
-                >
-                  <option value="">チームを選択してください</option>
-                  {teams.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
-                <p className="mt-1.5 text-xs text-gray-400">
-                  {diagnosticType === "ci"
-                    ? "チームメンバーのCareer Interest平均スコアに近い候補者を検索します"
-                    : diagnosticType === "integrated"
-                    ? "チームメンバーのWV・CI両方の平均スコアに近い候補者を検索します"
-                    : "チームメンバーのWork Values平均スコアに近い候補者を検索します"}
-                </p>
-              </div>
+              <select
+                value={selectedTeamId}
+                onChange={(e) => setSelectedTeamId(e.target.value)}
+                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer min-w-[160px]"
+              >
+                <option value="">チームを選択</option>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
             )}
 
-            {diagnosticMode === "custom" && (diagnosticType === "wv" || diagnosticType === "integrated") && (
-              <div className="space-y-3">
-                {diagnosticType === "integrated" ? (
-                  <p className="text-xs font-medium text-gray-600">Work Values</p>
-                ) : (
-                  <p className="text-xs text-gray-500">求める人材の価値観を0〜100で設定してください</p>
-                )}
+            <button
+              onClick={handleSearch}
+              disabled={loading || (diagnosticMode === "team" && !selectedTeamId)}
+              className="rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer ml-auto"
+              style={{ backgroundColor: accentColor }}
+            >
+              {loading ? "検索中..." : "マッチング検索"}
+            </button>
+          </div>
+
+          {/* Custom sliders (only shown in custom mode) */}
+          {diagnosticMode === "custom" && (diagnosticType === "wv" || diagnosticType === "integrated") && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              {diagnosticType === "integrated" && (
+                <p className="text-[11px] font-medium text-gray-500 mb-2">Work Values</p>
+              )}
+              <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-1.5">
                 {Object.entries(VALUE_LABELS).map(([key, label]) => (
-                  <div key={key} className="flex items-center gap-3">
-                    <span className="w-16 text-sm text-gray-600 shrink-0">{label}</span>
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="w-12 text-xs text-gray-600 shrink-0">{label}</span>
                     <input
                       type="range"
                       min={0}
                       max={100}
                       value={customWeights[key]}
                       onChange={(e) => setCustomWeights({ ...customWeights, [key]: Number(e.target.value) })}
-                      className="flex-1 accent-blue-600 cursor-pointer"
+                      className="flex-1 accent-blue-600 cursor-pointer h-4"
                     />
-                    <span className="w-8 text-right text-sm font-mono text-gray-500">{customWeights[key]}</span>
+                    <span className="w-6 text-right text-xs font-mono text-gray-400">{customWeights[key]}</span>
                   </div>
                 ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {diagnosticMode === "custom" && (diagnosticType === "ci" || diagnosticType === "integrated") && (
-              <div className="space-y-3">
-                {diagnosticType === "integrated" ? (
-                  <p className="text-xs font-medium text-gray-600">Career Interest</p>
-                ) : (
-                  <p className="text-xs text-gray-500">求める人材の興味傾向を0〜100で設定してください</p>
-                )}
+          {diagnosticMode === "custom" && (diagnosticType === "ci" || diagnosticType === "integrated") && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              {diagnosticType === "integrated" && (
+                <p className="text-[11px] font-medium text-gray-500 mb-2">Career Interest</p>
+              )}
+              <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-1.5">
                 {Object.entries(CI_TYPE_LABELS).map(([key, label]) => (
-                  <div key={key} className="flex items-center gap-3">
-                    <span className="w-16 text-sm text-gray-600 shrink-0">{label}</span>
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="w-12 text-xs text-gray-600 shrink-0">{label}</span>
                     <input
                       type="range"
                       min={0}
                       max={100}
                       value={customCIWeights[key]}
                       onChange={(e) => setCustomCIWeights({ ...customCIWeights, [key]: Number(e.target.value) })}
-                      className="flex-1 accent-purple-600 cursor-pointer"
+                      className="flex-1 accent-purple-600 cursor-pointer h-4"
                     />
-                    <span className="w-8 text-right text-sm font-mono text-gray-500">{customCIWeights[key]}</span>
+                    <span className="w-6 text-right text-xs font-mono text-gray-400">{customCIWeights[key]}</span>
                   </div>
                 ))}
               </div>
-            )}
-
-            <button
-              onClick={handleSearch}
-              disabled={loading || (diagnosticMode === "team" && !selectedTeamId)}
-              className="rounded-lg px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
-              style={{ backgroundColor: accentColor }}
-            >
-              {loading ? "検索中..." : "マッチング検索"}
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -823,7 +832,10 @@ export default function TalentsPage() {
 
       {/* Loading skeleton (diagnostic tab) */}
       {loading && tab === "diagnostic" && (
-        <div className="flex rounded-xl border border-gray-200 bg-white overflow-hidden" style={{ height: "calc(100vh - 340px)", minHeight: 500 }}>
+        <div
+          className="relative left-1/2 -translate-x-1/2 flex rounded-xl border border-gray-200 bg-white overflow-hidden"
+          style={{ width: "calc(100vw - 48px)", height: "calc(100vh - 300px)", minHeight: 400 }}
+        >
           <div className="w-full lg:w-[400px] lg:shrink-0 lg:border-r border-gray-200 p-3 space-y-3 animate-pulse">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="rounded-xl bg-gray-100 p-4">
@@ -861,14 +873,16 @@ export default function TalentsPage() {
         </>
       )}
 
-      {/* Diagnostic tab: split layout — break out of parent max-w-5xl px-6 */}
+      {/* Diagnostic tab: split layout — sticky full-width panel */}
       {!loading && tab === "diagnostic" && users.length > 0 && (
         <div
-          className="relative left-1/2 -translate-x-1/2 flex rounded-xl border border-gray-200 bg-white overflow-hidden"
-          style={{ width: "calc(100vw - 48px)", height: "calc(100vh - 340px)", minHeight: 500 }}
+          ref={splitPanelRef}
+          data-testid="diagnostic-split-panel"
+          className="sticky top-[28px] ml-[50%] -translate-x-1/2 flex border-t border-gray-200 bg-white overflow-hidden"
+          style={{ width: "calc(100vw - 48px)", height: "calc(100vh - 28px)" }}
         >
           {/* Left Panel - candidate list */}
-          <div ref={leftPanelRef} className="w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 overflow-y-auto bg-gray-50/60">
+          <div ref={leftPanelRef} className={`w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 bg-gray-50/60 ${panelStuck ? "overflow-y-auto" : "overflow-y-hidden"}`}>
             <ul className="p-2 space-y-1">
               {users.map((u) => (
                 <li key={u.user_id}>
@@ -890,7 +904,7 @@ export default function TalentsPage() {
           </div>
 
           {/* Right Panel - detail with radar charts */}
-          <div className="hidden lg:flex flex-1 min-h-0 overflow-y-auto bg-gray-50/50">
+          <div className={`hidden lg:flex flex-1 min-h-0 bg-gray-50/50 ${panelStuck ? "overflow-y-auto" : "overflow-y-hidden"}`}>
             {selectedUser ? (
               <CandidateDetail
                 user={selectedUser}

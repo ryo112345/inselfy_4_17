@@ -106,8 +106,8 @@ test.describe("Talents page state preservation on browser back", () => {
     await page.goto("/company/talents?tab=diagnostic");
     await page.waitForLoadState("networkidle");
 
-    // Select a team and search
-    const teamSelect = page.locator("select").first();
+    // Select a team and search (second select is team dropdown; first is mode selector)
+    const teamSelect = page.locator("select").nth(1);
     await teamSelect.selectOption({ index: 1 });
     await page.click('button:has-text("マッチング検索")');
     await page.waitForLoadState("networkidle");
