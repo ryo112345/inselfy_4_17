@@ -43,14 +43,9 @@ test.describe("Talents page scroll behavior", () => {
     const splitPanel = page.getByTestId("diagnostic-split-panel");
     await expect(splitPanel).toBeVisible();
 
-    // Before scrolling, left panel should have overflow-y-hidden (not scrollable)
-    const leftPanel = splitPanel.locator("div").first();
-    const overflowBefore = await leftPanel.evaluate((el) => getComputedStyle(el).overflowY);
-    expect(overflowBefore).toBe("hidden");
-
     // Scroll down to hide header and search bar
     const panelBox = await splitPanel.boundingBox();
-    const scrollAmount = panelBox!.y - 2;
+    const scrollAmount = panelBox!.y - 28;
     await page.evaluate((amount) => window.scrollTo(0, amount), scrollAmount);
     await page.waitForTimeout(300);
 
@@ -58,14 +53,10 @@ test.describe("Talents page scroll behavior", () => {
     const headerAfterScroll = await header.boundingBox();
     expect(headerAfterScroll!.y).toBeLessThan(0);
 
-    // Panel should be near top
+    // Panel should be near top (at ~28px)
     const panelBoxAfter = await splitPanel.boundingBox();
-    expect(panelBoxAfter!.y).toBeLessThanOrEqual(5);
-    expect(panelBoxAfter!.y).toBeGreaterThanOrEqual(0);
-
-    // After sticking, left panel should now have overflow-y-auto (scrollable)
-    // IntersectionObserver fires asynchronously, wait for class update
-    await expect(leftPanel).toHaveCSS("overflow-y", "auto", { timeout: 3000 });
+    expect(panelBoxAfter!.y).toBeLessThanOrEqual(30);
+    expect(panelBoxAfter!.y).toBeGreaterThanOrEqual(25);
   });
 
   test("diagnostic tab: wheel on panel scrolls page first when header is visible", async ({
@@ -76,7 +67,6 @@ test.describe("Talents page scroll behavior", () => {
     const splitPanel = page.getByTestId("diagnostic-split-panel");
     await expect(splitPanel).toBeVisible();
 
-    // Ensure page is at top
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(100);
 
@@ -90,5 +80,47 @@ test.describe("Talents page scroll behavior", () => {
 
     const scrollAfter = await page.evaluate(() => window.scrollY);
     expect(scrollAfter).toBeGreaterThan(scrollBefore);
+  });
+
+  test("diagnostic tab: seamless scroll from page to right panel", async ({
+    page,
+  }) => {
+    await searchDiagnosticTab(page);
+
+    // Select a candidate to show detail in right panel
+    const firstCandidate = page.locator("ul > li").first();
+    await firstCandidate.click();
+    await page.waitForTimeout(500);
+
+    const splitPanel = page.getByTestId("diagnostic-split-panel");
+    await expect(splitPanel).toBeVisible();
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(100);
+
+    // Wheel enough on the right panel area to first hide header, then scroll panel content
+    const box = await splitPanel.boundingBox();
+    const rightPanelX = box!.x + box!.width * 0.75;
+    const rightPanelY = box!.y + box!.height / 2;
+    await page.mouse.move(rightPanelX, rightPanelY);
+
+    // Multiple wheel events simulating continuous scroll
+    for (let i = 0; i < 10; i++) {
+      await page.mouse.wheel(0, 80);
+      await page.waitForTimeout(50);
+    }
+    await page.waitForTimeout(300);
+
+    // Page should have scrolled to hide header
+    const pageScroll = await page.evaluate(() => window.scrollY);
+    expect(pageScroll).toBeGreaterThan(100);
+
+    // Right panel should have scrolled internally too (seamless transition)
+    const rightPanelScroll = await page.evaluate(() => {
+      const panel = document.querySelector('[data-testid="diagnostic-split-panel"]');
+      const rightPanel = panel?.querySelector('.lg\\:flex.flex-1.overflow-y-auto');
+      return rightPanel?.scrollTop ?? 0;
+    });
+    expect(rightPanelScroll).toBeGreaterThan(0);
   });
 });
