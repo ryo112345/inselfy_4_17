@@ -901,13 +901,14 @@ export default function TalentsPage() {
         >
           {/* Left Panel - candidate list */}
           <div ref={leftPanelRef} className="w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 bg-gray-50/60 overflow-y-auto">
-            <ul className="p-2 space-y-1">
+            <ul className="p-2.5 space-y-1.5">
               {users.map((u) => (
                 <li key={u.user_id}>
                   <DiagnosticCandidateCard
                     user={u}
                     isSelected={selectedUserId === u.user_id}
                     onSelect={() => setSelectedUserId(u.user_id)}
+                    diagnosticType={diagnosticType}
                   />
                 </li>
               ))}
@@ -1096,8 +1097,8 @@ function SeekingDot({ status }: { status: string }) {
   const dotColor = status === "actively_looking" ? "bg-emerald-400" : status === "open" ? "bg-amber-400" : "bg-gray-300";
   return (
     <span className="inline-flex items-center gap-1">
-      <span className={`inline-block h-1.5 w-1.5 rounded-full ${dotColor}`} />
-      <span className={`text-[10px] leading-none ${cfg.text}`}>{cfg.label}</span>
+      <span className={`inline-block h-2 w-2 rounded-full ${dotColor}`} />
+      <span className={`text-xs leading-none ${cfg.text}`}>{cfg.label}</span>
     </span>
   );
 }
@@ -1106,78 +1107,99 @@ function DiagnosticCandidateCard({
   user: u,
   isSelected,
   onSelect,
+  diagnosticType,
 }: {
   user: TalentCard;
   isSelected: boolean;
   onSelect: () => void;
+  diagnosticType: "wv" | "ci" | "integrated";
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
   const avatarBg = u.profile_color ?? "#94a3b8";
   const recentExps = u.experiences.slice(0, 2);
-  const topSkills = u.skills.slice(0, 3);
-  const extraSkillCount = u.skills.length - 3;
+  const topSkills = u.skills.slice(0, 4);
+  const extraSkillCount = u.skills.length - 4;
+  const topLabels = diagnosticType === "ci" ? u.top_ci_labels : u.top_wv_labels;
 
   const inner = (
     <div
-      className={`rounded-xl p-3 transition-all ${
+      className={`rounded-xl px-4 py-3.5 transition-all ${
         isSelected
           ? "bg-white ring-1 ring-blue-200 shadow-sm"
           : "hover:bg-white/60"
       }`}
     >
-      <div className="flex gap-3">
-        {/* Match ring */}
-        {u.similarity != null && <SimilarityRing value={u.similarity} />}
-
-        {/* Main content */}
+      {/* Row 1: Avatar + Name + Match badges */}
+      <div className="flex items-center gap-3">
+        {u.avatar_url ? (
+          <img src={u.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover shrink-0" />
+        ) : (
+          <div
+            className="h-11 w-11 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+            style={{ backgroundColor: avatarBg }}
+          >
+            {initials}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
-          {/* Name row */}
-          <div className="flex items-center gap-2">
-            {u.avatar_url ? (
-              <img src={u.avatar_url} alt="" className="h-5 w-5 rounded-full object-cover shrink-0" />
-            ) : (
-              <div
-                className="h-5 w-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold shrink-0"
-                style={{ backgroundColor: avatarBg }}
-              >
-                {initials}
-              </div>
-            )}
-            <p className={`text-[13px] font-semibold truncate ${isSelected ? "text-gray-900" : "text-gray-800"}`}>
+          <div className="flex items-center justify-between gap-2">
+            <p className={`text-base font-semibold truncate ${isSelected ? "text-gray-900" : "text-gray-800"}`}>
               {u.name}
             </p>
+            <MatchBadges user={u} diagnosticType={diagnosticType} />
           </div>
-
-          {/* Experiences */}
-          {recentExps.length > 0 && (
-            <div className="mt-1.5 space-y-0.5">
-              {recentExps.map((exp, i) => (
-                <p key={i} className="text-[11px] leading-snug truncate">
-                  <span className="text-gray-700 font-medium">{exp.company_name}</span>
-                  <span className="text-gray-300 mx-1">—</span>
-                  <span className="text-gray-500">{exp.title}</span>
-                </p>
-              ))}
-            </div>
+          {u.headline && (
+            <p className="text-sm text-gray-500 truncate mt-0.5">{u.headline}</p>
           )}
-
-          {/* Skills + Status row */}
-          <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-            {topSkills.map((s) => (
-              <span key={s} className="rounded-md bg-gray-100 px-1.5 py-[3px] text-[10px] font-medium text-gray-600 leading-none">
-                {s}
-              </span>
-            ))}
-            {extraSkillCount > 0 && (
-              <span className="text-[10px] text-gray-400 leading-none">+{extraSkillCount}</span>
-            )}
-            {u.job_seeking_status && topSkills.length > 0 && (
-              <span className="text-gray-200 text-[10px]">|</span>
-            )}
-            {u.job_seeking_status && <SeekingDot status={u.job_seeking_status} />}
-          </div>
         </div>
       </div>
+
+      {/* Row 2: Recent experiences (up to 2) */}
+      {recentExps.length > 0 && (
+        <div className="mt-2.5 space-y-1">
+          {recentExps.map((exp, i) => (
+            <div key={i} className="flex items-center gap-1.5 min-w-0">
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={1.5} className="shrink-0">
+                <rect x="2" y="7" width="20" height="14" rx="2" />
+                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+              </svg>
+              <p className="text-sm leading-snug truncate">
+                <span className="text-gray-700 font-medium">{exp.company_name}</span>
+                <span className="text-gray-300 mx-1.5">—</span>
+                <span className="text-gray-500">{exp.title}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Row 3: Skills + Status */}
+      <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+        {topSkills.map((s) => (
+          <span key={s} className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 leading-none">
+            {s}
+          </span>
+        ))}
+        {extraSkillCount > 0 && (
+          <span className="text-xs text-gray-400 leading-none">+{extraSkillCount}</span>
+        )}
+        {u.job_seeking_status && topSkills.length > 0 && (
+          <span className="text-gray-200 text-xs">|</span>
+        )}
+        {u.job_seeking_status && <SeekingDot status={u.job_seeking_status} />}
+      </div>
+
+      {/* Row 4: Top diagnostic labels */}
+      {topLabels.length > 0 && (
+        <div className="mt-2 flex items-center gap-1 min-w-0">
+          <span className="text-xs text-gray-400 shrink-0">
+            {diagnosticType === "ci" ? "適職:" : "価値観:"}
+          </span>
+          <span className="text-xs text-gray-500 truncate">
+            {topLabels.slice(0, 3).join("・")}
+          </span>
+        </div>
+      )}
     </div>
   );
 
