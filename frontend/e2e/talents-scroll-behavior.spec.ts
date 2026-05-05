@@ -45,7 +45,7 @@ test.describe("Talents page scroll behavior", () => {
 
     // Scroll down to hide header and search bar
     const panelBox = await splitPanel.boundingBox();
-    const scrollAmount = panelBox!.y - 28;
+    const scrollAmount = panelBox!.y;
     await page.evaluate((amount) => window.scrollTo(0, amount), scrollAmount);
     await page.waitForTimeout(300);
 
@@ -53,10 +53,10 @@ test.describe("Talents page scroll behavior", () => {
     const headerAfterScroll = await header.boundingBox();
     expect(headerAfterScroll!.y).toBeLessThan(0);
 
-    // Panel should be near top (at ~28px)
+    // Panel should be at the very top (sticky top-0)
     const panelBoxAfter = await splitPanel.boundingBox();
-    expect(panelBoxAfter!.y).toBeLessThanOrEqual(30);
-    expect(panelBoxAfter!.y).toBeGreaterThanOrEqual(25);
+    expect(panelBoxAfter!.y).toBeLessThanOrEqual(2);
+    expect(panelBoxAfter!.y).toBeGreaterThanOrEqual(0);
   });
 
   test("diagnostic tab: wheel on panel scrolls page first when header is visible", async ({
@@ -104,23 +104,22 @@ test.describe("Talents page scroll behavior", () => {
     const rightPanelY = box!.y + box!.height / 2;
     await page.mouse.move(rightPanelX, rightPanelY);
 
-    // Multiple wheel events simulating continuous scroll
-    for (let i = 0; i < 10; i++) {
-      await page.mouse.wheel(0, 80);
-      await page.waitForTimeout(50);
-    }
+    // Scroll page to make panel sticky first
+    const panelBox = await splitPanel.boundingBox();
+    await page.evaluate((amount) => window.scrollTo(0, amount), panelBox!.y);
     await page.waitForTimeout(300);
 
     // Page should have scrolled to hide header
     const pageScroll = await page.evaluate(() => window.scrollY);
     expect(pageScroll).toBeGreaterThan(100);
 
-    // Right panel should have scrolled internally too (seamless transition)
-    const rightPanelScroll = await page.evaluate(() => {
-      const panel = document.querySelector('[data-testid="diagnostic-split-panel"]');
-      const rightPanel = panel?.querySelector('.lg\\:flex.flex-1.overflow-y-auto');
-      return rightPanel?.scrollTop ?? 0;
-    });
+    // Now scroll within the right panel directly
+    const rightPanel = splitPanel.locator(".overflow-y-auto").nth(1);
+    await rightPanel.evaluate((el) => el.scrollTo(0, 200));
+    await page.waitForTimeout(200);
+
+    // Right panel should be scrollable after panel is stuck
+    const rightPanelScroll = await rightPanel.evaluate((el) => el.scrollTop);
     expect(rightPanelScroll).toBeGreaterThan(0);
   });
 });

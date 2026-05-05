@@ -205,7 +205,7 @@ export default function TalentsPage() {
     if (!panel) return;
     const checkStuck = () => {
       const rect = panel.getBoundingClientRect();
-      const stuck = rect.top <= 29;
+      const stuck = rect.top <= 1;
       if (stuck !== panelStuckRef.current) {
         panelStuckRef.current = stuck;
       }
@@ -877,8 +877,8 @@ export default function TalentsPage() {
         <div
           ref={splitPanelRef}
           data-testid="diagnostic-split-panel"
-          className="sticky top-[28px] ml-[50%] -translate-x-1/2 flex border-t border-gray-200 bg-white overflow-clip"
-          style={{ width: "calc(100vw - 48px)", height: "calc(100vh - 28px)" }}
+          className="sticky top-0 ml-[50%] -translate-x-1/2 flex border-t border-gray-200 bg-white overflow-hidden"
+          style={{ width: "calc(100vw - 48px)", height: "100vh" }}
         >
           {/* Left Panel - candidate list */}
           <div ref={leftPanelRef} className="w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 bg-gray-50/60 overflow-y-auto">
