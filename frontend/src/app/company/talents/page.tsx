@@ -215,14 +215,33 @@ export default function TalentsPage() {
     return () => window.removeEventListener("scroll", checkStuck);
   }, [users, loading, tab]);
 
-  // Forward wheel events to page scroll until header is hidden, then let panel scroll natively
+  // Forward wheel events to page scroll when header needs to show/hide
   useEffect(() => {
     const panel = splitPanelRef.current;
     if (!panel) return;
+    const findScrollParent = (target: EventTarget | null): HTMLElement | null => {
+      let el = target as HTMLElement | null;
+      while (el && el !== panel) {
+        if (el.scrollHeight > el.clientHeight && getComputedStyle(el).overflowY !== "hidden") return el;
+        el = el.parentElement;
+      }
+      return null;
+    };
     const handler = (e: WheelEvent) => {
-      if (panelStuckRef.current) return;
-      e.preventDefault();
-      window.scrollTo(0, window.scrollY + e.deltaY);
+      // Scrolling down, header still visible → forward to page
+      if (!panelStuckRef.current) {
+        e.preventDefault();
+        window.scrollTo(0, window.scrollY + e.deltaY);
+        return;
+      }
+      // Scrolling up while panel is at top → forward to page to reveal header
+      if (e.deltaY < 0) {
+        const scrollable = findScrollParent(e.target);
+        if (!scrollable || scrollable.scrollTop <= 0) {
+          e.preventDefault();
+          window.scrollTo(0, window.scrollY + e.deltaY);
+        }
+      }
     };
     panel.addEventListener("wheel", handler, { passive: false });
     return () => panel.removeEventListener("wheel", handler);
@@ -903,7 +922,7 @@ export default function TalentsPage() {
           </div>
 
           {/* Right Panel - detail with radar charts */}
-          <div className="hidden lg:flex flex-1 min-h-0 bg-gray-50/50 overflow-y-auto">
+          <div className="hidden lg:block flex-1 min-h-0 bg-gray-50/50 overflow-y-auto">
             {selectedUser ? (
               <CandidateDetail
                 user={selectedUser}
@@ -919,7 +938,7 @@ export default function TalentsPage() {
                 diagnosticType={diagnosticType}
               />
             ) : (
-              <div className="flex flex-1 flex-col items-center justify-center text-center px-6">
+              <div className="flex h-full flex-col items-center justify-center text-center px-6">
                 <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
                   <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={1.5}>
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
