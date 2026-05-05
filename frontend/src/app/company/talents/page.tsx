@@ -30,9 +30,9 @@ type Team = {
 };
 
 const SEEKING_STATUS_MAP: Record<string, { label: string; bg: string; text: string }> = {
-  actively_looking:  { label: "積極的に探している", bg: "bg-emerald-50", text: "text-emerald-700" },
-  open:              { label: "良い話があれば", bg: "bg-amber-50", text: "text-amber-700" },
-  not_looking:       { label: "今は探していない", bg: "bg-gray-100", text: "text-gray-500" },
+  active:       { label: "スカウト歓迎", bg: "bg-emerald-50", text: "text-emerald-700" },
+  open:         { label: "いい話があれば", bg: "bg-amber-50", text: "text-amber-700" },
+  not_seeking:  { label: "スカウト不要", bg: "bg-gray-100", text: "text-gray-500" },
 };
 
 const VALUE_LABELS: Record<string, string> = {
@@ -471,7 +471,11 @@ export default function TalentsPage() {
       const res = await companyFetch(`${endpoint}?${params}`);
       const data = await res.json();
       const newUsers = data.users ?? [];
-      setUsers((prev) => append ? [...prev, ...newUsers] : newUsers);
+      setUsers((prev) => {
+        if (!append) return newUsers;
+        const seen = new Set(prev.map((u: TalentCard) => u.user_id));
+        return [...prev, ...newUsers.filter((u: TalentCard) => !seen.has(u.user_id))];
+      });
       setTotal(data.total ?? 0);
     } catch {
       if (!append) { setUsers([]); setTotal(0); }
@@ -685,9 +689,9 @@ export default function TalentsPage() {
                 className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
               >
                 <option value="">転職意欲</option>
-                <option value="actively_looking">積極的に探している</option>
-                <option value="open">良い話があれば</option>
-                <option value="not_looking">今は探していない</option>
+                <option value="active">スカウト歓迎</option>
+                <option value="open">いい話があれば</option>
+                <option value="not_seeking">スカウト不要</option>
               </select>
               <select
                 value={jobType}
@@ -1094,7 +1098,7 @@ function SimilarityRing({ value, size = 44 }: { value: number; size?: number }) 
 function SeekingDot({ status }: { status: string }) {
   const cfg = SEEKING_STATUS_MAP[status];
   if (!cfg) return null;
-  const dotColor = status === "actively_looking" ? "bg-emerald-400" : status === "open" ? "bg-amber-400" : "bg-gray-300";
+  const dotColor = status === "active" ? "bg-emerald-400" : status === "open" ? "bg-amber-400" : "bg-gray-300";
   return (
     <span className="inline-flex items-center gap-1">
       <span className={`inline-block h-2 w-2 rounded-full ${dotColor}`} />
@@ -1327,7 +1331,7 @@ function CandidateDetail({
             {status && (
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}>
                 <span className={`inline-block h-1.5 w-1.5 rounded-full ${
-                  u.job_seeking_status === "actively_looking" ? "bg-emerald-400" : u.job_seeking_status === "open" ? "bg-amber-400" : "bg-gray-300"
+                  u.job_seeking_status === "active" ? "bg-emerald-400" : u.job_seeking_status === "open" ? "bg-amber-400" : "bg-gray-300"
                 }`} />
                 {status.label}
               </span>
