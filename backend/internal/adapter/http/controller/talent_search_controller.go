@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"math"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/labstack/echo/v4"
 
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
-	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
 )
 
 type TalentSearchController struct {
@@ -209,87 +209,59 @@ func (c *TalentSearchController) DiagnosticSearch(ctx echo.Context) error {
 
 	reqCtx := ctx.Request().Context()
 
-	var targetMu map[string]float64
+	var targetWV map[string]float64
 
 	if teamID != "" {
-		mu, err := c.getTeamAverageMu(reqCtx, companyID, teamID)
+		wv, err := c.getTeamAverageWVDisplayScores(reqCtx, companyID, teamID)
 		if err != nil {
 			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team not found or no completed WV data"})
 		}
-		targetMu = mu
+		targetWV = wv
 	} else {
-		targetMu = c.parseCustomWeights(ctx)
-		if targetMu == nil {
+		targetWV = c.parseCustomWVDisplayScores(ctx)
+		if targetWV == nil {
 			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team_id or custom wv_ weights required"})
 		}
 	}
 
-	targetJSON, err := json.Marshal(targetMu)
+	scored, err := c.computeWVScores(reqCtx, targetWV)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
-	// SQL CTE: latest session per user, cosine similarity computed in DB
-	query := `
-WITH latest_wv AS (
-  SELECT DISTINCT ON (wns.user_id) wns.user_id, wns.mu
-  FROM work_needs_scores wns
-  ORDER BY wns.user_id, wns.created_at DESC
-),
-target AS (
-  SELECT $1::jsonb AS mu
-),
-similarity AS (
-  SELECT
-    lw.user_id,
-    lw.mu,
-    (
-      SELECT
-        CASE WHEN norm_a = 0 OR norm_b = 0 THEN 0
-        ELSE (dot / (SQRT(norm_a) * SQRT(norm_b)) + 1.0) / 2.0
-        END
-      FROM (
-        SELECT
-          SUM(a_val * b_val) AS dot,
-          SUM(a_val * a_val) AS norm_a,
-          SUM(b_val * b_val) AS norm_b
-        FROM jsonb_each_text(lw.mu) AS a(key, val)
-        JOIN jsonb_each_text((SELECT mu FROM target)) AS b(key, val) ON a.key = b.key
-        CROSS JOIN LATERAL (SELECT a.val::float8 AS a_val, b.val::float8 AS b_val) v
-      ) inner_calc
-    ) AS sim
-  FROM latest_wv lw
-)
-SELECT
-  u.id, u.username, u.name, u.headline, u.avatar_url, u.profile_color, u.job_seeking_status,
-  ROUND((s.sim * 100)::numeric, 1) AS similarity_pct
-FROM similarity s
-JOIN users u ON u.id = s.user_id
-WHERE u.is_public = true
-ORDER BY s.sim DESC
-LIMIT $2 OFFSET $3`
+	sort.Slice(scored, func(i, j int) bool { return scored[i].sim > scored[j].sim })
+	total := len(scored)
 
-	rows, err := c.pool.Query(reqCtx, query, targetJSON, limit, offset)
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	if offset >= len(scored) {
+		scored = nil
+	} else {
+		end := offset + limit
+		if end > len(scored) {
+			end = len(scored)
+		}
+		scored = scored[offset:end]
 	}
-	defer rows.Close()
 
-	users := scanSimilarityCards(rows)
+	if len(scored) == 0 {
+		return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": total})
+	}
+
+	users := c.fetchUserCards(reqCtx, scored)
 	for i := range users {
 		users[i].WVSimilarity = users[i].Similarity
 	}
 
-	var total int
-	_ = c.pool.QueryRow(reqCtx,
-		`SELECT COUNT(DISTINCT wns.user_id)
-		 FROM work_needs_scores wns
-		 JOIN users u ON u.id = wns.user_id
-		 WHERE u.is_public = true`,
-	).Scan(&total)
-
 	if len(users) > 0 {
 		c.enrichCards(reqCtx, users)
+		var targetCI *[6]float64
+		if teamID != "" {
+			if ci, err := c.getTeamAverageCIScores(reqCtx, companyID, teamID); err == nil {
+				targetCI = &ci
+			}
+		} else if ci, ok := c.parseCustomCIWeights(ctx); ok {
+			targetCI = &ci
+		}
+		c.fillCrossSimilarity(reqCtx, users, nil, targetCI)
 	}
 
 	if users == nil {
@@ -427,170 +399,130 @@ func (c *TalentSearchController) enrichCards(ctx context.Context, cards []talent
 	}
 }
 
-func (c *TalentSearchController) getTeamAverageMu(ctx context.Context, companyID, teamID string) (map[string]float64, error) {
-	var ownerID pgtype.UUID
-	teamUUID := pgUUID(teamID)
-	err := c.pool.QueryRow(ctx,
-		`SELECT company_id FROM teams WHERE id = $1`, teamUUID,
-	).Scan(&ownerID)
-	if err != nil {
-		return nil, err
+func (c *TalentSearchController) fillCrossSimilarity(ctx context.Context, cards []talentCard, targetWV map[string]float64, targetCI *[6]float64) {
+	if len(cards) == 0 {
+		return
 	}
-	if pgUUIDToString(ownerID) != companyID {
-		return nil, pgx.ErrNoRows
+	uids := make([]pgtype.UUID, len(cards))
+	uidMap := make(map[string]int, len(cards))
+	for i, card := range cards {
+		uids[i] = pgUUID(card.UserID)
+		uidMap[card.UserID] = i
 	}
 
-	rows, err := c.pool.Query(ctx,
-		`SELECT DISTINCT ON (wns.user_id) wns.mu
-		FROM work_needs_scores wns
-		JOIN team_members tm ON tm.user_id = wns.user_id
-		WHERE tm.team_id = $1 AND tm.wv_status = 'completed'
-		ORDER BY wns.user_id, wns.created_at DESC`, teamUUID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+	if targetWV != nil {
+		rows, err := c.pool.Query(ctx, `
+SELECT DISTINCT ON (s.user_id) s.user_id, s.id
+FROM work_values_sessions s
+WHERE s.user_id = ANY($1) AND s.status = 'completed'
+ORDER BY s.user_id, s.completed_at DESC`, uids)
+		if err == nil {
+			var sids []pgtype.UUID
+			userSessionMap := make(map[string]string)
+			for rows.Next() {
+				var uid, sid pgtype.UUID
+				if rows.Scan(&uid, &sid) == nil {
+					uidStr := pgUUIDToString(uid)
+					sidStr := pgUUIDToString(sid)
+					userSessionMap[sidStr] = uidStr
+					sids = append(sids, sid)
+				}
+			}
+			rows.Close()
 
-	avg := make(map[string]float64)
-	count := 0
-	for rows.Next() {
-		var muJSON []byte
-		if err := rows.Scan(&muJSON); err != nil {
-			continue
-		}
-		var mu map[string]float64
-		if err := json.Unmarshal(muJSON, &mu); err != nil {
-			continue
-		}
-		for _, id := range workvalues.NeedIDs {
-			avg[id] += mu[id]
-		}
-		count++
-	}
-	if count == 0 {
-		return nil, pgx.ErrNoRows
-	}
-	for k := range avg {
-		avg[k] /= float64(count)
-	}
-	return avg, nil
-}
+			if len(sids) > 0 {
+				scoreRows, err := c.pool.Query(ctx,
+					`SELECT session_id, value_id, display_score FROM work_values_scores WHERE session_id = ANY($1)`, sids)
+				if err == nil {
+					sessionScores := make(map[string]map[string]float64)
+					for scoreRows.Next() {
+						var sid pgtype.UUID
+						var vid string
+						var ds float64
+						if scoreRows.Scan(&sid, &vid, &ds) == nil {
+							sidStr := pgUUIDToString(sid)
+							if sessionScores[sidStr] == nil {
+								sessionScores[sidStr] = make(map[string]float64)
+							}
+							sessionScores[sidStr][vid] = ds
+						}
+					}
+					scoreRows.Close()
 
-func (c *TalentSearchController) parseCustomWeights(ctx echo.Context) map[string]float64 {
-	weights := make(map[string]float64)
-	hasAny := false
-	for _, vid := range workvalues.ValueIDs {
-		param := ctx.QueryParam("wv_" + vid)
-		if param != "" {
-			v, err := strconv.ParseFloat(param, 64)
-			if err == nil {
-				weights[vid] = v
-				hasAny = true
+					for sidStr, userScores := range sessionScores {
+						uidStr := userSessionMap[sidStr]
+						if idx, ok := uidMap[uidStr]; ok && cards[idx].WVSimilarity == nil {
+							sim := gaussianWVSimilarity(userScores, targetWV)
+							cards[idx].WVSimilarity = &sim
+						}
+					}
+				}
 			}
 		}
 	}
-	if !hasAny {
-		return nil
+
+	if targetCI != nil {
+		rows, err := c.pool.Query(ctx, `
+SELECT DISTINCT ON (s.user_id) s.user_id, s.id
+FROM career_interest_sessions s
+WHERE s.user_id = ANY($1) AND s.status = 'completed'
+ORDER BY s.user_id, s.completed_at DESC`, uids)
+		if err == nil {
+			var sids []pgtype.UUID
+			userSessionMap := make(map[string]string)
+			for rows.Next() {
+				var uid, sid pgtype.UUID
+				if rows.Scan(&uid, &sid) == nil {
+					uidStr := pgUUIDToString(uid)
+					sidStr := pgUUIDToString(sid)
+					userSessionMap[sidStr] = uidStr
+					sids = append(sids, sid)
+				}
+			}
+			rows.Close()
+
+			if len(sids) > 0 {
+				scoreRows, err := c.pool.Query(ctx,
+					`SELECT session_id, type_id, score FROM career_interest_type_scores WHERE session_id = ANY($1)`, sids)
+				if err == nil {
+					sessionScores := make(map[string][6]float64)
+					for scoreRows.Next() {
+						var sid pgtype.UUID
+						var tid string
+						var score float64
+						if scoreRows.Scan(&sid, &tid, &score) == nil {
+							sidStr := pgUUIDToString(sid)
+							scores := sessionScores[sidStr]
+							if idx, ok := ciTypeIndex[tid]; ok {
+								scores[idx] = score
+							}
+							sessionScores[sidStr] = scores
+						}
+					}
+					scoreRows.Close()
+
+					for sidStr, userScores := range sessionScores {
+						uidStr := userSessionMap[sidStr]
+						if idx, ok := uidMap[uidStr]; ok && cards[idx].CISimilarity == nil {
+							sim := gaussianCISimilarity(userScores, *targetCI)
+							cards[idx].CISimilarity = &sim
+						}
+					}
+				}
+			}
+		}
 	}
 
-	valNeeds := map[string][]string{
-		"achievement": {"ability_utilization", "achievement"},
-		"comfort":     {"activity", "independence", "variety", "compensation", "security", "working_conditions"},
-		"status":      {"advancement", "authority", "recognition", "social_status"},
-		"altruism":    {"co_workers", "moral_values", "social_service"},
-		"safety":      {"company_policies", "supervision_hr", "supervision_technical"},
-		"autonomy":    {"autonomy", "creativity", "responsibility"},
-	}
-
-	mu := make(map[string]float64)
-	for vid, score := range weights {
-		s := score / 100.0
-		if s <= 0.01 {
-			s = 0.01
-		}
-		if s >= 0.99 {
-			s = 0.99
-		}
-		muVal := math.Log(s / (1.0 - s))
-
-		for _, nid := range valNeeds[vid] {
-			mu[nid] = muVal
+	for i := range cards {
+		if cards[i].WVSimilarity != nil && cards[i].CISimilarity != nil && cards[i].IntSimilarity == nil {
+			avg := (*cards[i].WVSimilarity + *cards[i].CISimilarity) / 2.0
+			rounded := math.Round(avg*10) / 10
+			cards[i].IntSimilarity = &rounded
 		}
 	}
-	return mu
 }
 
 var ciTypeIDs = [6]string{"R", "I", "A", "S", "E", "C"}
-
-func scanSimilarityCards(rows pgx.Rows) []talentCard {
-	return scanCards(rows, false)
-}
-
-func scanIntegratedCards(rows pgx.Rows) []talentCard {
-	return scanCards(rows, true)
-}
-
-func scanCards(rows pgx.Rows, hasBreakdown bool) []talentCard {
-	var cards []talentCard
-	for rows.Next() {
-		var uid pgtype.UUID
-		var username, name string
-		var headline, avatarURL, profileColor, seekingStatus pgtype.Text
-		var simPct, wvPct, ciPct pgtype.Numeric
-
-		var err error
-		if hasBreakdown {
-			err = rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus, &simPct, &wvPct, &ciPct)
-		} else {
-			err = rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus, &simPct)
-		}
-		if err != nil {
-			continue
-		}
-
-		card := talentCard{
-			UserID:   pgUUIDToString(uid),
-			Username: username,
-			Name:     name,
-		}
-		if headline.Valid {
-			card.Headline = &headline.String
-		}
-		if avatarURL.Valid {
-			card.AvatarURL = &avatarURL.String
-		}
-		if profileColor.Valid {
-			card.ProfileColor = &profileColor.String
-		}
-		if seekingStatus.Valid {
-			card.JobSeekingStatus = &seekingStatus.String
-		}
-		if simPct.Valid {
-			f, _ := simPct.Float64Value()
-			if f.Valid {
-				card.Similarity = &f.Float64
-			}
-		}
-		if hasBreakdown {
-			if wvPct.Valid {
-				f, _ := wvPct.Float64Value()
-				if f.Valid {
-					card.WVSimilarity = &f.Float64
-				}
-			}
-			if ciPct.Valid {
-				f, _ := ciPct.Float64Value()
-				if f.Valid {
-					card.CISimilarity = &f.Float64
-				}
-			}
-			card.IntSimilarity = card.Similarity
-		}
-
-		cards = append(cards, card)
-	}
-	return cards
-}
 
 func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
 	companyID := ctx.Get(authmw.CompanyIDKey).(string)
@@ -622,80 +554,44 @@ func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
 		target = scores
 	}
 
-	query := `
-WITH latest_ci AS (
-  SELECT DISTINCT ON (s.user_id) s.user_id, s.id AS session_id
-  FROM career_interest_sessions s
-  WHERE s.status = 'completed'
-  ORDER BY s.user_id, s.completed_at DESC
-),
-ci_vectors AS (
-  SELECT lc.user_id,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'R' THEN ts.score END), 0) AS score_r,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'I' THEN ts.score END), 0) AS score_i,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'A' THEN ts.score END), 0) AS score_a,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'S' THEN ts.score END), 0) AS score_s,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'E' THEN ts.score END), 0) AS score_e,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'C' THEN ts.score END), 0) AS score_c
-  FROM latest_ci lc
-  JOIN career_interest_type_scores ts ON ts.session_id = lc.session_id
-  GROUP BY lc.user_id
-),
-target_ci AS (
-  SELECT $1::float8 AS r, $2::float8 AS i, $3::float8 AS a,
-         $4::float8 AS s, $5::float8 AS e, $6::float8 AS c
-),
-similarity AS (
-  SELECT cv.user_id,
-    (
-      SELECT
-        CASE WHEN norm_a = 0 OR norm_b = 0 THEN 0
-        ELSE (dot / (SQRT(norm_a) * SQRT(norm_b)) + 1.0) / 2.0
-        END
-      FROM (
-        SELECT
-          cv.score_r*tc.r + cv.score_i*tc.i + cv.score_a*tc.a +
-          cv.score_s*tc.s + cv.score_e*tc.e + cv.score_c*tc.c AS dot,
-          cv.score_r*cv.score_r + cv.score_i*cv.score_i + cv.score_a*cv.score_a +
-          cv.score_s*cv.score_s + cv.score_e*cv.score_e + cv.score_c*cv.score_c AS norm_a,
-          tc.r*tc.r + tc.i*tc.i + tc.a*tc.a + tc.s*tc.s + tc.e*tc.e + tc.c*tc.c AS norm_b
-        FROM target_ci tc
-      ) calc
-    ) AS sim
-  FROM ci_vectors cv
-)
-SELECT
-  u.id, u.username, u.name, u.headline, u.avatar_url, u.profile_color, u.job_seeking_status,
-  ROUND((s.sim * 100)::numeric, 1) AS similarity_pct
-FROM similarity s
-JOIN users u ON u.id = s.user_id
-WHERE u.is_public = true
-ORDER BY s.sim DESC
-LIMIT $7 OFFSET $8`
-
-	rows, err := c.pool.Query(reqCtx, query,
-		target[0], target[1], target[2], target[3], target[4], target[5],
-		limit, offset)
+	scored, err := c.computeCIScores(reqCtx, target)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
-	defer rows.Close()
 
-	users := scanSimilarityCards(rows)
+	sort.Slice(scored, func(i, j int) bool { return scored[i].sim > scored[j].sim })
+	total := len(scored)
+
+	if offset >= len(scored) {
+		scored = nil
+	} else {
+		end := offset + limit
+		if end > len(scored) {
+			end = len(scored)
+		}
+		scored = scored[offset:end]
+	}
+
+	if len(scored) == 0 {
+		return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": total})
+	}
+
+	users := c.fetchUserCards(reqCtx, scored)
 	for i := range users {
 		users[i].CISimilarity = users[i].Similarity
 	}
 
-	var total int
-	_ = c.pool.QueryRow(reqCtx,
-		`SELECT COUNT(DISTINCT s.user_id)
-		 FROM career_interest_sessions s
-		 JOIN users u ON u.id = s.user_id
-		 WHERE s.status = 'completed' AND u.is_public = true`,
-	).Scan(&total)
-
 	if len(users) > 0 {
 		c.enrichCards(reqCtx, users)
+		var targetWV map[string]float64
+		if teamID != "" {
+			if wv, err := c.getTeamAverageWVDisplayScores(reqCtx, companyID, teamID); err == nil {
+				targetWV = wv
+			}
+		} else {
+			targetWV = c.parseCustomWVDisplayScores(ctx)
+		}
+		c.fillCrossSimilarity(reqCtx, users, targetWV, nil)
 	}
 
 	if users == nil {
@@ -723,11 +619,11 @@ func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) er
 
 	reqCtx := ctx.Request().Context()
 
-	var targetMu map[string]float64
+	var targetWV map[string]float64
 	var targetCI [6]float64
 
 	if teamID != "" {
-		mu, errWV := c.getTeamAverageMu(reqCtx, companyID, teamID)
+		wv, errWV := c.getTeamAverageWVDisplayScores(reqCtx, companyID, teamID)
 		ci, errCI := c.getTeamAverageCIScores(reqCtx, companyID, teamID)
 		if errWV != nil && errCI != nil {
 			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team not found or no completed diagnostic data"})
@@ -738,135 +634,79 @@ func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) er
 		if errCI != nil {
 			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team has no completed CI data"})
 		}
-		targetMu = mu
+		targetWV = wv
 		targetCI = ci
 	} else {
-		targetMu = c.parseCustomWeights(ctx)
+		targetWV = c.parseCustomWVDisplayScores(ctx)
 		ci, hasCI := c.parseCustomCIWeights(ctx)
-		if targetMu == nil || !hasCI {
+		if targetWV == nil || !hasCI {
 			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "both wv_ and ci_ weights required"})
 		}
 		targetCI = ci
 	}
 
-	targetJSON, err := json.Marshal(targetMu)
+	wvScored, err := c.computeWVScores(reqCtx, targetWV)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	ciScored, err := c.computeCIScores(reqCtx, targetCI)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
-	query := `
-WITH latest_wv AS (
-  SELECT DISTINCT ON (wns.user_id) wns.user_id, wns.mu
-  FROM work_needs_scores wns
-  ORDER BY wns.user_id, wns.created_at DESC
-),
-target_wv AS (
-  SELECT $1::jsonb AS mu
-),
-wv_sim AS (
-  SELECT
-    lw.user_id,
-    (
-      SELECT
-        CASE WHEN norm_a = 0 OR norm_b = 0 THEN 0
-        ELSE (dot / (SQRT(norm_a) * SQRT(norm_b)) + 1.0) / 2.0
-        END
-      FROM (
-        SELECT
-          SUM(a_val * b_val) AS dot,
-          SUM(a_val * a_val) AS norm_a,
-          SUM(b_val * b_val) AS norm_b
-        FROM jsonb_each_text(lw.mu) AS a(key, val)
-        JOIN jsonb_each_text((SELECT mu FROM target_wv)) AS b(key, val) ON a.key = b.key
-        CROSS JOIN LATERAL (SELECT a.val::float8 AS a_val, b.val::float8 AS b_val) v
-      ) inner_calc
-    ) AS sim
-  FROM latest_wv lw
-),
-latest_ci AS (
-  SELECT DISTINCT ON (s.user_id) s.user_id, s.id AS session_id
-  FROM career_interest_sessions s
-  WHERE s.status = 'completed'
-  ORDER BY s.user_id, s.completed_at DESC
-),
-ci_vectors AS (
-  SELECT lc.user_id,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'R' THEN ts.score END), 0) AS score_r,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'I' THEN ts.score END), 0) AS score_i,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'A' THEN ts.score END), 0) AS score_a,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'S' THEN ts.score END), 0) AS score_s,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'E' THEN ts.score END), 0) AS score_e,
-    COALESCE(MAX(CASE WHEN ts.type_id = 'C' THEN ts.score END), 0) AS score_c
-  FROM latest_ci lc
-  JOIN career_interest_type_scores ts ON ts.session_id = lc.session_id
-  GROUP BY lc.user_id
-),
-target_ci AS (
-  SELECT $2::float8 AS r, $3::float8 AS i, $4::float8 AS a,
-         $5::float8 AS s, $6::float8 AS e, $7::float8 AS c
-),
-ci_sim AS (
-  SELECT cv.user_id,
-    (
-      SELECT
-        CASE WHEN norm_a = 0 OR norm_b = 0 THEN 0
-        ELSE (dot / (SQRT(norm_a) * SQRT(norm_b)) + 1.0) / 2.0
-        END
-      FROM (
-        SELECT
-          cv.score_r*tc.r + cv.score_i*tc.i + cv.score_a*tc.a +
-          cv.score_s*tc.s + cv.score_e*tc.e + cv.score_c*tc.c AS dot,
-          cv.score_r*cv.score_r + cv.score_i*cv.score_i + cv.score_a*cv.score_a +
-          cv.score_s*cv.score_s + cv.score_e*cv.score_e + cv.score_c*cv.score_c AS norm_a,
-          tc.r*tc.r + tc.i*tc.i + tc.a*tc.a + tc.s*tc.s + tc.e*tc.e + tc.c*tc.c AS norm_b
-        FROM target_ci tc
-      ) calc
-    ) AS sim
-  FROM ci_vectors cv
-),
-combined AS (
-  SELECT ws.user_id, (ws.sim + cs.sim) / 2.0 AS sim, ws.sim AS wv_sim, cs.sim AS ci_sim
-  FROM wv_sim ws
-  INNER JOIN ci_sim cs ON ws.user_id = cs.user_id
-)
-SELECT
-  u.id, u.username, u.name, u.headline, u.avatar_url, u.profile_color, u.job_seeking_status,
-  ROUND((c.sim * 100)::numeric, 1) AS similarity_pct,
-  ROUND((c.wv_sim * 100)::numeric, 1) AS wv_similarity_pct,
-  ROUND((c.ci_sim * 100)::numeric, 1) AS ci_similarity_pct
-FROM combined c
-JOIN users u ON u.id = c.user_id
-WHERE u.is_public = true
-ORDER BY c.sim DESC
-LIMIT $8 OFFSET $9`
-
-	rows, err := c.pool.Query(reqCtx, query,
-		targetJSON,
-		targetCI[0], targetCI[1], targetCI[2], targetCI[3], targetCI[4], targetCI[5],
-		limit, offset)
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	wvMap := make(map[string]float64, len(wvScored))
+	for _, s := range wvScored {
+		wvMap[s.userID] = s.sim
 	}
-	defer rows.Close()
+	ciMap := make(map[string]float64, len(ciScored))
+	for _, s := range ciScored {
+		ciMap[s.userID] = s.sim
+	}
 
-	users := scanIntegratedCards(rows)
+	var scored []intScored
+	for uid, wvSim := range wvMap {
+		ciSim, ok := ciMap[uid]
+		if !ok {
+			continue
+		}
+		overall := math.Round((wvSim+ciSim)/2.0*10) / 10
+		scored = append(scored, intScored{uid, overall, wvSim, ciSim})
+	}
 
-	var total int
-	_ = c.pool.QueryRow(reqCtx,
-		`SELECT COUNT(*)
-		FROM (
-			SELECT DISTINCT wns.user_id
-			FROM work_needs_scores wns
-			JOIN users u ON u.id = wns.user_id
-			WHERE u.is_public = true
-		) wv
-		INNER JOIN (
-			SELECT DISTINCT s.user_id
-			FROM career_interest_sessions s
-			JOIN users u ON u.id = s.user_id
-			WHERE s.status = 'completed' AND u.is_public = true
-		) ci ON wv.user_id = ci.user_id`,
-	).Scan(&total)
+	sort.Slice(scored, func(i, j int) bool { return scored[i].sim > scored[j].sim })
+	total := len(scored)
+
+	if offset >= len(scored) {
+		scored = nil
+	} else {
+		end := offset + limit
+		if end > len(scored) {
+			end = len(scored)
+		}
+		scored = scored[offset:end]
+	}
+
+	if len(scored) == 0 {
+		return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": total})
+	}
+
+	basicScored := make([]scoredUser, len(scored))
+	for i, s := range scored {
+		basicScored[i] = scoredUser{s.userID, s.sim}
+	}
+	users := c.fetchUserCards(reqCtx, basicScored)
+	for i := range users {
+		for _, s := range scored {
+			if s.userID == users[i].UserID {
+				wv := math.Round(s.wvSim*10) / 10
+				ci := math.Round(s.ciSim*10) / 10
+				users[i].WVSimilarity = &wv
+				users[i].CISimilarity = &ci
+				users[i].IntSimilarity = users[i].Similarity
+				break
+			}
+		}
+	}
 
 	if len(users) > 0 {
 		c.enrichCards(reqCtx, users)
@@ -944,4 +784,317 @@ func (c *TalentSearchController) parseCustomCIWeights(ctx echo.Context) ([6]floa
 		}
 	}
 	return scores, hasAny
+}
+
+const (
+	sigmaWV       = 18.0
+	sigmaCI       = 0.7
+	geomeanFloor  = 0.001
+)
+
+var ciTypeIndex = map[string]int{"R": 0, "I": 1, "A": 2, "S": 3, "E": 4, "C": 5}
+
+var wvValueIDs = []string{"achievement", "comfort", "status", "altruism", "safety", "autonomy"}
+
+func gauss(diff, sigma float64) float64 {
+	return math.Exp(-(diff * diff) / (2 * sigma * sigma))
+}
+
+func gaussianWVSimilarity(userScores, targetScores map[string]float64) float64 {
+	var logSum, weightTotal float64
+	for _, vid := range wvValueIDs {
+		u, uOk := userScores[vid]
+		t, tOk := targetScores[vid]
+		if !uOk || !tOk {
+			continue
+		}
+		closeness := gauss(math.Abs(u-t), sigmaWV)
+		logSum += u * math.Log(closeness+geomeanFloor)
+		weightTotal += u
+	}
+	if weightTotal == 0 {
+		return 0
+	}
+	return math.Round(math.Exp(logSum/weightTotal)*1000) / 10
+}
+
+func gaussianCISimilarity(userScores, targetScores [6]float64) float64 {
+	var logSum float64
+	count := 0
+	for i := 0; i < 6; i++ {
+		if userScores[i] == 0 && targetScores[i] == 0 {
+			continue
+		}
+		logSum += math.Log(gauss(math.Abs(userScores[i]-targetScores[i]), sigmaCI) + geomeanFloor)
+		count++
+	}
+	if count == 0 {
+		return 0
+	}
+	return math.Round(math.Exp(logSum/float64(count))*1000) / 10
+}
+
+type scoredUser struct {
+	userID string
+	sim    float64
+}
+
+type intScored struct {
+	userID string
+	sim    float64
+	wvSim  float64
+	ciSim  float64
+}
+
+func (c *TalentSearchController) fetchUserCards(ctx context.Context, scored []scoredUser) []talentCard {
+	if len(scored) == 0 {
+		return nil
+	}
+	uids := make([]pgtype.UUID, len(scored))
+	simMap := make(map[string]float64, len(scored))
+	for i, s := range scored {
+		uids[i] = pgUUID(s.userID)
+		simMap[s.userID] = s.sim
+	}
+
+	rows, err := c.pool.Query(ctx,
+		`SELECT id, username, name, headline, avatar_url, profile_color, job_seeking_status
+		 FROM users WHERE id = ANY($1) AND is_public = true`, uids)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	cardMap := make(map[string]*talentCard, len(scored))
+	for rows.Next() {
+		var uid pgtype.UUID
+		var username, name string
+		var headline, avatarURL, profileColor, seekingStatus pgtype.Text
+		if err := rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus); err != nil {
+			continue
+		}
+		card := &talentCard{
+			UserID:   pgUUIDToString(uid),
+			Username: username,
+			Name:     name,
+		}
+		if headline.Valid {
+			card.Headline = &headline.String
+		}
+		if avatarURL.Valid {
+			card.AvatarURL = &avatarURL.String
+		}
+		if profileColor.Valid {
+			card.ProfileColor = &profileColor.String
+		}
+		if seekingStatus.Valid {
+			card.JobSeekingStatus = &seekingStatus.String
+		}
+		sim := simMap[card.UserID]
+		card.Similarity = &sim
+		cardMap[card.UserID] = card
+	}
+
+	result := make([]talentCard, 0, len(scored))
+	for _, s := range scored {
+		if card, ok := cardMap[s.userID]; ok {
+			result = append(result, *card)
+		}
+	}
+	return result
+}
+
+func (c *TalentSearchController) getTeamAverageWVDisplayScores(ctx context.Context, companyID, teamID string) (map[string]float64, error) {
+	var ownerID pgtype.UUID
+	teamUUID := pgUUID(teamID)
+	err := c.pool.QueryRow(ctx,
+		`SELECT company_id FROM teams WHERE id = $1`, teamUUID,
+	).Scan(&ownerID)
+	if err != nil {
+		return nil, err
+	}
+	if pgUUIDToString(ownerID) != companyID {
+		return nil, pgx.ErrNoRows
+	}
+
+	rows, err := c.pool.Query(ctx,
+		`SELECT ws.value_id, AVG(ws.display_score) AS avg_score
+		FROM work_values_scores ws
+		JOIN (
+			SELECT DISTINCT ON (s.user_id) s.id AS session_id
+			FROM work_values_sessions s
+			JOIN team_members tm ON tm.user_id = s.user_id
+			WHERE tm.team_id = $1 AND tm.wv_status = 'completed' AND s.status = 'completed'
+			ORDER BY s.user_id, s.completed_at DESC
+		) latest ON ws.session_id = latest.session_id
+		GROUP BY ws.value_id`, teamUUID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	scores := make(map[string]float64)
+	for rows.Next() {
+		var vid string
+		var avg float64
+		if err := rows.Scan(&vid, &avg); err == nil {
+			scores[vid] = avg
+		}
+	}
+	if len(scores) == 0 {
+		return nil, pgx.ErrNoRows
+	}
+	return scores, nil
+}
+
+func (c *TalentSearchController) parseCustomWVDisplayScores(ctx echo.Context) map[string]float64 {
+	scores := make(map[string]float64)
+	hasAny := false
+	for _, vid := range wvValueIDs {
+		param := ctx.QueryParam("wv_" + vid)
+		if param != "" {
+			v, err := strconv.ParseFloat(param, 64)
+			if err == nil {
+				scores[vid] = v
+				hasAny = true
+			}
+		}
+	}
+	if !hasAny {
+		return nil
+	}
+	return scores
+}
+
+func (c *TalentSearchController) computeWVScores(ctx context.Context, targetWV map[string]float64) ([]scoredUser, error) {
+	rows, err := c.pool.Query(ctx, `
+SELECT DISTINCT ON (s.user_id) s.user_id, s.id AS session_id
+FROM work_values_sessions s
+JOIN users u ON u.id = s.user_id
+WHERE s.status = 'completed' AND u.is_public = true
+ORDER BY s.user_id, s.completed_at DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	type userSession struct {
+		userID    string
+		sessionID string
+	}
+	var sessions []userSession
+	for rows.Next() {
+		var uid, sid pgtype.UUID
+		if err := rows.Scan(&uid, &sid); err == nil {
+			sessions = append(sessions, userSession{pgUUIDToString(uid), pgUUIDToString(sid)})
+		}
+	}
+	if len(sessions) == 0 {
+		return nil, nil
+	}
+
+	sessionIDs := make([]pgtype.UUID, len(sessions))
+	for i, s := range sessions {
+		sessionIDs[i] = pgUUID(s.sessionID)
+	}
+
+	scoreRows, err := c.pool.Query(ctx,
+		`SELECT session_id, value_id, display_score FROM work_values_scores WHERE session_id = ANY($1)`,
+		sessionIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer scoreRows.Close()
+
+	sessionScores := make(map[string]map[string]float64)
+	for scoreRows.Next() {
+		var sid pgtype.UUID
+		var vid string
+		var ds float64
+		if err := scoreRows.Scan(&sid, &vid, &ds); err == nil {
+			sidStr := pgUUIDToString(sid)
+			if sessionScores[sidStr] == nil {
+				sessionScores[sidStr] = make(map[string]float64)
+			}
+			sessionScores[sidStr][vid] = ds
+		}
+	}
+
+	var scored []scoredUser
+	for _, s := range sessions {
+		userScores := sessionScores[s.sessionID]
+		if len(userScores) == 0 {
+			continue
+		}
+		sim := gaussianWVSimilarity(userScores, targetWV)
+		scored = append(scored, scoredUser{s.userID, sim})
+	}
+	return scored, nil
+}
+
+func (c *TalentSearchController) computeCIScores(ctx context.Context, target [6]float64) ([]scoredUser, error) {
+	rows, err := c.pool.Query(ctx, `
+SELECT DISTINCT ON (s.user_id) s.user_id, s.id AS session_id
+FROM career_interest_sessions s
+JOIN users u ON u.id = s.user_id
+WHERE s.status = 'completed' AND u.is_public = true
+ORDER BY s.user_id, s.completed_at DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	type userSession struct {
+		userID    string
+		sessionID string
+	}
+	var sessions []userSession
+	for rows.Next() {
+		var uid, sid pgtype.UUID
+		if err := rows.Scan(&uid, &sid); err == nil {
+			sessions = append(sessions, userSession{pgUUIDToString(uid), pgUUIDToString(sid)})
+		}
+	}
+	if len(sessions) == 0 {
+		return nil, nil
+	}
+
+	sessionIDs := make([]pgtype.UUID, len(sessions))
+	for i, s := range sessions {
+		sessionIDs[i] = pgUUID(s.sessionID)
+	}
+
+	scoreRows, err := c.pool.Query(ctx,
+		`SELECT session_id, type_id, score FROM career_interest_type_scores WHERE session_id = ANY($1)`,
+		sessionIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer scoreRows.Close()
+
+	sessionScores := make(map[string][6]float64)
+	for scoreRows.Next() {
+		var sid pgtype.UUID
+		var tid string
+		var score float64
+		if err := scoreRows.Scan(&sid, &tid, &score); err == nil {
+			sidStr := pgUUIDToString(sid)
+			scores := sessionScores[sidStr]
+			if idx, ok := ciTypeIndex[tid]; ok {
+				scores[idx] = score
+			}
+			sessionScores[sidStr] = scores
+		}
+	}
+
+	var scored []scoredUser
+	for _, s := range sessions {
+		userScores, ok := sessionScores[s.sessionID]
+		if !ok {
+			continue
+		}
+		sim := gaussianCISimilarity(userScores, target)
+		scored = append(scored, scoredUser{s.userID, sim})
+	}
+	return scored, nil
 }

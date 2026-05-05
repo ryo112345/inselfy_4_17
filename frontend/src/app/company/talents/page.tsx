@@ -1102,7 +1102,7 @@ function SeekingDot({ status }: { status: string }) {
   return (
     <span className="inline-flex items-center gap-1">
       <span className={`inline-block h-2 w-2 rounded-full ${dotColor}`} />
-      <span className={`text-xs leading-none ${cfg.text}`}>{cfg.label}</span>
+      <span className={`text-[13px] leading-none ${cfg.text}`}>{cfg.label}</span>
     </span>
   );
 }
@@ -1123,7 +1123,8 @@ function DiagnosticCandidateCard({
   const recentExps = u.experiences.slice(0, 2);
   const topSkills = u.skills.slice(0, 4);
   const extraSkillCount = u.skills.length - 4;
-  const topLabels = diagnosticType === "ci" ? u.top_ci_labels : u.top_wv_labels;
+  const wvLabels = u.top_wv_labels.slice(0, 3);
+  const ciLabels = u.top_ci_labels.slice(0, 3);
 
   const inner = (
     <div
@@ -1133,41 +1134,41 @@ function DiagnosticCandidateCard({
           : "hover:bg-white/60"
       }`}
     >
-      {/* Row 1: Avatar + Name + Match badges */}
-      <div className="flex items-center gap-3">
+      {/* Row 1: Avatar + Name */}
+      <div className="flex items-center gap-3.5">
         {u.avatar_url ? (
-          <img src={u.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover shrink-0" />
+          <img src={u.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
         ) : (
           <div
-            className="h-11 w-11 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+            className="h-12 w-12 rounded-full flex items-center justify-center text-white text-[15px] font-bold shrink-0"
             style={{ backgroundColor: avatarBg }}
           >
             {initials}
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <p className={`text-base font-semibold truncate ${isSelected ? "text-gray-900" : "text-gray-800"}`}>
-              {u.name}
-            </p>
-            <MatchBadges user={u} diagnosticType={diagnosticType} />
-          </div>
+          <p className={`text-[17px] font-semibold truncate ${isSelected ? "text-gray-900" : "text-gray-800"}`}>
+            {u.name}
+          </p>
           {u.headline && (
-            <p className="text-sm text-gray-500 truncate mt-0.5">{u.headline}</p>
+            <p className="text-[15px] text-gray-500 truncate mt-0.5">{u.headline}</p>
           )}
         </div>
       </div>
 
+      {/* Row 2: Match badges */}
+      <MatchBadges user={u} />
+
       {/* Row 2: Recent experiences (up to 2) */}
       {recentExps.length > 0 && (
-        <div className="mt-2.5 space-y-1">
+        <div className="mt-3 space-y-1">
           {recentExps.map((exp, i) => (
             <div key={i} className="flex items-center gap-1.5 min-w-0">
-              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={1.5} className="shrink-0">
+              <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={1.5} className="shrink-0">
                 <rect x="2" y="7" width="20" height="14" rx="2" />
                 <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
               </svg>
-              <p className="text-sm leading-snug truncate">
+              <p className="text-[15px] leading-snug truncate">
                 <span className="text-gray-700 font-medium">{exp.company_name}</span>
                 <span className="text-gray-300 mx-1.5">—</span>
                 <span className="text-gray-500">{exp.title}</span>
@@ -1178,30 +1179,36 @@ function DiagnosticCandidateCard({
       )}
 
       {/* Row 3: Skills + Status */}
-      <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+      <div className="mt-3 flex items-center gap-2 flex-wrap">
         {topSkills.map((s) => (
-          <span key={s} className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 leading-none">
+          <span key={s} className="rounded-md bg-gray-100 px-2.5 py-1 text-[13px] font-medium text-gray-600 leading-none">
             {s}
           </span>
         ))}
         {extraSkillCount > 0 && (
-          <span className="text-xs text-gray-400 leading-none">+{extraSkillCount}</span>
+          <span className="text-[13px] text-gray-400 leading-none">+{extraSkillCount}</span>
         )}
         {u.job_seeking_status && topSkills.length > 0 && (
-          <span className="text-gray-200 text-xs">|</span>
+          <span className="text-gray-200 text-[13px]">|</span>
         )}
         {u.job_seeking_status && <SeekingDot status={u.job_seeking_status} />}
       </div>
 
       {/* Row 4: Top diagnostic labels */}
-      {topLabels.length > 0 && (
-        <div className="mt-2 flex items-center gap-1 min-w-0">
-          <span className="text-xs text-gray-400 shrink-0">
-            {diagnosticType === "ci" ? "適職:" : "価値観:"}
-          </span>
-          <span className="text-xs text-gray-500 truncate">
-            {topLabels.slice(0, 3).join("・")}
-          </span>
+      {(wvLabels.length > 0 || ciLabels.length > 0) && (
+        <div className="mt-2.5 flex items-center gap-3 min-w-0">
+          {wvLabels.length > 0 && (
+            <span className="text-[13px] truncate">
+              <span className="text-gray-400">価値観:</span>
+              <span className="text-gray-500 ml-1">{wvLabels.join("・")}</span>
+            </span>
+          )}
+          {ciLabels.length > 0 && (
+            <span className="text-[13px] truncate">
+              <span className="text-gray-400">適職:</span>
+              <span className="text-gray-500 ml-1">{ciLabels.join("・")}</span>
+            </span>
+          )}
         </div>
       )}
     </div>
@@ -1223,47 +1230,44 @@ function DiagnosticCandidateCard({
   );
 }
 
-function matchColor(v: number) {
-  return v >= 80 ? "#2563eb" : v >= 60 ? "#60a5fa" : "#9ca3af";
+function matchScoreColor(score: number): string {
+  if (score >= 80) return "#149470";
+  if (score >= 55) return "#10b77f";
+  if (score >= 30) return "#8aa3d6";
+  return "#cfd0cd";
 }
 
-function MatchBadges({ user: u, diagnosticType }: { user: TalentCard; diagnosticType: "wv" | "ci" | "integrated" }) {
-  type Entry = { label: string; value: number; primary: boolean };
-  const entries: Entry[] = [];
+function MatchScoreBadge({ label, value }: { label: string; value: number }) {
+  const color = matchScoreColor(value);
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-xs font-medium text-gray-700">{label}</span>
+      <span className="text-sm font-bold tabular-nums" style={{ color }}>
+        {Math.round(value)}%
+      </span>
+      <div className="w-12 h-[6px] rounded-full bg-gray-200 overflow-hidden">
+        <div className="h-full rounded-full" style={{ width: `${value}%`, backgroundColor: color }} />
+      </div>
+    </div>
+  );
+}
 
-  if (diagnosticType === "wv") {
-    if (u.wv_similarity != null) entries.push({ label: "価値観", value: u.wv_similarity, primary: true });
-    if (u.ci_similarity != null) entries.push({ label: "適職", value: u.ci_similarity, primary: false });
-    if (u.integrated_similarity != null) entries.push({ label: "総合", value: u.integrated_similarity, primary: false });
-  } else if (diagnosticType === "ci") {
-    if (u.ci_similarity != null) entries.push({ label: "適職", value: u.ci_similarity, primary: true });
-    if (u.wv_similarity != null) entries.push({ label: "価値観", value: u.wv_similarity, primary: false });
-    if (u.integrated_similarity != null) entries.push({ label: "総合", value: u.integrated_similarity, primary: false });
-  } else {
-    if (u.integrated_similarity != null) entries.push({ label: "総合", value: u.integrated_similarity, primary: true });
-    if (u.wv_similarity != null) entries.push({ label: "価値観", value: u.wv_similarity, primary: false });
-    if (u.ci_similarity != null) entries.push({ label: "適職", value: u.ci_similarity, primary: false });
-  }
+function MatchBadges({ user: u }: { user: TalentCard }) {
+  const entries: { label: string; value: number }[] = [];
+  if (u.integrated_similarity != null) entries.push({ label: "総合", value: u.integrated_similarity });
+  if (u.wv_similarity != null) entries.push({ label: "文化", value: u.wv_similarity });
+  if (u.ci_similarity != null) entries.push({ label: "適職", value: u.ci_similarity });
 
   if (entries.length === 0 && u.similarity != null) {
-    const label = diagnosticType === "wv" ? "価値観" : diagnosticType === "ci" ? "適職" : "総合";
-    entries.push({ label, value: u.similarity, primary: true });
+    entries.push({ label: "総合", value: u.similarity });
   }
 
   if (entries.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-1.5 shrink-0">
+    <div className="mt-2.5 flex items-center gap-3">
       {entries.map((e) => (
-        <span
-          key={e.label}
-          className={`rounded-full px-2.5 py-0.5 text-xs font-bold leading-snug ${
-            e.primary ? "text-white" : "bg-gray-100 text-gray-600"
-          }`}
-          style={e.primary ? { backgroundColor: matchColor(e.value) } : undefined}
-        >
-          {e.label} {Math.round(e.value)}%
-        </span>
+        <MatchScoreBadge key={e.label} label={e.label} value={e.value} />
       ))}
     </div>
   );
@@ -1339,7 +1343,7 @@ function CandidateDetail({
           </div>
           {u.headline && <p className="text-sm text-gray-500 mt-1">{u.headline}</p>}
           <div className="flex items-center gap-1.5 mt-2.5">
-            <MatchBadges user={u} diagnosticType={diagnosticType} />
+            <MatchBadges user={u} />
           </div>
         </div>
         <Link

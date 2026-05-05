@@ -2,10 +2,12 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"math/rand/v2"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/careerinterest"
+	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -86,15 +88,31 @@ func (i *CareerInterestInteractor) SubmitResult(ctx context.Context, sessionID s
 
 func (i *CareerInterestInteractor) GetLatestResult(ctx context.Context, userID string) error {
 	result, err := i.resultRepo.GetLatestByUserID(ctx, userID)
-	if err != nil {
+	if err != nil && !errors.Is(err, domainerr.ErrNotFound) {
 		return err
 	}
 
-	basicScores, err := i.basicScoreRepo.GetBySessionID(ctx, result.SessionID)
+	var sessionID string
+	if result != nil {
+		sessionID = result.SessionID
+	} else {
+		session, sessErr := i.sessionRepo.GetLatestCompletedByUserID(ctx, userID)
+		if sessErr != nil {
+			return sessErr
+		}
+		sessionID = session.ID
+		result = &careerinterest.Result{
+			SessionID: sessionID,
+			UserID:    userID,
+			CreatedAt: session.CreatedAt,
+		}
+	}
+
+	basicScores, err := i.basicScoreRepo.GetBySessionID(ctx, sessionID)
 	if err != nil {
 		return err
 	}
-	typeScores, err := i.typeScoreRepo.GetBySessionID(ctx, result.SessionID)
+	typeScores, err := i.typeScoreRepo.GetBySessionID(ctx, sessionID)
 	if err != nil {
 		return err
 	}
