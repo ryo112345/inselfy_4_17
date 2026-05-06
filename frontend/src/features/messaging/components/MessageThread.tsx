@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { Message } from "../types";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
@@ -49,14 +49,17 @@ export function MessageThread({
   onBack,
   loading,
 }: Props) {
-  const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!loading && messages.length > 0 && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  }, [messages, loading]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col min-h-0">
       <div className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3">
         {onBack && (
           <button
@@ -85,7 +88,7 @@ export function MessageThread({
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-[#C8E8F5] px-4 py-4">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto bg-[#C8E8F5] px-4 py-4">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
@@ -122,7 +125,6 @@ export function MessageThread({
                 </div>
               );
             })}
-            <div ref={bottomRef} />
           </div>
         )}
       </div>

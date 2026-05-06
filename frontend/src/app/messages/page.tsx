@@ -135,38 +135,40 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="min-h-screen md:pl-[50px] bg-[#f6f7f5]">
+    <div className="h-screen overflow-hidden md:pl-[50px] bg-[#f6f7f5]">
       {user && <Sidebar username={user.username} displayName={user.name} />}
 
       <div className="mx-auto flex h-[calc(100vh-env(safe-area-inset-bottom,0px))] max-w-5xl flex-col md:flex-row md:pb-0 pb-[68px]">
         {/* Conversation list - hide on mobile when a conversation is selected */}
         <div
-          className={`w-full border-r border-gray-200 bg-white md:w-80 md:block ${
-            selectedConv ? "hidden" : "block"
+          className={`flex w-full flex-col border-r border-gray-200 bg-white md:w-80 md:flex ${
+            selectedConv ? "hidden" : "flex"
           }`}
         >
-          <div className="border-b border-gray-200 px-4 py-3">
+          <div className="shrink-0 border-b border-gray-200 px-4 py-3">
             <h1 className="text-base font-semibold text-gray-900">
               メッセージ
             </h1>
           </div>
-          {loadingConvs ? (
-            <div className="flex items-center justify-center py-12">
-              <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
-            </div>
-          ) : (
-            <ConversationList
-              conversations={conversations}
-              selectedId={selectedConv?.id ?? null}
-              onSelect={handleSelectConv}
-              nameKey="companyName"
-            />
-          )}
+          <div className="flex-1 overflow-y-auto scrollbar-hide">
+            {loadingConvs ? (
+              <div className="flex items-center justify-center py-12">
+                <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+              </div>
+            ) : (
+              <ConversationList
+                conversations={conversations}
+                selectedId={selectedConv?.id ?? null}
+                onSelect={handleSelectConv}
+                nameKey="companyName"
+              />
+            )}
+          </div>
         </div>
 
         {/* Message thread - show on mobile only when selected */}
         <div
-          className={`flex-1 flex flex-col md:flex ${
+          className={`flex-1 min-h-0 flex flex-col md:flex ${
             selectedConv ? "flex" : "hidden md:flex"
           }`}
         >
