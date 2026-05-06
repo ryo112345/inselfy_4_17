@@ -186,6 +186,33 @@ func (c *MessagingController) CountUnreadByCompany(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, p.UnreadCountResponse())
 }
 
+type startCandidateConversationRequest struct {
+	RecipientID string `json:"recipientId"`
+	Body        string `json:"body"`
+}
+
+func (c *MessagingController) StartCandidateConversation(ctx echo.Context) error {
+	userID, ok := ctx.Get(authmw.UserIDKey).(string)
+	if !ok || userID == "" {
+		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
+	}
+
+	var body startCandidateConversationRequest
+	if err := ctx.Bind(&body); err != nil {
+		return badRequest(ctx, "invalid request body")
+	}
+
+	input, p := c.newIO()
+	if err := input.StartCandidateConversation(ctx.Request().Context(), messaging.StartCandidateConversationInput{
+		SenderID:    userID,
+		RecipientID: body.RecipientID,
+		Body:        body.Body,
+	}); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.JSON(http.StatusCreated, p.ConversationResponse())
+}
+
 func (c *MessagingController) ListConversationsByCandidate(ctx echo.Context) error {
 	userID, ok := ctx.Get(authmw.UserIDKey).(string)
 	if !ok || userID == "" {

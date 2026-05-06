@@ -11,3 +11,7 @@ WHERE conversation_id = $1 AND participant_type = $2 AND participant_id = $3;
 UPDATE conversation_participants
 SET last_read_at = NOW()
 WHERE conversation_id = $1 AND participant_type = $2 AND participant_id = $3;
+
+-- name: ListParticipantsByConversation :many
+SELECT * FROM conversation_participants
+WHERE conversation_id = $1;

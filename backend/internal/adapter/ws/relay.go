@@ -10,9 +10,9 @@ import (
 )
 
 type Relay struct {
-	hub      *Hub
-	broker   port.MessageBroker
-	convRepo port.ConversationRepository
+	hub             *Hub
+	broker          port.MessageBroker
+	participantRepo port.ConversationParticipantRepository
 }
 
 type notifyPayload struct {
@@ -27,8 +27,8 @@ type wsEnvelope struct {
 	Payload json.RawMessage `json:"payload"`
 }
 
-func NewRelay(hub *Hub, broker port.MessageBroker, convRepo port.ConversationRepository) *Relay {
-	return &Relay{hub: hub, broker: broker, convRepo: convRepo}
+func NewRelay(hub *Hub, broker port.MessageBroker, participantRepo port.ConversationParticipantRepository) *Relay {
+	return &Relay{hub: hub, broker: broker, participantRepo: participantRepo}
 }
 
 func (r *Relay) Start(ctx context.Context) {
@@ -48,9 +48,9 @@ func (r *Relay) Start(ctx context.Context) {
 			continue
 		}
 
-		conv, err := r.convRepo.GetByID(ctx, np.ConversationID)
+		participants, err := r.participantRepo.ListByConversation(ctx, np.ConversationID)
 		if err != nil {
-			log.Printf("[relay] failed to get conversation %s: %v", np.ConversationID, err)
+			log.Printf("[relay] failed to list participants for %s: %v", np.ConversationID, err)
 			continue
 		}
 
@@ -59,14 +59,12 @@ func (r *Relay) Start(ctx context.Context) {
 			Payload: payload,
 		})
 
-		candidateKey := fmt.Sprintf("candidate:%s", conv.CandidateID)
-		companyKey := fmt.Sprintf("company:%s", conv.CompanyID)
-
-		if np.SenderType != "candidate" || np.SenderID != conv.CandidateID {
-			r.hub.Send(candidateKey, envelope)
-		}
-		if np.SenderType != "company" || np.SenderID != conv.CompanyID {
-			r.hub.Send(companyKey, envelope)
+		for _, p := range participants {
+			if p.ParticipantType == np.SenderType && p.ParticipantID == np.SenderID {
+				continue
+			}
+			key := fmt.Sprintf("%s:%s", p.ParticipantType, p.ParticipantID)
+			r.hub.Send(key, envelope)
 		}
 	}
 }

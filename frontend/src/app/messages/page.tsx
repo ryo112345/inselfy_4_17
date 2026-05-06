@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
 import { useUnreadMessaging } from "@/features/messaging/unread-context";
 import {
@@ -8,8 +9,10 @@ import {
   fetchCandidateConversationMessages,
   sendMessageAsCandidate,
   markReadAsCandidate,
+  startCandidateConversation,
 } from "@/features/messaging/api";
 import type { Conversation, Message } from "@/features/messaging/types";
+import { getCounterpartName } from "@/features/messaging/types";
 import { ConversationList } from "@/features/messaging/components/ConversationList";
 import { MessageThread } from "@/features/messaging/components/MessageThread";
 import { useMessagingWebSocket } from "@/features/messaging/useWebSocket";
@@ -18,6 +21,10 @@ import { Sidebar } from "@/app/components/Sidebar";
 export default function MessagesPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { refresh: refreshUnread } = useUnreadMessaging();
+  const searchParams = useSearchParams();
+  const initialConvId = searchParams.get("conversation");
+  const recipientId = searchParams.get("recipient");
+  const recipientName = searchParams.get("recipientName");
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
@@ -25,22 +32,23 @@ export default function MessagesPage() {
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
 
+  // New conversation mode: recipient specified but no existing conversation found
+  const [newConvRecipient, setNewConvRecipient] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const loadConversations = useCallback(async () => {
     try {
       const data = await fetchCandidateConversations({ limit: 50 });
       setConversations(data.items ?? []);
+      return data.items ?? [];
     } catch {
-      // ignore
+      return [];
     } finally {
       setLoadingConvs(false);
     }
   }, []);
-
-  useEffect(() => {
-    if (!authLoading && user) {
-      loadConversations();
-    }
-  }, [authLoading, user, loadConversations]);
 
   const loadMessages = useCallback(
     async (convId: string) => {
@@ -66,8 +74,40 @@ export default function MessagesPage() {
     [refreshUnread],
   );
 
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    loadConversations().then((items) => {
+      if (initialConvId) {
+        const target = items.find((c) => c.id === initialConvId);
+        if (target) {
+          setSelectedConv(target);
+          loadMessages(target.id);
+        }
+      } else if (recipientId) {
+        const existing = items.find(
+          (c) =>
+            c.conversationType === "candidate_candidate" &&
+            (c.participant1Id === recipientId ||
+              c.participant2Id === recipientId),
+        );
+        if (existing) {
+          setSelectedConv(existing);
+          loadMessages(existing.id);
+        } else {
+          setNewConvRecipient({
+            id: recipientId,
+            name: recipientName ?? "",
+          });
+        }
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user]);
+
   const handleSelectConv = useCallback(
     (conv: Conversation) => {
+      setNewConvRecipient(null);
       setSelectedConv(conv);
       setMessages([]);
       loadMessages(conv.id);
@@ -91,8 +131,33 @@ export default function MessagesPage() {
     [selectedConv],
   );
 
+  const handleSendNewConv = useCallback(
+    async (body: string) => {
+      if (!newConvRecipient) return;
+      const conv = await startCandidateConversation({
+        recipientId: newConvRecipient.id,
+        body: body,
+      });
+      setNewConvRecipient(null);
+      setSelectedConv(conv);
+      setMessages([{
+        id: conv.id + "-first",
+        conversationId: conv.id,
+        senderType: "candidate",
+        senderId: user!.id,
+        body,
+        createdAt: conv.createdAt,
+      }]);
+      await loadConversations();
+      refreshUnread();
+      loadMessages(conv.id);
+    },
+    [newConvRecipient, user, loadConversations, refreshUnread, loadMessages],
+  );
+
   const handleBack = useCallback(() => {
     setSelectedConv(null);
+    setNewConvRecipient(null);
     setMessages([]);
     loadConversations();
   }, [loadConversations]);
@@ -135,15 +200,20 @@ export default function MessagesPage() {
     );
   }
 
+  const showThread = selectedConv || newConvRecipient;
+  const threadCounterpartName = selectedConv && user
+    ? getCounterpartName(selectedConv, user.id)
+    : newConvRecipient?.name ?? "";
+
   return (
     <div className="h-screen overflow-hidden md:pl-[50px] bg-[#f6f7f5]">
       {user && <Sidebar username={user.username} displayName={user.name} />}
 
       <div className="mx-auto flex h-[calc(100vh-env(safe-area-inset-bottom,0px))] max-w-5xl flex-col md:flex-row md:pb-0 pb-[68px]">
-        {/* Conversation list - hide on mobile when a conversation is selected */}
+        {/* Conversation list */}
         <div
           className={`flex w-full flex-col border-r border-gray-200 bg-white md:w-80 md:flex ${
-            selectedConv ? "hidden" : "flex"
+            showThread ? "hidden" : "flex"
           }`}
         >
           <div className="shrink-0 border-b border-gray-200 px-4 py-3">
@@ -161,25 +231,25 @@ export default function MessagesPage() {
                 conversations={conversations}
                 selectedId={selectedConv?.id ?? null}
                 onSelect={handleSelectConv}
-                nameKey="companyName"
+                getDisplayName={(c) => user ? getCounterpartName(c, user.id) : c.companyName}
               />
             )}
           </div>
         </div>
 
-        {/* Message thread - show on mobile only when selected */}
+        {/* Message thread */}
         <div
           className={`flex-1 min-h-0 flex flex-col md:flex ${
-            selectedConv ? "flex" : "hidden md:flex"
+            showThread ? "flex" : "hidden md:flex"
           }`}
         >
-          {selectedConv && user ? (
+          {showThread && user ? (
             <MessageThread
               messages={messages}
               myId={user.id}
               mySenderType="candidate"
-              counterpartName={selectedConv.companyName}
-              onSend={handleSend}
+              counterpartName={threadCounterpartName}
+              onSend={selectedConv ? handleSend : handleSendNewConv}
               onBack={handleBack}
               loading={loadingMsgs}
             />

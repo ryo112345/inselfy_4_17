@@ -97,6 +97,80 @@ func (i *MessagingInteractor) StartConversation(ctx context.Context, input messa
 	return i.output.PresentConversation(ctx, result)
 }
 
+func (i *MessagingInteractor) StartCandidateConversation(ctx context.Context, input messaging.StartCandidateConversationInput) error {
+	input.Body = strings.TrimSpace(input.Body)
+	if err := messaging.ValidateMessageBody(input.Body); err != nil {
+		return err
+	}
+	if input.SenderID == input.RecipientID {
+		return messaging.ErrSelfConversation
+	}
+
+	p1, p2 := input.SenderID, input.RecipientID
+	if p1 > p2 {
+		p1, p2 = p2, p1
+	}
+
+	existing, err := i.convRepo.GetByCandidatePair(ctx, p1, p2)
+	if err != nil && !isNotFound(err) {
+		return err
+	}
+	if existing != nil {
+		result, err := i.convRepo.GetByID(ctx, existing.ID)
+		if err != nil {
+			return err
+		}
+		return i.output.PresentConversation(ctx, result)
+	}
+
+	var conv *messaging.Conversation
+	err = i.tx.WithinTransaction(ctx, func(txCtx context.Context) error {
+		var txErr error
+		conv, txErr = i.convRepo.CreateCandidateConversation(txCtx, &messaging.Conversation{
+			Participant1ID: p1,
+			Participant2ID: p2,
+		})
+		if txErr != nil {
+			return txErr
+		}
+
+		txErr = i.participantRepo.Create(txCtx, &messaging.ConversationParticipant{
+			ConversationID:  conv.ID,
+			ParticipantType: "candidate",
+			ParticipantID:   input.SenderID,
+		})
+		if txErr != nil {
+			return txErr
+		}
+
+		txErr = i.participantRepo.Create(txCtx, &messaging.ConversationParticipant{
+			ConversationID:  conv.ID,
+			ParticipantType: "candidate",
+			ParticipantID:   input.RecipientID,
+		})
+		if txErr != nil {
+			return txErr
+		}
+
+		_, txErr = i.msgRepo.Create(txCtx, &messaging.Message{
+			ConversationID: conv.ID,
+			SenderType:     "candidate",
+			SenderID:       input.SenderID,
+			Body:           input.Body,
+		})
+		return txErr
+	})
+	if err != nil {
+		return err
+	}
+
+	result, err := i.convRepo.GetByID(ctx, conv.ID)
+	if err != nil {
+		return err
+	}
+	return i.output.PresentConversation(ctx, result)
+}
+
 func (i *MessagingInteractor) SendMessage(ctx context.Context, input messaging.SendMessageInput) error {
 	input.Body = strings.TrimSpace(input.Body)
 	if err := messaging.ValidateMessageBody(input.Body); err != nil {

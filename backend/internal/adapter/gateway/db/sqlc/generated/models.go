@@ -355,11 +355,14 @@ type CompanyRefreshToken struct {
 }
 
 type Conversation struct {
-	ID            pgtype.UUID        `json:"id"`
-	CompanyID     pgtype.UUID        `json:"company_id"`
-	CandidateID   pgtype.UUID        `json:"candidate_id"`
-	LastMessageAt pgtype.Timestamptz `json:"last_message_at"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	ID               pgtype.UUID        `json:"id"`
+	CompanyID        pgtype.UUID        `json:"company_id"`
+	CandidateID      pgtype.UUID        `json:"candidate_id"`
+	LastMessageAt    pgtype.Timestamptz `json:"last_message_at"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	ConversationType string             `json:"conversation_type"`
+	Participant1ID   pgtype.UUID        `json:"participant1_id"`
+	Participant2ID   pgtype.UUID        `json:"participant2_id"`
 }
 
 type ConversationParticipant struct {

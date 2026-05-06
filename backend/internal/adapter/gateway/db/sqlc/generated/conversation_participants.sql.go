@@ -52,6 +52,37 @@ func (q *Queries) GetConversationParticipant(ctx context.Context, arg *GetConver
 	return &i, err
 }
 
+const listParticipantsByConversation = `-- name: ListParticipantsByConversation :many
+SELECT id, conversation_id, participant_type, participant_id, last_read_at FROM conversation_participants
+WHERE conversation_id = $1
+`
+
+func (q *Queries) ListParticipantsByConversation(ctx context.Context, conversationID pgtype.UUID) ([]*ConversationParticipant, error) {
+	rows, err := q.db.Query(ctx, listParticipantsByConversation, conversationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ConversationParticipant
+	for rows.Next() {
+		var i ConversationParticipant
+		if err := rows.Scan(
+			&i.ID,
+			&i.ConversationID,
+			&i.ParticipantType,
+			&i.ParticipantID,
+			&i.LastReadAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateParticipantLastReadAt = `-- name: UpdateParticipantLastReadAt :exec
 UPDATE conversation_participants
 SET last_read_at = NOW()

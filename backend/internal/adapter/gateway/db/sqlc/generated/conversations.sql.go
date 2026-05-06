@@ -12,18 +12,21 @@ import (
 )
 
 const countConversationsByCandidate = `-- name: CountConversationsByCandidate :one
-SELECT count(*) FROM conversations WHERE candidate_id = $1
+SELECT count(*) FROM conversations c
+JOIN conversation_participants cp_me ON cp_me.conversation_id = c.id
+    AND cp_me.participant_type = 'candidate' AND cp_me.participant_id = $1
 `
 
-func (q *Queries) CountConversationsByCandidate(ctx context.Context, candidateID pgtype.UUID) (int64, error) {
-	row := q.db.QueryRow(ctx, countConversationsByCandidate, candidateID)
+func (q *Queries) CountConversationsByCandidate(ctx context.Context, participantID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countConversationsByCandidate, participantID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
 const countConversationsByCompany = `-- name: CountConversationsByCompany :one
-SELECT count(*) FROM conversations WHERE company_id = $1
+SELECT count(*) FROM conversations
+WHERE company_id = $1 AND conversation_type = 'company_candidate'
 `
 
 func (q *Queries) CountConversationsByCompany(ctx context.Context, companyID pgtype.UUID) (int64, error) {
@@ -37,11 +40,10 @@ const countUnreadConversationsByCandidate = `-- name: CountUnreadConversationsBy
 SELECT count(DISTINCT c.id)::int FROM conversations c
 JOIN conversation_participants cp ON cp.conversation_id = c.id
     AND cp.participant_type = 'candidate' AND cp.participant_id = $1
-WHERE c.candidate_id = $1
-    AND EXISTS (
-        SELECT 1 FROM messages m
-        WHERE m.conversation_id = c.id AND m.created_at > cp.last_read_at AND m.sender_type != 'candidate'
-    )
+WHERE EXISTS (
+    SELECT 1 FROM messages m
+    WHERE m.conversation_id = c.id AND m.created_at > cp.last_read_at AND m.sender_id != $1
+)
 `
 
 func (q *Queries) CountUnreadConversationsByCandidate(ctx context.Context, participantID pgtype.UUID) (int32, error) {
@@ -55,7 +57,7 @@ const countUnreadConversationsByCompany = `-- name: CountUnreadConversationsByCo
 SELECT count(DISTINCT c.id)::int FROM conversations c
 JOIN conversation_participants cp ON cp.conversation_id = c.id
     AND cp.participant_type = 'company' AND cp.participant_id = $1
-WHERE c.company_id = $1
+WHERE c.company_id = $1 AND c.conversation_type = 'company_candidate'
     AND EXISTS (
         SELECT 1 FROM messages m
         WHERE m.conversation_id = c.id AND m.created_at > cp.last_read_at AND m.sender_type != 'company'
@@ -69,10 +71,37 @@ func (q *Queries) CountUnreadConversationsByCompany(ctx context.Context, partici
 	return column_1, err
 }
 
+const createCandidateConversation = `-- name: CreateCandidateConversation :one
+INSERT INTO conversations (conversation_type, company_id, candidate_id, participant1_id, participant2_id)
+VALUES ('candidate_candidate', NULL, NULL, $1, $2)
+RETURNING id, company_id, candidate_id, last_message_at, created_at, conversation_type, participant1_id, participant2_id
+`
+
+type CreateCandidateConversationParams struct {
+	Participant1ID pgtype.UUID `json:"participant1_id"`
+	Participant2ID pgtype.UUID `json:"participant2_id"`
+}
+
+func (q *Queries) CreateCandidateConversation(ctx context.Context, arg *CreateCandidateConversationParams) (*Conversation, error) {
+	row := q.db.QueryRow(ctx, createCandidateConversation, arg.Participant1ID, arg.Participant2ID)
+	var i Conversation
+	err := row.Scan(
+		&i.ID,
+		&i.CompanyID,
+		&i.CandidateID,
+		&i.LastMessageAt,
+		&i.CreatedAt,
+		&i.ConversationType,
+		&i.Participant1ID,
+		&i.Participant2ID,
+	)
+	return &i, err
+}
+
 const createConversation = `-- name: CreateConversation :one
 INSERT INTO conversations (company_id, candidate_id)
 VALUES ($1, $2)
-RETURNING id, company_id, candidate_id, last_message_at, created_at
+RETURNING id, company_id, candidate_id, last_message_at, created_at, conversation_type, participant1_id, participant2_id
 `
 
 type CreateConversationParams struct {
@@ -89,12 +118,42 @@ func (q *Queries) CreateConversation(ctx context.Context, arg *CreateConversatio
 		&i.CandidateID,
 		&i.LastMessageAt,
 		&i.CreatedAt,
+		&i.ConversationType,
+		&i.Participant1ID,
+		&i.Participant2ID,
+	)
+	return &i, err
+}
+
+const getConversationByCandidatePair = `-- name: GetConversationByCandidatePair :one
+SELECT id, company_id, candidate_id, last_message_at, created_at, conversation_type, participant1_id, participant2_id FROM conversations
+WHERE conversation_type = 'candidate_candidate'
+  AND participant1_id = $1 AND participant2_id = $2
+`
+
+type GetConversationByCandidatePairParams struct {
+	Participant1ID pgtype.UUID `json:"participant1_id"`
+	Participant2ID pgtype.UUID `json:"participant2_id"`
+}
+
+func (q *Queries) GetConversationByCandidatePair(ctx context.Context, arg *GetConversationByCandidatePairParams) (*Conversation, error) {
+	row := q.db.QueryRow(ctx, getConversationByCandidatePair, arg.Participant1ID, arg.Participant2ID)
+	var i Conversation
+	err := row.Scan(
+		&i.ID,
+		&i.CompanyID,
+		&i.CandidateID,
+		&i.LastMessageAt,
+		&i.CreatedAt,
+		&i.ConversationType,
+		&i.Participant1ID,
+		&i.Participant2ID,
 	)
 	return &i, err
 }
 
 const getConversationByCompanyAndCandidate = `-- name: GetConversationByCompanyAndCandidate :one
-SELECT id, company_id, candidate_id, last_message_at, created_at FROM conversations
+SELECT id, company_id, candidate_id, last_message_at, created_at, conversation_type, participant1_id, participant2_id FROM conversations
 WHERE company_id = $1 AND candidate_id = $2
 `
 
@@ -112,28 +171,40 @@ func (q *Queries) GetConversationByCompanyAndCandidate(ctx context.Context, arg 
 		&i.CandidateID,
 		&i.LastMessageAt,
 		&i.CreatedAt,
+		&i.ConversationType,
+		&i.Participant1ID,
+		&i.Participant2ID,
 	)
 	return &i, err
 }
 
 const getConversationByID = `-- name: GetConversationByID :one
-SELECT c.id, c.company_id, c.candidate_id, c.last_message_at, c.created_at,
-    ca.company_name,
-    u.name AS candidate_name
+SELECT c.id, c.company_id, c.candidate_id, c.last_message_at, c.created_at, c.conversation_type, c.participant1_id, c.participant2_id,
+    COALESCE(ca.company_name, '') AS company_name,
+    COALESCE(u_cand.name, '') AS candidate_name,
+    COALESCE(u_p1.name, '') AS participant1_name,
+    COALESCE(u_p2.name, '') AS participant2_name
 FROM conversations c
-JOIN company_accounts ca ON ca.id = c.company_id
-JOIN users u ON u.id = c.candidate_id
+LEFT JOIN company_accounts ca ON ca.id = c.company_id
+LEFT JOIN users u_cand ON u_cand.id = c.candidate_id
+LEFT JOIN users u_p1 ON u_p1.id = c.participant1_id
+LEFT JOIN users u_p2 ON u_p2.id = c.participant2_id
 WHERE c.id = $1
 `
 
 type GetConversationByIDRow struct {
-	ID            pgtype.UUID        `json:"id"`
-	CompanyID     pgtype.UUID        `json:"company_id"`
-	CandidateID   pgtype.UUID        `json:"candidate_id"`
-	LastMessageAt pgtype.Timestamptz `json:"last_message_at"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
-	CompanyName   string             `json:"company_name"`
-	CandidateName string             `json:"candidate_name"`
+	ID               pgtype.UUID        `json:"id"`
+	CompanyID        pgtype.UUID        `json:"company_id"`
+	CandidateID      pgtype.UUID        `json:"candidate_id"`
+	LastMessageAt    pgtype.Timestamptz `json:"last_message_at"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	ConversationType string             `json:"conversation_type"`
+	Participant1ID   pgtype.UUID        `json:"participant1_id"`
+	Participant2ID   pgtype.UUID        `json:"participant2_id"`
+	CompanyName      string             `json:"company_name"`
+	CandidateName    string             `json:"candidate_name"`
+	Participant1Name string             `json:"participant1_name"`
+	Participant2Name string             `json:"participant2_name"`
 }
 
 func (q *Queries) GetConversationByID(ctx context.Context, id pgtype.UUID) (*GetConversationByIDRow, error) {
@@ -145,51 +216,66 @@ func (q *Queries) GetConversationByID(ctx context.Context, id pgtype.UUID) (*Get
 		&i.CandidateID,
 		&i.LastMessageAt,
 		&i.CreatedAt,
+		&i.ConversationType,
+		&i.Participant1ID,
+		&i.Participant2ID,
 		&i.CompanyName,
 		&i.CandidateName,
+		&i.Participant1Name,
+		&i.Participant2Name,
 	)
 	return &i, err
 }
 
 const listConversationsByCandidate = `-- name: ListConversationsByCandidate :many
-SELECT c.id, c.company_id, c.candidate_id, c.last_message_at, c.created_at,
-    ca.company_name,
-    u.name AS candidate_name,
+SELECT c.id, c.company_id, c.candidate_id, c.last_message_at, c.created_at, c.conversation_type, c.participant1_id, c.participant2_id,
+    COALESCE(ca.company_name, '') AS company_name,
+    COALESCE(u_cand.name, '') AS candidate_name,
+    COALESCE(u_p1.name, '') AS participant1_name,
+    COALESCE(u_p2.name, '') AS participant2_name,
     (SELECT body FROM messages m WHERE m.conversation_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message_body,
     (SELECT count(*)
      FROM messages m2
      JOIN conversation_participants cp ON cp.conversation_id = c.id
-         AND cp.participant_type = 'candidate' AND cp.participant_id = c.candidate_id
-     WHERE m2.conversation_id = c.id AND m2.created_at > cp.last_read_at AND m2.sender_type != 'candidate'
+         AND cp.participant_type = 'candidate' AND cp.participant_id = $1::uuid
+     WHERE m2.conversation_id = c.id AND m2.created_at > cp.last_read_at AND m2.sender_id != $1::uuid
     )::int AS unread_count
 FROM conversations c
-JOIN company_accounts ca ON ca.id = c.company_id
-JOIN users u ON u.id = c.candidate_id
-WHERE c.candidate_id = $1
+JOIN conversation_participants cp_me ON cp_me.conversation_id = c.id
+    AND cp_me.participant_type = 'candidate' AND cp_me.participant_id = $1
+LEFT JOIN company_accounts ca ON ca.id = c.company_id
+LEFT JOIN users u_cand ON u_cand.id = c.candidate_id
+LEFT JOIN users u_p1 ON u_p1.id = c.participant1_id
+LEFT JOIN users u_p2 ON u_p2.id = c.participant2_id
 ORDER BY c.last_message_at DESC
-LIMIT $2 OFFSET $3
+LIMIT $3 OFFSET $2
 `
 
 type ListConversationsByCandidateParams struct {
-	CandidateID pgtype.UUID `json:"candidate_id"`
-	Limit       int32       `json:"limit"`
-	Offset      int32       `json:"offset"`
+	UserID    pgtype.UUID `json:"user_id"`
+	RowOffset int32       `json:"row_offset"`
+	RowLimit  int32       `json:"row_limit"`
 }
 
 type ListConversationsByCandidateRow struct {
-	ID              pgtype.UUID        `json:"id"`
-	CompanyID       pgtype.UUID        `json:"company_id"`
-	CandidateID     pgtype.UUID        `json:"candidate_id"`
-	LastMessageAt   pgtype.Timestamptz `json:"last_message_at"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	CompanyName     string             `json:"company_name"`
-	CandidateName   string             `json:"candidate_name"`
-	LastMessageBody string             `json:"last_message_body"`
-	UnreadCount     int32              `json:"unread_count"`
+	ID               pgtype.UUID        `json:"id"`
+	CompanyID        pgtype.UUID        `json:"company_id"`
+	CandidateID      pgtype.UUID        `json:"candidate_id"`
+	LastMessageAt    pgtype.Timestamptz `json:"last_message_at"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	ConversationType string             `json:"conversation_type"`
+	Participant1ID   pgtype.UUID        `json:"participant1_id"`
+	Participant2ID   pgtype.UUID        `json:"participant2_id"`
+	CompanyName      string             `json:"company_name"`
+	CandidateName    string             `json:"candidate_name"`
+	Participant1Name string             `json:"participant1_name"`
+	Participant2Name string             `json:"participant2_name"`
+	LastMessageBody  string             `json:"last_message_body"`
+	UnreadCount      int32              `json:"unread_count"`
 }
 
 func (q *Queries) ListConversationsByCandidate(ctx context.Context, arg *ListConversationsByCandidateParams) ([]*ListConversationsByCandidateRow, error) {
-	rows, err := q.db.Query(ctx, listConversationsByCandidate, arg.CandidateID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listConversationsByCandidate, arg.UserID, arg.RowOffset, arg.RowLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -203,8 +289,13 @@ func (q *Queries) ListConversationsByCandidate(ctx context.Context, arg *ListCon
 			&i.CandidateID,
 			&i.LastMessageAt,
 			&i.CreatedAt,
+			&i.ConversationType,
+			&i.Participant1ID,
+			&i.Participant2ID,
 			&i.CompanyName,
 			&i.CandidateName,
+			&i.Participant1Name,
+			&i.Participant2Name,
 			&i.LastMessageBody,
 			&i.UnreadCount,
 		); err != nil {
@@ -219,9 +310,11 @@ func (q *Queries) ListConversationsByCandidate(ctx context.Context, arg *ListCon
 }
 
 const listConversationsByCompany = `-- name: ListConversationsByCompany :many
-SELECT c.id, c.company_id, c.candidate_id, c.last_message_at, c.created_at,
+SELECT c.id, c.company_id, c.candidate_id, c.last_message_at, c.created_at, c.conversation_type, c.participant1_id, c.participant2_id,
     ca.company_name,
     u.name AS candidate_name,
+    '' AS participant1_name,
+    '' AS participant2_name,
     (SELECT body FROM messages m WHERE m.conversation_id = c.id ORDER BY m.created_at DESC LIMIT 1) AS last_message_body,
     (SELECT count(*)
      FROM messages m2
@@ -232,7 +325,7 @@ SELECT c.id, c.company_id, c.candidate_id, c.last_message_at, c.created_at,
 FROM conversations c
 JOIN company_accounts ca ON ca.id = c.company_id
 JOIN users u ON u.id = c.candidate_id
-WHERE c.company_id = $1
+WHERE c.company_id = $1 AND c.conversation_type = 'company_candidate'
 ORDER BY c.last_message_at DESC
 LIMIT $2 OFFSET $3
 `
@@ -244,15 +337,20 @@ type ListConversationsByCompanyParams struct {
 }
 
 type ListConversationsByCompanyRow struct {
-	ID              pgtype.UUID        `json:"id"`
-	CompanyID       pgtype.UUID        `json:"company_id"`
-	CandidateID     pgtype.UUID        `json:"candidate_id"`
-	LastMessageAt   pgtype.Timestamptz `json:"last_message_at"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	CompanyName     string             `json:"company_name"`
-	CandidateName   string             `json:"candidate_name"`
-	LastMessageBody string             `json:"last_message_body"`
-	UnreadCount     int32              `json:"unread_count"`
+	ID               pgtype.UUID        `json:"id"`
+	CompanyID        pgtype.UUID        `json:"company_id"`
+	CandidateID      pgtype.UUID        `json:"candidate_id"`
+	LastMessageAt    pgtype.Timestamptz `json:"last_message_at"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	ConversationType string             `json:"conversation_type"`
+	Participant1ID   pgtype.UUID        `json:"participant1_id"`
+	Participant2ID   pgtype.UUID        `json:"participant2_id"`
+	CompanyName      string             `json:"company_name"`
+	CandidateName    string             `json:"candidate_name"`
+	Participant1Name string             `json:"participant1_name"`
+	Participant2Name string             `json:"participant2_name"`
+	LastMessageBody  string             `json:"last_message_body"`
+	UnreadCount      int32              `json:"unread_count"`
 }
 
 func (q *Queries) ListConversationsByCompany(ctx context.Context, arg *ListConversationsByCompanyParams) ([]*ListConversationsByCompanyRow, error) {
@@ -270,8 +368,13 @@ func (q *Queries) ListConversationsByCompany(ctx context.Context, arg *ListConve
 			&i.CandidateID,
 			&i.LastMessageAt,
 			&i.CreatedAt,
+			&i.ConversationType,
+			&i.Participant1ID,
+			&i.Participant2ID,
 			&i.CompanyName,
 			&i.CandidateName,
+			&i.Participant1Name,
+			&i.Participant2Name,
 			&i.LastMessageBody,
 			&i.UnreadCount,
 		); err != nil {

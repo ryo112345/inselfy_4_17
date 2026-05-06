@@ -43,6 +43,26 @@ func (r *ConversationRepository) Create(ctx context.Context, conv *messaging.Con
 	return conversationToDomain(row), nil
 }
 
+func (r *ConversationRepository) CreateCandidateConversation(ctx context.Context, conv *messaging.Conversation) (*messaging.Conversation, error) {
+	q := queriesForContext(ctx, r.queries)
+	p1, err := parseUUID(conv.Participant1ID)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+	p2, err := parseUUID(conv.Participant2ID)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+	row, err := q.CreateCandidateConversation(ctx, &generated.CreateCandidateConversationParams{
+		Participant1ID: p1,
+		Participant2ID: p2,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return conversationToDomain(row), nil
+}
+
 func (r *ConversationRepository) GetByID(ctx context.Context, id string) (*messaging.ConversationWithPreview, error) {
 	q := queriesForContext(ctx, r.queries)
 	pgID, err := parseUUID(id)
@@ -58,14 +78,19 @@ func (r *ConversationRepository) GetByID(ctx context.Context, id string) (*messa
 	}
 	return &messaging.ConversationWithPreview{
 		Conversation: messaging.Conversation{
-			ID:            uuidToString(row.ID),
-			CompanyID:     uuidToString(row.CompanyID),
-			CandidateID:   uuidToString(row.CandidateID),
-			LastMessageAt: row.LastMessageAt.Time,
-			CreatedAt:     row.CreatedAt.Time,
+			ID:               uuidToString(row.ID),
+			ConversationType: row.ConversationType,
+			CompanyID:        uuidToString(row.CompanyID),
+			CandidateID:      uuidToString(row.CandidateID),
+			Participant1ID:   uuidToString(row.Participant1ID),
+			Participant2ID:   uuidToString(row.Participant2ID),
+			LastMessageAt:    row.LastMessageAt.Time,
+			CreatedAt:        row.CreatedAt.Time,
 		},
-		CompanyName:   row.CompanyName,
-		CandidateName: row.CandidateName,
+		CompanyName:      row.CompanyName,
+		CandidateName:    row.CandidateName,
+		Participant1Name: row.Participant1Name,
+		Participant2Name: row.Participant2Name,
 	}, nil
 }
 
@@ -92,6 +117,29 @@ func (r *ConversationRepository) GetByCompanyAndCandidate(ctx context.Context, c
 	return conversationToDomain(row), nil
 }
 
+func (r *ConversationRepository) GetByCandidatePair(ctx context.Context, userID1, userID2 string) (*messaging.Conversation, error) {
+	q := queriesForContext(ctx, r.queries)
+	p1, err := parseUUID(userID1)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+	p2, err := parseUUID(userID2)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+	row, err := q.GetConversationByCandidatePair(ctx, &generated.GetConversationByCandidatePairParams{
+		Participant1ID: p1,
+		Participant2ID: p2,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domainerr.ErrNotFound
+		}
+		return nil, err
+	}
+	return conversationToDomain(row), nil
+}
+
 func (r *ConversationRepository) ListByCandidate(ctx context.Context, candidateID string, limit, offset int) ([]*messaging.ConversationWithPreview, int, error) {
 	q := queriesForContext(ctx, r.queries)
 	pgCandidateID, err := parseUUID(candidateID)
@@ -99,9 +147,9 @@ func (r *ConversationRepository) ListByCandidate(ctx context.Context, candidateI
 		return nil, 0, domainerr.ErrBadRequest
 	}
 	rows, err := q.ListConversationsByCandidate(ctx, &generated.ListConversationsByCandidateParams{
-		CandidateID: pgCandidateID,
-		Limit:       int32(limit),
-		Offset:      int32(offset),
+		UserID:   pgCandidateID,
+		RowLimit: int32(limit),
+		RowOffset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -179,11 +227,14 @@ func (r *ConversationRepository) CountUnreadByCompany(ctx context.Context, compa
 
 func conversationToDomain(row *generated.Conversation) *messaging.Conversation {
 	return &messaging.Conversation{
-		ID:            uuidToString(row.ID),
-		CompanyID:     uuidToString(row.CompanyID),
-		CandidateID:   uuidToString(row.CandidateID),
-		LastMessageAt: row.LastMessageAt.Time,
-		CreatedAt:     row.CreatedAt.Time,
+		ID:               uuidToString(row.ID),
+		ConversationType: row.ConversationType,
+		CompanyID:        uuidToString(row.CompanyID),
+		CandidateID:      uuidToString(row.CandidateID),
+		Participant1ID:   uuidToString(row.Participant1ID),
+		Participant2ID:   uuidToString(row.Participant2ID),
+		LastMessageAt:    row.LastMessageAt.Time,
+		CreatedAt:        row.CreatedAt.Time,
 	}
 }
 
@@ -194,16 +245,21 @@ func candidateConvRowToDomain(row *generated.ListConversationsByCandidateRow) *m
 	}
 	return &messaging.ConversationWithPreview{
 		Conversation: messaging.Conversation{
-			ID:            uuidToString(row.ID),
-			CompanyID:     uuidToString(row.CompanyID),
-			CandidateID:   uuidToString(row.CandidateID),
-			LastMessageAt: row.LastMessageAt.Time,
-			CreatedAt:     row.CreatedAt.Time,
+			ID:               uuidToString(row.ID),
+			ConversationType: row.ConversationType,
+			CompanyID:        uuidToString(row.CompanyID),
+			CandidateID:      uuidToString(row.CandidateID),
+			Participant1ID:   uuidToString(row.Participant1ID),
+			Participant2ID:   uuidToString(row.Participant2ID),
+			LastMessageAt:    row.LastMessageAt.Time,
+			CreatedAt:        row.CreatedAt.Time,
 		},
-		CompanyName:     row.CompanyName,
-		CandidateName:   row.CandidateName,
-		LastMessageBody: body,
-		UnreadCount:     int(row.UnreadCount),
+		CompanyName:      row.CompanyName,
+		CandidateName:    row.CandidateName,
+		Participant1Name: row.Participant1Name,
+		Participant2Name: row.Participant2Name,
+		LastMessageBody:  body,
+		UnreadCount:      int(row.UnreadCount),
 	}
 }
 
@@ -214,15 +270,20 @@ func companyConvRowToDomain(row *generated.ListConversationsByCompanyRow) *messa
 	}
 	return &messaging.ConversationWithPreview{
 		Conversation: messaging.Conversation{
-			ID:            uuidToString(row.ID),
-			CompanyID:     uuidToString(row.CompanyID),
-			CandidateID:   uuidToString(row.CandidateID),
-			LastMessageAt: row.LastMessageAt.Time,
-			CreatedAt:     row.CreatedAt.Time,
+			ID:               uuidToString(row.ID),
+			ConversationType: row.ConversationType,
+			CompanyID:        uuidToString(row.CompanyID),
+			CandidateID:      uuidToString(row.CandidateID),
+			Participant1ID:   uuidToString(row.Participant1ID),
+			Participant2ID:   uuidToString(row.Participant2ID),
+			LastMessageAt:    row.LastMessageAt.Time,
+			CreatedAt:        row.CreatedAt.Time,
 		},
-		CompanyName:     row.CompanyName,
-		CandidateName:   row.CandidateName,
-		LastMessageBody: body,
-		UnreadCount:     int(row.UnreadCount),
+		CompanyName:      row.CompanyName,
+		CandidateName:    row.CandidateName,
+		Participant1Name: row.Participant1Name,
+		Participant2Name: row.Participant2Name,
+		LastMessageBody:  body,
+		UnreadCount:      int(row.UnreadCount),
 	}
 }

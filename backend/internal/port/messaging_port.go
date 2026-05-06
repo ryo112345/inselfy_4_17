@@ -8,6 +8,7 @@ import (
 
 type MessagingInputPort interface {
 	StartConversation(ctx context.Context, input messaging.StartConversationInput) error
+	StartCandidateConversation(ctx context.Context, input messaging.StartCandidateConversationInput) error
 	SendMessage(ctx context.Context, input messaging.SendMessageInput) error
 	ListConversationsByCandidate(ctx context.Context, candidateID string, limit, offset int) error
 	ListConversationsByCompany(ctx context.Context, companyID string, limit, offset int) error
@@ -29,8 +30,10 @@ type MessagingOutputPort interface {
 
 type ConversationRepository interface {
 	Create(ctx context.Context, conv *messaging.Conversation) (*messaging.Conversation, error)
+	CreateCandidateConversation(ctx context.Context, conv *messaging.Conversation) (*messaging.Conversation, error)
 	GetByID(ctx context.Context, id string) (*messaging.ConversationWithPreview, error)
 	GetByCompanyAndCandidate(ctx context.Context, companyID, candidateID string) (*messaging.Conversation, error)
+	GetByCandidatePair(ctx context.Context, userID1, userID2 string) (*messaging.Conversation, error)
 	ListByCandidate(ctx context.Context, candidateID string, limit, offset int) ([]*messaging.ConversationWithPreview, int, error)
 	ListByCompany(ctx context.Context, companyID string, limit, offset int) ([]*messaging.ConversationWithPreview, int, error)
 	UpdateLastMessageAt(ctx context.Context, id string) error
@@ -47,6 +50,7 @@ type ConversationParticipantRepository interface {
 	Create(ctx context.Context, p *messaging.ConversationParticipant) error
 	GetByConversationAndParticipant(ctx context.Context, conversationID, participantType, participantID string) (*messaging.ConversationParticipant, error)
 	UpdateLastReadAt(ctx context.Context, conversationID, participantType, participantID string) error
+	ListByConversation(ctx context.Context, conversationID string) ([]*messaging.ConversationParticipant, error)
 }
 
 type MessageBroker interface {

@@ -3,19 +3,24 @@ package messaging
 import "time"
 
 type Conversation struct {
-	ID            string
-	CompanyID     string
-	CandidateID   string
-	LastMessageAt time.Time
-	CreatedAt     time.Time
+	ID               string
+	ConversationType string // "company_candidate" or "candidate_candidate"
+	CompanyID        string
+	CandidateID      string
+	Participant1ID   string
+	Participant2ID   string
+	LastMessageAt    time.Time
+	CreatedAt        time.Time
 }
 
 type ConversationWithPreview struct {
 	Conversation
-	CompanyName     string
-	CandidateName   string
-	LastMessageBody *string
-	UnreadCount     int
+	CompanyName      string
+	CandidateName    string
+	Participant1Name string
+	Participant2Name string
+	LastMessageBody  *string
+	UnreadCount      int
 }
 
 type Message struct {
@@ -47,5 +52,11 @@ type StartConversationInput struct {
 	CandidateID string
 	SenderType  string
 	SenderID    string
+	Body        string
+}
+
+type StartCandidateConversationInput struct {
+	SenderID    string
+	RecipientID string
 	Body        string
 }

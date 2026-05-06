@@ -13,6 +13,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
+	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
 	"github.com/akiyama/inselfy/backend/internal/domain/skill"
@@ -32,7 +33,8 @@ func handleError(ctx echo.Context, err error) error {
 		errors.Is(err, education.ErrTooManyEntries),
 		errors.Is(err, skill.ErrTooManyEntries),
 		errors.Is(err, scout.ErrDuplicateScout),
-		errors.Is(err, scout.ErrTooManyTemplates):
+		errors.Is(err, scout.ErrTooManyTemplates),
+		errors.Is(err, messaging.ErrConversationExists):
 		return ctx.JSON(http.StatusConflict, openapi.ModelsConflictError{
 			Code:    openapi.ModelsConflictErrorCodeCONFLICT,
 			Message: err.Error(),
@@ -111,6 +113,11 @@ func isBadRequest(err error) bool {
 		errors.Is(err, article.ErrNotPaid),
 		errors.Is(err, article.ErrTooManyTags),
 		errors.Is(err, article.ErrTagTooLong):
+		return true
+	case errors.Is(err, messaging.ErrBodyRequired),
+		errors.Is(err, messaging.ErrBodyTooLong),
+		errors.Is(err, messaging.ErrSelfConversation),
+		errors.Is(err, messaging.ErrNotParticipant):
 		return true
 	case errors.Is(err, scout.ErrSubjectRequired),
 		errors.Is(err, scout.ErrSubjectTooLong),
