@@ -7,6 +7,7 @@ import { CompanyHeader } from "./CompanyHeader";
 
 const publicPaths = ["/company/login", "/company/register"];
 const headerlessPaths = ["/company/profile/preview", "/company/jobs/preview"];
+const fullBleedPaths = ["/company/messages"];
 
 export function CompanyAuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useCompanyAuth();
@@ -41,8 +42,10 @@ export function CompanyAuthGuard({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  const isFullBleed = fullBleedPaths.some((p) => pathname.startsWith(p));
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={isFullBleed ? "flex h-screen flex-col overflow-hidden bg-gray-50" : "min-h-screen bg-gray-50"}>
       <CompanyHeader>{children}</CompanyHeader>
     </div>
   );

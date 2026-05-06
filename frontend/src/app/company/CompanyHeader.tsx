@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
@@ -17,12 +17,15 @@ const navItems = [
   { label: "設定", href: "/company/settings", icon: SettingsIcon },
 ];
 
+const fullBleedPaths = ["/company/messages"];
+
 export function CompanyHeader({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { company, logout } = useCompanyAuth();
   const [expanded, setExpanded] = useState(true);
   const accentColor = "#2979ff";
+  const isFullBleed = useMemo(() => fullBleedPaths.some((p) => pathname.startsWith(p)), [pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -123,9 +126,11 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
         </header>
       </div>
 
-      <main className="mx-auto max-w-5xl px-6 pt-8 pb-8">
-        {children}
-      </main>
+      {isFullBleed ? (
+        <main className="flex-1 overflow-hidden">{children}</main>
+      ) : (
+        <main className="mx-auto max-w-5xl px-6 pt-8 pb-8">{children}</main>
+      )}
     </>
   );
 }

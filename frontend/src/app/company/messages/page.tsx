@@ -127,69 +127,73 @@ export default function CompanyMessagesPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col md:flex-row">
-      {/* Conversation list */}
-      <div
-        className={`w-full border-r border-gray-200 bg-white md:w-80 md:block ${
-          selectedConv ? "hidden" : "block"
-        }`}
-      >
-        <div className="border-b border-gray-200 px-4 py-3">
-          <h1 className="text-base font-semibold text-gray-900">
-            メッセージ
-          </h1>
-        </div>
-        {loadingConvs ? (
-          <div className="flex items-center justify-center py-12">
-            <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+    <div className="h-full overflow-hidden bg-[#f6f7f5]">
+      <div className="mx-auto flex h-full max-w-5xl flex-col md:flex-row">
+        {/* Conversation list - hide on mobile when a conversation is selected */}
+        <div
+          className={`flex w-full flex-col border-r border-gray-200 bg-white md:w-80 md:flex ${
+            selectedConv ? "hidden" : "flex"
+          }`}
+        >
+          <div className="shrink-0 border-b border-gray-200 px-4 py-3">
+            <h1 className="text-base font-semibold text-gray-900">
+              メッセージ
+            </h1>
           </div>
-        ) : (
-          <ConversationList
-            conversations={conversations}
-            selectedId={selectedConv?.id ?? null}
-            onSelect={handleSelectConv}
-            nameKey="candidateName"
-          />
-        )}
-      </div>
-
-      {/* Message thread */}
-      <div
-        className={`flex-1 flex flex-col md:flex ${
-          selectedConv ? "flex" : "hidden md:flex"
-        }`}
-      >
-        {selectedConv && company ? (
-          <MessageThread
-            messages={messages}
-            myId={company.id}
-            mySenderType="company"
-            counterpartName={selectedConv.candidateName}
-            onSend={handleSend}
-            onBack={handleBack}
-            loading={loadingMsgs}
-          />
-        ) : (
-          <div className="flex flex-1 flex-col items-center justify-center bg-[#f6f7f5] text-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="mb-3 h-12 w-12 text-gray-300"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+          <div className="flex-1 overflow-y-auto scrollbar-hide">
+            {loadingConvs ? (
+              <div className="flex items-center justify-center py-12">
+                <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+              </div>
+            ) : (
+              <ConversationList
+                conversations={conversations}
+                selectedId={selectedConv?.id ?? null}
+                onSelect={handleSelectConv}
+                nameKey="candidateName"
               />
-            </svg>
-            <p className="text-sm font-medium text-gray-500">
-              会話を選択してください
-            </p>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Message thread - show on mobile only when selected */}
+        <div
+          className={`flex-1 min-h-0 flex flex-col md:flex ${
+            selectedConv ? "flex" : "hidden md:flex"
+          }`}
+        >
+          {selectedConv && company ? (
+            <MessageThread
+              messages={messages}
+              myId={company.id}
+              mySenderType="company"
+              counterpartName={selectedConv.candidateName}
+              onSend={handleSend}
+              onBack={handleBack}
+              loading={loadingMsgs}
+            />
+          ) : (
+            <div className="flex flex-1 flex-col items-center justify-center text-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="mb-3 h-12 w-12 text-gray-300"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+                />
+              </svg>
+              <p className="text-sm font-medium text-gray-500">
+                会話を選択してください
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
