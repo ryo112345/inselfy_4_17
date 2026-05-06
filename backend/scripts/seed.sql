@@ -14575,6 +14575,42 @@ INSERT INTO career_interest_type_scores (session_id, type_id, score, rank) VALUE
   ('c021d000-0000-0003-0000-000000000009', 'C', 2.3, 4)
 ON CONFLICT DO NOTHING;
 
+-- Bulk-generate basic_scores from type_scores for all sessions that don't have them yet
+WITH basic_ids(type_id, basic_interest_id) AS (
+  VALUES
+    ('R', 'R1'), ('R', 'R2'), ('R', 'R3'),
+    ('I', 'I1'), ('I', 'I2'), ('I', 'I3'), ('I', 'I4'),
+    ('A', 'A1'), ('A', 'A2'), ('A', 'A3'),
+    ('S', 'S1'), ('S', 'S2'), ('S', 'S3'), ('S', 'S4'),
+    ('E', 'E1'), ('E', 'E2'), ('E', 'E3'),
+    ('C', 'C1'), ('C', 'C2'), ('C', 'C3')
+),
+raw_scores AS (
+  SELECT
+    ts.session_id, bi.basic_interest_id,
+    GREATEST(1.0, LEAST(5.0,
+      ts.score + (abs(hashtext(ts.session_id::text || bi.basic_interest_id)) % 61 - 30)::float / 100.0
+    ))::real as score
+  FROM career_interest_type_scores ts
+  JOIN basic_ids bi ON bi.type_id = ts.type_id
+  WHERE ts.session_id NOT IN (SELECT DISTINCT session_id FROM career_interest_basic_scores)
+),
+ranked AS (
+  SELECT session_id, basic_interest_id, score,
+    ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY score DESC, basic_interest_id)::smallint as rank
+  FROM raw_scores
+)
+INSERT INTO career_interest_basic_scores (session_id, basic_interest_id, score, rank)
+SELECT session_id, basic_interest_id, score, rank FROM ranked
+ON CONFLICT DO NOTHING;
+
+-- Bulk-generate career_interest_results for sessions that have type_scores but no results
+INSERT INTO career_interest_results (session_id, user_id, responses, question_count, differentiation_sd, differentiation_level, created_at)
+SELECT s.id, s.user_id, '[]'::jsonb, 60::smallint, 0.5::real, 'moderate', COALESCE(s.completed_at, now())
+FROM career_interest_sessions s
+WHERE s.status = 'completed'
+  AND s.id NOT IN (SELECT session_id FROM career_interest_results)
+ON CONFLICT DO NOTHING;
 
 -- セッション
 
