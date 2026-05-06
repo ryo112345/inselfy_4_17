@@ -210,6 +210,23 @@ export function MapPinIcon({ className }: IconProps) {
   );
 }
 
+export function MailIcon({ className }: IconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M22 4 12 13 2 4" />
+    </svg>
+  );
+}
+
 export function FaceIcon({ className, style }: IconProps) {
   return (
     <svg className={className} style={style} viewBox="0 0 64 64" fill="none">

@@ -150,7 +150,7 @@ export default function CompanyMessagesPage() {
                 conversations={conversations}
                 selectedId={selectedConv?.id ?? null}
                 onSelect={handleSelectConv}
-                nameKey="candidateName"
+                getDisplayName={(c) => c.candidateName}
               />
             )}
           </div>

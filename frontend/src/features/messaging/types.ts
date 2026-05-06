@@ -1,13 +1,26 @@
 export interface Conversation {
   id: string;
+  conversationType: "company_candidate" | "candidate_candidate";
   companyId: string;
   candidateId: string;
   companyName: string;
   candidateName: string;
+  participant1Id?: string;
+  participant2Id?: string;
+  participant1Name?: string;
+  participant2Name?: string;
   lastMessageBody: string | null;
   lastMessageAt: string;
   unreadCount: number;
   createdAt: string;
+}
+
+export function getCounterpartName(conv: Conversation, myUserId: string): string {
+  if (conv.conversationType === "candidate_candidate") {
+    if (conv.participant1Id === myUserId) return conv.participant2Name ?? "";
+    return conv.participant1Name ?? "";
+  }
+  return conv.companyName;
 }
 
 export interface ConversationListResponse {

@@ -102,6 +102,23 @@ export async function fetchCompanyUnreadCount(): Promise<UnreadCountResponse> {
 // Candidate side
 // ---------------------------------------------------------------------------
 
+export async function startCandidateConversation(body: {
+  recipientId: string;
+  body: string;
+}): Promise<Conversation> {
+  const res = await fetch(`${BASE_URL}/api/messages/conversations`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message ?? "会話の開始に失敗しました");
+  }
+  return res.json();
+}
+
 export async function fetchCandidateConversations(
   params?: { limit?: number; offset?: number },
 ): Promise<ConversationListResponse> {

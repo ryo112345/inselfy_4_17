@@ -9,15 +9,20 @@ import (
 )
 
 type conversationResponse struct {
-	ID              string    `json:"id"`
-	CompanyID       string    `json:"companyId"`
-	CandidateID     string    `json:"candidateId"`
-	CompanyName     string    `json:"companyName"`
-	CandidateName   string    `json:"candidateName"`
-	LastMessageBody *string   `json:"lastMessageBody"`
-	LastMessageAt   time.Time `json:"lastMessageAt"`
-	UnreadCount     int       `json:"unreadCount"`
-	CreatedAt       time.Time `json:"createdAt"`
+	ID               string    `json:"id"`
+	ConversationType string    `json:"conversationType"`
+	CompanyID        string    `json:"companyId"`
+	CandidateID      string    `json:"candidateId"`
+	CompanyName      string    `json:"companyName"`
+	CandidateName    string    `json:"candidateName"`
+	Participant1ID   string    `json:"participant1Id,omitempty"`
+	Participant2ID   string    `json:"participant2Id,omitempty"`
+	Participant1Name string    `json:"participant1Name,omitempty"`
+	Participant2Name string    `json:"participant2Name,omitempty"`
+	LastMessageBody  *string   `json:"lastMessageBody"`
+	LastMessageAt    time.Time `json:"lastMessageAt"`
+	UnreadCount      int       `json:"unreadCount"`
+	CreatedAt        time.Time `json:"createdAt"`
 }
 
 type conversationListResponse struct {
@@ -105,15 +110,20 @@ func (p *MessagingPresenter) OKResponse() interface{}               { return map
 
 func toConversationResponse(c *messaging.ConversationWithPreview) *conversationResponse {
 	return &conversationResponse{
-		ID:              c.ID,
-		CompanyID:       c.CompanyID,
-		CandidateID:     c.CandidateID,
-		CompanyName:     c.CompanyName,
-		CandidateName:   c.CandidateName,
-		LastMessageBody: c.LastMessageBody,
-		LastMessageAt:   c.LastMessageAt,
-		UnreadCount:     c.UnreadCount,
-		CreatedAt:       c.CreatedAt,
+		ID:               c.ID,
+		ConversationType: c.ConversationType,
+		CompanyID:        c.CompanyID,
+		CandidateID:      c.CandidateID,
+		CompanyName:      c.CompanyName,
+		CandidateName:    c.CandidateName,
+		Participant1ID:   c.Participant1ID,
+		Participant2ID:   c.Participant2ID,
+		Participant1Name: c.Participant1Name,
+		Participant2Name: c.Participant2Name,
+		LastMessageBody:  c.LastMessageBody,
+		LastMessageAt:    c.LastMessageAt,
+		UnreadCount:      c.UnreadCount,
+		CreatedAt:        c.CreatedAt,
 	}
 }
 

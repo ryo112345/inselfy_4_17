@@ -86,3 +86,26 @@ func (r *ConversationParticipantRepository) UpdateLastReadAt(ctx context.Context
 		ParticipantID:   pgParticipantID,
 	})
 }
+
+func (r *ConversationParticipantRepository) ListByConversation(ctx context.Context, conversationID string) ([]*messaging.ConversationParticipant, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgConvID, err := parseUUID(conversationID)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+	rows, err := q.ListParticipantsByConversation(ctx, pgConvID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*messaging.ConversationParticipant, len(rows))
+	for i, row := range rows {
+		result[i] = &messaging.ConversationParticipant{
+			ID:              uuidToString(row.ID),
+			ConversationID:  uuidToString(row.ConversationID),
+			ParticipantType: row.ParticipantType,
+			ParticipantID:   uuidToString(row.ParticipantID),
+			LastReadAt:      row.LastReadAt.Time,
+		}
+	}
+	return result, nil
+}

@@ -605,6 +605,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	// --- Candidate Messages ---
 	candidateMsgGroup := e.Group("/api/messages", jwtMW)
+	candidateMsgGroup.POST("/conversations", messagingCtrl.StartCandidateConversation)
 	candidateMsgGroup.GET("/conversations", messagingCtrl.ListConversationsByCandidate)
 	candidateMsgGroup.GET("/conversations/:conversationId", func(c echo.Context) error {
 		return messagingCtrl.GetConversationAsCandidate(c, c.Param("conversationId"))
@@ -643,8 +644,8 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	go wsHub.Run()
 
 	pgBroker := ws.NewPgMessageBroker(pool)
-	convRepoForRelay := conversationRepoFactory()
-	relay := ws.NewRelay(wsHub, pgBroker, convRepoForRelay)
+	participantRepoForRelay := participantRepoFactory()
+	relay := ws.NewRelay(wsHub, pgBroker, participantRepoForRelay)
 	go relay.Start(ctx)
 
 	wsTickets := ws.NewTicketStore()

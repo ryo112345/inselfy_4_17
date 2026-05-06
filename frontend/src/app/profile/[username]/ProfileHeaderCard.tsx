@@ -4,9 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import type { ModelsUserResponse } from "@/external/client/api/generated";
-
 import { updateProfile, type ApiError } from "./api";
-import { CameraIcon, FaceIcon, MapPinIcon, PencilIcon, PlusIcon } from "./Icons";
+import { CameraIcon, FaceIcon, MailIcon, MapPinIcon, PencilIcon, PlusIcon } from "./Icons";
 import { FollowButton } from "./FollowButton";
 import { Field, PrimaryButton, SecondaryButton } from "./Modal";
 
@@ -131,7 +130,16 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
           </button>
         )}
         {!isOwner && !isEditing && (
-          <div className="absolute right-4 top-[136px] md:top-[188px]">
+          <div className="absolute right-4 top-[136px] md:top-[188px] flex items-center gap-2">
+            <button
+              type="button"
+              aria-label="メッセージを送る"
+              onClick={() => router.push(`/messages?recipient=${user.id}&recipientName=${encodeURIComponent(user.name)}`)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white transition hover:opacity-80"
+              style={{ borderColor: headerColor, color: headerColor }}
+            >
+              <MailIcon className="h-[18px] w-[18px]" />
+            </button>
             <FollowButton username={user.username} profileColor={headerColor} />
           </div>
         )}
@@ -460,6 +468,7 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
           </div>
         )}
       </div>
+
     </section>
   );
 }

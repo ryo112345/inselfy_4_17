@@ -6,7 +6,7 @@ type Props = {
   conversations: Conversation[];
   selectedId: string | null;
   onSelect: (conv: Conversation) => void;
-  nameKey: "companyName" | "candidateName";
+  getDisplayName: (conv: Conversation) => string;
 };
 
 function formatRelativeTime(dateStr: string): string {
@@ -27,7 +27,7 @@ export function ConversationList({
   conversations,
   selectedId,
   onSelect,
-  nameKey,
+  getDisplayName,
 }: Props) {
   if (conversations.length === 0) {
     return (
@@ -60,6 +60,7 @@ export function ConversationList({
     <ul className="divide-y divide-gray-100">
       {conversations.map((conv) => {
         const isSelected = conv.id === selectedId;
+        const displayName = getDisplayName(conv);
         return (
           <li key={conv.id}>
             <button
@@ -71,12 +72,12 @@ export function ConversationList({
               }`}
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E]/10 text-[#3D8B6E] text-sm font-semibold">
-                {conv[nameKey]?.charAt(0) ?? "?"}
+                {displayName?.charAt(0) ?? "?"}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="truncate text-sm font-medium text-gray-900">
-                    {conv[nameKey]}
+                    {displayName}
                   </span>
                   <span className="shrink-0 text-[10px] text-gray-400">
                     {formatRelativeTime(conv.lastMessageAt)}
