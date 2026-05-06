@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { GoogleProvider } from "@/features/auth/google-provider";
@@ -29,9 +30,7 @@ export default function RootLayout({
   return (
     <html lang="ja" className={`${notoSansJp.variable} ${plusJakartaSans.variable}`}>
       <body className="antialiased">
-        <script
-          dangerouslySetInnerHTML={{ __html: 'window.addEventListener("pageshow",function(e){if(e.persisted)location.reload()});window.addEventListener("pageshow",function(){var n=performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")location.reload()})' }}
-        />
+        <Script id="bfcache-reload" strategy="afterInteractive">{`window.addEventListener("pageshow",function(e){if(e.persisted)location.reload()});window.addEventListener("pageshow",function(){var n=performance.getEntriesByType("navigation")[0];if(n&&n.type==="back_forward")location.reload()})`}</Script>
         <GoogleProvider>
           <AuthProvider>
             <UnreadScoutProvider>
