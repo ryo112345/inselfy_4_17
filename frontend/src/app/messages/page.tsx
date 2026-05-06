@@ -69,6 +69,7 @@ export default function MessagesPage() {
   const handleSelectConv = useCallback(
     (conv: Conversation) => {
       setSelectedConv(conv);
+      setMessages([]);
       loadMessages(conv.id);
     },
     [loadMessages],
