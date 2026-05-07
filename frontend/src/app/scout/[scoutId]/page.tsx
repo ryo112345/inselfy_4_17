@@ -159,7 +159,7 @@ export default function ScoutDetailPage() {
         {/* Back link */}
         <button
           type="button"
-          onClick={() => router.push("/scout")}
+          onClick={() => router.push("/messages?view=scout")}
           className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition-colors"
         >
           <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -169,7 +169,7 @@ export default function ScoutDetailPage() {
               clipRule="evenodd"
             />
           </svg>
-          スカウト一覧に戻る
+          やりとりに戻る
         </button>
 
         {/* Scout message card */}
