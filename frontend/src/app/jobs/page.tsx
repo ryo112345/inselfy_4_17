@@ -15,6 +15,7 @@ import { getLatestResult as getLatestCiResult } from "@/features/career-interest
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 import { ValuesFilterDrawer } from "@/features/work-values/ValuesFilterDrawer";
 import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
+import { applyToJob, checkApplied } from "@/features/job-application/api";
 
 const ACCENT = "#3D8B6E";
 
@@ -787,6 +788,34 @@ function DetailConditionGroup({
 }
 
 function JobDetail({ job, matchScores, onScroll }: { job: JobPostingWithCompany; matchScores: MatchScores | null; onScroll?: React.UIEventHandler<HTMLDivElement> }) {
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [applied, setApplied] = useState(false);
+  const [applying, setApplying] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    checkApplied(job.id).then(setApplied);
+  }, [isAuthenticated, user, job.id]);
+
+  const handleApply = async () => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/jobs/${job.id}`);
+      return;
+    }
+    if (applied || applying) return;
+    setApplying(true);
+    try {
+      await applyToJob(job.id);
+      setApplied(true);
+    } catch {
+      // already applied is also fine
+      setApplied(true);
+    } finally {
+      setApplying(false);
+    }
+  };
+
   const quickFacts = [
     {
       label: "想定年収",
@@ -909,10 +938,12 @@ function JobDetail({ job, matchScores, onScroll }: { job: JobPostingWithCompany;
         <div className="mt-6 flex items-center gap-3">
           <button
             type="button"
-            className="flex-1 inline-flex items-center justify-center rounded-xl py-3.5 text-base font-bold text-white transition-colors hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: ACCENT }}
+            onClick={handleApply}
+            disabled={applied || applying}
+            className="flex-1 inline-flex items-center justify-center rounded-xl py-3.5 text-base font-bold text-white transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default"
+            style={{ backgroundColor: applied ? "#9CA3AF" : ACCENT }}
           >
-            応募する
+            {applying ? "送信中..." : applied ? "応募済み" : "応募する"}
           </button>
           <Link
             href={`/jobs/${job.id}`}

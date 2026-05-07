@@ -205,6 +205,20 @@ func NewFollowInputFactory() func(repo port.FollowRepository, userRepo port.User
 	}
 }
 
+func NewJobApplicationInputFactory() func(
+	repo port.JobApplicationRepository,
+	jobRepo port.JobPostingRepository,
+	output port.JobApplicationOutputPort,
+) port.JobApplicationInputPort {
+	return func(
+		repo port.JobApplicationRepository,
+		jobRepo port.JobPostingRepository,
+		output port.JobApplicationOutputPort,
+	) port.JobApplicationInputPort {
+		return usecase.NewJobApplicationInteractor(repo, jobRepo, output)
+	}
+}
+
 func NewMessagingInputFactory() func(
 	convRepo port.ConversationRepository,
 	msgRepo port.MessageRepository,

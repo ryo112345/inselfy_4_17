@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/features/auth/auth-context";
+import { applyToJob, checkApplied } from "@/features/job-application/api";
 import { Gallery } from "../../companies/[id]/Gallery";
 import { fetchPublicJobPosting } from "@/features/job-posting/api";
 import type { JobPosting } from "@/features/scout/types";
@@ -249,12 +251,38 @@ type CompanyData = {
 
 export default function JobDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const jobId = params.jobId as string;
+  const { user, isAuthenticated } = useAuth();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [company, setCompany] = useState<CompanyData | null>(null);
   const [error, setError] = useState(false);
   const [teamWVScores, setTeamWVScores] = useState<{ id: string; score: number }[] | null>(null);
   const [teamCIScores, setTeamCIScores] = useState<{ id: string; score: number }[] | null>(null);
+  const [applied, setApplied] = useState(false);
+  const [applying, setApplying] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    checkApplied(jobId).then(setApplied);
+  }, [isAuthenticated, user, jobId]);
+
+  const handleApply = async () => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/jobs/${jobId}`);
+      return;
+    }
+    if (applied || applying) return;
+    setApplying(true);
+    try {
+      await applyToJob(jobId);
+      setApplied(true);
+    } catch {
+      setApplied(true);
+    } finally {
+      setApplying(false);
+    }
+  };
 
   useEffect(() => {
     fetchPublicJobPosting(jobId)
@@ -469,10 +497,12 @@ export default function JobDetailPage() {
 
             <div className="mt-7 flex gap-3">
               <button
-                className="flex-1 rounded-xl py-4 text-center text-base font-bold text-white transition-colors hover:opacity-90 cursor-pointer"
-                style={{ background: ACCENT }}
+                onClick={handleApply}
+                disabled={applied || applying}
+                className="flex-1 rounded-xl py-4 text-center text-base font-bold text-white transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default"
+                style={{ background: applied ? "#9CA3AF" : ACCENT }}
               >
-                この求人に応募する
+                {applying ? "送信中..." : applied ? "応募済み" : "この求人に応募する"}
               </button>
               <button className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
                 <BookmarkIcon />
@@ -762,10 +792,12 @@ export default function JobDetailPage() {
         <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm z-50 sm:hidden">
           <div className="mx-auto max-w-3xl flex items-center gap-3 px-4 py-3">
             <button
-              className="flex-1 rounded-xl py-3.5 text-center text-base font-bold text-white cursor-pointer"
-              style={{ background: ACCENT }}
+              onClick={handleApply}
+              disabled={applied || applying}
+              className="flex-1 rounded-xl py-3.5 text-center text-base font-bold text-white cursor-pointer disabled:opacity-60 disabled:cursor-default"
+              style={{ background: applied ? "#9CA3AF" : ACCENT }}
             >
-              この求人に応募する
+              {applying ? "送信中..." : applied ? "応募済み" : "この求人に応募する"}
             </button>
             <button className="rounded-xl border border-gray-300 px-4 py-3.5 text-base text-gray-700 cursor-pointer">
               <BookmarkIcon />

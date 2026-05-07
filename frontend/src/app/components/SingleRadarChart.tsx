@@ -144,13 +144,13 @@ export function SingleRadarChart({
       })}
       {/* Legend */}
       {hasCompare && (
-        <g transform={`translate(${cx - 100}, ${cy + R + 50})`}>
-          <line x1={0} y1={6} x2={20} y2={6} stroke={strokeColor} strokeWidth={2} />
-          <circle cx={10} cy={6} r={2.5} fill={dotColor} />
-          <text x={26} y={10} fill="#555" fontSize={12} fontWeight="500">候補者</text>
-          <line x1={90} y1={6} x2={110} y2={6} stroke={compareStrokeColor} strokeWidth={2} strokeDasharray="4 2" />
-          <circle cx={100} cy={6} r={2} fill={compareStrokeColor} />
-          <text x={116} y={10} fill="#555" fontSize={12} fontWeight="500">{compareLabel ?? "チーム"}</text>
+        <g transform={`translate(${cx + 15}, ${cy + R + 85})`}>
+          <line x1={-120} y1={0} x2={-95} y2={0} stroke={strokeColor} strokeWidth={2.5} />
+          <circle cx={-107.5} cy={0} r={3} fill={dotColor} />
+          <text x={-88} y={5} fill="#444" fontSize={16} fontWeight="600">候補者</text>
+          <line x1={10} y1={0} x2={35} y2={0} stroke={compareStrokeColor} strokeWidth={2.5} strokeDasharray="5 3" />
+          <circle cx={22.5} cy={0} r={2.5} fill={compareStrokeColor} />
+          <text x={42} y={5} fill="#444" fontSize={16} fontWeight="600">{compareLabel ?? "チーム"}</text>
         </g>
       )}
     </svg>

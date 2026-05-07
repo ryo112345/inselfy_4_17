@@ -110,6 +110,10 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	messagingInputFactory := factory.NewMessagingInputFactory()
 	messagingOutputFactory := httpfactory.NewMessagingOutputFactory()
 
+	jobApplicationRepoFactory := factory.NewJobApplicationRepoFactory(pool)
+	jobApplicationInputFactory := factory.NewJobApplicationInputFactory()
+	jobApplicationOutputFactory := httpfactory.NewJobApplicationOutputFactory()
+
 	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
 	authCtrl := httpcontroller.NewAuthController(authInputFactory, authOutputFactory, userRepoFactory, refreshTokenRepoFactory)
 	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
@@ -156,6 +160,11 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	followCtrl := httpcontroller.NewFollowController(
 		followInputFactory, followOutputFactory, followRepoFactory, userRepoFactory,
+	)
+
+	jobApplicationCtrl := httpcontroller.NewJobApplicationController(
+		jobApplicationInputFactory, jobApplicationOutputFactory,
+		jobApplicationRepoFactory, jobPostingRepoFactory,
 	)
 
 	messagingCtrl := httpcontroller.NewMessagingController(
@@ -602,6 +611,25 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return notifCtrl.MarkAsRead(c, c.Param("id"))
 	})
 	userNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByUser)
+
+	// --- Candidate Job Applications ---
+	candidateAppGroup := e.Group("/api/applications", jwtMW)
+	candidateAppGroup.POST("", jobApplicationCtrl.Apply)
+	candidateAppGroup.GET("", jobApplicationCtrl.ListByCandidate)
+	candidateAppGroup.GET("/check", jobApplicationCtrl.CheckApplied)
+	candidateAppGroup.POST("/:applicationId/withdraw", func(c echo.Context) error {
+		return jobApplicationCtrl.Withdraw(c, c.Param("applicationId"))
+	})
+
+	// --- Company Job Applications ---
+	companyAppGroup := e.Group("/api/company/applications", companyJwtMW)
+	companyAppGroup.GET("", jobApplicationCtrl.ListByCompany)
+	companyAppGroup.GET("/:applicationId", func(c echo.Context) error {
+		return jobApplicationCtrl.GetByID(c, c.Param("applicationId"))
+	})
+	companyAppGroup.PATCH("/:applicationId/status", func(c echo.Context) error {
+		return jobApplicationCtrl.UpdateStatus(c, c.Param("applicationId"))
+	})
 
 	// --- Candidate Messages ---
 	candidateMsgGroup := e.Group("/api/messages", jwtMW)

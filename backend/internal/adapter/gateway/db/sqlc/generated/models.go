@@ -424,6 +424,17 @@ type IntegratedReportRequest struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type JobApplication struct {
+	ID           pgtype.UUID        `json:"id"`
+	JobPostingID pgtype.UUID        `json:"job_posting_id"`
+	CandidateID  pgtype.UUID        `json:"candidate_id"`
+	CompanyID    pgtype.UUID        `json:"company_id"`
+	Status       string             `json:"status"`
+	Message      string             `json:"message"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
 type JobPosting struct {
 	ID                        pgtype.UUID        `json:"id"`
 	CompanyID                 pgtype.UUID        `json:"company_id"`
