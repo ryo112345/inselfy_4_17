@@ -31,6 +31,7 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [activeTab, setActiveTab] = useState<"company" | "personal">("company");
 
   // New conversation mode: recipient specified but no existing conversation found
   const [newConvRecipient, setNewConvRecipient] = useState<{
@@ -81,10 +82,12 @@ export default function MessagesPage() {
       if (initialConvId) {
         const target = items.find((c) => c.id === initialConvId);
         if (target) {
+          setActiveTab(target.conversationType === "candidate_candidate" ? "personal" : "company");
           setSelectedConv(target);
           loadMessages(target.id);
         }
       } else if (recipientId) {
+        setActiveTab("personal");
         const existing = items.find(
           (c) =>
             c.conversationType === "candidate_candidate" &&
@@ -216,10 +219,43 @@ export default function MessagesPage() {
             showThread ? "hidden" : "flex"
           }`}
         >
-          <div className="shrink-0 border-b border-gray-200 px-4 py-3">
-            <h1 className="text-base font-semibold text-gray-900">
-              メッセージ
-            </h1>
+          <div className="shrink-0 border-b border-gray-200">
+            <div className="px-4 py-3">
+              <h1 className="text-base font-semibold text-gray-900">
+                メッセージ
+              </h1>
+            </div>
+            <div className="flex">
+              {(["company", "personal"] as const).map((tab) => {
+                const isActive = activeTab === tab;
+                const label = tab === "company" ? "企業" : "個人";
+                const count = conversations.filter((c) =>
+                  tab === "company"
+                    ? c.conversationType === "company_candidate"
+                    : c.conversationType === "candidate_candidate"
+                ).reduce((sum, c) => sum + c.unreadCount, 0);
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`relative flex-1 py-2 text-sm font-medium transition-colors text-center ${
+                      isActive
+                        ? "text-[#3D8B6E] border-b-2 border-[#3D8B6E]"
+                        : "text-gray-500 hover:text-gray-700 border-b-2 border-transparent"
+                    }`}
+                  >
+                    <span className="relative">
+                      {label}
+                      {count > 0 && (
+                        <span className="absolute -right-6 top-1/2 -translate-y-[44%] inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-[#3D8B6E] px-1 text-[10px] font-bold text-white">
+                          {count > 99 ? "99+" : count}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="flex-1 overflow-y-auto scrollbar-hide">
             {loadingConvs ? (
@@ -228,7 +264,11 @@ export default function MessagesPage() {
               </div>
             ) : (
               <ConversationList
-                conversations={conversations}
+                conversations={conversations.filter((c) =>
+                  activeTab === "company"
+                    ? c.conversationType === "company_candidate"
+                    : c.conversationType === "candidate_candidate"
+                )}
                 selectedId={selectedConv?.id ?? null}
                 onSelect={handleSelectConv}
                 getDisplayName={(c) => user ? getCounterpartName(c, user.id) : c.companyName}
