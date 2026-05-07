@@ -999,7 +999,7 @@ function DiagnosticCandidateCard({
       className={`rounded-xl px-4 py-3.5 transition-all ${
         isSelected
           ? "bg-white ring-1 ring-blue-200 shadow-sm"
-          : "hover:bg-white/60"
+          : "hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-gray-200"
       }`}
     >
       {/* Row 1: Avatar + Name */}

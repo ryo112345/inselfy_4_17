@@ -164,7 +164,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	jobApplicationCtrl := httpcontroller.NewJobApplicationController(
 		jobApplicationInputFactory, jobApplicationOutputFactory,
-		jobApplicationRepoFactory, jobPostingRepoFactory,
+		jobApplicationRepoFactory, jobPostingRepoFactory, pool,
 	)
 
 	messagingCtrl := httpcontroller.NewMessagingController(

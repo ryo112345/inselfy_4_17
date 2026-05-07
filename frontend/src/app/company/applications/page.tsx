@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   fetchCompanyApplications,
   updateApplicationStatus,
 } from "@/features/job-application/api";
 import type { JobApplication } from "@/features/job-application/api";
+import { fetchJobPostings } from "@/features/job-posting/api";
 import {
   SingleRadarChart,
   WV_ORDER,
@@ -80,6 +81,43 @@ const SEEKING_STATUS_MAP: Record<
   },
 };
 
+function matchScoreColor(score: number): string {
+  if (score >= 80) return "#149470";
+  if (score >= 55) return "#10b77f";
+  if (score >= 30) return "#8aa3d6";
+  return "#cfd0cd";
+}
+
+function MatchScoreBadge({ label, value }: { label: string; value: number }) {
+  const color = matchScoreColor(value);
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-xs font-medium text-gray-700">{label}</span>
+      <span className="text-sm font-bold tabular-nums" style={{ color }}>
+        {Math.round(value)}%
+      </span>
+      <div className="w-12 h-[6px] rounded-full bg-gray-200 overflow-hidden">
+        <div className="h-full rounded-full" style={{ width: `${value}%`, backgroundColor: color }} />
+      </div>
+    </div>
+  );
+}
+
+function AppMatchBadges({ app }: { app: JobApplication }) {
+  const entries: { label: string; value: number }[] = [];
+  if (app.integratedSimilarity != null) entries.push({ label: "総合", value: app.integratedSimilarity });
+  if (app.wvSimilarity != null) entries.push({ label: "文化", value: app.wvSimilarity });
+  if (app.ciSimilarity != null) entries.push({ label: "適職", value: app.ciSimilarity });
+  if (entries.length === 0) return null;
+  return (
+    <div className="mt-2.5 flex items-center gap-3">
+      {entries.map((e) => (
+        <MatchScoreBadge key={e.label} label={e.label} value={e.value} />
+      ))}
+    </div>
+  );
+}
+
 type CandidateExperience = {
   companyName: string;
   title: string;
@@ -100,6 +138,38 @@ type CandidateDetail = {
   wvScores: { id: string; score: number }[] | null;
   ciScores: { id: string; score: number }[] | null;
 };
+
+type DatePreset = "" | "today" | "week" | "month" | "3months";
+
+const DATE_PRESETS: { value: DatePreset; label: string }[] = [
+  { value: "", label: "全期間" },
+  { value: "today", label: "今日" },
+  { value: "week", label: "直近1週間" },
+  { value: "month", label: "直近1ヶ月" },
+  { value: "3months", label: "直近3ヶ月" },
+];
+
+function datePresetToRange(preset: DatePreset): { from?: string; to?: string } {
+  if (!preset) return {};
+  const now = new Date();
+  const to = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  let from: Date;
+  switch (preset) {
+    case "today":
+      from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+    case "week":
+      from = new Date(now.getTime() - 7 * 86400000);
+      break;
+    case "month":
+      from = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+      break;
+    case "3months":
+      from = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+      break;
+  }
+  return { from: from.toISOString(), to: to.toISOString() };
+}
 
 function daysAgo(dateStr: string): string {
   const d = Math.floor(
@@ -125,16 +195,24 @@ function formatPeriod(
 
 export default function CompanyApplicationsPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialStatus = searchParams.get("status") ?? "";
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState(initialStatus);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [jobFilter, setJobFilter] = useState("");
+  const [keywordInput, setKeywordInput] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [datePreset, setDatePreset] = useState<DatePreset>("");
+  const [jobPostings, setJobPostings] = useState<{ id: string; title: string }[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(searchParams.get("selected") ?? null);
   const [detail, setDetail] = useState<CandidateDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const leftPanelRef = useRef<HTMLDivElement>(null);
+  const splitPanelRef = useRef<HTMLDivElement>(null);
+  const panelStuckRef = useRef(false);
 
   const [teamWvAvg, setTeamWvAvg] = useState<{ id: string; score: number }[] | null>(null);
   const [teamCiAvg, setTeamCiAvg] = useState<{ id: string; score: number }[] | null>(null);
@@ -142,10 +220,27 @@ export default function CompanyApplicationsPage() {
 
   const selected = applications.find((a) => a.id === selectedId) ?? null;
 
-  const load = useCallback((status: string) => {
+  useEffect(() => {
+    fetchJobPostings()
+      .then((jobs) => setJobPostings(jobs.map((j) => ({ id: j.id, title: j.title }))))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setKeyword(keywordInput), 300);
+    return () => clearTimeout(t);
+  }, [keywordInput]);
+
+  const dateRange = useMemo(() => datePresetToRange(datePreset), [datePreset]);
+
+  const load = useCallback((status: string, jobPostingId: string, kw: string, dr: { from?: string; to?: string }) => {
     setLoading(true);
     fetchCompanyApplications({
       status: status || undefined,
+      jobPostingId: jobPostingId || undefined,
+      keyword: kw || undefined,
+      dateFrom: dr.from,
+      dateTo: dr.to,
       limit: 50,
       offset: 0,
     })
@@ -163,8 +258,8 @@ export default function CompanyApplicationsPage() {
   }, []);
 
   useEffect(() => {
-    load(statusFilter);
-  }, [statusFilter, load]);
+    load(statusFilter, jobFilter, keyword, dateRange);
+  }, [statusFilter, jobFilter, keyword, dateRange, load]);
 
   useEffect(() => {
     if (!selected?.jobPostingId) {
@@ -280,6 +375,98 @@ export default function CompanyApplicationsPage() {
       .finally(() => setDetailLoading(false));
   }, [selected?.candidateUsername, selected?.candidateId, selected?.id]);
 
+  // Detect when split panel becomes sticky
+  useEffect(() => {
+    const panel = splitPanelRef.current;
+    if (!panel) return;
+    const checkStuck = () => {
+      const rect = panel.getBoundingClientRect();
+      const stuck = rect.top <= 1;
+      if (stuck !== panelStuckRef.current) {
+        panelStuckRef.current = stuck;
+      }
+    };
+    window.addEventListener("scroll", checkStuck, { passive: true });
+    checkStuck();
+    return () => window.removeEventListener("scroll", checkStuck);
+  }, [applications, loading]);
+
+  // Forward wheel events to page scroll when header needs to show/hide
+  useEffect(() => {
+    const panel = splitPanelRef.current;
+    if (!panel) return;
+    const findScrollParent = (target: EventTarget | null): HTMLElement | null => {
+      let el = target as HTMLElement | null;
+      while (el && el !== panel) {
+        if (el.scrollHeight > el.clientHeight && getComputedStyle(el).overflowY !== "hidden") return el;
+        el = el.parentElement;
+      }
+      return null;
+    };
+    const handler = (e: WheelEvent) => {
+      if (!panelStuckRef.current) {
+        e.preventDefault();
+        window.scrollTo(0, window.scrollY + e.deltaY);
+        return;
+      }
+      if (e.deltaY < 0) {
+        const scrollable = findScrollParent(e.target);
+        if (!scrollable || scrollable.scrollTop <= 0) {
+          e.preventDefault();
+          window.scrollTo(0, window.scrollY + e.deltaY);
+        }
+      }
+    };
+    panel.addEventListener("wheel", handler, { passive: false });
+    return () => panel.removeEventListener("wheel", handler);
+  }, [applications, loading]);
+
+  // Sync selectedId and statusFilter to URL for back-navigation
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (statusFilter) params.set("status", statusFilter);
+    if (selectedId) params.set("selected", selectedId);
+    const qs = params.toString();
+    const target = qs ? `/company/applications?${qs}` : "/company/applications";
+    router.replace(target, { scroll: false });
+  }, [selectedId, statusFilter, router]);
+
+  // Save scroll positions continuously
+  const restoredScrollRef = useRef(false);
+  useEffect(() => {
+    const panel = leftPanelRef.current;
+    const onPanelScroll = () => {
+      if (panel) sessionStorage.setItem("applications_scroll_left", String(panel.scrollTop));
+    };
+    const onPageScroll = () => {
+      sessionStorage.setItem("applications_scroll_page", String(window.scrollY));
+    };
+    panel?.addEventListener("scroll", onPanelScroll, { passive: true });
+    window.addEventListener("scroll", onPageScroll, { passive: true });
+    return () => {
+      panel?.removeEventListener("scroll", onPanelScroll);
+      window.removeEventListener("scroll", onPageScroll);
+    };
+  }, [applications]);
+
+  // Restore scroll positions once after data loads
+  useEffect(() => {
+    if (applications.length === 0 || restoredScrollRef.current) return;
+    restoredScrollRef.current = true;
+    requestAnimationFrame(() => {
+      const savedLeft = sessionStorage.getItem("applications_scroll_left");
+      if (savedLeft && leftPanelRef.current) {
+        leftPanelRef.current.scrollTop = Number(savedLeft);
+      }
+      const savedPage = sessionStorage.getItem("applications_scroll_page");
+      if (savedPage) {
+        window.scrollTo(0, Number(savedPage));
+      }
+      sessionStorage.removeItem("applications_scroll_left");
+      sessionStorage.removeItem("applications_scroll_page");
+    });
+  }, [applications]);
+
   const handleStatusChange = async (
     applicationId: string,
     newStatus: string,
@@ -292,7 +479,7 @@ export default function CompanyApplicationsPage() {
         ),
       );
     } catch {
-      load(statusFilter);
+      load(statusFilter, jobFilter, keyword, dateRange);
     }
   };
 
@@ -343,6 +530,80 @@ export default function CompanyApplicationsPage() {
             </button>
           );
         })}
+      </div>
+
+      {/* Filters row */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Keyword search */}
+        <div className="relative">
+          <svg
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+          <input
+            type="text"
+            value={keywordInput}
+            onChange={(e) => setKeywordInput(e.target.value)}
+            placeholder="名前・スキル・求人で検索"
+            className="rounded-lg border border-gray-200 bg-white pl-8 pr-3 py-1.5 text-xs text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 w-52"
+          />
+          {keywordInput && (
+            <button
+              type="button"
+              onClick={() => setKeywordInput("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Job posting filter */}
+        {jobPostings.length > 0 && (
+          <select
+            value={jobFilter}
+            onChange={(e) => setJobFilter(e.target.value)}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300 max-w-48 truncate"
+          >
+            <option value="">すべての求人</option>
+            {jobPostings.map((jp) => (
+              <option key={jp.id} value={jp.id}>{jp.title}</option>
+            ))}
+          </select>
+        )}
+
+        {/* Date range filter */}
+        <select
+          value={datePreset}
+          onChange={(e) => setDatePreset(e.target.value as DatePreset)}
+          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300 focus:border-blue-300"
+        >
+          {DATE_PRESETS.map((p) => (
+            <option key={p.value} value={p.value}>{p.label}</option>
+          ))}
+        </select>
+
+        {/* Active filter count */}
+        {(jobFilter || keyword || datePreset) && (
+          <button
+            type="button"
+            onClick={() => {
+              setKeywordInput("");
+              setJobFilter("");
+              setDatePreset("");
+            }}
+            className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            フィルターをリセット
+          </button>
+        )}
       </div>
 
       {/* Main content */}
@@ -397,10 +658,11 @@ export default function CompanyApplicationsPage() {
         </div>
       ) : (
         <div
+          ref={splitPanelRef}
           className="sticky top-0 ml-[50%] -translate-x-1/2 flex border border-gray-200 rounded-xl bg-white overflow-hidden"
           style={{
             width: "calc(100vw - 48px)",
-            height: "calc(100vh - 220px)",
+            height: "100vh",
             minHeight: 400,
           }}
         >
@@ -422,7 +684,7 @@ export default function CompanyApplicationsPage() {
                     className={`w-full text-left rounded-xl px-4 py-3.5 transition-all cursor-pointer ${
                       isSelected
                         ? "bg-white ring-1 ring-blue-200 shadow-sm"
-                        : "hover:bg-white/60"
+                        : "hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-gray-200"
                     }`}
                   >
                     {/* Row 1: avatar + name + status */}
@@ -434,7 +696,10 @@ export default function CompanyApplicationsPage() {
                           className="h-12 w-12 rounded-full object-cover shrink-0"
                         />
                       ) : (
-                        <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center text-white text-[15px] font-bold shrink-0">
+                        <div
+                          className="h-12 w-12 rounded-full flex items-center justify-center text-white text-[15px] font-bold shrink-0"
+                          style={{ backgroundColor: app.candidateProfileColor || "#94a3b8" }}
+                        >
                           {initials}
                         </div>
                       )}
@@ -458,6 +723,9 @@ export default function CompanyApplicationsPage() {
                         )}
                       </div>
                     </div>
+
+                    {/* Match badges */}
+                    <AppMatchBadges app={app} />
 
                     {/* Row 2: job title + elapsed time */}
                     <div className="mt-3 flex items-center gap-1.5 min-w-0">
@@ -484,12 +752,35 @@ export default function CompanyApplicationsPage() {
                       </p>
                     </div>
 
-                    {/* Row 3: message preview */}
-                    {app.message && (
-                      <p className="mt-2 text-[13px] text-gray-400 truncate">
-                        {app.message}
-                      </p>
+                    {/* Row 3: skills + seeking status */}
+                    {((app.candidateSkills && app.candidateSkills.length > 0) || app.candidateSeekingStatus) && (
+                      <div className="mt-3 flex items-center gap-2 flex-wrap">
+                        {app.candidateSkills?.slice(0, 4).map((s) => (
+                          <span key={s} className="rounded-md bg-gray-100 px-2.5 py-1 text-[13px] font-medium text-gray-600 leading-none">
+                            {s}
+                          </span>
+                        ))}
+                        {(app.candidateSkills?.length ?? 0) > 4 && (
+                          <span className="text-[13px] text-gray-400 leading-none">
+                            +{(app.candidateSkills?.length ?? 0) - 4}
+                          </span>
+                        )}
+                        {app.candidateSeekingStatus && SEEKING_STATUS_MAP[app.candidateSeekingStatus] && (
+                          <>
+                            {(app.candidateSkills?.length ?? 0) > 0 && (
+                              <span className="text-gray-200 text-[13px]">|</span>
+                            )}
+                            <span className="inline-flex items-center gap-1">
+                              <span className={`inline-block h-2 w-2 rounded-full ${SEEKING_STATUS_MAP[app.candidateSeekingStatus].dot}`} />
+                              <span className={`text-[13px] leading-none ${SEEKING_STATUS_MAP[app.candidateSeekingStatus].text}`}>
+                                {SEEKING_STATUS_MAP[app.candidateSeekingStatus].label}
+                              </span>
+                            </span>
+                          </>
+                        )}
+                      </div>
                     )}
+
                   </button>
                 );
               })}
@@ -546,6 +837,9 @@ export default function CompanyApplicationsPage() {
                         {selected.candidateHeadline}
                       </p>
                     )}
+                    <div className="flex items-center gap-1.5 mt-2.5">
+                      <AppMatchBadges app={selected} />
+                    </div>
                     <p className="text-xs text-gray-400 mt-2">
                       応募日:{" "}
                       {new Date(selected.createdAt).toLocaleDateString(
@@ -738,9 +1032,14 @@ export default function CompanyApplicationsPage() {
                       </h3>
                       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                         <div className="rounded-xl border border-gray-150 bg-white p-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-1">
-                            価値観（Work Values）
-                          </h4>
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="text-sm font-semibold text-gray-700">
+                              価値観（Work Values）
+                            </h4>
+                            {selected.wvSimilarity != null && (
+                              <span className="text-xs text-gray-400">{Math.round(selected.wvSimilarity)}% match</span>
+                            )}
+                          </div>
                           {detail.wvScores ? (
                             <SingleRadarChart
                               scores={detail.wvScores}
@@ -757,9 +1056,14 @@ export default function CompanyApplicationsPage() {
                           )}
                         </div>
                         <div className="rounded-xl border border-gray-150 bg-white p-4">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-1">
-                            適職（Career Interest）
-                          </h4>
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="text-sm font-semibold text-gray-700">
+                              適職（Career Interest）
+                            </h4>
+                            {selected.ciSimilarity != null && (
+                              <span className="text-xs text-gray-400">{Math.round(selected.ciSimilarity)}% match</span>
+                            )}
+                          </div>
                           {detail.ciScores ? (
                             <SingleRadarChart
                               scores={detail.ciScores}

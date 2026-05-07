@@ -16,6 +16,12 @@ export type JobApplication = {
   candidateAvatar: string;
   candidateUsername: string;
   candidateHeadline: string;
+  candidateProfileColor?: string;
+  candidateSeekingStatus?: string;
+  candidateSkills?: string[];
+  wvSimilarity?: number;
+  ciSimilarity?: number;
+  integratedSimilarity?: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -75,11 +81,19 @@ export async function withdrawApplication(
 
 export async function fetchCompanyApplications(params?: {
   status?: string;
+  jobPostingId?: string;
+  keyword?: string;
+  dateFrom?: string;
+  dateTo?: string;
   limit?: number;
   offset?: number;
 }): Promise<JobApplicationListResponse> {
   const query = new URLSearchParams();
   if (params?.status) query.set("status", params.status);
+  if (params?.jobPostingId) query.set("job_posting_id", params.jobPostingId);
+  if (params?.keyword) query.set("keyword", params.keyword);
+  if (params?.dateFrom) query.set("date_from", params.dateFrom);
+  if (params?.dateTo) query.set("date_to", params.dateTo);
   query.set("limit", String(params?.limit ?? 50));
   query.set("offset", String(params?.offset ?? 0));
   const res = await fetch(
