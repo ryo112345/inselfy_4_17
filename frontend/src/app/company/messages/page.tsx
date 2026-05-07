@@ -127,7 +127,7 @@ export default function CompanyMessagesPage() {
   }
 
   return (
-    <div className="h-full overflow-hidden bg-[#f6f7f5]">
+    <div className="h-full overflow-hidden">
       <div className="mx-auto flex h-full max-w-5xl flex-col md:flex-row">
         {/* Conversation list - hide on mobile when a conversation is selected */}
         <div
