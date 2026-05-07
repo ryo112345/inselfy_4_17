@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import { SingleRadarChart, WV_ORDER, WV_FULL_LABELS, CI_ORDER, CI_FULL_LABELS } from "@/app/components/SingleRadarChart";
+import { PREFECTURES, INDUSTRIES, JOB_TYPE_GROUPS } from "@/constants/profile-options";
 
 type TalentCard = {
   user_id: string;
@@ -37,11 +38,11 @@ const SEEKING_STATUS_MAP: Record<string, { label: string; bg: string; text: stri
 
 const VALUE_LABELS: Record<string, string> = {
   achievement: "達成",
-  comfort: "快適さ",
-  status: "地位",
-  altruism: "利他",
-  safety: "安全",
-  autonomy: "自律",
+  status: "地位名声",
+  autonomy: "自主性",
+  safety: "支援",
+  altruism: "人間関係",
+  comfort: "労働条件",
 };
 
 const CI_TYPE_LABELS: Record<string, string> = {
@@ -58,10 +59,8 @@ export default function TalentsPage() {
   const router = useRouter();
   const { companyFetch } = useCompanyAuth();
 
-  const initialTab = searchParams.get("tab") === "diagnostic" ? "diagnostic" : "condition";
   const initialTeamId = searchParams.get("team") ?? "";
 
-  const [tab, setTab] = useState<"condition" | "diagnostic">(initialTab);
   const [users, setUsers] = useState<TalentCard[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -80,6 +79,7 @@ export default function TalentsPage() {
   const [industry, setIndustry] = useState(searchParams.get("industry") ?? "");
   const [seekingStatus, setSeekingStatus] = useState(searchParams.get("job_seeking_status") ?? "");
   const [jobType, setJobType] = useState(searchParams.get("job_type") ?? "");
+  const [diagnosedOnly, setDiagnosedOnly] = useState(searchParams.get("diagnosed") === "1");
 
   // Detail panel (diagnostic split view)
   const [selectedUserId, setSelectedUserId] = useState<string | null>(searchParams.get("selected") ?? null);
@@ -213,7 +213,7 @@ export default function TalentsPage() {
     window.addEventListener("scroll", checkStuck, { passive: true });
     checkStuck();
     return () => window.removeEventListener("scroll", checkStuck);
-  }, [users, loading, tab]);
+  }, [users, loading]);
 
   // Forward wheel events to page scroll when header needs to show/hide
   useEffect(() => {
@@ -245,7 +245,7 @@ export default function TalentsPage() {
     };
     panel.addEventListener("wheel", handler, { passive: false });
     return () => panel.removeEventListener("wheel", handler);
-  }, [users, loading, tab]);
+  }, [users, loading]);
 
 
   // Auto-search on mount: restore from URL or from team page link
@@ -259,27 +259,24 @@ export default function TalentsPage() {
     const restoreLimit = savedCount ? Number(savedCount) : undefined;
     sessionStorage.removeItem("talents_loaded_count");
 
-    if (initialTab === "diagnostic" && (initialTeamId || wasSearched)) {
+    if (initialTeamId || wasSearched) {
       if (diagnosticMode === "team" && !selectedTeamId) return;
       syncFiltersToURL();
       fetchTalents(getDiagnosticEndpoint(), buildDiagnosticParams(0, restoreLimit), false);
-    } else if (initialTab === "condition" && wasSearched) {
-      syncFiltersToURL();
-      fetchTalents("/api/company/talents/search", buildConditionParams(0, restoreLimit), false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-select first user when diagnostic results load
+  // Auto-select first user when results load
   useEffect(() => {
-    if (tab === "diagnostic" && users.length > 0 && (!selectedUserId || !users.some((u) => u.user_id === selectedUserId))) {
+    if (users.length > 0 && (!selectedUserId || !users.some((u) => u.user_id === selectedUserId))) {
       setSelectedUserId(users[0].user_id);
     }
-  }, [users, tab, selectedUserId]);
+  }, [users, selectedUserId]);
 
-  // Fetch WV/CI scores + full experiences/skills when a user is selected in diagnostic mode
+  // Fetch WV/CI scores + full experiences/skills when a user is selected
   useEffect(() => {
-    if (!selectedUserId || tab !== "diagnostic") {
+    if (!selectedUserId) {
       setDetailWv(null);
       setDetailCi(null);
       setDetailExperiences([]);
@@ -324,7 +321,7 @@ export default function TalentsPage() {
         setDetailAbout(profileData?.about ?? null);
       })
       .finally(() => setDetailLoading(false));
-  }, [selectedUserId, tab, users]);
+  }, [selectedUserId, users]);
 
   const selectedUser = useMemo(
     () => (selectedUserId ? users.find((u) => u.user_id === selectedUserId) ?? null : null),
@@ -333,31 +330,28 @@ export default function TalentsPage() {
 
   const buildURLParams = useCallback(() => {
     const params = new URLSearchParams();
-    params.set("tab", tab);
-    if (tab === "condition") {
-      if (keyword) params.set("q", keyword);
-      if (skills.length > 0) params.set("skills", skills.join(","));
-      if (location) params.set("location", location);
-      if (industry) params.set("industry", industry);
-      if (seekingStatus) params.set("job_seeking_status", seekingStatus);
-      if (jobType) params.set("job_type", jobType);
-    } else {
-      params.set("mode", diagnosticMode);
-      params.set("dtype", diagnosticType);
-      if (diagnosticMode === "team" && selectedTeamId) {
-        params.set("team", selectedTeamId);
-      } else if (diagnosticMode === "custom") {
-        if (diagnosticType === "wv" || diagnosticType === "integrated") {
-          for (const [k, v] of Object.entries(customWeights)) params.set(`wv_${k}`, String(v));
-        }
-        if (diagnosticType === "ci" || diagnosticType === "integrated") {
-          for (const [k, v] of Object.entries(customCIWeights)) params.set(`ci_${k}`, String(v));
-        }
+    if (keyword) params.set("q", keyword);
+    if (skills.length > 0) params.set("skills", skills.join(","));
+    if (location) params.set("location", location);
+    if (industry) params.set("industry", industry);
+    if (seekingStatus) params.set("job_seeking_status", seekingStatus);
+    if (jobType) params.set("job_type", jobType);
+    if (diagnosedOnly) params.set("diagnosed", "1");
+    params.set("mode", diagnosticMode);
+    params.set("dtype", diagnosticType);
+    if (diagnosticMode === "team" && selectedTeamId) {
+      params.set("team", selectedTeamId);
+    } else if (diagnosticMode === "custom") {
+      if (diagnosticType === "wv" || diagnosticType === "integrated") {
+        for (const [k, v] of Object.entries(customWeights)) params.set(`wv_${k}`, String(v));
+      }
+      if (diagnosticType === "ci" || diagnosticType === "integrated") {
+        for (const [k, v] of Object.entries(customCIWeights)) params.set(`ci_${k}`, String(v));
       }
     }
     params.set("searched", "1");
     return params;
-  }, [tab, keyword, skills, location, industry, seekingStatus, jobType, diagnosticMode, diagnosticType, selectedTeamId, customWeights, customCIWeights]);
+  }, [keyword, skills, location, industry, seekingStatus, jobType, diagnosedOnly, diagnosticMode, diagnosticType, selectedTeamId, customWeights, customCIWeights]);
 
   const syncFiltersToURL = useCallback((overrideSelected?: string | null) => {
     const params = buildURLParams();
@@ -403,11 +397,9 @@ export default function TalentsPage() {
     if (users.length === 0 || restoredScrollRef.current) return;
     restoredScrollRef.current = true;
     requestAnimationFrame(() => {
-      if (tab === "diagnostic") {
-        const saved = sessionStorage.getItem("talents_scroll_left");
-        if (saved && leftPanelRef.current) {
-          leftPanelRef.current.scrollTop = Number(saved);
-        }
+      const saved = sessionStorage.getItem("talents_scroll_left");
+      if (saved && leftPanelRef.current) {
+        leftPanelRef.current.scrollTop = Number(saved);
       }
       const savedPage = sessionStorage.getItem("talents_scroll_page");
       if (savedPage) {
@@ -416,20 +408,7 @@ export default function TalentsPage() {
       sessionStorage.removeItem("talents_scroll_left");
       sessionStorage.removeItem("talents_scroll_page");
     });
-  }, [users, tab]);
-
-  const buildConditionParams = useCallback((offset: number, limit?: number) => {
-    const params = new URLSearchParams();
-    if (keyword) params.set("q", keyword);
-    if (skills.length > 0) params.set("skills", skills.join(","));
-    if (location) params.set("location", location);
-    if (industry) params.set("industry", industry);
-    if (seekingStatus) params.set("job_seeking_status", seekingStatus);
-    if (jobType) params.set("job_type", jobType);
-    params.set("limit", String(limit ?? PAGE_SIZE));
-    params.set("offset", String(offset));
-    return params;
-  }, [keyword, skills, location, industry, seekingStatus, jobType]);
+  }, [users]);
 
   const getDiagnosticEndpoint = useCallback(() => {
     switch (diagnosticType) {
@@ -455,10 +434,17 @@ export default function TalentsPage() {
         }
       }
     }
+    if (keyword) params.set("q", keyword);
+    if (skills.length > 0) params.set("skills", skills.join(","));
+    if (location) params.set("location", location);
+    if (industry) params.set("industry", industry);
+    if (seekingStatus) params.set("job_seeking_status", seekingStatus);
+    if (jobType) params.set("job_type", jobType);
+    if (diagnosedOnly) params.set("diagnosed", "1");
     params.set("limit", String(limit ?? PAGE_SIZE));
     params.set("offset", String(offset));
     return params;
-  }, [diagnosticMode, diagnosticType, selectedTeamId, customWeights, customCIWeights]);
+  }, [diagnosticMode, diagnosticType, selectedTeamId, customWeights, customCIWeights, keyword, skills, location, industry, seekingStatus, jobType, diagnosedOnly]);
 
   const fetchTalents = useCallback(async (endpoint: string, params: URLSearchParams, append: boolean) => {
     if (append) {
@@ -485,44 +471,42 @@ export default function TalentsPage() {
     }
   }, [companyFetch]);
 
-  const handleConditionSearch = useCallback(() => {
-    syncFiltersToURL();
-    fetchTalents("/api/company/talents/search", buildConditionParams(0), false);
-  }, [fetchTalents, buildConditionParams, syncFiltersToURL]);
+  const hasDiagnosticConfig = diagnosticMode === "custom" || (diagnosticMode === "team" && !!selectedTeamId);
 
-  const handleDiagnosticSearch = useCallback(() => {
-    if (diagnosticMode === "team" && !selectedTeamId) return;
+  const getSearchEndpoint = useCallback(() => {
+    if (!hasDiagnosticConfig) return "/api/company/talents/search";
+    return getDiagnosticEndpoint();
+  }, [hasDiagnosticConfig, getDiagnosticEndpoint]);
+
+  const buildSearchParams = useCallback((offset: number, limit?: number) => {
+    if (!hasDiagnosticConfig) {
+      const params = new URLSearchParams();
+      if (keyword) params.set("q", keyword);
+      if (skills.length > 0) params.set("skills", skills.join(","));
+      if (location) params.set("location", location);
+      if (industry) params.set("industry", industry);
+      if (seekingStatus) params.set("job_seeking_status", seekingStatus);
+      if (jobType) params.set("job_type", jobType);
+      if (diagnosedOnly) params.set("diagnosed", "1");
+      params.set("limit", String(limit ?? PAGE_SIZE));
+      params.set("offset", String(offset));
+      return params;
+    }
+    return buildDiagnosticParams(offset, limit);
+  }, [hasDiagnosticConfig, buildDiagnosticParams, keyword, skills, location, industry, seekingStatus, jobType, diagnosedOnly]);
+
+  const handleSearch = useCallback(() => {
     syncFiltersToURL();
-    fetchTalents(getDiagnosticEndpoint(), buildDiagnosticParams(0), false);
-  }, [fetchTalents, getDiagnosticEndpoint, buildDiagnosticParams, diagnosticMode, selectedTeamId, syncFiltersToURL]);
+    fetchTalents(getSearchEndpoint(), buildSearchParams(0), false);
+  }, [fetchTalents, getSearchEndpoint, buildSearchParams, syncFiltersToURL]);
 
   const handleLoadMore = useCallback(() => {
     const offset = users.length;
-    if (tab === "condition") {
-      fetchTalents("/api/company/talents/search", buildConditionParams(offset), true);
-    } else {
-      fetchTalents(getDiagnosticEndpoint(), buildDiagnosticParams(offset), true);
-    }
-  }, [tab, users.length, fetchTalents, buildConditionParams, getDiagnosticEndpoint, buildDiagnosticParams]);
-
-  const handleSearch = tab === "condition" ? handleConditionSearch : handleDiagnosticSearch;
+    fetchTalents(getSearchEndpoint(), buildSearchParams(offset), true);
+  }, [users.length, fetchTalents, getSearchEndpoint, buildSearchParams]);
 
   const hasMore = users.length > 0 && users.length < total;
-  const pageSentinelObserver = useRef<IntersectionObserver | null>(null);
   const panelSentinelObserver = useRef<IntersectionObserver | null>(null);
-
-  const pageSentinelRef: RefCallback<HTMLDivElement> = useCallback(
-    (node) => {
-      if (pageSentinelObserver.current) pageSentinelObserver.current.disconnect();
-      if (!node || !hasMore) return;
-      pageSentinelObserver.current = new IntersectionObserver(
-        (entries) => { if (entries[0].isIntersecting && !loadingMore) handleLoadMore(); },
-        { rootMargin: "200px" },
-      );
-      pageSentinelObserver.current.observe(node);
-    },
-    [hasMore, loadingMore, handleLoadMore],
-  );
 
   const panelSentinelRef: RefCallback<HTMLDivElement> = useCallback(
     (node) => {
@@ -548,279 +532,322 @@ export default function TalentsPage() {
 
   const removeSkill = (s: string) => setSkills(skills.filter((x) => x !== s));
 
-  const switchTab = (t: "condition" | "diagnostic") => {
-    setTab(t);
-    setUsers([]);
-    setTotal(0);
-    setSearched(false);
-    setSelectedUserId(null);
-    const params = new URLSearchParams(searchParams);
-    params.set("tab", t);
-    if (t !== "diagnostic") params.delete("team");
-    router.replace(`/company/talents?${params}`, { scroll: false });
-  };
-
   const accentColor = "#2979ff";
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
         <h1 className="text-xl font-bold text-gray-900">人材を探す</h1>
-        <div className="inline-flex rounded-lg border border-gray-200 bg-white p-0.5">
-          <button
-            onClick={() => switchTab("condition")}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all cursor-pointer ${
-              tab === "condition" ? "text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
-            }`}
-            style={tab === "condition" ? { backgroundColor: accentColor } : {}}
-          >
-            条件検索
-          </button>
-          <button
-            onClick={() => switchTab("diagnostic")}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all cursor-pointer ${
-              tab === "diagnostic" ? "text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
-            }`}
-            style={tab === "diagnostic" ? { backgroundColor: accentColor } : {}}
-          >
-            診断検索
-          </button>
-        </div>
       </div>
 
-      {/* Condition Search Filters */}
-      {tab === "condition" && (
-        <div className="rounded-xl border border-gray-200 bg-white p-3 mb-4">
-          <div className="space-y-2.5">
-            {/* Keyword + Skills row */}
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  width={14} height={14} viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth={2}
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="M21 21l-4.35-4.35" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="キーワード（名前・肩書き・自己紹介）"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="w-full rounded-lg border border-gray-200 py-1.5 pl-9 pr-3 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-colors"
-                />
-              </div>
-              <div className="flex gap-1.5">
-                <input
-                  type="text"
-                  placeholder="スキル追加"
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") { e.preventDefault(); addSkill(); }
-                  }}
-                  className="w-32 rounded-lg border border-gray-200 py-1.5 px-2.5 text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-colors"
-                />
-                <button
-                  onClick={addSkill}
-                  className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  追加
-                </button>
-              </div>
-            </div>
-
-            {/* Skills chips */}
-            {skills.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {skills.map((s) => (
-                  <span
-                    key={s}
-                    className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-700"
-                  >
-                    {s}
-                    <button onClick={() => removeSkill(s)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
-                      <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </span>
-                ))}
-                <button
-                  onClick={() => setSkills([])}
-                  className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
-                >
-                  クリア
-                </button>
-              </div>
-            )}
-
-            {/* Dropdowns + search button row */}
-            <div className="flex items-center gap-2">
-              <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
-              >
-                <option value="">勤務地</option>
-                <option value="東京">東京</option>
-                <option value="大阪">大阪</option>
-                <option value="名古屋">名古屋</option>
-                <option value="福岡">福岡</option>
-                <option value="リモート">リモート</option>
-              </select>
-              <select
-                value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
-              >
-                <option value="">業界</option>
-                <option value="IT">IT</option>
-                <option value="金融">金融</option>
-                <option value="製造">製造</option>
-                <option value="コンサルティング">コンサルティング</option>
-                <option value="医療">医療</option>
-              </select>
-              <select
-                value={seekingStatus}
-                onChange={(e) => setSeekingStatus(e.target.value)}
-                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
-              >
-                <option value="">転職意欲</option>
-                <option value="active">スカウト歓迎</option>
-                <option value="open">いい話があれば</option>
-                <option value="not_seeking">スカウト不要</option>
-              </select>
-              <select
-                value={jobType}
-                onChange={(e) => setJobType(e.target.value)}
-                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
-              >
-                <option value="">職種</option>
-                <option value="エンジニア">エンジニア</option>
-                <option value="デザイナー">デザイナー</option>
-                <option value="PM">PM</option>
-                <option value="営業">営業</option>
-                <option value="マーケティング">マーケティング</option>
-              </select>
-              <button
-                onClick={handleSearch}
-                disabled={loading}
-                className="rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer ml-auto"
-                style={{ backgroundColor: accentColor }}
-              >
-                {loading ? "検索中..." : "検索する"}
-              </button>
-            </div>
+      {/* ── Layer 1: Search & Condition Filters ── */}
+      <div className="rounded-xl border border-gray-200 bg-white p-3 mb-3 space-y-2.5">
+        {/* Keyword search bar */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              width={16} height={16} viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth={2}
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              placeholder="キーワードで検索（名前・肩書き・自己紹介）"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              className="w-full rounded-lg border border-gray-200 py-2 pl-10 pr-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+            />
           </div>
+          <button
+            onClick={handleSearch}
+            disabled={loading}
+            className="rounded-lg px-5 py-2 text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-50 cursor-pointer shrink-0"
+            style={{ backgroundColor: accentColor }}
+          >
+            {loading ? (
+              <span className="flex items-center gap-1.5">
+                <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                検索中
+              </span>
+            ) : "検索する"}
+          </button>
         </div>
-      )}
 
-      {/* Diagnostic Search Filters */}
-      {tab === "diagnostic" && (
-        <div className="rounded-xl border border-gray-200 bg-white p-3 mb-4">
-          {/* Toolbar row: type tabs + mode + team/custom selector + search button */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex gap-0.5 rounded-lg bg-gray-100 p-0.5">
-              {([["wv", "Work Values"], ["ci", "Career Interest"], ["integrated", "総合"]] as const).map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setDiagnosticType(key)}
-                  className={`rounded-md px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
-                    diagnosticType === key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            <div className="h-5 w-px bg-gray-200" />
-
-            <select
-              value={diagnosticMode}
-              onChange={(e) => setDiagnosticMode(e.target.value as "team" | "custom")}
-              className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
-            >
-              <option value="team">チームから選択</option>
-              <option value="custom">カスタム設定</option>
-            </select>
-
-            {diagnosticMode === "team" && (
-              <select
-                value={selectedTeamId}
-                onChange={(e) => setSelectedTeamId(e.target.value)}
-                className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer min-w-[160px]"
-              >
-                <option value="">チームを選択</option>
-                {teams.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
+        {/* Filters row: dropdowns + skill input + diagnosed toggle */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className={`rounded-lg border py-1.5 px-2.5 text-xs outline-none focus:border-blue-400 cursor-pointer transition-colors ${
+              location ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600"
+            }`}
+          >
+            <option value="">勤務地</option>
+            {PREFECTURES.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+          <select
+            value={jobType}
+            onChange={(e) => setJobType(e.target.value)}
+            className={`rounded-lg border py-1.5 px-2.5 text-xs outline-none focus:border-blue-400 cursor-pointer transition-colors ${
+              jobType ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600"
+            }`}
+          >
+            <option value="">職種</option>
+            {JOB_TYPE_GROUPS.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.options.map((o) => (
+                  <option key={o} value={o}>{o}</option>
                 ))}
-              </select>
-            )}
+              </optgroup>
+            ))}
+            <option value="その他">その他</option>
+          </select>
+          <select
+            value={industry}
+            onChange={(e) => setIndustry(e.target.value)}
+            className={`rounded-lg border py-1.5 px-2.5 text-xs outline-none focus:border-blue-400 cursor-pointer transition-colors ${
+              industry ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600"
+            }`}
+          >
+            <option value="">業界</option>
+            {INDUSTRIES.map((ind) => (
+              <option key={ind} value={ind}>{ind}</option>
+            ))}
+          </select>
+          <select
+            value={seekingStatus}
+            onChange={(e) => setSeekingStatus(e.target.value)}
+            className={`rounded-lg border py-1.5 px-2.5 text-xs outline-none focus:border-blue-400 cursor-pointer transition-colors ${
+              seekingStatus ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600"
+            }`}
+          >
+            <option value="">転職意欲</option>
+            <option value="active">スカウト歓迎</option>
+            <option value="open">いい話があれば</option>
+            <option value="not_seeking">スカウト不要</option>
+          </select>
 
+          <div className="h-4 w-px bg-gray-200" />
+
+          <input
+            type="text"
+            placeholder="スキルを追加..."
+            value={skillInput}
+            onChange={(e) => setSkillInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { e.preventDefault(); addSkill(); }
+            }}
+            className="w-28 rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100 transition-all"
+          />
+
+          <button
+            type="button"
+            onClick={() => setDiagnosedOnly(!diagnosedOnly)}
+            className={`rounded-full py-1.5 px-3 text-xs font-medium transition-all cursor-pointer ${
+              diagnosedOnly
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            }`}
+          >
+            診断済みのみ
+          </button>
+        </div>
+
+        {/* Active filter chips */}
+        {(skills.length > 0 || location || industry || seekingStatus || jobType || diagnosedOnly) && (
+          <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+            {skills.map((s) => (
+              <button
+                key={`skill-${s}`}
+                onClick={() => removeSkill(s)}
+                className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-100 px-2.5 py-0.5 text-xs text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer"
+              >
+                {s}
+                <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            ))}
+            {location && (
+              <button
+                onClick={() => setLocation("")}
+                className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                {location}
+                <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            {industry && (
+              <button
+                onClick={() => setIndustry("")}
+                className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                {industry}
+                <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            {seekingStatus && (
+              <button
+                onClick={() => setSeekingStatus("")}
+                className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                {SEEKING_STATUS_MAP[seekingStatus]?.label ?? seekingStatus}
+                <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            {jobType && (
+              <button
+                onClick={() => setJobType("")}
+                className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                {jobType}
+                <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            {diagnosedOnly && (
+              <button
+                onClick={() => setDiagnosedOnly(false)}
+                className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-xs text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
+              >
+                診断済みのみ
+                <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
             <button
-              onClick={handleSearch}
-              disabled={loading || (diagnosticMode === "team" && !selectedTeamId)}
-              className="rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer ml-auto"
-              style={{ backgroundColor: accentColor }}
+              onClick={() => { setSkills([]); setLocation(""); setIndustry(""); setSeekingStatus(""); setJobType(""); setDiagnosedOnly(false); }}
+              className="text-[11px] text-gray-400 hover:text-gray-600 cursor-pointer ml-1"
             >
-              {loading ? "検索中..." : "マッチング検索"}
+              すべてクリア
             </button>
           </div>
+        )}
+      </div>
 
-          {/* Custom sliders (only shown in custom mode) */}
-          {diagnosticMode === "custom" && (diagnosticType === "wv" || diagnosticType === "integrated") && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              {diagnosticType === "integrated" && (
-                <p className="text-[11px] font-medium text-gray-500 mb-2">Work Values</p>
-              )}
-              <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-1.5">
-                {Object.entries(VALUE_LABELS).map(([key, label]) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <span className="w-12 text-xs text-gray-600 shrink-0">{label}</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={customWeights[key]}
-                      onChange={(e) => setCustomWeights({ ...customWeights, [key]: Number(e.target.value) })}
-                      className="flex-1 accent-blue-600 cursor-pointer h-4"
-                    />
-                    <span className="w-6 text-right text-xs font-mono text-gray-400">{customWeights[key]}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* ── Layer 2: Diagnostic Matching (optional enhancement) ── */}
+      <div className="rounded-xl border border-gray-200 bg-white p-3 mb-4">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+            <span className="font-medium text-gray-700">マッチング</span>
+          </div>
+
+          <div className="flex gap-0.5 rounded-lg bg-gray-100 p-0.5">
+            {([["wv", "価値観"], ["ci", "適職"], ["integrated", "総合"]] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setDiagnosticType(key)}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
+                  diagnosticType === key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="h-4 w-px bg-gray-200" />
+
+          <select
+            value={diagnosticMode}
+            onChange={(e) => setDiagnosticMode(e.target.value as "team" | "custom")}
+            className="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs text-gray-700 outline-none focus:border-blue-400 cursor-pointer"
+          >
+            <option value="team">チームから選択</option>
+            <option value="custom">カスタム設定</option>
+          </select>
+
+          {diagnosticMode === "team" && (
+            <select
+              value={selectedTeamId}
+              onChange={(e) => setSelectedTeamId(e.target.value)}
+              className={`rounded-lg border py-1.5 px-2.5 text-xs outline-none focus:border-blue-400 cursor-pointer min-w-[160px] transition-colors ${
+                selectedTeamId ? "border-blue-200 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-700"
+              }`}
+            >
+              <option value="">チームを選択...</option>
+              {teams.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
           )}
 
-          {diagnosticMode === "custom" && (diagnosticType === "ci" || diagnosticType === "integrated") && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              {diagnosticType === "integrated" && (
-                <p className="text-[11px] font-medium text-gray-500 mb-2">Career Interest</p>
-              )}
-              <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-1.5">
-                {Object.entries(CI_TYPE_LABELS).map(([key, label]) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <span className="w-12 text-xs text-gray-600 shrink-0">{label}</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={customCIWeights[key]}
-                      onChange={(e) => setCustomCIWeights({ ...customCIWeights, [key]: Number(e.target.value) })}
-                      className="flex-1 accent-purple-600 cursor-pointer h-4"
-                    />
-                    <span className="w-6 text-right text-xs font-mono text-gray-400">{customCIWeights[key]}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {!hasDiagnosticConfig && (
+            <span className="text-[11px] text-gray-400 italic">チームまたはカスタム設定で候補者をマッチ度順に表示</span>
           )}
         </div>
-      )}
+
+        {/* Custom sliders */}
+        {diagnosticMode === "custom" && (diagnosticType === "wv" || diagnosticType === "integrated") && (
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            {diagnosticType === "integrated" && (
+              <p className="text-[11px] font-medium text-gray-500 mb-2">価値観（Work Values）</p>
+            )}
+            <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-1.5">
+              {Object.entries(VALUE_LABELS).map(([key, label]) => (
+                <div key={key} className="flex items-center gap-2">
+                  <span className="w-12 text-xs text-gray-600 shrink-0">{label}</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={customWeights[key]}
+                    onChange={(e) => setCustomWeights({ ...customWeights, [key]: Number(e.target.value) })}
+                    className="flex-1 accent-blue-600 cursor-pointer h-4"
+                  />
+                  <span className="w-6 text-right text-xs font-mono text-gray-400">{customWeights[key]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {diagnosticMode === "custom" && (diagnosticType === "ci" || diagnosticType === "integrated") && (
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            {diagnosticType === "integrated" && (
+              <p className="text-[11px] font-medium text-gray-500 mb-2">適職（Career Interest）</p>
+            )}
+            <div className="grid grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-1.5">
+              {Object.entries(CI_TYPE_LABELS).map(([key, label]) => (
+                <div key={key} className="flex items-center gap-2">
+                  <span className="w-12 text-xs text-gray-600 shrink-0">{label}</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={customCIWeights[key]}
+                    onChange={(e) => setCustomCIWeights({ ...customCIWeights, [key]: Number(e.target.value) })}
+                    className="flex-1 accent-purple-600 cursor-pointer h-4"
+                  />
+                  <span className="w-6 text-right text-xs font-mono text-gray-400">{customCIWeights[key]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Results header */}
       {searched && !loading && (
@@ -833,27 +860,8 @@ export default function TalentsPage() {
         </div>
       )}
 
-      {/* Loading skeleton (condition tab) */}
-      {loading && tab === "condition" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 animate-pulse">
-              <div className="flex gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-gray-200" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-32 rounded bg-gray-200" />
-                  <div className="h-3 w-48 rounded bg-gray-200" />
-                </div>
-              </div>
-              <div className="h-3 w-full rounded bg-gray-100 mb-2" />
-              <div className="h-3 w-3/4 rounded bg-gray-100" />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Loading skeleton (diagnostic tab) */}
-      {loading && tab === "diagnostic" && (
+      {/* Loading skeleton */}
+      {loading && (
         <div
           className="relative left-1/2 -translate-x-1/2 flex rounded-xl border border-gray-200 bg-white overflow-hidden"
           style={{ width: "calc(100vw - 48px)", height: "calc(100vh - 300px)", minHeight: 400 }}
@@ -877,26 +885,8 @@ export default function TalentsPage() {
         </div>
       )}
 
-      {/* Condition tab: grid layout */}
-      {!loading && tab === "condition" && users.length > 0 && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {users.map((u) => (
-              <CandidateCard key={u.user_id} user={u} showSimilarity={false} />
-            ))}
-          </div>
-          {hasMore && (
-            <div ref={pageSentinelRef} className="flex justify-center mt-6 py-4">
-              {loadingMore && (
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
-              )}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Diagnostic tab: split layout — sticky full-width panel */}
-      {!loading && tab === "diagnostic" && users.length > 0 && (
+      {/* Split layout — sticky full-width panel */}
+      {!loading && users.length > 0 && (
         <div
           ref={splitPanelRef}
           data-testid="diagnostic-split-panel"
@@ -969,128 +959,6 @@ export default function TalentsPage() {
           <p className="text-sm text-gray-500">検索条件を変更して再度お試しください</p>
         </div>
       )}
-    </div>
-  );
-}
-
-function CandidateCard({ user: u, showSimilarity }: { user: TalentCard; showSimilarity: boolean }) {
-  const status = u.job_seeking_status ? SEEKING_STATUS_MAP[u.job_seeking_status] : null;
-
-  const initials = u.name
-    .split(/\s/)
-    .map((s) => s[0])
-    .join("")
-    .slice(0, 2);
-  const avatarBg = u.profile_color ?? "#94a3b8";
-
-  return (
-    <Link
-      href={`/profile/${u.username}`}
-      className="group block rounded-xl border border-gray-200 bg-white p-5 hover:shadow-md transition-shadow"
-    >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3 min-w-0">
-          {u.avatar_url ? (
-            <img src={u.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover shrink-0" />
-          ) : (
-            <div
-              className="h-10 w-10 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-              style={{ backgroundColor: avatarBg }}
-            >
-              {initials}
-            </div>
-          )}
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-              {u.name}
-            </p>
-            {u.headline && (
-              <p className="text-xs text-gray-500 truncate">{u.headline}</p>
-            )}
-          </div>
-        </div>
-
-        {showSimilarity && u.similarity != null && (
-          <span
-            className="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold text-white"
-            style={{ backgroundColor: u.similarity >= 80 ? "#2979ff" : u.similarity >= 60 ? "#64b5f6" : "#9ca3af" }}
-          >
-            {Math.round(u.similarity)}%
-          </span>
-        )}
-      </div>
-
-      {/* Experiences */}
-      {u.experiences.length > 0 && (
-        <div className="mb-3 space-y-1">
-          {u.experiences.map((exp, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
-              <svg className="shrink-0 text-gray-400" width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <rect x="3" y="7" width="18" height="14" rx="2" />
-                <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-              </svg>
-              <span className="truncate">{exp.company_name}</span>
-              <span className="text-gray-300">·</span>
-              <span className="truncate text-gray-500">{exp.title}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Skills */}
-      {u.skills.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {u.skills.map((s) => (
-            <span key={s} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-              {s}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Bottom row: status + diagnostic labels */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {status && (
-          <span className={`rounded-full px-2 py-0.5 text-xs ${status.bg} ${status.text}`}>
-            {status.label}
-          </span>
-        )}
-        {u.top_wv_labels.length > 0 && (
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">
-            WV: {u.top_wv_labels.join("・")}
-          </span>
-        )}
-        {u.top_ci_labels.length > 0 && (
-          <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-600">
-            CI: {u.top_ci_labels.join("・")}
-          </span>
-        )}
-      </div>
-    </Link>
-  );
-}
-
-function SimilarityRing({ value, size = 44 }: { value: number; size?: number }) {
-  const r = (size - 6) / 2;
-  const circumference = 2 * Math.PI * r;
-  const filled = (value / 100) * circumference;
-  const color = value >= 80 ? "#2563eb" : value >= 60 ? "#60a5fa" : "#d1d5db";
-  const bgColor = value >= 80 ? "#dbeafe" : value >= 60 ? "#eff6ff" : "#f9fafb";
-
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill={bgColor} stroke="#e5e7eb" strokeWidth={2.5} />
-        <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke={color} strokeWidth={2.5}
-          strokeDasharray={circumference} strokeDashoffset={circumference - filled}
-          strokeLinecap="round"
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-xs font-bold text-gray-700">{Math.round(value)}</span>
-      </div>
     </div>
   );
 }
@@ -1444,7 +1312,7 @@ function CandidateDetail({
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             <div className="rounded-xl border border-gray-150 bg-white p-4">
               <div className="flex items-center justify-between mb-1">
-                <h4 className="text-sm font-semibold text-gray-700">Work Values</h4>
+                <h4 className="text-sm font-semibold text-gray-700">価値観（Work Values）</h4>
                 {u.wv_similarity != null && (
                   <span className="text-xs text-gray-400">{Math.round(u.wv_similarity)}% match</span>
                 )}
@@ -1457,7 +1325,7 @@ function CandidateDetail({
             </div>
             <div className="rounded-xl border border-gray-150 bg-white p-4">
               <div className="flex items-center justify-between mb-1">
-                <h4 className="text-sm font-semibold text-gray-700">Career Interest</h4>
+                <h4 className="text-sm font-semibold text-gray-700">適職（Career Interest）</h4>
                 {u.ci_similarity != null && (
                   <span className="text-xs text-gray-400">{Math.round(u.ci_similarity)}% match</span>
                 )}
