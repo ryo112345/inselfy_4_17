@@ -194,3 +194,9 @@ func NewConversationParticipantRepoFactory(pool *pgxpool.Pool) func() port.Conve
 		return sqlcgw.NewConversationParticipantRepository(pool)
 	}
 }
+
+func NewJobApplicationRepoFactory(pool *pgxpool.Pool) func() port.JobApplicationRepository {
+	return func() port.JobApplicationRepository {
+		return sqlcgw.NewJobApplicationRepository(pool)
+	}
+}

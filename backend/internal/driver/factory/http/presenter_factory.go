@@ -106,3 +106,9 @@ func NewMessagingOutputFactory() func() *presenter.MessagingPresenter {
 		return presenter.NewMessagingPresenter()
 	}
 }
+
+func NewJobApplicationOutputFactory() func() *presenter.JobApplicationPresenter {
+	return func() *presenter.JobApplicationPresenter {
+		return presenter.NewJobApplicationPresenter()
+	}
+}
