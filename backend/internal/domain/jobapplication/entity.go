@@ -53,16 +53,29 @@ type JobApplication struct {
 
 type JobApplicationWithDetails struct {
 	JobApplication
-	JobTitle           string
-	CompanyName        string
-	CandidateName      string
-	CandidateAvatar    string
-	CandidateUsername  string
-	CandidateHeadline string
+	JobTitle               string
+	CompanyName            string
+	CandidateName          string
+	CandidateAvatar        string
+	CandidateUsername      string
+	CandidateHeadline      string
+	CandidateProfileColor  string
+	CandidateSeekingStatus string
+	CandidateSkills        []string
 }
 
 type ApplyInput struct {
 	JobPostingID string
 	CandidateID  string
 	Message      string
+}
+
+type ListFilter struct {
+	Status       *string
+	JobPostingID *string
+	Keyword      *string
+	DateFrom     *time.Time
+	DateTo       *time.Time
+	Limit        int
+	Offset       int
 }

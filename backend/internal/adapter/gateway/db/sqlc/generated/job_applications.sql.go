@@ -12,18 +12,40 @@ import (
 )
 
 const countJobApplicationsByCompanyID = `-- name: CountJobApplicationsByCompanyID :one
-SELECT COUNT(*) FROM job_applications
-WHERE company_id = $1
-  AND ($2::TEXT IS NULL OR status = $2)
+SELECT COUNT(*) FROM job_applications ja
+JOIN users u ON u.id = ja.candidate_id
+JOIN job_postings jp ON jp.id = ja.job_posting_id
+WHERE ja.company_id = $1
+  AND ($2::TEXT IS NULL OR ja.status = $2)
+  AND ($3::UUID IS NULL OR ja.job_posting_id = $3)
+  AND ($4::TEXT IS NULL
+       OR u.name ILIKE '%' || $4 || '%'
+       OR COALESCE(u.headline, '') ILIKE '%' || $4 || '%'
+       OR jp.title ILIKE '%' || $4 || '%'
+       OR EXISTS (SELECT 1 FROM user_skills us2 JOIN skills s2 ON s2.id = us2.skill_id
+                  WHERE us2.user_id = u.id AND s2.name ILIKE '%' || $4 || '%'))
+  AND ($5::TIMESTAMPTZ IS NULL OR ja.created_at >= $5)
+  AND ($6::TIMESTAMPTZ IS NULL OR ja.created_at < $6)
 `
 
 type CountJobApplicationsByCompanyIDParams struct {
-	CompanyID pgtype.UUID `json:"company_id"`
-	Status    pgtype.Text `json:"status"`
+	CompanyID    pgtype.UUID        `json:"company_id"`
+	Status       pgtype.Text        `json:"status"`
+	JobPostingID pgtype.UUID        `json:"job_posting_id"`
+	Keyword      pgtype.Text        `json:"keyword"`
+	DateFrom     pgtype.Timestamptz `json:"date_from"`
+	DateTo       pgtype.Timestamptz `json:"date_to"`
 }
 
 func (q *Queries) CountJobApplicationsByCompanyID(ctx context.Context, arg *CountJobApplicationsByCompanyIDParams) (int64, error) {
-	row := q.db.QueryRow(ctx, countJobApplicationsByCompanyID, arg.CompanyID, arg.Status)
+	row := q.db.QueryRow(ctx, countJobApplicationsByCompanyID,
+		arg.CompanyID,
+		arg.Status,
+		arg.JobPostingID,
+		arg.Keyword,
+		arg.DateFrom,
+		arg.DateTo,
+	)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -220,39 +242,60 @@ SELECT ja.id, ja.job_posting_id, ja.candidate_id, ja.company_id, ja.status, ja.m
        u.name AS candidate_name,
        COALESCE(u.avatar_url, '') AS candidate_avatar,
        u.username AS candidate_username,
-       COALESCE(u.headline, '') AS candidate_headline
+       COALESCE(u.headline, '') AS candidate_headline,
+       COALESCE(u.profile_color, '') AS candidate_profile_color,
+       COALESCE(u.job_seeking_status, '') AS candidate_seeking_status,
+       COALESCE((SELECT array_agg(s.name ORDER BY us.created_at)
+                 FROM user_skills us JOIN skills s ON s.id = us.skill_id
+                 WHERE us.user_id = u.id), '{}') AS candidate_skills
 FROM job_applications ja
 JOIN job_postings jp ON jp.id = ja.job_posting_id
 JOIN company_accounts ca ON ca.id = ja.company_id
 JOIN users u ON u.id = ja.candidate_id
 WHERE ja.company_id = $1
   AND ($4::TEXT IS NULL OR ja.status = $4)
+  AND ($5::UUID IS NULL OR ja.job_posting_id = $5)
+  AND ($6::TEXT IS NULL
+       OR u.name ILIKE '%' || $6 || '%'
+       OR COALESCE(u.headline, '') ILIKE '%' || $6 || '%'
+       OR jp.title ILIKE '%' || $6 || '%'
+       OR EXISTS (SELECT 1 FROM user_skills us2 JOIN skills s2 ON s2.id = us2.skill_id
+                  WHERE us2.user_id = u.id AND s2.name ILIKE '%' || $6 || '%'))
+  AND ($7::TIMESTAMPTZ IS NULL OR ja.created_at >= $7)
+  AND ($8::TIMESTAMPTZ IS NULL OR ja.created_at < $8)
 ORDER BY ja.created_at DESC
 LIMIT $2 OFFSET $3
 `
 
 type ListJobApplicationsByCompanyIDParams struct {
-	CompanyID pgtype.UUID `json:"company_id"`
-	Limit     int32       `json:"limit"`
-	Offset    int32       `json:"offset"`
-	Status    pgtype.Text `json:"status"`
+	CompanyID    pgtype.UUID        `json:"company_id"`
+	Limit        int32              `json:"limit"`
+	Offset       int32              `json:"offset"`
+	Status       pgtype.Text        `json:"status"`
+	JobPostingID pgtype.UUID        `json:"job_posting_id"`
+	Keyword      pgtype.Text        `json:"keyword"`
+	DateFrom     pgtype.Timestamptz `json:"date_from"`
+	DateTo       pgtype.Timestamptz `json:"date_to"`
 }
 
 type ListJobApplicationsByCompanyIDRow struct {
-	ID                pgtype.UUID        `json:"id"`
-	JobPostingID      pgtype.UUID        `json:"job_posting_id"`
-	CandidateID       pgtype.UUID        `json:"candidate_id"`
-	CompanyID         pgtype.UUID        `json:"company_id"`
-	Status            string             `json:"status"`
-	Message           string             `json:"message"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
-	JobTitle          string             `json:"job_title"`
-	CompanyName       string             `json:"company_name"`
-	CandidateName     string             `json:"candidate_name"`
-	CandidateAvatar   string             `json:"candidate_avatar"`
-	CandidateUsername string             `json:"candidate_username"`
-	CandidateHeadline string             `json:"candidate_headline"`
+	ID                     pgtype.UUID        `json:"id"`
+	JobPostingID           pgtype.UUID        `json:"job_posting_id"`
+	CandidateID            pgtype.UUID        `json:"candidate_id"`
+	CompanyID              pgtype.UUID        `json:"company_id"`
+	Status                 string             `json:"status"`
+	Message                string             `json:"message"`
+	CreatedAt              pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt              pgtype.Timestamptz `json:"updated_at"`
+	JobTitle               string             `json:"job_title"`
+	CompanyName            string             `json:"company_name"`
+	CandidateName          string             `json:"candidate_name"`
+	CandidateAvatar        string             `json:"candidate_avatar"`
+	CandidateUsername      string             `json:"candidate_username"`
+	CandidateHeadline      string             `json:"candidate_headline"`
+	CandidateProfileColor  string             `json:"candidate_profile_color"`
+	CandidateSeekingStatus string             `json:"candidate_seeking_status"`
+	CandidateSkills        interface{}        `json:"candidate_skills"`
 }
 
 func (q *Queries) ListJobApplicationsByCompanyID(ctx context.Context, arg *ListJobApplicationsByCompanyIDParams) ([]*ListJobApplicationsByCompanyIDRow, error) {
@@ -261,6 +304,10 @@ func (q *Queries) ListJobApplicationsByCompanyID(ctx context.Context, arg *ListJ
 		arg.Limit,
 		arg.Offset,
 		arg.Status,
+		arg.JobPostingID,
+		arg.Keyword,
+		arg.DateFrom,
+		arg.DateTo,
 	)
 	if err != nil {
 		return nil, err
@@ -284,6 +331,9 @@ func (q *Queries) ListJobApplicationsByCompanyID(ctx context.Context, arg *ListJ
 			&i.CandidateAvatar,
 			&i.CandidateUsername,
 			&i.CandidateHeadline,
+			&i.CandidateProfileColor,
+			&i.CandidateSeekingStatus,
+			&i.CandidateSkills,
 		); err != nil {
 			return nil, err
 		}

@@ -57,8 +57,8 @@ func (i *JobApplicationInteractor) Apply(ctx context.Context, input jobapplicati
 	return i.output.PresentJobApplication(ctx, detail)
 }
 
-func (i *JobApplicationInteractor) ListByCompany(ctx context.Context, companyID string, status *string, limit, offset int) error {
-	apps, total, err := i.repo.ListByCompanyID(ctx, companyID, status, limit, offset)
+func (i *JobApplicationInteractor) ListByCompany(ctx context.Context, companyID string, filter jobapplication.ListFilter) error {
+	apps, total, err := i.repo.ListByCompanyID(ctx, companyID, filter)
 	if err != nil {
 		return err
 	}
