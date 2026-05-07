@@ -1,6 +1,6 @@
 export const WV_ORDER = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"] as const;
 export const WV_FULL_LABELS: Record<string, string> = {
-  achievement: "達成", status: "地位・名声", autonomy: "自主性", safety: "支援", altruism: "人間関係", comfort: "労働条件",
+  achievement: "達成", status: "地位名声", autonomy: "自主性", safety: "支援", altruism: "人間関係", comfort: "労働条件",
 };
 
 export const CI_ORDER = ["R", "I", "A", "S", "E", "C"] as const;

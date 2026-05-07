@@ -120,6 +120,14 @@ func (c *TalentSearchController) Search(ctx echo.Context) error {
 		args = append(args, jobType)
 		argIdx++
 	}
+	if ctx.QueryParam("diagnosed") == "1" {
+		clause := ` AND (
+			u.id IN (SELECT user_id FROM work_values_sessions WHERE status = 'completed')
+			OR u.id IN (SELECT user_id FROM career_interest_sessions WHERE status = 'completed')
+		)`
+		query += clause
+		countQuery += clause
+	}
 	if len(skills) > 0 {
 		clause := ` AND u.id IN (
 			SELECT us.user_id FROM user_skills us
@@ -194,6 +202,105 @@ func (c *TalentSearchController) Search(ctx echo.Context) error {
 	})
 }
 
+type conditionFilter struct {
+	keyword          string
+	skills           []string
+	location         string
+	industry         string
+	jobSeekingStatus string
+	jobType          string
+	diagnosedOnly    bool
+}
+
+func (f *conditionFilter) isEmpty() bool {
+	return f.keyword == "" && len(f.skills) == 0 && f.location == "" && f.industry == "" && f.jobSeekingStatus == "" && f.jobType == "" && !f.diagnosedOnly
+}
+
+func parseConditionFilter(ctx echo.Context) conditionFilter {
+	var f conditionFilter
+	f.keyword = ctx.QueryParam("q")
+	f.location = ctx.QueryParam("location")
+	f.industry = ctx.QueryParam("industry")
+	f.jobSeekingStatus = ctx.QueryParam("job_seeking_status")
+	f.jobType = ctx.QueryParam("job_type")
+	f.diagnosedOnly = ctx.QueryParam("diagnosed") == "1"
+	skillsParam := ctx.QueryParam("skills")
+	if skillsParam != "" {
+		for _, s := range strings.Split(skillsParam, ",") {
+			s = strings.TrimSpace(s)
+			if s != "" {
+				f.skills = append(f.skills, s)
+			}
+		}
+	}
+	return f
+}
+
+func (c *TalentSearchController) getFilteredUserIDs(ctx context.Context, filter conditionFilter) ([]pgtype.UUID, error) {
+	query := `SELECT u.id FROM users u WHERE u.is_public = true`
+	var args []any
+	argIdx := 1
+
+	if filter.keyword != "" {
+		query += ` AND (u.name ILIKE $` + strconv.Itoa(argIdx) +
+			` OR u.headline ILIKE $` + strconv.Itoa(argIdx) +
+			` OR u.about ILIKE $` + strconv.Itoa(argIdx) + `)`
+		args = append(args, "%"+filter.keyword+"%")
+		argIdx++
+	}
+	if filter.location != "" {
+		query += ` AND u.location = $` + strconv.Itoa(argIdx)
+		args = append(args, filter.location)
+		argIdx++
+	}
+	if filter.industry != "" {
+		query += ` AND u.industry = $` + strconv.Itoa(argIdx)
+		args = append(args, filter.industry)
+		argIdx++
+	}
+	if filter.jobSeekingStatus != "" {
+		query += ` AND u.job_seeking_status = $` + strconv.Itoa(argIdx)
+		args = append(args, filter.jobSeekingStatus)
+		argIdx++
+	}
+	if filter.jobType != "" {
+		query += ` AND u.job_type = $` + strconv.Itoa(argIdx)
+		args = append(args, filter.jobType)
+		argIdx++
+	}
+	if filter.diagnosedOnly {
+		query += ` AND (
+			u.id IN (SELECT user_id FROM work_values_sessions WHERE status = 'completed')
+			OR u.id IN (SELECT user_id FROM career_interest_sessions WHERE status = 'completed')
+		)`
+	}
+	if len(filter.skills) > 0 {
+		query += ` AND u.id IN (
+			SELECT us.user_id FROM user_skills us
+			JOIN skills s ON s.id = us.skill_id
+			WHERE s.name = ANY($` + strconv.Itoa(argIdx) + `)
+			GROUP BY us.user_id
+			HAVING COUNT(DISTINCT s.name) = $` + strconv.Itoa(argIdx+1) + `)`
+		args = append(args, filter.skills, len(filter.skills))
+		argIdx += 2
+	}
+
+	rows, err := c.pool.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var uids []pgtype.UUID
+	for rows.Next() {
+		var uid pgtype.UUID
+		if err := rows.Scan(&uid); err == nil {
+			uids = append(uids, uid)
+		}
+	}
+	return uids, nil
+}
+
 func (c *TalentSearchController) DiagnosticSearch(ctx echo.Context) error {
 	companyID := ctx.Get(authmw.CompanyIDKey).(string)
 	teamID := ctx.QueryParam("team_id")
@@ -208,6 +315,19 @@ func (c *TalentSearchController) DiagnosticSearch(ctx echo.Context) error {
 	}
 
 	reqCtx := ctx.Request().Context()
+
+	filter := parseConditionFilter(ctx)
+	var filterUIDs []pgtype.UUID
+	if !filter.isEmpty() {
+		var err error
+		filterUIDs, err = c.getFilteredUserIDs(reqCtx, filter)
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		if len(filterUIDs) == 0 {
+			return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": 0})
+		}
+	}
 
 	var targetWV map[string]float64
 
@@ -224,7 +344,7 @@ func (c *TalentSearchController) DiagnosticSearch(ctx echo.Context) error {
 		}
 	}
 
-	scored, err := c.computeWVScores(reqCtx, targetWV)
+	scored, err := c.computeWVScores(reqCtx, targetWV, filterUIDs)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
@@ -538,6 +658,20 @@ func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
 	}
 
 	reqCtx := ctx.Request().Context()
+
+	filter := parseConditionFilter(ctx)
+	var filterUIDs []pgtype.UUID
+	if !filter.isEmpty() {
+		var err error
+		filterUIDs, err = c.getFilteredUserIDs(reqCtx, filter)
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		if len(filterUIDs) == 0 {
+			return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": 0})
+		}
+	}
+
 	var target [6]float64
 
 	if teamID != "" {
@@ -554,7 +688,7 @@ func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
 		target = scores
 	}
 
-	scored, err := c.computeCIScores(reqCtx, target)
+	scored, err := c.computeCIScores(reqCtx, target, filterUIDs)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
@@ -619,6 +753,19 @@ func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) er
 
 	reqCtx := ctx.Request().Context()
 
+	filter := parseConditionFilter(ctx)
+	var filterUIDs []pgtype.UUID
+	if !filter.isEmpty() {
+		var err error
+		filterUIDs, err = c.getFilteredUserIDs(reqCtx, filter)
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		if len(filterUIDs) == 0 {
+			return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": 0})
+		}
+	}
+
 	var targetWV map[string]float64
 	var targetCI [6]float64
 
@@ -645,11 +792,11 @@ func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) er
 		targetCI = ci
 	}
 
-	wvScored, err := c.computeWVScores(reqCtx, targetWV)
+	wvScored, err := c.computeWVScores(reqCtx, targetWV, filterUIDs)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
-	ciScored, err := c.computeCIScores(reqCtx, targetCI)
+	ciScored, err := c.computeCIScores(reqCtx, targetCI, filterUIDs)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
@@ -966,13 +1113,20 @@ func (c *TalentSearchController) parseCustomWVDisplayScores(ctx echo.Context) ma
 	return scores
 }
 
-func (c *TalentSearchController) computeWVScores(ctx context.Context, targetWV map[string]float64) ([]scoredUser, error) {
-	rows, err := c.pool.Query(ctx, `
+func (c *TalentSearchController) computeWVScores(ctx context.Context, targetWV map[string]float64, filterUIDs []pgtype.UUID) ([]scoredUser, error) {
+	query := `
 SELECT DISTINCT ON (s.user_id) s.user_id, s.id AS session_id
 FROM work_values_sessions s
 JOIN users u ON u.id = s.user_id
-WHERE s.status = 'completed' AND u.is_public = true
-ORDER BY s.user_id, s.completed_at DESC`)
+WHERE s.status = 'completed' AND u.is_public = true`
+	var args []any
+	if filterUIDs != nil {
+		query += ` AND s.user_id = ANY($1)`
+		args = append(args, filterUIDs)
+	}
+	query += `
+ORDER BY s.user_id, s.completed_at DESC`
+	rows, err := c.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -1032,13 +1186,20 @@ ORDER BY s.user_id, s.completed_at DESC`)
 	return scored, nil
 }
 
-func (c *TalentSearchController) computeCIScores(ctx context.Context, target [6]float64) ([]scoredUser, error) {
-	rows, err := c.pool.Query(ctx, `
+func (c *TalentSearchController) computeCIScores(ctx context.Context, target [6]float64, filterUIDs []pgtype.UUID) ([]scoredUser, error) {
+	query := `
 SELECT DISTINCT ON (s.user_id) s.user_id, s.id AS session_id
 FROM career_interest_sessions s
 JOIN users u ON u.id = s.user_id
-WHERE s.status = 'completed' AND u.is_public = true
-ORDER BY s.user_id, s.completed_at DESC`)
+WHERE s.status = 'completed' AND u.is_public = true`
+	var args []any
+	if filterUIDs != nil {
+		query += ` AND s.user_id = ANY($1)`
+		args = append(args, filterUIDs)
+	}
+	query += `
+ORDER BY s.user_id, s.completed_at DESC`
+	rows, err := c.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
