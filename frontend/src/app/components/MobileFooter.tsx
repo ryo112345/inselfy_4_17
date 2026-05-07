@@ -10,7 +10,7 @@ const navItems = [
   { href: "/search", match: (p: string) => p.startsWith("/search") },
   { href: "/articles", match: (p: string) => p.startsWith("/articles") && !p.startsWith("/articles/mine") && !p.startsWith("/articles/new") && !p.match(/\/articles\/[^/]+\/edit/) },
   { href: "/jobs", match: (p: string) => p.startsWith("/jobs") },
-  { href: "/scout", match: (p: string) => p.startsWith("/scout") },
+  { href: "/messages", match: (p: string) => p.startsWith("/messages") || p.startsWith("/scout") },
   { href: "__profile__", match: (p: string) => p.startsWith("/profile/") },
 ];
 
@@ -114,7 +114,7 @@ function Icons({ id, size }: { id: string; size: number }) {
     case "/jobs": return (
       <svg {...s}><rect x="3" y="7" width="18" height="14" rx="2" /><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /><path d="M9 7v14" /><path d="M15 7v14" /></svg>
     );
-    case "/scout": return (
+    case "/messages": return (
       <svg {...s}><path d="M22 2L11 13" /><path d="M22 2L15 22l-4-9-9-4z" /></svg>
     );
     case "__profile__": return (
