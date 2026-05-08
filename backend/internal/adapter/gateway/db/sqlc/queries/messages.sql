@@ -1,6 +1,6 @@
 -- name: CreateMessage :one
-INSERT INTO messages (conversation_id, sender_type, sender_id, body)
-VALUES ($1, $2, $3, $4)
+INSERT INTO messages (conversation_id, sender_type, sender_id, body, message_type, metadata)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: ListMessagesByConversationID :many

@@ -23,9 +23,9 @@ func (q *Queries) CountMessagesByConversationID(ctx context.Context, conversatio
 }
 
 const createMessage = `-- name: CreateMessage :one
-INSERT INTO messages (conversation_id, sender_type, sender_id, body)
-VALUES ($1, $2, $3, $4)
-RETURNING id, conversation_id, sender_type, sender_id, body, created_at
+INSERT INTO messages (conversation_id, sender_type, sender_id, body, message_type, metadata)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, conversation_id, sender_type, sender_id, body, created_at, message_type, metadata
 `
 
 type CreateMessageParams struct {
@@ -33,6 +33,8 @@ type CreateMessageParams struct {
 	SenderType     string      `json:"sender_type"`
 	SenderID       pgtype.UUID `json:"sender_id"`
 	Body           string      `json:"body"`
+	MessageType    string      `json:"message_type"`
+	Metadata       []byte      `json:"metadata"`
 }
 
 func (q *Queries) CreateMessage(ctx context.Context, arg *CreateMessageParams) (*Message, error) {
@@ -41,6 +43,8 @@ func (q *Queries) CreateMessage(ctx context.Context, arg *CreateMessageParams) (
 		arg.SenderType,
 		arg.SenderID,
 		arg.Body,
+		arg.MessageType,
+		arg.Metadata,
 	)
 	var i Message
 	err := row.Scan(
@@ -50,12 +54,14 @@ func (q *Queries) CreateMessage(ctx context.Context, arg *CreateMessageParams) (
 		&i.SenderID,
 		&i.Body,
 		&i.CreatedAt,
+		&i.MessageType,
+		&i.Metadata,
 	)
 	return &i, err
 }
 
 const listMessagesByConversationID = `-- name: ListMessagesByConversationID :many
-SELECT id, conversation_id, sender_type, sender_id, body, created_at FROM messages
+SELECT id, conversation_id, sender_type, sender_id, body, created_at, message_type, metadata FROM messages
 WHERE conversation_id = $1
 ORDER BY created_at ASC
 LIMIT $2 OFFSET $3
@@ -83,6 +89,8 @@ func (q *Queries) ListMessagesByConversationID(ctx context.Context, arg *ListMes
 			&i.SenderID,
 			&i.Body,
 			&i.CreatedAt,
+			&i.MessageType,
+			&i.Metadata,
 		); err != nil {
 			return nil, err
 		}

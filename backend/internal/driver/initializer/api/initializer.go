@@ -178,6 +178,11 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		conversationRepoFactory, messageRepoFactory, participantRepoFactory, tx,
 	)
 
+	interviewCtrl := httpcontroller.NewInterviewController(
+		pool,
+		conversationRepoFactory(), messageRepoFactory(), participantRepoFactory(), tx,
+	)
+
 	companyAuthCtrl := httpcontroller.NewCompanyAuthController(
 		func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort {
 			return companyAuthInputFactory(companyRepo, refreshRepo, output)
@@ -652,6 +657,27 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 	companyAppGroup.PATCH("/:applicationId/status", func(c echo.Context) error {
 		return jobApplicationCtrl.UpdateStatus(c, c.Param("applicationId"))
+	})
+
+	// --- Company Interviews ---
+	companyInterviewGroup := e.Group("/api/company/interviews", companyJwtMW)
+	companyInterviewGroup.POST("/propose", interviewCtrl.Propose)
+	companyInterviewGroup.GET("", interviewCtrl.ListByCompany)
+	companyInterviewGroup.POST("/:interviewId/cancel", func(c echo.Context) error {
+		return interviewCtrl.CancelInterview(c)
+	})
+
+	// --- Candidate Interviews ---
+	candidateInterviewGroup := e.Group("/api/interviews", jwtMW)
+	candidateInterviewGroup.GET("", interviewCtrl.ListByCandidate)
+	candidateInterviewGroup.POST("/proposals/:proposalId/select", func(c echo.Context) error {
+		return interviewCtrl.SelectSlot(c)
+	})
+	candidateInterviewGroup.GET("/proposals/:proposalId/slots", func(c echo.Context) error {
+		return interviewCtrl.GetProposalSlots(c)
+	})
+	candidateInterviewGroup.POST("/:interviewId/cancel", func(c echo.Context) error {
+		return interviewCtrl.CancelInterview(c)
 	})
 
 	// --- Candidate Messages ---

@@ -424,6 +424,50 @@ type IntegratedReportRequest struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type Interview struct {
+	ID             pgtype.UUID        `json:"id"`
+	ApplicationID  pgtype.UUID        `json:"application_id"`
+	CompanyID      pgtype.UUID        `json:"company_id"`
+	CandidateID    pgtype.UUID        `json:"candidate_id"`
+	Title          string             `json:"title"`
+	StartTime      pgtype.Timestamptz `json:"start_time"`
+	EndTime        pgtype.Timestamptz `json:"end_time"`
+	Location       pgtype.Text        `json:"location"`
+	MeetingUrl     pgtype.Text        `json:"meeting_url"`
+	InternalNotes  pgtype.Text        `json:"internal_notes"`
+	Status         string             `json:"status"`
+	SelectedSlotID pgtype.UUID        `json:"selected_slot_id"`
+	ProposalID     pgtype.UUID        `json:"proposal_id"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
+type InterviewProposal struct {
+	ID              pgtype.UUID        `json:"id"`
+	ApplicationID   pgtype.UUID        `json:"application_id"`
+	CompanyID       pgtype.UUID        `json:"company_id"`
+	CandidateID     pgtype.UUID        `json:"candidate_id"`
+	Message         pgtype.Text        `json:"message"`
+	Status          string             `json:"status"`
+	MessageID       pgtype.UUID        `json:"message_id"`
+	ExpiresAt       pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DurationMinutes int32              `json:"duration_minutes"`
+}
+
+type InterviewSlot struct {
+	ID            pgtype.UUID        `json:"id"`
+	ProposalID    pgtype.UUID        `json:"proposal_id"`
+	ApplicationID pgtype.UUID        `json:"application_id"`
+	ProposedBy    pgtype.UUID        `json:"proposed_by"`
+	StartTime     pgtype.Timestamptz `json:"start_time"`
+	EndTime       pgtype.Timestamptz `json:"end_time"`
+	Status        string             `json:"status"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
 type JobApplication struct {
 	ID           pgtype.UUID        `json:"id"`
 	JobPostingID pgtype.UUID        `json:"job_posting_id"`
@@ -489,6 +533,8 @@ type Message struct {
 	SenderID       pgtype.UUID        `json:"sender_id"`
 	Body           string             `json:"body"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	MessageType    string             `json:"message_type"`
+	Metadata       []byte             `json:"metadata"`
 }
 
 type Notification struct {
@@ -518,6 +564,13 @@ type RefreshToken struct {
 	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	RevokedAt pgtype.Timestamptz `json:"revoked_at"`
+}
+
+type SavedCandidate struct {
+	ID        pgtype.UUID        `json:"id"`
+	CompanyID pgtype.UUID        `json:"company_id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type ScoutCredit struct {

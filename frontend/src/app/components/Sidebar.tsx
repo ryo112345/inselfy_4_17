@@ -28,6 +28,7 @@ const navItems = [
 const navItems2 = [
   { label: "気になる", href: "/bookmarks", icon: BookmarkIcon },
   { label: "やりとり", href: "/messages", icon: SendIcon },
+  { label: "面接予定", href: "/interviews", icon: CalendarIcon },
 ];
 
 const assessmentItems = [
@@ -627,6 +628,25 @@ function DraftIcon() {
     >
       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x={3} y={4} width={18} height={18} rx={2} />
+      <path d="M16 2v4M8 2v4M3 10h18" />
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
     </svg>
   );
 }
