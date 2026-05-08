@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   fetchCompanyScouts,
   fetchScoutDashboard,
@@ -62,6 +63,7 @@ function formatDate(dateStr: string | null): string {
 }
 
 export default function ScoutListPage() {
+  const router = useRouter();
   const [scouts, setScouts] = useState<ScoutMessage[]>([]);
   const [total, setTotal] = useState(0);
   const [dashboard, setDashboard] = useState<ScoutDashboard | null>(null);
@@ -282,12 +284,17 @@ export default function ScoutListPage() {
               {scouts.map((scout) => {
                 const badge = STATUS_BADGE[scout.status];
                 return (
-                  <tr key={scout.id} className="transition-colors hover:bg-gray-50">
+                  <tr
+                    key={scout.id}
+                    className="transition-colors hover:bg-gray-50 cursor-pointer"
+                    onClick={() => router.push(`/company/scout/${scout.id}`)}
+                  >
                     <td className="py-3.5 pl-5 pr-2">
                       <Link
                         href={`/company/scout/${scout.id}`}
                         className="text-sm font-medium text-gray-900 hover:underline"
                         style={{ textDecorationColor: "#2979ff" }}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {scout.candidateName}
                       </Link>
