@@ -431,6 +431,22 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	talentGroup.GET("/search/diagnostic/ci", talentCtrl.CIDiagnosticSearch)
 	talentGroup.GET("/search/diagnostic/integrated", talentCtrl.IntegratedDiagnosticSearch)
 
+	// --- Saved Candidates ---
+	savedCandCtrl := httpcontroller.NewSavedCandidateController(pool)
+	savedCandGroup := e.Group("/api/company/saved-candidates", companyJwtMW)
+	savedCandGroup.GET("", savedCandCtrl.List)
+	savedCandGroup.GET("/count", savedCandCtrl.Count)
+	savedCandGroup.POST("/bulk-check", savedCandCtrl.BulkCheck)
+	savedCandGroup.POST("/:userId", func(c echo.Context) error {
+		return savedCandCtrl.Save(c)
+	})
+	savedCandGroup.DELETE("/:userId", func(c echo.Context) error {
+		return savedCandCtrl.Unsave(c)
+	})
+	savedCandGroup.GET("/:userId", func(c echo.Context) error {
+		return savedCandCtrl.IsSaved(c)
+	})
+
 	// --- Team Diagnose (public) ---
 	diagCtrl := httpcontroller.NewTeamDiagnoseController(pool)
 	e.GET("/api/team-diagnose/:token", func(c echo.Context) error {

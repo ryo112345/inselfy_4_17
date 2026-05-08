@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
@@ -22,9 +22,18 @@ const fullBleedPaths = ["/company/messages"];
 export function CompanyHeader({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { company, logout } = useCompanyAuth();
+  const { company, logout, companyFetch } = useCompanyAuth();
   const [expanded, setExpanded] = useState(true);
+  const [savedCount, setSavedCount] = useState(0);
   const accentColor = "#2979ff";
+
+  useEffect(() => {
+    if (!company) return;
+    companyFetch("/api/company/saved-candidates/count")
+      .then((r) => r.json())
+      .then((d) => setSavedCount(d.count ?? 0))
+      .catch(() => {});
+  }, [company, companyFetch]);
   const isFullBleed = useMemo(() => fullBleedPaths.some((p) => pathname.startsWith(p)), [pathname]);
 
   const handleLogout = async () => {
@@ -65,6 +74,18 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
                 </span>
               </div>
               <div className="flex items-center gap-4">
+                <Link
+                  href="/company/saved-candidates"
+                  className="relative flex items-center justify-center h-9 w-9 rounded-md hover:bg-gray-100 transition-colors"
+                  title="保存した候補者"
+                >
+                  <BookmarkIcon />
+                  {savedCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2979ff] px-1 text-[10px] font-bold text-white">
+                      {savedCount > 99 ? "99+" : savedCount}
+                    </span>
+                  )}
+                </Link>
                 <Link
                   href="/company/manual"
                   className="text-sm font-medium hover:underline"
@@ -225,6 +246,14 @@ function TeamIcon() {
       <rect x="14" y="3" width="7" height="7" rx="1.5" />
       <rect x="3" y="14" width="7" height="7" rx="1.5" />
       <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}
+
+function BookmarkIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
   );
 }

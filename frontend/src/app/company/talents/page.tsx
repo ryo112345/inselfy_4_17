@@ -121,6 +121,29 @@ export default function TalentsPage() {
     return defaults;
   });
 
+  // Saved candidates
+  const [savedSet, setSavedSet] = useState<Set<string>>(new Set());
+
+  const toggleSave = useCallback(async (userId: string) => {
+    const isSaved = savedSet.has(userId);
+    setSavedSet((prev) => {
+      const next = new Set(prev);
+      if (isSaved) next.delete(userId); else next.add(userId);
+      return next;
+    });
+    try {
+      await companyFetch(`/api/company/saved-candidates/${userId}`, {
+        method: isSaved ? "DELETE" : "POST",
+      });
+    } catch {
+      setSavedSet((prev) => {
+        const next = new Set(prev);
+        if (isSaved) next.add(userId); else next.delete(userId);
+        return next;
+      });
+    }
+  }, [savedSet, companyFetch]);
+
   // Team average scores for compare overlay
   const [teamWvAvg, setTeamWvAvg] = useState<{ id: string; score: number }[] | null>(null);
   const [teamCiAvg, setTeamCiAvg] = useState<{ id: string; score: number }[] | null>(null);
@@ -470,6 +493,27 @@ export default function TalentsPage() {
       setLoadingMore(false);
     }
   }, [companyFetch]);
+
+  useEffect(() => {
+    if (users.length === 0) return;
+    const ids = users.map((u) => u.user_id);
+    companyFetch("/api/company/saved-candidates/bulk-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_ids: ids }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        setSavedSet((prev) => {
+          const next = new Set(prev);
+          for (const [id, saved] of Object.entries(data.saved ?? {})) {
+            if (saved) next.add(id); else next.delete(id);
+          }
+          return next;
+        });
+      })
+      .catch(() => {});
+  }, [users, companyFetch]);
 
   const hasDiagnosticConfig = diagnosticMode === "custom" || (diagnosticMode === "team" && !!selectedTeamId);
 
@@ -903,6 +947,8 @@ export default function TalentsPage() {
                     isSelected={selectedUserId === u.user_id}
                     onSelect={() => setSelectedUserId(u.user_id)}
                     diagnosticType={diagnosticType}
+                    isSaved={savedSet.has(u.user_id)}
+                    onToggleSave={() => toggleSave(u.user_id)}
                   />
                 </li>
               ))}
@@ -931,6 +977,8 @@ export default function TalentsPage() {
                 allSkills={detailSkills}
                 about={detailAbout}
                 diagnosticType={diagnosticType}
+                isSaved={savedSet.has(selectedUser.user_id)}
+                onToggleSave={() => toggleSave(selectedUser.user_id)}
               />
             ) : (
               <div className="flex h-full flex-col items-center justify-center text-center px-6">
@@ -963,6 +1011,69 @@ export default function TalentsPage() {
   );
 }
 
+function SaveBookmark({
+  saved,
+  onToggle,
+  size = 16,
+  showLabel = false,
+}: {
+  saved: boolean;
+  onToggle: () => void;
+  size?: number;
+  showLabel?: boolean;
+}) {
+  const [animating, setAnimating] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!saved) {
+      setAnimating(true);
+      setTimeout(() => setAnimating(false), 400);
+    }
+    onToggle();
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className={`shrink-0 flex items-center gap-1.5 rounded-lg transition-all cursor-pointer ${
+        showLabel
+          ? `border px-3.5 py-2 text-xs font-medium ${
+              saved
+                ? "border-blue-200 bg-blue-50 text-[#2979ff]"
+                : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300"
+            }`
+          : "p-1.5 rounded-md hover:bg-gray-100"
+      }`}
+      title={saved ? "保存を解除" : "候補者を保存"}
+    >
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill={saved ? "#2979ff" : "none"}
+        stroke={saved ? "#2979ff" : showLabel ? "currentColor" : "#9ca3af"}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={animating ? "animate-[bookmark-pop_0.4s_ease-out]" : ""}
+      >
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+      </svg>
+      {showLabel && (saved ? "保存済み" : "保存")}
+      <style>{`
+        @keyframes bookmark-pop {
+          0% { transform: scale(1); }
+          30% { transform: scale(1.35); }
+          50% { transform: scale(0.9); }
+          70% { transform: scale(1.1); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
+    </button>
+  );
+}
+
 function SeekingDot({ status }: { status: string }) {
   const cfg = SEEKING_STATUS_MAP[status];
   if (!cfg) return null;
@@ -980,11 +1091,15 @@ function DiagnosticCandidateCard({
   isSelected,
   onSelect,
   diagnosticType,
+  isSaved,
+  onToggleSave,
 }: {
   user: TalentCard;
   isSelected: boolean;
   onSelect: () => void;
   diagnosticType: "wv" | "ci" | "integrated";
+  isSaved?: boolean;
+  onToggleSave?: () => void;
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
   const avatarBg = u.profile_color ?? "#94a3b8";
@@ -1022,6 +1137,9 @@ function DiagnosticCandidateCard({
             <p className="text-[15px] text-gray-500 truncate mt-0.5">{u.headline}</p>
           )}
         </div>
+        {onToggleSave && (
+          <SaveBookmark saved={!!isSaved} onToggle={onToggleSave} size={16} />
+        )}
       </div>
 
       {/* Row 2: Match badges */}
@@ -1160,6 +1278,8 @@ function CandidateDetail({
   allSkills,
   about,
   diagnosticType,
+  isSaved,
+  onToggleSave,
 }: {
   user: TalentCard;
   wvScores: { id: string; score: number }[] | null;
@@ -1172,6 +1292,8 @@ function CandidateDetail({
   allSkills: string[];
   about: string | null;
   diagnosticType: "wv" | "ci" | "integrated";
+  isSaved?: boolean;
+  onToggleSave?: () => void;
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
   const avatarBg = u.profile_color ?? "#94a3b8";
@@ -1214,12 +1336,23 @@ function CandidateDetail({
             <MatchBadges user={u} />
           </div>
         </div>
-        <Link
-          href={`/profile/${u.username}`}
-          className="shrink-0 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
-        >
-          プロフィール →
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          {onToggleSave && (
+            <SaveBookmark saved={!!isSaved} onToggle={onToggleSave} size={14} showLabel />
+          )}
+          <Link
+            href={`/company/scout/send?userId=${u.user_id}&username=${u.username}`}
+            className="rounded-lg border border-[#2979ff] bg-[#2979ff] px-3.5 py-2 text-xs font-medium text-white hover:bg-blue-600 transition-colors"
+          >
+            スカウトを送る
+          </Link>
+          <Link
+            href={`/profile/${u.username}`}
+            className="rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+          >
+            プロフィール →
+          </Link>
+        </div>
       </div>
 
       <div className="border-t border-gray-100" />
