@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { MessagesPageContent } from "@/features/messaging/components/MessagesPageContent";
 
 export default function ScoutPage() {
-  redirect("/messages?view=scout");
+  return <MessagesPageContent initialTab="scout" />;
 }

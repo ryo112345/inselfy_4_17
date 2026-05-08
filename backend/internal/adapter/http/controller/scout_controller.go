@@ -22,18 +22,24 @@ type ScoutController struct {
 		settingsRepo port.UserScoutSettingsRepository,
 		notifRepo port.NotificationRepository,
 		userRepo port.UserRepository,
+		convRepo port.ConversationRepository,
+		convMsgRepo port.MessageRepository,
+		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
 		output port.ScoutOutputPort,
 	) port.ScoutInputPort
-	outputFactory       func() *presenter.ScoutPresenter
-	msgRepoFactory      func() port.ScoutMessageRepository
-	creditRepoFactory   func() port.ScoutCreditRepository
-	ledgerRepoFactory   func() port.ScoutCreditLedgerRepository
-	replyRepoFactory    func() port.ScoutReplyRepository
-	settingsRepoFactory func() port.UserScoutSettingsRepository
-	notifRepoFactory    func() port.NotificationRepository
-	userRepoFactory     func() port.UserRepository
-	tx                  port.TxManager
+	outputFactory          func() *presenter.ScoutPresenter
+	msgRepoFactory         func() port.ScoutMessageRepository
+	creditRepoFactory      func() port.ScoutCreditRepository
+	ledgerRepoFactory      func() port.ScoutCreditLedgerRepository
+	replyRepoFactory       func() port.ScoutReplyRepository
+	settingsRepoFactory    func() port.UserScoutSettingsRepository
+	notifRepoFactory       func() port.NotificationRepository
+	userRepoFactory        func() port.UserRepository
+	convRepoFactory        func() port.ConversationRepository
+	convMsgRepoFactory     func() port.MessageRepository
+	participantRepoFactory func() port.ConversationParticipantRepository
+	tx                     port.TxManager
 }
 
 // NewScoutController creates a ScoutController.
@@ -46,6 +52,9 @@ func NewScoutController(
 		settingsRepo port.UserScoutSettingsRepository,
 		notifRepo port.NotificationRepository,
 		userRepo port.UserRepository,
+		convRepo port.ConversationRepository,
+		convMsgRepo port.MessageRepository,
+		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
 		output port.ScoutOutputPort,
 	) port.ScoutInputPort,
@@ -57,19 +66,25 @@ func NewScoutController(
 	settingsRepoFactory func() port.UserScoutSettingsRepository,
 	notifRepoFactory func() port.NotificationRepository,
 	userRepoFactory func() port.UserRepository,
+	convRepoFactory func() port.ConversationRepository,
+	convMsgRepoFactory func() port.MessageRepository,
+	participantRepoFactory func() port.ConversationParticipantRepository,
 	tx port.TxManager,
 ) *ScoutController {
 	return &ScoutController{
-		inputFactory:        inputFactory,
-		outputFactory:       outputFactory,
-		msgRepoFactory:      msgRepoFactory,
-		creditRepoFactory:   creditRepoFactory,
-		ledgerRepoFactory:   ledgerRepoFactory,
-		replyRepoFactory:    replyRepoFactory,
-		settingsRepoFactory: settingsRepoFactory,
-		notifRepoFactory:    notifRepoFactory,
-		userRepoFactory:     userRepoFactory,
-		tx:                  tx,
+		inputFactory:           inputFactory,
+		outputFactory:          outputFactory,
+		msgRepoFactory:         msgRepoFactory,
+		creditRepoFactory:      creditRepoFactory,
+		ledgerRepoFactory:      ledgerRepoFactory,
+		replyRepoFactory:       replyRepoFactory,
+		settingsRepoFactory:    settingsRepoFactory,
+		notifRepoFactory:       notifRepoFactory,
+		userRepoFactory:        userRepoFactory,
+		convRepoFactory:        convRepoFactory,
+		convMsgRepoFactory:     convMsgRepoFactory,
+		participantRepoFactory: participantRepoFactory,
+		tx:                     tx,
 	}
 }
 
@@ -238,6 +253,9 @@ func (c *ScoutController) newIO() (port.ScoutInputPort, *presenter.ScoutPresente
 		c.settingsRepoFactory(),
 		c.notifRepoFactory(),
 		c.userRepoFactory(),
+		c.convRepoFactory(),
+		c.convMsgRepoFactory(),
+		c.participantRepoFactory(),
 		c.tx,
 		output,
 	)

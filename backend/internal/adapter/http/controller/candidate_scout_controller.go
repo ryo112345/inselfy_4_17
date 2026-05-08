@@ -22,18 +22,24 @@ type CandidateScoutController struct {
 		settingsRepo port.UserScoutSettingsRepository,
 		notifRepo port.NotificationRepository,
 		userRepo port.UserRepository,
+		convRepo port.ConversationRepository,
+		convMsgRepo port.MessageRepository,
+		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
 		output port.ScoutOutputPort,
 	) port.ScoutInputPort
-	outputFactory       func() *presenter.ScoutPresenter
-	msgRepoFactory      func() port.ScoutMessageRepository
-	creditRepoFactory   func() port.ScoutCreditRepository
-	ledgerRepoFactory   func() port.ScoutCreditLedgerRepository
-	replyRepoFactory    func() port.ScoutReplyRepository
-	settingsRepoFactory func() port.UserScoutSettingsRepository
-	notifRepoFactory    func() port.NotificationRepository
-	userRepoFactory     func() port.UserRepository
-	tx                  port.TxManager
+	outputFactory          func() *presenter.ScoutPresenter
+	msgRepoFactory         func() port.ScoutMessageRepository
+	creditRepoFactory      func() port.ScoutCreditRepository
+	ledgerRepoFactory      func() port.ScoutCreditLedgerRepository
+	replyRepoFactory       func() port.ScoutReplyRepository
+	settingsRepoFactory    func() port.UserScoutSettingsRepository
+	notifRepoFactory       func() port.NotificationRepository
+	userRepoFactory        func() port.UserRepository
+	convRepoFactory        func() port.ConversationRepository
+	convMsgRepoFactory     func() port.MessageRepository
+	participantRepoFactory func() port.ConversationParticipantRepository
+	tx                     port.TxManager
 }
 
 // NewCandidateScoutController creates a CandidateScoutController.
@@ -46,6 +52,9 @@ func NewCandidateScoutController(
 		settingsRepo port.UserScoutSettingsRepository,
 		notifRepo port.NotificationRepository,
 		userRepo port.UserRepository,
+		convRepo port.ConversationRepository,
+		convMsgRepo port.MessageRepository,
+		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
 		output port.ScoutOutputPort,
 	) port.ScoutInputPort,
@@ -57,19 +66,25 @@ func NewCandidateScoutController(
 	settingsRepoFactory func() port.UserScoutSettingsRepository,
 	notifRepoFactory func() port.NotificationRepository,
 	userRepoFactory func() port.UserRepository,
+	convRepoFactory func() port.ConversationRepository,
+	convMsgRepoFactory func() port.MessageRepository,
+	participantRepoFactory func() port.ConversationParticipantRepository,
 	tx port.TxManager,
 ) *CandidateScoutController {
 	return &CandidateScoutController{
-		inputFactory:        inputFactory,
-		outputFactory:       outputFactory,
-		msgRepoFactory:      msgRepoFactory,
-		creditRepoFactory:   creditRepoFactory,
-		ledgerRepoFactory:   ledgerRepoFactory,
-		replyRepoFactory:    replyRepoFactory,
-		settingsRepoFactory: settingsRepoFactory,
-		notifRepoFactory:    notifRepoFactory,
-		userRepoFactory:     userRepoFactory,
-		tx:                  tx,
+		inputFactory:           inputFactory,
+		outputFactory:          outputFactory,
+		msgRepoFactory:         msgRepoFactory,
+		creditRepoFactory:      creditRepoFactory,
+		ledgerRepoFactory:      ledgerRepoFactory,
+		replyRepoFactory:       replyRepoFactory,
+		settingsRepoFactory:    settingsRepoFactory,
+		notifRepoFactory:       notifRepoFactory,
+		userRepoFactory:        userRepoFactory,
+		convRepoFactory:        convRepoFactory,
+		convMsgRepoFactory:     convMsgRepoFactory,
+		participantRepoFactory: participantRepoFactory,
+		tx:                     tx,
 	}
 }
 
@@ -83,6 +98,11 @@ type candidateReplyRequest struct {
 
 type bulkDeclineRequest struct {
 	ScoutIDs []string `json:"scoutIds"`
+}
+
+type bulkRespondRequest struct {
+	ScoutIDs []string `json:"scoutIds"`
+	Response string   `json:"response"`
 }
 
 // List handles GET /api/scouts.
@@ -137,11 +157,22 @@ func (c *CandidateScoutController) Respond(ctx echo.Context, scoutID string) err
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
+	input, _ := c.newIO()
 	if err := input.Respond(ctx.Request().Context(), userID, scoutID, scout.CandidateResponse(body.Response)); err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.MessageResponse())
+
+	resp := map[string]string{"status": "ok"}
+	msgRepo := c.msgRepoFactory()
+	msg, err := msgRepo.GetByID(ctx.Request().Context(), scoutID)
+	if err == nil {
+		convRepo := c.convRepoFactory()
+		conv, err := convRepo.GetByCompanyAndCandidate(ctx.Request().Context(), msg.CompanyID, msg.CandidateID)
+		if err == nil && conv != nil {
+			resp["conversationId"] = conv.ID
+		}
+	}
+	return ctx.JSON(http.StatusOK, resp)
 }
 
 // Reply handles POST /api/scouts/:scoutID/replies.
@@ -188,6 +219,33 @@ func (c *CandidateScoutController) BulkDecline(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
+// BulkRespond handles POST /api/scouts/bulk-respond.
+func (c *CandidateScoutController) BulkRespond(ctx echo.Context) error {
+	userID, ok := ctx.Get(authmw.UserIDKey).(string)
+	if !ok || userID == "" {
+		return ctx.JSON(http.StatusUnauthorized, map[string]string{
+			"code":    "UNAUTHORIZED",
+			"message": "unauthorized",
+		})
+	}
+
+	var body bulkRespondRequest
+	if err := ctx.Bind(&body); err != nil {
+		return badRequest(ctx, "invalid request body")
+	}
+
+	response, err := scout.ValidateResponse(body.Response)
+	if err != nil {
+		return badRequest(ctx, "invalid response: must be 'interested' or 'declined'")
+	}
+
+	input, _ := c.newIO()
+	if err := input.BulkRespond(ctx.Request().Context(), userID, body.ScoutIDs, response); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.NoContent(http.StatusNoContent)
+}
+
 func (c *CandidateScoutController) newIO() (port.ScoutInputPort, *presenter.ScoutPresenter) {
 	output := c.outputFactory()
 	input := c.inputFactory(
@@ -198,6 +256,9 @@ func (c *CandidateScoutController) newIO() (port.ScoutInputPort, *presenter.Scou
 		c.settingsRepoFactory(),
 		c.notifRepoFactory(),
 		c.userRepoFactory(),
+		c.convRepoFactory(),
+		c.convMsgRepoFactory(),
+		c.participantRepoFactory(),
 		c.tx,
 		output,
 	)

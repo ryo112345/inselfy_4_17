@@ -98,7 +98,8 @@ type ScoutPresenter struct {
 	quality   *qualityScoreResponse
 	settings  *scoutSettingsResponse
 	dashboard *dashboardResponse
-	ok        bool
+	ok             bool
+	conversationID string
 }
 
 var _ port.ScoutOutputPort = (*ScoutPresenter)(nil)
@@ -221,6 +222,8 @@ func (p *ScoutPresenter) QualityResponse() *qualityScoreResponse   { return p.qu
 func (p *ScoutPresenter) SettingsResponse() *scoutSettingsResponse  { return p.settings }
 func (p *ScoutPresenter) DashboardResponse() *dashboardResponse     { return p.dashboard }
 func (p *ScoutPresenter) IsOK() bool                               { return p.ok }
+func (p *ScoutPresenter) SetConversationID(id string)              { p.conversationID = id }
+func (p *ScoutPresenter) ConversationID() string                   { return p.conversationID }
 
 func toScoutMessageResponse(m *scout.ScoutMessageWithNames) *scoutMessageResponse {
 	return &scoutMessageResponse{
