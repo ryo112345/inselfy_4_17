@@ -249,7 +249,19 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
         </div>
         {message && <p className="text-sm text-gray-600">{message}</p>}
         {location && <p className="text-xs text-gray-500 mt-1">場所: {location}</p>}
-        <p className="text-xs text-gray-400 mt-2">青い時間帯をクリックして開始時間を選択してください</p>
+        <div className="mt-2 space-y-1">
+          {slots.map((slot, i) => {
+            const s = new Date(slot.startTime);
+            const e = new Date(slot.endTime);
+            const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+            return (
+              <p key={i} className="text-sm font-medium text-gray-900">
+                {s.getMonth() + 1}/{s.getDate()}({weekdays[s.getDay()]}) {formatTimeFromDate(s)} – {formatTimeFromDate(e)}
+              </p>
+            );
+          })}
+        </div>
+        <p className="text-xs text-gray-400 mt-2">上記の時間帯からカレンダーをクリックして選択</p>
       </div>
 
       {/* Week header + grid */}
