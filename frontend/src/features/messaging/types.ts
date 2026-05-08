@@ -28,12 +28,16 @@ export interface ConversationListResponse {
   total: number;
 }
 
+export type MessageType = "text" | "interview_proposal" | "interview_confirmed" | "interview_cancelled";
+
 export interface Message {
   id: string;
   conversationId: string;
   senderType: "candidate" | "company" | "system";
   senderId: string;
   body: string;
+  messageType: MessageType;
+  metadata?: Record<string, unknown>;
   createdAt: string;
 }
 

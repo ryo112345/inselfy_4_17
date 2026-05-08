@@ -13,11 +13,12 @@ const navItems = [
   { label: "応募一覧", href: "/company/applications", icon: ApplicationIcon },
   { label: "人材を探す", href: "/company/talents", icon: TalentIcon },
   { label: "スカウト", href: "/company/scout", icon: ScoutIcon },
+  { label: "カレンダー", href: "/company/calendar", icon: CalendarIcon },
   { label: "メッセージ", href: "/company/messages", icon: MessageIcon },
   { label: "設定", href: "/company/settings", icon: SettingsIcon },
 ];
 
-const fullBleedPaths = ["/company/messages"];
+const fullBleedPaths = ["/company/messages", "/company/calendar"];
 
 export function CompanyHeader({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -254,6 +255,16 @@ function BookmarkIcon() {
   return (
     <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x={3} y={4} width={18} height={18} rx={2} />
+      <path d="M16 2v4M8 2v4M3 10h18" />
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
     </svg>
   );
 }

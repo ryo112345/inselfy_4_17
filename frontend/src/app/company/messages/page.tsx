@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import {
+  startConversation,
   fetchCompanyConversations,
   fetchCompanyConversationMessages,
   sendMessageAsCompany,
@@ -15,19 +17,26 @@ import { useMessagingWebSocket } from "@/features/messaging/useWebSocket";
 
 export default function CompanyMessagesPage() {
   const { company, isLoading: authLoading } = useCompanyAuth();
+  const searchParams = useSearchParams();
+  const candidateIdParam = searchParams.get("candidateId");
+  const candidateNameParam = searchParams.get("candidateName");
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [newConvCandidateId, setNewConvCandidateId] = useState<string | null>(null);
+  const [newConvCandidateName, setNewConvCandidateName] = useState<string>("");
+  const deepLinkHandledRef = useRef(false);
 
   const loadConversations = useCallback(async () => {
     try {
       const data = await fetchCompanyConversations({ limit: 50 });
       setConversations(data.items ?? []);
+      return data.items ?? [];
     } catch {
-      // ignore
+      return [];
     } finally {
       setLoadingConvs(false);
     }
@@ -35,9 +44,21 @@ export default function CompanyMessagesPage() {
 
   useEffect(() => {
     if (!authLoading && company) {
-      loadConversations();
+      loadConversations().then((convs) => {
+        if (candidateIdParam && !deepLinkHandledRef.current) {
+          deepLinkHandledRef.current = true;
+          const existing = convs.find((c) => c.candidateId === candidateIdParam);
+          if (existing) {
+            setSelectedConv(existing);
+            loadMessages(existing.id);
+          } else {
+            setNewConvCandidateId(candidateIdParam);
+            setNewConvCandidateName(candidateNameParam ?? "");
+          }
+        }
+      });
     }
-  }, [authLoading, company, loadConversations]);
+  }, [authLoading, company, loadConversations, candidateIdParam, candidateNameParam]);
 
   const loadMessages = useCallback(async (convId: string) => {
     setLoadingMsgs(true);
@@ -85,9 +106,24 @@ export default function CompanyMessagesPage() {
 
   const handleBack = useCallback(() => {
     setSelectedConv(null);
+    setNewConvCandidateId(null);
+    setNewConvCandidateName("");
     setMessages([]);
     loadConversations();
   }, [loadConversations]);
+
+  const handleSendNewConversation = useCallback(
+    async (body: string) => {
+      if (!newConvCandidateId) return;
+      const conv = await startConversation({ candidateId: newConvCandidateId, body });
+      setNewConvCandidateId(null);
+      setNewConvCandidateName("");
+      setSelectedConv(conv);
+      await loadMessages(conv.id);
+      await loadConversations();
+    },
+    [newConvCandidateId, loadMessages, loadConversations],
+  );
 
   const selectedConvRef = useRef(selectedConv);
   selectedConvRef.current = selectedConv;
@@ -132,7 +168,7 @@ export default function CompanyMessagesPage() {
         {/* Conversation list - hide on mobile when a conversation is selected */}
         <div
           className={`flex w-full flex-col border-r border-gray-200 bg-white md:w-80 md:flex ${
-            selectedConv ? "hidden" : "flex"
+            selectedConv || newConvCandidateId ? "hidden" : "flex"
           }`}
         >
           <div className="shrink-0 border-b border-gray-200 px-4 py-3">
@@ -159,7 +195,7 @@ export default function CompanyMessagesPage() {
         {/* Message thread - show on mobile only when selected */}
         <div
           className={`flex-1 min-h-0 flex flex-col md:flex ${
-            selectedConv ? "flex" : "hidden md:flex"
+            selectedConv || newConvCandidateId ? "flex" : "hidden md:flex"
           }`}
         >
           {selectedConv && company ? (
@@ -171,6 +207,16 @@ export default function CompanyMessagesPage() {
               onSend={handleSend}
               onBack={handleBack}
               loading={loadingMsgs}
+            />
+          ) : newConvCandidateId && company ? (
+            <MessageThread
+              messages={[]}
+              myId={company.id}
+              mySenderType="company"
+              counterpartName={newConvCandidateName}
+              onSend={handleSendNewConversation}
+              onBack={handleBack}
+              loading={false}
             />
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center text-center">

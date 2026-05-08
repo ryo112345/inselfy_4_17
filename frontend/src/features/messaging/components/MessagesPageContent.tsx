@@ -155,6 +155,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
         senderType: "candidate",
         senderId: user!.id,
         body,
+        messageType: "text",
         createdAt: conv.createdAt,
       }]);
       await loadConversations();

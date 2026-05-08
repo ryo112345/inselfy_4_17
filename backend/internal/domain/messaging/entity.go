@@ -29,6 +29,8 @@ type Message struct {
 	SenderType     string
 	SenderID       string
 	Body           string
+	MessageType    string
+	Metadata       map[string]interface{}
 	CreatedAt      time.Time
 }
 
@@ -45,6 +47,8 @@ type SendMessageInput struct {
 	SenderType     string
 	SenderID       string
 	Body           string
+	MessageType    string
+	Metadata       map[string]interface{}
 }
 
 type StartConversationInput struct {

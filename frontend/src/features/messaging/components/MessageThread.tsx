@@ -129,7 +129,11 @@ export function MessageThread({
                       </span>
                     </div>
                   ) : (
-                    <MessageBubble message={msg} isMine={isMine} />
+                    <MessageBubble
+                      message={msg}
+                      isMine={isMine}
+                      isCandidate={mySenderType === "candidate"}
+                    />
                   )}
                 </div>
               );

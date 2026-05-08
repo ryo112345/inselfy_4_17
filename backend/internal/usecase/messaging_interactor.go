@@ -190,6 +190,8 @@ func (i *MessagingInteractor) SendMessage(ctx context.Context, input messaging.S
 		SenderType:     input.SenderType,
 		SenderID:       input.SenderID,
 		Body:           input.Body,
+		MessageType:    input.MessageType,
+		Metadata:       input.Metadata,
 	})
 	if err != nil {
 		return err

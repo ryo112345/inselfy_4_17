@@ -31,12 +31,14 @@ type conversationListResponse struct {
 }
 
 type messageResponse struct {
-	ID             string    `json:"id"`
-	ConversationID string    `json:"conversationId"`
-	SenderType     string    `json:"senderType"`
-	SenderID       string    `json:"senderId"`
-	Body           string    `json:"body"`
-	CreatedAt      time.Time `json:"createdAt"`
+	ID             string                 `json:"id"`
+	ConversationID string                 `json:"conversationId"`
+	SenderType     string                 `json:"senderType"`
+	SenderID       string                 `json:"senderId"`
+	Body           string                 `json:"body"`
+	MessageType    string                 `json:"messageType"`
+	Metadata       map[string]interface{} `json:"metadata,omitempty"`
+	CreatedAt      time.Time              `json:"createdAt"`
 }
 
 type messageListResponse struct {
@@ -128,12 +130,18 @@ func toConversationResponse(c *messaging.ConversationWithPreview) *conversationR
 }
 
 func toMessageResponse(m *messaging.Message) *messageResponse {
+	msgType := m.MessageType
+	if msgType == "" {
+		msgType = "text"
+	}
 	return &messageResponse{
 		ID:             m.ID,
 		ConversationID: m.ConversationID,
 		SenderType:     m.SenderType,
 		SenderID:       m.SenderID,
 		Body:           m.Body,
+		MessageType:    msgType,
+		Metadata:       m.Metadata,
 		CreatedAt:      m.CreatedAt,
 	}
 }

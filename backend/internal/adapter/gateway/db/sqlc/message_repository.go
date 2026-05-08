@@ -2,6 +2,7 @@ package sqlc
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -31,11 +32,21 @@ func (r *MessageRepository) Create(ctx context.Context, msg *messaging.Message) 
 	if err != nil {
 		return nil, domainerr.ErrBadRequest
 	}
+	msgType := msg.MessageType
+	if msgType == "" {
+		msgType = "text"
+	}
+	var metadataBytes []byte
+	if msg.Metadata != nil {
+		metadataBytes, _ = json.Marshal(msg.Metadata)
+	}
 	row, err := q.CreateMessage(ctx, &generated.CreateMessageParams{
 		ConversationID: convID,
 		SenderType:     msg.SenderType,
 		SenderID:       senderID,
 		Body:           msg.Body,
+		MessageType:    msgType,
+		Metadata:       metadataBytes,
 	})
 	if err != nil {
 		return nil, err
@@ -69,12 +80,18 @@ func (r *MessageRepository) ListByConversationID(ctx context.Context, conversati
 }
 
 func messageToDomain(row *generated.Message) *messaging.Message {
+	var metadata map[string]interface{}
+	if len(row.Metadata) > 0 {
+		_ = json.Unmarshal(row.Metadata, &metadata)
+	}
 	return &messaging.Message{
 		ID:             uuidToString(row.ID),
 		ConversationID: uuidToString(row.ConversationID),
 		SenderType:     row.SenderType,
 		SenderID:       uuidToString(row.SenderID),
 		Body:           row.Body,
+		MessageType:    row.MessageType,
+		Metadata:       metadata,
 		CreatedAt:      row.CreatedAt.Time,
 	}
 }
