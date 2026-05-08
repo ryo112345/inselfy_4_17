@@ -268,8 +268,20 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
         </div>
         {message && <p className="text-sm text-gray-700">{message}</p>}
         {location && <p className="text-xs text-gray-500 mt-1">場所: {location}</p>}
+        <div className="mt-2 space-y-1">
+          {slots.map((slot, i) => {
+            const s = new Date(slot.start_time);
+            const e = new Date(slot.end_time);
+            const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+            return (
+              <p key={i} className="text-sm font-medium text-gray-900">
+                {s.getMonth() + 1}/{s.getDate()}({weekdays[s.getDay()]}) {formatTimeFromDate(s)} – {formatTimeFromDate(e)}
+              </p>
+            );
+          })}
+        </div>
         {canSelect && (
-          <p className="text-xs text-gray-400 mt-1">青い時間帯をクリックして開始時間を選択してください</p>
+          <p className="text-xs text-gray-400 mt-2">上記の時間帯からカレンダーをクリックして選択</p>
         )}
       </div>
 
