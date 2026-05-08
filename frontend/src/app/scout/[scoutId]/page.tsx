@@ -61,6 +61,7 @@ export default function ScoutDetailPage() {
   const [responding, setResponding] = useState(false);
   const [replyBody, setReplyBody] = useState("");
   const [sending, setSending] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const loadDetail = useCallback(async () => {
     setLoading(true);
@@ -82,20 +83,20 @@ export default function ScoutDetailPage() {
     loadDetail();
   }, [authLoading, user, loadDetail]);
 
+  function showToast(message: string, type: "success" | "error" = "success") {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }
+
   async function handleRespond(response: "interested" | "declined") {
     if (responding) return;
-    if (
-      response === "declined" &&
-      !confirm("このスカウトを辞退しますか?")
-    ) {
-      return;
-    }
     setResponding(true);
     try {
       await respondToScout(scoutId, response);
+      showToast(response === "interested" ? "興味ありと回答しました" : "辞退しました");
       await loadDetail();
     } catch {
-      alert("応答に失敗しました");
+      showToast("応答に失敗しました", "error");
     } finally {
       setResponding(false);
     }
@@ -159,7 +160,7 @@ export default function ScoutDetailPage() {
         {/* Back link */}
         <button
           type="button"
-          onClick={() => router.push("/messages?view=scout")}
+          onClick={() => router.push("/scout")}
           className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6 transition-colors"
         >
           <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -282,6 +283,31 @@ export default function ScoutDetailPage() {
           </div>
         )}
       </div>
+
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 animate-[toastSlideDown_0.35s_cubic-bezier(0.21,1.02,0.73,1)]">
+          <div
+            className={`flex items-center gap-3 rounded-xl px-5 py-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.08)] border ${
+              toast.type === "error"
+                ? "bg-red-50 border-red-200"
+                : "bg-emerald-50 border-emerald-200"
+            }`}
+          >
+            {toast.type === "error" ? (
+              <svg className="h-5 w-5 shrink-0 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5 shrink-0 text-[#3D8B6E]" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+              </svg>
+            )}
+            <span className={`text-sm font-medium ${
+              toast.type === "error" ? "text-red-800" : "text-emerald-800"
+            }`}>{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
 import {
@@ -8,6 +8,7 @@ import {
   fetchScoutSettings,
   updateScoutSettings,
   bulkDeclineScouts,
+  bulkRespondScouts,
 } from "@/features/scout/api";
 import type { ScoutMessage, ScoutSettings, ScoutStatus } from "@/features/scout/types";
 
@@ -57,6 +58,9 @@ export function ScoutListView() {
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [declining, setDeclining] = useState(false);
+  const [responding, setResponding] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const loadScouts = useCallback(
     async (offset: number) => {
@@ -122,18 +126,41 @@ export function ScoutListView() {
     }
   }
 
+  function showToast(message: string, type: "success" | "error" = "success") {
+    setToast({ message, type });
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3000);
+  }
+
   async function handleBulkDecline() {
     if (selected.size === 0 || declining) return;
-    if (!confirm(`${selected.size}件のスカウトを辞退しますか?`)) return;
+    const count = selected.size;
     setDeclining(true);
     try {
       await bulkDeclineScouts(Array.from(selected));
       setSelected(new Set());
       await loadScouts(page * PAGE_SIZE);
+      showToast(`${count}件のスカウトを辞退しました`);
     } catch {
-      alert("一括辞退に失敗しました");
+      showToast("一括辞退に失敗しました", "error");
     } finally {
       setDeclining(false);
+    }
+  }
+
+  async function handleBulkInterested() {
+    if (selected.size === 0 || responding) return;
+    const count = selected.size;
+    setResponding(true);
+    try {
+      await bulkRespondScouts(Array.from(selected), "interested");
+      setSelected(new Set());
+      await loadScouts(page * PAGE_SIZE);
+      showToast(`${count}件のスカウトに興味ありと回答しました`);
+    } catch {
+      showToast("一括応答に失敗しました", "error");
+    } finally {
+      setResponding(false);
     }
   }
 
@@ -149,33 +176,18 @@ export function ScoutListView() {
 
   return (
     <div className="px-4 sm:px-6 py-6">
-      {/* Settings toggle */}
+      {/* Header: select all + settings toggle */}
       <div className="flex items-center justify-between mb-5">
-        {/* Bulk actions */}
         {scouts.length > 0 ? (
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selected.size === scouts.length && scouts.length > 0}
-                onChange={handleSelectAll}
-                className="rounded border-gray-300"
-              />
-              すべて選択
-            </label>
-            {selected.size > 0 && (
-              <button
-                type="button"
-                onClick={handleBulkDecline}
-                disabled={declining}
-                className="border border-red-300 text-red-600 px-4 py-1.5 rounded-lg text-sm hover:bg-red-50 disabled:opacity-50 transition-colors"
-              >
-                {declining
-                  ? "処理中..."
-                  : `選択したスカウトを辞退 (${selected.size}件)`}
-              </button>
-            )}
-          </div>
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={selected.size === scouts.length && scouts.length > 0}
+              onChange={handleSelectAll}
+              className="rounded border-gray-300"
+            />
+            すべて選択
+          </label>
         ) : (
           <div />
         )}
@@ -265,8 +277,14 @@ export function ScoutListView() {
                   </p>
 
                   {scout.jobTitle && (
-                    <p className="text-xs text-gray-500 truncate mb-2">
+                    <p className="text-xs text-gray-500 truncate mb-1">
                       {scout.jobTitle}
+                    </p>
+                  )}
+
+                  {scout.body && (
+                    <p className="text-xs text-gray-500 leading-relaxed mb-2 line-clamp-2">
+                      {scout.body}
                     </p>
                   )}
 
@@ -325,6 +343,88 @@ export function ScoutListView() {
           >
             次へ
           </button>
+        </div>
+      )}
+
+      {selected.size > 0 && <div className="h-20" />}
+
+      {/* Floating bulk action bar */}
+      <div
+        role="toolbar"
+        aria-label="一括操作"
+        className={`fixed bottom-24 md:bottom-6 left-1/2 z-40 transition-all duration-300 ease-out ${
+          selected.size > 0
+            ? "opacity-100 -translate-x-1/2 translate-y-0"
+            : "opacity-0 -translate-x-1/2 translate-y-3 pointer-events-none"
+        }`}
+      >
+        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl px-2 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.10)]">
+          <span className="text-sm font-medium text-gray-700 whitespace-nowrap px-3">
+            {selected.size}件選択中
+          </span>
+
+          <span className="w-px h-5 bg-gray-200" />
+
+          <button
+            type="button"
+            onClick={handleBulkInterested}
+            disabled={responding}
+            className="flex items-center gap-1.5 min-h-[44px] text-sm font-medium text-[#3D8B6E] hover:bg-[#3D8B6E]/8 rounded-lg px-3 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
+          >
+            <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            {responding ? "処理中..." : "興味あり"}
+          </button>
+
+          <span className="w-px h-5 bg-gray-200" />
+
+          <button
+            type="button"
+            onClick={handleBulkDecline}
+            disabled={declining}
+            className="flex items-center gap-1.5 min-h-[44px] text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg px-3 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
+          >
+            <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+            {declining ? "処理中..." : "辞退する"}
+          </button>
+
+          <span className="w-px h-5 bg-gray-200" />
+
+          <button
+            type="button"
+            onClick={() => setSelected(new Set())}
+            className="min-h-[44px] text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg px-3 transition-colors cursor-pointer whitespace-nowrap"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 animate-[toastSlideDown_0.35s_cubic-bezier(0.21,1.02,0.73,1)]">
+          <div
+            className={`flex items-center gap-3 rounded-xl px-5 py-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.08)] border ${
+              toast.type === "error"
+                ? "bg-red-50 border-red-200"
+                : "bg-emerald-50 border-emerald-200"
+            }`}
+          >
+            {toast.type === "error" ? (
+              <svg className="h-5 w-5 shrink-0 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5 shrink-0 text-[#3D8B6E]" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+              </svg>
+            )}
+            <span className={`text-sm font-medium ${
+              toast.type === "error" ? "text-red-800" : "text-emerald-800"
+            }`}>{toast.message}</span>
+          </div>
         </div>
       )}
     </div>

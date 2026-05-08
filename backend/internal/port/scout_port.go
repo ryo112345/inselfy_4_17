@@ -20,6 +20,7 @@ type ScoutInputPort interface {
 	Respond(ctx context.Context, candidateID, scoutID string, response scout.CandidateResponse) error
 	CandidateReply(ctx context.Context, candidateID, scoutID, body string) error
 	BulkDecline(ctx context.Context, candidateID string, scoutIDs []string) error
+	BulkRespond(ctx context.Context, candidateID string, scoutIDs []string, response scout.CandidateResponse) error
 
 	UpdateScoutSettings(ctx context.Context, userID string, accepting bool) error
 	GetScoutSettings(ctx context.Context, userID string) error

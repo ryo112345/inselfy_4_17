@@ -31,7 +31,7 @@ export interface ConversationListResponse {
 export interface Message {
   id: string;
   conversationId: string;
-  senderType: "candidate" | "company";
+  senderType: "candidate" | "company" | "system";
   senderId: string;
   body: string;
   createdAt: string;

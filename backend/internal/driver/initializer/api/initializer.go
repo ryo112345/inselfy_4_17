@@ -134,19 +134,25 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		scoutInputFactory, scoutOutputFactory,
 		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
 		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
-		userRepoFactory, tx,
+		userRepoFactory,
+		conversationRepoFactory, messageRepoFactory, participantRepoFactory,
+		tx,
 	)
 	candidateScoutCtrl := httpcontroller.NewCandidateScoutController(
 		scoutInputFactory, scoutOutputFactory,
 		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
 		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
-		userRepoFactory, tx,
+		userRepoFactory,
+		conversationRepoFactory, messageRepoFactory, participantRepoFactory,
+		tx,
 	)
 	scoutSettingsCtrl := httpcontroller.NewScoutSettingsController(
 		scoutInputFactory, scoutOutputFactory,
 		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
 		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
-		userRepoFactory, tx,
+		userRepoFactory,
+		conversationRepoFactory, messageRepoFactory, participantRepoFactory,
+		tx,
 	)
 	scoutTemplateCtrl := httpcontroller.NewScoutTemplateController(
 		scoutTemplateInputFactory, scoutTemplateOutputFactory, scoutTemplateRepoFactory,
@@ -598,6 +604,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return candidateScoutCtrl.Reply(c, c.Param("scoutId"))
 	})
 	candidateScoutGroup.POST("/bulk-decline", candidateScoutCtrl.BulkDecline)
+	candidateScoutGroup.POST("/bulk-respond", candidateScoutCtrl.BulkRespond)
 
 	// --- Scout Settings ---
 	e.GET("/api/scout-settings", scoutSettingsCtrl.Get, jwtMW)

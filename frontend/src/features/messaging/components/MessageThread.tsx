@@ -104,8 +104,9 @@ export function MessageThread({
             {messages.map((msg, idx) => {
               const prev = idx > 0 ? messages[idx - 1] : undefined;
               const showDate = shouldShowDateSeparator(msg, prev);
+              const isSystem = msg.senderType === "system";
               const isMine =
-                msg.senderType === mySenderType && msg.senderId === myId;
+                !isSystem && msg.senderType === mySenderType && msg.senderId === myId;
               const differentSender =
                 prev && prev.senderType !== msg.senderType;
 
@@ -121,7 +122,15 @@ export function MessageThread({
                       </span>
                     </div>
                   )}
-                  <MessageBubble message={msg} isMine={isMine} />
+                  {isSystem ? (
+                    <div className="my-3 flex items-center justify-center">
+                      <span className="rounded-full bg-gray-100 px-4 py-1.5 text-xs text-gray-500">
+                        {msg.body}
+                      </span>
+                    </div>
+                  ) : (
+                    <MessageBubble message={msg} isMine={isMine} />
+                  )}
                 </div>
               );
             })}

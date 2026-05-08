@@ -142,7 +142,7 @@ export async function fetchReceivedScoutDetail(
 export async function respondToScout(
   scoutId: string,
   response: "interested" | "declined",
-): Promise<void> {
+): Promise<{ conversationId?: string }> {
   const res = await fetch(`${BASE_URL}/api/scouts/${scoutId}/respond`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -153,6 +153,7 @@ export async function respondToScout(
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message ?? "Failed to respond to scout");
   }
+  return res.json();
 }
 
 export async function replyToScout(
@@ -183,6 +184,22 @@ export async function bulkDeclineScouts(
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message ?? "Failed to bulk decline scouts");
+  }
+}
+
+export async function bulkRespondScouts(
+  scoutIds: string[],
+  response: "interested" | "declined",
+): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/scouts/bulk-respond`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ scoutIds, response }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message ?? "Failed to bulk respond to scouts");
   }
 }
 

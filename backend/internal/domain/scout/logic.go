@@ -108,8 +108,9 @@ func CanResend(existing *ScoutMessage) error {
 }
 
 func CalcExpiresAt(sentAt time.Time) time.Time {
-	y, m, _ := sentAt.Date()
-	return time.Date(y, m+time.Month(ExpiryMonthsAfterSent)+1, 0, 23, 59, 59, 0, sentAt.Location())
+	jst := time.FixedZone("Asia/Tokyo", 9*60*60)
+	y, m, _ := sentAt.In(jst).Date()
+	return time.Date(y, m+time.Month(ExpiryMonthsAfterSent)+1, 0, 0, 0, 0, 0, jst)
 }
 
 func IsExpired(m *ScoutMessage) bool {

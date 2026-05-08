@@ -128,6 +128,9 @@ func NewScoutInputFactory() func(
 	settingsRepo port.UserScoutSettingsRepository,
 	notifRepo port.NotificationRepository,
 	userRepo port.UserRepository,
+	convRepo port.ConversationRepository,
+	convMsgRepo port.MessageRepository,
+	participantRepo port.ConversationParticipantRepository,
 	tx port.TxManager,
 	output port.ScoutOutputPort,
 ) port.ScoutInputPort {
@@ -139,10 +142,13 @@ func NewScoutInputFactory() func(
 		settingsRepo port.UserScoutSettingsRepository,
 		notifRepo port.NotificationRepository,
 		userRepo port.UserRepository,
+		convRepo port.ConversationRepository,
+		convMsgRepo port.MessageRepository,
+		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
 		output port.ScoutOutputPort,
 	) port.ScoutInputPort {
-		return usecase.NewScoutInteractor(msgRepo, creditRepo, ledgerRepo, replyRepo, settingsRepo, notifRepo, userRepo, tx, output)
+		return usecase.NewScoutInteractor(msgRepo, creditRepo, ledgerRepo, replyRepo, settingsRepo, notifRepo, userRepo, convRepo, convMsgRepo, participantRepo, tx, output)
 	}
 }
 

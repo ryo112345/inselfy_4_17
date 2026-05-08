@@ -6,21 +6,25 @@ import (
 	"time"
 
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
+	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 	"github.com/akiyama/inselfy/backend/internal/domain/notification"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type ScoutInteractor struct {
-	msgRepo      port.ScoutMessageRepository
-	creditRepo   port.ScoutCreditRepository
-	ledgerRepo   port.ScoutCreditLedgerRepository
-	replyRepo    port.ScoutReplyRepository
-	settingsRepo port.UserScoutSettingsRepository
-	notifRepo    port.NotificationRepository
-	userRepo     port.UserRepository
-	tx           port.TxManager
-	output       port.ScoutOutputPort
+	msgRepo         port.ScoutMessageRepository
+	creditRepo      port.ScoutCreditRepository
+	ledgerRepo      port.ScoutCreditLedgerRepository
+	replyRepo       port.ScoutReplyRepository
+	settingsRepo    port.UserScoutSettingsRepository
+	notifRepo       port.NotificationRepository
+	userRepo        port.UserRepository
+	convRepo        port.ConversationRepository
+	convMsgRepo     port.MessageRepository
+	participantRepo port.ConversationParticipantRepository
+	tx              port.TxManager
+	output          port.ScoutOutputPort
 }
 
 var _ port.ScoutInputPort = (*ScoutInteractor)(nil)
@@ -33,19 +37,25 @@ func NewScoutInteractor(
 	settingsRepo port.UserScoutSettingsRepository,
 	notifRepo port.NotificationRepository,
 	userRepo port.UserRepository,
+	convRepo port.ConversationRepository,
+	convMsgRepo port.MessageRepository,
+	participantRepo port.ConversationParticipantRepository,
 	tx port.TxManager,
 	output port.ScoutOutputPort,
 ) *ScoutInteractor {
 	return &ScoutInteractor{
-		msgRepo:      msgRepo,
-		creditRepo:   creditRepo,
-		ledgerRepo:   ledgerRepo,
-		replyRepo:    replyRepo,
-		settingsRepo: settingsRepo,
-		notifRepo:    notifRepo,
-		userRepo:     userRepo,
-		tx:           tx,
-		output:       output,
+		msgRepo:         msgRepo,
+		creditRepo:      creditRepo,
+		ledgerRepo:      ledgerRepo,
+		replyRepo:       replyRepo,
+		settingsRepo:    settingsRepo,
+		notifRepo:       notifRepo,
+		userRepo:        userRepo,
+		convRepo:        convRepo,
+		convMsgRepo:     convMsgRepo,
+		participantRepo: participantRepo,
+		tx:              tx,
+		output:          output,
 	}
 }
 
@@ -366,9 +376,16 @@ func (i *ScoutInteractor) Respond(ctx context.Context, candidateID, scoutID stri
 		return scout.ErrNotSentOrOpened
 	}
 
+	if err := i.processResponse(ctx, msg, scoutID, response); err != nil {
+		return err
+	}
+	return i.output.PresentOK(ctx)
+}
+
+func (i *ScoutInteractor) processResponse(ctx context.Context, msg *scout.ScoutMessageWithNames, scoutID string, response scout.CandidateResponse) error {
 	newStatus := scout.Status(response)
 
-	err = i.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+	return i.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		if err := i.msgRepo.UpdateStatus(ctx, scoutID, newStatus); err != nil {
 			return err
 		}
@@ -394,18 +411,85 @@ func (i *ScoutInteractor) Respond(ctx context.Context, candidateID, scoutID stri
 			notifTitle = "スカウトが辞退されました"
 		}
 		companyID := msg.CompanyID
-		_, err = i.notifRepo.Create(ctx, &notification.Notification{
+		if _, err := i.notifRepo.Create(ctx, &notification.Notification{
 			CompanyID:   &companyID,
 			Type:        notifType,
 			Title:       notifTitle,
 			ReferenceID: &scoutID,
-		})
-		return err
+		}); err != nil {
+			return err
+		}
+
+		if err := i.createConversationFromScout(ctx, msg, response); err != nil {
+			return err
+		}
+
+		return nil
 	})
-	if err != nil {
+}
+
+func (i *ScoutInteractor) createConversationFromScout(ctx context.Context, msg *scout.ScoutMessageWithNames, response scout.CandidateResponse) error {
+	existing, err := i.convRepo.GetByCompanyAndCandidate(ctx, msg.CompanyID, msg.CandidateID)
+	if err != nil && !isNotFound(err) {
 		return err
 	}
-	return i.output.PresentOK(ctx)
+
+	var convID string
+	if existing != nil {
+		convID = existing.ID
+	} else {
+		conv, err := i.convRepo.Create(ctx, &messaging.Conversation{
+			CompanyID:   msg.CompanyID,
+			CandidateID: msg.CandidateID,
+		})
+		if err != nil {
+			return err
+		}
+		convID = conv.ID
+
+		if err := i.participantRepo.Create(ctx, &messaging.ConversationParticipant{
+			ConversationID:  convID,
+			ParticipantType: "company",
+			ParticipantID:   msg.CompanyID,
+		}); err != nil {
+			return err
+		}
+		if err := i.participantRepo.Create(ctx, &messaging.ConversationParticipant{
+			ConversationID:  convID,
+			ParticipantType: "candidate",
+			ParticipantID:   msg.CandidateID,
+		}); err != nil {
+			return err
+		}
+	}
+
+	if _, err := i.convMsgRepo.Create(ctx, &messaging.Message{
+		ConversationID: convID,
+		SenderType:     "company",
+		SenderID:       msg.CompanyID,
+		Body:           msg.Subject + "\n\n" + msg.Body,
+	}); err != nil {
+		return err
+	}
+
+	systemBody := "興味ありと回答しました"
+	if response == scout.ResponseDeclined {
+		systemBody = "辞退されました"
+	}
+	if _, err := i.convMsgRepo.Create(ctx, &messaging.Message{
+		ConversationID: convID,
+		SenderType:     "system",
+		SenderID:       msg.CandidateID,
+		Body:           systemBody,
+	}); err != nil {
+		return err
+	}
+
+	if err := i.convRepo.UpdateLastMessageAt(ctx, convID); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (i *ScoutInteractor) CandidateReply(ctx context.Context, candidateID, scoutID, body string) error {
@@ -471,6 +555,10 @@ func (i *ScoutInteractor) CandidateReply(ctx context.Context, candidateID, scout
 }
 
 func (i *ScoutInteractor) BulkDecline(ctx context.Context, candidateID string, scoutIDs []string) error {
+	return i.BulkRespond(ctx, candidateID, scoutIDs, scout.ResponseDeclined)
+}
+
+func (i *ScoutInteractor) BulkRespond(ctx context.Context, candidateID string, scoutIDs []string, response scout.CandidateResponse) error {
 	for _, id := range scoutIDs {
 		msg, err := i.msgRepo.GetByID(ctx, id)
 		if err != nil {
@@ -482,23 +570,7 @@ func (i *ScoutInteractor) BulkDecline(ctx context.Context, candidateID string, s
 		if msg.Status != scout.StatusSent && msg.Status != scout.StatusOpened {
 			continue
 		}
-		err = i.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-			if err := i.msgRepo.UpdateStatus(ctx, id, scout.StatusDeclined); err != nil {
-				return err
-			}
-			credit, err := i.creditRepo.Refund(ctx, msg.CompanyID)
-			if err != nil {
-				return err
-			}
-			return i.ledgerRepo.Create(ctx, &scout.CreditLedgerEntry{
-				CompanyID:      msg.CompanyID,
-				Delta:          1,
-				Reason:         "decline_refund",
-				ScoutMessageID: &id,
-				BalanceAfter:   credit.Balance,
-			})
-		})
-		if err != nil {
+		if err := i.processResponse(ctx, msg, id, response); err != nil {
 			return err
 		}
 	}
