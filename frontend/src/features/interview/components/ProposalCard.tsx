@@ -371,7 +371,7 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
                   ))}
 
                   {/* Selected slot */}
-                  {selection && selection.dayIndex === dayIdx && (
+                  {selection && selection.dayIndex === dayIdx && toDateStr(weekDays[dayIdx]) === toDateStr(new Date(selection.startIso)) && (
                     <div
                       className="absolute left-0.5 right-0.5 rounded-md bg-blue-600 text-white px-1.5 py-0.5 z-10 shadow-md ring-2 ring-blue-600 ring-offset-1"
                       style={{
