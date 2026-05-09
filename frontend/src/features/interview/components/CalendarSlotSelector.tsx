@@ -350,7 +350,7 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
                   ))}
 
                   {/* Selection */}
-                  {selection && selection.dayIndex === dayIdx && (
+                  {selection && selection.dayIndex === dayIdx && toDateStr(weekDays[dayIdx]) === toDateStr(new Date(selection.startIso)) && (
                     <div
                       className="absolute left-1 right-1 rounded-md bg-[#3D8B6E] text-white px-1.5 py-0.5 z-10 shadow-md ring-2 ring-[#3D8B6E] ring-offset-1"
                       style={{
