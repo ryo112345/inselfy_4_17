@@ -421,6 +421,7 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
                         top: `${minutesToY(slot.startMinutes)}px`,
                         height: `${minutesToY(slot.endMinutes) - minutesToY(slot.startMinutes)}px`,
                       }}
+                      onMouseDown={(e) => e.stopPropagation()}
                       onClick={(e) => { e.stopPropagation(); removeSlot(slot.id); }}
                     >
                       <p className="text-xs font-medium leading-tight truncate">
