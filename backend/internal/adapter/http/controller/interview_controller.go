@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -15,6 +17,10 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
+type WSNotifier interface {
+	Send(key string, data []byte)
+}
+
 type InterviewController struct {
 	pool            *pgxpool.Pool
 	proposalRepo    port.InterviewProposalRepository
@@ -24,6 +30,7 @@ type InterviewController struct {
 	convRepo        port.ConversationRepository
 	participantRepo port.ConversationParticipantRepository
 	tx              port.TxManager
+	ws              WSNotifier
 }
 
 func NewInterviewController(
@@ -43,6 +50,10 @@ func NewInterviewController(
 		participantRepo: participantRepo,
 		tx:              tx,
 	}
+}
+
+func (ctrl *InterviewController) SetWS(ws WSNotifier) {
+	ctrl.ws = ws
 }
 
 type proposeRequest struct {
@@ -112,8 +123,13 @@ func (ctrl *InterviewController) Propose(c echo.Context) error {
 	ctx := c.Request().Context()
 	var proposal *interview.Proposal
 	var createdSlots []*interview.Slot
+	var cancelledProposals []*interview.Proposal
 
 	err := ctrl.tx.WithinTransaction(ctx, func(txCtx context.Context) error {
+		// Cancel any existing pending proposals for this application
+		cancelled, _ := ctrl.proposalRepo.CancelPendingByApplication(txCtx, req.ApplicationID)
+		cancelledProposals = cancelled
+
 		var txErr error
 		proposal, txErr = ctrl.proposalRepo.Create(txCtx, &interview.Proposal{
 			ApplicationID:   req.ApplicationID,
@@ -212,6 +228,19 @@ func (ctrl *InterviewController) Propose(c echo.Context) error {
 	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	// Notify candidate via WebSocket about cancelled proposals
+	if ctrl.ws != nil && len(cancelledProposals) > 0 {
+		for _, cp := range cancelledProposals {
+			payload, _ := json.Marshal(map[string]interface{}{
+				"type": "proposal_cancelled",
+				"payload": map[string]string{
+					"proposal_id": cp.ID,
+				},
+			})
+			ctrl.ws.Send(fmt.Sprintf("candidate:%s", candidateID), payload)
+		}
 	}
 
 	// Auto-update application status to "interview" if currently applied/screening
@@ -566,6 +595,31 @@ func (ctrl *InterviewController) CancelInterview(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"status": "cancelled"})
+}
+
+func (ctrl *InterviewController) GetPendingProposal(c echo.Context) error {
+	companyID, ok := c.Get(authmw.CompanyIDKey).(string)
+	if !ok || companyID == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
+	}
+
+	applicationID := c.Param("applicationId")
+	ctx := c.Request().Context()
+
+	var proposalID, status string
+	var createdAt time.Time
+	err := ctrl.pool.QueryRow(ctx,
+		"SELECT id, status, created_at FROM interview_proposals WHERE application_id = $1 AND status = 'pending' AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1",
+		applicationID).Scan(&proposalID, &status, &createdAt)
+	if err != nil {
+		return c.JSON(http.StatusOK, map[string]interface{}{"hasPending": false})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"hasPending": true,
+		"proposalId": proposalID,
+		"createdAt":  createdAt,
+	})
 }
 
 func (ctrl *InterviewController) GetProposalSlots(c echo.Context) error {

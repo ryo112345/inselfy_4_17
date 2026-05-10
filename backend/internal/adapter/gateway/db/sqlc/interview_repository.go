@@ -124,6 +124,23 @@ func (r *InterviewProposalRepository) ListPendingByCandidate(ctx context.Context
 	return result, nil
 }
 
+func (r *InterviewProposalRepository) CancelPendingByApplication(ctx context.Context, applicationID string) ([]*interview.Proposal, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(applicationID)
+	if err != nil {
+		return nil, domainerr.ErrBadRequest
+	}
+	rows, err := q.CancelPendingProposalsByApplication(ctx, pgID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*interview.Proposal, len(rows))
+	for i, row := range rows {
+		result[i] = proposalToDomain(row)
+	}
+	return result, nil
+}
+
 func proposalToDomain(row *generated.InterviewProposal) *interview.Proposal {
 	return &interview.Proposal{
 		ID:              uuidToString(row.ID),

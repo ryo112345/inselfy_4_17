@@ -7,6 +7,7 @@ import {
   fetchCompanyApplications,
   updateApplicationStatus,
 } from "@/features/job-application/api";
+import { checkPendingProposal } from "@/features/interview/api";
 import type { JobApplication } from "@/features/job-application/api";
 import { fetchJobPostings } from "@/features/job-posting/api";
 import {
@@ -214,6 +215,8 @@ export default function CompanyApplicationsPage() {
   const splitPanelRef = useRef<HTMLDivElement>(null);
   const panelStuckRef = useRef(false);
 
+  const [pendingProposal, setPendingProposal] = useState<{ hasPending: boolean; createdAt?: string } | null>(null);
+
   const [teamWvAvg, setTeamWvAvg] = useState<{ id: string; score: number }[] | null>(null);
   const [teamCiAvg, setTeamCiAvg] = useState<{ id: string; score: number }[] | null>(null);
   const [teamName, setTeamName] = useState<string>("");
@@ -261,6 +264,16 @@ export default function CompanyApplicationsPage() {
   useEffect(() => {
     load(statusFilter, jobFilter, keyword, dateRange);
   }, [statusFilter, jobFilter, keyword, dateRange, load]);
+
+  useEffect(() => {
+    if (!selected?.id) {
+      setPendingProposal(null);
+      return;
+    }
+    checkPendingProposal(selected.id)
+      .then(setPendingProposal)
+      .catch(() => setPendingProposal(null));
+  }, [selected?.id]);
 
   useEffect(() => {
     if (!selected?.jobPostingId) {
@@ -878,8 +891,13 @@ export default function CompanyApplicationsPage() {
                       <rect x="3" y="4" width="18" height="18" rx="2" />
                       <path d="M16 2v4M8 2v4M3 10h18" />
                     </svg>
-                    日程を提案
+                    {pendingProposal?.hasPending ? "日程を再提案" : "日程を提案"}
                   </Link>
+                  {pendingProposal?.hasPending && (
+                    <span className="text-xs text-amber-600">
+                      提案済み・回答待ち
+                    </span>
+                  )}
                 </div>
 
                 <div className="border-t border-gray-100" />

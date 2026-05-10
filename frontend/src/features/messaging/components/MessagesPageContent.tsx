@@ -180,6 +180,16 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
     enabled: !!user,
     onMessage: useCallback(
       (msg: { type: string; payload: unknown }) => {
+        if (msg.type === "proposal_cancelled") {
+          const p = msg.payload as { proposal_id: string };
+          window.dispatchEvent(
+            new CustomEvent("proposal_cancelled", {
+              detail: { proposalId: p.proposal_id },
+            }),
+          );
+          loadConversations();
+          return;
+        }
         if (msg.type !== "new_message") return;
         const p = msg.payload as {
           conversation_id: string;
@@ -214,6 +224,14 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-gray-500">ログインしてください</p>
       </div>
     );
   }

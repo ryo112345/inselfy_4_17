@@ -28,6 +28,7 @@ type InterviewProposalRepository interface {
 	UpdateStatus(ctx context.Context, id, status string) error
 	UpdateMessageID(ctx context.Context, id, messageID string) error
 	ListPendingByCandidate(ctx context.Context, candidateID string) ([]*interview.Proposal, error)
+	CancelPendingByApplication(ctx context.Context, applicationID string) ([]*interview.Proposal, error)
 }
 
 type InterviewSlotRepository interface {

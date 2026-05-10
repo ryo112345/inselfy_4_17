@@ -97,20 +97,51 @@ type Selection = {
 
 type ConfirmedSlot = { startTime: string; endTime: string };
 
-export function ProposalCard({ proposalId, slots, message, location, expiresAt, durationMinutes, isCandidate, status, onConfirmed }: Props) {
+export function ProposalCard({ proposalId, slots, message, location, expiresAt, durationMinutes, isCandidate, status: statusProp, onConfirmed }: Props) {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const [confirmed, setConfirmed] = useState(status === "confirmed");
+  const [confirmed, setConfirmed] = useState(statusProp === "confirmed");
   const [confirmedSlot, setConfirmedSlot] = useState<ConfirmedSlot | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [liveStatus, setLiveStatus] = useState<string | undefined>(statusProp);
 
+  useEffect(() => {
+    if (statusProp) return;
+    fetchProposalSlots(proposalId)
+      .then((res) => {
+        const s = res.proposal?.status;
+        if (s) setLiveStatus(s);
+        if (s === "confirmed") {
+          setConfirmed(true);
+          const selected = res.slots?.find(
+            (sl: { status: string; startTime: string; endTime: string }) => sl.status === "selected",
+          );
+          if (selected) setConfirmedSlot({ startTime: selected.startTime, endTime: selected.endTime });
+        }
+      })
+      .catch(() => {});
+  }, [proposalId, statusProp]);
+
+  const status = liveStatus ?? statusProp;
   const duration = durationMinutes && durationMinutes > 0 ? durationMinutes : 60;
   const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
   const isPending = !confirmed && !isExpired && status !== "cancelled";
   const canSelect = isCandidate && isPending;
 
   useEffect(() => {
-    if (status === "confirmed" && !confirmedSlot) {
+    if (confirmed || isExpired || status === "cancelled") return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.proposalId === proposalId) {
+        setLiveStatus("cancelled");
+      }
+    };
+    window.addEventListener("proposal_cancelled", handler);
+    return () => window.removeEventListener("proposal_cancelled", handler);
+  }, [proposalId, confirmed, isExpired, status]);
+
+  useEffect(() => {
+    if (statusProp === "confirmed" && !confirmedSlot) {
       fetchProposalSlots(proposalId)
         .then((res) => {
           const selected = res.slots?.find(
@@ -122,7 +153,7 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
         })
         .catch(() => {});
     }
-  }, [status, proposalId, confirmedSlot]);
+  }, [statusProp, proposalId, confirmedSlot]);
 
   const initialWeekStart = useMemo(() => {
     if (slots.length === 0) return getMonday(new Date());
@@ -242,6 +273,14 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
             {" "}{formatTimeFromDate(new Date(confirmedSlot.startTime))} – {formatTimeFromDate(new Date(confirmedSlot.endTime))}
           </p>
         )}
+      </div>
+    );
+  }
+
+  if (status === "cancelled") {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+        <p className="text-sm text-gray-500">この提案は取り消されました</p>
       </div>
     );
   }

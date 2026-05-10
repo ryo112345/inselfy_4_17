@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { useCompanyUnreadMessaging } from "@/features/messaging/company-unread-context";
 
 const navItems = [
   { label: "HOME", href: "/company", icon: HomeIcon },
@@ -24,6 +25,7 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { company, logout, companyFetch } = useCompanyAuth();
+  const { unreadCount: unreadMessages } = useCompanyUnreadMessaging();
   const [expanded, setExpanded] = useState(true);
   const [savedCount, setSavedCount] = useState(0);
   const accentColor = "#2979ff";
@@ -125,6 +127,7 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
                   item.href === "/company"
                     ? pathname === "/company"
                     : pathname.startsWith(item.href);
+                const badge = item.href === "/company/messages" ? unreadMessages : 0;
                 return (
                   <Link
                     key={item.href}
@@ -136,8 +139,13 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
                         : { color: "#4b5563" }
                     }
                   >
-                    <span className="h-6 w-6">
+                    <span className="relative h-6 w-6">
                       <item.icon />
+                      {badge > 0 && (
+                        <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                          {badge > 99 ? "99+" : badge}
+                        </span>
+                      )}
                     </span>
                     <span className="whitespace-nowrap">{item.label}</span>
                   </Link>
