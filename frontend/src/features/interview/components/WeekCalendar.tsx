@@ -8,6 +8,7 @@ import { fetchCompanyApplications, type JobApplication } from "@/features/job-ap
 import { CalendarHeader } from "./CalendarHeader";
 import { InterviewBlock } from "./InterviewBlock";
 import { InterviewDetailPanel } from "./InterviewDetailPanel";
+import { MiniCalendar } from "./MiniCalendar";
 
 const START_HOUR = 8;
 const END_HOUR = 21;
@@ -121,6 +122,12 @@ export function WeekCalendar() {
   const handleToday = () => {
     changeWeek(getMonday(new Date()));
   };
+
+  const [miniCalMonth, setMiniCalMonth] = useState(() => new Date(weekStart.getFullYear(), weekStart.getMonth(), 1));
+
+  const handleMiniCalDateClick = useCallback((date: Date) => {
+    changeWeek(getMonday(date));
+  }, [changeWeek]);
 
   const [initialized, setInitialized] = useState(false);
   if (!initialized) {
@@ -248,6 +255,17 @@ export function WeekCalendar() {
         </div>
       )}
 
+      <div className="flex flex-1 min-h-0">
+        {/* Mini Calendar */}
+        <div className="w-56 shrink-0 border-r border-gray-100 px-4 pt-4">
+          <MiniCalendar
+            month={miniCalMonth}
+            onMonthChange={setMiniCalMonth}
+            weekStart={weekStart}
+            onDateClick={handleMiniCalDateClick}
+          />
+        </div>
+
       <div className="flex-1 overflow-auto">
         <div className="min-w-[700px]">
           {/* Day headers */}
@@ -353,6 +371,7 @@ export function WeekCalendar() {
             })}
           </div>
         </div>
+      </div>
       </div>
 
       {/* Interview detail modal */}

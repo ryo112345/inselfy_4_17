@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth/auth-context";
 import { fetchCandidateInterviews, cancelInterviewAsCandidate } from "@/features/interview/api";
 import type { Interview, InterviewProposal } from "@/features/interview/types";
 import { CalendarSlotSelector } from "@/features/interview/components/CalendarSlotSelector";
+import { useMessagingWebSocket } from "@/features/messaging/useWebSocket";
 
 type Tab = "pending" | "scheduled" | "past";
 
@@ -59,6 +60,25 @@ export default function InterviewsPage() {
   useEffect(() => {
     if (!authLoading && user) load();
   }, [authLoading, user, load]);
+
+  useMessagingWebSocket({
+    type: "candidate",
+    enabled: !!user,
+    onMessage: useCallback(
+      (msg: { type: string; payload: unknown }) => {
+        if (msg.type === "proposal_cancelled") {
+          const p = msg.payload as { proposal_id: string };
+          window.dispatchEvent(
+            new CustomEvent("proposal_cancelled", {
+              detail: { proposalId: p.proposal_id },
+            }),
+          );
+          load();
+        }
+      },
+      [load],
+    ),
+  });
 
   const now = new Date();
   const scheduled = interviews.filter(

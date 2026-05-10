@@ -17,6 +17,17 @@ SELECT * FROM interview_proposals
 WHERE candidate_id = $1 AND status = 'pending' AND expires_at > NOW()
 ORDER BY created_at DESC;
 
+-- name: GetPendingProposalByApplication :one
+SELECT * FROM interview_proposals
+WHERE application_id = $1 AND status = 'pending' AND expires_at > NOW()
+ORDER BY created_at DESC
+LIMIT 1;
+
+-- name: CancelPendingProposalsByApplication :many
+UPDATE interview_proposals SET status = 'cancelled', updated_at = NOW()
+WHERE application_id = $1 AND status = 'pending' AND expires_at > NOW()
+RETURNING *;
+
 -- name: CreateInterviewSlot :one
 INSERT INTO interview_slots (proposal_id, application_id, proposed_by, start_time, end_time, status)
 VALUES ($1, $2, $3, $4, $5, $6)

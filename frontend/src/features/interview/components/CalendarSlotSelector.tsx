@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { selectSlot } from "../api";
 
 type Slot = {
@@ -99,10 +99,24 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
   const [selection, setSelection] = useState<Selection | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const duration = durationMinutes && durationMinutes > 0 ? durationMinutes : 60;
   const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
+
+  useEffect(() => {
+    if (confirmed || isExpired) return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.proposalId === proposalId) {
+        setCancelled(true);
+        onConfirmed?.();
+      }
+    };
+    window.addEventListener("proposal_cancelled", handler);
+    return () => window.removeEventListener("proposal_cancelled", handler);
+  }, [proposalId, confirmed, isExpired, onConfirmed]);
 
   const initialWeekStart = useMemo(() => {
     if (slots.length === 0) return getMonday(new Date());
@@ -221,6 +235,20 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
             {" "}{formatTimeFromDate(new Date(selection.startIso))} – {formatTimeFromDate(new Date(selection.endIso))}
           </p>
         )}
+      </div>
+    );
+  }
+
+  if (cancelled) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <div className="flex items-center gap-2">
+          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+          <span className="text-sm font-semibold text-amber-800">この提案は取り消されました</span>
+        </div>
+        <p className="text-xs text-amber-600 mt-1">企業から新しい日程が提案される可能性があります</p>
       </div>
     );
   }

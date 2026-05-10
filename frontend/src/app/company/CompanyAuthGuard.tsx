@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { CompanyUnreadMessagingProvider } from "@/features/messaging/company-unread-context";
 import { CompanyHeader } from "./CompanyHeader";
 
 const publicPaths = ["/company/login", "/company/register"];
@@ -45,8 +46,10 @@ export function CompanyAuthGuard({ children }: { children: React.ReactNode }) {
   const isFullBleed = fullBleedPaths.some((p) => pathname.startsWith(p));
 
   return (
-    <div className={isFullBleed ? "flex h-screen flex-col overflow-hidden bg-gray-50" : "min-h-screen bg-gray-50"}>
-      <CompanyHeader>{children}</CompanyHeader>
-    </div>
+    <CompanyUnreadMessagingProvider>
+      <div className={isFullBleed ? "flex h-screen flex-col overflow-hidden bg-gray-50" : "min-h-screen bg-gray-50"}>
+        <CompanyHeader>{children}</CompanyHeader>
+      </div>
+    </CompanyUnreadMessagingProvider>
   );
 }

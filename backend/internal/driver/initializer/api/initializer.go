@@ -662,6 +662,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// --- Company Interviews ---
 	companyInterviewGroup := e.Group("/api/company/interviews", companyJwtMW)
 	companyInterviewGroup.POST("/propose", interviewCtrl.Propose)
+	companyInterviewGroup.GET("/pending/:applicationId", interviewCtrl.GetPendingProposal)
 	companyInterviewGroup.GET("", interviewCtrl.ListByCompany)
 	companyInterviewGroup.POST("/:interviewId/cancel", func(c echo.Context) error {
 		return interviewCtrl.CancelInterview(c)
@@ -719,6 +720,8 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// --- WebSocket ---
 	wsHub := ws.NewHub()
 	go wsHub.Run()
+
+	interviewCtrl.SetWS(wsHub)
 
 	pgBroker := ws.NewPgMessageBroker(pool)
 	participantRepoForRelay := participantRepoFactory()

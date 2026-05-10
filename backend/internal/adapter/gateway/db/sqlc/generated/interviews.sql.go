@@ -11,6 +11,44 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const cancelPendingProposalsByApplication = `-- name: CancelPendingProposalsByApplication :many
+UPDATE interview_proposals SET status = 'cancelled', updated_at = NOW()
+WHERE application_id = $1 AND status = 'pending' AND expires_at > NOW()
+RETURNING id, application_id, company_id, candidate_id, message, status, message_id, expires_at, created_at, updated_at, duration_minutes
+`
+
+func (q *Queries) CancelPendingProposalsByApplication(ctx context.Context, applicationID pgtype.UUID) ([]*InterviewProposal, error) {
+	rows, err := q.db.Query(ctx, cancelPendingProposalsByApplication, applicationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*InterviewProposal
+	for rows.Next() {
+		var i InterviewProposal
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApplicationID,
+			&i.CompanyID,
+			&i.CandidateID,
+			&i.Message,
+			&i.Status,
+			&i.MessageID,
+			&i.ExpiresAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DurationMinutes,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const createInterview = `-- name: CreateInterview :one
 INSERT INTO interviews (application_id, company_id, candidate_id, title, start_time, end_time, location, meeting_url, internal_notes, status, selected_slot_id, proposal_id)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
@@ -219,6 +257,32 @@ func (q *Queries) GetInterviewSlotByID(ctx context.Context, id pgtype.UUID) (*In
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return &i, err
+}
+
+const getPendingProposalByApplication = `-- name: GetPendingProposalByApplication :one
+SELECT id, application_id, company_id, candidate_id, message, status, message_id, expires_at, created_at, updated_at, duration_minutes FROM interview_proposals
+WHERE application_id = $1 AND status = 'pending' AND expires_at > NOW()
+ORDER BY created_at DESC
+LIMIT 1
+`
+
+func (q *Queries) GetPendingProposalByApplication(ctx context.Context, applicationID pgtype.UUID) (*InterviewProposal, error) {
+	row := q.db.QueryRow(ctx, getPendingProposalByApplication, applicationID)
+	var i InterviewProposal
+	err := row.Scan(
+		&i.ID,
+		&i.ApplicationID,
+		&i.CompanyID,
+		&i.CandidateID,
+		&i.Message,
+		&i.Status,
+		&i.MessageID,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DurationMinutes,
 	)
 	return &i, err
 }

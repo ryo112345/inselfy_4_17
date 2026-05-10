@@ -10,6 +10,7 @@ import {
   sendMessageAsCompany,
   markReadAsCompany,
 } from "@/features/messaging/api";
+import { useCompanyUnreadMessaging } from "@/features/messaging/company-unread-context";
 import type { Conversation, Message } from "@/features/messaging/types";
 import { ConversationList } from "@/features/messaging/components/ConversationList";
 import { MessageThread } from "@/features/messaging/components/MessageThread";
@@ -17,6 +18,7 @@ import { useMessagingWebSocket } from "@/features/messaging/useWebSocket";
 
 export default function CompanyMessagesPage() {
   const { company, isLoading: authLoading } = useCompanyAuth();
+  const { refresh: refreshUnread } = useCompanyUnreadMessaging();
   const searchParams = useSearchParams();
   const candidateIdParam = searchParams.get("candidateId");
   const candidateNameParam = searchParams.get("candidateName");
@@ -68,6 +70,7 @@ export default function CompanyMessagesPage() {
       });
       setMessages(data.items ?? []);
       await markReadAsCompany(convId);
+      refreshUnread();
       setConversations((prev) =>
         prev.map((c) =>
           c.id === convId ? { ...c, unreadCount: 0 } : c,
@@ -149,8 +152,9 @@ export default function CompanyMessagesPage() {
             .catch(() => {});
         }
         loadConversations();
+        refreshUnread();
       },
-      [loadConversations],
+      [loadConversations, refreshUnread],
     ),
   });
 

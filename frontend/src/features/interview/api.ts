@@ -26,6 +26,16 @@ export async function proposeInterview(body: {
   return res.json();
 }
 
+export async function checkPendingProposal(
+  applicationId: string,
+): Promise<{ hasPending: boolean; proposalId?: string; createdAt?: string }> {
+  const res = await fetch(`/api/company/interviews/pending/${applicationId}`, {
+    credentials: "include",
+  });
+  if (!res.ok) return { hasPending: false };
+  return res.json();
+}
+
 export async function fetchCompanyInterviews(
   from: string,
   to: string,

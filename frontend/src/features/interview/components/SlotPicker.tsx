@@ -2,7 +2,8 @@
 
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { proposeInterview } from "../api";
+import { proposeInterview, checkPendingProposal } from "../api";
+import { MiniCalendar } from "./MiniCalendar";
 
 type SlotEntry = {
   id: string;
@@ -23,13 +24,11 @@ const END_HOUR = 21;
 const TOTAL_HOURS = END_HOUR - START_HOUR;
 const HOUR_HEIGHT = 60;
 const SNAP_MINUTES = 15;
-const DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"];
+const DAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 
-function getMonday(d: Date): Date {
+function getSunday(d: Date): Date {
   const date = new Date(d);
-  const day = date.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  date.setDate(date.getDate() + diff);
+  date.setDate(date.getDate() - date.getDay());
   date.setHours(0, 0, 0, 0);
   return date;
 }
@@ -88,11 +87,11 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
   const router = useRouter();
   const [duration, setDuration] = useState(60);
   const [weekStart, setWeekStart] = useState(() => {
-    if (initialDate) return getMonday(new Date(initialDate));
+    if (initialDate) return getSunday(new Date(initialDate));
     const today = new Date();
-    const monday = getMonday(today);
-    if (today.getDay() >= 5) return addDays(monday, 7);
-    return monday;
+    const sunday = getSunday(today);
+    if (today.getDay() >= 5) return addDays(sunday, 7);
+    return sunday;
   });
   const [slots, setSlots] = useState<SlotEntry[]>(() => {
     if (initialDate && initialStartMinutes != null) {
@@ -106,6 +105,11 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
   const [location, setLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasPending, setHasPending] = useState(false);
+
+  useEffect(() => {
+    checkPendingProposal(applicationId).then((res) => setHasPending(res.hasPending)).catch(() => {});
+  }, [applicationId]);
 
   const dragRef = useRef<{ dayIndex: number; startMinutes: number } | null>(null);
   const [dragPreview, setDragPreview] = useState<{ dayIndex: number; startMinutes: number; endMinutes: number } | null>(null);
@@ -113,11 +117,17 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<number | null>(null);
 
+  const [miniCalMonth, setMiniCalMonth] = useState(() => new Date(weekStart.getFullYear(), weekStart.getMonth(), 1));
+
   const weekDays = useMemo(() =>
     Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
   [weekStart]);
   const weekDaysRef = useRef(weekDays);
   weekDaysRef.current = weekDays;
+
+  const handleMiniCalDateClick = useCallback((date: Date) => {
+    setWeekStart(getSunday(date));
+  }, []);
 
   const getDayAndMinutes = useCallback((e: React.MouseEvent | MouseEvent) => {
     if (!gridRef.current) return null;
@@ -275,10 +285,17 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
             </svg>
           </button>
           <div>
-            <h1 className="text-base font-semibold text-gray-900">面接日程を提案</h1>
+            <h1 className="text-base font-semibold text-gray-900">
+              {hasPending ? "面接日程を再提案" : "面接日程を提案"}
+            </h1>
             <p className="text-xs text-gray-500">
-              <span className="font-medium text-gray-700">{candidateName}</span> さんに候補日時を提案
+              <span className="font-medium text-gray-700">{candidateName}</span> さんに候補日時を{hasPending ? "再" : ""}提案
             </p>
+            {hasPending && (
+              <p className="text-xs text-amber-600 mt-0.5">
+                前回の提案は自動的にキャンセルされます
+              </p>
+            )}
           </div>
         </div>
 
@@ -295,7 +312,7 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
             disabled={submitting || slots.length === 0}
             className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors"
           >
-            {submitting ? "送信中..." : `日程を提案する（${slots.length}件）`}
+            {submitting ? "送信中..." : hasPending ? `日程を再提案する（${slots.length}件）` : `日程を提案する（${slots.length}件）`}
           </button>
         </div>
       </div>
@@ -348,10 +365,24 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
               className="w-48 rounded-lg border border-gray-200 px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300"
             />
           </div>
-          <span className="text-xs text-gray-400">クリックまたはドラッグで候補日時を作成</span>
+          <span className="text-xs text-gray-400">空いている時間帯をドラッグしてください。候補者はその中から{duration >= 60 ? `${Math.floor(duration / 60)}時間` : ""}{duration % 60 > 0 ? `${duration % 60}分` : ""}を選びます</span>
         </div>
       </div>
 
+      {/* Main content: mini calendar + week grid */}
+      <div className="flex flex-1 min-h-0">
+        {/* Mini Calendar */}
+        <div className="w-56 shrink-0 border-r border-gray-100 px-4 pt-4">
+          <MiniCalendar
+            month={miniCalMonth}
+            onMonthChange={setMiniCalMonth}
+            weekStart={weekStart}
+            onDateClick={handleMiniCalDateClick}
+          />
+        </div>
+
+        {/* Week calendar */}
+        <div className="flex-1 flex flex-col min-h-0">
       {/* Day Headers */}
       <div className="grid grid-cols-[56px_repeat(7,1fr)] border-b border-gray-200 shrink-0">
         <div />
@@ -454,6 +485,9 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
           </div>
         </div>
       </div>
+        </div>
+      </div>
     </div>
   );
 }
+
