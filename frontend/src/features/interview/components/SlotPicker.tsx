@@ -437,13 +437,13 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
                   {/* Drag preview */}
                   {dragPreview && dragPreview.dayIndex === dayIdx && (
                     <div
-                      className="absolute left-1 right-1 rounded-lg bg-blue-400/50 border-2 border-blue-500 border-dashed z-20 pointer-events-none"
+                      className="absolute left-1 right-1 rounded-lg bg-blue-500 text-white z-20 pointer-events-none"
                       style={{
                         top: `${minutesToY(dragPreview.startMinutes)}px`,
                         height: `${Math.max(minutesToY(dragPreview.endMinutes) - minutesToY(dragPreview.startMinutes), 4)}px`,
                       }}
                     >
-                      <p className="text-xs font-medium text-blue-700 px-2 py-1">
+                      <p className="text-xs font-medium px-2 py-1">
                         {formatTime(dragPreview.startMinutes)} – {formatTime(dragPreview.endMinutes)}
                       </p>
                     </div>
