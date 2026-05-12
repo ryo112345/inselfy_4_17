@@ -7,14 +7,15 @@ import { cookies } from "next/headers";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const userId = cookieStore.get("userId")?.value ?? "";
-  const username = cookieStore.get("username")?.value ?? "guest";
-  const displayName = cookieStore.get("displayName")?.value;
+  const hasToken = !!cookieStore.get("inselfy_token")?.value;
+  const userId = hasToken ? cookieStore.get("userId")?.value ?? "" : "";
+  const username = hasToken ? cookieStore.get("username")?.value ?? "guest" : "guest";
+  const displayName = hasToken ? cookieStore.get("displayName")?.value : undefined;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
   let posts: Awaited<ReturnType<typeof fetchTimeline>> | null = null;
   try {
-    posts = await fetchTimeline();
+    posts = await fetchTimeline(20, 0, userId);
   } catch {
     // API not available
   }
@@ -29,10 +30,14 @@ export default async function HomePage() {
       <div className="flex justify-center min-h-screen md:pl-[50px]">
         <main className="w-full max-w-[600px] bg-white border-x border-gray-200/80">
           <FeedTabs />
-          <PostForm userId={userId} username={username} displayName={displayName} />
+          <PostForm />
 
           {posts ? (
-            <Timeline posts={posts.items ?? []} />
+            <Timeline
+              initialPosts={posts.items ?? []}
+              initialTotal={posts.total}
+              currentUserId={userId || undefined}
+            />
           ) : (
             <div className="flex items-center justify-center py-16 text-gray-400">
               <p className="text-sm">タイムラインを読み込めませんでした</p>
