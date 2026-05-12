@@ -349,8 +349,29 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	postGroup.GET("/users/:userId", func(c echo.Context) error {
 		return postCtrl.ListByUserID(c, c.Param("userId"))
 	})
+	postGroup.GET("/users/:userId/likes", func(c echo.Context) error {
+		return postCtrl.ListLikedByUserID(c, c.Param("userId"))
+	})
+	postGroup.GET("/:postId", func(c echo.Context) error {
+		return postCtrl.GetByID(c, c.Param("postId"))
+	})
 	postGroup.DELETE("/:postId", func(c echo.Context) error {
 		return postCtrl.Delete(c, c.Param("postId"))
+	}, jwtMW)
+	postGroup.POST("/:postId/like", func(c echo.Context) error {
+		return postCtrl.ToggleLike(c, c.Param("postId"))
+	}, jwtMW)
+	postGroup.POST("/:postId/repost", func(c echo.Context) error {
+		return postCtrl.ToggleRepost(c, c.Param("postId"))
+	}, jwtMW)
+	postGroup.GET("/:postId/comments", func(c echo.Context) error {
+		return postCtrl.ListComments(c, c.Param("postId"))
+	})
+	postGroup.POST("/:postId/comments", func(c echo.Context) error {
+		return postCtrl.CreateComment(c, c.Param("postId"))
+	}, jwtMW)
+	postGroup.DELETE("/comments/:commentId", func(c echo.Context) error {
+		return postCtrl.DeleteComment(c, c.Param("commentId"))
 	}, jwtMW)
 
 	// --- Work Values ---

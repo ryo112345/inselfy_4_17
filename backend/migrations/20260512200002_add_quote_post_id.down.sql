@@ -1,0 +1,1 @@
+ALTER TABLE posts DROP COLUMN IF EXISTS quote_post_id;

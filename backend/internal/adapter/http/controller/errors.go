@@ -100,7 +100,9 @@ func isBadRequest(err error) bool {
 		errors.Is(err, skill.ErrNameTooLong):
 		return true
 	case errors.Is(err, post.ErrContentRequired),
-		errors.Is(err, post.ErrContentTooLong):
+		errors.Is(err, post.ErrContentTooLong),
+		errors.Is(err, post.ErrCommentContentRequired),
+		errors.Is(err, post.ErrCommentContentTooLong):
 		return true
 	case errors.Is(err, article.ErrTitleRequired),
 		errors.Is(err, article.ErrTitleTooLong),

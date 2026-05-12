@@ -1,0 +1,1 @@
+ALTER TABLE posts ADD COLUMN quote_post_id UUID REFERENCES posts(id) ON DELETE SET NULL;

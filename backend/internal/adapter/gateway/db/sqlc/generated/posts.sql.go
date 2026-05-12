@@ -11,8 +11,55 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countLikedPostsByUserID = `-- name: CountLikedPostsByUserID :one
+SELECT count(*) FROM post_likes WHERE user_id = $1
+`
+
+func (q *Queries) CountLikedPostsByUserID(ctx context.Context, userID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countLikedPostsByUserID, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countPostComments = `-- name: CountPostComments :one
+SELECT count(*) FROM post_comments WHERE post_id = $1
+`
+
+func (q *Queries) CountPostComments(ctx context.Context, postID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countPostComments, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countPostLikes = `-- name: CountPostLikes :one
+SELECT count(*) FROM post_likes WHERE post_id = $1
+`
+
+func (q *Queries) CountPostLikes(ctx context.Context, postID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countPostLikes, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countPostReposts = `-- name: CountPostReposts :one
+SELECT count(*) FROM post_reposts WHERE post_id = $1
+`
+
+func (q *Queries) CountPostReposts(ctx context.Context, postID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countPostReposts, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countPostsByUserID = `-- name: CountPostsByUserID :one
-SELECT count(*) FROM posts WHERE user_id = $1
+SELECT count(DISTINCT p.id)
+FROM posts p
+LEFT JOIN post_reposts pr ON pr.post_id = p.id AND pr.user_id = $1
+WHERE p.user_id = $1 OR pr.user_id IS NOT NULL
 `
 
 func (q *Queries) CountPostsByUserID(ctx context.Context, userID pgtype.UUID) (int64, error) {
@@ -34,21 +81,49 @@ func (q *Queries) CountTimelinePosts(ctx context.Context) (int64, error) {
 }
 
 const createPost = `-- name: CreatePost :one
-INSERT INTO posts (user_id, content)
-VALUES ($1, $2)
-RETURNING id, user_id, content, created_at, updated_at
+INSERT INTO posts (user_id, content, quote_post_id)
+VALUES ($1, $2, $3)
+RETURNING id, user_id, content, created_at, updated_at, quote_post_id
 `
 
 type CreatePostParams struct {
+	UserID      pgtype.UUID `json:"user_id"`
+	Content     string      `json:"content"`
+	QuotePostID pgtype.UUID `json:"quote_post_id"`
+}
+
+func (q *Queries) CreatePost(ctx context.Context, arg *CreatePostParams) (*Post, error) {
+	row := q.db.QueryRow(ctx, createPost, arg.UserID, arg.Content, arg.QuotePostID)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Content,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.QuotePostID,
+	)
+	return &i, err
+}
+
+const createPostComment = `-- name: CreatePostComment :one
+INSERT INTO post_comments (post_id, user_id, content)
+VALUES ($1, $2, $3)
+RETURNING id, post_id, user_id, content, created_at, updated_at
+`
+
+type CreatePostCommentParams struct {
+	PostID  pgtype.UUID `json:"post_id"`
 	UserID  pgtype.UUID `json:"user_id"`
 	Content string      `json:"content"`
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg *CreatePostParams) (*Post, error) {
-	row := q.db.QueryRow(ctx, createPost, arg.UserID, arg.Content)
-	var i Post
+func (q *Queries) CreatePostComment(ctx context.Context, arg *CreatePostCommentParams) (*PostComment, error) {
+	row := q.db.QueryRow(ctx, createPostComment, arg.PostID, arg.UserID, arg.Content)
+	var i PostComment
 	err := row.Scan(
 		&i.ID,
+		&i.PostID,
 		&i.UserID,
 		&i.Content,
 		&i.CreatedAt,
@@ -66,8 +141,17 @@ func (q *Queries) DeletePost(ctx context.Context, id pgtype.UUID) error {
 	return err
 }
 
+const deletePostComment = `-- name: DeletePostComment :exec
+DELETE FROM post_comments WHERE id = $1
+`
+
+func (q *Queries) DeletePostComment(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deletePostComment, id)
+	return err
+}
+
 const getPostByID = `-- name: GetPostByID :one
-SELECT id, user_id, content, created_at, updated_at
+SELECT id, user_id, content, created_at, updated_at, quote_post_id
 FROM posts
 WHERE id = $1
 `
@@ -81,27 +165,253 @@ func (q *Queries) GetPostByID(ctx context.Context, id pgtype.UUID) (*Post, error
 		&i.Content,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.QuotePostID,
 	)
 	return &i, err
 }
 
-const listPostsByUserID = `-- name: ListPostsByUserID :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, u.username, u.name AS user_name
+const getPostCommentByID = `-- name: GetPostCommentByID :one
+SELECT id, post_id, user_id, content, created_at, updated_at FROM post_comments WHERE id = $1
+`
+
+func (q *Queries) GetPostCommentByID(ctx context.Context, id pgtype.UUID) (*PostComment, error) {
+	row := q.db.QueryRow(ctx, getPostCommentByID, id)
+	var i PostComment
+	err := row.Scan(
+		&i.ID,
+		&i.PostID,
+		&i.UserID,
+		&i.Content,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return &i, err
+}
+
+const getPostWithUserByID = `-- name: GetPostWithUserByID :one
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.quote_post_id, u.username, u.name AS user_name,
+  (SELECT count(*) FROM post_likes pl WHERE pl.post_id = p.id)::int AS like_count,
+  (SELECT count(*) FROM post_comments pc WHERE pc.post_id = p.id)::int AS comment_count,
+  (SELECT count(*) FROM post_reposts pr WHERE pr.post_id = p.id)::int AS repost_count,
+  EXISTS(SELECT 1 FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = $2) AS liked_by_me,
+  EXISTS(SELECT 1 FROM post_reposts pr WHERE pr.post_id = p.id AND pr.user_id = $2) AS reposted_by_me,
+  false AS is_repost,
+  COALESCE(qp.content, '') AS quote_content,
+  COALESCE(qu.username, '') AS quote_username,
+  COALESCE(qu.name, '') AS quote_name,
+  qp.created_at AS quote_created_at
 FROM posts p
 JOIN users u ON u.id = p.user_id
-WHERE p.user_id = $1
-ORDER BY p.created_at DESC
+LEFT JOIN posts qp ON qp.id = p.quote_post_id
+LEFT JOIN users qu ON qu.id = qp.user_id
+WHERE p.id = $1
+`
+
+type GetPostWithUserByIDParams struct {
+	ID     pgtype.UUID `json:"id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+type GetPostWithUserByIDRow struct {
+	ID             pgtype.UUID        `json:"id"`
+	UserID         pgtype.UUID        `json:"user_id"`
+	Content        string             `json:"content"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	QuotePostID    pgtype.UUID        `json:"quote_post_id"`
+	Username       string             `json:"username"`
+	UserName       string             `json:"user_name"`
+	LikeCount      int32              `json:"like_count"`
+	CommentCount   int32              `json:"comment_count"`
+	RepostCount    int32              `json:"repost_count"`
+	LikedByMe      bool               `json:"liked_by_me"`
+	RepostedByMe   bool               `json:"reposted_by_me"`
+	IsRepost       bool               `json:"is_repost"`
+	QuoteContent   string             `json:"quote_content"`
+	QuoteUsername  string             `json:"quote_username"`
+	QuoteName      string             `json:"quote_name"`
+	QuoteCreatedAt pgtype.Timestamptz `json:"quote_created_at"`
+}
+
+func (q *Queries) GetPostWithUserByID(ctx context.Context, arg *GetPostWithUserByIDParams) (*GetPostWithUserByIDRow, error) {
+	row := q.db.QueryRow(ctx, getPostWithUserByID, arg.ID, arg.UserID)
+	var i GetPostWithUserByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Content,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.QuotePostID,
+		&i.Username,
+		&i.UserName,
+		&i.LikeCount,
+		&i.CommentCount,
+		&i.RepostCount,
+		&i.LikedByMe,
+		&i.RepostedByMe,
+		&i.IsRepost,
+		&i.QuoteContent,
+		&i.QuoteUsername,
+		&i.QuoteName,
+		&i.QuoteCreatedAt,
+	)
+	return &i, err
+}
+
+const isPostLiked = `-- name: IsPostLiked :one
+SELECT EXISTS(SELECT 1 FROM post_likes WHERE post_id = $1 AND user_id = $2)
+`
+
+type IsPostLikedParams struct {
+	PostID pgtype.UUID `json:"post_id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+func (q *Queries) IsPostLiked(ctx context.Context, arg *IsPostLikedParams) (bool, error) {
+	row := q.db.QueryRow(ctx, isPostLiked, arg.PostID, arg.UserID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const isPostReposted = `-- name: IsPostReposted :one
+SELECT EXISTS(SELECT 1 FROM post_reposts WHERE post_id = $1 AND user_id = $2)
+`
+
+type IsPostRepostedParams struct {
+	PostID pgtype.UUID `json:"post_id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+func (q *Queries) IsPostReposted(ctx context.Context, arg *IsPostRepostedParams) (bool, error) {
+	row := q.db.QueryRow(ctx, isPostReposted, arg.PostID, arg.UserID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const likePost = `-- name: LikePost :exec
+INSERT INTO post_likes (post_id, user_id)
+VALUES ($1, $2)
+ON CONFLICT DO NOTHING
+`
+
+type LikePostParams struct {
+	PostID pgtype.UUID `json:"post_id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+func (q *Queries) LikePost(ctx context.Context, arg *LikePostParams) error {
+	_, err := q.db.Exec(ctx, likePost, arg.PostID, arg.UserID)
+	return err
+}
+
+const listLikedPostsByUserID = `-- name: ListLikedPostsByUserID :many
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.quote_post_id, u.username, u.name AS user_name,
+  (SELECT count(*) FROM post_likes pl WHERE pl.post_id = p.id)::int AS like_count,
+  (SELECT count(*) FROM post_comments pc WHERE pc.post_id = p.id)::int AS comment_count,
+  (SELECT count(*) FROM post_reposts pr WHERE pr.post_id = p.id)::int AS repost_count,
+  true AS liked_by_me,
+  EXISTS(SELECT 1 FROM post_reposts pr WHERE pr.post_id = p.id AND pr.user_id = $1) AS reposted_by_me,
+  false AS is_repost,
+  COALESCE(qp.content, '') AS quote_content,
+  COALESCE(qu.username, '') AS quote_username,
+  COALESCE(qu.name, '') AS quote_name,
+  qp.created_at AS quote_created_at
+FROM posts p
+JOIN users u ON u.id = p.user_id
+JOIN post_likes pl ON pl.post_id = p.id AND pl.user_id = $1
+LEFT JOIN posts qp ON qp.id = p.quote_post_id
+LEFT JOIN users qu ON qu.id = qp.user_id
+ORDER BY pl.created_at DESC
 LIMIT $2 OFFSET $3
 `
 
-type ListPostsByUserIDParams struct {
+type ListLikedPostsByUserIDParams struct {
 	UserID pgtype.UUID `json:"user_id"`
 	Limit  int32       `json:"limit"`
 	Offset int32       `json:"offset"`
 }
 
-type ListPostsByUserIDRow struct {
+type ListLikedPostsByUserIDRow struct {
+	ID             pgtype.UUID        `json:"id"`
+	UserID         pgtype.UUID        `json:"user_id"`
+	Content        string             `json:"content"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	QuotePostID    pgtype.UUID        `json:"quote_post_id"`
+	Username       string             `json:"username"`
+	UserName       string             `json:"user_name"`
+	LikeCount      int32              `json:"like_count"`
+	CommentCount   int32              `json:"comment_count"`
+	RepostCount    int32              `json:"repost_count"`
+	LikedByMe      bool               `json:"liked_by_me"`
+	RepostedByMe   bool               `json:"reposted_by_me"`
+	IsRepost       bool               `json:"is_repost"`
+	QuoteContent   string             `json:"quote_content"`
+	QuoteUsername  string             `json:"quote_username"`
+	QuoteName      string             `json:"quote_name"`
+	QuoteCreatedAt pgtype.Timestamptz `json:"quote_created_at"`
+}
+
+func (q *Queries) ListLikedPostsByUserID(ctx context.Context, arg *ListLikedPostsByUserIDParams) ([]*ListLikedPostsByUserIDRow, error) {
+	rows, err := q.db.Query(ctx, listLikedPostsByUserID, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ListLikedPostsByUserIDRow
+	for rows.Next() {
+		var i ListLikedPostsByUserIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Content,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.QuotePostID,
+			&i.Username,
+			&i.UserName,
+			&i.LikeCount,
+			&i.CommentCount,
+			&i.RepostCount,
+			&i.LikedByMe,
+			&i.RepostedByMe,
+			&i.IsRepost,
+			&i.QuoteContent,
+			&i.QuoteUsername,
+			&i.QuoteName,
+			&i.QuoteCreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPostComments = `-- name: ListPostComments :many
+SELECT c.id, c.post_id, c.user_id, c.content, c.created_at, c.updated_at, u.username, u.name AS user_name
+FROM post_comments c
+JOIN users u ON u.id = c.user_id
+WHERE c.post_id = $1
+ORDER BY c.created_at ASC
+LIMIT $2 OFFSET $3
+`
+
+type ListPostCommentsParams struct {
+	PostID pgtype.UUID `json:"post_id"`
+	Limit  int32       `json:"limit"`
+	Offset int32       `json:"offset"`
+}
+
+type ListPostCommentsRow struct {
 	ID        pgtype.UUID        `json:"id"`
+	PostID    pgtype.UUID        `json:"post_id"`
 	UserID    pgtype.UUID        `json:"user_id"`
 	Content   string             `json:"content"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
@@ -110,8 +420,92 @@ type ListPostsByUserIDRow struct {
 	UserName  string             `json:"user_name"`
 }
 
+func (q *Queries) ListPostComments(ctx context.Context, arg *ListPostCommentsParams) ([]*ListPostCommentsRow, error) {
+	rows, err := q.db.Query(ctx, listPostComments, arg.PostID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ListPostCommentsRow
+	for rows.Next() {
+		var i ListPostCommentsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.PostID,
+			&i.UserID,
+			&i.Content,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Username,
+			&i.UserName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPostsByUserID = `-- name: ListPostsByUserID :many
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.quote_post_id, u.username, u.name AS user_name,
+  (SELECT count(*) FROM post_likes pl WHERE pl.post_id = p.id)::int AS like_count,
+  (SELECT count(*) FROM post_comments pc WHERE pc.post_id = p.id)::int AS comment_count,
+  (SELECT count(*) FROM post_reposts pr WHERE pr.post_id = p.id)::int AS repost_count,
+  EXISTS(SELECT 1 FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = $4) AS liked_by_me,
+  EXISTS(SELECT 1 FROM post_reposts pr WHERE pr.post_id = p.id AND pr.user_id = $4) AS reposted_by_me,
+  (pr_self.user_id IS NOT NULL AND p.user_id != $1)::bool AS is_repost,
+  COALESCE(qp.content, '') AS quote_content,
+  COALESCE(qu.username, '') AS quote_username,
+  COALESCE(qu.name, '') AS quote_name,
+  qp.created_at AS quote_created_at
+FROM posts p
+JOIN users u ON u.id = p.user_id
+LEFT JOIN post_reposts pr_self ON pr_self.post_id = p.id AND pr_self.user_id = $1
+LEFT JOIN posts qp ON qp.id = p.quote_post_id
+LEFT JOIN users qu ON qu.id = qp.user_id
+WHERE p.user_id = $1 OR pr_self.user_id IS NOT NULL
+ORDER BY COALESCE(pr_self.created_at, p.created_at) DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListPostsByUserIDParams struct {
+	UserID   pgtype.UUID `json:"user_id"`
+	Limit    int32       `json:"limit"`
+	Offset   int32       `json:"offset"`
+	UserID_2 pgtype.UUID `json:"user_id_2"`
+}
+
+type ListPostsByUserIDRow struct {
+	ID             pgtype.UUID        `json:"id"`
+	UserID         pgtype.UUID        `json:"user_id"`
+	Content        string             `json:"content"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	QuotePostID    pgtype.UUID        `json:"quote_post_id"`
+	Username       string             `json:"username"`
+	UserName       string             `json:"user_name"`
+	LikeCount      int32              `json:"like_count"`
+	CommentCount   int32              `json:"comment_count"`
+	RepostCount    int32              `json:"repost_count"`
+	LikedByMe      bool               `json:"liked_by_me"`
+	RepostedByMe   bool               `json:"reposted_by_me"`
+	IsRepost       bool               `json:"is_repost"`
+	QuoteContent   string             `json:"quote_content"`
+	QuoteUsername  string             `json:"quote_username"`
+	QuoteName      string             `json:"quote_name"`
+	QuoteCreatedAt pgtype.Timestamptz `json:"quote_created_at"`
+}
+
 func (q *Queries) ListPostsByUserID(ctx context.Context, arg *ListPostsByUserIDParams) ([]*ListPostsByUserIDRow, error) {
-	rows, err := q.db.Query(ctx, listPostsByUserID, arg.UserID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listPostsByUserID,
+		arg.UserID,
+		arg.Limit,
+		arg.Offset,
+		arg.UserID_2,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -125,8 +519,19 @@ func (q *Queries) ListPostsByUserID(ctx context.Context, arg *ListPostsByUserIDP
 			&i.Content,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.QuotePostID,
 			&i.Username,
 			&i.UserName,
+			&i.LikeCount,
+			&i.CommentCount,
+			&i.RepostCount,
+			&i.LikedByMe,
+			&i.RepostedByMe,
+			&i.IsRepost,
+			&i.QuoteContent,
+			&i.QuoteUsername,
+			&i.QuoteName,
+			&i.QuoteCreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -139,30 +544,54 @@ func (q *Queries) ListPostsByUserID(ctx context.Context, arg *ListPostsByUserIDP
 }
 
 const listTimelinePosts = `-- name: ListTimelinePosts :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, u.username, u.name AS user_name
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.quote_post_id, u.username, u.name AS user_name,
+  (SELECT count(*) FROM post_likes pl WHERE pl.post_id = p.id)::int AS like_count,
+  (SELECT count(*) FROM post_comments pc WHERE pc.post_id = p.id)::int AS comment_count,
+  (SELECT count(*) FROM post_reposts pr WHERE pr.post_id = p.id)::int AS repost_count,
+  EXISTS(SELECT 1 FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = $3) AS liked_by_me,
+  EXISTS(SELECT 1 FROM post_reposts pr WHERE pr.post_id = p.id AND pr.user_id = $3) AS reposted_by_me,
+  false AS is_repost,
+  COALESCE(qp.content, '') AS quote_content,
+  COALESCE(qu.username, '') AS quote_username,
+  COALESCE(qu.name, '') AS quote_name,
+  qp.created_at AS quote_created_at
 FROM posts p
 JOIN users u ON u.id = p.user_id
+LEFT JOIN posts qp ON qp.id = p.quote_post_id
+LEFT JOIN users qu ON qu.id = qp.user_id
 ORDER BY p.created_at DESC
 LIMIT $1 OFFSET $2
 `
 
 type ListTimelinePostsParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	Limit  int32       `json:"limit"`
+	Offset int32       `json:"offset"`
+	UserID pgtype.UUID `json:"user_id"`
 }
 
 type ListTimelinePostsRow struct {
-	ID        pgtype.UUID        `json:"id"`
-	UserID    pgtype.UUID        `json:"user_id"`
-	Content   string             `json:"content"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	Username  string             `json:"username"`
-	UserName  string             `json:"user_name"`
+	ID             pgtype.UUID        `json:"id"`
+	UserID         pgtype.UUID        `json:"user_id"`
+	Content        string             `json:"content"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	QuotePostID    pgtype.UUID        `json:"quote_post_id"`
+	Username       string             `json:"username"`
+	UserName       string             `json:"user_name"`
+	LikeCount      int32              `json:"like_count"`
+	CommentCount   int32              `json:"comment_count"`
+	RepostCount    int32              `json:"repost_count"`
+	LikedByMe      bool               `json:"liked_by_me"`
+	RepostedByMe   bool               `json:"reposted_by_me"`
+	IsRepost       bool               `json:"is_repost"`
+	QuoteContent   string             `json:"quote_content"`
+	QuoteUsername  string             `json:"quote_username"`
+	QuoteName      string             `json:"quote_name"`
+	QuoteCreatedAt pgtype.Timestamptz `json:"quote_created_at"`
 }
 
 func (q *Queries) ListTimelinePosts(ctx context.Context, arg *ListTimelinePostsParams) ([]*ListTimelinePostsRow, error) {
-	rows, err := q.db.Query(ctx, listTimelinePosts, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listTimelinePosts, arg.Limit, arg.Offset, arg.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -176,8 +605,19 @@ func (q *Queries) ListTimelinePosts(ctx context.Context, arg *ListTimelinePostsP
 			&i.Content,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.QuotePostID,
 			&i.Username,
 			&i.UserName,
+			&i.LikeCount,
+			&i.CommentCount,
+			&i.RepostCount,
+			&i.LikedByMe,
+			&i.RepostedByMe,
+			&i.IsRepost,
+			&i.QuoteContent,
+			&i.QuoteUsername,
+			&i.QuoteName,
+			&i.QuoteCreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -187,4 +627,48 @@ func (q *Queries) ListTimelinePosts(ctx context.Context, arg *ListTimelinePostsP
 		return nil, err
 	}
 	return items, nil
+}
+
+const repostPost = `-- name: RepostPost :exec
+INSERT INTO post_reposts (post_id, user_id)
+VALUES ($1, $2)
+ON CONFLICT DO NOTHING
+`
+
+type RepostPostParams struct {
+	PostID pgtype.UUID `json:"post_id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+func (q *Queries) RepostPost(ctx context.Context, arg *RepostPostParams) error {
+	_, err := q.db.Exec(ctx, repostPost, arg.PostID, arg.UserID)
+	return err
+}
+
+const undoRepost = `-- name: UndoRepost :exec
+DELETE FROM post_reposts WHERE post_id = $1 AND user_id = $2
+`
+
+type UndoRepostParams struct {
+	PostID pgtype.UUID `json:"post_id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+func (q *Queries) UndoRepost(ctx context.Context, arg *UndoRepostParams) error {
+	_, err := q.db.Exec(ctx, undoRepost, arg.PostID, arg.UserID)
+	return err
+}
+
+const unlikePost = `-- name: UnlikePost :exec
+DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2
+`
+
+type UnlikePostParams struct {
+	PostID pgtype.UUID `json:"post_id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+func (q *Queries) UnlikePost(ctx context.Context, arg *UnlikePostParams) error {
+	_, err := q.db.Exec(ctx, unlikePost, arg.PostID, arg.UserID)
+	return err
 }

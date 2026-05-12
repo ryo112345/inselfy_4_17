@@ -53,7 +53,7 @@ export function ProfileContent({ user, username, experiences, educations, skills
       {(isOwner || user.about) && (
         <AboutCard user={user} isOwner={isOwner} />
       )}
-      <PostsTabs posts={posts} />
+      <PostsTabs posts={posts} userId={user.id} />
     </div>
   );
 }

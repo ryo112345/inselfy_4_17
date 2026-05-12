@@ -45,7 +45,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
   const assessmentRef = useRef<HTMLDivElement>(null);
   const assessmentTriggerRef = useRef<HTMLButtonElement>(null);
   const initialRender = useRef(true);
-  const { user, logout } = useAuth();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -216,7 +216,11 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
           </nav>
 
           <div className="shrink-0 px-1 py-2 space-y-0.5">
-            {user ? (
+            {authLoading ? (
+              <div className={`flex items-center py-2 px-1 ${open ? "w-full" : "w-11"}`}>
+                <span className="flex shrink-0 w-9 h-9 items-center justify-center rounded-full bg-gray-200 animate-pulse" />
+              </div>
+            ) : user ? (
               <button
                 ref={triggerRef}
                 onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}

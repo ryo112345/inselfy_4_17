@@ -2,15 +2,11 @@
 
 import { useState, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/features/auth/auth-context";
 import { createPost } from "./api";
 
-type Props = {
-  userId: string;
-  username: string;
-  displayName?: string | null;
-};
-
-export function PostForm({ userId, username, displayName }: Props) {
+export function PostForm() {
+  const { user, isLoading } = useAuth();
   const [content, setContent] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -18,14 +14,17 @@ export function PostForm({ userId, username, displayName }: Props) {
   const router = useRouter();
   const maxLength = 280;
 
-  const initial = displayName ? displayName.charAt(0) : username.charAt(0);
-
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
     el.style.height = `${Math.max(el.scrollHeight, 48)}px`;
   }, [content]);
+
+  if (isLoading || !user) return null;
+
+  const initial = user.name ? user.name.charAt(0) : user.username.charAt(0);
+  const userId = user.id;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
