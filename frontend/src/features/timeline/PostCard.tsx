@@ -134,16 +134,14 @@ export function PostCard({ post, currentUserId }: Props) {
         </div>
       )}
       <div className="flex gap-3">
-        <div className="shrink-0">
-          <span className="flex w-10 h-10 items-center justify-center rounded-full text-sm font-bold text-white" style={{ backgroundColor: "var(--accent)" }}>
-            {initial}
-          </span>
-        </div>
+        <Link href={`/profile/${post.username}`} className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white self-start" style={{ backgroundColor: "var(--accent)" }}>
+          {initial}
+        </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
-            <span className="font-bold text-[15px] text-gray-900 truncate">
+            <Link href={`/profile/${post.username}`} className="font-bold text-[15px] text-gray-900 hover:underline truncate">
               {post.name || post.username}
-            </span>
+            </Link>
             <span className="text-[15px] text-gray-400 truncate">
               @{post.username}
             </span>
