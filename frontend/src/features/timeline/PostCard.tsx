@@ -219,15 +219,17 @@ export function PostCard({ post, currentUserId }: Props) {
                   >
                     {liked ? <LikeIconFilled /> : <LikeIcon />}
                   </span>
-                  {likeAnimating && <span className="like-ring" />}
+                  {/* {likeAnimating && <span className="like-ring" />} */}
                   {likeAnimating && (
                     <>
-                      <span className="like-particle" style={{ "--angle": "0deg", "--color": "#F91880" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "60deg", "--color": "#FC5CA8" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "120deg", "--color": "#F91880" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "180deg", "--color": "#FC5CA8" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "240deg", "--color": "#F91880" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "300deg", "--color": "#FC5CA8" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "0deg", "--color": "#FF9999" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "45deg", "--color": "#FFCC99" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "90deg", "--color": "#FFEE99" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "135deg", "--color": "#99EEBB" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "180deg", "--color": "#99DDFF" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "225deg", "--color": "#99BBFF" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "270deg", "--color": "#CC99FF" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "315deg", "--color": "#FF99CC" } as React.CSSProperties} />
                     </>
                   )}
                 </span>
