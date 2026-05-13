@@ -3,14 +3,20 @@ import { Timeline } from "@/features/timeline/Timeline";
 import { PostForm } from "@/features/timeline/PostForm";
 import { FeedTabs } from "@/features/timeline/FeedTabs";
 import { Sidebar } from "@/app/components/Sidebar";
+import { LandingPage } from "@/app/components/LandingPage";
 import { cookies } from "next/headers";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
   const hasToken = !!cookieStore.get("inselfy_token")?.value;
-  const userId = hasToken ? cookieStore.get("userId")?.value ?? "" : "";
-  const username = hasToken ? cookieStore.get("username")?.value ?? "guest" : "guest";
-  const displayName = hasToken ? cookieStore.get("displayName")?.value : undefined;
+
+  if (!hasToken) {
+    return <LandingPage />;
+  }
+
+  const userId = cookieStore.get("userId")?.value ?? "";
+  const username = cookieStore.get("username")?.value ?? "guest";
+  const displayName = cookieStore.get("displayName")?.value;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
   let posts: Awaited<ReturnType<typeof fetchTimeline>> | null = null;
