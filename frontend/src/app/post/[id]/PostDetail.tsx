@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { PostItem, CommentItem } from "@/features/timeline/api";
 import { toggleLike, toggleRepost, createComment } from "@/features/timeline/api";
 import { useAuth } from "@/features/auth/auth-context";
+import { ArticlePreviewCard, extractArticleId, removeArticleUrl } from "@/features/timeline/ArticlePreviewCard";
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -132,9 +133,24 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
           </div>
         </div>
 
-        <p className="text-[17px] text-gray-900 whitespace-pre-wrap break-words leading-relaxed mb-3">
-          {post.content}
-        </p>
+        {(() => {
+          const articleId = extractArticleId(post.content);
+          const displayContent = articleId ? removeArticleUrl(post.content) : post.content;
+          return (
+            <>
+              {displayContent && (
+                <p className="text-[17px] text-gray-900 whitespace-pre-wrap break-words leading-relaxed mb-3">
+                  {displayContent}
+                </p>
+              )}
+              {articleId && (
+                <div className="mb-3">
+                  <ArticlePreviewCard articleId={articleId} />
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {post.quotedPost && (
           <div
