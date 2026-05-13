@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition, useRef, useEffect } from "react";
+import { useState, useTransition, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/auth-context";
 import { createPost } from "./api";
+import { ArticlePreviewCard, extractArticleId } from "./ArticlePreviewCard";
 
 export function PostForm() {
   const { user, isLoading } = useAuth();
@@ -13,6 +14,8 @@ export function PostForm() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const router = useRouter();
   const maxLength = 280;
+
+  const detectedArticleId = useMemo(() => extractArticleId(content), [content]);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -57,6 +60,10 @@ export function PostForm() {
             className="w-full resize-none border-none bg-transparent text-lg outline-none placeholder:text-gray-400 text-gray-900 py-2.5 leading-normal"
             style={{ minHeight: 48 }}
           />
+
+          {detectedArticleId && (
+            <ArticlePreviewCard articleId={detectedArticleId} />
+          )}
 
           <div className="flex items-center justify-between pt-2 border-t border-gray-100">
             <div className="flex items-center gap-0.5 -ml-2">

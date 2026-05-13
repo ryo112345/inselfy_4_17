@@ -7,6 +7,7 @@ import type { PostItem } from "./api";
 import { toggleLike, toggleRepost, createPost } from "./api";
 import { useAuth } from "@/features/auth/auth-context";
 import { CommentSection } from "./CommentSection";
+import { ArticlePreviewCard, extractArticleId, removeArticleUrl } from "./ArticlePreviewCard";
 
 type Props = {
   post: PostItem;
@@ -148,9 +149,20 @@ export function PostCard({ post, currentUserId }: Props) {
             <span className="text-gray-300">·</span>
             <span className="text-[15px] text-gray-400 whitespace-nowrap">{timeAgo(post.createdAt)}</span>
           </div>
-          <p className="mt-0.5 text-[15px] text-gray-900 whitespace-pre-wrap break-words leading-relaxed">
-            {post.content}
-          </p>
+          {(() => {
+            const articleId = extractArticleId(post.content);
+            const displayContent = articleId ? removeArticleUrl(post.content) : post.content;
+            return (
+              <>
+                {displayContent && (
+                  <p className="mt-0.5 text-[15px] text-gray-900 whitespace-pre-wrap break-words leading-relaxed">
+                    {displayContent}
+                  </p>
+                )}
+                {articleId && <ArticlePreviewCard articleId={articleId} />}
+              </>
+            );
+          })()}
           {post.quotedPost && (
             <QuotedPostCard quote={post.quotedPost} />
           )}
