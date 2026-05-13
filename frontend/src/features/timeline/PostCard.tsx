@@ -163,21 +163,23 @@ export function PostCard({ post, currentUserId }: Props) {
               active={showComments}
               activeColor="text-blue-500"
             />
-            <div className="relative" ref={menuRef}>
+            <div className="relative flex-1" ref={menuRef}>
               <button
                 onClick={handleRepostButtonClick}
                 className={`group flex items-center transition-colors ${reposted ? "text-green-600" : "text-gray-400"}`}
               >
-                <span className="relative flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-green-50 hover:text-green-600">
-                  <span
-                    className={repostAnimating ? "repost-icon-pop" : ""}
-                    onAnimationEnd={() => setRepostAnimating(false)}
-                  >
-                    <RetweetIcon />
+                <span className="flex items-center rounded-full transition-colors hover:bg-green-50 hover:text-green-600">
+                  <span className="relative flex items-center justify-center w-9 h-9">
+                    <span
+                      className={repostAnimating ? "repost-icon-pop" : ""}
+                      onAnimationEnd={() => setRepostAnimating(false)}
+                    >
+                      <RetweetIcon />
+                    </span>
+                    {repostAnimating && <span className="repost-ring" />}
                   </span>
-                  {repostAnimating && <span className="repost-ring" />}
+                  {repostCount > 0 && <span className="text-[13px] -ml-1.5 pr-2">{repostCount}</span>}
                 </span>
-                <span className="text-[13px] -ml-1 w-5">{repostCount > 0 ? repostCount : ""}</span>
               </button>
               {showRepostMenu && (
                 <div
@@ -207,28 +209,30 @@ export function PostCard({ post, currentUserId }: Props) {
             </div>
             <button
               onClick={handleLike}
-              className={`group flex items-center transition-colors ${liked ? "text-[#F91880]" : "text-gray-400"}`}
+              className={`group flex-1 flex items-center transition-colors ${liked ? "text-[#F91880]" : "text-gray-400"}`}
             >
-              <span className="relative flex items-center justify-center w-9 h-9 rounded-full transition-colors hover:bg-[#F918800d] hover:text-[#F91880]">
-                <span
-                  className={likeAnimating ? "like-icon-pop" : ""}
-                  onAnimationEnd={() => setLikeAnimating(false)}
-                >
-                  {liked ? <LikeIconFilled /> : <LikeIcon />}
+              <span className="flex items-center rounded-full transition-colors hover:bg-[#F918800d] hover:text-[#F91880]">
+                <span className="relative flex items-center justify-center w-9 h-9">
+                  <span
+                    className={likeAnimating ? "like-icon-pop" : ""}
+                    onAnimationEnd={() => setLikeAnimating(false)}
+                  >
+                    {liked ? <LikeIconFilled /> : <LikeIcon />}
+                  </span>
+                  {likeAnimating && <span className="like-ring" />}
+                  {likeAnimating && (
+                    <>
+                      <span className="like-particle" style={{ "--angle": "0deg", "--color": "#F91880" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "60deg", "--color": "#FC5CA8" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "120deg", "--color": "#F91880" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "180deg", "--color": "#FC5CA8" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "240deg", "--color": "#F91880" } as React.CSSProperties} />
+                      <span className="like-particle" style={{ "--angle": "300deg", "--color": "#FC5CA8" } as React.CSSProperties} />
+                    </>
+                  )}
                 </span>
-                {likeAnimating && <span className="like-ring" />}
-                {likeAnimating && (
-                  <>
-                    <span className="like-particle" style={{ "--angle": "0deg", "--color": "#F91880" } as React.CSSProperties} />
-                    <span className="like-particle" style={{ "--angle": "60deg", "--color": "#FC5CA8" } as React.CSSProperties} />
-                    <span className="like-particle" style={{ "--angle": "120deg", "--color": "#F91880" } as React.CSSProperties} />
-                    <span className="like-particle" style={{ "--angle": "180deg", "--color": "#FC5CA8" } as React.CSSProperties} />
-                    <span className="like-particle" style={{ "--angle": "240deg", "--color": "#F91880" } as React.CSSProperties} />
-                    <span className="like-particle" style={{ "--angle": "300deg", "--color": "#FC5CA8" } as React.CSSProperties} />
-                  </>
-                )}
+                {likeCount > 0 && <span className="text-[13px] -ml-1.5 pr-2">{likeCount}</span>}
               </span>
-              <span className="text-[13px] -ml-1 w-5">{likeCount > 0 ? likeCount : ""}</span>
             </button>
             <PostAction icon={<ViewIcon />} hoverColor="hover:bg-blue-50 hover:text-blue-500" />
             <PostAction icon={<ShareIcon />} hoverColor="hover:bg-blue-50 hover:text-blue-500" />
@@ -396,28 +400,33 @@ function PostAction({
   return (
     <button
       onClick={onClick}
-      className={`group flex items-center transition-colors ${active && activeColor ? activeColor : "text-gray-400"}`}
+      className={`group flex-1 flex items-center transition-colors ${active && activeColor ? activeColor : "text-gray-400"}`}
     >
-      <span className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors ${hoverColor}`}>
-        {icon}
+      <span className={`flex items-center rounded-full transition-colors ${hoverColor}`}>
+        <span className="flex items-center justify-center w-9 h-9">
+          {icon}
+        </span>
+        {count !== undefined && count > 0 && <span className="text-[13px] -ml-1.5 pr-2">{count}</span>}
       </span>
-      <span className="text-[13px] -ml-1 w-5">{count !== undefined && count > 0 ? count : ""}</span>
     </button>
   );
 }
 
 function CommentIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path d="M1.751 10c.003-.72.01-1.597.992-2.685C3.903 6.118 5.88 5 8.25 5h7.5c2.37 0 4.348 1.118 5.508 2.315.981 1.088.988 1.965.992 2.685v3c-.004.72-.011 1.597-.992 2.685C20.098 16.882 18.12 18 15.75 18H14l-5.25 4.5V18H8.25c-2.37 0-4.348-1.118-5.508-2.315-.981-1.088-.988-1.965-.992-2.685v-3z" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
 
 function RetweetIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2h4v2h-4c-2.209 0-4-1.791-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM19.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2h-4V4h4c2.209 0 4 1.791 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14z" />
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="17 1 21 5 17 9" />
+      <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+      <polyline points="7 23 3 19 7 15" />
+      <path d="M21 13v2a4 4 0 0 1-4 4H3" />
     </svg>
   );
 }
@@ -426,39 +435,42 @@ function QuoteIcon() {
   return (
     <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
       <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-      <path d="M12 22h10" />
     </svg>
   );
 }
 
 function LikeIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-      <path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.807 1.09-.806-1.09c-1.211-1.65-2.668-2.22-3.89-2.16-1.4.07-2.698.96-3.116 2.56-.418 1.602.106 3.461 1.972 5.478l.17.177 5.45 5.54c.138.14.32.14.457 0l5.45-5.54.172-.177c1.866-2.017 2.39-3.876 1.972-5.478-.418-1.6-1.716-2.49-3.116-2.56z" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
 }
 
 function LikeIconFilled() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.807 1.09-.806-1.09c-1.211-1.65-2.668-2.22-3.89-2.16-1.4.07-2.698.96-3.116 2.56-.418 1.602.106 3.461 1.972 5.478l.17.177 5.45 5.54c.138.14.32.14.457 0l5.45-5.54.172-.177c1.866-2.017 2.39-3.876 1.972-5.478-.418-1.6-1.716-2.49-3.116-2.56z" />
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
 }
 
 function ViewIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M8.75 21V3h2v18h-2zM18.75 21V8.5h2V21h-2zM13.75 21v-8h2v8h-2zM3.75 21v-3.5h2V21h-2z" />
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 20V10" />
+      <path d="M12 20V4" />
+      <path d="M6 20v-6" />
     </svg>
   );
 }
 
 function ShareIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z" />
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" y1="2" x2="12" y2="15" />
     </svg>
   );
 }
