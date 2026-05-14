@@ -25,7 +25,7 @@ export function LandingPage() {
       </div>
 
       {/* Right: Auth */}
-      <div className="flex flex-1 items-center justify-center bg-white px-8 py-16 lg:py-0">
+      <div className="flex flex-1 items-center justify-center bg-white px-8 py-16 pb-24 lg:py-0">
         <div className="w-full max-w-[380px] space-y-10">
           <div className="space-y-3">
             <h2 className="text-[28px] font-extrabold leading-tight text-gray-900 sm:text-[32px]">
@@ -94,7 +94,7 @@ export function LandingPage() {
       </div>
 
       {/* Footer links */}
-      <nav className="absolute bottom-0 left-0 right-0 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 bg-white px-4 py-3 text-[12px] text-gray-500 lg:bg-transparent">
+      <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 bg-white px-4 py-3 text-[12px] text-gray-500 lg:absolute lg:bottom-0 lg:left-0 lg:right-0 lg:bg-transparent">
         <a href="/terms" className="hover:underline">
           利用規約
         </a>
