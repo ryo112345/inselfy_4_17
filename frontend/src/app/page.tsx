@@ -4,6 +4,7 @@ import { PostForm } from "@/features/timeline/PostForm";
 import { FeedTabs } from "@/features/timeline/FeedTabs";
 import { Sidebar } from "@/app/components/Sidebar";
 import { LandingPage } from "@/app/components/LandingPage";
+import { MobilePostButton } from "@/features/timeline/MobilePostButton";
 import { cookies } from "next/headers";
 
 export default async function HomePage() {
@@ -51,6 +52,7 @@ export default async function HomePage() {
           )}
         </main>
       </div>
+      <MobilePostButton />
     </>
   );
 }
