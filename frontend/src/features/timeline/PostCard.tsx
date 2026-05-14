@@ -14,6 +14,11 @@ type Props = {
   currentUserId?: string;
 };
 
+function useCurrentUserId(propUserId?: string) {
+  const { user } = useAuth();
+  return propUserId || user?.id;
+}
+
 function timeAgo(dateStr: string): string {
   const now = Date.now();
   const then = new Date(dateStr).getTime();
@@ -25,7 +30,8 @@ function timeAgo(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
 }
 
-export function PostCard({ post, currentUserId }: Props) {
+export function PostCard({ post, currentUserId: propUserId }: Props) {
+  const currentUserId = useCurrentUserId(propUserId);
   const initial = post.name ? post.name.charAt(0) : post.username.charAt(0);
   const [liked, setLiked] = useState(post.likedByMe);
   const [likeCount, setLikeCount] = useState(post.likeCount);
@@ -181,7 +187,7 @@ export function PostCard({ post, currentUserId }: Props) {
                 className={`group flex items-center transition-colors ${reposted ? "text-green-600" : "text-gray-400"}`}
               >
                 <span className="flex items-center rounded-full transition-colors hover:bg-green-50 hover:text-green-600">
-                  <span className="relative flex items-center justify-center w-9 h-9">
+                  <span className="relative flex items-center justify-center w-11 h-11">
                     <span
                       className={repostAnimating ? "repost-icon-pop" : ""}
                       onAnimationEnd={() => setRepostAnimating(false)}
@@ -224,7 +230,7 @@ export function PostCard({ post, currentUserId }: Props) {
               className={`group flex-1 flex items-center transition-colors ${liked ? "text-[#F91880]" : "text-gray-400"}`}
             >
               <span className="flex items-center rounded-full transition-colors hover:bg-[#F918800d] hover:text-[#F91880]">
-                <span className="relative flex items-center justify-center w-9 h-9">
+                <span className="relative flex items-center justify-center w-11 h-11">
                   <span
                     className={likeAnimating ? "like-icon-pop" : ""}
                     onAnimationEnd={() => setLikeAnimating(false)}
@@ -417,10 +423,10 @@ function PostAction({
       className={`group flex-1 flex items-center transition-colors ${active && activeColor ? activeColor : "text-gray-400"}`}
     >
       <span className={`flex items-center rounded-full transition-colors ${hoverColor}`}>
-        <span className="flex items-center justify-center w-9 h-9">
+        <span className="flex items-center justify-center w-11 h-11">
           {icon}
         </span>
-        {count !== undefined && count > 0 && <span className="text-[13px] -ml-1.5 pr-2">{count}</span>}
+        {count !== undefined && count > 0 && <span className="text-[13px] -ml-2 pr-2">{count}</span>}
       </span>
     </button>
   );
