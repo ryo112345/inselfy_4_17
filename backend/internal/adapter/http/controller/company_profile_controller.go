@@ -3,9 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -14,19 +12,18 @@ import (
 	"github.com/labstack/echo/v4"
 
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
+	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type CompanyProfileController struct {
-	pool       *pgxpool.Pool
-	uploadDir  string
-	uploadBase string
+	pool    *pgxpool.Pool
+	storage port.FileStorage
 }
 
-func NewCompanyProfileController(pool *pgxpool.Pool) *CompanyProfileController {
+func NewCompanyProfileController(pool *pgxpool.Pool, storage port.FileStorage) *CompanyProfileController {
 	return &CompanyProfileController{
-		pool:       pool,
-		uploadDir:  "./uploads/company-images",
-		uploadBase: "/api/uploads/company-images",
+		pool:    pool,
+		storage: storage,
 	}
 }
 
@@ -282,17 +279,12 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "JPG、PNG、WebP形式のみ対応しています"})
 	}
 
-	if err := os.MkdirAll(c.uploadDir, 0o755); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to create upload dir"})
-	}
-
-	var filename string
+	var key string
 	if imageType == "gallery" {
-		filename = fmt.Sprintf("%s_gallery_%s%s", companyID, uuid.New().String()[:8], ext)
+		key = fmt.Sprintf("company-images/%s_gallery_%s%s", companyID, uuid.New().String()[:8], ext)
 	} else {
-		filename = fmt.Sprintf("%s_%s%s", companyID, imageType, ext)
+		key = fmt.Sprintf("company-images/%s_%s%s", companyID, imageType, ext)
 	}
-	dst := filepath.Join(c.uploadDir, filename)
 
 	src, err := file.Open()
 	if err != nil {
@@ -300,17 +292,10 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 	}
 	defer src.Close()
 
-	out, err := os.Create(dst)
+	imageURL, err := c.storage.Save(ctx.Request().Context(), key, src)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to save file"})
 	}
-	defer out.Close()
-
-	if _, err := io.Copy(out, src); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to write file"})
-	}
-
-	imageURL := c.uploadBase + "/" + filename
 
 	if imageType == "gallery" {
 		_, err = c.pool.Exec(ctx.Request().Context(),
