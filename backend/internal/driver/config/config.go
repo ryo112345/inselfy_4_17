@@ -27,9 +27,18 @@ type Config struct {
 	StripeSecretKey     string `env:"STRIPE_SECRET_KEY" envDefault:""`
 	StripeWebhookSecret string `env:"STRIPE_WEBHOOK_SECRET" envDefault:""`
 
-	// Storage: "local" or "gcs"
+	// Storage: "local" or "r2"
 	StorageBackend string `env:"STORAGE_BACKEND" envDefault:"local"`
-	GCSBucket      string `env:"GCS_BUCKET" envDefault:""`
+
+	R2AccountID       string `env:"R2_ACCOUNT_ID" envDefault:""`
+	R2AccessKeyID     string `env:"R2_ACCESS_KEY_ID" envDefault:""`
+	R2SecretAccessKey string `env:"R2_SECRET_ACCESS_KEY" envDefault:""`
+	R2Bucket          string `env:"R2_BUCKET" envDefault:""`
+	R2PublicURL       string `env:"R2_PUBLIC_URL" envDefault:""`
+
+	DBSSLMode string `env:"DB_SSLMODE" envDefault:"disable"`
+
+	AppURL string `env:"APP_URL" envDefault:"http://localhost:5173"`
 }
 
 func Load() (*Config, error) {
@@ -43,6 +52,6 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) DatabaseURL() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		c.DBUser, c.DBPassword, c.DBHost, c.DBPort, c.DBName)
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		c.DBUser, c.DBPassword, c.DBHost, c.DBPort, c.DBName, c.DBSSLMode)
 }

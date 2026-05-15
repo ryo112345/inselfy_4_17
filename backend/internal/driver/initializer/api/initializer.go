@@ -62,8 +62,13 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	postInputFactory := factory.NewPostInputFactory()
 	wvInputFactory := factory.NewWorkValuesInputFactory()
 	ciInputFactory := factory.NewCareerInterestInputFactory()
-	fileStorage := storagegw.NewLocal("./uploads", "/api/uploads")
-	stripeService := stripegw.NewService(cfg.StripeSecretKey, "http://localhost:5173")
+	var fileStorage port.FileStorage
+	if cfg.StorageBackend == "r2" {
+		fileStorage = storagegw.NewR2(cfg.R2AccountID, cfg.R2AccessKeyID, cfg.R2SecretAccessKey, cfg.R2Bucket, cfg.R2PublicURL)
+	} else {
+		fileStorage = storagegw.NewLocal("./uploads", "/api/uploads")
+	}
+	stripeService := stripegw.NewService(cfg.StripeSecretKey, cfg.AppURL)
 	articleRepoFactory := factory.NewArticleRepoFactory(pool)
 	articlePurchaseRepoFactory := factory.NewArticlePurchaseRepoFactory(pool)
 
@@ -401,7 +406,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 
 	// --- Company Profile (public) ---
-	companyProfileCtrl := httpcontroller.NewCompanyProfileController(pool)
+	companyProfileCtrl := httpcontroller.NewCompanyProfileController(pool, fileStorage)
 	e.GET("/api/companies/:id", func(c echo.Context) error {
 		return companyProfileCtrl.GetPublicProfile(c)
 	})
@@ -603,9 +608,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	// --- Company Jobs ---
 	jobGroup := e.Group("/api/company/jobs", companyJwtMW)
-	jobGroup.POST("/team-member-photo", httpcontroller.HandleTeamMemberPhotoUpload)
-	jobGroup.POST("/gallery-image", httpcontroller.HandleGalleryImageUpload)
-	jobGroup.POST("/cover-image", httpcontroller.HandleCoverImageUpload)
+	jobGroup.POST("/team-member-photo", httpcontroller.HandleImageUpload(fileStorage, "team-member-photos"))
+	jobGroup.POST("/gallery-image", httpcontroller.HandleImageUpload(fileStorage, "gallery-images"))
+	jobGroup.POST("/cover-image", httpcontroller.HandleImageUpload(fileStorage, "cover-images"))
 	jobGroup.POST("", jobPostingCtrl.Create)
 	jobGroup.GET("", jobPostingCtrl.List)
 	jobGroup.GET("/:jobId", func(c echo.Context) error {
