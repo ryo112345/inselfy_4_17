@@ -121,3 +121,22 @@ export type FollowCounts = {
   followersCount: number;
   followingCount: number;
 };
+
+export async function uploadProfileImage(
+  username: string,
+  file: File,
+  type: "avatar" | "cover",
+): Promise<{ url: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`/api/users/${username}/upload-image?type=${type}`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw { code: "UPLOAD_ERROR", message: err.message ?? "アップロードに失敗しました" };
+  }
+  return res.json();
+}

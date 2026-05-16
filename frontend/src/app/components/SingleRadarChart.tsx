@@ -15,6 +15,7 @@ export function SingleRadarChart({
   isWV,
   compareScores,
   compareLabel,
+  mainLabel,
 }: {
   scores: { id: string; score: number }[] | null;
   order: readonly string[];
@@ -22,6 +23,7 @@ export function SingleRadarChart({
   isWV: boolean;
   compareScores?: { id: string; score: number }[] | null;
   compareLabel?: string;
+  mainLabel?: string;
 }) {
   const cx = 210;
   const cy = 190;
@@ -147,7 +149,7 @@ export function SingleRadarChart({
         <g transform={`translate(${cx + 15}, ${cy + R + 85})`}>
           <line x1={-120} y1={0} x2={-95} y2={0} stroke={strokeColor} strokeWidth={2.5} />
           <circle cx={-107.5} cy={0} r={3} fill={dotColor} />
-          <text x={-88} y={5} fill="#444" fontSize={16} fontWeight="600">候補者</text>
+          <text x={-88} y={5} fill="#444" fontSize={16} fontWeight="600">{mainLabel ?? "候補者"}</text>
           <line x1={10} y1={0} x2={35} y2={0} stroke={compareStrokeColor} strokeWidth={2.5} strokeDasharray="5 3" />
           <circle cx={22.5} cy={0} r={2.5} fill={compareStrokeColor} />
           <text x={42} y={5} fill="#444" fontSize={16} fontWeight="600">{compareLabel ?? "チーム"}</text>

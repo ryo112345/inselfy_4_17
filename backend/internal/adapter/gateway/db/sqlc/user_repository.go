@@ -113,6 +113,8 @@ func (r *UserRepository) UpdateProfile(ctx context.Context, id string, input use
 	setTextField(&params.JobTypeSet, &params.JobType, input.JobType)
 	setTextField(&params.JobSeekingStatusSet, &params.JobSeekingStatus, input.JobSeekingStatus)
 	setTextField(&params.ProfileColorSet, &params.ProfileColor, input.ProfileColor)
+	setTextField(&params.AvatarUrlSet, &params.AvatarUrl, input.AvatarURL)
+	setTextField(&params.CoverPhotoUrlSet, &params.CoverPhotoUrl, input.CoverPhotoURL)
 
 	row, err := q.UpdateUserProfile(ctx, params)
 	if err != nil {
@@ -171,6 +173,7 @@ func toDomainUser(u *generated.User) (*user.User, error) {
 		OAuthProvider:    textPtr(u.OauthProvider),
 		OAuthProviderID:  textPtr(u.OauthProviderID),
 		AvatarURL:        textPtr(u.AvatarUrl),
+		CoverPhotoURL:    textPtr(u.CoverPhotoUrl),
 		CreatedAt:        u.CreatedAt.Time,
 		UpdatedAt:        u.UpdatedAt.Time,
 	}, nil

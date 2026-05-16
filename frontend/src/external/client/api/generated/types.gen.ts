@@ -372,6 +372,14 @@ export type ModelsUpdateUserProfileRequest = {
      */
     profileColor?: string | null;
     /**
+     * アバター画像URL
+     */
+    avatarUrl?: string | null;
+    /**
+     * カバー写真URL
+     */
+    coverPhotoUrl?: string | null;
+    /**
      * プロフィール公開フラグ
      */
     isPublic?: boolean;
@@ -421,6 +429,14 @@ export type ModelsUserResponse = {
      * プロフィールカラー
      */
     profileColor?: string | null;
+    /**
+     * アバター画像URL
+     */
+    avatarUrl?: string | null;
+    /**
+     * カバー写真URL
+     */
+    coverPhotoUrl?: string | null;
     /**
      * 公開フラグ
      */

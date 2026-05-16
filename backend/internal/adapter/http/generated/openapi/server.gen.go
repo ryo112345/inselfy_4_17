@@ -351,6 +351,12 @@ type ModelsUserResponse struct {
 	// About 自己紹介
 	About *string `json:"about,omitempty"`
 
+	// AvatarUrl アバター画像URL
+	AvatarUrl *string `json:"avatarUrl,omitempty"`
+
+	// CoverPhotoUrl カバー写真URL
+	CoverPhotoUrl *string `json:"coverPhotoUrl,omitempty"`
+
 	// CreatedAt 作成日時
 	CreatedAt time.Time `json:"createdAt"`
 

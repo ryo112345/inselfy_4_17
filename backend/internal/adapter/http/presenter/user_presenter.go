@@ -34,6 +34,8 @@ func (p *UserPresenter) PresentUser(_ context.Context, u *user.User) error {
 		JobType:          u.JobType,
 		JobSeekingStatus: u.JobSeekingStatus,
 		ProfileColor:     u.ProfileColor,
+		AvatarUrl:        u.AvatarURL,
+		CoverPhotoUrl:    u.CoverPhotoURL,
 		IsPublic:         u.IsPublic,
 		CreatedAt:        u.CreatedAt,
 		UpdatedAt:        u.UpdatedAt,

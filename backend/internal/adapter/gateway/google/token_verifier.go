@@ -2,6 +2,7 @@ package google
 
 import (
 	"context"
+	"strings"
 
 	"google.golang.org/api/idtoken"
 
@@ -33,7 +34,7 @@ func (v *TokenVerifier) Verify(ctx context.Context, idToken string, clientID str
 		claims.Name = name
 	}
 	if picture, ok := payload.Claims["picture"].(string); ok {
-		claims.Picture = picture
+		claims.Picture = strings.Replace(picture, "=s96-c", "=s400-c", 1)
 	}
 	return claims, nil
 }

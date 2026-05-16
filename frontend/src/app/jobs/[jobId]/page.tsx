@@ -13,6 +13,8 @@ import {
   WV_ORDER, WV_FULL_LABELS,
   CI_ORDER, CI_FULL_LABELS,
 } from "@/app/components/SingleRadarChart";
+import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
+import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
@@ -261,10 +263,23 @@ export default function JobDetailPage() {
   const [teamCIScores, setTeamCIScores] = useState<{ id: string; score: number }[] | null>(null);
   const [applied, setApplied] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [myWVScores, setMyWVScores] = useState<{ id: string; score: number }[] | null>(null);
+  const [myCIScores, setMyCIScores] = useState<{ id: string; score: number }[] | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
     checkApplied(jobId).then(setApplied);
+    Promise.all([
+      getLatestWvResult(user.id).catch(() => null),
+      getLatestCiResult(user.id).catch(() => null),
+    ]).then(([wv, ci]) => {
+      setMyWVScores(
+        wv?.values?.map((v) => ({ id: v.value_id, score: v.display_score })) ?? null,
+      );
+      setMyCIScores(
+        ci?.type_scores?.map((s) => ({ id: s.type_id, score: s.score })) ?? null,
+      );
+    });
   }, [isAuthenticated, user, jobId]);
 
   const handleApply = async () => {
@@ -604,6 +619,9 @@ export default function JobDetailPage() {
                       order={WV_ORDER}
                       fullLabels={WV_FULL_LABELS}
                       isWV={true}
+                      compareScores={myWVScores}
+                      compareLabel="あなた"
+                      mainLabel="チーム"
                     />
                   ) : (
                     <div className="py-10 text-sm text-gray-400">データ準備中</div>
@@ -617,6 +635,9 @@ export default function JobDetailPage() {
                       order={CI_ORDER}
                       fullLabels={CI_FULL_LABELS}
                       isWV={false}
+                      compareScores={myCIScores}
+                      compareLabel="あなた"
+                      mainLabel="チーム"
                     />
                   ) : (
                     <div className="py-10 text-sm text-gray-400">データ準備中</div>

@@ -63,6 +63,8 @@ SET
     job_type = CASE WHEN sqlc.arg('job_type_set')::bool THEN sqlc.narg('job_type') ELSE job_type END,
     job_seeking_status = CASE WHEN sqlc.arg('job_seeking_status_set')::bool THEN sqlc.narg('job_seeking_status') ELSE job_seeking_status END,
     profile_color = CASE WHEN sqlc.arg('profile_color_set')::bool THEN sqlc.narg('profile_color') ELSE profile_color END,
+    avatar_url = CASE WHEN sqlc.arg('avatar_url_set')::bool THEN sqlc.narg('avatar_url') ELSE avatar_url END,
+    cover_photo_url = CASE WHEN sqlc.arg('cover_photo_url_set')::bool THEN sqlc.narg('cover_photo_url') ELSE cover_photo_url END,
     is_public = COALESCE(sqlc.narg('is_public'), is_public),
     updated_at = NOW()
 WHERE id = sqlc.arg('id')

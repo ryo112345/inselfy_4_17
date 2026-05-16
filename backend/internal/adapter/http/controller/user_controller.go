@@ -3,8 +3,12 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"path/filepath"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
@@ -18,6 +22,7 @@ type UserController struct {
 	inputFactory  func(repo port.UserRepository, output port.UserOutputPort) port.UserInputPort
 	outputFactory func() *presenter.UserPresenter
 	repoFactory   func() port.UserRepository
+	storage       port.FileStorage
 }
 
 // NewUserController creates a UserController.
@@ -25,11 +30,13 @@ func NewUserController(
 	inputFactory func(repo port.UserRepository, output port.UserOutputPort) port.UserInputPort,
 	outputFactory func() *presenter.UserPresenter,
 	repoFactory func() port.UserRepository,
+	storage port.FileStorage,
 ) *UserController {
 	return &UserController{
 		inputFactory:  inputFactory,
 		outputFactory: outputFactory,
 		repoFactory:   repoFactory,
+		storage:       storage,
 	}
 }
 
@@ -133,6 +140,12 @@ func decodeUpdateProfile(raw map[string]json.RawMessage) (user.UpdateProfileInpu
 	if err := decodeNullableString(raw, "profileColor", &input.ProfileColor); err != nil {
 		return input, err
 	}
+	if err := decodeNullableString(raw, "avatarUrl", &input.AvatarURL); err != nil {
+		return input, err
+	}
+	if err := decodeNullableString(raw, "coverPhotoUrl", &input.CoverPhotoURL); err != nil {
+		return input, err
+	}
 	if v, ok := raw["isPublic"]; ok {
 		var b *bool
 		if err := json.Unmarshal(v, &b); err != nil || b == nil {
@@ -157,6 +170,59 @@ func decodeNullableString(raw map[string]json.RawMessage, key string, dst ***str
 	}
 	*dst = &s
 	return nil
+}
+
+// UploadImage handles POST /api/users/:username/upload-image?type={avatar|cover}.
+func (c *UserController) UploadImage(ctx echo.Context, username string) error {
+	imageType := ctx.QueryParam("type")
+	if imageType != "avatar" && imageType != "cover" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "type must be 'avatar' or 'cover'"})
+	}
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "file is required"})
+	}
+
+	if file.Size > 5*1024*1024 {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "ファイルサイズは5MB以下にしてください"})
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "JPG、PNG、WebP形式のみ対応しています"})
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to open file"})
+	}
+	defer src.Close()
+
+	key := fmt.Sprintf("user-images/%s_%s%s", uuid.New().String()[:8], imageType, ext)
+
+	imageURL, err := c.storage.Save(ctx.Request().Context(), key, src)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to save file"})
+	}
+
+	var updateInput user.UpdateProfileInput
+	if imageType == "avatar" {
+		updateInput.AvatarURL = ptrPtr(imageURL)
+	} else {
+		updateInput.CoverPhotoURL = ptrPtr(imageURL)
+	}
+
+	in, p := c.newIO()
+	if err := in.UpdateProfile(ctx.Request().Context(), username, updateInput); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.JSON(http.StatusOK, map[string]any{"url": imageURL, "user": p.Response()})
+}
+
+func ptrPtr(s string) **string {
+	p := &s
+	return &p
 }
 
 func (c *UserController) newIO() (port.UserInputPort, *presenter.UserPresenter) {

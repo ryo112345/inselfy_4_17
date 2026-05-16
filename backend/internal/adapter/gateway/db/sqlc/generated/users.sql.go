@@ -40,7 +40,7 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, name)
 VALUES ($1, $2)
-RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count
+RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count, cover_photo_url
 `
 
 type CreateUserParams struct {
@@ -71,6 +71,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (*User,
 		&i.AvatarUrl,
 		&i.FollowersCount,
 		&i.FollowingCount,
+		&i.CoverPhotoUrl,
 	)
 	return &i, err
 }
@@ -78,7 +79,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (*User,
 const createUserWithOAuth = `-- name: CreateUserWithOAuth :one
 INSERT INTO users (username, name, email, oauth_provider, oauth_provider_id, avatar_url)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count
+RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count, cover_photo_url
 `
 
 type CreateUserWithOAuthParams struct {
@@ -120,6 +121,7 @@ func (q *Queries) CreateUserWithOAuth(ctx context.Context, arg *CreateUserWithOA
 		&i.AvatarUrl,
 		&i.FollowersCount,
 		&i.FollowingCount,
+		&i.CoverPhotoUrl,
 	)
 	return &i, err
 }
@@ -134,7 +136,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count
+SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count, cover_photo_url
 FROM users
 WHERE id = $1
 `
@@ -162,12 +164,13 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (*User, error
 		&i.AvatarUrl,
 		&i.FollowersCount,
 		&i.FollowingCount,
+		&i.CoverPhotoUrl,
 	)
 	return &i, err
 }
 
 const getUserByOAuthProvider = `-- name: GetUserByOAuthProvider :one
-SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count
+SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count, cover_photo_url
 FROM users
 WHERE oauth_provider = $1 AND oauth_provider_id = $2
 `
@@ -200,12 +203,13 @@ func (q *Queries) GetUserByOAuthProvider(ctx context.Context, arg *GetUserByOAut
 		&i.AvatarUrl,
 		&i.FollowersCount,
 		&i.FollowingCount,
+		&i.CoverPhotoUrl,
 	)
 	return &i, err
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count
+SELECT id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count, cover_photo_url
 FROM users
 WHERE username = $1
 `
@@ -233,6 +237,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (*User
 		&i.AvatarUrl,
 		&i.FollowersCount,
 		&i.FollowingCount,
+		&i.CoverPhotoUrl,
 	)
 	return &i, err
 }
@@ -349,10 +354,12 @@ SET
     job_type = CASE WHEN $11::bool THEN $12 ELSE job_type END,
     job_seeking_status = CASE WHEN $13::bool THEN $14 ELSE job_seeking_status END,
     profile_color = CASE WHEN $15::bool THEN $16 ELSE profile_color END,
-    is_public = COALESCE($17, is_public),
+    avatar_url = CASE WHEN $17::bool THEN $18 ELSE avatar_url END,
+    cover_photo_url = CASE WHEN $19::bool THEN $20 ELSE cover_photo_url END,
+    is_public = COALESCE($21, is_public),
     updated_at = NOW()
-WHERE id = $18
-RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count
+WHERE id = $22
+RETURNING id, username, name, created_at, updated_at, headline, location, about, industry, job_type, job_seeking_status, profile_color, is_public, email, oauth_provider, oauth_provider_id, avatar_url, followers_count, following_count, cover_photo_url
 `
 
 type UpdateUserProfileParams struct {
@@ -372,6 +379,10 @@ type UpdateUserProfileParams struct {
 	JobSeekingStatus    pgtype.Text `json:"job_seeking_status"`
 	ProfileColorSet     bool        `json:"profile_color_set"`
 	ProfileColor        pgtype.Text `json:"profile_color"`
+	AvatarUrlSet        bool        `json:"avatar_url_set"`
+	AvatarUrl           pgtype.Text `json:"avatar_url"`
+	CoverPhotoUrlSet    bool        `json:"cover_photo_url_set"`
+	CoverPhotoUrl       pgtype.Text `json:"cover_photo_url"`
 	IsPublic            pgtype.Bool `json:"is_public"`
 	ID                  pgtype.UUID `json:"id"`
 }
@@ -394,6 +405,10 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg *UpdateUserProfileP
 		arg.JobSeekingStatus,
 		arg.ProfileColorSet,
 		arg.ProfileColor,
+		arg.AvatarUrlSet,
+		arg.AvatarUrl,
+		arg.CoverPhotoUrlSet,
+		arg.CoverPhotoUrl,
 		arg.IsPublic,
 		arg.ID,
 	)
@@ -418,6 +433,7 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg *UpdateUserProfileP
 		&i.AvatarUrl,
 		&i.FollowersCount,
 		&i.FollowingCount,
+		&i.CoverPhotoUrl,
 	)
 	return &i, err
 }
