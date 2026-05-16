@@ -407,7 +407,7 @@ export default function JobDetailPage() {
   const selectionSteps = job.selectionProcess.split("→").map((s) => s.trim());
 
   return (
-    <div className="min-h-screen bg-[#f6f7f5]">
+    <div className="min-h-screen overflow-x-hidden bg-[#f6f7f5]">
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
         {/* ─── Hero ─── */}
         <section className={`overflow-hidden ${cardClass}`}>
@@ -719,7 +719,7 @@ export default function JobDetailPage() {
                   >
                     {i + 1}
                   </span>
-                  <span className="text-base font-medium text-gray-800 whitespace-nowrap">
+                  <span className="text-base font-medium text-gray-800">
                     {step}
                   </span>
                 </div>
@@ -788,22 +788,6 @@ export default function JobDetailPage() {
         </section>
         )}
 
-        {/* ─── Sticky CTA (mobile) ─── */}
-        <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm z-50 sm:hidden">
-          <div className="mx-auto max-w-3xl flex items-center gap-3 px-4 py-3">
-            <button
-              onClick={handleApply}
-              disabled={applied || applying}
-              className="flex-1 rounded-xl py-3.5 text-center text-base font-bold text-white cursor-pointer disabled:opacity-60 disabled:cursor-default"
-              style={{ background: applied ? "#9CA3AF" : ACCENT }}
-            >
-              {applying ? "送信中..." : applied ? "応募済み" : "この求人に応募する"}
-            </button>
-            <button className="rounded-xl border border-gray-300 px-4 py-3.5 text-base text-gray-700 cursor-pointer">
-              <BookmarkIcon />
-            </button>
-          </div>
-        </div>
 
         <p className="text-center text-sm text-gray-400 mt-2">
           {new Date(job.createdAt).toLocaleDateString("ja-JP")} 掲載
