@@ -74,14 +74,14 @@ export function SkillsCard({ username, skills, isOwner = true }: Props) {
               }}
               placeholder="スキルを入力"
               maxLength={100}
-              className="h-10 flex-1 md:w-56 md:flex-none rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
+              className="h-10 min-w-0 flex-1 md:w-56 md:flex-none rounded-full border border-gray-200 bg-white px-4 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
               style={{ "--tw-ring-color": pc } as React.CSSProperties}
             />
             <button
               type="button"
               disabled={pending || input.trim() === ""}
               onClick={handleAdd}
-              className="inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 shrink-0 items-center justify-center rounded-full px-5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{ backgroundColor: pc }}
             >
               追加
