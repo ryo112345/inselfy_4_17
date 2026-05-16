@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 import type { ModelsUserResponse } from "@/external/client/api/generated";
-import { updateProfile, type ApiError } from "./api";
-import { CameraIcon, FaceIcon, MailIcon, MapPinIcon, PencilIcon, PlusIcon } from "./Icons";
+import { updateProfile, uploadProfileImage, type ApiError } from "./api";
+import { CameraIcon, FaceIcon, MailIcon, MapPinIcon, PencilIcon, PlusIcon, XIcon } from "./Icons";
 import { FollowButton } from "./FollowButton";
 import { Field, PrimaryButton, SecondaryButton } from "./Modal";
+import { ImageCropModal } from "./ImageCropModal";
 
 const PRESET_COLORS = [
   "#3D8B6E", "#059669", "#0D9488", "#0891B2",
@@ -42,6 +43,50 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
   const [profileColor, setProfileColor] = useState(user.profileColor ?? "#3D8B6E");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [uploading, setUploading] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropType, setCropType] = useState<"avatar" | "cover">("avatar");
+
+  const handleFileSelect = (file: File, type: "avatar" | "cover") => {
+    const url = URL.createObjectURL(file);
+    setCropType(type);
+    setCropSrc(url);
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    setCropSrc(null);
+    setUploading(true);
+    try {
+      const ext = cropType === "cover" ? "cover.jpg" : "avatar.jpg";
+      const file = new File([blob], ext, { type: "image/jpeg" });
+      await uploadProfileImage(user.username, file, cropType);
+      router.refresh();
+    } catch (e) {
+      setError((e as ApiError).message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCropClose = () => {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
+  };
+
+  const handleImageDelete = async (type: "avatar" | "cover") => {
+    setUploading(true);
+    try {
+      const body = type === "avatar" ? { avatarUrl: null } : { coverPhotoUrl: null };
+      await updateProfile(user.username, body);
+      router.refresh();
+    } catch (e) {
+      setError((e as ApiError).message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = () => {
     setError(null);
@@ -79,41 +124,106 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
 
   const headerColor = isEditing ? profileColor : (user.profileColor ?? "#3D8B6E");
   const jobStatus = user.jobSeekingStatus ? JOB_SEEKING_LABELS[user.jobSeekingStatus] : null;
+  const avatarSrc = user.avatarUrl?.replace("=s96-c", "=s400-c") ?? null;
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]">
       <div
-        className="absolute inset-x-0 top-0 h-32 md:h-44"
-        style={{ background: headerColor }}
+        className="absolute inset-x-0 top-0 z-10 h-32 md:h-44 overflow-hidden"
+        style={{ background: user.coverPhotoUrl ? undefined : headerColor }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
+        {user.coverPhotoUrl ? (
+          <img src={user.coverPhotoUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
+        )}
         {isOwner && (
-          <button
-            type="button"
-            aria-label="カバー画像を変更"
-            className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur hover:bg-black/30"
-          >
-            <CameraIcon className="h-[18px] w-[18px]" />
-          </button>
+          <>
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileSelect(file, "cover");
+                e.target.value = "";
+              }}
+            />
+            {user.coverPhotoUrl && (
+              <button
+                type="button"
+                aria-label="カバー画像を削除"
+                disabled={uploading}
+                onClick={() => handleImageDelete("cover")}
+                className="absolute top-2 right-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur hover:bg-black/50 disabled:opacity-50"
+              >
+                <XIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label="カバー画像を変更"
+              disabled={uploading}
+              onClick={() => coverInputRef.current?.click()}
+              className="absolute bottom-4 right-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur hover:bg-black/30 disabled:opacity-50"
+            >
+              <CameraIcon className="h-[18px] w-[18px]" />
+            </button>
+          </>
         )}
       </div>
 
       <div className="relative px-4 md:px-7 pb-6">
-        <div className="h-[120px] md:h-36" />
-        <div className="absolute top-14 md:top-20 left-4 md:left-6">
+        <div className="pointer-events-none h-[120px] md:h-36" />
+        <div className="absolute top-14 md:top-20 left-4 md:left-6 z-20">
           <div className="relative">
-            <div className="group flex h-24 w-24 md:h-36 md:w-36 cursor-pointer items-center justify-center rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
-              <FaceIcon className="h-14 w-14 md:h-20 md:w-20" style={{ color: headerColor }} />
+            <div className="group flex h-24 w-24 md:h-36 md:w-36 cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
+              {avatarSrc ? (
+                <img src={avatarSrc} alt={user.name} className="h-full w-full object-cover" />
+              ) : (
+                <FaceIcon className="h-14 w-14 md:h-20 md:w-20" style={{ color: headerColor }} />
+              )}
             </div>
             {isOwner && (
-              <button
-                type="button"
-                aria-label="アバターを追加"
-                className="absolute bottom-0 right-0 flex h-7 w-7 md:h-10 md:w-10 items-center justify-center rounded-full border-2 bg-white shadow-sm transition hover:opacity-80"
-                style={{ borderColor: headerColor, color: headerColor }}
-              >
-                <PlusIcon className="h-4 w-4 md:h-[22px] md:w-[22px]" />
-              </button>
+              <>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileSelect(file, "avatar");
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  type="button"
+                  aria-label={user.avatarUrl ? "アバターを変更" : "アバターを追加"}
+                  disabled={uploading}
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="absolute bottom-0 right-0 flex h-7 w-7 md:h-10 md:w-10 items-center justify-center rounded-full border-2 bg-white shadow-sm transition hover:opacity-80 disabled:opacity-50"
+                  style={{ borderColor: headerColor, color: headerColor }}
+                >
+                  {user.avatarUrl ? (
+                    <CameraIcon className="h-3.5 w-3.5 md:h-[18px] md:w-[18px]" />
+                  ) : (
+                    <PlusIcon className="h-4 w-4 md:h-[22px] md:w-[22px]" />
+                  )}
+                </button>
+                {user.avatarUrl && (
+                  <button
+                    type="button"
+                    aria-label="アバターを削除"
+                    disabled={uploading}
+                    onClick={() => handleImageDelete("avatar")}
+                    className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-gray-600 text-white shadow-sm transition hover:bg-gray-700 disabled:opacity-50"
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -469,6 +579,16 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
         )}
       </div>
 
+      {cropSrc && (
+        <ImageCropModal
+          open
+          imageSrc={cropSrc}
+          aspect={cropType === "cover" ? 16 / 5 : 1}
+          title={cropType === "cover" ? "カバー画像を調整" : "アバターを調整"}
+          onClose={handleCropClose}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </section>
   );
 }

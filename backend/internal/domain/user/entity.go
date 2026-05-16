@@ -23,6 +23,7 @@ type User struct {
 	OAuthProvider    *string
 	OAuthProviderID  *string
 	AvatarURL        *string
+	CoverPhotoURL    *string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 }
@@ -46,5 +47,7 @@ type UpdateProfileInput struct {
 	JobType          **string
 	JobSeekingStatus **string
 	ProfileColor     **string
+	AvatarURL        **string
+	CoverPhotoURL    **string
 	IsPublic         *bool
 }

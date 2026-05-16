@@ -706,6 +706,7 @@ type User struct {
 	AvatarUrl        pgtype.Text        `json:"avatar_url"`
 	FollowersCount   int32              `json:"followers_count"`
 	FollowingCount   int32              `json:"following_count"`
+	CoverPhotoUrl    pgtype.Text        `json:"cover_photo_url"`
 }
 
 type UserScoutSetting struct {

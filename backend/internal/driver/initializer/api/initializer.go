@@ -119,7 +119,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	jobApplicationInputFactory := factory.NewJobApplicationInputFactory()
 	jobApplicationOutputFactory := httpfactory.NewJobApplicationOutputFactory()
 
-	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory)
+	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory, fileStorage)
 	authCtrl := httpcontroller.NewAuthController(authInputFactory, authOutputFactory, userRepoFactory, refreshTokenRepoFactory)
 	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
 	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationOutputFactory, educationRepoFactory, userRepoFactory)
@@ -237,6 +237,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	e.GET("/api/users/id/:id", func(c echo.Context) error {
 		return userCtrl.GetByID(c, c.Param("id"))
 	})
+	e.POST("/api/users/:username/upload-image", func(c echo.Context) error {
+		return userCtrl.UploadImage(c, c.Param("username"))
+	}, jwtMW)
 
 	// --- Similar Users ---
 	similarUsersCtrl := httpcontroller.NewSimilarUsersController(pool)
