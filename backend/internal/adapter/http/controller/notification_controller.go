@@ -33,13 +33,7 @@ func NewNotificationController(
 
 // ListByUser handles GET /api/notifications.
 func (c *NotificationController) ListByUser(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
@@ -53,13 +47,7 @@ func (c *NotificationController) ListByUser(ctx echo.Context) error {
 
 // ListByCompany handles GET /api/company/notifications.
 func (c *NotificationController) ListByCompany(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
@@ -73,13 +61,7 @@ func (c *NotificationController) ListByCompany(ctx echo.Context) error {
 
 // CountUnreadByUser handles GET /api/notifications/unread-count.
 func (c *NotificationController) CountUnreadByUser(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.CountUnreadByUser(ctx.Request().Context(), userID); err != nil {
@@ -90,13 +72,7 @@ func (c *NotificationController) CountUnreadByUser(ctx echo.Context) error {
 
 // CountUnreadByCompany handles GET /api/company/notifications/unread-count.
 func (c *NotificationController) CountUnreadByCompany(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.CountUnreadByCompany(ctx.Request().Context(), companyID); err != nil {
@@ -119,13 +95,7 @@ func (c *NotificationController) MarkAsRead(ctx echo.Context, id string) error {
 
 // MarkAllAsReadByUser handles PUT /api/notifications/read-all.
 func (c *NotificationController) MarkAllAsReadByUser(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.MarkAllAsReadByUser(ctx.Request().Context(), userID); err != nil {
@@ -139,13 +109,7 @@ func (c *NotificationController) MarkAllAsReadByUser(ctx echo.Context) error {
 
 // MarkAllAsReadByCompany handles PUT /api/company/notifications/read-all.
 func (c *NotificationController) MarkAllAsReadByCompany(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.MarkAllAsReadByCompany(ctx.Request().Context(), companyID); err != nil {

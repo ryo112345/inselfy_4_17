@@ -107,13 +107,7 @@ type bulkRespondRequest struct {
 
 // List handles GET /api/scouts.
 func (c *CandidateScoutController) List(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
@@ -127,13 +121,7 @@ func (c *CandidateScoutController) List(ctx echo.Context) error {
 
 // GetDetail handles GET /api/scouts/:scoutID.
 func (c *CandidateScoutController) GetDetail(ctx echo.Context, scoutID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetReceivedDetail(ctx.Request().Context(), userID, scoutID); err != nil {
@@ -144,13 +132,7 @@ func (c *CandidateScoutController) GetDetail(ctx echo.Context, scoutID string) e
 
 // Respond handles POST /api/scouts/:scoutID/respond.
 func (c *CandidateScoutController) Respond(ctx echo.Context, scoutID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body respondRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -177,13 +159,7 @@ func (c *CandidateScoutController) Respond(ctx echo.Context, scoutID string) err
 
 // Reply handles POST /api/scouts/:scoutID/replies.
 func (c *CandidateScoutController) Reply(ctx echo.Context, scoutID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body candidateReplyRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -199,13 +175,7 @@ func (c *CandidateScoutController) Reply(ctx echo.Context, scoutID string) error
 
 // BulkDecline handles POST /api/scouts/bulk-decline.
 func (c *CandidateScoutController) BulkDecline(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body bulkDeclineRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -221,13 +191,7 @@ func (c *CandidateScoutController) BulkDecline(ctx echo.Context) error {
 
 // BulkRespond handles POST /api/scouts/bulk-respond.
 func (c *CandidateScoutController) BulkRespond(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body bulkRespondRequest
 	if err := ctx.Bind(&body); err != nil {

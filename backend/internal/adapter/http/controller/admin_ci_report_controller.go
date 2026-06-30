@@ -24,16 +24,16 @@ func NewAdminCIReportController(pool *pgxpool.Pool) *AdminCIReportController {
 func (c *AdminCIReportController) ListPending(ctx echo.Context) error {
 	rows, err := c.queries.ListCISessionsWithoutReport(ctx.Request().Context())
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	items := make([]pendingSessionItem, 0, len(rows))
 	for _, r := range rows {
 		item := pendingSessionItem{
-			SessionID:   pgUUIDToString(r.SessionID),
-			UserID:      pgUUIDToString(r.UserID),
-			Username:    r.Username,
-			Name:        r.Name,
+			SessionID: pgUUIDToString(r.SessionID),
+			UserID:    pgUUIDToString(r.UserID),
+			Username:  r.Username,
+			Name:      r.Name,
 		}
 		if r.CompletedAt.Valid {
 			t := r.CompletedAt.Time.Format("2006-01-02T15:04:05Z")
@@ -67,9 +67,9 @@ func (c *AdminCIReportController) SaveReport(ctx echo.Context, sessionID string)
 	session, err := c.queries.GetCISessionByID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "session not found"})
+			return notFoundError(ctx, "session not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	report, err := c.queries.UpsertCIAIReport(ctx.Request().Context(), &generated.UpsertCIAIReportParams{
@@ -78,7 +78,7 @@ func (c *AdminCIReportController) SaveReport(ctx echo.Context, sessionID string)
 		Content:   body.Content,
 	})
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
@@ -99,9 +99,9 @@ func (c *AdminCIReportController) GetReport(ctx echo.Context, sessionID string) 
 	report, err := c.queries.GetCIAIReportBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "report not found"})
+			return notFoundError(ctx, "report not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	firstView := !report.ViewedAt.Valid
@@ -122,7 +122,7 @@ func (c *AdminCIReportController) GetReport(ctx echo.Context, sessionID string) 
 func (c *AdminCIReportController) ListReports(ctx echo.Context) error {
 	rows, err := c.queries.ListCIAIReports(ctx.Request().Context())
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	items := make([]map[string]any, 0, len(rows))
@@ -156,7 +156,7 @@ func (c *AdminCIReportController) ResetViewed(ctx echo.Context, sessionID string
 
 	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
 	if err := c.queries.ResetCIAIReportViewed(ctx.Request().Context(), pgSessionID); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{"message": "ok"})
@@ -172,33 +172,33 @@ func (c *AdminCIReportController) GetPrompt(ctx echo.Context, sessionID string) 
 
 	basicScores, err := c.queries.GetCIBasicScoresBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	if len(basicScores) == 0 {
-		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "scores not found"})
+		return notFoundError(ctx, "scores not found")
 	}
 
 	typeScores, err := c.queries.GetCITypeScoresBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	result, err := c.queries.GetCIResultBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "result not found"})
+			return notFoundError(ctx, "result not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	var responses []ciResponse
 	if err := json.Unmarshal(result.Responses, &responses); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to parse responses"})
+		return internalError(ctx, "failed to parse responses")
 	}
 
 	template, err := readCIPromptTemplate()
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to read prompt template: " + err.Error()})
+		return internalError(ctx, "failed to read prompt template: "+err.Error())
 	}
 
 	prompt := buildCIReportPrompt(string(template), typeScores, basicScores, responses)

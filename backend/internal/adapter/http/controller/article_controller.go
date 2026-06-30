@@ -59,18 +59,15 @@ type updateArticleRequest struct {
 }
 
 func (c *ArticleController) CreateAsUser(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	userID := authmw.UserID(ctx)
 	var body createArticleRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
 	input, p := c.newIO()
 	if err := input.Create(ctx.Request().Context(), article.CreateArticleInput{
-		AuthorType:   article.AuthorTypeUser,
-		AuthorUserID: &userID,
+		AuthorType:    article.AuthorTypeUser,
+		AuthorUserID:  &userID,
 		Title:         body.Title,
 		Body:          body.Body,
 		IsPaid:        body.IsPaid,
@@ -84,10 +81,7 @@ func (c *ArticleController) CreateAsUser(ctx echo.Context) error {
 }
 
 func (c *ArticleController) CreateAsCompany(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	companyID := authmw.CompanyID(ctx)
 	var body createArticleRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
@@ -129,10 +123,7 @@ func (c *ArticleController) List(ctx echo.Context) error {
 }
 
 func (c *ArticleController) ListMine(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	userID := authmw.UserID(ctx)
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 	input, p := c.newIO()
@@ -143,10 +134,7 @@ func (c *ArticleController) ListMine(ctx echo.Context) error {
 }
 
 func (c *ArticleController) UpdateAsUser(ctx echo.Context, id string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	userID := authmw.UserID(ctx)
 	var body updateArticleRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
@@ -166,10 +154,7 @@ func (c *ArticleController) UpdateAsUser(ctx echo.Context, id string) error {
 }
 
 func (c *ArticleController) UpdateAsCompany(ctx echo.Context, id string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	companyID := authmw.CompanyID(ctx)
 	var body updateArticleRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
@@ -189,10 +174,7 @@ func (c *ArticleController) UpdateAsCompany(ctx echo.Context, id string) error {
 }
 
 func (c *ArticleController) DeleteAsUser(ctx echo.Context, id string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	userID := authmw.UserID(ctx)
 	input, _ := c.newIO()
 	if err := input.Delete(ctx.Request().Context(), id, article.AuthorTypeUser, userID); err != nil {
 		return handleError(ctx, err)
@@ -201,10 +183,7 @@ func (c *ArticleController) DeleteAsUser(ctx echo.Context, id string) error {
 }
 
 func (c *ArticleController) DeleteAsCompany(ctx echo.Context, id string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	companyID := authmw.CompanyID(ctx)
 	input, _ := c.newIO()
 	if err := input.Delete(ctx.Request().Context(), id, article.AuthorTypeCompany, companyID); err != nil {
 		return handleError(ctx, err)
@@ -213,10 +192,7 @@ func (c *ArticleController) DeleteAsCompany(ctx echo.Context, id string) error {
 }
 
 func (c *ArticleController) PublishAsUser(ctx echo.Context, id string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	userID := authmw.UserID(ctx)
 	input, p := c.newIO()
 	if err := input.Publish(ctx.Request().Context(), id, article.AuthorTypeUser, userID); err != nil {
 		return handleError(ctx, err)
@@ -225,10 +201,7 @@ func (c *ArticleController) PublishAsUser(ctx echo.Context, id string) error {
 }
 
 func (c *ArticleController) PublishAsCompany(ctx echo.Context, id string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	companyID := authmw.CompanyID(ctx)
 	input, p := c.newIO()
 	if err := input.Publish(ctx.Request().Context(), id, article.AuthorTypeCompany, companyID); err != nil {
 		return handleError(ctx, err)
@@ -237,10 +210,7 @@ func (c *ArticleController) PublishAsCompany(ctx echo.Context, id string) error 
 }
 
 func (c *ArticleController) CreateCheckout(ctx echo.Context, id string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, unauthorizedResponse)
-	}
+	userID := authmw.UserID(ctx)
 	input, p := c.newIO()
 	if err := input.CreateCheckoutSession(ctx.Request().Context(), id, userID); err != nil {
 		return handleError(ctx, err)
@@ -281,13 +251,13 @@ func (c *ArticleController) UploadImage(ctx echo.Context) error {
 	}
 	src, err := file.Open()
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"code": "INTERNAL", "message": "failed to read file"})
+		return internalError(ctx, "failed to read file")
 	}
 	defer src.Close()
 	key := fmt.Sprintf("article-images/%s%s", uuid.New().String(), ext)
 	url, err := c.storage.Save(ctx.Request().Context(), key, src)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"code": "INTERNAL", "message": "failed to save file"})
+		return internalError(ctx, "failed to save file")
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{"url": url})
 }

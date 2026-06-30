@@ -66,8 +66,8 @@ func (c *WorkValuesController) StartSession(ctx echo.Context) error {
 
 type submitResultRequest struct {
 	Responses []workvalues.Response `json:"responses"`
-	Mu        map[string]float64   `json:"mu"`
-	SE        map[string]float64   `json:"se"`
+	Mu        map[string]float64    `json:"mu"`
+	SE        map[string]float64    `json:"se"`
 }
 
 func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) error {

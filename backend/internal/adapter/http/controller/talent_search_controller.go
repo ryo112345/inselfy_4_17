@@ -26,21 +26,21 @@ func NewTalentSearchController(pool *pgxpool.Pool) *TalentSearchController {
 }
 
 type talentCard struct {
-	UserID           string     `json:"user_id"`
-	Username         string     `json:"username"`
-	Name             string     `json:"name"`
-	Headline         *string    `json:"headline"`
-	AvatarURL        *string    `json:"avatar_url"`
-	ProfileColor     *string    `json:"profile_color"`
-	JobSeekingStatus *string    `json:"job_seeking_status"`
-	Skills           []string   `json:"skills"`
+	UserID           string      `json:"user_id"`
+	Username         string      `json:"username"`
+	Name             string      `json:"name"`
+	Headline         *string     `json:"headline"`
+	AvatarURL        *string     `json:"avatar_url"`
+	ProfileColor     *string     `json:"profile_color"`
+	JobSeekingStatus *string     `json:"job_seeking_status"`
+	Skills           []string    `json:"skills"`
 	Experiences      []talentExp `json:"experiences"`
-	TopWVLabels      []string   `json:"top_wv_labels"`
-	TopCILabels      []string   `json:"top_ci_labels"`
-	Similarity       *float64   `json:"similarity,omitempty"`
-	WVSimilarity     *float64   `json:"wv_similarity,omitempty"`
-	CISimilarity     *float64   `json:"ci_similarity,omitempty"`
-	IntSimilarity    *float64   `json:"integrated_similarity,omitempty"`
+	TopWVLabels      []string    `json:"top_wv_labels"`
+	TopCILabels      []string    `json:"top_ci_labels"`
+	Similarity       *float64    `json:"similarity,omitempty"`
+	WVSimilarity     *float64    `json:"wv_similarity,omitempty"`
+	CISimilarity     *float64    `json:"ci_similarity,omitempty"`
+	IntSimilarity    *float64    `json:"integrated_similarity,omitempty"`
 }
 
 type talentExp struct {
@@ -147,7 +147,7 @@ func (c *TalentSearchController) Search(ctx echo.Context) error {
 	countArgs := make([]any, len(args))
 	copy(countArgs, args)
 	if err := c.pool.QueryRow(reqCtx, countQuery, countArgs...).Scan(&total); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	query += ` ORDER BY u.created_at DESC LIMIT $` + strconv.Itoa(argIdx) + ` OFFSET $` + strconv.Itoa(argIdx+1)
@@ -155,7 +155,7 @@ func (c *TalentSearchController) Search(ctx echo.Context) error {
 
 	rows, err := c.pool.Query(reqCtx, query, args...)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	defer rows.Close()
 
@@ -322,7 +322,7 @@ func (c *TalentSearchController) DiagnosticSearch(ctx echo.Context) error {
 		var err error
 		filterUIDs, err = c.getFilteredUserIDs(reqCtx, filter)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		if len(filterUIDs) == 0 {
 			return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": 0})
@@ -334,19 +334,19 @@ func (c *TalentSearchController) DiagnosticSearch(ctx echo.Context) error {
 	if teamID != "" {
 		wv, err := c.getTeamAverageWVDisplayScores(reqCtx, companyID, teamID)
 		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team not found or no completed WV data"})
+			return badRequest(ctx, "team not found or no completed WV data")
 		}
 		targetWV = wv
 	} else {
 		targetWV = c.parseCustomWVDisplayScores(ctx)
 		if targetWV == nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team_id or custom wv_ weights required"})
+			return badRequest(ctx, "team_id or custom wv_ weights required")
 		}
 	}
 
 	scored, err := c.computeWVScores(reqCtx, targetWV, filterUIDs)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	sort.Slice(scored, func(i, j int) bool { return scored[i].sim > scored[j].sim })
@@ -665,7 +665,7 @@ func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
 		var err error
 		filterUIDs, err = c.getFilteredUserIDs(reqCtx, filter)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		if len(filterUIDs) == 0 {
 			return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": 0})
@@ -677,20 +677,20 @@ func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
 	if teamID != "" {
 		scores, err := c.getTeamAverageCIScores(reqCtx, companyID, teamID)
 		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team not found or no completed CI data"})
+			return badRequest(ctx, "team not found or no completed CI data")
 		}
 		target = scores
 	} else {
 		scores, ok := c.parseCustomCIWeights(ctx)
 		if !ok {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team_id or custom ci_ weights required"})
+			return badRequest(ctx, "team_id or custom ci_ weights required")
 		}
 		target = scores
 	}
 
 	scored, err := c.computeCIScores(reqCtx, target, filterUIDs)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	sort.Slice(scored, func(i, j int) bool { return scored[i].sim > scored[j].sim })
@@ -759,7 +759,7 @@ func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) er
 		var err error
 		filterUIDs, err = c.getFilteredUserIDs(reqCtx, filter)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		if len(filterUIDs) == 0 {
 			return ctx.JSON(http.StatusOK, map[string]any{"users": []talentCard{}, "total": 0})
@@ -773,13 +773,13 @@ func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) er
 		wv, errWV := c.getTeamAverageWVDisplayScores(reqCtx, companyID, teamID)
 		ci, errCI := c.getTeamAverageCIScores(reqCtx, companyID, teamID)
 		if errWV != nil && errCI != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team not found or no completed diagnostic data"})
+			return badRequest(ctx, "team not found or no completed diagnostic data")
 		}
 		if errWV != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team has no completed WV data"})
+			return badRequest(ctx, "team has no completed WV data")
 		}
 		if errCI != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "team has no completed CI data"})
+			return badRequest(ctx, "team has no completed CI data")
 		}
 		targetWV = wv
 		targetCI = ci
@@ -787,18 +787,18 @@ func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) er
 		targetWV = c.parseCustomWVDisplayScores(ctx)
 		ci, hasCI := c.parseCustomCIWeights(ctx)
 		if targetWV == nil || !hasCI {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "both wv_ and ci_ weights required"})
+			return badRequest(ctx, "both wv_ and ci_ weights required")
 		}
 		targetCI = ci
 	}
 
 	wvScored, err := c.computeWVScores(reqCtx, targetWV, filterUIDs)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	ciScored, err := c.computeCIScores(reqCtx, targetCI, filterUIDs)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	wvMap := make(map[string]float64, len(wvScored))
@@ -934,9 +934,9 @@ func (c *TalentSearchController) parseCustomCIWeights(ctx echo.Context) ([6]floa
 }
 
 const (
-	sigmaWV       = 18.0
-	sigmaCI       = 0.7
-	geomeanFloor  = 0.001
+	sigmaWV      = 18.0
+	sigmaCI      = 0.7
+	geomeanFloor = 0.001
 )
 
 var ciTypeIndex = map[string]int{"R": 0, "I": 1, "A": 2, "S": 3, "E": 4, "C": 5}

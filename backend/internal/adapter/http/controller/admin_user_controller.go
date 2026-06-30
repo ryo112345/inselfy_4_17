@@ -25,12 +25,12 @@ func NewAdminUserController(pool *pgxpool.Pool, jwtService port.JWTService) *Adm
 }
 
 type adminUserItem struct {
-	ID          string  `json:"id"`
-	Username    string  `json:"username"`
-	Name        string  `json:"name"`
-	Email       *string `json:"email"`
-	AvatarURL   *string `json:"avatar_url"`
-	CreatedAt   string  `json:"created_at"`
+	ID        string  `json:"id"`
+	Username  string  `json:"username"`
+	Name      string  `json:"name"`
+	Email     *string `json:"email"`
+	AvatarURL *string `json:"avatar_url"`
+	CreatedAt string  `json:"created_at"`
 }
 
 type adminUserListResponse struct {
@@ -60,7 +60,7 @@ func (c *AdminUserController) List(ctx echo.Context) error {
 		searchText := pgtype.Text{String: search, Valid: true}
 		total, err = c.queries.CountSearchUsers(ctx.Request().Context(), searchText)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		rows, err := c.queries.SearchUsers(ctx.Request().Context(), &generated.SearchUsersParams{
 			Column1: searchText,
@@ -68,21 +68,21 @@ func (c *AdminUserController) List(ctx echo.Context) error {
 			Offset:  offset,
 		})
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		return ctx.JSON(http.StatusOK, buildListResponse(toItemsFromSearch(rows), total, page, perPage))
 	}
 
 	total, err = c.queries.CountUsers(ctx.Request().Context())
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	rows, err := c.queries.ListUsers(ctx.Request().Context(), &generated.ListUsersParams{
 		Limit:  int32(perPage),
 		Offset: offset,
 	})
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	return ctx.JSON(http.StatusOK, buildListResponse(toItemsFromList(rows), total, page, perPage))
 }
@@ -90,11 +90,11 @@ func (c *AdminUserController) List(ctx echo.Context) error {
 func (c *AdminUserController) Delete(ctx echo.Context, id string) error {
 	parsed, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid user id"})
+		return badRequest(ctx, "invalid user id")
 	}
 	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
 	if err := c.queries.DeleteUser(ctx.Request().Context(), pgID); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
@@ -135,12 +135,12 @@ func toItemsFromList(rows []*generated.ListUsersRow) []adminUserItem {
 	items := make([]adminUserItem, 0, len(rows))
 	for _, r := range rows {
 		items = append(items, adminUserItem{
-			ID:          pgUUIDToString(r.ID),
-			Username:    r.Username,
-			Name:        r.Name,
-			Email:       textToPtr(r.Email),
-			AvatarURL:   textToPtr(r.AvatarUrl),
-			CreatedAt:   r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			ID:        pgUUIDToString(r.ID),
+			Username:  r.Username,
+			Name:      r.Name,
+			Email:     textToPtr(r.Email),
+			AvatarURL: textToPtr(r.AvatarUrl),
+			CreatedAt: r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 		})
 	}
 	return items
@@ -150,12 +150,12 @@ func toItemsFromSearch(rows []*generated.SearchUsersRow) []adminUserItem {
 	items := make([]adminUserItem, 0, len(rows))
 	for _, r := range rows {
 		items = append(items, adminUserItem{
-			ID:          pgUUIDToString(r.ID),
-			Username:    r.Username,
-			Name:        r.Name,
-			Email:       textToPtr(r.Email),
-			AvatarURL:   textToPtr(r.AvatarUrl),
-			CreatedAt:   r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			ID:        pgUUIDToString(r.ID),
+			Username:  r.Username,
+			Name:      r.Name,
+			Email:     textToPtr(r.Email),
+			AvatarURL: textToPtr(r.AvatarUrl),
+			CreatedAt: r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 		})
 	}
 	return items
@@ -164,23 +164,23 @@ func toItemsFromSearch(rows []*generated.SearchUsersRow) []adminUserItem {
 func (c *AdminUserController) BypassLogin(ctx echo.Context, id string) error {
 	parsed, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid user id"})
+		return badRequest(ctx, "invalid user id")
 	}
 	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
 
 	u, err := c.queries.GetUserByID(ctx.Request().Context(), pgID)
 	if err != nil {
-		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "user not found"})
+		return notFoundError(ctx, "user not found")
 	}
 
 	accessToken, err := c.jwtService.GenerateAccessToken(pgUUIDToString(u.ID))
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to generate token"})
+		return internalError(ctx, "failed to generate token")
 	}
 
 	rawRefresh, err := c.jwtService.GenerateRefreshToken()
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to generate token"})
+		return internalError(ctx, "failed to generate token")
 	}
 
 	if err := c.queries.CreateRefreshToken(ctx.Request().Context(), &generated.CreateRefreshTokenParams{
@@ -188,7 +188,7 @@ func (c *AdminUserController) BypassLogin(ctx echo.Context, id string) error {
 		TokenHash: c.jwtService.HashRefreshToken(rawRefresh),
 		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(7 * 24 * time.Hour), Valid: true},
 	}); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to store refresh token"})
+		return internalError(ctx, "failed to store refresh token")
 	}
 
 	userResp := &presenter.AuthUserResponse{

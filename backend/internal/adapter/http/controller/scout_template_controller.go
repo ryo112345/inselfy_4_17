@@ -45,13 +45,7 @@ type updateTemplateRequest struct {
 
 // Create handles POST /api/company/scout-templates.
 func (c *ScoutTemplateController) Create(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body createTemplateRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -72,13 +66,7 @@ func (c *ScoutTemplateController) Create(ctx echo.Context) error {
 
 // List handles GET /api/company/scout-templates.
 func (c *ScoutTemplateController) List(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.List(ctx.Request().Context(), companyID); err != nil {
@@ -89,13 +77,7 @@ func (c *ScoutTemplateController) List(ctx echo.Context) error {
 
 // Get handles GET /api/company/scout-templates/:templateID.
 func (c *ScoutTemplateController) Get(ctx echo.Context, templateID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.Get(ctx.Request().Context(), companyID, templateID); err != nil {
@@ -106,13 +88,7 @@ func (c *ScoutTemplateController) Get(ctx echo.Context, templateID string) error
 
 // Update handles PUT /api/company/scout-templates/:templateID.
 func (c *ScoutTemplateController) Update(ctx echo.Context, templateID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body updateTemplateRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -132,13 +108,7 @@ func (c *ScoutTemplateController) Update(ctx echo.Context, templateID string) er
 
 // Delete handles DELETE /api/company/scout-templates/:templateID.
 func (c *ScoutTemplateController) Delete(ctx echo.Context, templateID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, _ := c.newIO()
 	if err := input.Delete(ctx.Request().Context(), companyID, templateID); err != nil {

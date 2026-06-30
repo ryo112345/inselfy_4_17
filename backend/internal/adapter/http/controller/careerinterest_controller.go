@@ -18,11 +18,11 @@ type CareerInterestController struct {
 		typeScoreRepo port.CareerInterestTypeScoreRepository,
 		output port.CareerInterestOutputPort,
 	) port.CareerInterestInputPort
-	outputFactory          func() *presenter.CareerInterestPresenter
-	sessionRepoFactory     func() port.CareerInterestSessionRepository
-	resultRepoFactory      func() port.CareerInterestResultRepository
-	basicScoreRepoFactory  func() port.CareerInterestBasicScoreRepository
-	typeScoreRepoFactory   func() port.CareerInterestTypeScoreRepository
+	outputFactory         func() *presenter.CareerInterestPresenter
+	sessionRepoFactory    func() port.CareerInterestSessionRepository
+	resultRepoFactory     func() port.CareerInterestResultRepository
+	basicScoreRepoFactory func() port.CareerInterestBasicScoreRepository
+	typeScoreRepoFactory  func() port.CareerInterestTypeScoreRepository
 }
 
 func NewCareerInterestController(

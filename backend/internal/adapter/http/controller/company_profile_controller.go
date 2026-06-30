@@ -82,7 +82,7 @@ func (c *CompanyProfileController) GetPublicProfile(ctx echo.Context) error {
 	id := ctx.Param("id")
 	parsed, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+		return badRequest(ctx, "invalid company id")
 	}
 
 	var p publicCompanyProfileResponse
@@ -103,7 +103,7 @@ func (c *CompanyProfileController) GetPublicProfile(ctx echo.Context) error {
 			&benefitsJSON, &p.AverageAge, &p.AverageOvertimeHours, &p.PaidLeaveRate,
 			&p.SmokingPolicy, &galleryJSON)
 	if err != nil {
-		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "company not found"})
+		return notFoundError(ctx, "company not found")
 	}
 	if foundedYear != nil {
 		v := int(*foundedYear)
@@ -133,7 +133,7 @@ func (c *CompanyProfileController) GetProfile(ctx echo.Context) error {
 	companyID := c.companyID(ctx)
 	parsed, err := uuid.Parse(companyID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+		return badRequest(ctx, "invalid company id")
 	}
 
 	var p companyProfileResponse
@@ -154,7 +154,7 @@ func (c *CompanyProfileController) GetProfile(ctx echo.Context) error {
 			&benefitsJSON, &p.AverageAge, &p.AverageOvertimeHours, &p.PaidLeaveRate,
 			&p.SmokingPolicy, &galleryJSON)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	if foundedYear != nil {
 		v := int(*foundedYear)
@@ -180,36 +180,36 @@ func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
 	companyID := c.companyID(ctx)
 	parsed, err := uuid.Parse(companyID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+		return badRequest(ctx, "invalid company id")
 	}
 
 	var body struct {
-		CompanyName          string `json:"companyName"`
-		ContactPersonName    string `json:"contactPersonName"`
-		PhoneNumber          string `json:"phoneNumber"`
-		Headline             string `json:"headline"`
-		Description          string `json:"description"`
-		Industry             string `json:"industry"`
-		Location             string `json:"location"`
-		EmployeeCount        string `json:"employeeCount"`
-		FoundedYear          *int   `json:"foundedYear"`
-		FoundedMonth         *int   `json:"foundedMonth"`
-		WebsiteURL           string `json:"websiteUrl"`
-		RepresentativeName   string `json:"representativeName"`
-		Capital              string `json:"capital"`
-		Revenue              string `json:"revenue"`
+		CompanyName          string   `json:"companyName"`
+		ContactPersonName    string   `json:"contactPersonName"`
+		PhoneNumber          string   `json:"phoneNumber"`
+		Headline             string   `json:"headline"`
+		Description          string   `json:"description"`
+		Industry             string   `json:"industry"`
+		Location             string   `json:"location"`
+		EmployeeCount        string   `json:"employeeCount"`
+		FoundedYear          *int     `json:"foundedYear"`
+		FoundedMonth         *int     `json:"foundedMonth"`
+		WebsiteURL           string   `json:"websiteUrl"`
+		RepresentativeName   string   `json:"representativeName"`
+		Capital              string   `json:"capital"`
+		Revenue              string   `json:"revenue"`
 		Benefits             []string `json:"benefits"`
 		AverageAge           string   `json:"averageAge"`
-		AverageOvertimeHours string `json:"averageOvertimeHours"`
-		PaidLeaveRate        string `json:"paidLeaveRate"`
-		SmokingPolicy        string `json:"smokingPolicy"`
+		AverageOvertimeHours string   `json:"averageOvertimeHours"`
+		PaidLeaveRate        string   `json:"paidLeaveRate"`
+		SmokingPolicy        string   `json:"smokingPolicy"`
 	}
 	if err := ctx.Bind(&body); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request"})
+		return badRequest(ctx, "invalid request")
 	}
 
 	if strings.TrimSpace(body.CompanyName) == "" {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "企業名は必須です"})
+		return badRequest(ctx, "企業名は必須です")
 	}
 
 	benefitsJSON, _ := json.Marshal(body.Benefits)
@@ -247,7 +247,7 @@ func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
 		string(benefitsJSON), body.AverageAge, body.AverageOvertimeHours,
 		body.PaidLeaveRate, body.SmokingPolicy)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return c.GetProfile(ctx)
@@ -257,26 +257,26 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 	companyID := c.companyID(ctx)
 	parsed, err := uuid.Parse(companyID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+		return badRequest(ctx, "invalid company id")
 	}
 
 	imageType := ctx.QueryParam("type")
 	if imageType != "logo" && imageType != "cover" && imageType != "gallery" {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "type must be 'logo', 'cover', or 'gallery'"})
+		return badRequest(ctx, "type must be 'logo', 'cover', or 'gallery'")
 	}
 
 	file, err := ctx.FormFile("file")
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "file is required"})
+		return badRequest(ctx, "file is required")
 	}
 
 	if file.Size > 5*1024*1024 {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "ファイルサイズは5MB以下にしてください"})
+		return badRequest(ctx, "ファイルサイズは5MB以下にしてください")
 	}
 
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "JPG、PNG、WebP形式のみ対応しています"})
+		return badRequest(ctx, "JPG、PNG、WebP形式のみ対応しています")
 	}
 
 	var key string
@@ -288,13 +288,13 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 
 	src, err := file.Open()
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to open file"})
+		return internalError(ctx, "failed to open file")
 	}
 	defer src.Close()
 
 	imageURL, err := c.storage.Save(ctx.Request().Context(), key, src)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to save file"})
+		return internalError(ctx, "failed to save file")
 	}
 
 	if imageType == "gallery" {
@@ -302,7 +302,7 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 			`UPDATE company_accounts SET gallery_urls = gallery_urls || $2::jsonb, updated_at = NOW() WHERE id = $1`,
 			parsed, fmt.Sprintf(`[%q]`, imageURL))
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 	} else {
 		column := "logo_url"
@@ -313,7 +313,7 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 			fmt.Sprintf("UPDATE company_accounts SET %s = $2, updated_at = NOW() WHERE id = $1", column),
 			parsed, imageURL)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 	}
 
@@ -324,7 +324,7 @@ func (c *CompanyProfileController) DeleteImage(ctx echo.Context) error {
 	companyID := c.companyID(ctx)
 	parsed, err := uuid.Parse(companyID)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+		return badRequest(ctx, "invalid company id")
 	}
 
 	imageType := ctx.QueryParam("type")
@@ -332,7 +332,7 @@ func (c *CompanyProfileController) DeleteImage(ctx echo.Context) error {
 
 	if imageType == "gallery" {
 		if imageURL == "" {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "url is required for gallery delete"})
+			return badRequest(ctx, "url is required for gallery delete")
 		}
 		_, err = c.pool.Exec(ctx.Request().Context(),
 			`UPDATE company_accounts
@@ -344,7 +344,7 @@ func (c *CompanyProfileController) DeleteImage(ctx echo.Context) error {
 			 WHERE id = $1`,
 			parsed, imageURL)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 	} else if imageType == "logo" || imageType == "cover" {
 		column := "logo_url"
@@ -355,10 +355,10 @@ func (c *CompanyProfileController) DeleteImage(ctx echo.Context) error {
 			fmt.Sprintf("UPDATE company_accounts SET %s = '', updated_at = NOW() WHERE id = $1", column),
 			parsed)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 	} else {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "type must be 'logo', 'cover', or 'gallery'"})
+		return badRequest(ctx, "type must be 'logo', 'cover', or 'gallery'")
 	}
 
 	return ctx.NoContent(http.StatusNoContent)

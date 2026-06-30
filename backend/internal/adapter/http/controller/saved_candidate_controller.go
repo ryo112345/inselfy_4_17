@@ -20,45 +20,36 @@ func NewSavedCandidateController(pool *pgxpool.Pool) *SavedCandidateController {
 }
 
 func (c *SavedCandidateController) Save(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 	userID := ctx.Param("userId")
 	if userID == "" {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"code": "BAD_REQUEST", "message": "userId is required"})
+		return badRequest(ctx, "userId is required")
 	}
 
 	_, err := c.pool.Exec(ctx.Request().Context(),
 		`INSERT INTO saved_candidates (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
 		pgUUID(companyID), pgUUID(userID))
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
 func (c *SavedCandidateController) Unsave(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 	userID := ctx.Param("userId")
 
 	_, err := c.pool.Exec(ctx.Request().Context(),
 		`DELETE FROM saved_candidates WHERE company_id = $1 AND user_id = $2`,
 		pgUUID(companyID), pgUUID(userID))
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
 func (c *SavedCandidateController) List(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
@@ -75,7 +66,7 @@ func (c *SavedCandidateController) List(ctx echo.Context) error {
 	if err := c.pool.QueryRow(reqCtx,
 		`SELECT COUNT(*) FROM saved_candidates WHERE company_id = $1`,
 		pgUUID(companyID)).Scan(&total); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	rows, err := c.pool.Query(reqCtx, `
@@ -87,7 +78,7 @@ func (c *SavedCandidateController) List(ctx echo.Context) error {
 		LIMIT $2 OFFSET $3`,
 		pgUUID(companyID), limit, offset)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	defer rows.Close()
 
@@ -137,10 +128,7 @@ func (c *SavedCandidateController) List(ctx echo.Context) error {
 }
 
 func (c *SavedCandidateController) IsSaved(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 	userID := ctx.Param("userId")
 
 	var exists bool
@@ -148,29 +136,26 @@ func (c *SavedCandidateController) IsSaved(ctx echo.Context) error {
 		`SELECT EXISTS(SELECT 1 FROM saved_candidates WHERE company_id = $1 AND user_id = $2)`,
 		pgUUID(companyID), pgUUID(userID)).Scan(&exists)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	return ctx.JSON(http.StatusOK, map[string]bool{"saved": exists})
 }
 
 func (c *SavedCandidateController) BulkCheck(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body struct {
 		UserIDs []string `json:"user_ids"`
 	}
 	if err := ctx.Bind(&body); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid body"})
+		return badRequest(ctx, "invalid body")
 	}
 
 	rows, err := c.pool.Query(ctx.Request().Context(),
 		`SELECT user_id FROM saved_candidates WHERE company_id = $1 AND user_id = ANY($2)`,
 		pgUUID(companyID), pgUUIDs(body.UserIDs))
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	defer rows.Close()
 
@@ -186,17 +171,14 @@ func (c *SavedCandidateController) BulkCheck(ctx echo.Context) error {
 }
 
 func (c *SavedCandidateController) Count(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var count int
 	err := c.pool.QueryRow(ctx.Request().Context(),
 		`SELECT COUNT(*) FROM saved_candidates WHERE company_id = $1`,
 		pgUUID(companyID)).Scan(&count)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	return ctx.JSON(http.StatusOK, map[string]int{"count": count})
 }

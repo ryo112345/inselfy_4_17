@@ -12,9 +12,9 @@ import (
 )
 
 type FollowController struct {
-	inputFactory  func(repo port.FollowRepository, userRepo port.UserRepository, output port.FollowOutputPort) port.FollowInputPort
-	outputFactory func() *presenter.FollowPresenter
-	repoFactory   func() port.FollowRepository
+	inputFactory    func(repo port.FollowRepository, userRepo port.UserRepository, output port.FollowOutputPort) port.FollowInputPort
+	outputFactory   func() *presenter.FollowPresenter
+	repoFactory     func() port.FollowRepository
 	userRepoFactory func() port.UserRepository
 }
 
@@ -33,13 +33,7 @@ func NewFollowController(
 }
 
 func (c *FollowController) Follow(ctx echo.Context, username string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 	input, _ := c.newIO()
 	if err := input.Follow(ctx.Request().Context(), userID, username); err != nil {
 		return handleError(ctx, err)
@@ -48,13 +42,7 @@ func (c *FollowController) Follow(ctx echo.Context, username string) error {
 }
 
 func (c *FollowController) Unfollow(ctx echo.Context, username string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 	input, _ := c.newIO()
 	if err := input.Unfollow(ctx.Request().Context(), userID, username); err != nil {
 		return handleError(ctx, err)
@@ -83,13 +71,7 @@ func (c *FollowController) GetFollowing(ctx echo.Context, username string) error
 }
 
 func (c *FollowController) GetFollowStatus(ctx echo.Context, username string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 	input, p := c.newIO()
 	if err := input.GetFollowStatus(ctx.Request().Context(), userID, username); err != nil {
 		return handleError(ctx, err)

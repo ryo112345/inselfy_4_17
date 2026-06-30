@@ -36,13 +36,7 @@ type createPostRequest struct {
 }
 
 func (c *PostController) Create(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body createPostRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -91,13 +85,7 @@ func (c *PostController) ListByUserID(ctx echo.Context, userID string) error {
 }
 
 func (c *PostController) Delete(ctx echo.Context, postID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, _ := c.newIO()
 	if err := input.Delete(ctx.Request().Context(), postID, userID); err != nil {
@@ -107,13 +95,7 @@ func (c *PostController) Delete(ctx echo.Context, postID string) error {
 }
 
 func (c *PostController) ToggleLike(ctx echo.Context, postID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.ToggleLike(ctx.Request().Context(), postID, userID); err != nil {
@@ -133,13 +115,7 @@ func (c *PostController) ListLikedByUserID(ctx echo.Context, userID string) erro
 }
 
 func (c *PostController) ToggleRepost(ctx echo.Context, postID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.ToggleRepost(ctx.Request().Context(), postID, userID); err != nil {
@@ -153,13 +129,7 @@ type createCommentRequest struct {
 }
 
 func (c *PostController) CreateComment(ctx echo.Context, postID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body createCommentRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -187,13 +157,7 @@ func (c *PostController) ListComments(ctx echo.Context, postID string) error {
 }
 
 func (c *PostController) DeleteComment(ctx echo.Context, commentID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, _ := c.newIO()
 	if err := input.DeleteComment(ctx.Request().Context(), commentID, userID); err != nil {

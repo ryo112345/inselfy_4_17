@@ -26,7 +26,7 @@ func NewWSController(hub *ws.Hub, jwtService port.JWTService, tickets *ws.Ticket
 func (c *WSController) IssueTicket(ctx echo.Context) error {
 	participantType := ctx.QueryParam("type")
 	if participantType != "candidate" && participantType != "company" {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "type is required (candidate|company)"})
+		return badRequest(ctx, "type is required (candidate|company)")
 	}
 
 	var token string
@@ -41,7 +41,7 @@ func (c *WSController) IssueTicket(ctx echo.Context) error {
 		}
 	}
 	if token == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"message": "not authenticated"})
+		return unauthorized(ctx, "not authenticated")
 	}
 
 	var id string
@@ -53,7 +53,7 @@ func (c *WSController) IssueTicket(ctx echo.Context) error {
 		id, err = c.jwtService.ValidateCompanyAccessToken(token)
 	}
 	if err != nil || id == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"message": "invalid token"})
+		return unauthorized(ctx, "invalid token")
 	}
 
 	ticket := c.tickets.Issue(participantType, id)
@@ -66,14 +66,14 @@ func (c *WSController) HandleWS(ctx echo.Context) error {
 	if ticket := ctx.QueryParam("ticket"); ticket != "" {
 		info, ok := c.tickets.Consume(ticket)
 		if !ok {
-			return ctx.JSON(http.StatusUnauthorized, map[string]string{"message": "invalid or expired ticket"})
+			return unauthorized(ctx, "invalid or expired ticket")
 		}
 		participantType = info.ParticipantType
 		id = info.ParticipantID
 	} else {
 		participantType = ctx.QueryParam("type")
 		if participantType != "candidate" && participantType != "company" {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "type query param is required (candidate|company)"})
+			return badRequest(ctx, "type query param is required (candidate|company)")
 		}
 
 		var token string
@@ -88,7 +88,7 @@ func (c *WSController) HandleWS(ctx echo.Context) error {
 			}
 		}
 		if token == "" {
-			return ctx.JSON(http.StatusUnauthorized, map[string]string{"message": "not authenticated"})
+			return unauthorized(ctx, "not authenticated")
 		}
 
 		var err error
@@ -99,7 +99,7 @@ func (c *WSController) HandleWS(ctx echo.Context) error {
 			id, err = c.jwtService.ValidateCompanyAccessToken(token)
 		}
 		if err != nil || id == "" {
-			return ctx.JSON(http.StatusUnauthorized, map[string]string{"message": "invalid token"})
+			return unauthorized(ctx, "invalid token")
 		}
 	}
 

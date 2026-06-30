@@ -61,7 +61,7 @@ func (c *AdminCompanyController) List(ctx echo.Context) error {
 		cs := generated.CompanyStatus(status)
 		total, err = c.queries.CountCompanyAccountsByStatus(ctx.Request().Context(), cs)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		rows, err := c.queries.ListCompanyAccountsByStatus(ctx.Request().Context(), &generated.ListCompanyAccountsByStatusParams{
 			Status: cs,
@@ -69,21 +69,21 @@ func (c *AdminCompanyController) List(ctx echo.Context) error {
 			Offset: offset,
 		})
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		return ctx.JSON(http.StatusOK, buildCompanyListResponse(toCompanyItems(rows), total, page, perPage))
 	}
 
 	total, err = c.queries.CountAllCompanyAccounts(ctx.Request().Context())
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	rows, err := c.queries.ListAllCompanyAccounts(ctx.Request().Context(), &generated.ListAllCompanyAccountsParams{
 		Limit:  int32(perPage),
 		Offset: offset,
 	})
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	return ctx.JSON(http.StatusOK, buildCompanyListResponse(toCompanyItems(rows), total, page, perPage))
 }
@@ -91,18 +91,18 @@ func (c *AdminCompanyController) List(ctx echo.Context) error {
 func (c *AdminCompanyController) UpdateStatus(ctx echo.Context, id string) error {
 	parsed, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+		return badRequest(ctx, "invalid company id")
 	}
 
 	var body struct {
 		Status string `json:"status"`
 	}
 	if err := ctx.Bind(&body); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request"})
+		return badRequest(ctx, "invalid request")
 	}
 
 	if body.Status != "approved" && body.Status != "rejected" {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "status must be 'approved' or 'rejected'"})
+		return badRequest(ctx, "status must be 'approved' or 'rejected'")
 	}
 
 	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
@@ -111,7 +111,7 @@ func (c *AdminCompanyController) UpdateStatus(ctx echo.Context, id string) error
 		Status: generated.CompanyStatus(body.Status),
 	})
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, adminCompanyItem{
@@ -161,24 +161,24 @@ func buildCompanyListResponse(companies []adminCompanyItem, total int64, page, p
 func (c *AdminCompanyController) BypassLogin(ctx echo.Context, id string) error {
 	parsed, err := uuid.Parse(id)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid company id"})
+		return badRequest(ctx, "invalid company id")
 	}
 	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
 
 	ca, err := c.queries.GetCompanyAccountByID(ctx.Request().Context(), pgID)
 	if err != nil {
-		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "company not found"})
+		return notFoundError(ctx, "company not found")
 	}
 
 	companyID := pgUUIDToString(ca.ID)
 	accessToken, err := c.jwtService.GenerateCompanyAccessToken(companyID)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to generate token"})
+		return internalError(ctx, "failed to generate token")
 	}
 
 	rawRefresh, err := c.jwtService.GenerateRefreshToken()
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to generate token"})
+		return internalError(ctx, "failed to generate token")
 	}
 
 	if err := c.queries.CreateCompanyRefreshToken(ctx.Request().Context(), &generated.CreateCompanyRefreshTokenParams{
@@ -186,7 +186,7 @@ func (c *AdminCompanyController) BypassLogin(ctx echo.Context, id string) error 
 		TokenHash: c.jwtService.HashRefreshToken(rawRefresh),
 		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(7 * 24 * time.Hour), Valid: true},
 	}); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to store refresh token"})
+		return internalError(ctx, "failed to store refresh token")
 	}
 
 	setCompanyAuthCookies(ctx, &presenter.CompanyAuthTokenResponse{

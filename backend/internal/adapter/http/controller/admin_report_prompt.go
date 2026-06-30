@@ -28,23 +28,23 @@ func (c *AdminReportController) GetPrompt(ctx echo.Context, sessionID string) er
 	row, err := c.queries.GetWVNeedsScoresBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "scores not found"})
+			return notFoundError(ctx, "scores not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	var mu map[string]float64
 	var se map[string]float64
 	if err := json.Unmarshal(row.Mu, &mu); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to parse mu"})
+		return internalError(ctx, "failed to parse mu")
 	}
 	if err := json.Unmarshal(row.Se, &se); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to parse se"})
+		return internalError(ctx, "failed to parse se")
 	}
 
 	template, err := readPromptTemplate()
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to read prompt template: " + err.Error()})
+		return internalError(ctx, "failed to read prompt template: "+err.Error())
 	}
 
 	prompt := buildReportPrompt(string(template), mu, se)

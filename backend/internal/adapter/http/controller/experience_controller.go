@@ -18,9 +18,9 @@ type ExperienceController struct {
 		userRepo port.UserRepository,
 		output port.ExperienceOutputPort,
 	) port.ExperienceInputPort
-	outputFactory    func() *presenter.ExperiencePresenter
-	repoFactory      func() port.ExperienceRepository
-	userRepoFactory  func() port.UserRepository
+	outputFactory   func() *presenter.ExperiencePresenter
+	repoFactory     func() port.ExperienceRepository
+	userRepoFactory func() port.UserRepository
 }
 
 // NewExperienceController creates an ExperienceController.

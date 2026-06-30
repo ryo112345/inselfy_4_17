@@ -37,105 +37,61 @@ func NewJobPostingController(
 }
 
 type jobPostingRequest struct {
-	Title                     string   `json:"title"`
-	Description               string   `json:"description"`
-	EmploymentType            string   `json:"employmentType"`
-	Location                  *string  `json:"location"`
-	Status                    string   `json:"status"`
-	JobCategory               string   `json:"jobCategory"`
-	HiringCount               string   `json:"hiringCount"`
-	AppealPoints              string   `json:"appealPoints"`
-	Challenges                string   `json:"challenges"`
-	TeamDescription           string                    `json:"teamDescription"`
-	TeamMembers               []jobposting.TeamMember   `json:"teamMembers"`
-	TeamLabel                 string                    `json:"teamLabel"`
-	TeamID                    *string                   `json:"teamId"`
-	SkillsGained              string                    `json:"skillsGained"`
-	Tags                      []string `json:"tags"`
-	RequiredQualifications    string   `json:"requiredQualifications"`
-	PreferredQualifications   string   `json:"preferredQualifications"`
-	WorkLocation              string   `json:"workLocation"`
-	WorkLocationChangeScope   string   `json:"workLocationChangeScope"`
-	JobDescriptionChangeScope string   `json:"jobDescriptionChangeScope"`
-	ContractType              string   `json:"contractType"`
-	ProbationPeriod           string   `json:"probationPeriod"`
-	WorkHours                 string   `json:"workHours"`
-	BreakTime                 string   `json:"breakTime"`
-	Holidays                  string   `json:"holidays"`
-	SalaryMin                 *int32   `json:"salaryMin"`
-	SalaryMax                 *int32   `json:"salaryMax"`
-	SalaryDetail              string   `json:"salaryDetail"`
-	Insurance                 string   `json:"insurance"`
-	RemotePolicy              string   `json:"remotePolicy"`
-	Benefits                  string   `json:"benefits"`
-	SmokingPolicy             string   `json:"smokingPolicy"`
-	SelectionProcess          string   `json:"selectionProcess"`
-	CoverImageURL             string   `json:"coverImageUrl"`
-	HighlightTitleRole        string   `json:"highlightTitleRole"`
-	HighlightTitleAppeal      string   `json:"highlightTitleAppeal"`
-	HighlightTitleChallenge   string   `json:"highlightTitleChallenge"`
-	HighlightTitleGrowth      string   `json:"highlightTitleGrowth"`
-	GalleryURLs               []string `json:"galleryUrls"`
+	Title                     string                  `json:"title"`
+	Description               string                  `json:"description"`
+	EmploymentType            string                  `json:"employmentType"`
+	Location                  *string                 `json:"location"`
+	Status                    string                  `json:"status"`
+	JobCategory               string                  `json:"jobCategory"`
+	HiringCount               string                  `json:"hiringCount"`
+	AppealPoints              string                  `json:"appealPoints"`
+	Challenges                string                  `json:"challenges"`
+	TeamDescription           string                  `json:"teamDescription"`
+	TeamMembers               []jobposting.TeamMember `json:"teamMembers"`
+	TeamLabel                 string                  `json:"teamLabel"`
+	TeamID                    *string                 `json:"teamId"`
+	SkillsGained              string                  `json:"skillsGained"`
+	Tags                      []string                `json:"tags"`
+	RequiredQualifications    string                  `json:"requiredQualifications"`
+	PreferredQualifications   string                  `json:"preferredQualifications"`
+	WorkLocation              string                  `json:"workLocation"`
+	WorkLocationChangeScope   string                  `json:"workLocationChangeScope"`
+	JobDescriptionChangeScope string                  `json:"jobDescriptionChangeScope"`
+	ContractType              string                  `json:"contractType"`
+	ProbationPeriod           string                  `json:"probationPeriod"`
+	WorkHours                 string                  `json:"workHours"`
+	BreakTime                 string                  `json:"breakTime"`
+	Holidays                  string                  `json:"holidays"`
+	SalaryMin                 *int32                  `json:"salaryMin"`
+	SalaryMax                 *int32                  `json:"salaryMax"`
+	SalaryDetail              string                  `json:"salaryDetail"`
+	Insurance                 string                  `json:"insurance"`
+	RemotePolicy              string                  `json:"remotePolicy"`
+	Benefits                  string                  `json:"benefits"`
+	SmokingPolicy             string                  `json:"smokingPolicy"`
+	SelectionProcess          string                  `json:"selectionProcess"`
+	CoverImageURL             string                  `json:"coverImageUrl"`
+	HighlightTitleRole        string                  `json:"highlightTitleRole"`
+	HighlightTitleAppeal      string                  `json:"highlightTitleAppeal"`
+	HighlightTitleChallenge   string                  `json:"highlightTitleChallenge"`
+	HighlightTitleGrowth      string                  `json:"highlightTitleGrowth"`
+	GalleryURLs               []string                `json:"galleryUrls"`
 }
 
 // Create handles POST /api/company/jobs.
 func (c *JobPostingController) Create(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body jobPostingRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
 
+	in := jobPostingReqConv.ToCreateInput(body)
+	in.CompanyID = companyID
+
 	input, p := c.newIO()
-	if err := input.Create(ctx.Request().Context(), jobposting.CreateJobPostingInput{
-		CompanyID:                 companyID,
-		Title:                     body.Title,
-		Description:               body.Description,
-		EmploymentType:            body.EmploymentType,
-		Location:                  body.Location,
-		Status:                    body.Status,
-		JobCategory:               body.JobCategory,
-		HiringCount:               body.HiringCount,
-		AppealPoints:              body.AppealPoints,
-		Challenges:                body.Challenges,
-		TeamDescription:           body.TeamDescription,
-		TeamMembers:               body.TeamMembers,
-		TeamLabel:                 body.TeamLabel,
-		TeamID:                    body.TeamID,
-		SkillsGained:              body.SkillsGained,
-		Tags:                      body.Tags,
-		RequiredQualifications:    body.RequiredQualifications,
-		PreferredQualifications:   body.PreferredQualifications,
-		WorkLocation:              body.WorkLocation,
-		WorkLocationChangeScope:   body.WorkLocationChangeScope,
-		JobDescriptionChangeScope: body.JobDescriptionChangeScope,
-		ContractType:              body.ContractType,
-		ProbationPeriod:           body.ProbationPeriod,
-		WorkHours:                 body.WorkHours,
-		BreakTime:                 body.BreakTime,
-		Holidays:                  body.Holidays,
-		SalaryMin:                 body.SalaryMin,
-		SalaryMax:                 body.SalaryMax,
-		SalaryDetail:              body.SalaryDetail,
-		Insurance:                 body.Insurance,
-		RemotePolicy:              body.RemotePolicy,
-		Benefits:                  body.Benefits,
-		SmokingPolicy:             body.SmokingPolicy,
-		SelectionProcess:          body.SelectionProcess,
-		CoverImageURL:             body.CoverImageURL,
-		HighlightTitleRole:        body.HighlightTitleRole,
-		HighlightTitleAppeal:      body.HighlightTitleAppeal,
-		HighlightTitleChallenge:   body.HighlightTitleChallenge,
-		HighlightTitleGrowth:      body.HighlightTitleGrowth,
-		GalleryURLs:               body.GalleryURLs,
-	}); err != nil {
+	if err := input.Create(ctx.Request().Context(), in); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusCreated, p.SingleResponse())
@@ -143,13 +99,7 @@ func (c *JobPostingController) Create(ctx echo.Context) error {
 
 // List handles GET /api/company/jobs.
 func (c *JobPostingController) List(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.List(ctx.Request().Context(), companyID); err != nil {
@@ -160,13 +110,7 @@ func (c *JobPostingController) List(ctx echo.Context) error {
 
 // Get handles GET /api/company/jobs/:jobId.
 func (c *JobPostingController) Get(ctx echo.Context, jobID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.Get(ctx.Request().Context(), companyID, jobID); err != nil {
@@ -244,13 +188,7 @@ func (c *JobPostingController) GetPublic(ctx echo.Context, jobID string) error {
 
 // Update handles PUT /api/company/jobs/:jobId.
 func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body jobPostingRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -258,47 +196,7 @@ func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 	}
 
 	input, p := c.newIO()
-	if err := input.Update(ctx.Request().Context(), companyID, jobID, jobposting.UpdateJobPostingInput{
-		Title:                     body.Title,
-		Description:               body.Description,
-		EmploymentType:            body.EmploymentType,
-		Location:                  body.Location,
-		Status:                    body.Status,
-		JobCategory:               body.JobCategory,
-		HiringCount:               body.HiringCount,
-		AppealPoints:              body.AppealPoints,
-		Challenges:                body.Challenges,
-		TeamDescription:           body.TeamDescription,
-		TeamMembers:               body.TeamMembers,
-		TeamLabel:                 body.TeamLabel,
-		TeamID:                    body.TeamID,
-		SkillsGained:              body.SkillsGained,
-		Tags:                      body.Tags,
-		RequiredQualifications:    body.RequiredQualifications,
-		PreferredQualifications:   body.PreferredQualifications,
-		WorkLocation:              body.WorkLocation,
-		WorkLocationChangeScope:   body.WorkLocationChangeScope,
-		JobDescriptionChangeScope: body.JobDescriptionChangeScope,
-		ContractType:              body.ContractType,
-		ProbationPeriod:           body.ProbationPeriod,
-		WorkHours:                 body.WorkHours,
-		BreakTime:                 body.BreakTime,
-		Holidays:                  body.Holidays,
-		SalaryMin:                 body.SalaryMin,
-		SalaryMax:                 body.SalaryMax,
-		SalaryDetail:              body.SalaryDetail,
-		Insurance:                 body.Insurance,
-		RemotePolicy:              body.RemotePolicy,
-		Benefits:                  body.Benefits,
-		SmokingPolicy:             body.SmokingPolicy,
-		SelectionProcess:          body.SelectionProcess,
-		CoverImageURL:             body.CoverImageURL,
-		HighlightTitleRole:        body.HighlightTitleRole,
-		HighlightTitleAppeal:      body.HighlightTitleAppeal,
-		HighlightTitleChallenge:   body.HighlightTitleChallenge,
-		HighlightTitleGrowth:      body.HighlightTitleGrowth,
-		GalleryURLs:               body.GalleryURLs,
-	}); err != nil {
+	if err := input.Update(ctx.Request().Context(), companyID, jobID, jobPostingReqConv.ToUpdateInput(body)); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusOK, p.SingleResponse())
@@ -306,13 +204,7 @@ func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 
 // Delete handles DELETE /api/company/jobs/:jobId.
 func (c *JobPostingController) Delete(ctx echo.Context, jobID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, _ := c.newIO()
 	if err := input.Delete(ctx.Request().Context(), companyID, jobID); err != nil {
@@ -320,6 +212,10 @@ func (c *JobPostingController) Delete(ctx echo.Context, jobID string) error {
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
+
+// jobPostingReqConv is the goverter-generated request→input mapper.
+// See job_posting_request_converter.go for its declaration.
+var jobPostingReqConv jobPostingRequestConverter = &jobPostingRequestConverterImpl{}
 
 func (c *JobPostingController) newIO() (port.JobPostingInputPort, *presenter.JobPostingPresenter) {
 	output := c.outputFactory()
@@ -332,26 +228,26 @@ func HandleImageUpload(storage port.FileStorage, subdir string) echo.HandlerFunc
 	return func(ctx echo.Context) error {
 		file, err := ctx.FormFile("file")
 		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "file is required"})
+			return badRequest(ctx, "file is required")
 		}
 		if file.Size > 5*1024*1024 {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "ファイルサイズは5MB以下にしてください"})
+			return badRequest(ctx, "ファイルサイズは5MB以下にしてください")
 		}
 		ext := strings.ToLower(filepath.Ext(file.Filename))
 		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "JPG、PNG、WebP形式のみ対応しています"})
+			return badRequest(ctx, "JPG、PNG、WebP形式のみ対応しています")
 		}
 
 		src, err := file.Open()
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to open file"})
+			return internalError(ctx, "failed to open file")
 		}
 		defer src.Close()
 
 		key := fmt.Sprintf("%s/%s%s", subdir, uuid.New().String()[:8], ext)
 		url, err := storage.Save(ctx.Request().Context(), key, src)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to save file"})
+			return internalError(ctx, "failed to save file")
 		}
 
 		return ctx.JSON(http.StatusOK, map[string]string{"url": url})
