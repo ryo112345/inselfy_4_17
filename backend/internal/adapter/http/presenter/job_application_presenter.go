@@ -53,17 +53,17 @@ func NewJobApplicationPresenter() *JobApplicationPresenter {
 	return &JobApplicationPresenter{}
 }
 
+// jobApplicationConv is the goverter-generated read-model→response mapper.
+// See job_application_converter.go for its declaration.
+var jobApplicationConv jobApplicationConverter = &jobApplicationConverterImpl{}
+
 func (p *JobApplicationPresenter) PresentJobApplication(_ context.Context, a *jobapplication.JobApplicationWithDetails) error {
-	p.single = toJobApplicationResponse(a)
+	p.single = jobApplicationConv.ToResponse(a)
 	return nil
 }
 
 func (p *JobApplicationPresenter) PresentJobApplications(_ context.Context, apps []*jobapplication.JobApplicationWithDetails, total int) error {
-	items := make([]*JobApplicationResponse, len(apps))
-	for i, a := range apps {
-		items[i] = toJobApplicationResponse(a)
-	}
-	p.list = &JobApplicationListResponse{Items: items, Total: total}
+	p.list = &JobApplicationListResponse{Items: jobApplicationConv.ToResponses(apps), Total: total}
 	return nil
 }
 
@@ -77,29 +77,7 @@ func (p *JobApplicationPresenter) PresentOK(_ context.Context) error {
 	return nil
 }
 
-func (p *JobApplicationPresenter) SingleResponse() *JobApplicationResponse       { return p.single }
-func (p *JobApplicationPresenter) ListResponse() *JobApplicationListResponse     { return p.list }
-func (p *JobApplicationPresenter) AppliedResponse() *appliedResponse             { return p.applied }
-func (p *JobApplicationPresenter) IsOK() bool                                    { return p.ok }
-
-func toJobApplicationResponse(a *jobapplication.JobApplicationWithDetails) *JobApplicationResponse {
-	return &JobApplicationResponse{
-		ID:                     a.ID,
-		JobPostingID:           a.JobPostingID,
-		CandidateID:            a.CandidateID,
-		CompanyID:              a.CompanyID,
-		Status:                 string(a.Status),
-		Message:                a.Message,
-		JobTitle:               a.JobTitle,
-		CompanyName:            a.CompanyName,
-		CandidateName:          a.CandidateName,
-		CandidateAvatar:        a.CandidateAvatar,
-		CandidateUsername:      a.CandidateUsername,
-		CandidateHeadline:      a.CandidateHeadline,
-		CandidateProfileColor:  a.CandidateProfileColor,
-		CandidateSeekingStatus: a.CandidateSeekingStatus,
-		CandidateSkills:        a.CandidateSkills,
-		CreatedAt:              a.CreatedAt,
-		UpdatedAt:              a.UpdatedAt,
-	}
-}
+func (p *JobApplicationPresenter) SingleResponse() *JobApplicationResponse   { return p.single }
+func (p *JobApplicationPresenter) ListResponse() *JobApplicationListResponse { return p.list }
+func (p *JobApplicationPresenter) AppliedResponse() *appliedResponse         { return p.applied }
+func (p *JobApplicationPresenter) IsOK() bool                                { return p.ok }

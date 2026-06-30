@@ -17,6 +17,32 @@
 - **`down -all` → `up` は絶対にやらない**（全テーブルが再作成されデータが消える）
 - カラム追加のような非破壊的変更は `ALTER TABLE ADD COLUMN` だけで済むので、既存データに影響しない
 
+### struct 変換マッパー（goverter）
+
+クリーンアーキを保ちつつ、層をまたぐ struct 詰め替えの手書き写経を減らすため
+[goverter](https://goverter.jmattheis.de/) でコード生成する。`sqlc`/`oapi-codegen` と同じく
+「別モデルは保つ・マッパーだけ生成」する方針。
+
+**いつ goverter にするか（線引き）:**
+- **goverter化する:** 同名フィールドが概ね **15個以上** で、ソースが単一のフラット構造体
+  （埋め込みは `goverter:autoMap` で可）、計算・条件分岐がほぼ無いマッパー。
+  例: `JobPosting`(entity↔response, request→Input→entity)、`JobApplicationWithDetails`→response。
+- **手書きのまま残す:** フィールドが少ない（〜10個程度）／composite read-model で値が複数ソースから来る
+  （`a.Article.X`＋著者情報など）／計算フィールド（`CountChars` 等）・条件付き代入・日付整形・
+  値オブジェクト変換（`Username.String()`）・デフォルト値（`"" → "text"`）を含むもの。
+  これらに goverter を当てると `goverter:map`/`extend` だらけで手書きより読みにくくなる。
+- 派生フィールドだけ別扱いしたい場合は `goverter:ignore` して、interactor 側で後付けする
+  （例: `JobPosting` の `Status`/`IsActive`）。
+
+**やり方:**
+- converter 定義は `*_converter.go`（`// goverter:converter` interface）に書く。実装は
+  `*_converter.gen.go` に生成される（`DO NOT EDIT`）。同パッケージ生成なので未公開型にもアクセス可。
+- 共通の小さな変換関数（`copyTime`、`emptySliceIfNil` 等）は同パッケージで `// goverter:extend` 再利用。
+- 再生成: `make goverter`。フィールド追加時は entity/request/response に足して再生成するだけ
+  （マッパーの手編集は不要・漏れはコンパイルエラーで検出）。
+- **注意:** goverter バイナリはモジュールと同じ Go バージョンでビルドが必要。インストールは
+  `GOTOOLCHAIN=go1.25.0 go install github.com/jmattheis/goverter/cmd/goverter@v1.9.4`。
+
 ## ディレクトリ構成
 - (TODO: プロジェクト構成が決まったら記載)
 

@@ -17,6 +17,10 @@ type JobPostingInteractor struct {
 
 var _ port.JobPostingInputPort = (*JobPostingInteractor)(nil)
 
+// jobPostingEntityConv is the goverter-generated create-input→entity mapper.
+// See job_posting_entity_converter.go for its declaration.
+var jobPostingEntityConv jobPostingEntityConverter = &jobPostingEntityConverterImpl{}
+
 func NewJobPostingInteractor(
 	repo port.JobPostingRepository,
 	output port.JobPostingOutputPort,
@@ -41,49 +45,11 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 		status = "draft"
 	}
 
-	j, err := i.repo.Create(ctx, &jobposting.JobPosting{
-		CompanyID:                 input.CompanyID,
-		Title:                     input.Title,
-		Description:               input.Description,
-		EmploymentType:            input.EmploymentType,
-		Location:                  input.Location,
-		IsActive:                  status == "open",
-		Status:                    status,
-		JobCategory:               input.JobCategory,
-		HiringCount:               input.HiringCount,
-		AppealPoints:              input.AppealPoints,
-		Challenges:                input.Challenges,
-		TeamDescription:           input.TeamDescription,
-		TeamMembers:               input.TeamMembers,
-		TeamLabel:                 input.TeamLabel,
-		TeamID:                    input.TeamID,
-		SkillsGained:              input.SkillsGained,
-		Tags:                      input.Tags,
-		RequiredQualifications:    input.RequiredQualifications,
-		PreferredQualifications:   input.PreferredQualifications,
-		WorkLocation:              input.WorkLocation,
-		WorkLocationChangeScope:   input.WorkLocationChangeScope,
-		JobDescriptionChangeScope: input.JobDescriptionChangeScope,
-		ContractType:              input.ContractType,
-		ProbationPeriod:           input.ProbationPeriod,
-		WorkHours:                 input.WorkHours,
-		BreakTime:                 input.BreakTime,
-		Holidays:                  input.Holidays,
-		SalaryMin:                 input.SalaryMin,
-		SalaryMax:                 input.SalaryMax,
-		SalaryDetail:              input.SalaryDetail,
-		Insurance:                 input.Insurance,
-		RemotePolicy:              input.RemotePolicy,
-		Benefits:                  input.Benefits,
-		SmokingPolicy:             input.SmokingPolicy,
-		SelectionProcess:          input.SelectionProcess,
-		CoverImageURL:             input.CoverImageURL,
-		HighlightTitleRole:        input.HighlightTitleRole,
-		HighlightTitleAppeal:      input.HighlightTitleAppeal,
-		HighlightTitleChallenge:   input.HighlightTitleChallenge,
-		HighlightTitleGrowth:      input.HighlightTitleGrowth,
-		GalleryURLs:               input.GalleryURLs,
-	})
+	entity := jobPostingEntityConv.CreateInputToEntity(input)
+	entity.Status = status
+	entity.IsActive = status == "open"
+
+	j, err := i.repo.Create(ctx, entity)
 	if err != nil {
 		return err
 	}
