@@ -15,10 +15,10 @@ import (
 )
 
 type CompanyAuthController struct {
-	inputFactory        func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort
-	outputFactory       func() *presenter.CompanyAuthPresenter
-	companyRepoFactory  func() port.CompanyAccountRepository
-	refreshRepoFactory  func() port.CompanyRefreshTokenRepository
+	inputFactory       func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort
+	outputFactory      func() *presenter.CompanyAuthPresenter
+	companyRepoFactory func() port.CompanyAccountRepository
+	refreshRepoFactory func() port.CompanyRefreshTokenRepository
 }
 
 func NewCompanyAuthController(
@@ -28,10 +28,10 @@ func NewCompanyAuthController(
 	refreshRepoFactory func() port.CompanyRefreshTokenRepository,
 ) *CompanyAuthController {
 	return &CompanyAuthController{
-		inputFactory:        inputFactory,
-		outputFactory:       outputFactory,
-		companyRepoFactory:  companyRepoFactory,
-		refreshRepoFactory:  refreshRepoFactory,
+		inputFactory:       inputFactory,
+		outputFactory:      outputFactory,
+		companyRepoFactory: companyRepoFactory,
+		refreshRepoFactory: refreshRepoFactory,
 	}
 }
 
@@ -94,13 +94,7 @@ func (c *CompanyAuthController) Refresh(ctx echo.Context) error {
 }
 
 func (c *CompanyAuthController) GetMe(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetCurrentCompany(ctx.Request().Context(), companyID); err != nil {
@@ -183,32 +177,17 @@ func clearCompanyAuthCookies(ctx echo.Context) {
 
 func handleCompanyAuthError(ctx echo.Context, err error) error {
 	if err == nil {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
+		return unauthorized(ctx, "unauthorized")
 	}
 	switch {
 	case errors.Is(err, company.ErrInvalidCredentials):
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "invalid email or password",
-		})
+		return unauthorized(ctx, "invalid email or password")
 	case errors.Is(err, company.ErrAccountPending):
-		return ctx.JSON(http.StatusForbidden, map[string]string{
-			"code":    "ACCOUNT_PENDING",
-			"message": "your account is awaiting admin approval",
-		})
+		return errorResponse(ctx, http.StatusForbidden, "ACCOUNT_PENDING", "your account is awaiting admin approval")
 	case errors.Is(err, company.ErrAccountRejected):
-		return ctx.JSON(http.StatusForbidden, map[string]string{
-			"code":    "ACCOUNT_REJECTED",
-			"message": "your account registration has been rejected",
-		})
+		return errorResponse(ctx, http.StatusForbidden, "ACCOUNT_REJECTED", "your account registration has been rejected")
 	case errors.Is(err, company.ErrEmailAlreadyRegistered):
-		return ctx.JSON(http.StatusConflict, map[string]string{
-			"code":    "CONFLICT",
-			"message": err.Error(),
-		})
+		return errorResponse(ctx, http.StatusConflict, "CONFLICT", err.Error())
 	case isCompanyBadRequest(err):
 		return badRequest(ctx, err.Error())
 	}

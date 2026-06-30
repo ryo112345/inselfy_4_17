@@ -32,16 +32,16 @@ type pendingSessionItem struct {
 func (c *AdminReportController) ListPending(ctx echo.Context) error {
 	rows, err := c.queries.ListSessionsWithoutReport(ctx.Request().Context())
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	items := make([]pendingSessionItem, 0, len(rows))
 	for _, r := range rows {
 		item := pendingSessionItem{
-			SessionID:   pgUUIDToString(r.SessionID),
-			UserID:      pgUUIDToString(r.UserID),
-			Username:    r.Username,
-			Name:        r.Name,
+			SessionID: pgUUIDToString(r.SessionID),
+			UserID:    pgUUIDToString(r.UserID),
+			Username:  r.Username,
+			Name:      r.Name,
 		}
 		if r.CompletedAt.Valid {
 			t := r.CompletedAt.Time.Format("2006-01-02T15:04:05Z")
@@ -79,9 +79,9 @@ func (c *AdminReportController) SaveReport(ctx echo.Context, sessionID string) e
 	session, err := c.queries.GetWVSessionByID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "session not found"})
+			return notFoundError(ctx, "session not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	report, err := c.queries.UpsertAIReport(ctx.Request().Context(), &generated.UpsertAIReportParams{
@@ -90,7 +90,7 @@ func (c *AdminReportController) SaveReport(ctx echo.Context, sessionID string) e
 		Content:   body.Content,
 	})
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
@@ -111,18 +111,18 @@ func (c *AdminReportController) GetSessionScores(ctx echo.Context, sessionID str
 	row, err := c.queries.GetWVNeedsScoresBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "scores not found"})
+			return notFoundError(ctx, "scores not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	var mu map[string]float64
 	var se map[string]float64
 	if err := json.Unmarshal(row.Mu, &mu); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to parse mu"})
+		return internalError(ctx, "failed to parse mu")
 	}
 	if err := json.Unmarshal(row.Se, &se); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to parse se"})
+		return internalError(ctx, "failed to parse se")
 	}
 
 	resp := map[string]any{
@@ -148,9 +148,9 @@ func (c *AdminReportController) GetReport(ctx echo.Context, sessionID string) er
 	report, err := c.queries.GetAIReportBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "report not found"})
+			return notFoundError(ctx, "report not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	firstView := !report.ViewedAt.Valid
@@ -171,7 +171,7 @@ func (c *AdminReportController) GetReport(ctx echo.Context, sessionID string) er
 func (c *AdminReportController) ListReports(ctx echo.Context) error {
 	rows, err := c.queries.ListAIReports(ctx.Request().Context())
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	items := make([]map[string]any, 0, len(rows))
@@ -205,7 +205,7 @@ func (c *AdminReportController) ResetViewed(ctx echo.Context, sessionID string) 
 
 	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
 	if err := c.queries.ResetAIReportViewed(ctx.Request().Context(), pgSessionID); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{"message": "ok"})

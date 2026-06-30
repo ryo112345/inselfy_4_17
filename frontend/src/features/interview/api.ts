@@ -21,7 +21,7 @@ export async function proposeInterview(body: {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error ?? "日程提案に失敗しました");
+    throw new Error(err.message ?? err.error ?? "日程提案に失敗しました");
   }
   return res.json();
 }
@@ -80,7 +80,7 @@ export async function selectSlot(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error ?? "日程選択に失敗しました");
+    throw new Error(err.message ?? err.error ?? "日程選択に失敗しました");
   }
   return res.json();
 }

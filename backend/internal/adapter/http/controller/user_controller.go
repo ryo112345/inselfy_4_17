@@ -176,26 +176,26 @@ func decodeNullableString(raw map[string]json.RawMessage, key string, dst ***str
 func (c *UserController) UploadImage(ctx echo.Context, username string) error {
 	imageType := ctx.QueryParam("type")
 	if imageType != "avatar" && imageType != "cover" {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "type must be 'avatar' or 'cover'"})
+		return badRequest(ctx, "type must be 'avatar' or 'cover'")
 	}
 
 	file, err := ctx.FormFile("file")
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "file is required"})
+		return badRequest(ctx, "file is required")
 	}
 
 	if file.Size > 5*1024*1024 {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "ファイルサイズは5MB以下にしてください"})
+		return badRequest(ctx, "ファイルサイズは5MB以下にしてください")
 	}
 
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "JPG、PNG、WebP形式のみ対応しています"})
+		return badRequest(ctx, "JPG、PNG、WebP形式のみ対応しています")
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to open file"})
+		return internalError(ctx, "failed to open file")
 	}
 	defer src.Close()
 
@@ -203,7 +203,7 @@ func (c *UserController) UploadImage(ctx echo.Context, username string) error {
 
 	imageURL, err := c.storage.Save(ctx.Request().Context(), key, src)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to save file"})
+		return internalError(ctx, "failed to save file")
 	}
 
 	var updateInput user.UpdateProfileInput

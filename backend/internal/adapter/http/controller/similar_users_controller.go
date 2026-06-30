@@ -31,14 +31,14 @@ type similarUserExperience struct {
 }
 
 type similarUserItem struct {
-	UserID       string                 `json:"user_id"`
-	Username     string                 `json:"username"`
-	Name         string                 `json:"name"`
-	Headline     *string                `json:"headline"`
-	AvatarURL    *string                `json:"avatar_url"`
-	ProfileColor *string                `json:"profile_color"`
-	Similarity   float64                `json:"similarity"`
-	TopNeeds     []string               `json:"top_needs"`
+	UserID       string                  `json:"user_id"`
+	Username     string                  `json:"username"`
+	Name         string                  `json:"name"`
+	Headline     *string                 `json:"headline"`
+	AvatarURL    *string                 `json:"avatar_url"`
+	ProfileColor *string                 `json:"profile_color"`
+	Similarity   float64                 `json:"similarity"`
+	TopNeeds     []string                `json:"top_needs"`
 	Experiences  []similarUserExperience `json:"experiences"`
 }
 
@@ -50,7 +50,7 @@ func (c *SimilarUsersController) GetSimilarUsers(ctx echo.Context, userID string
 
 	targetMu, err := c.getLatestMu(ctx.Request().Context(), userID)
 	if err != nil {
-		return ctx.JSON(http.StatusNotFound, map[string]string{"message": "user has no work values result"})
+		return notFoundError(ctx, "user has no work values result")
 	}
 
 	rows, err := c.pool.Query(ctx.Request().Context(),
@@ -64,7 +64,7 @@ func (c *SimilarUsersController) GetSimilarUsers(ctx echo.Context, userID string
 		pgUUID(userID),
 	)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 	defer rows.Close()
 
@@ -213,7 +213,7 @@ func cosineSimilarity(a, b map[string]float64) float64 {
 	if normA == 0 || normB == 0 {
 		return 0
 	}
-	return (dot / (math.Sqrt(normA) * math.Sqrt(normB)) + 1) / 2
+	return (dot/(math.Sqrt(normA)*math.Sqrt(normB)) + 1) / 2
 }
 
 type needScore struct {

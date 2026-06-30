@@ -65,13 +65,7 @@ func (c *AuthController) Refresh(ctx echo.Context) error {
 }
 
 func (c *AuthController) GetMe(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetCurrentUser(ctx.Request().Context(), userID); err != nil {

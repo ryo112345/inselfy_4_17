@@ -73,10 +73,7 @@ type sendMessageRequest struct {
 }
 
 func (c *MessagingController) StartConversation(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body startConversationRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -97,10 +94,7 @@ func (c *MessagingController) StartConversation(ctx echo.Context) error {
 }
 
 func (c *MessagingController) ListConversationsByCompany(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	limit, offset := parsePagination(ctx)
 	input, p := c.newIO()
@@ -111,10 +105,7 @@ func (c *MessagingController) ListConversationsByCompany(ctx echo.Context) error
 }
 
 func (c *MessagingController) GetConversationAsCompany(ctx echo.Context, conversationID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetConversation(ctx.Request().Context(), conversationID, "company", companyID); err != nil {
@@ -124,10 +115,7 @@ func (c *MessagingController) GetConversationAsCompany(ctx echo.Context, convers
 }
 
 func (c *MessagingController) ListMessagesAsCompany(ctx echo.Context, conversationID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	limit, offset := parsePagination(ctx)
 	input, p := c.newIO()
@@ -138,10 +126,7 @@ func (c *MessagingController) ListMessagesAsCompany(ctx echo.Context, conversati
 }
 
 func (c *MessagingController) SendMessageAsCompany(ctx echo.Context, conversationID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body sendMessageRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -161,10 +146,7 @@ func (c *MessagingController) SendMessageAsCompany(ctx echo.Context, conversatio
 }
 
 func (c *MessagingController) MarkReadAsCompany(ctx echo.Context, conversationID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.MarkRead(ctx.Request().Context(), conversationID, "company", companyID); err != nil {
@@ -174,10 +156,7 @@ func (c *MessagingController) MarkReadAsCompany(ctx echo.Context, conversationID
 }
 
 func (c *MessagingController) CountUnreadByCompany(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.CountUnreadByCompany(ctx.Request().Context(), companyID); err != nil {
@@ -192,10 +171,7 @@ type startCandidateConversationRequest struct {
 }
 
 func (c *MessagingController) StartCandidateConversation(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body startCandidateConversationRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -214,10 +190,7 @@ func (c *MessagingController) StartCandidateConversation(ctx echo.Context) error
 }
 
 func (c *MessagingController) ListConversationsByCandidate(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	limit, offset := parsePagination(ctx)
 	input, p := c.newIO()
@@ -228,10 +201,7 @@ func (c *MessagingController) ListConversationsByCandidate(ctx echo.Context) err
 }
 
 func (c *MessagingController) GetConversationAsCandidate(ctx echo.Context, conversationID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetConversation(ctx.Request().Context(), conversationID, "candidate", userID); err != nil {
@@ -241,10 +211,7 @@ func (c *MessagingController) GetConversationAsCandidate(ctx echo.Context, conve
 }
 
 func (c *MessagingController) ListMessagesAsCandidate(ctx echo.Context, conversationID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	limit, offset := parsePagination(ctx)
 	input, p := c.newIO()
@@ -255,10 +222,7 @@ func (c *MessagingController) ListMessagesAsCandidate(ctx echo.Context, conversa
 }
 
 func (c *MessagingController) SendMessageAsCandidate(ctx echo.Context, conversationID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body sendMessageRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -278,10 +242,7 @@ func (c *MessagingController) SendMessageAsCandidate(ctx echo.Context, conversat
 }
 
 func (c *MessagingController) MarkReadAsCandidate(ctx echo.Context, conversationID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.MarkRead(ctx.Request().Context(), conversationID, "candidate", userID); err != nil {
@@ -291,10 +252,7 @@ func (c *MessagingController) MarkReadAsCandidate(ctx echo.Context, conversation
 }
 
 func (c *MessagingController) CountUnreadByCandidate(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"code": "UNAUTHORIZED", "message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.CountUnreadByCandidate(ctx.Request().Context(), userID); err != nil {

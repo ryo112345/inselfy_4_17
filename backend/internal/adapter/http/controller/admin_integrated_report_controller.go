@@ -29,10 +29,7 @@ type createIntegratedReportRequestBody struct {
 }
 
 func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body createIntegratedReportRequestBody
 	if err := ctx.Bind(&body); err != nil {
@@ -63,7 +60,7 @@ func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) err
 		FreeText: body.FreeText,
 	})
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusCreated, map[string]any{
@@ -79,7 +76,7 @@ func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) err
 func (ctrl *AdminIntegratedReportController) ListPending(ctx echo.Context) error {
 	rows, err := ctrl.queries.ListIntegratedRequestsWithoutReport(ctx.Request().Context())
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	items := make([]map[string]any, 0, len(rows))
@@ -123,9 +120,9 @@ func (ctrl *AdminIntegratedReportController) SaveReport(ctx echo.Context, reques
 	req, err := ctrl.queries.GetIntegratedReportRequestByID(ctx.Request().Context(), pgReqID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "request not found"})
+			return notFoundError(ctx, "request not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	report, err := ctrl.queries.UpsertIntegratedReport(ctx.Request().Context(), &generated.UpsertIntegratedReportParams{
@@ -134,7 +131,7 @@ func (ctrl *AdminIntegratedReportController) SaveReport(ctx echo.Context, reques
 		Content:   body.Content,
 	})
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
@@ -155,9 +152,9 @@ func (ctrl *AdminIntegratedReportController) GetReport(ctx echo.Context, request
 	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), pgReqID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "report not found"})
+			return notFoundError(ctx, "report not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	firstView := !report.ViewedAt.Valid
@@ -176,10 +173,7 @@ func (ctrl *AdminIntegratedReportController) GetReport(ctx echo.Context, request
 }
 
 func (ctrl *AdminIntegratedReportController) GetReportByUser(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	parsedUserID, err := uuid.Parse(userID)
 	if err != nil {
@@ -190,9 +184,9 @@ func (ctrl *AdminIntegratedReportController) GetReportByUser(ctx echo.Context) e
 	report, err := ctrl.queries.GetLatestIntegratedReportByUserID(ctx.Request().Context(), pgUserID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "report not found"})
+			return notFoundError(ctx, "report not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	firstView := !report.ViewedAt.Valid
@@ -210,10 +204,7 @@ func (ctrl *AdminIntegratedReportController) GetReportByUser(ctx echo.Context) e
 }
 
 func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{"message": "unauthorized"})
-	}
+	userID := authmw.UserID(ctx)
 
 	parsedUserID, err := uuid.Parse(userID)
 	if err != nil {
@@ -226,7 +217,7 @@ func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) 
 		if err == pgx.ErrNoRows {
 			return ctx.JSON(http.StatusOK, map[string]any{"status": "none"})
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), req.ID)
@@ -237,7 +228,7 @@ func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) 
 				"request_id": pgUUIDToString(req.ID),
 			})
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
@@ -249,7 +240,7 @@ func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) 
 func (ctrl *AdminIntegratedReportController) ListReports(ctx echo.Context) error {
 	rows, err := ctrl.queries.ListIntegratedReports(ctx.Request().Context())
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	items := make([]map[string]any, 0, len(rows))
@@ -283,7 +274,7 @@ func (ctrl *AdminIntegratedReportController) ResetViewed(ctx echo.Context, reque
 
 	pgReqID := pgtype.UUID{Bytes: parsedReqID, Valid: true}
 	if err := ctrl.queries.ResetIntegratedReportViewed(ctx.Request().Context(), pgReqID); err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{"message": "ok"})
@@ -299,9 +290,9 @@ func (ctrl *AdminIntegratedReportController) GetLatestRequest(ctx echo.Context, 
 	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx.Request().Context(), pgUserID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "not found"})
+			return notFoundError(ctx, "not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	hasReport := false

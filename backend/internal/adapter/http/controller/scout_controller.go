@@ -102,13 +102,7 @@ type companyReplyRequest struct {
 
 // Send handles POST /api/company/scouts.
 func (c *ScoutController) Send(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body sendScoutRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -131,13 +125,7 @@ func (c *ScoutController) Send(ctx echo.Context) error {
 
 // List handles GET /api/company/scouts.
 func (c *ScoutController) List(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var status *string
 	if s := ctx.QueryParam("status"); s != "" {
@@ -155,13 +143,7 @@ func (c *ScoutController) List(ctx echo.Context) error {
 
 // GetDetail handles GET /api/company/scouts/:scoutID.
 func (c *ScoutController) GetDetail(ctx echo.Context, scoutID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetDetail(ctx.Request().Context(), companyID, scoutID); err != nil {
@@ -172,13 +154,7 @@ func (c *ScoutController) GetDetail(ctx echo.Context, scoutID string) error {
 
 // GetCredits handles GET /api/company/scouts/credits.
 func (c *ScoutController) GetCredits(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetCredits(ctx.Request().Context(), companyID); err != nil {
@@ -189,13 +165,7 @@ func (c *ScoutController) GetCredits(ctx echo.Context) error {
 
 // GetQualityScore handles GET /api/company/scouts/quality.
 func (c *ScoutController) GetQualityScore(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetQualityScore(ctx.Request().Context(), companyID); err != nil {
@@ -206,13 +176,7 @@ func (c *ScoutController) GetQualityScore(ctx echo.Context) error {
 
 // GetDashboard handles GET /api/company/scouts/dashboard.
 func (c *ScoutController) GetDashboard(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetDashboard(ctx.Request().Context(), companyID); err != nil {
@@ -223,13 +187,7 @@ func (c *ScoutController) GetDashboard(ctx echo.Context) error {
 
 // Reply handles POST /api/company/scouts/:scoutID/replies.
 func (c *ScoutController) Reply(ctx echo.Context, scoutID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body companyReplyRequest
 	if err := ctx.Bind(&body); err != nil {

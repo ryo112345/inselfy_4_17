@@ -44,9 +44,9 @@ func (c *TeamDiagnoseController) GetByToken(ctx echo.Context, token string) erro
 	).Scan(&memberID, &userID, &resp.MemberName, &email, &resp.WVStatus, &resp.CIStatus, &resp.TeamName, &resp.CompanyName)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "無効なリンクです"})
+			return notFoundError(ctx, "無効なリンクです")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	resp.MemberID = memberID.String()
@@ -62,38 +62,38 @@ func (c *TeamDiagnoseController) UpdateStatus(ctx echo.Context, token string) er
 		CIStatus *string `json:"ci_status"`
 	}
 	if err := ctx.Bind(&body); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "invalid request"})
+		return badRequest(ctx, "invalid request")
 	}
 
 	if body.WVStatus != nil {
 		if *body.WVStatus != "completed" {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "wv_status must be 'completed'"})
+			return badRequest(ctx, "wv_status must be 'completed'")
 		}
 		tag, err := c.pool.Exec(ctx.Request().Context(),
 			`UPDATE team_members SET wv_status = $1, updated_at = $2 WHERE invite_token = $3`,
 			*body.WVStatus, time.Now(), token,
 		)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		if tag.RowsAffected() == 0 {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "member not found"})
+			return notFoundError(ctx, "member not found")
 		}
 	}
 
 	if body.CIStatus != nil {
 		if *body.CIStatus != "completed" {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "ci_status must be 'completed'"})
+			return badRequest(ctx, "ci_status must be 'completed'")
 		}
 		tag, err := c.pool.Exec(ctx.Request().Context(),
 			`UPDATE team_members SET ci_status = $1, updated_at = $2 WHERE invite_token = $3`,
 			*body.CIStatus, time.Now(), token,
 		)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+			return internalError(ctx, err.Error())
 		}
 		if tag.RowsAffected() == 0 {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "member not found"})
+			return notFoundError(ctx, "member not found")
 		}
 	}
 

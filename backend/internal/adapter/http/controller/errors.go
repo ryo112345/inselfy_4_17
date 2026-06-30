@@ -152,16 +152,35 @@ func badRequest(ctx echo.Context, message string) error {
 	})
 }
 
+// errorResponse renders the canonical {code, message} error body used across the
+// API. The helpers below wrap it per status so handlers never hand-roll error maps.
+func errorResponse(ctx echo.Context, status int, code, message string) error {
+	return ctx.JSON(status, openapi.ModelsErrorResponse{Code: code, Message: message})
+}
+
+func unauthorized(ctx echo.Context, message string) error {
+	return errorResponse(ctx, http.StatusUnauthorized, "UNAUTHORIZED", message)
+}
+
+func forbidden(ctx echo.Context, message string) error {
+	return errorResponse(ctx, http.StatusForbidden, "FORBIDDEN", message)
+}
+
+func notFoundError(ctx echo.Context, message string) error {
+	return errorResponse(ctx, http.StatusNotFound, "NOT_FOUND", message)
+}
+
+func internalError(ctx echo.Context, message string) error {
+	return errorResponse(ctx, http.StatusInternalServerError, "INTERNAL", message)
+}
+
 func handleAuthError(ctx echo.Context, err error) error {
 	if err == nil ||
 		errors.Is(err, auth.ErrInvalidGoogleToken) ||
 		errors.Is(err, auth.ErrUnauthorized) ||
 		errors.Is(err, auth.ErrTokenExpired) ||
 		errors.Is(err, auth.ErrRefreshTokenRevoked) {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
+		return unauthorized(ctx, "unauthorized")
 	}
 	return handleError(ctx, err)
 }

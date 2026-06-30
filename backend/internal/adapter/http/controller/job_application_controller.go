@@ -57,13 +57,7 @@ type updateStatusRequest struct {
 }
 
 func (c *JobApplicationController) Apply(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body applyRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -85,13 +79,7 @@ func (c *JobApplicationController) Apply(ctx echo.Context) error {
 }
 
 func (c *JobApplicationController) ListByCompany(ctx echo.Context) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	filter := jobapplication.ListFilter{}
 	if s := ctx.QueryParam("status"); s != "" {
@@ -126,13 +114,7 @@ func (c *JobApplicationController) ListByCompany(ctx echo.Context) error {
 }
 
 func (c *JobApplicationController) ListByCandidate(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.ListByCandidate(ctx.Request().Context(), userID); err != nil {
@@ -142,13 +124,7 @@ func (c *JobApplicationController) ListByCandidate(ctx echo.Context) error {
 }
 
 func (c *JobApplicationController) GetByID(ctx echo.Context, applicationID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetByID(ctx.Request().Context(), companyID, applicationID); err != nil {
@@ -158,13 +134,7 @@ func (c *JobApplicationController) GetByID(ctx echo.Context, applicationID strin
 }
 
 func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID string) error {
-	companyID, ok := ctx.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	companyID := authmw.CompanyID(ctx)
 
 	var body updateStatusRequest
 	if err := ctx.Bind(&body); err != nil {
@@ -180,13 +150,7 @@ func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID 
 }
 
 func (c *JobApplicationController) Withdraw(ctx echo.Context, applicationID string) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.Withdraw(ctx.Request().Context(), userID, applicationID); err != nil {
@@ -197,13 +161,7 @@ func (c *JobApplicationController) Withdraw(ctx echo.Context, applicationID stri
 }
 
 func (c *JobApplicationController) CheckApplied(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	jobPostingID := ctx.QueryParam("jobPostingId")
 	if jobPostingID == "" {
@@ -224,8 +182,8 @@ const (
 )
 
 var appWVValueIDs = []string{"achievement", "comfort", "status", "altruism", "safety", "autonomy"}
-var appCITypeIDs  = [6]string{"R", "I", "A", "S", "E", "C"}
-var appCITypeIdx  = map[string]int{"R": 0, "I": 1, "A": 2, "S": 3, "E": 4, "C": 5}
+var appCITypeIDs = [6]string{"R", "I", "A", "S", "E", "C"}
+var appCITypeIdx = map[string]int{"R": 0, "I": 1, "A": 2, "S": 3, "E": 4, "C": 5}
 
 func appGauss(diff, sigma float64) float64 {
 	return math.Exp(-(diff * diff) / (2 * sigma * sigma))
@@ -475,4 +433,3 @@ func (c *JobApplicationController) enrichWithSimilarity(ctx context.Context, com
 		}
 	}
 }
-

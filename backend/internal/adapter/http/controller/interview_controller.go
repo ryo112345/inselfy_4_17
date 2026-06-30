@@ -69,35 +69,32 @@ type proposeRequest struct {
 }
 
 func (ctrl *InterviewController) Propose(c echo.Context) error {
-	companyID, ok := c.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(c)
 
 	var req proposeRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+		return badRequest(c, "invalid request")
 	}
 
 	if len(req.Slots) == 0 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "at least one slot is required"})
+		return badRequest(c, "at least one slot is required")
 	}
 	if len(req.Slots) > 10 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "maximum 10 slots"})
+		return badRequest(c, "maximum 10 slots")
 	}
 
 	slots := make([]interview.SlotInput, len(req.Slots))
 	for i, s := range req.Slots {
 		start, err := time.Parse(time.RFC3339, s.StartTime)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid start time"})
+			return badRequest(c, "invalid start time")
 		}
 		end, err := time.Parse(time.RFC3339, s.EndTime)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid end time"})
+			return badRequest(c, "invalid end time")
 		}
 		if !end.After(start) {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "end time must be after start time"})
+			return badRequest(c, "end time must be after start time")
 		}
 		slots[i] = interview.SlotInput{StartTime: start, EndTime: end}
 	}
@@ -107,7 +104,7 @@ func (ctrl *InterviewController) Propose(c echo.Context) error {
 	row := ctrl.pool.QueryRow(c.Request().Context(),
 		"SELECT candidate_id FROM job_applications WHERE id = $1 AND company_id = $2", req.ApplicationID, companyID)
 	if err := row.Scan(&candidateID); err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "application not found"})
+		return notFoundError(c, "application not found")
 	}
 
 	expiresInDays := req.ExpiresInDays
@@ -227,7 +224,7 @@ func (ctrl *InterviewController) Propose(c echo.Context) error {
 		return ctrl.proposalRepo.UpdateMessageID(txCtx, proposal.ID, msg.ID)
 	})
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return internalError(c, err.Error())
 	}
 
 	// Notify candidate via WebSocket about cancelled proposals
@@ -271,39 +268,36 @@ type selectSlotRequest struct {
 }
 
 func (ctrl *InterviewController) SelectSlot(c echo.Context) error {
-	userID, ok := c.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
-	}
+	userID := authmw.UserID(c)
 
 	proposalID := c.Param("proposalId")
 	var req selectSlotRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+		return badRequest(c, "invalid request")
 	}
 
 	ctx := c.Request().Context()
 
 	proposal, err := ctrl.proposalRepo.GetByID(ctx, proposalID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "proposal not found"})
+		return notFoundError(c, "proposal not found")
 	}
 	if proposal.CandidateID != userID {
-		return c.JSON(http.StatusForbidden, map[string]string{"error": "not your proposal"})
+		return forbidden(c, "not your proposal")
 	}
 	if proposal.Status != "pending" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "proposal is not pending"})
+		return badRequest(c, "proposal is not pending")
 	}
 	if time.Now().After(proposal.ExpiresAt) {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "proposal has expired"})
+		return badRequest(c, "proposal has expired")
 	}
 
 	slot, err := ctrl.slotRepo.GetByID(ctx, req.SlotID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "slot not found"})
+		return notFoundError(c, "slot not found")
 	}
 	if slot.ProposalID != proposalID {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "slot does not belong to this proposal"})
+		return badRequest(c, "slot does not belong to this proposal")
 	}
 
 	interviewStart := slot.StartTime
@@ -311,14 +305,14 @@ func (ctrl *InterviewController) SelectSlot(c echo.Context) error {
 	if req.StartTime != "" && req.EndTime != "" {
 		st, err := time.Parse(time.RFC3339, req.StartTime)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid startTime"})
+			return badRequest(c, "invalid startTime")
 		}
 		et, err := time.Parse(time.RFC3339, req.EndTime)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid endTime"})
+			return badRequest(c, "invalid endTime")
 		}
 		if st.Before(slot.StartTime) || et.After(slot.EndTime) || !et.After(st) {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "selected time must be within the slot range"})
+			return badRequest(c, "selected time must be within the slot range")
 		}
 		interviewStart = st
 		interviewEnd = et
@@ -377,7 +371,7 @@ func (ctrl *InterviewController) SelectSlot(c echo.Context) error {
 		return ctrl.convRepo.UpdateLastMessageAt(txCtx, conv.ID)
 	})
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return internalError(c, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -391,10 +385,7 @@ func (ctrl *InterviewController) SelectSlot(c echo.Context) error {
 }
 
 func (ctrl *InterviewController) ListByCompany(c echo.Context) error {
-	companyID, ok := c.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
-	}
+	companyID := authmw.CompanyID(c)
 
 	fromStr := c.QueryParam("from")
 	toStr := c.QueryParam("to")
@@ -410,7 +401,7 @@ func (ctrl *InterviewController) ListByCompany(c echo.Context) error {
 	ctx := c.Request().Context()
 	interviews, err := ctrl.interviewRepo.ListByCompany(ctx, companyID, from, to)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return internalError(c, err.Error())
 	}
 
 	// Enrich with candidate names and job titles
@@ -447,15 +438,12 @@ func (ctrl *InterviewController) ListByCompany(c echo.Context) error {
 }
 
 func (ctrl *InterviewController) ListByCandidate(c echo.Context) error {
-	userID, ok := c.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
-	}
+	userID := authmw.UserID(c)
 
 	ctx := c.Request().Context()
 	interviews, err := ctrl.interviewRepo.ListByCandidate(ctx, userID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return internalError(c, err.Error())
 	}
 
 	result := make([]map[string]interface{}, len(interviews))
@@ -537,21 +525,21 @@ func (ctrl *InterviewController) CancelInterview(c echo.Context) error {
 	ctx := c.Request().Context()
 	iv, err := ctrl.interviewRepo.GetByID(ctx, interviewID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "interview not found"})
+		return notFoundError(c, "interview not found")
 	}
 
 	if companyID != "" && iv.CompanyID != companyID {
-		return c.JSON(http.StatusForbidden, map[string]string{"error": "forbidden"})
+		return forbidden(c, "forbidden")
 	}
 	if userID != "" && iv.CandidateID != userID {
-		return c.JSON(http.StatusForbidden, map[string]string{"error": "forbidden"})
+		return forbidden(c, "forbidden")
 	}
 	if companyID == "" && userID == "" {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
+		return unauthorized(c, "unauthorized")
 	}
 
 	if iv.Status != "scheduled" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "interview is not scheduled"})
+		return badRequest(c, "interview is not scheduled")
 	}
 
 	err = ctrl.tx.WithinTransaction(ctx, func(txCtx context.Context) error {
@@ -591,18 +579,14 @@ func (ctrl *InterviewController) CancelInterview(c echo.Context) error {
 		return ctrl.convRepo.UpdateLastMessageAt(txCtx, conv.ID)
 	})
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return internalError(c, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"status": "cancelled"})
 }
 
 func (ctrl *InterviewController) GetPendingProposal(c echo.Context) error {
-	companyID, ok := c.Get(authmw.CompanyIDKey).(string)
-	if !ok || companyID == "" {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
-	}
-
+	// Auth is enforced by companyJwtMW; this handler does not scope by company.
 	applicationID := c.Param("applicationId")
 	ctx := c.Request().Context()
 
@@ -628,12 +612,12 @@ func (ctrl *InterviewController) GetProposalSlots(c echo.Context) error {
 
 	proposal, err := ctrl.proposalRepo.GetByID(ctx, proposalID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "proposal not found"})
+		return notFoundError(c, "proposal not found")
 	}
 
 	slots, err := ctrl.slotRepo.ListByProposal(ctx, proposalID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return internalError(c, err.Error())
 	}
 
 	slotData := make([]map[string]interface{}, len(slots))
@@ -656,4 +640,3 @@ func (ctrl *InterviewController) GetProposalSlots(c echo.Context) error {
 		"slots": slotData,
 	})
 }
-

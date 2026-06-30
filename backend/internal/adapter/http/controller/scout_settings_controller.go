@@ -92,13 +92,7 @@ type updateScoutSettingsRequest struct {
 
 // Get handles GET /api/scout-settings.
 func (c *ScoutSettingsController) Get(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	input, p := c.newIO()
 	if err := input.GetScoutSettings(ctx.Request().Context(), userID); err != nil {
@@ -109,13 +103,7 @@ func (c *ScoutSettingsController) Get(ctx echo.Context) error {
 
 // Update handles PUT /api/scout-settings.
 func (c *ScoutSettingsController) Update(ctx echo.Context) error {
-	userID, ok := ctx.Get(authmw.UserIDKey).(string)
-	if !ok || userID == "" {
-		return ctx.JSON(http.StatusUnauthorized, map[string]string{
-			"code":    "UNAUTHORIZED",
-			"message": "unauthorized",
-		})
-	}
+	userID := authmw.UserID(ctx)
 
 	var body updateScoutSettingsRequest
 	if err := ctx.Bind(&body); err != nil {

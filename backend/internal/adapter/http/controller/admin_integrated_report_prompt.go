@@ -43,14 +43,14 @@ func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, request
 	req, err := ctrl.queries.GetIntegratedReportRequestByID(reqCtx, pgReqID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"message": "request not found"})
+			return notFoundError(ctx, "request not found")
 		}
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		return internalError(ctx, err.Error())
 	}
 
 	base, err := readIntegratedBaseTemplate()
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to read base template: " + err.Error()})
+		return internalError(ctx, "failed to read base template: "+err.Error())
 	}
 
 	topics := []int16{req.Topic1, req.Topic2, req.Topic3}
@@ -58,7 +58,7 @@ func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, request
 	for i, topicNum := range topics {
 		content, err := readIntegratedTopicFile(topicNum)
 		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": fmt.Sprintf("failed to read topic %d: %s", topicNum, err.Error())})
+			return internalError(ctx, fmt.Sprintf("failed to read topic %d: %s", topicNum, err.Error()))
 		}
 		chapterBlocks[i] = strings.ReplaceAll(string(content), "{{CHAPTER_NUM}}", fmt.Sprintf("%d", i+1))
 	}
@@ -80,19 +80,19 @@ func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, request
 
 	experiences, err := ctrl.queries.ListExperiencesByUserID(reqCtx, req.UserID)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to fetch experiences"})
+		return internalError(ctx, "failed to fetch experiences")
 	}
 	prompt = strings.Replace(prompt, "{{EXPERIENCES}}", buildExperiencesMarkdown(experiences), 1)
 
 	educations, err := ctrl.queries.ListEducationsByUserID(reqCtx, req.UserID)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to fetch educations"})
+		return internalError(ctx, "failed to fetch educations")
 	}
 	prompt = strings.Replace(prompt, "{{EDUCATIONS}}", buildEducationsMarkdown(educations), 1)
 
 	skills, err := ctrl.queries.ListUserSkills(reqCtx, req.UserID)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"message": "failed to fetch skills"})
+		return internalError(ctx, "failed to fetch skills")
 	}
 	prompt = strings.Replace(prompt, "{{SKILLS}}", buildSkillsMarkdown(skills), 1)
 

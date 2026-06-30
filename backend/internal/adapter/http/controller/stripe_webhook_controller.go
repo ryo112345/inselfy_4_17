@@ -30,27 +30,27 @@ func NewStripeWebhookController(
 func (c *StripeWebhookController) HandleWebhook(ctx echo.Context) error {
 	body, err := io.ReadAll(ctx.Request().Body)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "cannot read body"})
+		return badRequest(ctx, "cannot read body")
 	}
 
 	sig := ctx.Request().Header.Get("Stripe-Signature")
 	event, err := webhook.ConstructEvent(body, sig, c.webhookSecret)
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "invalid signature"})
+		return badRequest(ctx, "invalid signature")
 	}
 
 	switch event.Type {
 	case "checkout.session.completed":
 		var session stripe.CheckoutSession
 		if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "invalid session data"})
+			return badRequest(ctx, "invalid session data")
 		}
 		paymentIntentID := ""
 		if session.PaymentIntent != nil {
 			paymentIntentID = session.PaymentIntent.ID
 		}
 		if err := c.purchaseRepo.CompleteBySessionID(ctx.Request().Context(), session.ID, paymentIntentID); err != nil {
-			return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to complete purchase"})
+			return internalError(ctx, "failed to complete purchase")
 		}
 	}
 
