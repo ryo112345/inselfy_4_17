@@ -2,6 +2,7 @@ MIGRATE ?= migrate
 MIGRATIONS_DIR ?= migrations
 OAPI_CODEGEN ?= $(shell go env GOPATH)/bin/oapi-codegen
 SQLC ?= $(shell go env GOPATH)/bin/sqlc
+GOVERTER ?= $(shell go env GOPATH)/bin/goverter
 OPENAPI_SPEC ?= ../api-schema/generated/openapi.yaml
 OAPI_CONFIG ?= oapi-codegen.yaml
 ENV_FILE ?= ../.env
@@ -49,6 +50,14 @@ oapi:
 .PHONY: sqlc
 sqlc:
 	$(SQLC) generate
+
+# Generates struct-to-struct mappers from the `// goverter:converter` interfaces
+# (e.g. internal/adapter/http/presenter/*_converter.go). The goverter binary must
+# be built with the same Go version as the module; install with:
+#   GOTOOLCHAIN=go1.25.0 go install github.com/jmattheis/goverter/cmd/goverter@v1.9.4
+.PHONY: goverter
+goverter:
+	$(GOVERTER) gen -build-tags "" ./...
 
 .PHONY: run
 run:

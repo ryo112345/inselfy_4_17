@@ -65,17 +65,17 @@ func NewMessagingPresenter() *MessagingPresenter {
 	return &MessagingPresenter{}
 }
 
+// messagingConv is the goverter-generated conversation read-model→response mapper.
+// See messaging_converter.go for its declaration.
+var messagingConv messagingConverter = &messagingConverterImpl{}
+
 func (p *MessagingPresenter) PresentConversation(_ context.Context, conv *messaging.ConversationWithPreview) error {
-	p.conversation = toConversationResponse(conv)
+	p.conversation = messagingConv.ToConversationResponse(conv)
 	return nil
 }
 
 func (p *MessagingPresenter) PresentConversations(_ context.Context, convs []*messaging.ConversationWithPreview, total int) error {
-	items := make([]*conversationResponse, len(convs))
-	for i, c := range convs {
-		items[i] = toConversationResponse(c)
-	}
-	p.conversations = &conversationListResponse{Items: items, Total: total}
+	p.conversations = &conversationListResponse{Items: messagingConv.ToConversationResponses(convs), Total: total}
 	return nil
 }
 
@@ -109,25 +109,6 @@ func (p *MessagingPresenter) MessageResponse() interface{}          { return p.m
 func (p *MessagingPresenter) MessageListResponse() interface{}      { return p.messages }
 func (p *MessagingPresenter) UnreadCountResponse() interface{}      { return p.unreadCount }
 func (p *MessagingPresenter) OKResponse() interface{}               { return map[string]string{"status": "ok"} }
-
-func toConversationResponse(c *messaging.ConversationWithPreview) *conversationResponse {
-	return &conversationResponse{
-		ID:               c.ID,
-		ConversationType: c.ConversationType,
-		CompanyID:        c.CompanyID,
-		CandidateID:      c.CandidateID,
-		CompanyName:      c.CompanyName,
-		CandidateName:    c.CandidateName,
-		Participant1ID:   c.Participant1ID,
-		Participant2ID:   c.Participant2ID,
-		Participant1Name: c.Participant1Name,
-		Participant2Name: c.Participant2Name,
-		LastMessageBody:  c.LastMessageBody,
-		LastMessageAt:    c.LastMessageAt,
-		UnreadCount:      c.UnreadCount,
-		CreatedAt:        c.CreatedAt,
-	}
-}
 
 func toMessageResponse(m *messaging.Message) *messageResponse {
 	msgType := m.MessageType
