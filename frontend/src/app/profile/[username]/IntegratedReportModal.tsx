@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createIntegratedReportRequest } from "@/features/integrated-report/api";
 import { Modal, Field, PrimaryButton, SecondaryButton } from "./Modal";
 
 const TOPICS = [
@@ -44,21 +45,12 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
     setError("");
 
     try {
-      const res = await fetch("/api/integrated-report/requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          topic1: selected[0],
-          topic2: selected[1],
-          topic3: selected[2],
-          free_text: freeText,
-        }),
+      await createIntegratedReportRequest({
+        topic1: selected[0],
+        topic2: selected[1],
+        topic3: selected[2],
+        free_text: freeText,
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.message || "リクエストに失敗しました");
-      }
       onSubmitted();
       onClose();
     } catch (e) {

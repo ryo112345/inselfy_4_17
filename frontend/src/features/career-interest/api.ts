@@ -1,9 +1,11 @@
 import "@/external/client/api/client";
 import {
+  careerInterestCiGetAiReport,
   careerInterestCiGetLatestResult,
   careerInterestCiGetResultBySession,
   careerInterestCiStartSession,
   careerInterestCiSubmitResult,
+  type ModelsAiReportResponse,
   type ModelsCiBasicScoreResponse,
   type ModelsCiItemResponse,
   type ModelsCiResponseItem,
@@ -53,5 +55,14 @@ export async function getLatestResult(userId: string): Promise<ResultDTO | null>
   });
   if (response.status === 404) return null;
   if (error || !data) throw new Error(`Failed to fetch latest result: ${response.status}`);
+  return data;
+}
+
+export type AiReportDTO = ModelsAiReportResponse;
+
+// AIレポート取得。未生成（404）等のエラーは null を返す。
+export async function getAiReport(sessionId: string): Promise<AiReportDTO | null> {
+  const { data, error } = await careerInterestCiGetAiReport({ path: { sessionId } });
+  if (error || !data) return null;
   return data;
 }

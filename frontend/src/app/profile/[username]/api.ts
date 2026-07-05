@@ -14,6 +14,7 @@ import {
   skillsAttachSkill,
   skillsDetachSkill,
   usersUpdateUserProfile,
+  usersUploadUserImage,
   type ModelsCreateEducationRequest,
   type ModelsCreateExperienceRequest,
   type ModelsFollowStatusResponse,
@@ -116,16 +117,13 @@ export async function uploadProfileImage(
   file: File,
   type: "avatar" | "cover",
 ): Promise<{ url: string }> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`/api/users/${username}/upload-image?type=${type}`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
+  const { data, error } = await usersUploadUserImage({
+    path: { username },
+    query: { type },
+    body: { file },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw { code: "UPLOAD_ERROR", message: err.message ?? "アップロードに失敗しました" };
+  if (error || !data) {
+    throw { code: "UPLOAD_ERROR", message: error?.message ?? "アップロードに失敗しました" };
   }
-  return res.json();
+  return data;
 }

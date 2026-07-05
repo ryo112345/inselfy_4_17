@@ -20,6 +20,8 @@
   ```
 
   ↑ これが（Phase 2B 完了までは spec 未収載ファイルを除き）空になれば完了。
+  **→ 2026-07-05 完了確認済み。** 残る hit は `profile/[username]/page.tsx`（getCurrentUsername）と
+  `messaging/unread-context.tsx` / `scout/unread-context.tsx` の3件のみで、すべて下のスコープ外リストのもの。
 - 検証は毎コミット: `cd frontend && npx tsc --noEmit && npm run build`
 - **挙動変更ゼロが絶対条件。** リクエストの中身・クエリパラメータ・エラー時のフォールバック挙動を変えない。
 
@@ -146,7 +148,7 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 | B0 | [x] | user 機能のスペック漏れ2ルート（schema-first 移行時からの既知の残） | `GET /api/users/id/:userId`, `POST /api/users/:username/upload-image?type=...`（multipart）。`UserImageUploadResponse` は `{url, user}`（現行 UploadImage 実装どおり） |
 | B1 | [x] | integrated-report の spec 化 | `POST /api/integrated-report/requests`, `GET .../me`, `GET .../status`, `GET .../requests/:id/report`, `GET .../users/:userId/latest-request`（initializer.go の intGroup 参照）。キーは snake_case、`status` は `"none"\|"pending"\|"ready"` enum。Server に adminIntReport フィールド追加（実装は admin コントローラのまま） |
 | B2 | [x] | WV/CI ai-report GET の spec 化 | `GET /api/work-values/sessions/:id/ai-report`, `GET /api/career-interest/sessions/:id/ai-report`。レスポンスは両者同形のため共通 `AiReportResponse`（common.tsp）に集約 |
-| B3 | [ ] | B0〜B2 対象の FE 移行 | `app/profile/[username]/AiReportCard.tsx`, `IntegratedReportModal.tsx`, `api.ts`（upload-image）, `app/integrated-report/[requestId]/*`（2ファイル）, `app/work_values/[sessionId]/WorkValuesContent.tsx`, `app/career_interest/[sessionId]/CareerInterestContent.tsx`, `fetchPanelData.ts` 残り（users/id, ai-report, integrated-report） |
+| B3 | [x] | B0〜B2 対象の FE 移行 | `app/profile/[username]/AiReportCard.tsx`, `IntegratedReportModal.tsx`, `api.ts`（upload-image）, `app/integrated-report/[requestId]/*`（2ファイル）, `app/work_values/[sessionId]/WorkValuesContent.tsx`, `app/career_interest/[sessionId]/CareerInterestContent.tsx`, `fetchPanelData.ts` 残り（users/id, ai-report, integrated-report）。integrated-report 5EP は新設 `features/integrated-report/api.ts` に集約、WV/CI の ai-report GET は各 feature api の `getAiReport` に追加。⚠️ AiReportCard の `/status` は integrated-report ページ経由で匿名訪問者にもマウントされ 401 が正常系だったため、FollowButton と同じ `isAuthenticated` ガードを追加してから移行（未ログイン時は呼ばず初期表示のまま＝従来と同じ見た目）。multipart（upload-image）は SDK 経由の実アップロードで 200 + `{url, user}` を確認済み |
 
 再生成コマンド（B1/B2 でスペックを触ったときだけ必要）:
 

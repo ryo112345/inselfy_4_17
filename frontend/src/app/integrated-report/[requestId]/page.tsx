@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
+import { getIntegratedReport } from "@/features/integrated-report/api";
 import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 import { Sidebar } from "@/app/components/Sidebar";
 import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
@@ -9,14 +10,10 @@ import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND = process.env.INTERNAL_API_URL ?? "http://localhost:8081";
-
 async function getReportUserId(requestId: string): Promise<string | null> {
   try {
-    const res = await fetch(`${BACKEND}/api/integrated-report/requests/${requestId}/report`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.user_id ?? null;
+    const data = await getIntegratedReport(requestId);
+    return data?.user_id ?? null;
   } catch {
     return null;
   }

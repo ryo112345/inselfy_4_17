@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getIntegratedReport } from "@/features/integrated-report/api";
 import {
   SingleRadarChart,
   WV_ORDER, WV_FULL_LABELS,
@@ -116,8 +117,7 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/integrated-report/requests/${requestId}/report`)
-      .then((res) => (res.ok ? res.json() : null))
+    getIntegratedReport(requestId)
       .then((data) => {
         if (cancelled) return;
         if (data?.content) {
