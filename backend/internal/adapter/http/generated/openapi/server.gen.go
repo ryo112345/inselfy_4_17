@@ -265,6 +265,57 @@ type ModelsScoutSettingsResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// ModelsSimilarUserExperience 類似ユーザーの職歴（要約）
+type ModelsSimilarUserExperience struct {
+	// CompanyName 会社名
+	CompanyName string `json:"company_name"`
+
+	// IsCurrent 現職か
+	IsCurrent bool `json:"is_current"`
+
+	// Title 役職
+	Title string `json:"title"`
+}
+
+// ModelsSimilarUserItem 類似ユーザー
+type ModelsSimilarUserItem struct {
+	// AvatarUrl アバター画像URL
+	AvatarUrl *string `json:"avatar_url"`
+
+	// Experiences 職歴（現職優先の要約）
+	Experiences *[]ModelsSimilarUserExperience `json:"experiences"`
+
+	// Headline ヘッドライン
+	Headline *string `json:"headline"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// ProfileColor プロフィールカラー
+	ProfileColor *string `json:"profile_color"`
+
+	// Similarity 類似度（0-1）
+	Similarity float64 `json:"similarity"`
+
+	// TopNeeds 上位の Work Needs ID
+	TopNeeds *[]string `json:"top_needs"`
+
+	// UserId ユーザーID
+	UserId string `json:"user_id"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsSimilarUsersResponse 類似ユーザー一覧
+type ModelsSimilarUsersResponse struct {
+	// Total 件数
+	Total int32 `json:"total"`
+
+	// Users 類似ユーザー（0件時は null）
+	Users *[]ModelsSimilarUserItem `json:"users"`
+}
+
 // ModelsSkillListResponse スキル一覧
 type ModelsSkillListResponse struct {
 	// Items スキル
@@ -418,6 +469,12 @@ type ModelsUserResponse struct {
 	Username string `json:"username"`
 }
 
+// SimilarUsersGetSimilarUsersParams defines parameters for SimilarUsersGetSimilarUsers.
+type SimilarUsersGetSimilarUsersParams struct {
+	// Limit 取得件数（1-50、デフォルト10）
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // ScoutSettingsUpdateScoutSettingsJSONRequestBody defines body for ScoutSettingsUpdateScoutSettings for application/json ContentType.
 type ScoutSettingsUpdateScoutSettingsJSONRequestBody = ModelsUpdateScoutSettingsRequest
 
@@ -453,6 +510,9 @@ type ServerInterface interface {
 	// Create a new user
 	// (POST /api/users)
 	UsersCreateUser(ctx echo.Context) error
+	// Get users with similar work values
+	// (GET /api/users/id/{userId}/similar)
+	SimilarUsersGetSimilarUsers(ctx echo.Context, userId string, params SimilarUsersGetSimilarUsersParams) error
 	// Get a user by username
 	// (GET /api/users/{username})
 	UsersGetUserByUsername(ctx echo.Context, username string) error
@@ -523,6 +583,31 @@ func (w *ServerInterfaceWrapper) UsersCreateUser(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UsersCreateUser(ctx)
+	return err
+}
+
+// SimilarUsersGetSimilarUsers converts echo context to params.
+func (w *ServerInterfaceWrapper) SimilarUsersGetSimilarUsers(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SimilarUsersGetSimilarUsersParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SimilarUsersGetSimilarUsers(ctx, userId, params)
 	return err
 }
 
@@ -805,6 +890,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
 	router.PUT(baseURL+"/api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
 	router.POST(baseURL+"/api/users", wrapper.UsersCreateUser)
+	router.GET(baseURL+"/api/users/id/:userId/similar", wrapper.SimilarUsersGetSimilarUsers)
 	router.GET(baseURL+"/api/users/:username", wrapper.UsersGetUserByUsername)
 	router.PATCH(baseURL+"/api/users/:username", wrapper.UsersUpdateUserProfile)
 	router.GET(baseURL+"/api/users/:username/educations", wrapper.EducationsListEducations)
