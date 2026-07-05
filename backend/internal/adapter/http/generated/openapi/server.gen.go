@@ -277,6 +277,45 @@ type ModelsExperienceResponse struct {
 	UserId string `json:"userId"`
 }
 
+// ModelsFollowStatusResponse フォロー状態
+type ModelsFollowStatusResponse struct {
+	// FollowedBy 相手にフォローされているか
+	FollowedBy bool `json:"followedBy"`
+
+	// Following 自分が相手をフォローしているか
+	Following bool `json:"following"`
+}
+
+// ModelsFollowUserListResponse フォロー関係のユーザー一覧
+type ModelsFollowUserListResponse struct {
+	// Items ユーザー
+	Items []ModelsFollowUserResponse `json:"items"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsFollowUserResponse フォロー関係のユーザー
+type ModelsFollowUserResponse struct {
+	// AvatarUrl アバター画像URL
+	AvatarUrl *string `json:"avatarUrl"`
+
+	// CreatedAt フォロー日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Headline ヘッドライン
+	Headline *string `json:"headline"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// UserId ユーザーID
+	UserId string `json:"userId"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+}
+
 // ModelsForbiddenError Forbidden エラー
 type ModelsForbiddenError struct {
 	Code    ModelsForbiddenErrorCode `json:"code"`
@@ -616,6 +655,24 @@ type SimilarUsersGetSimilarUsersParams struct {
 	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
+// FollowsListFollowersParams defines parameters for FollowsListFollowers.
+type FollowsListFollowersParams struct {
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// FollowsListFollowingParams defines parameters for FollowsListFollowing.
+type FollowsListFollowingParams struct {
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // ScoutTemplatesCreateScoutTemplateJSONRequestBody defines body for ScoutTemplatesCreateScoutTemplate for application/json ContentType.
 type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplateRequest
 
@@ -738,6 +795,21 @@ type ServerInterface interface {
 	// Update an experience
 	// (PUT /api/users/{username}/experiences/{experienceId})
 	ExperiencesUpdateExperience(ctx echo.Context, username string, experienceId string) error
+	// Unfollow a user
+	// (DELETE /api/users/{username}/follow)
+	FollowsUnfollowUser(ctx echo.Context, username string) error
+	// Follow a user
+	// (POST /api/users/{username}/follow)
+	FollowsFollowUser(ctx echo.Context, username string) error
+	// Get follow status between the authenticated user and a user
+	// (GET /api/users/{username}/follow-status)
+	FollowsGetFollowStatus(ctx echo.Context, username string) error
+	// List followers of a user
+	// (GET /api/users/{username}/followers)
+	FollowsListFollowers(ctx echo.Context, username string, params FollowsListFollowersParams) error
+	// List users a user is following
+	// (GET /api/users/{username}/following)
+	FollowsListFollowing(ctx echo.Context, username string, params FollowsListFollowingParams) error
 	// List skills for a user
 	// (GET /api/users/{username}/skills)
 	SkillsListSkills(ctx echo.Context, username string) error
@@ -1214,6 +1286,118 @@ func (w *ServerInterfaceWrapper) ExperiencesUpdateExperience(ctx echo.Context) e
 	return err
 }
 
+// FollowsUnfollowUser converts echo context to params.
+func (w *ServerInterfaceWrapper) FollowsUnfollowUser(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.FollowsUnfollowUser(ctx, username)
+	return err
+}
+
+// FollowsFollowUser converts echo context to params.
+func (w *ServerInterfaceWrapper) FollowsFollowUser(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.FollowsFollowUser(ctx, username)
+	return err
+}
+
+// FollowsGetFollowStatus converts echo context to params.
+func (w *ServerInterfaceWrapper) FollowsGetFollowStatus(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.FollowsGetFollowStatus(ctx, username)
+	return err
+}
+
+// FollowsListFollowers converts echo context to params.
+func (w *ServerInterfaceWrapper) FollowsListFollowers(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params FollowsListFollowersParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.FollowsListFollowers(ctx, username, params)
+	return err
+}
+
+// FollowsListFollowing converts echo context to params.
+func (w *ServerInterfaceWrapper) FollowsListFollowing(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params FollowsListFollowingParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.FollowsListFollowing(ctx, username, params)
+	return err
+}
+
 // SkillsListSkills converts echo context to params.
 func (w *ServerInterfaceWrapper) SkillsListSkills(ctx echo.Context) error {
 	var err error
@@ -1327,6 +1511,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/users/:username/experiences", wrapper.ExperiencesCreateExperience)
 	router.DELETE(baseURL+"/api/users/:username/experiences/:experienceId", wrapper.ExperiencesDeleteExperience)
 	router.PUT(baseURL+"/api/users/:username/experiences/:experienceId", wrapper.ExperiencesUpdateExperience)
+	router.DELETE(baseURL+"/api/users/:username/follow", wrapper.FollowsUnfollowUser)
+	router.POST(baseURL+"/api/users/:username/follow", wrapper.FollowsFollowUser)
+	router.GET(baseURL+"/api/users/:username/follow-status", wrapper.FollowsGetFollowStatus)
+	router.GET(baseURL+"/api/users/:username/followers", wrapper.FollowsListFollowers)
+	router.GET(baseURL+"/api/users/:username/following", wrapper.FollowsListFollowing)
 	router.GET(baseURL+"/api/users/:username/skills", wrapper.SkillsListSkills)
 	router.POST(baseURL+"/api/users/:username/skills", wrapper.SkillsAttachSkill)
 	router.DELETE(baseURL+"/api/users/:username/skills/:name", wrapper.SkillsDetachSkill)

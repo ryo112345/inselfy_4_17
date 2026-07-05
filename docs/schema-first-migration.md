@@ -115,7 +115,7 @@ cd ../backend && make oapi
 | 3 | [x] | team_diagnose | 2 | inline struct、204 |
 | 4 | [x] | scout_template | 5 | **List が bare array** |
 | 5 | [x] | notification | 8 | req body なし、204系 |
-| 6 | [ ] | follow | 5 | **bare domain type**（FollowStatus） |
+| 6 | [x] | follow | 5 | **bare domain type**（FollowStatus） |
 | 7 | [ ] | auth | 4 | cookie 認証、body はユーザーのみ |
 | 8 | [ ] | company_auth | 5 | 同上 |
 | 9 | [ ] | careerinterest | 4 | domain `Response` 埋め込み |

@@ -10,6 +10,7 @@ import "./models/similar-users.tsp";
 import "./models/team-diagnose.tsp";
 import "./models/scout-template.tsp";
 import "./models/notification.tsp";
+import "./models/follow.tsp";
 import "./routes/users.tsp";
 import "./routes/experiences.tsp";
 import "./routes/educations.tsp";
@@ -19,6 +20,7 @@ import "./routes/similar-users.tsp";
 import "./routes/team-diagnose.tsp";
 import "./routes/scout-templates.tsp";
 import "./routes/notifications.tsp";
+import "./routes/follows.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
