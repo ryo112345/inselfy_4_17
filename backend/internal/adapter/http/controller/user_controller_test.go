@@ -13,7 +13,6 @@ import (
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 // stubInput records the UpdateProfile invocation for assertions.
@@ -34,23 +33,10 @@ func (s *stubInput) UpdateProfile(ctx context.Context, u string, in user.UpdateP
 	return s.updateFn(ctx, u, in)
 }
 
-type stubRepo struct{}
-
-func (stubRepo) Create(context.Context, *user.User) (*user.User, error)           { return nil, nil }
-func (stubRepo) GetByUsername(context.Context, user.Username) (*user.User, error) { return nil, nil }
-func (stubRepo) GetByID(context.Context, string) (*user.User, error)              { return nil, nil }
-func (stubRepo) GetByOAuthProvider(context.Context, string, string) (*user.User, error) {
-	return nil, nil
-}
-func (stubRepo) UpdateProfile(context.Context, string, user.UpdateProfileInput) (*user.User, error) {
-	return nil, nil
-}
-
 // controllerWith builds a UserController bound to the provided stub input.
 func controllerWith(stub *stubInput) *controller.UserController {
 	return controller.NewUserController(
-		func(port.UserRepository) port.UserInputPort { return stub },
-		func() port.UserRepository { return stubRepo{} },
+		stub,
 		nil, // storage (FileStorage) is unused in the profile-update path under test
 	)
 }

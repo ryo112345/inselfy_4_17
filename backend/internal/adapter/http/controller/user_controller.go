@@ -19,22 +19,13 @@ import (
 
 // UserController handles user HTTP endpoints.
 type UserController struct {
-	inputFactory func(repo port.UserRepository) port.UserInputPort
-	repoFactory  func() port.UserRepository
-	storage      port.FileStorage
+	input   port.UserInputPort
+	storage port.FileStorage
 }
 
 // NewUserController creates a UserController.
-func NewUserController(
-	inputFactory func(repo port.UserRepository) port.UserInputPort,
-	repoFactory func() port.UserRepository,
-	storage port.FileStorage,
-) *UserController {
-	return &UserController{
-		inputFactory: inputFactory,
-		repoFactory:  repoFactory,
-		storage:      storage,
-	}
+func NewUserController(input port.UserInputPort, storage port.FileStorage) *UserController {
+	return &UserController{input: input, storage: storage}
 }
 
 // Create handles POST /api/users.
@@ -43,7 +34,7 @@ func (c *UserController) Create(ctx echo.Context) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	usr, err := c.newInput().Create(ctx.Request().Context(), user.CreateUserInput{
+	usr, err := c.input.Create(ctx.Request().Context(), user.CreateUserInput{
 		Name:     body.Name,
 		Username: body.Username,
 	})
@@ -55,7 +46,7 @@ func (c *UserController) Create(ctx echo.Context) error {
 
 // GetByUsername handles GET /api/users/:username.
 func (c *UserController) GetByUsername(ctx echo.Context, username string) error {
-	usr, err := c.newInput().GetByUsername(ctx.Request().Context(), username)
+	usr, err := c.input.GetByUsername(ctx.Request().Context(), username)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -64,7 +55,7 @@ func (c *UserController) GetByUsername(ctx echo.Context, username string) error 
 
 // GetByID handles GET /api/users/id/:id.
 func (c *UserController) GetByID(ctx echo.Context, id string) error {
-	usr, err := c.newInput().GetByID(ctx.Request().Context(), id)
+	usr, err := c.input.GetByID(ctx.Request().Context(), id)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -86,7 +77,7 @@ func (c *UserController) UpdateProfile(ctx echo.Context, username string) error 
 	if err != nil {
 		return badRequest(ctx, err.Error())
 	}
-	usr, err := c.newInput().UpdateProfile(ctx.Request().Context(), username, input)
+	usr, err := c.input.UpdateProfile(ctx.Request().Context(), username, input)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -210,7 +201,7 @@ func (c *UserController) UploadImage(ctx echo.Context, username string) error {
 		updateInput.CoverPhotoURL = ptrPtr(imageURL)
 	}
 
-	usr, err := c.newInput().UpdateProfile(ctx.Request().Context(), username, updateInput)
+	usr, err := c.input.UpdateProfile(ctx.Request().Context(), username, updateInput)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -220,8 +211,4 @@ func (c *UserController) UploadImage(ctx echo.Context, username string) error {
 func ptrPtr(s string) **string {
 	p := &s
 	return &p
-}
-
-func (c *UserController) newInput() port.UserInputPort {
-	return c.inputFactory(c.repoFactory())
 }

@@ -13,33 +13,19 @@ import (
 
 // EducationController handles education HTTP endpoints.
 type EducationController struct {
-	inputFactory func(
-		repo port.EducationRepository,
-		userRepo port.UserRepository,
-	) port.EducationInputPort
-	repoFactory     func() port.EducationRepository
-	userRepoFactory func() port.UserRepository
+	input port.EducationInputPort
 }
 
 // NewEducationController creates an EducationController.
 func NewEducationController(
-	inputFactory func(
-		repo port.EducationRepository,
-		userRepo port.UserRepository,
-	) port.EducationInputPort,
-	repoFactory func() port.EducationRepository,
-	userRepoFactory func() port.UserRepository,
+	input port.EducationInputPort,
 ) *EducationController {
-	return &EducationController{
-		inputFactory:    inputFactory,
-		repoFactory:     repoFactory,
-		userRepoFactory: userRepoFactory,
-	}
+	return &EducationController{input: input}
 }
 
 // List handles GET /api/users/:username/educations.
 func (c *EducationController) List(ctx echo.Context, username string) error {
-	es, err := c.newInput().List(ctx.Request().Context(), username)
+	es, err := c.input.List(ctx.Request().Context(), username)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -52,7 +38,7 @@ func (c *EducationController) Create(ctx echo.Context, username string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	e, err := c.newInput().Create(ctx.Request().Context(), username, toCreateEducationInput(body))
+	e, err := c.input.Create(ctx.Request().Context(), username, toCreateEducationInput(body))
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -65,7 +51,7 @@ func (c *EducationController) Update(ctx echo.Context, username, educationID str
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	e, err := c.newInput().Update(ctx.Request().Context(), username, educationID, toUpdateEducationInput(body))
+	e, err := c.input.Update(ctx.Request().Context(), username, educationID, toUpdateEducationInput(body))
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -74,14 +60,10 @@ func (c *EducationController) Update(ctx echo.Context, username, educationID str
 
 // Delete handles DELETE /api/users/:username/educations/:educationId.
 func (c *EducationController) Delete(ctx echo.Context, username, educationID string) error {
-	if err := c.newInput().Delete(ctx.Request().Context(), username, educationID); err != nil {
+	if err := c.input.Delete(ctx.Request().Context(), username, educationID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func (c *EducationController) newInput() port.EducationInputPort {
-	return c.inputFactory(c.repoFactory(), c.userRepoFactory())
 }
 
 func toCreateEducationInput(body openapi.ModelsCreateEducationRequest) education.CreateInput {

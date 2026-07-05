@@ -15,21 +15,13 @@ import (
 )
 
 type CompanyAuthController struct {
-	inputFactory       func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository) port.CompanyAuthInputPort
-	companyRepoFactory func() port.CompanyAccountRepository
-	refreshRepoFactory func() port.CompanyRefreshTokenRepository
+	input port.CompanyAuthInputPort
 }
 
 func NewCompanyAuthController(
-	inputFactory func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository) port.CompanyAuthInputPort,
-	companyRepoFactory func() port.CompanyAccountRepository,
-	refreshRepoFactory func() port.CompanyRefreshTokenRepository,
+	input port.CompanyAuthInputPort,
 ) *CompanyAuthController {
-	return &CompanyAuthController{
-		inputFactory:       inputFactory,
-		companyRepoFactory: companyRepoFactory,
-		refreshRepoFactory: refreshRepoFactory,
-	}
+	return &CompanyAuthController{input: input}
 }
 
 func (c *CompanyAuthController) Register(ctx echo.Context) error {
@@ -44,7 +36,7 @@ func (c *CompanyAuthController) Register(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request")
 	}
 
-	account, err := c.newInput().Register(ctx.Request().Context(), company.RegisterInput{
+	account, err := c.input.Register(ctx.Request().Context(), company.RegisterInput{
 		Email:             body.Email,
 		Password:          body.Password,
 		CompanyName:       body.CompanyName,
@@ -66,7 +58,7 @@ func (c *CompanyAuthController) Login(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request")
 	}
 
-	pair, account, err := c.newInput().Login(ctx.Request().Context(), body.Email, body.Password)
+	pair, account, err := c.input.Login(ctx.Request().Context(), body.Email, body.Password)
 	if err != nil {
 		return handleCompanyAuthError(ctx, err)
 	}
@@ -81,7 +73,7 @@ func (c *CompanyAuthController) Refresh(ctx echo.Context) error {
 		return handleCompanyAuthError(ctx, nil)
 	}
 
-	pair, account, err := c.newInput().RefreshToken(ctx.Request().Context(), cookie.Value)
+	pair, account, err := c.input.RefreshToken(ctx.Request().Context(), cookie.Value)
 	if err != nil {
 		clearCompanyAuthCookies(ctx)
 		return handleCompanyAuthError(ctx, err)
@@ -94,7 +86,7 @@ func (c *CompanyAuthController) Refresh(ctx echo.Context) error {
 func (c *CompanyAuthController) GetMe(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	account, err := c.newInput().GetCurrentCompany(ctx.Request().Context(), companyID)
+	account, err := c.input.GetCurrentCompany(ctx.Request().Context(), companyID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -104,10 +96,6 @@ func (c *CompanyAuthController) GetMe(ctx echo.Context) error {
 func (c *CompanyAuthController) Logout(ctx echo.Context) error {
 	clearCompanyAuthCookies(ctx)
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func (c *CompanyAuthController) newInput() port.CompanyAuthInputPort {
-	return c.inputFactory(c.companyRepoFactory(), c.refreshRepoFactory())
 }
 
 func setCompanyAuthCookies(ctx echo.Context, resp *presenter.CompanyAuthTokenResponse) {

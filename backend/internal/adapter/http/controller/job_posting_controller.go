@@ -18,19 +18,14 @@ import (
 
 // JobPostingController handles job posting CRUD HTTP endpoints.
 type JobPostingController struct {
-	inputFactory func(repo port.JobPostingRepository) port.JobPostingInputPort
-	repoFactory  func() port.JobPostingRepository
+	input port.JobPostingInputPort
 }
 
 // NewJobPostingController creates a JobPostingController.
 func NewJobPostingController(
-	inputFactory func(repo port.JobPostingRepository) port.JobPostingInputPort,
-	repoFactory func() port.JobPostingRepository,
+	input port.JobPostingInputPort,
 ) *JobPostingController {
-	return &JobPostingController{
-		inputFactory: inputFactory,
-		repoFactory:  repoFactory,
-	}
+	return &JobPostingController{input: input}
 }
 
 type jobPostingRequest struct {
@@ -87,7 +82,7 @@ func (c *JobPostingController) Create(ctx echo.Context) error {
 	in := jobPostingReqConv.ToCreateInput(body)
 	in.CompanyID = companyID
 
-	j, err := c.newInput().Create(ctx.Request().Context(), in)
+	j, err := c.input.Create(ctx.Request().Context(), in)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -98,7 +93,7 @@ func (c *JobPostingController) Create(ctx echo.Context) error {
 func (c *JobPostingController) List(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	js, err := c.newInput().List(ctx.Request().Context(), companyID)
+	js, err := c.input.List(ctx.Request().Context(), companyID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -109,7 +104,7 @@ func (c *JobPostingController) List(ctx echo.Context) error {
 func (c *JobPostingController) Get(ctx echo.Context, jobID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	j, err := c.newInput().Get(ctx.Request().Context(), companyID, jobID)
+	j, err := c.input.Get(ctx.Request().Context(), companyID, jobID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -160,14 +155,14 @@ func (c *JobPostingController) ListPublic(ctx echo.Context) error {
 			}
 		}
 
-		js, total, err := c.newInput().SearchPublic(ctx.Request().Context(), params)
+		js, total, err := c.input.SearchPublic(ctx.Request().Context(), params)
 		if err != nil {
 			return handleError(ctx, err)
 		}
 		return ctx.JSON(http.StatusOK, presenter.JobPostingsPaginatedResponse(js, total))
 	}
 
-	js, err := c.newInput().ListPublic(ctx.Request().Context())
+	js, err := c.input.ListPublic(ctx.Request().Context())
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -176,7 +171,7 @@ func (c *JobPostingController) ListPublic(ctx echo.Context) error {
 
 // GetPublic handles GET /api/jobs/:jobId (no auth).
 func (c *JobPostingController) GetPublic(ctx echo.Context, jobID string) error {
-	j, err := c.newInput().GetPublic(ctx.Request().Context(), jobID)
+	j, err := c.input.GetPublic(ctx.Request().Context(), jobID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -192,7 +187,7 @@ func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	j, err := c.newInput().Update(ctx.Request().Context(), companyID, jobID, jobPostingReqConv.ToUpdateInput(body))
+	j, err := c.input.Update(ctx.Request().Context(), companyID, jobID, jobPostingReqConv.ToUpdateInput(body))
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -203,7 +198,7 @@ func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 func (c *JobPostingController) Delete(ctx echo.Context, jobID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	if err := c.newInput().Delete(ctx.Request().Context(), companyID, jobID); err != nil {
+	if err := c.input.Delete(ctx.Request().Context(), companyID, jobID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -212,10 +207,6 @@ func (c *JobPostingController) Delete(ctx echo.Context, jobID string) error {
 // jobPostingReqConv is the goverter-generated request→input mapper.
 // See job_posting_request_converter.go for its declaration.
 var jobPostingReqConv jobPostingRequestConverter = &jobPostingRequestConverterImpl{}
-
-func (c *JobPostingController) newInput() port.JobPostingInputPort {
-	return c.inputFactory(c.repoFactory())
-}
 
 // HandleImageUpload returns a handler that saves an uploaded image via FileStorage.
 func HandleImageUpload(storage port.FileStorage, subdir string) echo.HandlerFunc {

@@ -13,33 +13,19 @@ import (
 
 // ExperienceController handles experience HTTP endpoints.
 type ExperienceController struct {
-	inputFactory func(
-		repo port.ExperienceRepository,
-		userRepo port.UserRepository,
-	) port.ExperienceInputPort
-	repoFactory     func() port.ExperienceRepository
-	userRepoFactory func() port.UserRepository
+	input port.ExperienceInputPort
 }
 
 // NewExperienceController creates an ExperienceController.
 func NewExperienceController(
-	inputFactory func(
-		repo port.ExperienceRepository,
-		userRepo port.UserRepository,
-	) port.ExperienceInputPort,
-	repoFactory func() port.ExperienceRepository,
-	userRepoFactory func() port.UserRepository,
+	input port.ExperienceInputPort,
 ) *ExperienceController {
-	return &ExperienceController{
-		inputFactory:    inputFactory,
-		repoFactory:     repoFactory,
-		userRepoFactory: userRepoFactory,
-	}
+	return &ExperienceController{input: input}
 }
 
 // List handles GET /api/users/:username/experiences.
 func (c *ExperienceController) List(ctx echo.Context, username string) error {
-	list, err := c.newInput().List(ctx.Request().Context(), username)
+	list, err := c.input.List(ctx.Request().Context(), username)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -52,7 +38,7 @@ func (c *ExperienceController) Create(ctx echo.Context, username string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	e, err := c.newInput().Create(ctx.Request().Context(), username, toCreateExperienceInput(body))
+	e, err := c.input.Create(ctx.Request().Context(), username, toCreateExperienceInput(body))
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -65,7 +51,7 @@ func (c *ExperienceController) Update(ctx echo.Context, username, experienceID s
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	e, err := c.newInput().Update(ctx.Request().Context(), username, experienceID, toUpdateExperienceInput(body))
+	e, err := c.input.Update(ctx.Request().Context(), username, experienceID, toUpdateExperienceInput(body))
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -74,14 +60,10 @@ func (c *ExperienceController) Update(ctx echo.Context, username, experienceID s
 
 // Delete handles DELETE /api/users/:username/experiences/:experienceId.
 func (c *ExperienceController) Delete(ctx echo.Context, username, experienceID string) error {
-	if err := c.newInput().Delete(ctx.Request().Context(), username, experienceID); err != nil {
+	if err := c.input.Delete(ctx.Request().Context(), username, experienceID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func (c *ExperienceController) newInput() port.ExperienceInputPort {
-	return c.inputFactory(c.repoFactory(), c.userRepoFactory())
 }
 
 func toCreateExperienceInput(body openapi.ModelsCreateExperienceRequest) experience.CreateInput {

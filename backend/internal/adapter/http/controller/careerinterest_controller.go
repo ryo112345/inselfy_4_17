@@ -11,37 +11,11 @@ import (
 )
 
 type CareerInterestController struct {
-	inputFactory func(
-		sessionRepo port.CareerInterestSessionRepository,
-		resultRepo port.CareerInterestResultRepository,
-		basicScoreRepo port.CareerInterestBasicScoreRepository,
-		typeScoreRepo port.CareerInterestTypeScoreRepository,
-	) port.CareerInterestInputPort
-	sessionRepoFactory    func() port.CareerInterestSessionRepository
-	resultRepoFactory     func() port.CareerInterestResultRepository
-	basicScoreRepoFactory func() port.CareerInterestBasicScoreRepository
-	typeScoreRepoFactory  func() port.CareerInterestTypeScoreRepository
+	input port.CareerInterestInputPort
 }
 
-func NewCareerInterestController(
-	inputFactory func(
-		sessionRepo port.CareerInterestSessionRepository,
-		resultRepo port.CareerInterestResultRepository,
-		basicScoreRepo port.CareerInterestBasicScoreRepository,
-		typeScoreRepo port.CareerInterestTypeScoreRepository,
-	) port.CareerInterestInputPort,
-	sessionRepoFactory func() port.CareerInterestSessionRepository,
-	resultRepoFactory func() port.CareerInterestResultRepository,
-	basicScoreRepoFactory func() port.CareerInterestBasicScoreRepository,
-	typeScoreRepoFactory func() port.CareerInterestTypeScoreRepository,
-) *CareerInterestController {
-	return &CareerInterestController{
-		inputFactory:          inputFactory,
-		sessionRepoFactory:    sessionRepoFactory,
-		resultRepoFactory:     resultRepoFactory,
-		basicScoreRepoFactory: basicScoreRepoFactory,
-		typeScoreRepoFactory:  typeScoreRepoFactory,
-	}
+func NewCareerInterestController(input port.CareerInterestInputPort) *CareerInterestController {
+	return &CareerInterestController{input: input}
 }
 
 type ciStartSessionRequest struct {
@@ -57,7 +31,7 @@ func (c *CareerInterestController) StartSession(ctx echo.Context) error {
 		return badRequest(ctx, "user_id is required")
 	}
 
-	s, err := c.newInput().StartSession(ctx.Request().Context(), body.UserID)
+	s, err := c.input.StartSession(ctx.Request().Context(), body.UserID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -77,7 +51,7 @@ func (c *CareerInterestController) SubmitResult(ctx echo.Context, sessionID stri
 	input := careerinterest.SubmitInput{
 		Responses: body.Responses,
 	}
-	r, err := c.newInput().SubmitResult(ctx.Request().Context(), sessionID, input)
+	r, err := c.input.SubmitResult(ctx.Request().Context(), sessionID, input)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -85,7 +59,7 @@ func (c *CareerInterestController) SubmitResult(ctx echo.Context, sessionID stri
 }
 
 func (c *CareerInterestController) GetLatestResult(ctx echo.Context, userID string) error {
-	r, err := c.newInput().GetLatestResult(ctx.Request().Context(), userID)
+	r, err := c.input.GetLatestResult(ctx.Request().Context(), userID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -93,16 +67,9 @@ func (c *CareerInterestController) GetLatestResult(ctx echo.Context, userID stri
 }
 
 func (c *CareerInterestController) GetResultBySessionID(ctx echo.Context, sessionID string) error {
-	r, err := c.newInput().GetResultBySessionID(ctx.Request().Context(), sessionID)
+	r, err := c.input.GetResultBySessionID(ctx.Request().Context(), sessionID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusOK, presenter.CareerInterestResultResponse(r))
-}
-
-func (c *CareerInterestController) newInput() port.CareerInterestInputPort {
-	return c.inputFactory(
-		c.sessionRepoFactory(), c.resultRepoFactory(),
-		c.basicScoreRepoFactory(), c.typeScoreRepoFactory(),
-	)
 }

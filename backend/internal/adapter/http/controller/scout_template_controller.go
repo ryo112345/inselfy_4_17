@@ -13,19 +13,14 @@ import (
 
 // ScoutTemplateController handles scout template CRUD HTTP endpoints.
 type ScoutTemplateController struct {
-	inputFactory func(repo port.ScoutTemplateRepository) port.ScoutTemplateInputPort
-	repoFactory  func() port.ScoutTemplateRepository
+	input port.ScoutTemplateInputPort
 }
 
 // NewScoutTemplateController creates a ScoutTemplateController.
 func NewScoutTemplateController(
-	inputFactory func(repo port.ScoutTemplateRepository) port.ScoutTemplateInputPort,
-	repoFactory func() port.ScoutTemplateRepository,
+	input port.ScoutTemplateInputPort,
 ) *ScoutTemplateController {
-	return &ScoutTemplateController{
-		inputFactory: inputFactory,
-		repoFactory:  repoFactory,
-	}
+	return &ScoutTemplateController{input: input}
 }
 
 type createTemplateRequest struct {
@@ -49,7 +44,7 @@ func (c *ScoutTemplateController) Create(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	t, err := c.newInput().Create(ctx.Request().Context(), scout.CreateTemplateInput{
+	t, err := c.input.Create(ctx.Request().Context(), scout.CreateTemplateInput{
 		CompanyID: companyID,
 		Name:      body.Name,
 		Subject:   body.Subject,
@@ -65,7 +60,7 @@ func (c *ScoutTemplateController) Create(ctx echo.Context) error {
 func (c *ScoutTemplateController) List(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	ts, err := c.newInput().List(ctx.Request().Context(), companyID)
+	ts, err := c.input.List(ctx.Request().Context(), companyID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -76,7 +71,7 @@ func (c *ScoutTemplateController) List(ctx echo.Context) error {
 func (c *ScoutTemplateController) Get(ctx echo.Context, templateID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	t, err := c.newInput().Get(ctx.Request().Context(), companyID, templateID)
+	t, err := c.input.Get(ctx.Request().Context(), companyID, templateID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -92,7 +87,7 @@ func (c *ScoutTemplateController) Update(ctx echo.Context, templateID string) er
 		return badRequest(ctx, "invalid request body")
 	}
 
-	t, err := c.newInput().Update(ctx.Request().Context(), companyID, templateID, scout.UpdateTemplateInput{
+	t, err := c.input.Update(ctx.Request().Context(), companyID, templateID, scout.UpdateTemplateInput{
 		Name:    body.Name,
 		Subject: body.Subject,
 		Body:    body.Body,
@@ -107,12 +102,8 @@ func (c *ScoutTemplateController) Update(ctx echo.Context, templateID string) er
 func (c *ScoutTemplateController) Delete(ctx echo.Context, templateID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	if err := c.newInput().Delete(ctx.Request().Context(), companyID, templateID); err != nil {
+	if err := c.input.Delete(ctx.Request().Context(), companyID, templateID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func (c *ScoutTemplateController) newInput() port.ScoutTemplateInputPort {
-	return c.inputFactory(c.repoFactory())
 }

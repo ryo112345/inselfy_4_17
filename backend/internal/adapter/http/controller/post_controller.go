@@ -13,18 +13,13 @@ import (
 )
 
 type PostController struct {
-	inputFactory func(repo port.PostRepository) port.PostInputPort
-	repoFactory  func() port.PostRepository
+	input port.PostInputPort
 }
 
 func NewPostController(
-	inputFactory func(repo port.PostRepository) port.PostInputPort,
-	repoFactory func() port.PostRepository,
+	input port.PostInputPort,
 ) *PostController {
-	return &PostController{
-		inputFactory: inputFactory,
-		repoFactory:  repoFactory,
-	}
+	return &PostController{input: input}
 }
 
 type createPostRequest struct {
@@ -39,7 +34,7 @@ func (c *PostController) Create(ctx echo.Context) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	pw, err := c.newInput().Create(ctx.Request().Context(), post.CreatePostInput{
+	pw, err := c.input.Create(ctx.Request().Context(), post.CreatePostInput{
 		UserID:      userID,
 		Content:     body.Content,
 		QuotePostID: body.QuotePostID,
@@ -52,7 +47,7 @@ func (c *PostController) Create(ctx echo.Context) error {
 
 func (c *PostController) GetByID(ctx echo.Context, postID string) error {
 	viewerID := ctx.QueryParam("viewerId")
-	pw, err := c.newInput().GetByID(ctx.Request().Context(), postID, viewerID)
+	pw, err := c.input.GetByID(ctx.Request().Context(), postID, viewerID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -63,7 +58,7 @@ func (c *PostController) ListTimeline(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 	viewerID := ctx.QueryParam("viewerId")
-	posts, total, err := c.newInput().ListTimeline(ctx.Request().Context(), limit, offset, viewerID)
+	posts, total, err := c.input.ListTimeline(ctx.Request().Context(), limit, offset, viewerID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -74,7 +69,7 @@ func (c *PostController) ListByUserID(ctx echo.Context, userID string) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 	viewerID := ctx.QueryParam("viewerId")
-	posts, total, err := c.newInput().ListByUserID(ctx.Request().Context(), userID, limit, offset, viewerID)
+	posts, total, err := c.input.ListByUserID(ctx.Request().Context(), userID, limit, offset, viewerID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -84,7 +79,7 @@ func (c *PostController) ListByUserID(ctx echo.Context, userID string) error {
 func (c *PostController) Delete(ctx echo.Context, postID string) error {
 	userID := authmw.UserID(ctx)
 
-	if err := c.newInput().Delete(ctx.Request().Context(), postID, userID); err != nil {
+	if err := c.input.Delete(ctx.Request().Context(), postID, userID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -93,7 +88,7 @@ func (c *PostController) Delete(ctx echo.Context, postID string) error {
 func (c *PostController) ToggleLike(ctx echo.Context, postID string) error {
 	userID := authmw.UserID(ctx)
 
-	liked, count, err := c.newInput().ToggleLike(ctx.Request().Context(), postID, userID)
+	liked, count, err := c.input.ToggleLike(ctx.Request().Context(), postID, userID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -103,7 +98,7 @@ func (c *PostController) ToggleLike(ctx echo.Context, postID string) error {
 func (c *PostController) ListLikedByUserID(ctx echo.Context, userID string) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	posts, total, err := c.newInput().ListLikedByUserID(ctx.Request().Context(), userID, limit, offset)
+	posts, total, err := c.input.ListLikedByUserID(ctx.Request().Context(), userID, limit, offset)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -113,7 +108,7 @@ func (c *PostController) ListLikedByUserID(ctx echo.Context, userID string) erro
 func (c *PostController) ToggleRepost(ctx echo.Context, postID string) error {
 	userID := authmw.UserID(ctx)
 
-	reposted, count, err := c.newInput().ToggleRepost(ctx.Request().Context(), postID, userID)
+	reposted, count, err := c.input.ToggleRepost(ctx.Request().Context(), postID, userID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -131,7 +126,7 @@ func (c *PostController) CreateComment(ctx echo.Context, postID string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	cw, err := c.newInput().CreateComment(ctx.Request().Context(), post.CreateCommentInput{
+	cw, err := c.input.CreateComment(ctx.Request().Context(), post.CreateCommentInput{
 		PostID:  postID,
 		UserID:  userID,
 		Content: body.Content,
@@ -145,7 +140,7 @@ func (c *PostController) CreateComment(ctx echo.Context, postID string) error {
 func (c *PostController) ListComments(ctx echo.Context, postID string) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	comments, total, err := c.newInput().ListComments(ctx.Request().Context(), postID, limit, offset)
+	comments, total, err := c.input.ListComments(ctx.Request().Context(), postID, limit, offset)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -155,12 +150,8 @@ func (c *PostController) ListComments(ctx echo.Context, postID string) error {
 func (c *PostController) DeleteComment(ctx echo.Context, commentID string) error {
 	userID := authmw.UserID(ctx)
 
-	if err := c.newInput().DeleteComment(ctx.Request().Context(), commentID, userID); err != nil {
+	if err := c.input.DeleteComment(ctx.Request().Context(), commentID, userID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func (c *PostController) newInput() port.PostInputPort {
-	return c.inputFactory(c.repoFactory())
 }
