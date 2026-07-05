@@ -524,6 +524,34 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CIStartSessionRequest'
+  /api/career-interest/sessions/{sessionId}/ai-report:
+    get:
+      operationId: CareerInterest_ciGetAiReport
+      summary: Get the AI report for a career interest session
+      description: セッションのAIレポート取得
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AiReportResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CareerInterest
   /api/career-interest/sessions/{sessionId}/results:
     post:
       operationId: CareerInterest_ciSubmitResult
@@ -4991,6 +5019,34 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.WVStartSessionRequest'
+  /api/work-values/sessions/{sessionId}/ai-report:
+    get:
+      operationId: WorkValues_wvGetAiReport
+      summary: Get the AI report for a work values session
+      description: セッションのAIレポート取得
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AiReportResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - WorkValues
   /api/work-values/sessions/{sessionId}/results:
     post:
       operationId: WorkValues_wvSubmitResult
@@ -5095,6 +5151,32 @@ components:
           nullable: true
           description: 招待メールアドレス
       description: チームメンバー追加リクエスト
+    Models.AiReportResponse:
+      type: object
+      required:
+        - id
+        - session_id
+        - content
+        - created_at
+        - first_view
+      properties:
+        id:
+          type: string
+          description: レポートID
+        session_id:
+          type: string
+          description: セッションID
+        content:
+          type: string
+          description: レポート本文（Markdown）
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+        first_view:
+          type: boolean
+          description: 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
+      description: 診断AIレポート（Work Values / Career Interest 共通）
     Models.AppliedResponse:
       type: object
       required:

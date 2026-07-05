@@ -49,4 +49,12 @@ interface CareerInterest {
   ciGetResultBySession(
     @path sessionId: string,
   ): CIResultResponse | NotFoundError | BadRequestError;
+
+  /** セッションのAIレポート取得 */
+  @get
+  @route("/sessions/{sessionId}/ai-report")
+  @summary("Get the AI report for a career interest session")
+  ciGetAiReport(
+    @path sessionId: string,
+  ): AiReportResponse | NotFoundError | BadRequestError;
 }

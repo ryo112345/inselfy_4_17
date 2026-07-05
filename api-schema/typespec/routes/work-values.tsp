@@ -49,4 +49,12 @@ interface WorkValues {
   wvGetResultBySession(
     @path sessionId: string,
   ): WVResultResponse | NotFoundError | BadRequestError;
+
+  /** セッションのAIレポート取得 */
+  @get
+  @route("/sessions/{sessionId}/ai-report")
+  @summary("Get the AI report for a work values session")
+  wvGetAiReport(
+    @path sessionId: string,
+  ): AiReportResponse | NotFoundError | BadRequestError;
 }
