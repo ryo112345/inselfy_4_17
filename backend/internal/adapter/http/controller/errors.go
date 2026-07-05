@@ -10,6 +10,7 @@ import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
 	"github.com/akiyama/inselfy/backend/internal/domain/auth"
+	"github.com/akiyama/inselfy/backend/internal/domain/company"
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
@@ -30,7 +31,9 @@ func handleError(ctx echo.Context, err error) error {
 		errors.Is(err, interview.ErrProposalNotFound),
 		errors.Is(err, interview.ErrSlotNotFound),
 		errors.Is(err, interview.ErrInterviewNotFound),
-		errors.Is(err, interview.ErrApplicationNotFound):
+		errors.Is(err, interview.ErrApplicationNotFound),
+		errors.Is(err, company.ErrTeamNotFound),
+		errors.Is(err, company.ErrTeamMemberNotFound):
 		return ctx.JSON(http.StatusNotFound, openapi.ModelsNotFoundError{
 			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
 			Message: err.Error(),
@@ -48,6 +51,7 @@ func handleError(ctx echo.Context, err error) error {
 			Message: err.Error(),
 		})
 	case errors.Is(err, port.ErrForbidden),
+		errors.Is(err, company.ErrNotTeamOwner),
 		errors.Is(err, scout.ErrScoutingDisabled),
 		errors.Is(err, scout.ErrQualityRestricted),
 		errors.Is(err, scout.ErrNotOwner),
@@ -127,6 +131,9 @@ func isBadRequest(err error) bool {
 		return true
 	case errors.Is(err, jobapplication.ErrInvalidStatus),
 		errors.Is(err, jobapplication.ErrJobNotOpen):
+		return true
+	case errors.Is(err, company.ErrTeamNameRequired),
+		errors.Is(err, company.ErrTeamMemberLimit):
 		return true
 	case errors.Is(err, messaging.ErrBodyRequired),
 		errors.Is(err, messaging.ErrBodyTooLong),

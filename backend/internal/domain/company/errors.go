@@ -17,4 +17,10 @@ var (
 	ErrContactPersonNameTooLong  = errors.New("contact person name must be 100 characters or fewer")
 	ErrPhoneNumberTooLong        = errors.New("phone number must be 30 characters or fewer")
 	ErrEmailTooLong              = errors.New("email must be 255 characters or fewer")
+
+	ErrTeamNotFound       = errors.New("team not found")
+	ErrTeamMemberNotFound = errors.New("member not found")
+	ErrNotTeamOwner       = errors.New("not your team")
+	ErrTeamNameRequired   = errors.New("name is required (max 100 chars)")
+	ErrTeamMemberLimit    = errors.New("チームメンバーは最大30人までです")
 )
