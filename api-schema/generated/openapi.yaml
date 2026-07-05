@@ -15,6 +15,7 @@ tags:
   - name: Follows
   - name: Auth
   - name: CompanyAuth
+  - name: CareerInterest
 paths:
   /api/auth/google:
     post:
@@ -100,6 +101,124 @@ paths:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Auth
+  /api/career-interest/sessions:
+    post:
+      operationId: CareerInterest_ciStartSession
+      summary: Start a career interest session
+      description: 診断セッション開始
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CISessionResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CareerInterest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CIStartSessionRequest'
+  /api/career-interest/sessions/{sessionId}/results:
+    post:
+      operationId: CareerInterest_ciSubmitResult
+      summary: Submit career interest responses
+      description: 診断結果送信
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CIResultResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CareerInterest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CISubmitResultRequest'
+    get:
+      operationId: CareerInterest_ciGetResultBySession
+      summary: Get the career interest result by session
+      description: セッションIDで診断結果取得
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CIResultResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CareerInterest
+  /api/career-interest/users/{userId}/results/latest:
+    get:
+      operationId: CareerInterest_ciGetLatestResult
+      summary: Get the latest career interest result for a user
+      description: 最新の診断結果取得
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CIResultResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CareerInterest
   /api/company/auth/login:
     post:
       operationId: CompanyAuth_companyLogin
@@ -1352,6 +1471,165 @@ components:
           type: string
         details: {}
       description: Bad Request エラー
+    Models.CIBasicScoreResponse:
+      type: object
+      required:
+        - basic_interest_id
+        - score
+        - rank
+      properties:
+        basic_interest_id:
+          type: string
+          description: 基本興味領域ID
+        score:
+          type: number
+          format: double
+          description: スコア
+        rank:
+          type: integer
+          format: int32
+          description: 順位
+      description: 基本興味領域スコア
+    Models.CIItemResponse:
+      type: object
+      required:
+        - question_number
+        - item_code
+        - basic_interest_id
+        - skill_level
+        - activity_type
+        - text_ja
+      properties:
+        question_number:
+          type: integer
+          format: int32
+          description: 質問番号
+        item_code:
+          type: string
+          description: 項目コード
+        basic_interest_id:
+          type: string
+          description: 基本興味領域ID
+        skill_level:
+          type: string
+          description: スキルレベル
+        activity_type:
+          type: string
+          description: 活動種別
+        text_ja:
+          type: string
+          description: 設問文（日本語）
+      description: Career Interest 設問
+    Models.CIResponseItem:
+      type: object
+      required:
+        - question_number
+        - item_code
+        - score
+      properties:
+        question_number:
+          type: integer
+          format: int32
+          description: 質問番号
+        item_code:
+          type: string
+          description: 項目コード
+        score:
+          type: integer
+          format: int32
+          description: 回答スコア
+      description: Career Interest 回答（1問分）
+    Models.CIResultResponse:
+      type: object
+      required:
+        - id
+        - session_id
+        - user_id
+        - basic_scores
+        - type_scores
+        - created_at
+      properties:
+        id:
+          type: string
+          description: 結果ID
+        session_id:
+          type: string
+          description: セッションID
+        user_id:
+          type: string
+          description: ユーザーID
+        basic_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.CIBasicScoreResponse'
+          description: 基本興味領域スコア
+        type_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.CITypeScoreResponse'
+          description: RIASEC タイプスコア
+        created_at:
+          type: string
+          description: 作成日時（RFC3339 文字列）
+      description: Career Interest 診断結果
+    Models.CISessionResponse:
+      type: object
+      required:
+        - id
+        - status
+        - items
+      properties:
+        id:
+          type: string
+          description: セッションID
+        status:
+          type: string
+          description: ステータス
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.CIItemResponse'
+          description: 設問一覧
+      description: Career Interest セッション
+    Models.CIStartSessionRequest:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: ユーザーID
+      description: Career Interest セッション開始リクエスト
+    Models.CISubmitResultRequest:
+      type: object
+      required:
+        - responses
+      properties:
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.CIResponseItem'
+          description: 回答一覧
+      description: Career Interest 結果送信リクエスト
+    Models.CITypeScoreResponse:
+      type: object
+      required:
+        - type_id
+        - score
+        - rank
+      properties:
+        type_id:
+          type: string
+          description: タイプID
+        score:
+          type: number
+          format: double
+          description: スコア
+        rank:
+          type: integer
+          format: int32
+          description: 順位
+      description: RIASEC タイプスコア
     Models.CompanyLoginRequest:
       type: object
       required:

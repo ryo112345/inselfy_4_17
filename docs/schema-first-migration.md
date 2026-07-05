@@ -118,7 +118,7 @@ cd ../backend && make oapi
 | 6 | [x] | follow | 5 | **bare domain type**（FollowStatus） |
 | 7 | [x] | auth | 4 | cookie 認証、body はユーザーのみ |
 | 8 | [x] | company_auth | 5 | 同上 |
-| 9 | [ ] | careerinterest | 4 | domain `Response` 埋め込み |
+| 9 | [x] | careerinterest | 4 | domain `Response` 埋め込み |
 | 10 | [ ] | workvalues | 4 | 同上 + Mu/SE map |
 | 11 | [ ] | post | 11 | goverter 済み presenter |
 | 12 | [ ] | scout | 7 | dashboardResponse の深いネスト |

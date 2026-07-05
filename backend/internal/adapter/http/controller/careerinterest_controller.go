@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/careerinterest"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -18,38 +19,38 @@ func NewCareerInterestController(input port.CareerInterestInputPort) *CareerInte
 	return &CareerInterestController{input: input}
 }
 
-type ciStartSessionRequest struct {
-	UserID string `json:"user_id"`
-}
-
 func (c *CareerInterestController) StartSession(ctx echo.Context) error {
-	var body ciStartSessionRequest
+	var body openapi.ModelsCIStartSessionRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	if body.UserID == "" {
+	if body.UserId == "" {
 		return badRequest(ctx, "user_id is required")
 	}
 
-	s, err := c.input.StartSession(ctx.Request().Context(), body.UserID)
+	s, err := c.input.StartSession(ctx.Request().Context(), body.UserId)
 	if err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusCreated, presenter.CareerInterestSessionResponse(s))
 }
 
-type ciSubmitResultRequest struct {
-	Responses []careerinterest.Response `json:"responses"`
-}
-
 func (c *CareerInterestController) SubmitResult(ctx echo.Context, sessionID string) error {
-	var body ciSubmitResultRequest
+	var body openapi.ModelsCISubmitResultRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
 
+	responses := make([]careerinterest.Response, len(body.Responses))
+	for i, r := range body.Responses {
+		responses[i] = careerinterest.Response{
+			QuestionNumber: int(r.QuestionNumber),
+			ItemCode:       r.ItemCode,
+			Score:          int(r.Score),
+		}
+	}
 	input := careerinterest.SubmitInput{
-		Responses: body.Responses,
+		Responses: responses,
 	}
 	r, err := c.input.SubmitResult(ctx.Request().Context(), sessionID, input)
 	if err != nil {

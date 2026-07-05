@@ -20,6 +20,7 @@ type Server struct {
 	follow        *FollowController
 	auth          *AuthController
 	companyAuth   *CompanyAuthController
+	ci            *CareerInterestController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -38,6 +39,7 @@ func NewServer(
 	follow *FollowController,
 	auth *AuthController,
 	companyAuth *CompanyAuthController,
+	ci *CareerInterestController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -52,6 +54,7 @@ func NewServer(
 		follow:        follow,
 		auth:          auth,
 		companyAuth:   companyAuth,
+		ci:            ci,
 	}
 }
 
@@ -251,4 +254,22 @@ func (s *Server) CompanyAuthCompanyLogout(ctx echo.Context) error {
 
 func (s *Server) CompanyAuthCompanyGetMe(ctx echo.Context) error {
 	return s.companyAuth.GetMe(ctx)
+}
+
+// --- CareerInterest ---
+
+func (s *Server) CareerInterestCiStartSession(ctx echo.Context) error {
+	return s.ci.StartSession(ctx)
+}
+
+func (s *Server) CareerInterestCiSubmitResult(ctx echo.Context, sessionID string) error {
+	return s.ci.SubmitResult(ctx, sessionID)
+}
+
+func (s *Server) CareerInterestCiGetLatestResult(ctx echo.Context, userID string) error {
+	return s.ci.GetLatestResult(ctx, userID)
+}
+
+func (s *Server) CareerInterestCiGetResultBySession(ctx echo.Context, sessionID string) error {
+	return s.ci.GetResultBySessionID(ctx, sessionID)
 }
