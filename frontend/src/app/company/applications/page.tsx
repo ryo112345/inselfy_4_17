@@ -9,7 +9,12 @@ import {
 } from "@/features/job-application/api";
 import { checkPendingProposal } from "@/features/interview/api";
 import type { JobApplication } from "@/features/job-application/api";
-import { fetchJobPostings } from "@/features/job-posting/api";
+import { fetchJobPosting, fetchJobPostings } from "@/features/job-posting/api";
+import {
+  fetchCandidateDetail,
+  fetchTeamScoreAverages,
+  type CandidateDetail,
+} from "@/features/talent-search/api";
 import {
   SingleRadarChart,
   WV_ORDER,
@@ -118,27 +123,6 @@ function AppMatchBadges({ app }: { app: JobApplication }) {
     </div>
   );
 }
-
-type CandidateExperience = {
-  companyName: string;
-  title: string;
-  isCurrent: boolean;
-  startYear: number;
-  startMonth: number;
-  endYear: number | null;
-  endMonth: number | null;
-  description: string;
-};
-
-type CandidateDetail = {
-  experiences: CandidateExperience[];
-  skills: string[];
-  about: string | null;
-  jobSeekingStatus: string | null;
-  profileColor: string | null;
-  wvScores: { id: string; score: number }[] | null;
-  ciScores: { id: string; score: number }[] | null;
-};
 
 type DatePreset = "" | "today" | "week" | "month" | "3months";
 
@@ -282,43 +266,19 @@ export default function CompanyApplicationsPage() {
       setTeamName("");
       return;
     }
-    fetch(`/api/company/jobs/${selected.jobPostingId}`, { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : null))
+    fetchJobPosting(selected.jobPostingId)
       .then((job) => {
-        if (!job?.teamId) {
+        if (!job.teamId) {
           setTeamWvAvg(null);
           setTeamCiAvg(null);
           setTeamName("");
           return;
         }
-        setTeamName(job.teamName ?? "チーム");
-        return fetch(`/api/company/teams/${job.teamId}/scores`, { credentials: "include" })
-          .then((r) => (r.ok ? r.json() : null))
-          .then((data) => {
-            if (!data?.members) { setTeamWvAvg(null); setTeamCiAvg(null); return; }
-            const wvAccum: Record<string, { sum: number; count: number }> = {};
-            const ciAccum: Record<string, { sum: number; count: number }> = {};
-            for (const m of data.members) {
-              if (m.wv_scores) {
-                for (const s of m.wv_scores) {
-                  if (!wvAccum[s.id]) wvAccum[s.id] = { sum: 0, count: 0 };
-                  wvAccum[s.id].sum += s.display_score;
-                  wvAccum[s.id].count++;
-                }
-              }
-              if (m.ci_scores) {
-                for (const s of m.ci_scores) {
-                  if (!ciAccum[s.id]) ciAccum[s.id] = { sum: 0, count: 0 };
-                  ciAccum[s.id].sum += s.display_score;
-                  ciAccum[s.id].count++;
-                }
-              }
-            }
-            const wvAvg = Object.entries(wvAccum).map(([id, { sum, count }]) => ({ id, score: sum / count }));
-            const ciAvg = Object.entries(ciAccum).map(([id, { sum, count }]) => ({ id, score: sum / count }));
-            setTeamWvAvg(wvAvg.length > 0 ? wvAvg : null);
-            setTeamCiAvg(ciAvg.length > 0 ? ciAvg : null);
-          });
+        setTeamName("チーム");
+        return fetchTeamScoreAverages(job.teamId).then(({ wvAvg, ciAvg }) => {
+          setTeamWvAvg(wvAvg);
+          setTeamCiAvg(ciAvg);
+        });
       })
       .catch(() => {
         setTeamWvAvg(null);
@@ -332,59 +292,9 @@ export default function CompanyApplicationsPage() {
       setDetail(null);
       return;
     }
-    const username = selected.candidateUsername;
-    const candidateId = selected.candidateId;
     setDetailLoading(true);
-    Promise.all([
-      fetch(`/api/users/${username}/experiences`, { credentials: "include" })
-        .then((r) => (r.ok ? r.json() : { items: [] })),
-      fetch(`/api/users/${username}/skills`, { credentials: "include" })
-        .then((r) => (r.ok ? r.json() : { items: [] })),
-      fetch(`/api/users/${username}`, { credentials: "include" })
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-      fetch(`/api/work-values/users/${candidateId}/results/latest`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-      fetch(`/api/career-interest/users/${candidateId}/results/latest`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-    ])
-      .then(([expData, skillData, profileData, wvData, ciData]) => {
-        const rawExps = expData.items ?? expData.experiences ?? [];
-        setDetail({
-          experiences: rawExps.map((e: Record<string, unknown>) => ({
-            companyName: (e.companyName ?? e.company_name ?? "") as string,
-            title: (e.title ?? "") as string,
-            isCurrent: (e.isCurrent ?? e.is_current ?? false) as boolean,
-            startYear: (e.startYear ?? e.start_year ?? 0) as number,
-            startMonth: (e.startMonth ?? e.start_month ?? 0) as number,
-            endYear: (e.endYear ?? e.end_year ?? null) as number | null,
-            endMonth: (e.endMonth ?? e.end_month ?? null) as number | null,
-            description: (e.description ?? "") as string,
-          })),
-          skills: (skillData.items ?? skillData.skills ?? []).map(
-            (s: { name: string }) => s.name,
-          ),
-          about: profileData?.about ?? null,
-          jobSeekingStatus: profileData?.jobSeekingStatus ?? profileData?.job_seeking_status ?? null,
-          profileColor: profileData?.profileColor ?? profileData?.profile_color ?? null,
-          wvScores:
-            wvData?.values?.map(
-              (v: { value_id: string; display_score: number }) => ({
-                id: v.value_id,
-                score: v.display_score,
-              }),
-            ) ?? null,
-          ciScores:
-            ciData?.type_scores?.map(
-              (s: { type_id: string; score: number }) => ({
-                id: s.type_id,
-                score: s.score,
-              }),
-            ) ?? null,
-        });
-      })
+    fetchCandidateDetail(selected.candidateUsername, selected.candidateId)
+      .then(setDetail)
       .catch(() => setDetail(null))
       .finally(() => setDetailLoading(false));
   }, [selected?.candidateUsername, selected?.candidateId, selected?.id]);

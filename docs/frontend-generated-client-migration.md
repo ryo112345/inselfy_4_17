@@ -131,7 +131,7 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 | 11 | [x] | interview: `features/interview/api.ts` | 8 | propose/select の任意フィールドは `?? ""` / `?? 0` でゼロ値送信（Go デコードでは省略キーと等価、バックエンドがゼロ値にデフォルト適用するのを実装確認済み）。`status` リテラルunion型（`./types`）は既存宣言を維持してキャスト |
 | 12 | [x] | scout: `features/scout/api.ts` | 18関数 | dashboard/quality/credits 含む。`unread-context.tsx` は401正常系のため**スコープ外**（上表のとおり、触っていない）。`ScoutStatus`/`level` のリテラルunion型は既存宣言を維持してキャスト。`updateTemplate` の body は全フィールド必須化（唯一の呼び出し元は常に全指定） |
 | 13 | [x] | company auth register のみ: `app/company/register/page.tsx` | 1 | context は触らない（スコープ外）。エラー分岐（CONFLICT/message）は生成エラー型で維持 |
-| 14 | [ ] | 企業側候補者閲覧ページ群: `app/company/applications/page.tsx`, `saved-candidates/page.tsx`, `talents/page.tsx` | 各7 | 同じ束（users/experiences/skills/WV/CI/teams/jobs）を3ページが重複実装。共通ヘルパーに寄せてよい（挙動不変の範囲で） |
+| 14 | [x] | 企業側候補者閲覧ページ群: `app/company/applications/page.tsx`, `saved-candidates/page.tsx`, `talents/page.tsx` | 各7 | 共通束は新設 `features/talent-search/api.ts` に集約（candidate detail 5EP・team scores 平均・saved 系・talent search 4種）。`TalentCard`/`Candidate` 手書き型は `ModelsTalentCard` エイリアス化。動的 `wv_*`/`ci_*` クエリはスペック未表現のためキャストで送信。companyFetch の 401→company refresh リトライは SDK インターセプタに置き換わる（他の company 系既移行機能と同じ扱い）。応募一覧の `job.teamName` 参照はスペック上存在しない dead 分岐だったため固定文言 "チーム" に（実挙動どおり） |
 | 15 | [ ] | 公開企業・求人ページ: `app/companies/[id]/page.tsx`, `app/jobs/page.tsx`, `app/jobs/[jobId]/page.tsx`, `app/company/profile/preview/page.tsx` | 6 | SSR あり（パターンB） |
 | 16 | [ ] | profile 残り: `app/profile/[username]/api.ts`（follow / follow-status）, `fetchPanelData.ts`（followers/following） | 4 | upload-image と users/id は **スペック未収載 → Phase 2B（B0）**。ai-report / integrated-report 部分も Phase 2B へ残す |
 
