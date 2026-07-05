@@ -15,6 +15,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
+	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
 )
 
 type TalentSearchController struct {
@@ -462,8 +463,8 @@ func (c *TalentSearchController) enrichCards(ctx context.Context, cards []talent
 				if json.Unmarshal(muJSON, &mu) == nil {
 					id := pgUUIDToString(uid)
 					if idx, ok := uidMap[id]; ok {
-						top3 := topNeedIDs(mu, 3)
-						cards[idx].TopWVLabels = needLabels(top3)
+						top3 := workvalues.TopNeedIDs(mu, 3)
+						cards[idx].TopWVLabels = workvalues.NeedLabels(top3)
 					}
 				}
 			}

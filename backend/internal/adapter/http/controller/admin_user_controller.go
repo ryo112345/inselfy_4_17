@@ -124,6 +124,14 @@ func textToPtr(t pgtype.Text) *string {
 	return &s
 }
 
+func pgUUID(id string) pgtype.UUID {
+	parsed, err := uuid.Parse(id)
+	if err != nil {
+		return pgtype.UUID{}
+	}
+	return pgtype.UUID{Bytes: parsed, Valid: true}
+}
+
 func pgUUIDToString(id pgtype.UUID) string {
 	if !id.Valid {
 		return ""
