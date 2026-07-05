@@ -2,6 +2,8 @@ import "@/external/client/api/client";
 import {
   educationsListEducations,
   experiencesListExperiences,
+  followsListFollowers,
+  followsListFollowing,
   skillsListSkills,
   usersGetUserByUsername,
   type ModelsEducationResponse,
@@ -49,8 +51,7 @@ export type PanelData = {
 export async function fetchPanelDataByUsername(username: string): Promise<PanelData | null> {
   const userRes = await usersGetUserByUsername({ path: { username } });
   if (userRes.error || !userRes.data) return null;
-  const user = userRes.data as unknown as ModelsUserResponse;
-  return fetchRest(user, username);
+  return fetchRest(userRes.data, username);
 }
 
 export async function fetchPanelDataByUserId(userId: string): Promise<PanelData | null> {
@@ -107,12 +108,13 @@ async function fetchLatestIntegratedRequest(userId: string): Promise<{ requestId
 async function fetchFollowCounts(username: string): Promise<FollowCounts> {
   try {
     const [followersRes, followingRes] = await Promise.all([
-      fetch(`${INTERNAL_API}/api/users/${username}/followers?limit=1`),
-      fetch(`${INTERNAL_API}/api/users/${username}/following?limit=1`),
+      followsListFollowers({ path: { username }, query: { limit: 1 } }),
+      followsListFollowing({ path: { username }, query: { limit: 1 } }),
     ]);
-    const followers = followersRes.ok ? await followersRes.json() : { total: 0 };
-    const following = followingRes.ok ? await followingRes.json() : { total: 0 };
-    return { followersCount: followers.total ?? 0, followingCount: following.total ?? 0 };
+    return {
+      followersCount: followersRes.data?.total ?? 0,
+      followingCount: followingRes.data?.total ?? 0,
+    };
   } catch {
     return { followersCount: 0, followingCount: 0 };
   }
@@ -134,14 +136,9 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
     ciResult?.session_id ? checkReportExists(ciResult.session_id, "career-interest") : Promise.resolve(false),
   ]);
 
-  const experiences: ModelsExperienceResponse[] =
-    (experiencesRes.data as unknown as { items?: ModelsExperienceResponse[] } | undefined)
-      ?.items ?? [];
-  const educations: ModelsEducationResponse[] =
-    (educationsRes.data as unknown as { items?: ModelsEducationResponse[] } | undefined)
-      ?.items ?? [];
-  const skills: ModelsSkillResponse[] =
-    (skillsRes.data as unknown as { items?: ModelsSkillResponse[] } | undefined)?.items ?? [];
+  const experiences: ModelsExperienceResponse[] = experiencesRes.data?.items ?? [];
+  const educations: ModelsEducationResponse[] = educationsRes.data?.items ?? [];
+  const skills: ModelsSkillResponse[] = skillsRes.data?.items ?? [];
 
   const diagnostics: DiagnosticSummary[] = [];
   if (wvResult) {
