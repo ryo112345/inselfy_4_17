@@ -15,6 +15,32 @@ export type ModelsAddTeamMemberRequest = {
 };
 
 /**
+ * 診断AIレポート（Work Values / Career Interest 共通）
+ */
+export type ModelsAiReportResponse = {
+    /**
+     * レポートID
+     */
+    id: string;
+    /**
+     * セッションID
+     */
+    session_id: string;
+    /**
+     * レポート本文（Markdown）
+     */
+    content: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+    /**
+     * 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
+     */
+    first_view: boolean;
+};
+
+/**
  * 応募済み判定
  */
 export type ModelsAppliedResponse = {
@@ -4387,6 +4413,33 @@ export type CareerInterestCiStartSessionResponses = {
 
 export type CareerInterestCiStartSessionResponse = CareerInterestCiStartSessionResponses[keyof CareerInterestCiStartSessionResponses];
 
+export type CareerInterestCiGetAiReportData = {
+    body?: never;
+    path: {
+        sessionId: string;
+    };
+    query?: never;
+    url: '/api/career-interest/sessions/{sessionId}/ai-report';
+};
+
+export type CareerInterestCiGetAiReportErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CareerInterestCiGetAiReportError = CareerInterestCiGetAiReportErrors[keyof CareerInterestCiGetAiReportErrors];
+
+export type CareerInterestCiGetAiReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAiReportResponse;
+};
+
+export type CareerInterestCiGetAiReportResponse = CareerInterestCiGetAiReportResponses[keyof CareerInterestCiGetAiReportResponses];
+
 export type CareerInterestCiGetResultBySessionData = {
     body?: never;
     path: {
@@ -8383,6 +8436,33 @@ export type WorkValuesWvStartSessionResponses = {
 };
 
 export type WorkValuesWvStartSessionResponse = WorkValuesWvStartSessionResponses[keyof WorkValuesWvStartSessionResponses];
+
+export type WorkValuesWvGetAiReportData = {
+    body?: never;
+    path: {
+        sessionId: string;
+    };
+    query?: never;
+    url: '/api/work-values/sessions/{sessionId}/ai-report';
+};
+
+export type WorkValuesWvGetAiReportErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type WorkValuesWvGetAiReportError = WorkValuesWvGetAiReportErrors[keyof WorkValuesWvGetAiReportErrors];
+
+export type WorkValuesWvGetAiReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAiReportResponse;
+};
+
+export type WorkValuesWvGetAiReportResponse = WorkValuesWvGetAiReportResponses[keyof WorkValuesWvGetAiReportResponses];
 
 export type WorkValuesWvGetResultBySessionData = {
     body?: never;

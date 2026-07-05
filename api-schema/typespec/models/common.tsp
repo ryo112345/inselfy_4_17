@@ -59,3 +59,21 @@ model UploadUrlResponse {
   /** アップロードされたファイルのURL */
   url: string;
 }
+
+/** 診断AIレポート（Work Values / Career Interest 共通） */
+model AiReportResponse {
+  /** レポートID */
+  id: string;
+
+  /** セッションID */
+  session_id: string;
+
+  /** レポート本文（Markdown） */
+  content: string;
+
+  /** 作成日時 */
+  created_at: utcDateTime;
+
+  /** 初回閲覧かどうか（このレスポンスで閲覧済みが記録される） */
+  first_view: boolean;
+}

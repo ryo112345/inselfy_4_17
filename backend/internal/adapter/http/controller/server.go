@@ -37,6 +37,8 @@ type Server struct {
 
 	// User-facing routes served by admin controllers (spec-covered, pool直結のまま).
 	adminIntReport *AdminIntegratedReportController
+	adminReport    *AdminReportController
+	adminCIReport  *AdminCIReportController
 
 	// Job image uploads are standalone echo.HandlerFuncs built with
 	// HandleImageUpload(storage, subdir); wired here for interface conformance.
@@ -76,6 +78,8 @@ func NewServer(
 	jobPosting *JobPostingController,
 	interview *InterviewController,
 	adminIntReport *AdminIntegratedReportController,
+	adminReport *AdminReportController,
+	adminCIReport *AdminCIReportController,
 	uploadTeamMemberPhoto echo.HandlerFunc,
 	uploadGalleryImage echo.HandlerFunc,
 	uploadJobCoverImage echo.HandlerFunc,
@@ -109,6 +113,8 @@ func NewServer(
 		interview:     interview,
 
 		adminIntReport: adminIntReport,
+		adminReport:    adminReport,
+		adminCIReport:  adminCIReport,
 
 		uploadTeamMemberPhoto: uploadTeamMemberPhoto,
 		uploadGalleryImage:    uploadGalleryImage,
@@ -806,4 +812,14 @@ func (s *Server) IntegratedReportGetIntegratedReport(ctx echo.Context, requestID
 
 func (s *Server) IntegratedReportGetLatestIntegratedRequest(ctx echo.Context, userID string) error {
 	return s.adminIntReport.GetLatestRequest(ctx, userID)
+}
+
+// --- AI Reports (user-facing routes served by Admin(CI)ReportController) ---
+
+func (s *Server) WorkValuesWvGetAiReport(ctx echo.Context, sessionID string) error {
+	return s.adminReport.GetReport(ctx, sessionID)
+}
+
+func (s *Server) CareerInterestCiGetAiReport(ctx echo.Context, sessionID string) error {
+	return s.adminCIReport.GetReport(ctx, sessionID)
 }
