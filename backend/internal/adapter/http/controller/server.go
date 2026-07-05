@@ -15,6 +15,7 @@ type Server struct {
 	scoutSettings *ScoutSettingsController
 	similarUsers  *SimilarUsersController
 	teamDiagnose  *TeamDiagnoseController
+	scoutTemplate *ScoutTemplateController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -28,6 +29,7 @@ func NewServer(
 	scoutSettings *ScoutSettingsController,
 	similarUsers *SimilarUsersController,
 	teamDiagnose *TeamDiagnoseController,
+	scoutTemplate *ScoutTemplateController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -37,6 +39,7 @@ func NewServer(
 		scoutSettings: scoutSettings,
 		similarUsers:  similarUsers,
 		teamDiagnose:  teamDiagnose,
+		scoutTemplate: scoutTemplate,
 	}
 }
 
@@ -126,4 +129,26 @@ func (s *Server) TeamDiagnoseGetDiagnoseByToken(ctx echo.Context, token string) 
 
 func (s *Server) TeamDiagnoseUpdateDiagnoseStatus(ctx echo.Context, token string) error {
 	return s.teamDiagnose.UpdateStatus(ctx, token)
+}
+
+// --- ScoutTemplates ---
+
+func (s *Server) ScoutTemplatesCreateScoutTemplate(ctx echo.Context) error {
+	return s.scoutTemplate.Create(ctx)
+}
+
+func (s *Server) ScoutTemplatesListScoutTemplates(ctx echo.Context) error {
+	return s.scoutTemplate.List(ctx)
+}
+
+func (s *Server) ScoutTemplatesGetScoutTemplate(ctx echo.Context, templateID string) error {
+	return s.scoutTemplate.Get(ctx, templateID)
+}
+
+func (s *Server) ScoutTemplatesUpdateScoutTemplate(ctx echo.Context, templateID string) error {
+	return s.scoutTemplate.Update(ctx, templateID)
+}
+
+func (s *Server) ScoutTemplatesDeleteScoutTemplate(ctx echo.Context, templateID string) error {
+	return s.scoutTemplate.Delete(ctx, templateID)
 }
