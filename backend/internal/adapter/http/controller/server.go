@@ -32,6 +32,13 @@ type Server struct {
 	savedCand     *SavedCandidateController
 	talentSearch  *TalentSearchController
 	companyTeam   *CompanyTeamController
+	jobPosting    *JobPostingController
+
+	// Job image uploads are standalone echo.HandlerFuncs built with
+	// HandleImageUpload(storage, subdir); wired here for interface conformance.
+	uploadTeamMemberPhoto echo.HandlerFunc
+	uploadGalleryImage    echo.HandlerFunc
+	uploadJobCoverImage   echo.HandlerFunc
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -62,6 +69,10 @@ func NewServer(
 	savedCand *SavedCandidateController,
 	talentSearch *TalentSearchController,
 	companyTeam *CompanyTeamController,
+	jobPosting *JobPostingController,
+	uploadTeamMemberPhoto echo.HandlerFunc,
+	uploadGalleryImage echo.HandlerFunc,
+	uploadJobCoverImage echo.HandlerFunc,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -88,6 +99,11 @@ func NewServer(
 		savedCand:     savedCand,
 		talentSearch:  talentSearch,
 		companyTeam:   companyTeam,
+		jobPosting:    jobPosting,
+
+		uploadTeamMemberPhoto: uploadTeamMemberPhoto,
+		uploadGalleryImage:    uploadGalleryImage,
+		uploadJobCoverImage:   uploadJobCoverImage,
 	}
 }
 
@@ -675,4 +691,46 @@ func (s *Server) CompanyTeamsSetAceMember(ctx echo.Context, teamID, memberID str
 
 func (s *Server) CompanyTeamsUnsetAceMember(ctx echo.Context, teamID string) error {
 	return s.companyTeam.UnsetAceMember(ctx, teamID)
+}
+
+// --- JobPostings ---
+
+func (s *Server) CompanyJobPostingsUploadTeamMemberPhoto(ctx echo.Context) error {
+	return s.uploadTeamMemberPhoto(ctx)
+}
+
+func (s *Server) CompanyJobPostingsUploadGalleryImage(ctx echo.Context) error {
+	return s.uploadGalleryImage(ctx)
+}
+
+func (s *Server) CompanyJobPostingsUploadJobCoverImage(ctx echo.Context) error {
+	return s.uploadJobCoverImage(ctx)
+}
+
+func (s *Server) CompanyJobPostingsCreateJobPosting(ctx echo.Context) error {
+	return s.jobPosting.Create(ctx)
+}
+
+func (s *Server) CompanyJobPostingsListCompanyJobPostings(ctx echo.Context) error {
+	return s.jobPosting.List(ctx)
+}
+
+func (s *Server) CompanyJobPostingsGetCompanyJobPosting(ctx echo.Context, jobID string) error {
+	return s.jobPosting.Get(ctx, jobID)
+}
+
+func (s *Server) CompanyJobPostingsUpdateJobPosting(ctx echo.Context, jobID string) error {
+	return s.jobPosting.Update(ctx, jobID)
+}
+
+func (s *Server) CompanyJobPostingsDeleteJobPosting(ctx echo.Context, jobID string) error {
+	return s.jobPosting.Delete(ctx, jobID)
+}
+
+func (s *Server) PublicJobPostingsListPublicJobPostings(ctx echo.Context, _ openapi.PublicJobPostingsListPublicJobPostingsParams) error {
+	return s.jobPosting.ListPublic(ctx)
+}
+
+func (s *Server) PublicJobPostingsGetPublicJobPosting(ctx echo.Context, jobID string) error {
+	return s.jobPosting.GetPublic(ctx, jobID)
 }

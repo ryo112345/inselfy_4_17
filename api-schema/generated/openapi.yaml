@@ -27,6 +27,7 @@ tags:
   - name: SavedCandidates
   - name: TalentSearch
   - name: CompanyTeams
+  - name: JobPostings
 paths:
   /api/applications:
     post:
@@ -1029,6 +1030,238 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CompanyRegisterRequest'
+  /api/company/jobs:
+    post:
+      operationId: CompanyJobPostings_createJobPosting
+      summary: Create a job posting
+      description: 求人作成（企業認証）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.JobPostingResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.JobPostingRequest'
+    get:
+      operationId: CompanyJobPostings_listCompanyJobPostings
+      summary: List job postings of the company
+      description: 自社求人一覧（企業認証）。裸の配列を返す（互換のため）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Models.JobPostingResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
+  /api/company/jobs/cover-image:
+    post:
+      operationId: CompanyJobPostings_uploadJobCoverImage
+      summary: Upload a cover image
+      description: カバー画像アップロード（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UploadUrlResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+  /api/company/jobs/gallery-image:
+    post:
+      operationId: CompanyJobPostings_uploadGalleryImage
+      summary: Upload a gallery image
+      description: ギャラリー画像アップロード（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UploadUrlResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+  /api/company/jobs/team-member-photo:
+    post:
+      operationId: CompanyJobPostings_uploadTeamMemberPhoto
+      summary: Upload a team member photo
+      description: チームメンバー写真アップロード（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UploadUrlResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+  /api/company/jobs/{jobId}:
+    get:
+      operationId: CompanyJobPostings_getCompanyJobPosting
+      summary: Get a job posting
+      description: 求人取得（企業認証）
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.JobPostingResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
+    put:
+      operationId: CompanyJobPostings_updateJobPosting
+      summary: Update a job posting
+      description: 求人更新（企業認証）
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.JobPostingResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - JobPostings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.JobPostingRequest'
+    delete:
+      operationId: CompanyJobPostings_deleteJobPosting
+      summary: Delete a job posting
+      description: 求人削除（企業認証）
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
   /api/company/messages/conversations:
     post:
       operationId: CompanyMessaging_startCompanyConversation
@@ -2552,6 +2785,127 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - CompanyTeams
+  /api/jobs:
+    get:
+      operationId: PublicJobPostings_listPublicJobPostings
+      summary: List public job postings
+      description: |-
+        公開求人一覧。`limit > 0` を指定するとページングラッパー（items/total）で返し、
+        search / category / employmentType / remotePolicy / sort / valueFilters / filterMode を解釈する。
+        limit 未指定（0）のときは全件を裸の配列で返す（互換のため）。
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数（>0 でページングモード）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: search
+          in: query
+          required: false
+          description: フリーワード
+          schema:
+            type: string
+          explode: false
+        - name: category
+          in: query
+          required: false
+          description: 職種カテゴリ
+          schema:
+            type: string
+          explode: false
+        - name: employmentType
+          in: query
+          required: false
+          description: 雇用形態
+          schema:
+            type: string
+          explode: false
+        - name: remotePolicy
+          in: query
+          required: false
+          description: リモートポリシー
+          schema:
+            type: string
+          explode: false
+        - name: sort
+          in: query
+          required: false
+          description: ソート（"salary" で給与順）
+          schema:
+            type: string
+          explode: false
+        - name: valueFilters
+          in: query
+          required: false
+          description: Work Values フィルタ（`id:score` のカンマ区切り）
+          schema:
+            type: string
+          explode: false
+        - name: filterMode
+          in: query
+          required: false
+          description: フィルタモード（values / needs）
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.JobPostingListResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Models.JobPostingResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
+  /api/jobs/{jobId}:
+    get:
+      operationId: PublicJobPostings_getPublicJobPosting
+      summary: Get a public job posting
+      description: 公開求人取得
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.JobPostingResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobPostings
   /api/messages/conversations:
     post:
       operationId: CandidateMessaging_startCandidateConversation
@@ -5572,6 +5926,407 @@ components:
           format: date-time
           description: 更新日時
       description: 応募（詳細付き）
+    Models.JobPostingListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.JobPostingResponse'
+          description: 求人
+        total:
+          type: integer
+          description: 総件数
+      description: 求人一覧（ページング付き）
+    Models.JobPostingRequest:
+      type: object
+      required:
+        - title
+        - description
+        - employmentType
+        - location
+        - status
+        - jobCategory
+        - hiringCount
+        - appealPoints
+        - challenges
+        - teamDescription
+        - teamMembers
+        - teamLabel
+        - teamId
+        - skillsGained
+        - tags
+        - requiredQualifications
+        - preferredQualifications
+        - workLocation
+        - workLocationChangeScope
+        - jobDescriptionChangeScope
+        - contractType
+        - probationPeriod
+        - workHours
+        - breakTime
+        - holidays
+        - salaryMin
+        - salaryMax
+        - salaryDetail
+        - insurance
+        - remotePolicy
+        - benefits
+        - smokingPolicy
+        - selectionProcess
+        - coverImageUrl
+        - highlightTitleRole
+        - highlightTitleAppeal
+        - highlightTitleChallenge
+        - highlightTitleGrowth
+        - galleryUrls
+      properties:
+        title:
+          type: string
+          description: 求人タイトル
+        description:
+          type: string
+          description: 仕事内容
+        employmentType:
+          type: string
+          description: 雇用形態
+        location:
+          type: string
+          nullable: true
+          description: 勤務地（表示用）
+        status:
+          type: string
+          description: ステータス（draft / published 等）
+        jobCategory:
+          type: string
+          description: 職種カテゴリ
+        hiringCount:
+          type: string
+          description: 採用人数
+        appealPoints:
+          type: string
+          description: 訴求ポイント
+        challenges:
+          type: string
+          description: 課題・チャレンジ
+        teamDescription:
+          type: string
+          description: チーム紹介
+        teamMembers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.JobPostingTeamMember'
+          description: チームメンバー
+        teamLabel:
+          type: string
+          description: チームラベル
+        teamId:
+          type: string
+          nullable: true
+          description: 紐づけるチームID
+        skillsGained:
+          type: string
+          description: 得られるスキル
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグ
+        requiredQualifications:
+          type: string
+          description: 必須要件
+        preferredQualifications:
+          type: string
+          description: 歓迎要件
+        workLocation:
+          type: string
+          description: 就業場所
+        workLocationChangeScope:
+          type: string
+          description: 就業場所の変更の範囲
+        jobDescriptionChangeScope:
+          type: string
+          description: 業務内容の変更の範囲
+        contractType:
+          type: string
+          description: 契約種別
+        probationPeriod:
+          type: string
+          description: 試用期間
+        workHours:
+          type: string
+          description: 勤務時間
+        breakTime:
+          type: string
+          description: 休憩時間
+        holidays:
+          type: string
+          description: 休日
+        salaryMin:
+          type: integer
+          format: int32
+          nullable: true
+          description: 給与下限（万円）
+        salaryMax:
+          type: integer
+          format: int32
+          nullable: true
+          description: 給与上限（万円）
+        salaryDetail:
+          type: string
+          description: 給与詳細
+        insurance:
+          type: string
+          description: 保険
+        remotePolicy:
+          type: string
+          description: リモートポリシー
+        benefits:
+          type: string
+          description: 福利厚生
+        smokingPolicy:
+          type: string
+          description: 受動喫煙対策
+        selectionProcess:
+          type: string
+          description: 選考プロセス
+        coverImageUrl:
+          type: string
+          description: カバー画像URL
+        highlightTitleRole:
+          type: string
+          description: ハイライトタイトル（役割）
+        highlightTitleAppeal:
+          type: string
+          description: ハイライトタイトル（訴求）
+        highlightTitleChallenge:
+          type: string
+          description: ハイライトタイトル（チャレンジ）
+        highlightTitleGrowth:
+          type: string
+          description: ハイライトタイトル（成長）
+        galleryUrls:
+          type: array
+          items:
+            type: string
+          description: ギャラリー画像URL
+      description: 求人作成・更新リクエスト
+    Models.JobPostingResponse:
+      type: object
+      required:
+        - id
+        - companyId
+        - title
+        - description
+        - employmentType
+        - location
+        - isActive
+        - status
+        - jobCategory
+        - hiringCount
+        - appealPoints
+        - challenges
+        - teamDescription
+        - teamMembers
+        - teamLabel
+        - teamId
+        - skillsGained
+        - tags
+        - requiredQualifications
+        - preferredQualifications
+        - workLocation
+        - workLocationChangeScope
+        - jobDescriptionChangeScope
+        - contractType
+        - probationPeriod
+        - workHours
+        - breakTime
+        - holidays
+        - salaryMin
+        - salaryMax
+        - salaryDetail
+        - insurance
+        - remotePolicy
+        - benefits
+        - smokingPolicy
+        - selectionProcess
+        - coverImageUrl
+        - highlightTitleRole
+        - highlightTitleAppeal
+        - highlightTitleChallenge
+        - highlightTitleGrowth
+        - galleryUrls
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: 求人ID
+        companyId:
+          type: string
+          description: 企業ID
+        companyName:
+          type: string
+          description: 企業名
+        companyLogoUrl:
+          type: string
+          description: 企業ロゴURL
+        title:
+          type: string
+          description: 求人タイトル
+        description:
+          type: string
+          description: 仕事内容
+        employmentType:
+          type: string
+          description: 雇用形態
+        location:
+          type: string
+          nullable: true
+          description: 勤務地（表示用）
+        isActive:
+          type: boolean
+          description: 公開中か
+        status:
+          type: string
+          description: ステータス
+        jobCategory:
+          type: string
+          description: 職種カテゴリ
+        hiringCount:
+          type: string
+          description: 採用人数
+        appealPoints:
+          type: string
+          description: 訴求ポイント
+        challenges:
+          type: string
+          description: 課題・チャレンジ
+        teamDescription:
+          type: string
+          description: チーム紹介
+        teamMembers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.JobPostingTeamMember'
+          description: チームメンバー
+        teamLabel:
+          type: string
+          description: チームラベル
+        teamId:
+          type: string
+          nullable: true
+          description: 紐づくチームID
+        skillsGained:
+          type: string
+          description: 得られるスキル
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグ
+        requiredQualifications:
+          type: string
+          description: 必須要件
+        preferredQualifications:
+          type: string
+          description: 歓迎要件
+        workLocation:
+          type: string
+          description: 就業場所
+        workLocationChangeScope:
+          type: string
+          description: 就業場所の変更の範囲
+        jobDescriptionChangeScope:
+          type: string
+          description: 業務内容の変更の範囲
+        contractType:
+          type: string
+          description: 契約種別
+        probationPeriod:
+          type: string
+          description: 試用期間
+        workHours:
+          type: string
+          description: 勤務時間
+        breakTime:
+          type: string
+          description: 休憩時間
+        holidays:
+          type: string
+          description: 休日
+        salaryMin:
+          type: integer
+          format: int32
+          nullable: true
+          description: 給与下限（万円）
+        salaryMax:
+          type: integer
+          format: int32
+          nullable: true
+          description: 給与上限（万円）
+        salaryDetail:
+          type: string
+          description: 給与詳細
+        insurance:
+          type: string
+          description: 保険
+        remotePolicy:
+          type: string
+          description: リモートポリシー
+        benefits:
+          type: string
+          description: 福利厚生
+        smokingPolicy:
+          type: string
+          description: 受動喫煙対策
+        selectionProcess:
+          type: string
+          description: 選考プロセス
+        coverImageUrl:
+          type: string
+          description: カバー画像URL
+        highlightTitleRole:
+          type: string
+          description: ハイライトタイトル（役割）
+        highlightTitleAppeal:
+          type: string
+          description: ハイライトタイトル（訴求）
+        highlightTitleChallenge:
+          type: string
+          description: ハイライトタイトル（チャレンジ）
+        highlightTitleGrowth:
+          type: string
+          description: ハイライトタイトル（成長）
+        galleryUrls:
+          type: array
+          items:
+            type: string
+          description: ギャラリー画像URL
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+      description: 求人
+    Models.JobPostingTeamMember:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: 名前
+        photoUrl:
+          type: string
+          description: 写真URL
+      description: 求人のチームメンバー
     Models.LikeToggleResponse:
       type: object
       required:

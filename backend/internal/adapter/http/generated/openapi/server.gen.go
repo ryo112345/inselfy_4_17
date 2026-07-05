@@ -941,6 +941,285 @@ type ModelsJobApplicationResponse struct {
 	WvSimilarity *float64 `json:"wvSimilarity,omitempty"`
 }
 
+// ModelsJobPostingListResponse 求人一覧（ページング付き）
+type ModelsJobPostingListResponse struct {
+	// Items 求人
+	Items []ModelsJobPostingResponse `json:"items"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsJobPostingRequest 求人作成・更新リクエスト
+type ModelsJobPostingRequest struct {
+	// AppealPoints 訴求ポイント
+	AppealPoints string `json:"appealPoints"`
+
+	// Benefits 福利厚生
+	Benefits string `json:"benefits"`
+
+	// BreakTime 休憩時間
+	BreakTime string `json:"breakTime"`
+
+	// Challenges 課題・チャレンジ
+	Challenges string `json:"challenges"`
+
+	// ContractType 契約種別
+	ContractType string `json:"contractType"`
+
+	// CoverImageUrl カバー画像URL
+	CoverImageUrl string `json:"coverImageUrl"`
+
+	// Description 仕事内容
+	Description string `json:"description"`
+
+	// EmploymentType 雇用形態
+	EmploymentType string `json:"employmentType"`
+
+	// GalleryUrls ギャラリー画像URL
+	GalleryUrls []string `json:"galleryUrls"`
+
+	// HighlightTitleAppeal ハイライトタイトル（訴求）
+	HighlightTitleAppeal string `json:"highlightTitleAppeal"`
+
+	// HighlightTitleChallenge ハイライトタイトル（チャレンジ）
+	HighlightTitleChallenge string `json:"highlightTitleChallenge"`
+
+	// HighlightTitleGrowth ハイライトタイトル（成長）
+	HighlightTitleGrowth string `json:"highlightTitleGrowth"`
+
+	// HighlightTitleRole ハイライトタイトル（役割）
+	HighlightTitleRole string `json:"highlightTitleRole"`
+
+	// HiringCount 採用人数
+	HiringCount string `json:"hiringCount"`
+
+	// Holidays 休日
+	Holidays string `json:"holidays"`
+
+	// Insurance 保険
+	Insurance string `json:"insurance"`
+
+	// JobCategory 職種カテゴリ
+	JobCategory string `json:"jobCategory"`
+
+	// JobDescriptionChangeScope 業務内容の変更の範囲
+	JobDescriptionChangeScope string `json:"jobDescriptionChangeScope"`
+
+	// Location 勤務地（表示用）
+	Location *string `json:"location"`
+
+	// PreferredQualifications 歓迎要件
+	PreferredQualifications string `json:"preferredQualifications"`
+
+	// ProbationPeriod 試用期間
+	ProbationPeriod string `json:"probationPeriod"`
+
+	// RemotePolicy リモートポリシー
+	RemotePolicy string `json:"remotePolicy"`
+
+	// RequiredQualifications 必須要件
+	RequiredQualifications string `json:"requiredQualifications"`
+
+	// SalaryDetail 給与詳細
+	SalaryDetail string `json:"salaryDetail"`
+
+	// SalaryMax 給与上限（万円）
+	SalaryMax *int32 `json:"salaryMax"`
+
+	// SalaryMin 給与下限（万円）
+	SalaryMin *int32 `json:"salaryMin"`
+
+	// SelectionProcess 選考プロセス
+	SelectionProcess string `json:"selectionProcess"`
+
+	// SkillsGained 得られるスキル
+	SkillsGained string `json:"skillsGained"`
+
+	// SmokingPolicy 受動喫煙対策
+	SmokingPolicy string `json:"smokingPolicy"`
+
+	// Status ステータス（draft / published 等）
+	Status string `json:"status"`
+
+	// Tags タグ
+	Tags []string `json:"tags"`
+
+	// TeamDescription チーム紹介
+	TeamDescription string `json:"teamDescription"`
+
+	// TeamId 紐づけるチームID
+	TeamId *string `json:"teamId"`
+
+	// TeamLabel チームラベル
+	TeamLabel string `json:"teamLabel"`
+
+	// TeamMembers チームメンバー
+	TeamMembers []ModelsJobPostingTeamMember `json:"teamMembers"`
+
+	// Title 求人タイトル
+	Title string `json:"title"`
+
+	// WorkHours 勤務時間
+	WorkHours string `json:"workHours"`
+
+	// WorkLocation 就業場所
+	WorkLocation string `json:"workLocation"`
+
+	// WorkLocationChangeScope 就業場所の変更の範囲
+	WorkLocationChangeScope string `json:"workLocationChangeScope"`
+}
+
+// ModelsJobPostingResponse 求人
+type ModelsJobPostingResponse struct {
+	// AppealPoints 訴求ポイント
+	AppealPoints string `json:"appealPoints"`
+
+	// Benefits 福利厚生
+	Benefits string `json:"benefits"`
+
+	// BreakTime 休憩時間
+	BreakTime string `json:"breakTime"`
+
+	// Challenges 課題・チャレンジ
+	Challenges string `json:"challenges"`
+
+	// CompanyId 企業ID
+	CompanyId string `json:"companyId"`
+
+	// CompanyLogoUrl 企業ロゴURL
+	CompanyLogoUrl *string `json:"companyLogoUrl,omitempty"`
+
+	// CompanyName 企業名
+	CompanyName *string `json:"companyName,omitempty"`
+
+	// ContractType 契約種別
+	ContractType string `json:"contractType"`
+
+	// CoverImageUrl カバー画像URL
+	CoverImageUrl string `json:"coverImageUrl"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Description 仕事内容
+	Description string `json:"description"`
+
+	// EmploymentType 雇用形態
+	EmploymentType string `json:"employmentType"`
+
+	// GalleryUrls ギャラリー画像URL
+	GalleryUrls []string `json:"galleryUrls"`
+
+	// HighlightTitleAppeal ハイライトタイトル（訴求）
+	HighlightTitleAppeal string `json:"highlightTitleAppeal"`
+
+	// HighlightTitleChallenge ハイライトタイトル（チャレンジ）
+	HighlightTitleChallenge string `json:"highlightTitleChallenge"`
+
+	// HighlightTitleGrowth ハイライトタイトル（成長）
+	HighlightTitleGrowth string `json:"highlightTitleGrowth"`
+
+	// HighlightTitleRole ハイライトタイトル（役割）
+	HighlightTitleRole string `json:"highlightTitleRole"`
+
+	// HiringCount 採用人数
+	HiringCount string `json:"hiringCount"`
+
+	// Holidays 休日
+	Holidays string `json:"holidays"`
+
+	// Id 求人ID
+	Id string `json:"id"`
+
+	// Insurance 保険
+	Insurance string `json:"insurance"`
+
+	// IsActive 公開中か
+	IsActive bool `json:"isActive"`
+
+	// JobCategory 職種カテゴリ
+	JobCategory string `json:"jobCategory"`
+
+	// JobDescriptionChangeScope 業務内容の変更の範囲
+	JobDescriptionChangeScope string `json:"jobDescriptionChangeScope"`
+
+	// Location 勤務地（表示用）
+	Location *string `json:"location"`
+
+	// PreferredQualifications 歓迎要件
+	PreferredQualifications string `json:"preferredQualifications"`
+
+	// ProbationPeriod 試用期間
+	ProbationPeriod string `json:"probationPeriod"`
+
+	// RemotePolicy リモートポリシー
+	RemotePolicy string `json:"remotePolicy"`
+
+	// RequiredQualifications 必須要件
+	RequiredQualifications string `json:"requiredQualifications"`
+
+	// SalaryDetail 給与詳細
+	SalaryDetail string `json:"salaryDetail"`
+
+	// SalaryMax 給与上限（万円）
+	SalaryMax *int32 `json:"salaryMax"`
+
+	// SalaryMin 給与下限（万円）
+	SalaryMin *int32 `json:"salaryMin"`
+
+	// SelectionProcess 選考プロセス
+	SelectionProcess string `json:"selectionProcess"`
+
+	// SkillsGained 得られるスキル
+	SkillsGained string `json:"skillsGained"`
+
+	// SmokingPolicy 受動喫煙対策
+	SmokingPolicy string `json:"smokingPolicy"`
+
+	// Status ステータス
+	Status string `json:"status"`
+
+	// Tags タグ
+	Tags []string `json:"tags"`
+
+	// TeamDescription チーム紹介
+	TeamDescription string `json:"teamDescription"`
+
+	// TeamId 紐づくチームID
+	TeamId *string `json:"teamId"`
+
+	// TeamLabel チームラベル
+	TeamLabel string `json:"teamLabel"`
+
+	// TeamMembers チームメンバー
+	TeamMembers []ModelsJobPostingTeamMember `json:"teamMembers"`
+
+	// Title 求人タイトル
+	Title string `json:"title"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// WorkHours 勤務時間
+	WorkHours string `json:"workHours"`
+
+	// WorkLocation 就業場所
+	WorkLocation string `json:"workLocation"`
+
+	// WorkLocationChangeScope 就業場所の変更の範囲
+	WorkLocationChangeScope string `json:"workLocationChangeScope"`
+}
+
+// ModelsJobPostingTeamMember 求人のチームメンバー
+type ModelsJobPostingTeamMember struct {
+	// Name 名前
+	Name string `json:"name"`
+
+	// PhotoUrl 写真URL
+	PhotoUrl *string `json:"photoUrl,omitempty"`
+}
+
 // ModelsLikeToggleResponse いいねトグル結果
 type ModelsLikeToggleResponse struct {
 	// Count いいね数
@@ -2215,6 +2494,21 @@ type CompanyApplicationsListCompanyApplicationsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// CompanyJobPostingsUploadJobCoverImageMultipartBody defines parameters for CompanyJobPostingsUploadJobCoverImage.
+type CompanyJobPostingsUploadJobCoverImageMultipartBody struct {
+	File openapi_types.File `json:"file"`
+}
+
+// CompanyJobPostingsUploadGalleryImageMultipartBody defines parameters for CompanyJobPostingsUploadGalleryImage.
+type CompanyJobPostingsUploadGalleryImageMultipartBody struct {
+	File openapi_types.File `json:"file"`
+}
+
+// CompanyJobPostingsUploadTeamMemberPhotoMultipartBody defines parameters for CompanyJobPostingsUploadTeamMemberPhoto.
+type CompanyJobPostingsUploadTeamMemberPhotoMultipartBody struct {
+	File openapi_types.File `json:"file"`
+}
+
 // CompanyMessagingListCompanyConversationsParams defines parameters for CompanyMessagingListCompanyConversations.
 type CompanyMessagingListCompanyConversationsParams struct {
 	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
@@ -2350,6 +2644,36 @@ type TalentSearchIntegratedDiagnosticSearchTalentsParams struct {
 	Offset           *int32  `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// PublicJobPostingsListPublicJobPostingsParams defines parameters for PublicJobPostingsListPublicJobPostings.
+type PublicJobPostingsListPublicJobPostingsParams struct {
+	// Limit 取得件数（>0 でページングモード）
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+
+	// Search フリーワード
+	Search *string `form:"search,omitempty" json:"search,omitempty"`
+
+	// Category 職種カテゴリ
+	Category *string `form:"category,omitempty" json:"category,omitempty"`
+
+	// EmploymentType 雇用形態
+	EmploymentType *string `form:"employmentType,omitempty" json:"employmentType,omitempty"`
+
+	// RemotePolicy リモートポリシー
+	RemotePolicy *string `form:"remotePolicy,omitempty" json:"remotePolicy,omitempty"`
+
+	// Sort ソート（"salary" で給与順）
+	Sort *string `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// ValueFilters Work Values フィルタ（`id:score` のカンマ区切り）
+	ValueFilters *string `form:"valueFilters,omitempty" json:"valueFilters,omitempty"`
+
+	// FilterMode フィルタモード（values / needs）
+	FilterMode *string `form:"filterMode,omitempty" json:"filterMode,omitempty"`
+}
+
 // CandidateMessagingListCandidateConversationsParams defines parameters for CandidateMessagingListCandidateConversations.
 type CandidateMessagingListCandidateConversationsParams struct {
 	// Limit 取得件数（1-100）
@@ -2478,6 +2802,21 @@ type CompanyAuthCompanyLoginJSONRequestBody = ModelsCompanyLoginRequest
 
 // CompanyAuthCompanyRegisterJSONRequestBody defines body for CompanyAuthCompanyRegister for application/json ContentType.
 type CompanyAuthCompanyRegisterJSONRequestBody = ModelsCompanyRegisterRequest
+
+// CompanyJobPostingsCreateJobPostingJSONRequestBody defines body for CompanyJobPostingsCreateJobPosting for application/json ContentType.
+type CompanyJobPostingsCreateJobPostingJSONRequestBody = ModelsJobPostingRequest
+
+// CompanyJobPostingsUploadJobCoverImageMultipartRequestBody defines body for CompanyJobPostingsUploadJobCoverImage for multipart/form-data ContentType.
+type CompanyJobPostingsUploadJobCoverImageMultipartRequestBody CompanyJobPostingsUploadJobCoverImageMultipartBody
+
+// CompanyJobPostingsUploadGalleryImageMultipartRequestBody defines body for CompanyJobPostingsUploadGalleryImage for multipart/form-data ContentType.
+type CompanyJobPostingsUploadGalleryImageMultipartRequestBody CompanyJobPostingsUploadGalleryImageMultipartBody
+
+// CompanyJobPostingsUploadTeamMemberPhotoMultipartRequestBody defines body for CompanyJobPostingsUploadTeamMemberPhoto for multipart/form-data ContentType.
+type CompanyJobPostingsUploadTeamMemberPhotoMultipartRequestBody CompanyJobPostingsUploadTeamMemberPhotoMultipartBody
+
+// CompanyJobPostingsUpdateJobPostingJSONRequestBody defines body for CompanyJobPostingsUpdateJobPosting for application/json ContentType.
+type CompanyJobPostingsUpdateJobPostingJSONRequestBody = ModelsJobPostingRequest
 
 // CompanyMessagingStartCompanyConversationJSONRequestBody defines body for CompanyMessagingStartCompanyConversation for application/json ContentType.
 type CompanyMessagingStartCompanyConversationJSONRequestBody = ModelsStartConversationRequest
@@ -2679,6 +3018,30 @@ type ServerInterface interface {
 	// Register a company account
 	// (POST /api/company/auth/register)
 	CompanyAuthCompanyRegister(ctx echo.Context) error
+	// List job postings of the company
+	// (GET /api/company/jobs)
+	CompanyJobPostingsListCompanyJobPostings(ctx echo.Context) error
+	// Create a job posting
+	// (POST /api/company/jobs)
+	CompanyJobPostingsCreateJobPosting(ctx echo.Context) error
+	// Upload a cover image
+	// (POST /api/company/jobs/cover-image)
+	CompanyJobPostingsUploadJobCoverImage(ctx echo.Context) error
+	// Upload a gallery image
+	// (POST /api/company/jobs/gallery-image)
+	CompanyJobPostingsUploadGalleryImage(ctx echo.Context) error
+	// Upload a team member photo
+	// (POST /api/company/jobs/team-member-photo)
+	CompanyJobPostingsUploadTeamMemberPhoto(ctx echo.Context) error
+	// Delete a job posting
+	// (DELETE /api/company/jobs/{jobId})
+	CompanyJobPostingsDeleteJobPosting(ctx echo.Context, jobId string) error
+	// Get a job posting
+	// (GET /api/company/jobs/{jobId})
+	CompanyJobPostingsGetCompanyJobPosting(ctx echo.Context, jobId string) error
+	// Update a job posting
+	// (PUT /api/company/jobs/{jobId})
+	CompanyJobPostingsUpdateJobPosting(ctx echo.Context, jobId string) error
 	// List conversations for the company
 	// (GET /api/company/messages/conversations)
 	CompanyMessagingListCompanyConversations(ctx echo.Context, params CompanyMessagingListCompanyConversationsParams) error
@@ -2820,6 +3183,12 @@ type ServerInterface interface {
 	// Get diagnostic scores of team members
 	// (GET /api/company/teams/{teamId}/scores)
 	CompanyTeamsGetTeamScores(ctx echo.Context, teamId string) error
+	// List public job postings
+	// (GET /api/jobs)
+	PublicJobPostingsListPublicJobPostings(ctx echo.Context, params PublicJobPostingsListPublicJobPostingsParams) error
+	// Get a public job posting
+	// (GET /api/jobs/{jobId})
+	PublicJobPostingsGetPublicJobPosting(ctx echo.Context, jobId string) error
 	// List conversations for the candidate
 	// (GET /api/messages/conversations)
 	CandidateMessagingListCandidateConversations(ctx echo.Context, params CandidateMessagingListCandidateConversationsParams) error
@@ -3511,6 +3880,99 @@ func (w *ServerInterfaceWrapper) CompanyAuthCompanyRegister(ctx echo.Context) er
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyAuthCompanyRegister(ctx)
+	return err
+}
+
+// CompanyJobPostingsListCompanyJobPostings converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyJobPostingsListCompanyJobPostings(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyJobPostingsListCompanyJobPostings(ctx)
+	return err
+}
+
+// CompanyJobPostingsCreateJobPosting converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyJobPostingsCreateJobPosting(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyJobPostingsCreateJobPosting(ctx)
+	return err
+}
+
+// CompanyJobPostingsUploadJobCoverImage converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadJobCoverImage(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyJobPostingsUploadJobCoverImage(ctx)
+	return err
+}
+
+// CompanyJobPostingsUploadGalleryImage converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadGalleryImage(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyJobPostingsUploadGalleryImage(ctx)
+	return err
+}
+
+// CompanyJobPostingsUploadTeamMemberPhoto converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadTeamMemberPhoto(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyJobPostingsUploadTeamMemberPhoto(ctx)
+	return err
+}
+
+// CompanyJobPostingsDeleteJobPosting converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyJobPostingsDeleteJobPosting(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "jobId" -------------
+	var jobId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "jobId", ctx.Param("jobId"), &jobId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyJobPostingsDeleteJobPosting(ctx, jobId)
+	return err
+}
+
+// CompanyJobPostingsGetCompanyJobPosting converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyJobPostingsGetCompanyJobPosting(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "jobId" -------------
+	var jobId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "jobId", ctx.Param("jobId"), &jobId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyJobPostingsGetCompanyJobPosting(ctx, jobId)
+	return err
+}
+
+// CompanyJobPostingsUpdateJobPosting converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyJobPostingsUpdateJobPosting(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "jobId" -------------
+	var jobId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "jobId", ctx.Param("jobId"), &jobId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyJobPostingsUpdateJobPosting(ctx, jobId)
 	return err
 }
 
@@ -4490,6 +4952,96 @@ func (w *ServerInterfaceWrapper) CompanyTeamsGetTeamScores(ctx echo.Context) err
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsGetTeamScores(ctx, teamId)
+	return err
+}
+
+// PublicJobPostingsListPublicJobPostings converts echo context to params.
+func (w *ServerInterfaceWrapper) PublicJobPostingsListPublicJobPostings(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PublicJobPostingsListPublicJobPostingsParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "search", ctx.QueryParams(), &params.Search, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter search: %s", err))
+	}
+
+	// ------------- Optional query parameter "category" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "category", ctx.QueryParams(), &params.Category, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter category: %s", err))
+	}
+
+	// ------------- Optional query parameter "employmentType" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "employmentType", ctx.QueryParams(), &params.EmploymentType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter employmentType: %s", err))
+	}
+
+	// ------------- Optional query parameter "remotePolicy" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "remotePolicy", ctx.QueryParams(), &params.RemotePolicy, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter remotePolicy: %s", err))
+	}
+
+	// ------------- Optional query parameter "sort" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "sort", ctx.QueryParams(), &params.Sort, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sort: %s", err))
+	}
+
+	// ------------- Optional query parameter "valueFilters" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "valueFilters", ctx.QueryParams(), &params.ValueFilters, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter valueFilters: %s", err))
+	}
+
+	// ------------- Optional query parameter "filterMode" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "filterMode", ctx.QueryParams(), &params.FilterMode, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter filterMode: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PublicJobPostingsListPublicJobPostings(ctx, params)
+	return err
+}
+
+// PublicJobPostingsGetPublicJobPosting converts echo context to params.
+func (w *ServerInterfaceWrapper) PublicJobPostingsGetPublicJobPosting(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "jobId" -------------
+	var jobId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "jobId", ctx.Param("jobId"), &jobId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PublicJobPostingsGetPublicJobPosting(ctx, jobId)
 	return err
 }
 
@@ -5579,6 +6131,14 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/company/auth/me", wrapper.CompanyAuthCompanyGetMe)
 	router.POST(baseURL+"/api/company/auth/refresh", wrapper.CompanyAuthCompanyRefreshToken)
 	router.POST(baseURL+"/api/company/auth/register", wrapper.CompanyAuthCompanyRegister)
+	router.GET(baseURL+"/api/company/jobs", wrapper.CompanyJobPostingsListCompanyJobPostings)
+	router.POST(baseURL+"/api/company/jobs", wrapper.CompanyJobPostingsCreateJobPosting)
+	router.POST(baseURL+"/api/company/jobs/cover-image", wrapper.CompanyJobPostingsUploadJobCoverImage)
+	router.POST(baseURL+"/api/company/jobs/gallery-image", wrapper.CompanyJobPostingsUploadGalleryImage)
+	router.POST(baseURL+"/api/company/jobs/team-member-photo", wrapper.CompanyJobPostingsUploadTeamMemberPhoto)
+	router.DELETE(baseURL+"/api/company/jobs/:jobId", wrapper.CompanyJobPostingsDeleteJobPosting)
+	router.GET(baseURL+"/api/company/jobs/:jobId", wrapper.CompanyJobPostingsGetCompanyJobPosting)
+	router.PUT(baseURL+"/api/company/jobs/:jobId", wrapper.CompanyJobPostingsUpdateJobPosting)
 	router.GET(baseURL+"/api/company/messages/conversations", wrapper.CompanyMessagingListCompanyConversations)
 	router.POST(baseURL+"/api/company/messages/conversations", wrapper.CompanyMessagingStartCompanyConversation)
 	router.GET(baseURL+"/api/company/messages/conversations/:conversationId", wrapper.CompanyMessagingGetCompanyConversation)
@@ -5626,6 +6186,8 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/company/teams/:teamId/members", wrapper.CompanyTeamsAddTeamMember)
 	router.DELETE(baseURL+"/api/company/teams/:teamId/members/:memberId", wrapper.CompanyTeamsRemoveTeamMember)
 	router.GET(baseURL+"/api/company/teams/:teamId/scores", wrapper.CompanyTeamsGetTeamScores)
+	router.GET(baseURL+"/api/jobs", wrapper.PublicJobPostingsListPublicJobPostings)
+	router.GET(baseURL+"/api/jobs/:jobId", wrapper.PublicJobPostingsGetPublicJobPosting)
 	router.GET(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingListCandidateConversations)
 	router.POST(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingStartCandidateConversation)
 	router.GET(baseURL+"/api/messages/conversations/:conversationId", wrapper.CandidateMessagingGetCandidateConversation)

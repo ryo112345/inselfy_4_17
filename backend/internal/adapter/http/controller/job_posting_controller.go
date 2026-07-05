@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobposting"
@@ -28,53 +29,11 @@ func NewJobPostingController(
 	return &JobPostingController{input: input}
 }
 
-type jobPostingRequest struct {
-	Title                     string                  `json:"title"`
-	Description               string                  `json:"description"`
-	EmploymentType            string                  `json:"employmentType"`
-	Location                  *string                 `json:"location"`
-	Status                    string                  `json:"status"`
-	JobCategory               string                  `json:"jobCategory"`
-	HiringCount               string                  `json:"hiringCount"`
-	AppealPoints              string                  `json:"appealPoints"`
-	Challenges                string                  `json:"challenges"`
-	TeamDescription           string                  `json:"teamDescription"`
-	TeamMembers               []jobposting.TeamMember `json:"teamMembers"`
-	TeamLabel                 string                  `json:"teamLabel"`
-	TeamID                    *string                 `json:"teamId"`
-	SkillsGained              string                  `json:"skillsGained"`
-	Tags                      []string                `json:"tags"`
-	RequiredQualifications    string                  `json:"requiredQualifications"`
-	PreferredQualifications   string                  `json:"preferredQualifications"`
-	WorkLocation              string                  `json:"workLocation"`
-	WorkLocationChangeScope   string                  `json:"workLocationChangeScope"`
-	JobDescriptionChangeScope string                  `json:"jobDescriptionChangeScope"`
-	ContractType              string                  `json:"contractType"`
-	ProbationPeriod           string                  `json:"probationPeriod"`
-	WorkHours                 string                  `json:"workHours"`
-	BreakTime                 string                  `json:"breakTime"`
-	Holidays                  string                  `json:"holidays"`
-	SalaryMin                 *int32                  `json:"salaryMin"`
-	SalaryMax                 *int32                  `json:"salaryMax"`
-	SalaryDetail              string                  `json:"salaryDetail"`
-	Insurance                 string                  `json:"insurance"`
-	RemotePolicy              string                  `json:"remotePolicy"`
-	Benefits                  string                  `json:"benefits"`
-	SmokingPolicy             string                  `json:"smokingPolicy"`
-	SelectionProcess          string                  `json:"selectionProcess"`
-	CoverImageURL             string                  `json:"coverImageUrl"`
-	HighlightTitleRole        string                  `json:"highlightTitleRole"`
-	HighlightTitleAppeal      string                  `json:"highlightTitleAppeal"`
-	HighlightTitleChallenge   string                  `json:"highlightTitleChallenge"`
-	HighlightTitleGrowth      string                  `json:"highlightTitleGrowth"`
-	GalleryURLs               []string                `json:"galleryUrls"`
-}
-
 // Create handles POST /api/company/jobs.
 func (c *JobPostingController) Create(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body jobPostingRequest
+	var body openapi.ModelsJobPostingRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
@@ -182,7 +141,7 @@ func (c *JobPostingController) GetPublic(ctx echo.Context, jobID string) error {
 func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body jobPostingRequest
+	var body openapi.ModelsJobPostingRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
@@ -235,6 +194,6 @@ func HandleImageUpload(storage port.FileStorage, subdir string) echo.HandlerFunc
 			return internalError(ctx, "failed to save file")
 		}
 
-		return ctx.JSON(http.StatusOK, map[string]string{"url": url})
+		return ctx.JSON(http.StatusOK, openapi.ModelsUploadUrlResponse{Url: url})
 	}
 }

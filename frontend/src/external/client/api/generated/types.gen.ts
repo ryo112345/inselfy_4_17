@@ -1228,6 +1228,386 @@ export type ModelsJobApplicationResponse = {
 };
 
 /**
+ * 求人一覧（ページング付き）
+ */
+export type ModelsJobPostingListResponse = {
+    /**
+     * 求人
+     */
+    items: Array<ModelsJobPostingResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 求人作成・更新リクエスト
+ */
+export type ModelsJobPostingRequest = {
+    /**
+     * 求人タイトル
+     */
+    title: string;
+    /**
+     * 仕事内容
+     */
+    description: string;
+    /**
+     * 雇用形態
+     */
+    employmentType: string;
+    /**
+     * 勤務地（表示用）
+     */
+    location: string | null;
+    /**
+     * ステータス（draft / published 等）
+     */
+    status: string;
+    /**
+     * 職種カテゴリ
+     */
+    jobCategory: string;
+    /**
+     * 採用人数
+     */
+    hiringCount: string;
+    /**
+     * 訴求ポイント
+     */
+    appealPoints: string;
+    /**
+     * 課題・チャレンジ
+     */
+    challenges: string;
+    /**
+     * チーム紹介
+     */
+    teamDescription: string;
+    /**
+     * チームメンバー
+     */
+    teamMembers: Array<ModelsJobPostingTeamMember>;
+    /**
+     * チームラベル
+     */
+    teamLabel: string;
+    /**
+     * 紐づけるチームID
+     */
+    teamId: string | null;
+    /**
+     * 得られるスキル
+     */
+    skillsGained: string;
+    /**
+     * タグ
+     */
+    tags: Array<string>;
+    /**
+     * 必須要件
+     */
+    requiredQualifications: string;
+    /**
+     * 歓迎要件
+     */
+    preferredQualifications: string;
+    /**
+     * 就業場所
+     */
+    workLocation: string;
+    /**
+     * 就業場所の変更の範囲
+     */
+    workLocationChangeScope: string;
+    /**
+     * 業務内容の変更の範囲
+     */
+    jobDescriptionChangeScope: string;
+    /**
+     * 契約種別
+     */
+    contractType: string;
+    /**
+     * 試用期間
+     */
+    probationPeriod: string;
+    /**
+     * 勤務時間
+     */
+    workHours: string;
+    /**
+     * 休憩時間
+     */
+    breakTime: string;
+    /**
+     * 休日
+     */
+    holidays: string;
+    /**
+     * 給与下限（万円）
+     */
+    salaryMin: number | null;
+    /**
+     * 給与上限（万円）
+     */
+    salaryMax: number | null;
+    /**
+     * 給与詳細
+     */
+    salaryDetail: string;
+    /**
+     * 保険
+     */
+    insurance: string;
+    /**
+     * リモートポリシー
+     */
+    remotePolicy: string;
+    /**
+     * 福利厚生
+     */
+    benefits: string;
+    /**
+     * 受動喫煙対策
+     */
+    smokingPolicy: string;
+    /**
+     * 選考プロセス
+     */
+    selectionProcess: string;
+    /**
+     * カバー画像URL
+     */
+    coverImageUrl: string;
+    /**
+     * ハイライトタイトル（役割）
+     */
+    highlightTitleRole: string;
+    /**
+     * ハイライトタイトル（訴求）
+     */
+    highlightTitleAppeal: string;
+    /**
+     * ハイライトタイトル（チャレンジ）
+     */
+    highlightTitleChallenge: string;
+    /**
+     * ハイライトタイトル（成長）
+     */
+    highlightTitleGrowth: string;
+    /**
+     * ギャラリー画像URL
+     */
+    galleryUrls: Array<string>;
+};
+
+/**
+ * 求人
+ */
+export type ModelsJobPostingResponse = {
+    /**
+     * 求人ID
+     */
+    id: string;
+    /**
+     * 企業ID
+     */
+    companyId: string;
+    /**
+     * 企業名
+     */
+    companyName?: string;
+    /**
+     * 企業ロゴURL
+     */
+    companyLogoUrl?: string;
+    /**
+     * 求人タイトル
+     */
+    title: string;
+    /**
+     * 仕事内容
+     */
+    description: string;
+    /**
+     * 雇用形態
+     */
+    employmentType: string;
+    /**
+     * 勤務地（表示用）
+     */
+    location: string | null;
+    /**
+     * 公開中か
+     */
+    isActive: boolean;
+    /**
+     * ステータス
+     */
+    status: string;
+    /**
+     * 職種カテゴリ
+     */
+    jobCategory: string;
+    /**
+     * 採用人数
+     */
+    hiringCount: string;
+    /**
+     * 訴求ポイント
+     */
+    appealPoints: string;
+    /**
+     * 課題・チャレンジ
+     */
+    challenges: string;
+    /**
+     * チーム紹介
+     */
+    teamDescription: string;
+    /**
+     * チームメンバー
+     */
+    teamMembers: Array<ModelsJobPostingTeamMember>;
+    /**
+     * チームラベル
+     */
+    teamLabel: string;
+    /**
+     * 紐づくチームID
+     */
+    teamId: string | null;
+    /**
+     * 得られるスキル
+     */
+    skillsGained: string;
+    /**
+     * タグ
+     */
+    tags: Array<string>;
+    /**
+     * 必須要件
+     */
+    requiredQualifications: string;
+    /**
+     * 歓迎要件
+     */
+    preferredQualifications: string;
+    /**
+     * 就業場所
+     */
+    workLocation: string;
+    /**
+     * 就業場所の変更の範囲
+     */
+    workLocationChangeScope: string;
+    /**
+     * 業務内容の変更の範囲
+     */
+    jobDescriptionChangeScope: string;
+    /**
+     * 契約種別
+     */
+    contractType: string;
+    /**
+     * 試用期間
+     */
+    probationPeriod: string;
+    /**
+     * 勤務時間
+     */
+    workHours: string;
+    /**
+     * 休憩時間
+     */
+    breakTime: string;
+    /**
+     * 休日
+     */
+    holidays: string;
+    /**
+     * 給与下限（万円）
+     */
+    salaryMin: number | null;
+    /**
+     * 給与上限（万円）
+     */
+    salaryMax: number | null;
+    /**
+     * 給与詳細
+     */
+    salaryDetail: string;
+    /**
+     * 保険
+     */
+    insurance: string;
+    /**
+     * リモートポリシー
+     */
+    remotePolicy: string;
+    /**
+     * 福利厚生
+     */
+    benefits: string;
+    /**
+     * 受動喫煙対策
+     */
+    smokingPolicy: string;
+    /**
+     * 選考プロセス
+     */
+    selectionProcess: string;
+    /**
+     * カバー画像URL
+     */
+    coverImageUrl: string;
+    /**
+     * ハイライトタイトル（役割）
+     */
+    highlightTitleRole: string;
+    /**
+     * ハイライトタイトル（訴求）
+     */
+    highlightTitleAppeal: string;
+    /**
+     * ハイライトタイトル（チャレンジ）
+     */
+    highlightTitleChallenge: string;
+    /**
+     * ハイライトタイトル（成長）
+     */
+    highlightTitleGrowth: string;
+    /**
+     * ギャラリー画像URL
+     */
+    galleryUrls: Array<string>;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+    /**
+     * 更新日時
+     */
+    updatedAt: string;
+};
+
+/**
+ * 求人のチームメンバー
+ */
+export type ModelsJobPostingTeamMember = {
+    /**
+     * 名前
+     */
+    name: string;
+    /**
+     * 写真URL
+     */
+    photoUrl?: string;
+};
+
+/**
  * いいねトグル結果
  */
 export type ModelsLikeToggleResponse = {
@@ -3934,6 +4314,218 @@ export type CompanyAuthCompanyRegisterResponses = {
 
 export type CompanyAuthCompanyRegisterResponse = CompanyAuthCompanyRegisterResponses[keyof CompanyAuthCompanyRegisterResponses];
 
+export type CompanyJobPostingsListCompanyJobPostingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/jobs';
+};
+
+export type CompanyJobPostingsListCompanyJobPostingsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyJobPostingsListCompanyJobPostingsError = CompanyJobPostingsListCompanyJobPostingsErrors[keyof CompanyJobPostingsListCompanyJobPostingsErrors];
+
+export type CompanyJobPostingsListCompanyJobPostingsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: Array<ModelsJobPostingResponse>;
+};
+
+export type CompanyJobPostingsListCompanyJobPostingsResponse = CompanyJobPostingsListCompanyJobPostingsResponses[keyof CompanyJobPostingsListCompanyJobPostingsResponses];
+
+export type CompanyJobPostingsCreateJobPostingData = {
+    body: ModelsJobPostingRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/jobs';
+};
+
+export type CompanyJobPostingsCreateJobPostingErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyJobPostingsCreateJobPostingError = CompanyJobPostingsCreateJobPostingErrors[keyof CompanyJobPostingsCreateJobPostingErrors];
+
+export type CompanyJobPostingsCreateJobPostingResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsJobPostingResponse;
+};
+
+export type CompanyJobPostingsCreateJobPostingResponse = CompanyJobPostingsCreateJobPostingResponses[keyof CompanyJobPostingsCreateJobPostingResponses];
+
+export type CompanyJobPostingsUploadJobCoverImageData = {
+    body: {
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/company/jobs/cover-image';
+};
+
+export type CompanyJobPostingsUploadJobCoverImageErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyJobPostingsUploadJobCoverImageError = CompanyJobPostingsUploadJobCoverImageErrors[keyof CompanyJobPostingsUploadJobCoverImageErrors];
+
+export type CompanyJobPostingsUploadJobCoverImageResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUploadUrlResponse;
+};
+
+export type CompanyJobPostingsUploadJobCoverImageResponse = CompanyJobPostingsUploadJobCoverImageResponses[keyof CompanyJobPostingsUploadJobCoverImageResponses];
+
+export type CompanyJobPostingsUploadGalleryImageData = {
+    body: {
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/company/jobs/gallery-image';
+};
+
+export type CompanyJobPostingsUploadGalleryImageErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyJobPostingsUploadGalleryImageError = CompanyJobPostingsUploadGalleryImageErrors[keyof CompanyJobPostingsUploadGalleryImageErrors];
+
+export type CompanyJobPostingsUploadGalleryImageResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUploadUrlResponse;
+};
+
+export type CompanyJobPostingsUploadGalleryImageResponse = CompanyJobPostingsUploadGalleryImageResponses[keyof CompanyJobPostingsUploadGalleryImageResponses];
+
+export type CompanyJobPostingsUploadTeamMemberPhotoData = {
+    body: {
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/company/jobs/team-member-photo';
+};
+
+export type CompanyJobPostingsUploadTeamMemberPhotoErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyJobPostingsUploadTeamMemberPhotoError = CompanyJobPostingsUploadTeamMemberPhotoErrors[keyof CompanyJobPostingsUploadTeamMemberPhotoErrors];
+
+export type CompanyJobPostingsUploadTeamMemberPhotoResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUploadUrlResponse;
+};
+
+export type CompanyJobPostingsUploadTeamMemberPhotoResponse = CompanyJobPostingsUploadTeamMemberPhotoResponses[keyof CompanyJobPostingsUploadTeamMemberPhotoResponses];
+
+export type CompanyJobPostingsDeleteJobPostingData = {
+    body?: never;
+    path: {
+        jobId: string;
+    };
+    query?: never;
+    url: '/api/company/jobs/{jobId}';
+};
+
+export type CompanyJobPostingsDeleteJobPostingErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CompanyJobPostingsDeleteJobPostingError = CompanyJobPostingsDeleteJobPostingErrors[keyof CompanyJobPostingsDeleteJobPostingErrors];
+
+export type CompanyJobPostingsDeleteJobPostingResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CompanyJobPostingsDeleteJobPostingResponse = CompanyJobPostingsDeleteJobPostingResponses[keyof CompanyJobPostingsDeleteJobPostingResponses];
+
+export type CompanyJobPostingsGetCompanyJobPostingData = {
+    body?: never;
+    path: {
+        jobId: string;
+    };
+    query?: never;
+    url: '/api/company/jobs/{jobId}';
+};
+
+export type CompanyJobPostingsGetCompanyJobPostingErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CompanyJobPostingsGetCompanyJobPostingError = CompanyJobPostingsGetCompanyJobPostingErrors[keyof CompanyJobPostingsGetCompanyJobPostingErrors];
+
+export type CompanyJobPostingsGetCompanyJobPostingResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsJobPostingResponse;
+};
+
+export type CompanyJobPostingsGetCompanyJobPostingResponse = CompanyJobPostingsGetCompanyJobPostingResponses[keyof CompanyJobPostingsGetCompanyJobPostingResponses];
+
+export type CompanyJobPostingsUpdateJobPostingData = {
+    body: ModelsJobPostingRequest;
+    path: {
+        jobId: string;
+    };
+    query?: never;
+    url: '/api/company/jobs/{jobId}';
+};
+
+export type CompanyJobPostingsUpdateJobPostingErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CompanyJobPostingsUpdateJobPostingError = CompanyJobPostingsUpdateJobPostingErrors[keyof CompanyJobPostingsUpdateJobPostingErrors];
+
+export type CompanyJobPostingsUpdateJobPostingResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsJobPostingResponse;
+};
+
+export type CompanyJobPostingsUpdateJobPostingResponse = CompanyJobPostingsUpdateJobPostingResponses[keyof CompanyJobPostingsUpdateJobPostingResponses];
+
 export type CompanyMessagingListCompanyConversationsData = {
     body?: never;
     path?: never;
@@ -5276,6 +5868,95 @@ export type CompanyTeamsGetTeamScoresResponses = {
 };
 
 export type CompanyTeamsGetTeamScoresResponse = CompanyTeamsGetTeamScoresResponses[keyof CompanyTeamsGetTeamScoresResponses];
+
+export type PublicJobPostingsListPublicJobPostingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 取得件数（>0 でページングモード）
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+        /**
+         * フリーワード
+         */
+        search?: string;
+        /**
+         * 職種カテゴリ
+         */
+        category?: string;
+        /**
+         * 雇用形態
+         */
+        employmentType?: string;
+        /**
+         * リモートポリシー
+         */
+        remotePolicy?: string;
+        /**
+         * ソート（"salary" で給与順）
+         */
+        sort?: string;
+        /**
+         * Work Values フィルタ（`id:score` のカンマ区切り）
+         */
+        valueFilters?: string;
+        /**
+         * フィルタモード（values / needs）
+         */
+        filterMode?: string;
+    };
+    url: '/api/jobs';
+};
+
+export type PublicJobPostingsListPublicJobPostingsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type PublicJobPostingsListPublicJobPostingsError = PublicJobPostingsListPublicJobPostingsErrors[keyof PublicJobPostingsListPublicJobPostingsErrors];
+
+export type PublicJobPostingsListPublicJobPostingsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsJobPostingListResponse | Array<ModelsJobPostingResponse>;
+};
+
+export type PublicJobPostingsListPublicJobPostingsResponse = PublicJobPostingsListPublicJobPostingsResponses[keyof PublicJobPostingsListPublicJobPostingsResponses];
+
+export type PublicJobPostingsGetPublicJobPostingData = {
+    body?: never;
+    path: {
+        jobId: string;
+    };
+    query?: never;
+    url: '/api/jobs/{jobId}';
+};
+
+export type PublicJobPostingsGetPublicJobPostingErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type PublicJobPostingsGetPublicJobPostingError = PublicJobPostingsGetPublicJobPostingErrors[keyof PublicJobPostingsGetPublicJobPostingErrors];
+
+export type PublicJobPostingsGetPublicJobPostingResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsJobPostingResponse;
+};
+
+export type PublicJobPostingsGetPublicJobPostingResponse = PublicJobPostingsGetPublicJobPostingResponses[keyof PublicJobPostingsGetPublicJobPostingResponses];
 
 export type CandidateMessagingListCandidateConversationsData = {
     body?: never;

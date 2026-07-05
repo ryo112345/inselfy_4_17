@@ -3,94 +3,97 @@
 
 package presenter
 
-import jobposting "github.com/akiyama/inselfy/backend/internal/domain/jobposting"
+import (
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	jobposting "github.com/akiyama/inselfy/backend/internal/domain/jobposting"
+)
 
 type jobPostingConverterImpl struct{}
 
-func (c *jobPostingConverterImpl) ToResponse(source *jobposting.JobPosting) *jobPostingResponse {
-	var pPresenterjobPostingResponse *jobPostingResponse
+func (c *jobPostingConverterImpl) ToResponse(source *jobposting.JobPosting) *openapi.ModelsJobPostingResponse {
+	var pOpenapiModelsJobPostingResponse *openapi.ModelsJobPostingResponse
 	if source != nil {
-		var presenterjobPostingResponse jobPostingResponse
-		presenterjobPostingResponse.ID = (*source).ID
-		presenterjobPostingResponse.CompanyID = (*source).CompanyID
-		presenterjobPostingResponse.CompanyName = (*source).CompanyName
-		presenterjobPostingResponse.CompanyLogoURL = (*source).CompanyLogoURL
-		presenterjobPostingResponse.Title = (*source).Title
-		presenterjobPostingResponse.Description = (*source).Description
-		presenterjobPostingResponse.EmploymentType = (*source).EmploymentType
+		var openapiModelsJobPostingResponse openapi.ModelsJobPostingResponse
+		openapiModelsJobPostingResponse.AppealPoints = (*source).AppealPoints
+		openapiModelsJobPostingResponse.Benefits = (*source).Benefits
+		openapiModelsJobPostingResponse.BreakTime = (*source).BreakTime
+		openapiModelsJobPostingResponse.Challenges = (*source).Challenges
+		openapiModelsJobPostingResponse.CompanyId = (*source).CompanyID
+		openapiModelsJobPostingResponse.CompanyLogoUrl = omitEmptyString((*source).CompanyLogoURL)
+		openapiModelsJobPostingResponse.CompanyName = omitEmptyString((*source).CompanyName)
+		openapiModelsJobPostingResponse.ContractType = (*source).ContractType
+		openapiModelsJobPostingResponse.CoverImageUrl = (*source).CoverImageURL
+		openapiModelsJobPostingResponse.CreatedAt = copyTime((*source).CreatedAt)
+		openapiModelsJobPostingResponse.Description = (*source).Description
+		openapiModelsJobPostingResponse.EmploymentType = (*source).EmploymentType
+		openapiModelsJobPostingResponse.GalleryUrls = emptySliceIfNil((*source).GalleryURLs)
+		openapiModelsJobPostingResponse.HighlightTitleAppeal = (*source).HighlightTitleAppeal
+		openapiModelsJobPostingResponse.HighlightTitleChallenge = (*source).HighlightTitleChallenge
+		openapiModelsJobPostingResponse.HighlightTitleGrowth = (*source).HighlightTitleGrowth
+		openapiModelsJobPostingResponse.HighlightTitleRole = (*source).HighlightTitleRole
+		openapiModelsJobPostingResponse.HiringCount = (*source).HiringCount
+		openapiModelsJobPostingResponse.Holidays = (*source).Holidays
+		openapiModelsJobPostingResponse.Id = (*source).ID
+		openapiModelsJobPostingResponse.Insurance = (*source).Insurance
+		openapiModelsJobPostingResponse.IsActive = (*source).IsActive
+		openapiModelsJobPostingResponse.JobCategory = (*source).JobCategory
+		openapiModelsJobPostingResponse.JobDescriptionChangeScope = (*source).JobDescriptionChangeScope
 		if (*source).Location != nil {
 			xstring := *(*source).Location
-			presenterjobPostingResponse.Location = &xstring
+			openapiModelsJobPostingResponse.Location = &xstring
 		}
-		presenterjobPostingResponse.IsActive = (*source).IsActive
-		presenterjobPostingResponse.Status = (*source).Status
-		presenterjobPostingResponse.JobCategory = (*source).JobCategory
-		presenterjobPostingResponse.HiringCount = (*source).HiringCount
-		presenterjobPostingResponse.AppealPoints = (*source).AppealPoints
-		presenterjobPostingResponse.Challenges = (*source).Challenges
-		presenterjobPostingResponse.TeamDescription = (*source).TeamDescription
-		if (*source).TeamMembers != nil {
-			presenterjobPostingResponse.TeamMembers = make([]jobposting.TeamMember, len((*source).TeamMembers))
-			for i := 0; i < len((*source).TeamMembers); i++ {
-				presenterjobPostingResponse.TeamMembers[i] = c.jobpostingTeamMemberToJobpostingTeamMember((*source).TeamMembers[i])
-			}
+		openapiModelsJobPostingResponse.PreferredQualifications = (*source).PreferredQualifications
+		openapiModelsJobPostingResponse.ProbationPeriod = (*source).ProbationPeriod
+		openapiModelsJobPostingResponse.RemotePolicy = (*source).RemotePolicy
+		openapiModelsJobPostingResponse.RequiredQualifications = (*source).RequiredQualifications
+		openapiModelsJobPostingResponse.SalaryDetail = (*source).SalaryDetail
+		if (*source).SalaryMax != nil {
+			xint32 := *(*source).SalaryMax
+			openapiModelsJobPostingResponse.SalaryMax = &xint32
 		}
-		presenterjobPostingResponse.TeamLabel = (*source).TeamLabel
+		if (*source).SalaryMin != nil {
+			xint322 := *(*source).SalaryMin
+			openapiModelsJobPostingResponse.SalaryMin = &xint322
+		}
+		openapiModelsJobPostingResponse.SelectionProcess = (*source).SelectionProcess
+		openapiModelsJobPostingResponse.SkillsGained = (*source).SkillsGained
+		openapiModelsJobPostingResponse.SmokingPolicy = (*source).SmokingPolicy
+		openapiModelsJobPostingResponse.Status = (*source).Status
+		openapiModelsJobPostingResponse.Tags = emptySliceIfNil((*source).Tags)
+		openapiModelsJobPostingResponse.TeamDescription = (*source).TeamDescription
 		if (*source).TeamID != nil {
 			xstring2 := *(*source).TeamID
-			presenterjobPostingResponse.TeamID = &xstring2
+			openapiModelsJobPostingResponse.TeamId = &xstring2
 		}
-		presenterjobPostingResponse.SkillsGained = (*source).SkillsGained
-		presenterjobPostingResponse.Tags = emptySliceIfNil((*source).Tags)
-		presenterjobPostingResponse.RequiredQualifications = (*source).RequiredQualifications
-		presenterjobPostingResponse.PreferredQualifications = (*source).PreferredQualifications
-		presenterjobPostingResponse.WorkLocation = (*source).WorkLocation
-		presenterjobPostingResponse.WorkLocationChangeScope = (*source).WorkLocationChangeScope
-		presenterjobPostingResponse.JobDescriptionChangeScope = (*source).JobDescriptionChangeScope
-		presenterjobPostingResponse.ContractType = (*source).ContractType
-		presenterjobPostingResponse.ProbationPeriod = (*source).ProbationPeriod
-		presenterjobPostingResponse.WorkHours = (*source).WorkHours
-		presenterjobPostingResponse.BreakTime = (*source).BreakTime
-		presenterjobPostingResponse.Holidays = (*source).Holidays
-		if (*source).SalaryMin != nil {
-			xint32 := *(*source).SalaryMin
-			presenterjobPostingResponse.SalaryMin = &xint32
+		openapiModelsJobPostingResponse.TeamLabel = (*source).TeamLabel
+		if (*source).TeamMembers != nil {
+			openapiModelsJobPostingResponse.TeamMembers = make([]openapi.ModelsJobPostingTeamMember, len((*source).TeamMembers))
+			for i := 0; i < len((*source).TeamMembers); i++ {
+				openapiModelsJobPostingResponse.TeamMembers[i] = c.jobpostingTeamMemberToOpenapiModelsJobPostingTeamMember((*source).TeamMembers[i])
+			}
 		}
-		if (*source).SalaryMax != nil {
-			xint322 := *(*source).SalaryMax
-			presenterjobPostingResponse.SalaryMax = &xint322
-		}
-		presenterjobPostingResponse.SalaryDetail = (*source).SalaryDetail
-		presenterjobPostingResponse.Insurance = (*source).Insurance
-		presenterjobPostingResponse.RemotePolicy = (*source).RemotePolicy
-		presenterjobPostingResponse.Benefits = (*source).Benefits
-		presenterjobPostingResponse.SmokingPolicy = (*source).SmokingPolicy
-		presenterjobPostingResponse.SelectionProcess = (*source).SelectionProcess
-		presenterjobPostingResponse.CoverImageURL = (*source).CoverImageURL
-		presenterjobPostingResponse.HighlightTitleRole = (*source).HighlightTitleRole
-		presenterjobPostingResponse.HighlightTitleAppeal = (*source).HighlightTitleAppeal
-		presenterjobPostingResponse.HighlightTitleChallenge = (*source).HighlightTitleChallenge
-		presenterjobPostingResponse.HighlightTitleGrowth = (*source).HighlightTitleGrowth
-		presenterjobPostingResponse.GalleryURLs = emptySliceIfNil((*source).GalleryURLs)
-		presenterjobPostingResponse.CreatedAt = copyTime((*source).CreatedAt)
-		presenterjobPostingResponse.UpdatedAt = copyTime((*source).UpdatedAt)
-		pPresenterjobPostingResponse = &presenterjobPostingResponse
+		openapiModelsJobPostingResponse.Title = (*source).Title
+		openapiModelsJobPostingResponse.UpdatedAt = copyTime((*source).UpdatedAt)
+		openapiModelsJobPostingResponse.WorkHours = (*source).WorkHours
+		openapiModelsJobPostingResponse.WorkLocation = (*source).WorkLocation
+		openapiModelsJobPostingResponse.WorkLocationChangeScope = (*source).WorkLocationChangeScope
+		pOpenapiModelsJobPostingResponse = &openapiModelsJobPostingResponse
 	}
-	return pPresenterjobPostingResponse
+	return pOpenapiModelsJobPostingResponse
 }
-func (c *jobPostingConverterImpl) ToResponses(source []*jobposting.JobPosting) []*jobPostingResponse {
-	var pPresenterjobPostingResponseList []*jobPostingResponse
+func (c *jobPostingConverterImpl) ToResponses(source []*jobposting.JobPosting) []*openapi.ModelsJobPostingResponse {
+	var pOpenapiModelsJobPostingResponseList []*openapi.ModelsJobPostingResponse
 	if source != nil {
-		pPresenterjobPostingResponseList = make([]*jobPostingResponse, len(source))
+		pOpenapiModelsJobPostingResponseList = make([]*openapi.ModelsJobPostingResponse, len(source))
 		for i := 0; i < len(source); i++ {
-			pPresenterjobPostingResponseList[i] = c.ToResponse(source[i])
+			pOpenapiModelsJobPostingResponseList[i] = c.ToResponse(source[i])
 		}
 	}
-	return pPresenterjobPostingResponseList
+	return pOpenapiModelsJobPostingResponseList
 }
-func (c *jobPostingConverterImpl) jobpostingTeamMemberToJobpostingTeamMember(source jobposting.TeamMember) jobposting.TeamMember {
-	var jobpostingTeamMember jobposting.TeamMember
-	jobpostingTeamMember.Name = source.Name
-	jobpostingTeamMember.PhotoURL = source.PhotoURL
-	return jobpostingTeamMember
+func (c *jobPostingConverterImpl) jobpostingTeamMemberToOpenapiModelsJobPostingTeamMember(source jobposting.TeamMember) openapi.ModelsJobPostingTeamMember {
+	var openapiModelsJobPostingTeamMember openapi.ModelsJobPostingTeamMember
+	openapiModelsJobPostingTeamMember.Name = source.Name
+	openapiModelsJobPostingTeamMember.PhotoUrl = omitEmptyString(source.PhotoURL)
+	return openapiModelsJobPostingTeamMember
 }
