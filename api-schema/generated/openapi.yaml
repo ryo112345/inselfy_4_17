@@ -10,7 +10,141 @@ tags:
   - name: ScoutSettings
   - name: SimilarUsers
   - name: TeamDiagnose
+  - name: ScoutTemplates
 paths:
+  /api/company/scout-templates:
+    post:
+      operationId: ScoutTemplates_createScoutTemplate
+      summary: Create a scout template
+      description: スカウトテンプレート作成（企業認証）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutTemplateResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - ScoutTemplates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreateScoutTemplateRequest'
+    get:
+      operationId: ScoutTemplates_listScoutTemplates
+      summary: List scout templates
+      description: スカウトテンプレート一覧（企業認証）。裸の配列を返す（互換のため）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Models.ScoutTemplateResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - ScoutTemplates
+  /api/company/scout-templates/{templateId}:
+    get:
+      operationId: ScoutTemplates_getScoutTemplate
+      summary: Get a scout template
+      description: スカウトテンプレート取得（企業認証）
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutTemplateResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - ScoutTemplates
+    put:
+      operationId: ScoutTemplates_updateScoutTemplate
+      summary: Update a scout template
+      description: スカウトテンプレート更新（企業認証）
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutTemplateResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - ScoutTemplates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateScoutTemplateRequest'
+    delete:
+      operationId: ScoutTemplates_deleteScoutTemplate
+      summary: Delete a scout template
+      description: スカウトテンプレート削除（企業認証）
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - ScoutTemplates
   /api/scout-settings:
     get:
       operationId: ScoutSettings_getScoutSettings
@@ -718,6 +852,23 @@ components:
           maxLength: 5000
           description: 業務内容（自然文、5000文字以内）
       description: 職歴作成リクエスト
+    Models.CreateScoutTemplateRequest:
+      type: object
+      required:
+        - name
+        - subject
+        - body
+      properties:
+        name:
+          type: string
+          description: テンプレート名
+        subject:
+          type: string
+          description: 件名
+        body:
+          type: string
+          description: 本文
+      description: スカウトテンプレート作成リクエスト
     Models.CreateUserRequest:
       type: object
       required:
@@ -949,6 +1100,41 @@ components:
           format: date-time
           description: 更新日時
       description: スカウト受け入れ設定
+    Models.ScoutTemplateResponse:
+      type: object
+      required:
+        - id
+        - companyId
+        - name
+        - subject
+        - body
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: ID
+        companyId:
+          type: string
+          description: 企業ID
+        name:
+          type: string
+          description: テンプレート名
+        subject:
+          type: string
+          description: 件名
+        body:
+          type: string
+          description: 本文
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+      description: スカウトテンプレート
     Models.SimilarUserExperience:
       type: object
       required:
@@ -1167,6 +1353,23 @@ components:
           type: boolean
           description: スカウトを受け入れるか
       description: スカウト受け入れ設定更新リクエスト
+    Models.UpdateScoutTemplateRequest:
+      type: object
+      required:
+        - name
+        - subject
+        - body
+      properties:
+        name:
+          type: string
+          description: テンプレート名
+        subject:
+          type: string
+          description: 件名
+        body:
+          type: string
+          description: 本文
+      description: スカウトテンプレート更新リクエスト
     Models.UpdateUserProfileRequest:
       type: object
       properties:

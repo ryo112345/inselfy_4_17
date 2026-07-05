@@ -88,6 +88,24 @@ export type ModelsCreateExperienceRequest = {
 };
 
 /**
+ * スカウトテンプレート作成リクエスト
+ */
+export type ModelsCreateScoutTemplateRequest = {
+    /**
+     * テンプレート名
+     */
+    name: string;
+    /**
+     * 件名
+     */
+    subject: string;
+    /**
+     * 本文
+     */
+    body: string;
+};
+
+/**
  * ユーザー作成リクエスト
  */
 export type ModelsCreateUserRequest = {
@@ -300,6 +318,40 @@ export type ModelsScoutSettingsResponse = {
 };
 
 /**
+ * スカウトテンプレート
+ */
+export type ModelsScoutTemplateResponse = {
+    /**
+     * ID
+     */
+    id: string;
+    /**
+     * 企業ID
+     */
+    companyId: string;
+    /**
+     * テンプレート名
+     */
+    name: string;
+    /**
+     * 件名
+     */
+    subject: string;
+    /**
+     * 本文
+     */
+    body: string;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+    /**
+     * 更新日時
+     */
+    updatedAt: string;
+};
+
+/**
  * 類似ユーザーの職歴（要約）
  */
 export type ModelsSimilarUserExperience = {
@@ -486,6 +538,24 @@ export type ModelsUpdateScoutSettingsRequest = {
 };
 
 /**
+ * スカウトテンプレート更新リクエスト
+ */
+export type ModelsUpdateScoutTemplateRequest = {
+    /**
+     * テンプレート名
+     */
+    name: string;
+    /**
+     * 件名
+     */
+    subject: string;
+    /**
+     * 本文
+     */
+    body: string;
+};
+
+/**
  * プロフィール更新リクエスト（PATCH。指定したキーのみ差分適用）。値に null を渡すとフィールドをクリア。
  */
 export type ModelsUpdateUserProfileRequest = {
@@ -604,6 +674,137 @@ export type ModelsUserResponse = {
      */
     updatedAt: string;
 };
+
+export type ScoutTemplatesListScoutTemplatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/scout-templates';
+};
+
+export type ScoutTemplatesListScoutTemplatesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type ScoutTemplatesListScoutTemplatesError = ScoutTemplatesListScoutTemplatesErrors[keyof ScoutTemplatesListScoutTemplatesErrors];
+
+export type ScoutTemplatesListScoutTemplatesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: Array<ModelsScoutTemplateResponse>;
+};
+
+export type ScoutTemplatesListScoutTemplatesResponse = ScoutTemplatesListScoutTemplatesResponses[keyof ScoutTemplatesListScoutTemplatesResponses];
+
+export type ScoutTemplatesCreateScoutTemplateData = {
+    body: ModelsCreateScoutTemplateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/scout-templates';
+};
+
+export type ScoutTemplatesCreateScoutTemplateErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type ScoutTemplatesCreateScoutTemplateError = ScoutTemplatesCreateScoutTemplateErrors[keyof ScoutTemplatesCreateScoutTemplateErrors];
+
+export type ScoutTemplatesCreateScoutTemplateResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsScoutTemplateResponse;
+};
+
+export type ScoutTemplatesCreateScoutTemplateResponse = ScoutTemplatesCreateScoutTemplateResponses[keyof ScoutTemplatesCreateScoutTemplateResponses];
+
+export type ScoutTemplatesDeleteScoutTemplateData = {
+    body?: never;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/api/company/scout-templates/{templateId}';
+};
+
+export type ScoutTemplatesDeleteScoutTemplateErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type ScoutTemplatesDeleteScoutTemplateError = ScoutTemplatesDeleteScoutTemplateErrors[keyof ScoutTemplatesDeleteScoutTemplateErrors];
+
+export type ScoutTemplatesDeleteScoutTemplateResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type ScoutTemplatesDeleteScoutTemplateResponse = ScoutTemplatesDeleteScoutTemplateResponses[keyof ScoutTemplatesDeleteScoutTemplateResponses];
+
+export type ScoutTemplatesGetScoutTemplateData = {
+    body?: never;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/api/company/scout-templates/{templateId}';
+};
+
+export type ScoutTemplatesGetScoutTemplateErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type ScoutTemplatesGetScoutTemplateError = ScoutTemplatesGetScoutTemplateErrors[keyof ScoutTemplatesGetScoutTemplateErrors];
+
+export type ScoutTemplatesGetScoutTemplateResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutTemplateResponse;
+};
+
+export type ScoutTemplatesGetScoutTemplateResponse = ScoutTemplatesGetScoutTemplateResponses[keyof ScoutTemplatesGetScoutTemplateResponses];
+
+export type ScoutTemplatesUpdateScoutTemplateData = {
+    body: ModelsUpdateScoutTemplateRequest;
+    path: {
+        templateId: string;
+    };
+    query?: never;
+    url: '/api/company/scout-templates/{templateId}';
+};
+
+export type ScoutTemplatesUpdateScoutTemplateErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type ScoutTemplatesUpdateScoutTemplateError = ScoutTemplatesUpdateScoutTemplateErrors[keyof ScoutTemplatesUpdateScoutTemplateErrors];
+
+export type ScoutTemplatesUpdateScoutTemplateResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutTemplateResponse;
+};
+
+export type ScoutTemplatesUpdateScoutTemplateResponse = ScoutTemplatesUpdateScoutTemplateResponses[keyof ScoutTemplatesUpdateScoutTemplateResponses];
 
 export type ScoutSettingsGetScoutSettingsData = {
     body?: never;

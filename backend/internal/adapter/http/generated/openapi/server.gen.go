@@ -139,6 +139,18 @@ type ModelsCreateExperienceRequest struct {
 	Title string `json:"title"`
 }
 
+// ModelsCreateScoutTemplateRequest スカウトテンプレート作成リクエスト
+type ModelsCreateScoutTemplateRequest struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// Name テンプレート名
+	Name string `json:"name"`
+
+	// Subject 件名
+	Subject string `json:"subject"`
+}
+
 // ModelsCreateUserRequest ユーザー作成リクエスト
 type ModelsCreateUserRequest struct {
 	// Name 表示名（1-100文字）
@@ -292,6 +304,30 @@ type ModelsScoutSettingsResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// ModelsScoutTemplateResponse スカウトテンプレート
+type ModelsScoutTemplateResponse struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// CompanyId 企業ID
+	CompanyId string `json:"companyId"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id ID
+	Id string `json:"id"`
+
+	// Name テンプレート名
+	Name string `json:"name"`
+
+	// Subject 件名
+	Subject string `json:"subject"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
 // ModelsSimilarUserExperience 類似ユーザーの職歴（要約）
 type ModelsSimilarUserExperience struct {
 	// CompanyName 会社名
@@ -418,6 +454,18 @@ type ModelsUpdateScoutSettingsRequest struct {
 	AcceptingScouts bool `json:"acceptingScouts"`
 }
 
+// ModelsUpdateScoutTemplateRequest スカウトテンプレート更新リクエスト
+type ModelsUpdateScoutTemplateRequest struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// Name テンプレート名
+	Name string `json:"name"`
+
+	// Subject 件名
+	Subject string `json:"subject"`
+}
+
 // ModelsUpdateUserProfileRequest プロフィール更新リクエスト（PATCH。指定したキーのみ差分適用）。値に null を渡すとフィールドをクリア。
 type ModelsUpdateUserProfileRequest struct {
 	// About 自己紹介
@@ -511,6 +559,12 @@ type SimilarUsersGetSimilarUsersParams struct {
 	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
+// ScoutTemplatesCreateScoutTemplateJSONRequestBody defines body for ScoutTemplatesCreateScoutTemplate for application/json ContentType.
+type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplateRequest
+
+// ScoutTemplatesUpdateScoutTemplateJSONRequestBody defines body for ScoutTemplatesUpdateScoutTemplate for application/json ContentType.
+type ScoutTemplatesUpdateScoutTemplateJSONRequestBody = ModelsUpdateScoutTemplateRequest
+
 // ScoutSettingsUpdateScoutSettingsJSONRequestBody defines body for ScoutSettingsUpdateScoutSettings for application/json ContentType.
 type ScoutSettingsUpdateScoutSettingsJSONRequestBody = ModelsUpdateScoutSettingsRequest
 
@@ -540,6 +594,21 @@ type SkillsAttachSkillJSONRequestBody = ModelsAttachSkillRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// List scout templates
+	// (GET /api/company/scout-templates)
+	ScoutTemplatesListScoutTemplates(ctx echo.Context) error
+	// Create a scout template
+	// (POST /api/company/scout-templates)
+	ScoutTemplatesCreateScoutTemplate(ctx echo.Context) error
+	// Delete a scout template
+	// (DELETE /api/company/scout-templates/{templateId})
+	ScoutTemplatesDeleteScoutTemplate(ctx echo.Context, templateId string) error
+	// Get a scout template
+	// (GET /api/company/scout-templates/{templateId})
+	ScoutTemplatesGetScoutTemplate(ctx echo.Context, templateId string) error
+	// Update a scout template
+	// (PUT /api/company/scout-templates/{templateId})
+	ScoutTemplatesUpdateScoutTemplate(ctx echo.Context, templateId string) error
 	// Get scout settings for the authenticated user
 	// (GET /api/scout-settings)
 	ScoutSettingsGetScoutSettings(ctx echo.Context) error
@@ -602,6 +671,72 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// ScoutTemplatesListScoutTemplates converts echo context to params.
+func (w *ServerInterfaceWrapper) ScoutTemplatesListScoutTemplates(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ScoutTemplatesListScoutTemplates(ctx)
+	return err
+}
+
+// ScoutTemplatesCreateScoutTemplate converts echo context to params.
+func (w *ServerInterfaceWrapper) ScoutTemplatesCreateScoutTemplate(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ScoutTemplatesCreateScoutTemplate(ctx)
+	return err
+}
+
+// ScoutTemplatesDeleteScoutTemplate converts echo context to params.
+func (w *ServerInterfaceWrapper) ScoutTemplatesDeleteScoutTemplate(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "templateId" -------------
+	var templateId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "templateId", ctx.Param("templateId"), &templateId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter templateId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ScoutTemplatesDeleteScoutTemplate(ctx, templateId)
+	return err
+}
+
+// ScoutTemplatesGetScoutTemplate converts echo context to params.
+func (w *ServerInterfaceWrapper) ScoutTemplatesGetScoutTemplate(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "templateId" -------------
+	var templateId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "templateId", ctx.Param("templateId"), &templateId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter templateId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ScoutTemplatesGetScoutTemplate(ctx, templateId)
+	return err
+}
+
+// ScoutTemplatesUpdateScoutTemplate converts echo context to params.
+func (w *ServerInterfaceWrapper) ScoutTemplatesUpdateScoutTemplate(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "templateId" -------------
+	var templateId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "templateId", ctx.Param("templateId"), &templateId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter templateId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ScoutTemplatesUpdateScoutTemplate(ctx, templateId)
+	return err
 }
 
 // ScoutSettingsGetScoutSettings converts echo context to params.
@@ -964,6 +1099,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/api/company/scout-templates", wrapper.ScoutTemplatesListScoutTemplates)
+	router.POST(baseURL+"/api/company/scout-templates", wrapper.ScoutTemplatesCreateScoutTemplate)
+	router.DELETE(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesDeleteScoutTemplate)
+	router.GET(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesGetScoutTemplate)
+	router.PUT(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesUpdateScoutTemplate)
 	router.GET(baseURL+"/api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
 	router.PUT(baseURL+"/api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
 	router.GET(baseURL+"/api/team-diagnose/:token", wrapper.TeamDiagnoseGetDiagnoseByToken)

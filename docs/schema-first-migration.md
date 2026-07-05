@@ -113,7 +113,7 @@ cd ../backend && make oapi
 | 1 | [x] | scout_settings | 2 | 小さい。scout_presenter の型を共有 |
 | 2 | [x] | similar_users | 1 | inline struct、`{users,total}` ラッパー |
 | 3 | [x] | team_diagnose | 2 | inline struct、204 |
-| 4 | [ ] | scout_template | 5 | **List が bare array** |
+| 4 | [x] | scout_template | 5 | **List が bare array** |
 | 5 | [ ] | notification | 8 | req body なし、204系 |
 | 6 | [ ] | follow | 5 | **bare domain type**（FollowStatus） |
 | 7 | [ ] | auth | 4 | cookie 認証、body はユーザーのみ |

@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
@@ -23,23 +24,11 @@ func NewScoutTemplateController(
 	return &ScoutTemplateController{input: input}
 }
 
-type createTemplateRequest struct {
-	Name    string `json:"name"`
-	Subject string `json:"subject"`
-	Body    string `json:"body"`
-}
-
-type updateTemplateRequest struct {
-	Name    string `json:"name"`
-	Subject string `json:"subject"`
-	Body    string `json:"body"`
-}
-
 // Create handles POST /api/company/scout-templates.
 func (c *ScoutTemplateController) Create(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body createTemplateRequest
+	var body openapi.ModelsCreateScoutTemplateRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
@@ -82,7 +71,7 @@ func (c *ScoutTemplateController) Get(ctx echo.Context, templateID string) error
 func (c *ScoutTemplateController) Update(ctx echo.Context, templateID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body updateTemplateRequest
+	var body openapi.ModelsUpdateScoutTemplateRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
