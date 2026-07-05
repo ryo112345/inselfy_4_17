@@ -12,6 +12,12 @@
 
 ## 開発ルール
 
+### バックエンドの経路統一リファクタ（進行中）
+
+DB直結コントローラをクリーンアーキ経路（controller → InputPort → interactor → Repository/QueryService → gateway）
+に移行中。**手順・対象一覧・進捗チェックリストは `docs/controller-clean-route-refactor.md` を必ず読んでから作業する。**
+admin系コントローラは移行対象外（pool直結のままでよい）。
+
 ### マイグレーション
 - dirty 状態の修復には `force <現在適用済みのバージョン>` を使い、その後 `up` で新しいマイグレーションだけ適用する
 - **`down -all` → `up` は絶対にやらない**（全テーブルが再作成されデータが消える）

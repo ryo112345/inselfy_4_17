@@ -1,21 +1,21 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
-	"time"
 
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
+
+	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
+	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type TeamDiagnoseController struct {
-	pool *pgxpool.Pool
+	input port.TeamDiagnoseInputPort
 }
 
-func NewTeamDiagnoseController(pool *pgxpool.Pool) *TeamDiagnoseController {
-	return &TeamDiagnoseController{pool: pool}
+func NewTeamDiagnoseController(input port.TeamDiagnoseInputPort) *TeamDiagnoseController {
+	return &TeamDiagnoseController{input: input}
 }
 
 type diagnoseInfoResponse struct {
@@ -30,30 +30,24 @@ type diagnoseInfoResponse struct {
 }
 
 func (c *TeamDiagnoseController) GetByToken(ctx echo.Context, token string) error {
-	var resp diagnoseInfoResponse
-	var memberID, userID uuid.UUID
-	var email *string
-
-	err := c.pool.QueryRow(ctx.Request().Context(),
-		`SELECT tm.id, tm.user_id, tm.name, tm.email, tm.wv_status, tm.ci_status,
-			t.name AS team_name, ca.company_name
-		 FROM team_members tm
-		 JOIN teams t ON t.id = tm.team_id
-		 JOIN company_accounts ca ON ca.id = t.company_id
-		 WHERE tm.invite_token = $1`, token,
-	).Scan(&memberID, &userID, &resp.MemberName, &email, &resp.WVStatus, &resp.CIStatus, &resp.TeamName, &resp.CompanyName)
+	info, err := c.input.GetByToken(ctx.Request().Context(), token)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, domainerr.ErrNotFound) {
 			return notFoundError(ctx, "無効なリンクです")
 		}
 		return internalError(ctx, err.Error())
 	}
 
-	resp.MemberID = memberID.String()
-	resp.UserID = userID.String()
-	resp.Email = email
-
-	return ctx.JSON(http.StatusOK, resp)
+	return ctx.JSON(http.StatusOK, diagnoseInfoResponse{
+		MemberID:    info.MemberID,
+		MemberName:  info.MemberName,
+		TeamName:    info.TeamName,
+		CompanyName: info.CompanyName,
+		UserID:      info.UserID,
+		WVStatus:    info.WVStatus,
+		CIStatus:    info.CIStatus,
+		Email:       info.Email,
+	})
 }
 
 func (c *TeamDiagnoseController) UpdateStatus(ctx echo.Context, token string) error {
@@ -65,35 +59,14 @@ func (c *TeamDiagnoseController) UpdateStatus(ctx echo.Context, token string) er
 		return badRequest(ctx, "invalid request")
 	}
 
-	if body.WVStatus != nil {
-		if *body.WVStatus != "completed" {
-			return badRequest(ctx, "wv_status must be 'completed'")
-		}
-		tag, err := c.pool.Exec(ctx.Request().Context(),
-			`UPDATE team_members SET wv_status = $1, updated_at = $2 WHERE invite_token = $3`,
-			*body.WVStatus, time.Now(), token,
-		)
-		if err != nil {
-			return internalError(ctx, err.Error())
-		}
-		if tag.RowsAffected() == 0 {
+	if err := c.input.UpdateStatus(ctx.Request().Context(), token, body.WVStatus, body.CIStatus); err != nil {
+		switch {
+		case errors.Is(err, domainerr.ErrBadRequest):
+			return badRequest(ctx, err.Error())
+		case errors.Is(err, domainerr.ErrNotFound):
 			return notFoundError(ctx, "member not found")
-		}
-	}
-
-	if body.CIStatus != nil {
-		if *body.CIStatus != "completed" {
-			return badRequest(ctx, "ci_status must be 'completed'")
-		}
-		tag, err := c.pool.Exec(ctx.Request().Context(),
-			`UPDATE team_members SET ci_status = $1, updated_at = $2 WHERE invite_token = $3`,
-			*body.CIStatus, time.Now(), token,
-		)
-		if err != nil {
+		default:
 			return internalError(ctx, err.Error())
-		}
-		if tag.RowsAffected() == 0 {
-			return notFoundError(ctx, "member not found")
 		}
 	}
 

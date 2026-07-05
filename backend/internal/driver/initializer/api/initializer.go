@@ -418,7 +418,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 
 	// --- Team Diagnose (public) ---
-	diagCtrl := httpcontroller.NewTeamDiagnoseController(pool)
+	diagCtrl := httpcontroller.NewTeamDiagnoseController(
+		usecase.NewTeamDiagnoseInteractor(sqlcgw.NewTeamDiagnoseQueryService(pool), sqlcgw.NewTeamMemberRepository(pool)),
+	)
 	e.GET("/api/team-diagnose/:token", func(c echo.Context) error {
 		return diagCtrl.GetByToken(c, c.Param("token"))
 	})
