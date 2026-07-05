@@ -125,7 +125,7 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 | 5 | [x] | team-diagnose: `app/diagnose/[token]/page.tsx` | 2 | |
 | 6 | [x] | timeline/posts: `features/timeline/api.ts` | 7 | クエリ文字列組み立てを query オプションへ。旧実装が送っていた createPost の `userId`(body)・deletePost の `?userId=` はバックエンドが無視していた（authmw から解決）ので送信をやめた |
 | 7 | [x] | articles: `features/articles/api.ts`, `CoverImageUpload.tsx`, `PrevNextNav.tsx`, `RelatedArticles.tsx`, `RichEditor.tsx`, `features/timeline/ArticlePreviewCard.tsx` | 9 | multipart は SDK 経由の実アップロードで 200 + url 返却を確認済み（upload-image を共通ヘルパー `uploadArticleImage` に集約） |
-| 8 | [ ] | work-values + career-interest: `features/work-values/api.ts`, `features/career-interest/api.ts` | 6 | sessions/results/latest のみ。ai-report GET は Phase 2B |
+| 8 | [x] | work-values + career-interest: `features/work-values/api.ts`, `features/career-interest/api.ts` | 6 | sessions/results/latest のみ。ai-report GET は Phase 2B。DTO型名（`ResultDTO` 等）は生成型のエイリアスとして維持（消費側12ファイル無変更） |
 | 9 | [ ] | job-application: `features/job-application/api.ts` | 1 | |
 | 10 | [ ] | job-posting: `features/job-posting/api.ts` | 8 | **二形レスポンス narrow**、multipart 3種 |
 | 11 | [ ] | interview: `features/interview/api.ts` | 7 | 候補者側と企業側の両方 |
