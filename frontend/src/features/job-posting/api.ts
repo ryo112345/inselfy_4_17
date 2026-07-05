@@ -1,3 +1,17 @@
+import "@/external/client/api/client";
+import {
+  companyJobPostingsCreateJobPosting,
+  companyJobPostingsDeleteJobPosting,
+  companyJobPostingsGetCompanyJobPosting,
+  companyJobPostingsListCompanyJobPostings,
+  companyJobPostingsUpdateJobPosting,
+  companyJobPostingsUploadGalleryImage,
+  companyJobPostingsUploadJobCoverImage,
+  companyJobPostingsUploadTeamMemberPhoto,
+  publicJobPostingsGetPublicJobPosting,
+  publicJobPostingsListPublicJobPostings,
+  type ModelsJobPostingRequest,
+} from "@/external/client/api/generated";
 import type { JobPosting } from "../scout/types";
 
 export type JobPostingWithCompany = JobPosting & {
@@ -5,116 +19,63 @@ export type JobPostingWithCompany = JobPosting & {
   companyLogoUrl: string;
 };
 
-const BASE_URL =
-  typeof window === "undefined"
-    ? process.env.INTERNAL_API_URL ?? "http://localhost:8081"
-    : "";
-
-export type JobPostingBody = {
-  title: string;
-  description: string;
-  employmentType: string;
-  location?: string | null;
-  status: string;
-  jobCategory: string;
-  hiringCount: string;
-  appealPoints: string;
-  challenges: string;
-  teamDescription: string;
-  teamMembers: { name: string; photoUrl?: string }[];
-  teamLabel: string;
-  teamId: string | null;
-  skillsGained: string;
-  tags: string[];
-  requiredQualifications: string;
-  preferredQualifications: string;
-  workLocation: string;
-  workLocationChangeScope: string;
-  jobDescriptionChangeScope: string;
-  contractType: string;
-  probationPeriod: string;
-  workHours: string;
-  breakTime: string;
-  holidays: string;
-  salaryMin: number | null;
-  salaryMax: number | null;
-  salaryDetail: string;
-  insurance: string;
-  remotePolicy: string;
-  benefits: string;
-  smokingPolicy: string;
-  selectionProcess: string;
-  coverImageUrl: string;
-  highlightTitleRole: string;
-  highlightTitleAppeal: string;
-  highlightTitleChallenge: string;
-  highlightTitleGrowth: string;
-  galleryUrls: string[];
-};
+export type JobPostingBody = ModelsJobPostingRequest;
 
 export async function createJobPosting(
   body: JobPostingBody,
 ): Promise<JobPosting> {
-  const res = await fetch(`${BASE_URL}/api/company/jobs`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to create job posting");
+  const { data, error } = await companyJobPostingsCreateJobPosting({ body });
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to create job posting");
   }
-  return res.json();
+  return data;
 }
 
 export async function fetchJobPostings(): Promise<JobPosting[]> {
-  const res = await fetch(`${BASE_URL}/api/company/jobs`, {
+  const { data, error } = await companyJobPostingsListCompanyJobPostings({
     cache: "no-store",
-    credentials: "include",
   });
-  if (!res.ok) throw new Error("Failed to fetch job postings");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch job postings");
+  return data;
 }
 
 export async function fetchJobPosting(id: string): Promise<JobPosting> {
-  const res = await fetch(`${BASE_URL}/api/company/jobs/${id}`, {
+  const { data, error } = await companyJobPostingsGetCompanyJobPosting({
+    path: { jobId: id },
     cache: "no-store",
-    credentials: "include",
   });
-  if (!res.ok) throw new Error("Failed to fetch job posting");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch job posting");
+  return data;
 }
 
 export async function updateJobPosting(
   id: string,
   body: JobPostingBody,
 ): Promise<JobPosting> {
-  const res = await fetch(`${BASE_URL}/api/company/jobs/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
+  const { data, error } = await companyJobPostingsUpdateJobPosting({
+    path: { jobId: id },
+    body,
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to update job posting");
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to update job posting");
   }
-  return res.json();
+  return data;
 }
 
 export async function deleteJobPosting(id: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/api/company/jobs/${id}`, {
-    method: "DELETE",
-    credentials: "include",
+  const { error } = await companyJobPostingsDeleteJobPosting({
+    path: { jobId: id },
   });
-  if (!res.ok) throw new Error("Failed to delete job posting");
+  if (error) throw new Error("Failed to delete job posting");
 }
 
 export async function fetchPublicJobPostings(): Promise<JobPostingWithCompany[]> {
-  const res = await fetch(`${BASE_URL}/api/jobs`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch public job postings");
-  return res.json();
+  const { data, error } = await publicJobPostingsListPublicJobPostings({
+    cache: "no-store",
+  });
+  if (error || !data) throw new Error("Failed to fetch public job postings");
+  // クエリなしの GET /api/jobs は裸配列を返す（二形レスポンスの bare 側）
+  return (Array.isArray(data) ? data : data.items) as JobPostingWithCompany[];
 }
 
 export type JobSearchParams = {
@@ -137,73 +98,64 @@ export type PaginatedJobPostingsResponse = {
 export async function searchPublicJobPostings(
   params: JobSearchParams = {},
 ): Promise<PaginatedJobPostingsResponse> {
-  const query = new URLSearchParams();
-  if (params.search) query.set("search", params.search);
-  if (params.category) query.set("category", params.category);
-  if (params.employmentType) query.set("employmentType", params.employmentType);
-  if (params.remotePolicy) query.set("remotePolicy", params.remotePolicy);
-  if (params.sort) query.set("sort", params.sort);
-  if (params.valueFilters) query.set("valueFilters", params.valueFilters);
-  if (params.filterMode) query.set("filterMode", params.filterMode);
-  query.set("limit", String(params.limit ?? 20));
-  query.set("offset", String(params.offset ?? 0));
-
-  const res = await fetch(`${BASE_URL}/api/jobs?${query.toString()}`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch public job postings");
-  return res.json();
+  const { data, error } = await publicJobPostingsListPublicJobPostings({
+    query: {
+      search: params.search || undefined,
+      category: params.category || undefined,
+      employmentType: params.employmentType || undefined,
+      remotePolicy: params.remotePolicy || undefined,
+      sort: params.sort || undefined,
+      valueFilters: params.valueFilters || undefined,
+      filterMode: params.filterMode || undefined,
+      limit: params.limit ?? 20,
+      offset: params.offset ?? 0,
+    },
+    cache: "no-store",
+  });
+  if (error || !data) throw new Error("Failed to fetch public job postings");
+  // limit>0 なのでページングラッパー側が返る（二形レスポンスの wrapper 側）
+  return (Array.isArray(data)
+    ? { items: data, total: data.length }
+    : data) as PaginatedJobPostingsResponse;
 }
 
 export async function fetchPublicJobPosting(
   id: string,
 ): Promise<JobPosting> {
-  const res = await fetch(`${BASE_URL}/api/jobs/${id}`, {
+  const { data, error } = await publicJobPostingsGetPublicJobPosting({
+    path: { jobId: id },
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to fetch job posting");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch job posting");
+  return data;
 }
 
 export async function uploadTeamMemberPhoto(
   file: File,
 ): Promise<string> {
-  const form = new FormData();
-  form.append("file", file);
-  const res = await fetch(`${BASE_URL}/api/company/jobs/team-member-photo`, {
-    method: "POST",
-    credentials: "include",
-    body: form,
+  const { data, error } = await companyJobPostingsUploadTeamMemberPhoto({
+    body: { file },
   });
-  if (!res.ok) throw new Error("Failed to upload photo");
-  const data = await res.json();
+  if (error || !data) throw new Error("Failed to upload photo");
   return data.url;
 }
 
 export async function uploadCoverImage(
   file: File,
 ): Promise<string> {
-  const form = new FormData();
-  form.append("file", file);
-  const res = await fetch(`${BASE_URL}/api/company/jobs/cover-image`, {
-    method: "POST",
-    credentials: "include",
-    body: form,
+  const { data, error } = await companyJobPostingsUploadJobCoverImage({
+    body: { file },
   });
-  if (!res.ok) throw new Error("Failed to upload cover image");
-  const data = await res.json();
+  if (error || !data) throw new Error("Failed to upload cover image");
   return data.url;
 }
 
 export async function uploadGalleryImage(
   file: File,
 ): Promise<string> {
-  const form = new FormData();
-  form.append("file", file);
-  const res = await fetch(`${BASE_URL}/api/company/jobs/gallery-image`, {
-    method: "POST",
-    credentials: "include",
-    body: form,
+  const { data, error } = await companyJobPostingsUploadGalleryImage({
+    body: { file },
   });
-  if (!res.ok) throw new Error("Failed to upload gallery image");
-  const data = await res.json();
+  if (error || !data) throw new Error("Failed to upload gallery image");
   return data.url;
 }
