@@ -3510,6 +3510,20 @@ export type ModelsUploadUrlResponse = {
 };
 
 /**
+ * プロフィール画像アップロード結果
+ */
+export type ModelsUserImageUploadResponse = {
+    /**
+     * アップロードされたファイルのURL
+     */
+    url: string;
+    /**
+     * 更新後のユーザー
+     */
+    user: ModelsUserResponse;
+};
+
+/**
  * ユーザー情報
  */
 export type ModelsUserResponse = {
@@ -7473,6 +7487,33 @@ export type UsersCreateUserResponses = {
 
 export type UsersCreateUserResponse = UsersCreateUserResponses[keyof UsersCreateUserResponses];
 
+export type UsersGetUserByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/users/id/{id}';
+};
+
+export type UsersGetUserByIdErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type UsersGetUserByIdError = UsersGetUserByIdErrors[keyof UsersGetUserByIdErrors];
+
+export type UsersGetUserByIdResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUserResponse;
+};
+
+export type UsersGetUserByIdResponse = UsersGetUserByIdResponses[keyof UsersGetUserByIdResponses];
+
 export type SimilarUsersGetSimilarUsersData = {
     body?: never;
     path: {
@@ -8013,6 +8054,37 @@ export type SkillsDetachSkillResponses = {
 };
 
 export type SkillsDetachSkillResponse = SkillsDetachSkillResponses[keyof SkillsDetachSkillResponses];
+
+export type UsersUploadUserImageData = {
+    body: {
+        file: Blob | File;
+    };
+    path: {
+        username: string;
+    };
+    query: {
+        type: 'avatar' | 'cover';
+    };
+    url: '/api/users/{username}/upload-image';
+};
+
+export type UsersUploadUserImageErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type UsersUploadUserImageError = UsersUploadUserImageErrors[keyof UsersUploadUserImageErrors];
+
+export type UsersUploadUserImageResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUserImageUploadResponse;
+};
+
+export type UsersUploadUserImageResponse = UsersUploadUserImageResponses[keyof UsersUploadUserImageResponses];
 
 export type WorkValuesWvStartSessionData = {
     body: ModelsWvStartSessionRequest;

@@ -122,6 +122,14 @@ func (s *Server) UsersUpdateUserProfile(ctx echo.Context, username string) error
 	return s.user.UpdateProfile(ctx, username)
 }
 
+func (s *Server) UsersGetUserById(ctx echo.Context, id string) error {
+	return s.user.GetByID(ctx, id)
+}
+
+func (s *Server) UsersUploadUserImage(ctx echo.Context, username string, _ openapi.UsersUploadUserImageParams) error {
+	return s.user.UploadImage(ctx, username)
+}
+
 // --- Experiences ---
 
 func (s *Server) ExperiencesListExperiences(ctx echo.Context, username string) error {

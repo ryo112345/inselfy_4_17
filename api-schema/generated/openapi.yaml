@@ -4145,6 +4145,34 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateUserRequest'
+  /api/users/id/{id}:
+    get:
+      operationId: Users_getUserById
+      summary: Get a user by ID
+      description: ユーザーIDでユーザー取得
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UserResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Users
   /api/users/id/{userId}/similar:
     get:
       operationId: SimilarUsers_getSimilarUsers
@@ -4757,6 +4785,55 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - Skills
+  /api/users/{username}/upload-image:
+    post:
+      operationId: Users_uploadUserImage
+      summary: Upload a user profile image
+      description: プロフィール画像アップロード（avatar / cover、要ログイン）
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - avatar
+              - cover
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UserImageUploadResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
   /api/work-values/sessions:
     post:
       operationId: WorkValues_wvStartSession
@@ -8559,6 +8636,20 @@ components:
           type: string
           description: アップロードされたファイルのURL
       description: 画像アップロード結果
+    Models.UserImageUploadResponse:
+      type: object
+      required:
+        - url
+        - user
+      properties:
+        url:
+          type: string
+          description: アップロードされたファイルのURL
+        user:
+          allOf:
+            - $ref: '#/components/schemas/Models.UserResponse'
+          description: 更新後のユーザー
+      description: プロフィール画像アップロード結果
     Models.UserResponse:
       type: object
       required:

@@ -37,4 +37,25 @@ interface Users {
     @path username: string,
     @body request: UpdateUserProfileRequest,
   ): UserResponse | NotFoundError | BadRequestError;
+
+  /** ユーザーIDでユーザー取得 */
+  @get
+  @route("/id/{id}")
+  @summary("Get a user by ID")
+  getUserById(
+    @path id: string,
+  ): UserResponse | NotFoundError | BadRequestError;
+
+  /** プロフィール画像アップロード（avatar / cover、要ログイン） */
+  @post
+  @route("/{username}/upload-image")
+  @summary("Upload a user profile image")
+  uploadUserImage(
+    @path username: string,
+    @query type: "avatar" | "cover",
+    @header contentType: "multipart/form-data",
+    @multipartBody body: {
+      file: HttpPart<bytes>;
+    },
+  ): UserImageUploadResponse | BadRequestError | NotFoundError;
 }

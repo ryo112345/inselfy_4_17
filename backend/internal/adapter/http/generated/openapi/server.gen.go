@@ -88,6 +88,24 @@ func (e ModelsUnauthorizedErrorCode) Valid() bool {
 	}
 }
 
+// Defines values for UsersUploadUserImageParamsType.
+const (
+	UsersUploadUserImageParamsTypeAvatar UsersUploadUserImageParamsType = "avatar"
+	UsersUploadUserImageParamsTypeCover  UsersUploadUserImageParamsType = "cover"
+)
+
+// Valid indicates whether the value is a known member of the UsersUploadUserImageParamsType enum.
+func (e UsersUploadUserImageParamsType) Valid() bool {
+	switch e {
+	case UsersUploadUserImageParamsTypeAvatar:
+		return true
+	case UsersUploadUserImageParamsTypeCover:
+		return true
+	default:
+		return false
+	}
+}
+
 // ModelsAddTeamMemberRequest チームメンバー追加リクエスト
 type ModelsAddTeamMemberRequest struct {
 	// Email 招待メールアドレス
@@ -2537,6 +2555,15 @@ type ModelsUploadUrlResponse struct {
 	Url string `json:"url"`
 }
 
+// ModelsUserImageUploadResponse プロフィール画像アップロード結果
+type ModelsUserImageUploadResponse struct {
+	// Url アップロードされたファイルのURL
+	Url string `json:"url"`
+
+	// User 更新後のユーザー
+	User ModelsUserResponse `json:"user"`
+}
+
 // ModelsUserResponse ユーザー情報
 type ModelsUserResponse struct {
 	// About 自己紹介
@@ -3037,6 +3064,19 @@ type FollowsListFollowingParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// UsersUploadUserImageMultipartBody defines parameters for UsersUploadUserImage.
+type UsersUploadUserImageMultipartBody struct {
+	File openapi_types.File `json:"file"`
+}
+
+// UsersUploadUserImageParams defines parameters for UsersUploadUserImage.
+type UsersUploadUserImageParams struct {
+	Type UsersUploadUserImageParamsType `form:"type" json:"type"`
+}
+
+// UsersUploadUserImageParamsType defines parameters for UsersUploadUserImage.
+type UsersUploadUserImageParamsType string
+
 // CandidateApplicationsApplyToJobJSONRequestBody defines body for CandidateApplicationsApplyToJob for application/json ContentType.
 type CandidateApplicationsApplyToJobJSONRequestBody = ModelsApplyJobRequest
 
@@ -3180,6 +3220,9 @@ type ExperiencesUpdateExperienceJSONRequestBody = ModelsUpdateExperienceRequest
 
 // SkillsAttachSkillJSONRequestBody defines body for SkillsAttachSkill for application/json ContentType.
 type SkillsAttachSkillJSONRequestBody = ModelsAttachSkillRequest
+
+// UsersUploadUserImageMultipartRequestBody defines body for UsersUploadUserImage for multipart/form-data ContentType.
+type UsersUploadUserImageMultipartRequestBody UsersUploadUserImageMultipartBody
 
 // WorkValuesWvStartSessionJSONRequestBody defines body for WorkValuesWvStartSession for application/json ContentType.
 type WorkValuesWvStartSessionJSONRequestBody = ModelsWVStartSessionRequest
@@ -3588,6 +3631,9 @@ type ServerInterface interface {
 	// Create a new user
 	// (POST /api/users)
 	UsersCreateUser(ctx echo.Context) error
+	// Get a user by ID
+	// (GET /api/users/id/{id})
+	UsersGetUserById(ctx echo.Context, id string) error
 	// Get users with similar work values
 	// (GET /api/users/id/{userId}/similar)
 	SimilarUsersGetSimilarUsers(ctx echo.Context, userId string, params SimilarUsersGetSimilarUsersParams) error
@@ -3645,6 +3691,9 @@ type ServerInterface interface {
 	// Detach a skill by name
 	// (DELETE /api/users/{username}/skills/{name})
 	SkillsDetachSkill(ctx echo.Context, username string, name string) error
+	// Upload a user profile image
+	// (POST /api/users/{username}/upload-image)
+	UsersUploadUserImage(ctx echo.Context, username string, params UsersUploadUserImageParams) error
 	// Start a work values session
 	// (POST /api/work-values/sessions)
 	WorkValuesWvStartSession(ctx echo.Context) error
@@ -6049,6 +6098,22 @@ func (w *ServerInterfaceWrapper) UsersCreateUser(ctx echo.Context) error {
 	return err
 }
 
+// UsersGetUserById converts echo context to params.
+func (w *ServerInterfaceWrapper) UsersGetUserById(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UsersGetUserById(ctx, id)
+	return err
+}
+
 // SimilarUsersGetSimilarUsers converts echo context to params.
 func (w *ServerInterfaceWrapper) SimilarUsersGetSimilarUsers(ctx echo.Context) error {
 	var err error
@@ -6434,6 +6499,31 @@ func (w *ServerInterfaceWrapper) SkillsDetachSkill(ctx echo.Context) error {
 	return err
 }
 
+// UsersUploadUserImage converts echo context to params.
+func (w *ServerInterfaceWrapper) UsersUploadUserImage(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "username" -------------
+	var username string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "username", ctx.Param("username"), &username, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params UsersUploadUserImageParams
+	// ------------- Required query parameter "type" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "type", ctx.QueryParams(), &params.Type, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter type: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UsersUploadUserImage(ctx, username, params)
+	return err
+}
+
 // WorkValuesWvStartSession converts echo context to params.
 func (w *ServerInterfaceWrapper) WorkValuesWvStartSession(ctx echo.Context) error {
 	var err error
@@ -6652,6 +6742,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/team-diagnose/:token", wrapper.TeamDiagnoseGetDiagnoseByToken)
 	router.PUT(baseURL+"/api/team-diagnose/:token/status", wrapper.TeamDiagnoseUpdateDiagnoseStatus)
 	router.POST(baseURL+"/api/users", wrapper.UsersCreateUser)
+	router.GET(baseURL+"/api/users/id/:id", wrapper.UsersGetUserById)
 	router.GET(baseURL+"/api/users/id/:userId/similar", wrapper.SimilarUsersGetSimilarUsers)
 	router.GET(baseURL+"/api/users/:username", wrapper.UsersGetUserByUsername)
 	router.PATCH(baseURL+"/api/users/:username", wrapper.UsersUpdateUserProfile)
@@ -6671,6 +6762,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/users/:username/skills", wrapper.SkillsListSkills)
 	router.POST(baseURL+"/api/users/:username/skills", wrapper.SkillsAttachSkill)
 	router.DELETE(baseURL+"/api/users/:username/skills/:name", wrapper.SkillsDetachSkill)
+	router.POST(baseURL+"/api/users/:username/upload-image", wrapper.UsersUploadUserImage)
 	router.POST(baseURL+"/api/work-values/sessions", wrapper.WorkValuesWvStartSession)
 	router.GET(baseURL+"/api/work-values/sessions/:sessionId/results", wrapper.WorkValuesWvGetResultBySession)
 	router.POST(baseURL+"/api/work-values/sessions/:sessionId/results", wrapper.WorkValuesWvSubmitResult)

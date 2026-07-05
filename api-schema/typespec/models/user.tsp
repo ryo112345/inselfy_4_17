@@ -113,3 +113,12 @@ model UserResponse {
   /** 更新日時 */
   updatedAt: utcDateTime;
 }
+
+/** プロフィール画像アップロード結果 */
+model UserImageUploadResponse {
+  /** アップロードされたファイルのURL */
+  url: string;
+
+  /** 更新後のユーザー */
+  user: UserResponse;
+}
