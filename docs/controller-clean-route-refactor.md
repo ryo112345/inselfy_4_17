@@ -29,7 +29,7 @@ backend には現在2系統の経路が混在している:
 | # | 状態 | コントローラ | 行数 | 備考 |
 |---|------|-------------|------|------|
 | 1 | [x] | team_diagnose_controller.go | 101 | 最小。練習台に最適 |
-| 2 | [ ] | saved_candidate_controller.go | 192 | 単純CRUD |
+| 2 | [x] | saved_candidate_controller.go | 192 | 単純CRUD |
 | 3 | [ ] | similar_users_controller.go | 251 | 類似度読み取り |
 | 4 | [ ] | company_profile_controller.go | 365 | `port.FileStorage` も併用中 |
 | 5 | [ ] | job_application_controller.go | 413 | **ハイブリッド**: InputPort と pool を両方持つ。pool 側だけ移行 |

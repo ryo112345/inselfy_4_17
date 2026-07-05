@@ -4,19 +4,45 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
+	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
+	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type SavedCandidateController struct {
-	pool *pgxpool.Pool
+	input port.SavedCandidateInputPort
 }
 
-func NewSavedCandidateController(pool *pgxpool.Pool) *SavedCandidateController {
-	return &SavedCandidateController{pool: pool}
+func NewSavedCandidateController(input port.SavedCandidateInputPort) *SavedCandidateController {
+	return &SavedCandidateController{input: input}
+}
+
+// toTalentCardResponse converts the read model into the shared talentCard
+// JSON shape (defined in talent_search_controller.go).
+func toTalentCardResponse(c talentsearch.Card) talentCard {
+	exps := make([]talentExp, len(c.Experiences))
+	for i, e := range c.Experiences {
+		exps[i] = talentExp{CompanyName: e.CompanyName, Title: e.Title}
+	}
+	return talentCard{
+		UserID:           c.UserID,
+		Username:         c.Username,
+		Name:             c.Name,
+		Headline:         c.Headline,
+		AvatarURL:        c.AvatarURL,
+		ProfileColor:     c.ProfileColor,
+		JobSeekingStatus: c.JobSeekingStatus,
+		Skills:           c.Skills,
+		Experiences:      exps,
+		TopWVLabels:      c.TopWVLabels,
+		TopCILabels:      c.TopCILabels,
+		Similarity:       c.Similarity,
+		WVSimilarity:     c.WVSimilarity,
+		CISimilarity:     c.CISimilarity,
+		IntSimilarity:    c.IntSimilarity,
+	}
 }
 
 func (c *SavedCandidateController) Save(ctx echo.Context) error {
@@ -26,10 +52,7 @@ func (c *SavedCandidateController) Save(ctx echo.Context) error {
 		return badRequest(ctx, "userId is required")
 	}
 
-	_, err := c.pool.Exec(ctx.Request().Context(),
-		`INSERT INTO saved_candidates (company_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-		pgUUID(companyID), pgUUID(userID))
-	if err != nil {
+	if err := c.input.Save(ctx.Request().Context(), companyID, userID); err != nil {
 		return internalError(ctx, err.Error())
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -39,10 +62,7 @@ func (c *SavedCandidateController) Unsave(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 	userID := ctx.Param("userId")
 
-	_, err := c.pool.Exec(ctx.Request().Context(),
-		`DELETE FROM saved_candidates WHERE company_id = $1 AND user_id = $2`,
-		pgUUID(companyID), pgUUID(userID))
-	if err != nil {
+	if err := c.input.Unsave(ctx.Request().Context(), companyID, userID); err != nil {
 		return internalError(ctx, err.Error())
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -60,65 +80,14 @@ func (c *SavedCandidateController) List(ctx echo.Context) error {
 		offset = 0
 	}
 
-	reqCtx := ctx.Request().Context()
-
-	var total int
-	if err := c.pool.QueryRow(reqCtx,
-		`SELECT COUNT(*) FROM saved_candidates WHERE company_id = $1`,
-		pgUUID(companyID)).Scan(&total); err != nil {
-		return internalError(ctx, err.Error())
-	}
-
-	rows, err := c.pool.Query(reqCtx, `
-		SELECT u.id, u.username, u.name, u.headline, u.avatar_url, u.profile_color, u.job_seeking_status, sc.created_at
-		FROM saved_candidates sc
-		JOIN users u ON u.id = sc.user_id
-		WHERE sc.company_id = $1
-		ORDER BY sc.created_at DESC
-		LIMIT $2 OFFSET $3`,
-		pgUUID(companyID), limit, offset)
+	cards, total, err := c.input.List(ctx.Request().Context(), companyID, limit, offset)
 	if err != nil {
 		return internalError(ctx, err.Error())
 	}
-	defer rows.Close()
 
-	var users []talentCard
-	for rows.Next() {
-		var uid pgtype.UUID
-		var username, name string
-		var headline, avatarURL, profileColor, seekingStatus pgtype.Text
-		var savedAt pgtype.Timestamptz
-
-		if err := rows.Scan(&uid, &username, &name, &headline, &avatarURL, &profileColor, &seekingStatus, &savedAt); err != nil {
-			continue
-		}
-		card := talentCard{
-			UserID:   pgUUIDToString(uid),
-			Username: username,
-			Name:     name,
-		}
-		if headline.Valid {
-			card.Headline = &headline.String
-		}
-		if avatarURL.Valid {
-			card.AvatarURL = &avatarURL.String
-		}
-		if profileColor.Valid {
-			card.ProfileColor = &profileColor.String
-		}
-		if seekingStatus.Valid {
-			card.JobSeekingStatus = &seekingStatus.String
-		}
-		users = append(users, card)
-	}
-
-	if len(users) > 0 {
-		tsc := &TalentSearchController{pool: c.pool}
-		tsc.enrichCards(reqCtx, users)
-	}
-
-	if users == nil {
-		users = []talentCard{}
+	users := make([]talentCard, len(cards))
+	for i, card := range cards {
+		users[i] = toTalentCardResponse(card)
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
@@ -131,10 +100,7 @@ func (c *SavedCandidateController) IsSaved(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 	userID := ctx.Param("userId")
 
-	var exists bool
-	err := c.pool.QueryRow(ctx.Request().Context(),
-		`SELECT EXISTS(SELECT 1 FROM saved_candidates WHERE company_id = $1 AND user_id = $2)`,
-		pgUUID(companyID), pgUUID(userID)).Scan(&exists)
+	exists, err := c.input.IsSaved(ctx.Request().Context(), companyID, userID)
 	if err != nil {
 		return internalError(ctx, err.Error())
 	}
@@ -151,21 +117,9 @@ func (c *SavedCandidateController) BulkCheck(ctx echo.Context) error {
 		return badRequest(ctx, "invalid body")
 	}
 
-	rows, err := c.pool.Query(ctx.Request().Context(),
-		`SELECT user_id FROM saved_candidates WHERE company_id = $1 AND user_id = ANY($2)`,
-		pgUUID(companyID), pgUUIDs(body.UserIDs))
+	savedSet, err := c.input.SavedSet(ctx.Request().Context(), companyID, body.UserIDs)
 	if err != nil {
 		return internalError(ctx, err.Error())
-	}
-	defer rows.Close()
-
-	savedSet := make(map[string]bool)
-	for rows.Next() {
-		var uid pgtype.UUID
-		if err := rows.Scan(&uid); err != nil {
-			continue
-		}
-		savedSet[pgUUIDToString(uid)] = true
 	}
 	return ctx.JSON(http.StatusOK, map[string]any{"saved": savedSet})
 }
@@ -173,20 +127,9 @@ func (c *SavedCandidateController) BulkCheck(ctx echo.Context) error {
 func (c *SavedCandidateController) Count(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var count int
-	err := c.pool.QueryRow(ctx.Request().Context(),
-		`SELECT COUNT(*) FROM saved_candidates WHERE company_id = $1`,
-		pgUUID(companyID)).Scan(&count)
+	count, err := c.input.Count(ctx.Request().Context(), companyID)
 	if err != nil {
 		return internalError(ctx, err.Error())
 	}
 	return ctx.JSON(http.StatusOK, map[string]int{"count": count})
-}
-
-func pgUUIDs(ids []string) []pgtype.UUID {
-	result := make([]pgtype.UUID, len(ids))
-	for i, id := range ids {
-		result[i] = pgUUID(id)
-	}
-	return result
 }

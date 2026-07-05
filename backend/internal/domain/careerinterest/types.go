@@ -9,6 +9,12 @@ const NumTypes = 6
 
 var TypeIDs = [NumTypes]string{"R", "I", "A", "S", "E", "C"}
 
+// TypeLabels maps RIASEC type ids to their Japanese labels.
+var TypeLabels = map[string]string{
+	"R": "現実的", "I": "研究的", "A": "芸術的",
+	"S": "社会的", "E": "企業的", "C": "慣習的",
+}
+
 const NumBasicInterests = 20
 
 var BasicInterestIDs = [NumBasicInterests]string{
