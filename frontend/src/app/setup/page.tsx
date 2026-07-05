@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
+import "@/external/client/api/client";
+import { usersUpdateUserProfile } from "@/external/client/api/generated";
 
 export default function SetupPage() {
   const { user, isAuthenticated, isLoading, updateUser } = useAuth();
@@ -44,25 +46,21 @@ export default function SetupPage() {
 
     setSubmitting(true);
 
-    const res = await fetch(`/api/users/${user.username}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ username: trimmedUsername, name: trimmedName }),
+    const { data: updated, error: apiError, response } = await usersUpdateUserProfile({
+      path: { username: user.username },
+      body: { username: trimmedUsername, name: trimmedName },
     });
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      if (res.status === 409) {
+    if (apiError || !updated) {
+      if (response.status === 409) {
         setError("このユーザー名はすでに使われています");
       } else {
-        setError(body?.message || "設定に失敗しました");
+        setError(apiError?.message || "設定に失敗しました");
       }
       setSubmitting(false);
       return;
     }
 
-    const updated = await res.json();
     updateUser({ ...user, ...updated, needsSetup: false });
     router.push(`/profile/${updated.username}`);
   };
