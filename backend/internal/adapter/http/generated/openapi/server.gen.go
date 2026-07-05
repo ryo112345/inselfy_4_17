@@ -58,6 +58,27 @@ func (e ModelsForbiddenErrorCode) Valid() bool {
 	}
 }
 
+// Defines values for ModelsIntegratedReportStatusResponseStatus.
+const (
+	ModelsIntegratedReportStatusResponseStatusNone    ModelsIntegratedReportStatusResponseStatus = "none"
+	ModelsIntegratedReportStatusResponseStatusPending ModelsIntegratedReportStatusResponseStatus = "pending"
+	ModelsIntegratedReportStatusResponseStatusReady   ModelsIntegratedReportStatusResponseStatus = "ready"
+)
+
+// Valid indicates whether the value is a known member of the ModelsIntegratedReportStatusResponseStatus enum.
+func (e ModelsIntegratedReportStatusResponseStatus) Valid() bool {
+	switch e {
+	case ModelsIntegratedReportStatusResponseStatusNone:
+		return true
+	case ModelsIntegratedReportStatusResponseStatusPending:
+		return true
+	case ModelsIntegratedReportStatusResponseStatusReady:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ModelsNotFoundErrorCode.
 const (
 	ModelsNotFoundErrorCodeNOTFOUND ModelsNotFoundErrorCode = "NOT_FOUND"
@@ -761,6 +782,21 @@ type ModelsCreateExperienceRequest struct {
 	Title string `json:"title"`
 }
 
+// ModelsCreateIntegratedReportRequest 統合レポート生成リクエスト作成リクエスト
+type ModelsCreateIntegratedReportRequest struct {
+	// FreeText 自由記述（200文字以内）
+	FreeText string `json:"free_text"`
+
+	// Topic1 トピック1（1〜10、topic2/topic3 と重複不可）
+	Topic1 int16 `json:"topic1"`
+
+	// Topic2 トピック2（1〜10）
+	Topic2 int16 `json:"topic2"`
+
+	// Topic3 トピック3（1〜10）
+	Topic3 int16 `json:"topic3"`
+}
+
 // ModelsCreatePostRequest 投稿作成リクエスト
 type ModelsCreatePostRequest struct {
 	// Content 本文
@@ -970,6 +1006,93 @@ type ModelsGoogleLoginRequest struct {
 	// IdToken Google ID トークン
 	IdToken string `json:"idToken"`
 }
+
+// ModelsIntegratedReportLatestRequestResponse ユーザーの最新統合レポートリクエスト
+type ModelsIntegratedReportLatestRequestResponse struct {
+	// CreatedAt リクエスト作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// HasReport レポートが生成済みかどうか
+	HasReport bool `json:"has_report"`
+
+	// RequestId リクエストID
+	RequestId string `json:"request_id"`
+
+	// UserId ユーザーID
+	UserId string `json:"user_id"`
+}
+
+// ModelsIntegratedReportMineResponse 自分の最新統合レポート
+type ModelsIntegratedReportMineResponse struct {
+	// Content レポート本文（Markdown）
+	Content string `json:"content"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// FirstView 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
+	FirstView bool `json:"first_view"`
+
+	// Id レポートID
+	Id string `json:"id"`
+
+	// RequestId リクエストID
+	RequestId string `json:"request_id"`
+}
+
+// ModelsIntegratedReportRequestResponse 統合レポート生成リクエスト（作成結果）
+type ModelsIntegratedReportRequestResponse struct {
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// FreeText 自由記述
+	FreeText string `json:"free_text"`
+
+	// Id リクエストID
+	Id string `json:"id"`
+
+	// Topic1 トピック1
+	Topic1 int16 `json:"topic1"`
+
+	// Topic2 トピック2
+	Topic2 int16 `json:"topic2"`
+
+	// Topic3 トピック3
+	Topic3 int16 `json:"topic3"`
+}
+
+// ModelsIntegratedReportResponse 統合レポート（リクエストID指定）
+type ModelsIntegratedReportResponse struct {
+	// Content レポート本文（Markdown）
+	Content string `json:"content"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// FirstView 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
+	FirstView bool `json:"first_view"`
+
+	// Id レポートID
+	Id string `json:"id"`
+
+	// RequestId リクエストID
+	RequestId string `json:"request_id"`
+
+	// UserId ユーザーID
+	UserId string `json:"user_id"`
+}
+
+// ModelsIntegratedReportStatusResponse 統合レポートのリクエスト状況
+type ModelsIntegratedReportStatusResponse struct {
+	// RequestId リクエストID（pending / ready のときのみ）
+	RequestId *string `json:"request_id,omitempty"`
+
+	// Status none: リクエストなし / pending: 生成待ち / ready: レポートあり
+	Status ModelsIntegratedReportStatusResponseStatus `json:"status"`
+}
+
+// ModelsIntegratedReportStatusResponseStatus none: リクエストなし / pending: 生成待ち / ready: レポートあり
+type ModelsIntegratedReportStatusResponseStatus string
 
 // ModelsInterviewBase 面接（共通フィールド）
 type ModelsInterviewBase struct {
@@ -3167,6 +3290,9 @@ type CompanyTeamsUpdateTeamJSONRequestBody = ModelsUpdateTeamRequest
 // CompanyTeamsAddTeamMemberJSONRequestBody defines body for CompanyTeamsAddTeamMember for application/json ContentType.
 type CompanyTeamsAddTeamMemberJSONRequestBody = ModelsAddTeamMemberRequest
 
+// IntegratedReportCreateIntegratedReportRequestJSONRequestBody defines body for IntegratedReportCreateIntegratedReportRequest for application/json ContentType.
+type IntegratedReportCreateIntegratedReportRequestJSONRequestBody = ModelsCreateIntegratedReportRequest
+
 // CandidateInterviewsSelectInterviewSlotJSONRequestBody defines body for CandidateInterviewsSelectInterviewSlot for application/json ContentType.
 type CandidateInterviewsSelectInterviewSlotJSONRequestBody = ModelsSelectSlotRequest
 
@@ -3514,6 +3640,21 @@ type ServerInterface interface {
 	// Get diagnostic scores of team members
 	// (GET /api/company/teams/{teamId}/scores)
 	CompanyTeamsGetTeamScores(ctx echo.Context, teamId string) error
+	// Get my latest integrated report
+	// (GET /api/integrated-report/me)
+	IntegratedReportGetMyIntegratedReport(ctx echo.Context) error
+	// Create an integrated report request
+	// (POST /api/integrated-report/requests)
+	IntegratedReportCreateIntegratedReportRequest(ctx echo.Context) error
+	// Get an integrated report by request ID
+	// (GET /api/integrated-report/requests/{requestId}/report)
+	IntegratedReportGetIntegratedReport(ctx echo.Context, requestId string) error
+	// Get my integrated report request status
+	// (GET /api/integrated-report/status)
+	IntegratedReportGetIntegratedReportStatus(ctx echo.Context) error
+	// Get the latest integrated report request for a user
+	// (GET /api/integrated-report/users/{userId}/latest-request)
+	IntegratedReportGetLatestIntegratedRequest(ctx echo.Context, userId string) error
 	// List interviews and pending proposals for the candidate
 	// (GET /api/interviews)
 	CandidateInterviewsListCandidateInterviews(ctx echo.Context) error
@@ -5370,6 +5511,65 @@ func (w *ServerInterfaceWrapper) CompanyTeamsGetTeamScores(ctx echo.Context) err
 	return err
 }
 
+// IntegratedReportGetMyIntegratedReport converts echo context to params.
+func (w *ServerInterfaceWrapper) IntegratedReportGetMyIntegratedReport(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.IntegratedReportGetMyIntegratedReport(ctx)
+	return err
+}
+
+// IntegratedReportCreateIntegratedReportRequest converts echo context to params.
+func (w *ServerInterfaceWrapper) IntegratedReportCreateIntegratedReportRequest(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.IntegratedReportCreateIntegratedReportRequest(ctx)
+	return err
+}
+
+// IntegratedReportGetIntegratedReport converts echo context to params.
+func (w *ServerInterfaceWrapper) IntegratedReportGetIntegratedReport(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "requestId" -------------
+	var requestId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", ctx.Param("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter requestId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.IntegratedReportGetIntegratedReport(ctx, requestId)
+	return err
+}
+
+// IntegratedReportGetIntegratedReportStatus converts echo context to params.
+func (w *ServerInterfaceWrapper) IntegratedReportGetIntegratedReportStatus(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.IntegratedReportGetIntegratedReportStatus(ctx)
+	return err
+}
+
+// IntegratedReportGetLatestIntegratedRequest converts echo context to params.
+func (w *ServerInterfaceWrapper) IntegratedReportGetLatestIntegratedRequest(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.IntegratedReportGetLatestIntegratedRequest(ctx, userId)
+	return err
+}
+
 // CandidateInterviewsListCandidateInterviews converts echo context to params.
 func (w *ServerInterfaceWrapper) CandidateInterviewsListCandidateInterviews(ctx echo.Context) error {
 	var err error
@@ -6703,6 +6903,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/company/teams/:teamId/members", wrapper.CompanyTeamsAddTeamMember)
 	router.DELETE(baseURL+"/api/company/teams/:teamId/members/:memberId", wrapper.CompanyTeamsRemoveTeamMember)
 	router.GET(baseURL+"/api/company/teams/:teamId/scores", wrapper.CompanyTeamsGetTeamScores)
+	router.GET(baseURL+"/api/integrated-report/me", wrapper.IntegratedReportGetMyIntegratedReport)
+	router.POST(baseURL+"/api/integrated-report/requests", wrapper.IntegratedReportCreateIntegratedReportRequest)
+	router.GET(baseURL+"/api/integrated-report/requests/:requestId/report", wrapper.IntegratedReportGetIntegratedReport)
+	router.GET(baseURL+"/api/integrated-report/status", wrapper.IntegratedReportGetIntegratedReportStatus)
+	router.GET(baseURL+"/api/integrated-report/users/:userId/latest-request", wrapper.IntegratedReportGetLatestIntegratedRequest)
 	router.GET(baseURL+"/api/interviews", wrapper.CandidateInterviewsListCandidateInterviews)
 	router.POST(baseURL+"/api/interviews/proposals/:proposalId/select", wrapper.CandidateInterviewsSelectInterviewSlot)
 	router.GET(baseURL+"/api/interviews/proposals/:proposalId/slots", wrapper.CandidateInterviewsGetProposalSlots)
