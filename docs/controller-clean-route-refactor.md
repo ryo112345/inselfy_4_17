@@ -31,7 +31,7 @@ backend には現在2系統の経路が混在している:
 | 1 | [x] | team_diagnose_controller.go | 101 | 最小。練習台に最適 |
 | 2 | [x] | saved_candidate_controller.go | 192 | 単純CRUD |
 | 3 | [x] | similar_users_controller.go | 251 | 類似度読み取り |
-| 4 | [ ] | company_profile_controller.go | 365 | `port.FileStorage` も併用中 |
+| 4 | [x] | company_profile_controller.go | 365 | `port.FileStorage` も併用中 |
 | 5 | [ ] | job_application_controller.go | 413 | **ハイブリッド**: InputPort と pool を両方持つ。pool 側だけ移行 |
 | 6 | [ ] | interview_controller.go | 642 | **ハイブリッド**: pool + ConversationRepository 等の port + TxManager を持つ。日程調整ロジックの interactor 抽出が本体 |
 | 7 | [ ] | company_team_controller.go | 910 | ハンドラ13個。public/company 両方から使われる（initializer.go の2箇所で生成） |
