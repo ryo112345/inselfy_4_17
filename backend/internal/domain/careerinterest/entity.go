@@ -27,16 +27,16 @@ type Response struct {
 }
 
 type Result struct {
-	ID                  string
-	SessionID           string
-	UserID              string
-	Responses           []Response
-	QuestionCount       int
-	DifferentiationSD   *float64
+	ID                   string
+	SessionID            string
+	UserID               string
+	Responses            []Response
+	QuestionCount        int
+	DifferentiationSD    *float64
 	DifferentiationLevel *string
-	BasicScores         []BasicScore
-	TypeScores          []TypeScore
-	CreatedAt           time.Time
+	BasicScores          []BasicScore
+	TypeScores           []TypeScore
+	CreatedAt            time.Time
 }
 
 const (

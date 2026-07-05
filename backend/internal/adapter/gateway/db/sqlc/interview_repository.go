@@ -296,16 +296,16 @@ func (r *InterviewRepositoryImpl) Create(ctx context.Context, iv *interview.Inte
 		return nil, domainerr.ErrBadRequest
 	}
 	row, err := q.CreateInterview(ctx, &generated.CreateInterviewParams{
-		ApplicationID: appID,
-		CompanyID:     companyID,
-		CandidateID:   candidateID,
-		Title:         iv.Title,
-		StartTime:     pgtype.Timestamptz{Time: iv.StartTime, Valid: true},
-		EndTime:       pgtype.Timestamptz{Time: iv.EndTime, Valid: true},
-		Location:      pgtype.Text{String: iv.Location, Valid: iv.Location != ""},
-		MeetingUrl:    pgtype.Text{String: iv.MeetingURL, Valid: iv.MeetingURL != ""},
-		InternalNotes: pgtype.Text{String: iv.InternalNotes, Valid: iv.InternalNotes != ""},
-		Status:        iv.Status,
+		ApplicationID:  appID,
+		CompanyID:      companyID,
+		CandidateID:    candidateID,
+		Title:          iv.Title,
+		StartTime:      pgtype.Timestamptz{Time: iv.StartTime, Valid: true},
+		EndTime:        pgtype.Timestamptz{Time: iv.EndTime, Valid: true},
+		Location:       pgtype.Text{String: iv.Location, Valid: iv.Location != ""},
+		MeetingUrl:     pgtype.Text{String: iv.MeetingURL, Valid: iv.MeetingURL != ""},
+		InternalNotes:  pgtype.Text{String: iv.InternalNotes, Valid: iv.InternalNotes != ""},
+		Status:         iv.Status,
 		SelectedSlotID: optionalUUID(strPtr(iv.SelectedSlotID)),
 		ProposalID:     optionalUUID(strPtr(iv.ProposalID)),
 	})
@@ -335,8 +335,8 @@ func (r *InterviewRepositoryImpl) ListByCompany(ctx context.Context, companyID s
 		return nil, domainerr.ErrBadRequest
 	}
 	rows, err := q.ListInterviewsByCompany(ctx, &generated.ListInterviewsByCompanyParams{
-		CompanyID: pgID,
-		StartTime: pgtype.Timestamptz{Time: from, Valid: true},
+		CompanyID:   pgID,
+		StartTime:   pgtype.Timestamptz{Time: from, Valid: true},
 		StartTime_2: pgtype.Timestamptz{Time: to, Valid: true},
 	})
 	if err != nil {

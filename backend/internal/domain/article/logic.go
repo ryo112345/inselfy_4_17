@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	MaxTitleLength  = 200
-	MaxBodyLength   = 100000
-	MaxPriceYen     = 1000000
-	MaxTags         = 10
-	MaxTagLength    = 50
-	PaidSeparator   = `<div data-paid-separator="true"></div>`
+	MaxTitleLength = 200
+	MaxBodyLength  = 100000
+	MaxPriceYen    = 1000000
+	MaxTags        = 10
+	MaxTagLength   = 50
+	PaidSeparator  = `<div data-paid-separator="true"></div>`
 )
 
 var (

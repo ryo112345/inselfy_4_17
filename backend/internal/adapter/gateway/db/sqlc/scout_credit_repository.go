@@ -129,17 +129,17 @@ func (r *ScoutCreditRepository) ReplenishAll(ctx context.Context) ([]*scout.Scou
 
 func scoutCreditToDomain(row *generated.ScoutCredit) *scout.ScoutCredit {
 	return &scout.ScoutCredit{
-		ID:                uuidToString(row.ID),
-		CompanyID:         uuidToString(row.CompanyID),
-		Balance:           int(row.Balance),
-		MonthlyAllowance:  int(row.MonthlyAllowance),
-		MaxStock:          int(row.MaxStock),
-		LastReplenishedAt: row.LastReplenishedAt.Time,
+		ID:                   uuidToString(row.ID),
+		CompanyID:            uuidToString(row.CompanyID),
+		Balance:              int(row.Balance),
+		MonthlyAllowance:     int(row.MonthlyAllowance),
+		MaxStock:             int(row.MaxStock),
+		LastReplenishedAt:    row.LastReplenishedAt.Time,
 		WarningStartedAt:     timestamptzToTimePtr(row.WarningStartedAt),
 		RestrictionStartedAt: timestamptzToTimePtr(row.RestrictionStartedAt),
 		QualityRestricted:    row.QualityRestricted,
-		CreatedAt:         row.CreatedAt.Time,
-		UpdatedAt:         row.UpdatedAt.Time,
+		CreatedAt:            row.CreatedAt.Time,
+		UpdatedAt:            row.UpdatedAt.Time,
 	}
 }
 

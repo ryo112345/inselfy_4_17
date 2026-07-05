@@ -70,13 +70,13 @@ func (r *ArticlePurchaseRepository) CompleteBySessionID(ctx context.Context, str
 
 func toDomainPurchase(row *generated.ArticlePurchase) *article.Purchase {
 	return &article.Purchase{
-		ID:              uuidToString(row.ID),
-		ArticleID:       uuidToString(row.ArticleID),
-		BuyerUserID:     uuidToString(row.BuyerUserID),
-		StripeSessionID: row.StripeSessionID,
+		ID:                    uuidToString(row.ID),
+		ArticleID:             uuidToString(row.ArticleID),
+		BuyerUserID:           uuidToString(row.BuyerUserID),
+		StripeSessionID:       row.StripeSessionID,
 		StripePaymentIntentID: textPtr(row.StripePaymentIntentID),
-		AmountYen:       int(row.AmountYen),
-		Status:          row.Status,
-		CreatedAt:       row.CreatedAt.Time,
+		AmountYen:             int(row.AmountYen),
+		Status:                row.Status,
+		CreatedAt:             row.CreatedAt.Time,
 	}
 }

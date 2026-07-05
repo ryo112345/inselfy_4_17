@@ -19,8 +19,8 @@ type R2 struct {
 func NewR2(accountID, accessKeyID, secretAccessKey, bucket, publicURL string) *R2 {
 	endpoint := fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID)
 	client := s3.New(s3.Options{
-		Region:      "auto",
-		Credentials: credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
+		Region:       "auto",
+		Credentials:  credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
 		BaseEndpoint: &endpoint,
 	})
 	return &R2{client: client, bucket: bucket, publicURL: publicURL}
