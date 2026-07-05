@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { uploadArticleImage } from "./api";
 
 type Props = {
   value: string | null;
@@ -16,15 +17,8 @@ export function CoverImageUpload({ value, onChange }: Props) {
     if (!file) return;
     setUploading(true);
     try {
-      const form = new FormData();
-      form.append("file", file);
-      const res = await fetch("/api/articles/upload-image", {
-        method: "POST",
-        body: form,
-      });
-      if (!res.ok) throw new Error("upload failed");
-      const data = await res.json();
-      onChange(data.url);
+      const url = await uploadArticleImage(file);
+      onChange(url);
     } catch {
       // upload failed
     } finally {

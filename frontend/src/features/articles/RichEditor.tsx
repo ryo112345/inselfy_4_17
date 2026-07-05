@@ -15,24 +15,13 @@ import {
   type ReactNode,
 } from "react";
 import { PaidSeparator } from "./PaidSeparatorExtension";
+import { uploadArticleImage as uploadImage } from "./api";
 
 type Props = {
   content: string;
   onChange: (html: string) => void;
   isPaid: boolean;
 };
-
-async function uploadImage(file: File): Promise<string> {
-  const form = new FormData();
-  form.append("file", file);
-  const res = await fetch("/api/articles/upload-image", {
-    method: "POST",
-    body: form,
-  });
-  if (!res.ok) throw new Error("Failed to upload image");
-  const data = await res.json();
-  return data.url;
-}
 
 type Coords = { top: number; left: number };
 

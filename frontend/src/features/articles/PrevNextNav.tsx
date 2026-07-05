@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { ArticleItem } from "./api";
+import { fetchArticles, type ArticleItem } from "./api";
 
 type Props = {
   currentArticle: ArticleItem;
@@ -13,8 +13,7 @@ export function PrevNextNav({ currentArticle }: Props) {
   const [next, setNext] = useState<ArticleItem | null>(null);
 
   useEffect(() => {
-    fetch("/api/articles?limit=100&offset=0")
-      .then((res) => (res.ok ? res.json() : null))
+    fetchArticles(100, 0)
       .then((data) => {
         if (!data?.items) return;
         const articles: ArticleItem[] = data.items;
