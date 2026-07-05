@@ -18,6 +18,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
 	"github.com/akiyama/inselfy/backend/internal/domain/skill"
+	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -125,6 +126,15 @@ func isBadRequest(err error) bool {
 		errors.Is(err, messaging.ErrBodyTooLong),
 		errors.Is(err, messaging.ErrSelfConversation),
 		errors.Is(err, messaging.ErrNotParticipant):
+		return true
+	case errors.Is(err, talentsearch.ErrTeamWVUnavailable),
+		errors.Is(err, talentsearch.ErrTeamCIUnavailable),
+		errors.Is(err, talentsearch.ErrTeamDiagUnavailable),
+		errors.Is(err, talentsearch.ErrTeamWVMissing),
+		errors.Is(err, talentsearch.ErrTeamCIMissing),
+		errors.Is(err, talentsearch.ErrWVWeightsRequired),
+		errors.Is(err, talentsearch.ErrCIWeightsRequired),
+		errors.Is(err, talentsearch.ErrBothWeightsRequired):
 		return true
 	case errors.Is(err, scout.ErrSubjectRequired),
 		errors.Is(err, scout.ErrSubjectTooLong),

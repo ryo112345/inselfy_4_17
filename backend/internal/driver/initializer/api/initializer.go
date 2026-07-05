@@ -400,7 +400,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 
 	// --- Talent Search ---
-	talentCtrl := httpcontroller.NewTalentSearchController(pool)
+	talentCtrl := httpcontroller.NewTalentSearchController(
+		usecase.NewTalentSearchInteractor(sqlcgw.NewTalentSearchQueryService(pool)),
+	)
 	talentGroup := e.Group("/api/company/talents", companyJwtMW)
 	talentGroup.GET("/search", talentCtrl.Search)
 	talentGroup.GET("/search/diagnostic", talentCtrl.DiagnosticSearch)

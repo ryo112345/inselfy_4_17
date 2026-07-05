@@ -35,7 +35,7 @@ backend には現在2系統の経路が混在している:
 | 5 | [ ] | job_application_controller.go | 413 | **ハイブリッド**: InputPort と pool を両方持つ。pool 側だけ移行 |
 | 6 | [ ] | interview_controller.go | 642 | **ハイブリッド**: pool + ConversationRepository 等の port + TxManager を持つ。日程調整ロジックの interactor 抽出が本体 |
 | 7 | [ ] | company_team_controller.go | 910 | ハンドラ13個。public/company 両方から使われる（initializer.go の2箇所で生成） |
-| 8 | [ ] | talent_search_controller.go | 1261 | 最難関。動的WHERE句組み立て＋類似度スコアリング。スコアリングは interactor でユニットテスト必須 |
+| 8 | [x] | talent_search_controller.go | 1261 | 最難関。動的WHERE句組み立て＋類似度スコアリング。スコアリングは interactor でユニットテスト必須 |
 
 移行対象外（直結のまま）: admin_user / admin_company / admin_report / admin_ci_report / admin_integrated_report の5つ。
 
@@ -125,8 +125,9 @@ refactor(backend): migrate <feature> controller to clean route
 
 ## 全件完了後の仕上げ（別コミット）
 
-1. **dead code 削除:** `port/scout_port.go` 末尾の `TalentSearchInputPort` は未使用の旧定義。
-   新しい talent search port を作る際に削除するか、そこで流用する。
+1. **dead code 削除:** ~~`port/scout_port.go` 末尾の `TalentSearchInputPort` は未使用の旧定義。
+   新しい talent search port を作る際に削除するか、そこで流用する。~~ → #8 の移行時に削除済み
+   （新定義は `port/talent_search_port.go`）。
 2. **depguard 導入:** golangci-lint の depguard で
    「`internal/adapter/http/controller` から `github.com/jackc/pgx` 系の import を禁止」を設定。
    admin コントローラは例外指定（もしくは admin だけサブパッケージ `controller/admin/` に切り出して
