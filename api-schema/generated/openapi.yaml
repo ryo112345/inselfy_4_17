@@ -8,6 +8,7 @@ tags:
   - name: Educations
   - name: Skills
   - name: ScoutSettings
+  - name: SimilarUsers
 paths:
   /api/scout-settings:
     get:
@@ -89,6 +90,40 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateUserRequest'
+  /api/users/id/{userId}/similar:
+    get:
+      operationId: SimilarUsers_getSimilarUsers
+      summary: Get users with similar work values
+      description: Work Values 診断結果に基づく類似ユーザー取得
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数（1-50、デフォルト10）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SimilarUsersResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - SimilarUsers
   /api/users/{username}:
     get:
       operationId: Users_getUserByUsername
@@ -819,6 +854,91 @@ components:
           format: date-time
           description: 更新日時
       description: スカウト受け入れ設定
+    Models.SimilarUserExperience:
+      type: object
+      required:
+        - company_name
+        - title
+        - is_current
+      properties:
+        company_name:
+          type: string
+          description: 会社名
+        title:
+          type: string
+          description: 役職
+        is_current:
+          type: boolean
+          description: 現職か
+      description: 類似ユーザーの職歴（要約）
+    Models.SimilarUserItem:
+      type: object
+      required:
+        - user_id
+        - username
+        - name
+        - headline
+        - avatar_url
+        - profile_color
+        - similarity
+        - top_needs
+        - experiences
+      properties:
+        user_id:
+          type: string
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        headline:
+          type: string
+          nullable: true
+          description: ヘッドライン
+        avatar_url:
+          type: string
+          nullable: true
+          description: アバター画像URL
+        profile_color:
+          type: string
+          nullable: true
+          description: プロフィールカラー
+        similarity:
+          type: number
+          format: double
+          description: 類似度（0-1）
+        top_needs:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: 上位の Work Needs ID
+        experiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.SimilarUserExperience'
+          nullable: true
+          description: 職歴（現職優先の要約）
+      description: 類似ユーザー
+    Models.SimilarUsersResponse:
+      type: object
+      required:
+        - users
+        - total
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.SimilarUserItem'
+          nullable: true
+          description: 類似ユーザー（0件時は null）
+        total:
+          type: integer
+          format: int32
+          description: 件数
+      description: 類似ユーザー一覧
     Models.SkillListResponse:
       type: object
       required:

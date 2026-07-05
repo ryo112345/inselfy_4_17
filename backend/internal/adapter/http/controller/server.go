@@ -13,6 +13,7 @@ type Server struct {
 	education     *EducationController
 	skill         *SkillController
 	scoutSettings *ScoutSettingsController
+	similarUsers  *SimilarUsersController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -24,6 +25,7 @@ func NewServer(
 	education *EducationController,
 	skill *SkillController,
 	scoutSettings *ScoutSettingsController,
+	similarUsers *SimilarUsersController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -31,6 +33,7 @@ func NewServer(
 		education:     education,
 		skill:         skill,
 		scoutSettings: scoutSettings,
+		similarUsers:  similarUsers,
 	}
 }
 
@@ -104,4 +107,10 @@ func (s *Server) ScoutSettingsGetScoutSettings(ctx echo.Context) error {
 
 func (s *Server) ScoutSettingsUpdateScoutSettings(ctx echo.Context) error {
 	return s.scoutSettings.Update(ctx)
+}
+
+// --- SimilarUsers ---
+
+func (s *Server) SimilarUsersGetSimilarUsers(ctx echo.Context, userID string, _ openapi.SimilarUsersGetSimilarUsersParams) error {
+	return s.similarUsers.GetSimilarUsers(ctx, userID)
 }

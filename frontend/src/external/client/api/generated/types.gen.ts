@@ -262,6 +262,80 @@ export type ModelsScoutSettingsResponse = {
 };
 
 /**
+ * 類似ユーザーの職歴（要約）
+ */
+export type ModelsSimilarUserExperience = {
+    /**
+     * 会社名
+     */
+    company_name: string;
+    /**
+     * 役職
+     */
+    title: string;
+    /**
+     * 現職か
+     */
+    is_current: boolean;
+};
+
+/**
+ * 類似ユーザー
+ */
+export type ModelsSimilarUserItem = {
+    /**
+     * ユーザーID
+     */
+    user_id: string;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * ヘッドライン
+     */
+    headline: string | null;
+    /**
+     * アバター画像URL
+     */
+    avatar_url: string | null;
+    /**
+     * プロフィールカラー
+     */
+    profile_color: string | null;
+    /**
+     * 類似度（0-1）
+     */
+    similarity: number;
+    /**
+     * 上位の Work Needs ID
+     */
+    top_needs: Array<string> | null;
+    /**
+     * 職歴（現職優先の要約）
+     */
+    experiences: Array<ModelsSimilarUserExperience> | null;
+};
+
+/**
+ * 類似ユーザー一覧
+ */
+export type ModelsSimilarUsersResponse = {
+    /**
+     * 類似ユーザー（0件時は null）
+     */
+    users: Array<ModelsSimilarUserItem> | null;
+    /**
+     * 件数
+     */
+    total: number;
+};
+
+/**
  * スキル一覧
  */
 export type ModelsSkillListResponse = {
@@ -553,6 +627,38 @@ export type UsersCreateUserResponses = {
 };
 
 export type UsersCreateUserResponse = UsersCreateUserResponses[keyof UsersCreateUserResponses];
+
+export type SimilarUsersGetSimilarUsersData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: {
+        /**
+         * 取得件数（1-50、デフォルト10）
+         */
+        limit?: number;
+    };
+    url: '/api/users/id/{userId}/similar';
+};
+
+export type SimilarUsersGetSimilarUsersErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError;
+};
+
+export type SimilarUsersGetSimilarUsersError = SimilarUsersGetSimilarUsersErrors[keyof SimilarUsersGetSimilarUsersErrors];
+
+export type SimilarUsersGetSimilarUsersResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSimilarUsersResponse;
+};
+
+export type SimilarUsersGetSimilarUsersResponse = SimilarUsersGetSimilarUsersResponses[keyof SimilarUsersGetSimilarUsersResponses];
 
 export type UsersGetUserByUsernameData = {
     body?: never;

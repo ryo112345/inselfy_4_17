@@ -111,7 +111,7 @@ cd ../backend && make oapi
 |---|------|--------------------|------|-----------|
 | 0 | [x] | TypeSpec ドリフト修復（user avatarUrl 等） | - | ffa6d21 済み |
 | 1 | [x] | scout_settings | 2 | 小さい。scout_presenter の型を共有 |
-| 2 | [ ] | similar_users | 1 | inline struct、`{users,total}` ラッパー |
+| 2 | [x] | similar_users | 1 | inline struct、`{users,total}` ラッパー |
 | 3 | [ ] | team_diagnose | 2 | inline struct、204 |
 | 4 | [ ] | scout_template | 5 | **List が bare array** |
 | 5 | [ ] | notification | 8 | req body なし、204系 |
