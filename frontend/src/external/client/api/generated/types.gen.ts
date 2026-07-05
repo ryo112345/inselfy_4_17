@@ -328,6 +328,16 @@ export type ModelsCompanyResponse = {
 };
 
 /**
+ * 企業からのスカウト返信リクエスト
+ */
+export type ModelsCompanyScoutReplyRequest = {
+    /**
+     * 本文
+     */
+    body: string;
+};
+
+/**
  * Conflict エラー
  */
 export type ModelsConflictError = {
@@ -882,6 +892,266 @@ export type ModelsRepostToggleResponse = {
 };
 
 /**
+ * スカウトクレジット
+ */
+export type ModelsScoutCreditsResponse = {
+    /**
+     * 残高
+     */
+    balance: number;
+    /**
+     * 月次補充量
+     */
+    monthlyAllowance: number;
+    /**
+     * 最大ストック
+     */
+    maxStock: number;
+    /**
+     * 最終補充日時
+     */
+    lastReplenishedAt: string;
+};
+
+/**
+ * ダッシュボード: クレジット
+ */
+export type ModelsScoutDashboardCredits = {
+    /**
+     * 残高
+     */
+    balance: number;
+    /**
+     * 最大ストック
+     */
+    maxStock: number;
+    /**
+     * 月次補充量
+     */
+    monthlyAllowance: number;
+    /**
+     * 次回補充日
+     */
+    nextReplenishDate: string;
+};
+
+/**
+ * ダッシュボード: 未返信
+ */
+export type ModelsScoutDashboardPending = {
+    /**
+     * 総件数
+     */
+    total: number;
+    /**
+     * 月別内訳
+     */
+    byMonth: Array<ModelsScoutDashboardPendingByMonth>;
+};
+
+/**
+ * ダッシュボード: 月別未返信
+ */
+export type ModelsScoutDashboardPendingByMonth = {
+    /**
+     * 送信月（YYYY-MM）
+     */
+    month: string;
+    /**
+     * 件数
+     */
+    count: number;
+    /**
+     * 期限までの残日数
+     */
+    daysLeft: number;
+};
+
+/**
+ * スカウトダッシュボード
+ */
+export type ModelsScoutDashboardResponse = {
+    /**
+     * クレジット状況
+     */
+    credits: ModelsScoutDashboardCredits;
+    /**
+     * 未返信状況
+     */
+    pending: ModelsScoutDashboardPending;
+    /**
+     * 返信率
+     */
+    replyRate: number;
+    /**
+     * 平均返信日数
+     */
+    avgReplyDays: number;
+    /**
+     * 直近90日の送信数
+     */
+    sentLast90d: number;
+};
+
+/**
+ * スカウト詳細（メッセージ + 返信スレッド）
+ */
+export type ModelsScoutDetailResponse = {
+    /**
+     * スカウトメッセージ
+     */
+    message: ModelsScoutMessageResponse;
+    /**
+     * 返信一覧（0件時は空配列）
+     */
+    replies: Array<ModelsScoutReplyResponse>;
+};
+
+/**
+ * スカウト一覧
+ */
+export type ModelsScoutListResponse = {
+    /**
+     * スカウト
+     */
+    items: Array<ModelsScoutMessageResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * スカウトメッセージ
+ */
+export type ModelsScoutMessageResponse = {
+    /**
+     * スカウトID
+     */
+    id: string;
+    /**
+     * 企業ID
+     */
+    companyId: string;
+    /**
+     * 候補者ユーザーID
+     */
+    candidateId: string;
+    /**
+     * 関連求人ID
+     */
+    jobPostingId: string | null;
+    /**
+     * 件名
+     */
+    subject: string;
+    /**
+     * 本文
+     */
+    body: string;
+    /**
+     * ステータス
+     */
+    status: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 候補者名
+     */
+    candidateName: string;
+    /**
+     * 求人タイトル
+     */
+    jobTitle: string | null;
+    /**
+     * 送信日時
+     */
+    sentAt: string | null;
+    /**
+     * 開封日時
+     */
+    openedAt: string | null;
+    /**
+     * 返信日時
+     */
+    repliedAt: string | null;
+    /**
+     * 期限
+     */
+    expiresAt: string | null;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
+ * スカウト品質スコア
+ */
+export type ModelsScoutQualityScoreResponse = {
+    /**
+     * 直近14日の返信率
+     */
+    replyRate14d: number;
+    /**
+     * 品質レベル
+     */
+    level: string;
+    /**
+     * 直近14日の送信数
+     */
+    sentLast14d: number;
+    /**
+     * 直近14日の返信数
+     */
+    repliedLast14d: number;
+    /**
+     * 警告開始日時
+     */
+    warningStartedAt?: string;
+    /**
+     * 警告期限
+     */
+    warningDeadline?: string;
+    /**
+     * 残り日数
+     */
+    daysRemaining?: number;
+    /**
+     * 制限解除日時
+     */
+    restrictionEndsAt?: string;
+};
+
+/**
+ * スカウト返信
+ */
+export type ModelsScoutReplyResponse = {
+    /**
+     * 返信ID
+     */
+    id: string;
+    /**
+     * 送信者種別（company / candidate）
+     */
+    senderType: string;
+    /**
+     * 送信者ID
+     */
+    senderId: string;
+    /**
+     * 本文
+     */
+    body: string;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
  * スカウト受け入れ設定
  */
 export type ModelsScoutSettingsResponse = {
@@ -927,6 +1197,32 @@ export type ModelsScoutTemplateResponse = {
      * 更新日時
      */
     updatedAt: string;
+};
+
+/**
+ * スカウト送信リクエスト
+ */
+export type ModelsSendScoutRequest = {
+    /**
+     * 候補者ユーザーID
+     */
+    candidateId: string;
+    /**
+     * 関連求人ID
+     */
+    jobPostingId?: string | null;
+    /**
+     * 使用テンプレートID
+     */
+    templateId?: string | null;
+    /**
+     * 件名
+     */
+    subject: string;
+    /**
+     * 本文
+     */
+    body: string;
 };
 
 /**
@@ -2007,6 +2303,196 @@ export type ScoutTemplatesUpdateScoutTemplateResponses = {
 };
 
 export type ScoutTemplatesUpdateScoutTemplateResponse = ScoutTemplatesUpdateScoutTemplateResponses[keyof ScoutTemplatesUpdateScoutTemplateResponses];
+
+export type CompanyScoutsListCompanyScoutsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * ステータスで絞り込み
+         */
+        status?: string;
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/company/scouts';
+};
+
+export type CompanyScoutsListCompanyScoutsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyScoutsListCompanyScoutsError = CompanyScoutsListCompanyScoutsErrors[keyof CompanyScoutsListCompanyScoutsErrors];
+
+export type CompanyScoutsListCompanyScoutsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutListResponse;
+};
+
+export type CompanyScoutsListCompanyScoutsResponse = CompanyScoutsListCompanyScoutsResponses[keyof CompanyScoutsListCompanyScoutsResponses];
+
+export type CompanyScoutsSendScoutData = {
+    body: ModelsSendScoutRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/scouts';
+};
+
+export type CompanyScoutsSendScoutErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+};
+
+export type CompanyScoutsSendScoutError = CompanyScoutsSendScoutErrors[keyof CompanyScoutsSendScoutErrors];
+
+export type CompanyScoutsSendScoutResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsScoutMessageResponse;
+};
+
+export type CompanyScoutsSendScoutResponse = CompanyScoutsSendScoutResponses[keyof CompanyScoutsSendScoutResponses];
+
+export type CompanyScoutsGetScoutCreditsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/scouts/credits';
+};
+
+export type CompanyScoutsGetScoutCreditsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyScoutsGetScoutCreditsError = CompanyScoutsGetScoutCreditsErrors[keyof CompanyScoutsGetScoutCreditsErrors];
+
+export type CompanyScoutsGetScoutCreditsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutCreditsResponse;
+};
+
+export type CompanyScoutsGetScoutCreditsResponse = CompanyScoutsGetScoutCreditsResponses[keyof CompanyScoutsGetScoutCreditsResponses];
+
+export type CompanyScoutsGetScoutDashboardData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/scouts/dashboard';
+};
+
+export type CompanyScoutsGetScoutDashboardErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyScoutsGetScoutDashboardError = CompanyScoutsGetScoutDashboardErrors[keyof CompanyScoutsGetScoutDashboardErrors];
+
+export type CompanyScoutsGetScoutDashboardResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutDashboardResponse;
+};
+
+export type CompanyScoutsGetScoutDashboardResponse = CompanyScoutsGetScoutDashboardResponses[keyof CompanyScoutsGetScoutDashboardResponses];
+
+export type CompanyScoutsGetScoutQualityData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/scouts/quality';
+};
+
+export type CompanyScoutsGetScoutQualityErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyScoutsGetScoutQualityError = CompanyScoutsGetScoutQualityErrors[keyof CompanyScoutsGetScoutQualityErrors];
+
+export type CompanyScoutsGetScoutQualityResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutQualityScoreResponse;
+};
+
+export type CompanyScoutsGetScoutQualityResponse = CompanyScoutsGetScoutQualityResponses[keyof CompanyScoutsGetScoutQualityResponses];
+
+export type CompanyScoutsGetCompanyScoutDetailData = {
+    body?: never;
+    path: {
+        scoutId: string;
+    };
+    query?: never;
+    url: '/api/company/scouts/{scoutId}';
+};
+
+export type CompanyScoutsGetCompanyScoutDetailErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CompanyScoutsGetCompanyScoutDetailError = CompanyScoutsGetCompanyScoutDetailErrors[keyof CompanyScoutsGetCompanyScoutDetailErrors];
+
+export type CompanyScoutsGetCompanyScoutDetailResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutDetailResponse;
+};
+
+export type CompanyScoutsGetCompanyScoutDetailResponse = CompanyScoutsGetCompanyScoutDetailResponses[keyof CompanyScoutsGetCompanyScoutDetailResponses];
+
+export type CompanyScoutsCompanyScoutReplyData = {
+    body: ModelsCompanyScoutReplyRequest;
+    path: {
+        scoutId: string;
+    };
+    query?: never;
+    url: '/api/company/scouts/{scoutId}/reply';
+};
+
+export type CompanyScoutsCompanyScoutReplyErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CompanyScoutsCompanyScoutReplyError = CompanyScoutsCompanyScoutReplyErrors[keyof CompanyScoutsCompanyScoutReplyErrors];
+
+export type CompanyScoutsCompanyScoutReplyResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: unknown;
+};
 
 export type UserNotificationsListUserNotificationsData = {
     body?: never;
