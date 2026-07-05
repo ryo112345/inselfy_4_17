@@ -3,11 +3,14 @@
 
 package controller
 
-import jobposting "github.com/akiyama/inselfy/backend/internal/domain/jobposting"
+import (
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	jobposting "github.com/akiyama/inselfy/backend/internal/domain/jobposting"
+)
 
 type jobPostingRequestConverterImpl struct{}
 
-func (c *jobPostingRequestConverterImpl) ToCreateInput(source jobPostingRequest) jobposting.CreateJobPostingInput {
+func (c *jobPostingRequestConverterImpl) ToCreateInput(source openapi.ModelsJobPostingRequest) jobposting.CreateJobPostingInput {
 	var jobpostingCreateJobPostingInput jobposting.CreateJobPostingInput
 	jobpostingCreateJobPostingInput.Title = source.Title
 	jobpostingCreateJobPostingInput.Description = source.Description
@@ -25,12 +28,12 @@ func (c *jobPostingRequestConverterImpl) ToCreateInput(source jobPostingRequest)
 	if source.TeamMembers != nil {
 		jobpostingCreateJobPostingInput.TeamMembers = make([]jobposting.TeamMember, len(source.TeamMembers))
 		for i := 0; i < len(source.TeamMembers); i++ {
-			jobpostingCreateJobPostingInput.TeamMembers[i] = c.jobpostingTeamMemberToJobpostingTeamMember(source.TeamMembers[i])
+			jobpostingCreateJobPostingInput.TeamMembers[i] = c.openapiModelsJobPostingTeamMemberToJobpostingTeamMember(source.TeamMembers[i])
 		}
 	}
 	jobpostingCreateJobPostingInput.TeamLabel = source.TeamLabel
-	if source.TeamID != nil {
-		xstring2 := *source.TeamID
+	if source.TeamId != nil {
+		xstring2 := *source.TeamId
 		jobpostingCreateJobPostingInput.TeamID = &xstring2
 	}
 	jobpostingCreateJobPostingInput.SkillsGained = source.SkillsGained
@@ -64,20 +67,20 @@ func (c *jobPostingRequestConverterImpl) ToCreateInput(source jobPostingRequest)
 	jobpostingCreateJobPostingInput.Benefits = source.Benefits
 	jobpostingCreateJobPostingInput.SmokingPolicy = source.SmokingPolicy
 	jobpostingCreateJobPostingInput.SelectionProcess = source.SelectionProcess
-	jobpostingCreateJobPostingInput.CoverImageURL = source.CoverImageURL
+	jobpostingCreateJobPostingInput.CoverImageURL = source.CoverImageUrl
 	jobpostingCreateJobPostingInput.HighlightTitleRole = source.HighlightTitleRole
 	jobpostingCreateJobPostingInput.HighlightTitleAppeal = source.HighlightTitleAppeal
 	jobpostingCreateJobPostingInput.HighlightTitleChallenge = source.HighlightTitleChallenge
 	jobpostingCreateJobPostingInput.HighlightTitleGrowth = source.HighlightTitleGrowth
-	if source.GalleryURLs != nil {
-		jobpostingCreateJobPostingInput.GalleryURLs = make([]string, len(source.GalleryURLs))
-		for k := 0; k < len(source.GalleryURLs); k++ {
-			jobpostingCreateJobPostingInput.GalleryURLs[k] = source.GalleryURLs[k]
+	if source.GalleryUrls != nil {
+		jobpostingCreateJobPostingInput.GalleryURLs = make([]string, len(source.GalleryUrls))
+		for k := 0; k < len(source.GalleryUrls); k++ {
+			jobpostingCreateJobPostingInput.GalleryURLs[k] = source.GalleryUrls[k]
 		}
 	}
 	return jobpostingCreateJobPostingInput
 }
-func (c *jobPostingRequestConverterImpl) ToUpdateInput(source jobPostingRequest) jobposting.UpdateJobPostingInput {
+func (c *jobPostingRequestConverterImpl) ToUpdateInput(source openapi.ModelsJobPostingRequest) jobposting.UpdateJobPostingInput {
 	var jobpostingUpdateJobPostingInput jobposting.UpdateJobPostingInput
 	jobpostingUpdateJobPostingInput.Title = source.Title
 	jobpostingUpdateJobPostingInput.Description = source.Description
@@ -95,12 +98,12 @@ func (c *jobPostingRequestConverterImpl) ToUpdateInput(source jobPostingRequest)
 	if source.TeamMembers != nil {
 		jobpostingUpdateJobPostingInput.TeamMembers = make([]jobposting.TeamMember, len(source.TeamMembers))
 		for i := 0; i < len(source.TeamMembers); i++ {
-			jobpostingUpdateJobPostingInput.TeamMembers[i] = c.jobpostingTeamMemberToJobpostingTeamMember(source.TeamMembers[i])
+			jobpostingUpdateJobPostingInput.TeamMembers[i] = c.openapiModelsJobPostingTeamMemberToJobpostingTeamMember(source.TeamMembers[i])
 		}
 	}
 	jobpostingUpdateJobPostingInput.TeamLabel = source.TeamLabel
-	if source.TeamID != nil {
-		xstring2 := *source.TeamID
+	if source.TeamId != nil {
+		xstring2 := *source.TeamId
 		jobpostingUpdateJobPostingInput.TeamID = &xstring2
 	}
 	jobpostingUpdateJobPostingInput.SkillsGained = source.SkillsGained
@@ -134,22 +137,24 @@ func (c *jobPostingRequestConverterImpl) ToUpdateInput(source jobPostingRequest)
 	jobpostingUpdateJobPostingInput.Benefits = source.Benefits
 	jobpostingUpdateJobPostingInput.SmokingPolicy = source.SmokingPolicy
 	jobpostingUpdateJobPostingInput.SelectionProcess = source.SelectionProcess
-	jobpostingUpdateJobPostingInput.CoverImageURL = source.CoverImageURL
+	jobpostingUpdateJobPostingInput.CoverImageURL = source.CoverImageUrl
 	jobpostingUpdateJobPostingInput.HighlightTitleRole = source.HighlightTitleRole
 	jobpostingUpdateJobPostingInput.HighlightTitleAppeal = source.HighlightTitleAppeal
 	jobpostingUpdateJobPostingInput.HighlightTitleChallenge = source.HighlightTitleChallenge
 	jobpostingUpdateJobPostingInput.HighlightTitleGrowth = source.HighlightTitleGrowth
-	if source.GalleryURLs != nil {
-		jobpostingUpdateJobPostingInput.GalleryURLs = make([]string, len(source.GalleryURLs))
-		for k := 0; k < len(source.GalleryURLs); k++ {
-			jobpostingUpdateJobPostingInput.GalleryURLs[k] = source.GalleryURLs[k]
+	if source.GalleryUrls != nil {
+		jobpostingUpdateJobPostingInput.GalleryURLs = make([]string, len(source.GalleryUrls))
+		for k := 0; k < len(source.GalleryUrls); k++ {
+			jobpostingUpdateJobPostingInput.GalleryURLs[k] = source.GalleryUrls[k]
 		}
 	}
 	return jobpostingUpdateJobPostingInput
 }
-func (c *jobPostingRequestConverterImpl) jobpostingTeamMemberToJobpostingTeamMember(source jobposting.TeamMember) jobposting.TeamMember {
+func (c *jobPostingRequestConverterImpl) openapiModelsJobPostingTeamMemberToJobpostingTeamMember(source openapi.ModelsJobPostingTeamMember) jobposting.TeamMember {
 	var jobpostingTeamMember jobposting.TeamMember
 	jobpostingTeamMember.Name = source.Name
-	jobpostingTeamMember.PhotoURL = source.PhotoURL
+	if source.PhotoUrl != nil {
+		jobpostingTeamMember.PhotoURL = *source.PhotoUrl
+	}
 	return jobpostingTeamMember
 }

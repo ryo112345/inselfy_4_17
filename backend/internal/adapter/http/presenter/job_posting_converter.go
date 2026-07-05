@@ -3,6 +3,7 @@ package presenter
 import (
 	"time"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobposting"
 )
 
@@ -15,9 +16,11 @@ import (
 // goverter:output:package github.com/akiyama/inselfy/backend/internal/adapter/http/presenter
 // goverter:extend emptySliceIfNil
 // goverter:extend copyTime
+// goverter:extend omitEmptyString
+// goverter:matchIgnoreCase
 type jobPostingConverter interface {
-	ToResponse(j *jobposting.JobPosting) *jobPostingResponse
-	ToResponses(js []*jobposting.JobPosting) []*jobPostingResponse
+	ToResponse(j *jobposting.JobPosting) *openapi.ModelsJobPostingResponse
+	ToResponses(js []*jobposting.JobPosting) []*openapi.ModelsJobPostingResponse
 }
 
 // emptySliceIfNil normalizes nil slices to empty slices so JSON renders [] not null.
