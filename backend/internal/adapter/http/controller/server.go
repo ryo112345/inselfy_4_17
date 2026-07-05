@@ -18,6 +18,7 @@ type Server struct {
 	scoutTemplate *ScoutTemplateController
 	notification  *NotificationController
 	follow        *FollowController
+	auth          *AuthController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -34,6 +35,7 @@ func NewServer(
 	scoutTemplate *ScoutTemplateController,
 	notification *NotificationController,
 	follow *FollowController,
+	auth *AuthController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -46,6 +48,7 @@ func NewServer(
 		scoutTemplate: scoutTemplate,
 		notification:  notification,
 		follow:        follow,
+		auth:          auth,
 	}
 }
 
@@ -214,3 +217,13 @@ func (s *Server) FollowsListFollowing(ctx echo.Context, username string, _ opena
 func (s *Server) FollowsGetFollowStatus(ctx echo.Context, username string) error {
 	return s.follow.GetFollowStatus(ctx, username)
 }
+
+// --- Auth ---
+
+func (s *Server) AuthGoogleLogin(ctx echo.Context) error { return s.auth.GoogleLogin(ctx) }
+
+func (s *Server) AuthRefreshToken(ctx echo.Context) error { return s.auth.Refresh(ctx) }
+
+func (s *Server) AuthLogout(ctx echo.Context) error { return s.auth.Logout(ctx) }
+
+func (s *Server) AuthGetMe(ctx echo.Context) error { return s.auth.GetMe(ctx) }

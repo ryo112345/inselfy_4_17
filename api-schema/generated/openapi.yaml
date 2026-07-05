@@ -13,7 +13,92 @@ tags:
   - name: ScoutTemplates
   - name: Notifications
   - name: Follows
+  - name: Auth
 paths:
+  /api/auth/google:
+    post:
+      operationId: Auth_googleLogin
+      summary: Login with a Google ID token
+      description: Google ログイン。成功時は HttpOnly cookie にトークンを設定し、ユーザー情報を返す
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AuthUserResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.GoogleLoginRequest'
+  /api/auth/logout:
+    post:
+      operationId: Auth_logout
+      summary: Logout and clear auth cookies
+      description: ログアウト（認証 cookie を削除）
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+      tags:
+        - Auth
+  /api/auth/me:
+    get:
+      operationId: Auth_getMe
+      summary: Get the authenticated user
+      description: ログイン中ユーザー情報取得
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AuthUserResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Auth
+  /api/auth/refresh:
+    post:
+      operationId: Auth_refreshToken
+      summary: Refresh the access token via cookie
+      description: トークンリフレッシュ（refresh_token cookie 使用）。cookie を更新しユーザー情報を返す
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AuthUserResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Auth
   /api/company/notifications:
     get:
       operationId: CompanyNotifications_listCompanyNotifications
@@ -1106,6 +1191,38 @@ components:
           maxLength: 100
           description: スキル名（1-100文字）
       description: スキル追加リクエスト
+    Models.AuthUserResponse:
+      type: object
+      required:
+        - id
+        - username
+        - name
+        - needsSetup
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        avatarUrl:
+          type: string
+          description: アバター画像URL
+        email:
+          type: string
+          description: メールアドレス
+        needsSetup:
+          type: boolean
+          description: 初期セットアップが必要か（自動生成ユーザー名のまま）
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 認証ユーザー情報（トークンは HttpOnly cookie で返る）
     Models.BadRequestError:
       type: object
       required:
@@ -1498,6 +1615,17 @@ components:
         message:
           type: string
       description: Forbidden エラー
+    Models.GoogleLoginRequest:
+      type: object
+      required:
+        - idToken
+      properties:
+        idToken:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: Google ID トークン
+      description: Google ログインリクエスト
     Models.NotFoundError:
       type: object
       required:
@@ -1725,6 +1853,19 @@ components:
           format: date-time
           description: 追加日時（user_skills.created_at）
       description: スキル
+    Models.UnauthorizedError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - UNAUTHORIZED
+        message:
+          type: string
+      description: Unauthorized エラー
     Models.UnreadCountResponse:
       type: object
       required:

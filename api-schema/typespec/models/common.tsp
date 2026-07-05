@@ -46,3 +46,10 @@ model ForbiddenError {
   code: "FORBIDDEN";
   message: string;
 }
+
+/** Unauthorized エラー */
+@error
+model UnauthorizedError {
+  code: "UNAUTHORIZED";
+  message: string;
+}

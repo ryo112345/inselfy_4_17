@@ -72,10 +72,49 @@ func (e ModelsNotFoundErrorCode) Valid() bool {
 	}
 }
 
+// Defines values for ModelsUnauthorizedErrorCode.
+const (
+	ModelsUnauthorizedErrorCodeUNAUTHORIZED ModelsUnauthorizedErrorCode = "UNAUTHORIZED"
+)
+
+// Valid indicates whether the value is a known member of the ModelsUnauthorizedErrorCode enum.
+func (e ModelsUnauthorizedErrorCode) Valid() bool {
+	switch e {
+	case ModelsUnauthorizedErrorCodeUNAUTHORIZED:
+		return true
+	default:
+		return false
+	}
+}
+
 // ModelsAttachSkillRequest スキル追加リクエスト
 type ModelsAttachSkillRequest struct {
 	// Name スキル名（1-100文字）
 	Name string `json:"name"`
+}
+
+// ModelsAuthUserResponse 認証ユーザー情報（トークンは HttpOnly cookie で返る）
+type ModelsAuthUserResponse struct {
+	// AvatarUrl アバター画像URL
+	AvatarUrl *string `json:"avatarUrl,omitempty"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Email メールアドレス
+	Email *string `json:"email,omitempty"`
+
+	// Id ユーザーID
+	Id string `json:"id"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// NeedsSetup 初期セットアップが必要か（自動生成ユーザー名のまま）
+	NeedsSetup bool `json:"needsSetup"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
 }
 
 // ModelsBadRequestError Bad Request エラー
@@ -325,6 +364,12 @@ type ModelsForbiddenError struct {
 // ModelsForbiddenErrorCode defines model for ModelsForbiddenError.Code.
 type ModelsForbiddenErrorCode string
 
+// ModelsGoogleLoginRequest Google ログインリクエスト
+type ModelsGoogleLoginRequest struct {
+	// IdToken Google ID トークン
+	IdToken string `json:"idToken"`
+}
+
 // ModelsNotFoundError Not Found エラー
 type ModelsNotFoundError struct {
 	Code    ModelsNotFoundErrorCode `json:"code"`
@@ -468,6 +513,15 @@ type ModelsSkillResponse struct {
 	// Name スキル名
 	Name string `json:"name"`
 }
+
+// ModelsUnauthorizedError Unauthorized エラー
+type ModelsUnauthorizedError struct {
+	Code    ModelsUnauthorizedErrorCode `json:"code"`
+	Message string                      `json:"message"`
+}
+
+// ModelsUnauthorizedErrorCode defines model for ModelsUnauthorizedError.Code.
+type ModelsUnauthorizedErrorCode string
 
 // ModelsUnreadCountResponse 未読件数
 type ModelsUnreadCountResponse struct {
@@ -673,6 +727,9 @@ type FollowsListFollowingParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// AuthGoogleLoginJSONRequestBody defines body for AuthGoogleLogin for application/json ContentType.
+type AuthGoogleLoginJSONRequestBody = ModelsGoogleLoginRequest
+
 // ScoutTemplatesCreateScoutTemplateJSONRequestBody defines body for ScoutTemplatesCreateScoutTemplate for application/json ContentType.
 type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplateRequest
 
@@ -708,6 +765,18 @@ type SkillsAttachSkillJSONRequestBody = ModelsAttachSkillRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Login with a Google ID token
+	// (POST /api/auth/google)
+	AuthGoogleLogin(ctx echo.Context) error
+	// Logout and clear auth cookies
+	// (POST /api/auth/logout)
+	AuthLogout(ctx echo.Context) error
+	// Get the authenticated user
+	// (GET /api/auth/me)
+	AuthGetMe(ctx echo.Context) error
+	// Refresh the access token via cookie
+	// (POST /api/auth/refresh)
+	AuthRefreshToken(ctx echo.Context) error
 	// List notifications for the authenticated company
 	// (GET /api/company/notifications)
 	CompanyNotificationsListCompanyNotifications(ctx echo.Context, params CompanyNotificationsListCompanyNotificationsParams) error
@@ -824,6 +893,42 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// AuthGoogleLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) AuthGoogleLogin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AuthGoogleLogin(ctx)
+	return err
+}
+
+// AuthLogout converts echo context to params.
+func (w *ServerInterfaceWrapper) AuthLogout(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AuthLogout(ctx)
+	return err
+}
+
+// AuthGetMe converts echo context to params.
+func (w *ServerInterfaceWrapper) AuthGetMe(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AuthGetMe(ctx)
+	return err
+}
+
+// AuthRefreshToken converts echo context to params.
+func (w *ServerInterfaceWrapper) AuthRefreshToken(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AuthRefreshToken(ctx)
+	return err
 }
 
 // CompanyNotificationsListCompanyNotifications converts echo context to params.
@@ -1482,6 +1587,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.POST(baseURL+"/api/auth/google", wrapper.AuthGoogleLogin)
+	router.POST(baseURL+"/api/auth/logout", wrapper.AuthLogout)
+	router.GET(baseURL+"/api/auth/me", wrapper.AuthGetMe)
+	router.POST(baseURL+"/api/auth/refresh", wrapper.AuthRefreshToken)
 	router.GET(baseURL+"/api/company/notifications", wrapper.CompanyNotificationsListCompanyNotifications)
 	router.POST(baseURL+"/api/company/notifications/read-all", wrapper.CompanyNotificationsMarkAllCompanyNotificationsRead)
 	router.GET(baseURL+"/api/company/notifications/unread-count", wrapper.CompanyNotificationsCountCompanyUnreadNotifications)

@@ -11,6 +11,40 @@ export type ModelsAttachSkillRequest = {
 };
 
 /**
+ * 認証ユーザー情報（トークンは HttpOnly cookie で返る）
+ */
+export type ModelsAuthUserResponse = {
+    /**
+     * ユーザーID
+     */
+    id: string;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * アバター画像URL
+     */
+    avatarUrl?: string;
+    /**
+     * メールアドレス
+     */
+    email?: string;
+    /**
+     * 初期セットアップが必要か（自動生成ユーザー名のまま）
+     */
+    needsSetup: boolean;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
  * Bad Request エラー
  */
 export type ModelsBadRequestError = {
@@ -354,6 +388,16 @@ export type ModelsForbiddenError = {
 };
 
 /**
+ * Google ログインリクエスト
+ */
+export type ModelsGoogleLoginRequest = {
+    /**
+     * Google ID トークン
+     */
+    idToken: string;
+};
+
+/**
  * Not Found エラー
  */
 export type ModelsNotFoundError = {
@@ -557,6 +601,14 @@ export type ModelsSkillResponse = {
      * 追加日時（user_skills.created_at）
      */
     attachedAt: string;
+};
+
+/**
+ * Unauthorized エラー
+ */
+export type ModelsUnauthorizedError = {
+    code: 'UNAUTHORIZED';
+    message: string;
 };
 
 /**
@@ -790,6 +842,97 @@ export type ModelsUserResponse = {
      */
     updatedAt: string;
 };
+
+export type AuthGoogleLoginData = {
+    body: ModelsGoogleLoginRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/google';
+};
+
+export type AuthGoogleLoginErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsUnauthorizedError;
+};
+
+export type AuthGoogleLoginError = AuthGoogleLoginErrors[keyof AuthGoogleLoginErrors];
+
+export type AuthGoogleLoginResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAuthUserResponse;
+};
+
+export type AuthGoogleLoginResponse = AuthGoogleLoginResponses[keyof AuthGoogleLoginResponses];
+
+export type AuthLogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/logout';
+};
+
+export type AuthLogoutResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type AuthLogoutResponse = AuthLogoutResponses[keyof AuthLogoutResponses];
+
+export type AuthGetMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/me';
+};
+
+export type AuthGetMeErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsUnauthorizedError | ModelsNotFoundError;
+};
+
+export type AuthGetMeError = AuthGetMeErrors[keyof AuthGetMeErrors];
+
+export type AuthGetMeResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAuthUserResponse;
+};
+
+export type AuthGetMeResponse = AuthGetMeResponses[keyof AuthGetMeResponses];
+
+export type AuthRefreshTokenData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/refresh';
+};
+
+export type AuthRefreshTokenErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsUnauthorizedError;
+};
+
+export type AuthRefreshTokenError = AuthRefreshTokenErrors[keyof AuthRefreshTokenErrors];
+
+export type AuthRefreshTokenResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAuthUserResponse;
+};
+
+export type AuthRefreshTokenResponse = AuthRefreshTokenResponses[keyof AuthRefreshTokenResponses];
 
 export type CompanyNotificationsListCompanyNotificationsData = {
     body?: never;
