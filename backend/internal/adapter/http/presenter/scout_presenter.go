@@ -88,34 +88,30 @@ type dashboardResponse struct {
 	SentLast90d  int     `json:"sentLast90d"`
 }
 
+var scoutConv scoutConverter = &scoutConverterImpl{}
+
 // ScoutMessageResponse builds the single scout-message API response.
 func ScoutMessageResponse(m *scout.ScoutMessageWithNames) any {
-	return toScoutMessageResponse(m)
+	return scoutConv.ToScoutMessageResponse(m)
 }
 
 // ScoutMessagesResponse builds the paginated scout-message list API response.
 func ScoutMessagesResponse(msgs []*scout.ScoutMessageWithNames, total int) any {
 	items := make([]*scoutMessageResponse, len(msgs))
 	for i, m := range msgs {
-		items[i] = toScoutMessageResponse(m)
+		items[i] = scoutConv.ToScoutMessageResponse(m)
 	}
 	return &scoutListResponse{Items: items, Total: total}
 }
 
 // ScoutDetailResponse builds the scout-detail API response.
 func ScoutDetailResponse(m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) any {
-	rr := make([]*scoutReplyResponse, len(replies))
-	for i, r := range replies {
-		rr[i] = &scoutReplyResponse{
-			ID:         r.ID,
-			SenderType: r.SenderType,
-			SenderID:   r.SenderID,
-			Body:       r.Body,
-			CreatedAt:  r.CreatedAt,
-		}
+	rr := scoutConv.ToScoutReplyResponses(replies)
+	if rr == nil {
+		rr = []*scoutReplyResponse{} // keep rendering "replies": [] (not null)
 	}
 	return &scoutDetailResponse{
-		Message: toScoutMessageResponse(m),
+		Message: scoutConv.ToScoutMessageResponse(m),
 		Replies: rr,
 	}
 }
@@ -183,24 +179,4 @@ func ScoutDashboardResponse(stats *scout.DashboardStats) any {
 	resp.Pending.ByMonth = byMonth
 
 	return resp
-}
-
-func toScoutMessageResponse(m *scout.ScoutMessageWithNames) *scoutMessageResponse {
-	return &scoutMessageResponse{
-		ID:            m.ID,
-		CompanyID:     m.CompanyID,
-		CandidateID:   m.CandidateID,
-		JobPostingID:  m.JobPostingID,
-		Subject:       m.Subject,
-		Body:          m.Body,
-		Status:        string(m.Status),
-		CompanyName:   m.CompanyName,
-		CandidateName: m.CandidateName,
-		JobTitle:      m.JobTitle,
-		SentAt:        m.SentAt,
-		OpenedAt:      m.OpenedAt,
-		RepliedAt:     m.RepliedAt,
-		ExpiresAt:     m.ExpiresAt,
-		CreatedAt:     m.CreatedAt,
-	}
 }
