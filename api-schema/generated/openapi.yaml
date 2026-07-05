@@ -11,7 +11,107 @@ tags:
   - name: SimilarUsers
   - name: TeamDiagnose
   - name: ScoutTemplates
+  - name: Notifications
 paths:
+  /api/company/notifications:
+    get:
+      operationId: CompanyNotifications_listCompanyNotifications
+      summary: List notifications for the authenticated company
+      description: 通知一覧（企業認証）
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotificationListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Notifications
+  /api/company/notifications/read-all:
+    post:
+      operationId: CompanyNotifications_markAllCompanyNotificationsRead
+      summary: Mark all notifications as read for the authenticated company
+      description: 全件既読化（企業認証）
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Notifications
+  /api/company/notifications/unread-count:
+    get:
+      operationId: CompanyNotifications_countCompanyUnreadNotifications
+      summary: Count unread notifications for the authenticated company
+      description: 未読件数（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnreadCountResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Notifications
+  /api/company/notifications/{id}/read:
+    post:
+      operationId: CompanyNotifications_markCompanyNotificationRead
+      summary: Mark a company notification as read
+      description: 既読化
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Notifications
   /api/company/scout-templates:
     post:
       operationId: ScoutTemplates_createScoutTemplate
@@ -145,6 +245,105 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - ScoutTemplates
+  /api/notifications:
+    get:
+      operationId: UserNotifications_listUserNotifications
+      summary: List notifications for the authenticated user
+      description: 通知一覧（要ログイン）
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotificationListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Notifications
+  /api/notifications/read-all:
+    post:
+      operationId: UserNotifications_markAllUserNotificationsRead
+      summary: Mark all notifications as read for the authenticated user
+      description: 全件既読化（要ログイン）
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Notifications
+  /api/notifications/unread-count:
+    get:
+      operationId: UserNotifications_countUserUnreadNotifications
+      summary: Count unread notifications for the authenticated user
+      description: 未読件数（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnreadCountResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Notifications
+  /api/notifications/{id}/read:
+    post:
+      operationId: UserNotifications_markUserNotificationRead
+      summary: Mark a notification as read
+      description: 既読化
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Notifications
   /api/scout-settings:
     get:
       operationId: ScoutSettings_getScoutSettings
@@ -1086,6 +1285,57 @@ components:
         message:
           type: string
       description: Not Found エラー
+    Models.NotificationListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.NotificationResponse'
+          description: 通知
+        total:
+          type: integer
+          format: int32
+          description: 総件数
+      description: 通知一覧
+    Models.NotificationResponse:
+      type: object
+      required:
+        - id
+        - type
+        - title
+        - body
+        - referenceId
+        - isRead
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: ID
+        type:
+          type: string
+          description: 通知種別
+        title:
+          type: string
+          description: タイトル
+        body:
+          type: string
+          description: 本文
+        referenceId:
+          type: string
+          nullable: true
+          description: 関連リソースID
+        isRead:
+          type: boolean
+          description: 既読か
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 通知
     Models.ScoutSettingsResponse:
       type: object
       required:
@@ -1249,6 +1499,16 @@ components:
           format: date-time
           description: 追加日時（user_skills.created_at）
       description: スキル
+    Models.UnreadCountResponse:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          format: int32
+          description: 未読数
+      description: 未読件数
     Models.UpdateDiagnoseStatusRequest:
       type: object
       properties:

@@ -295,6 +295,39 @@ type ModelsNotFoundError struct {
 // ModelsNotFoundErrorCode defines model for ModelsNotFoundError.Code.
 type ModelsNotFoundErrorCode string
 
+// ModelsNotificationListResponse 通知一覧
+type ModelsNotificationListResponse struct {
+	// Items 通知
+	Items []ModelsNotificationResponse `json:"items"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsNotificationResponse 通知
+type ModelsNotificationResponse struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id ID
+	Id string `json:"id"`
+
+	// IsRead 既読か
+	IsRead bool `json:"isRead"`
+
+	// ReferenceId 関連リソースID
+	ReferenceId *string `json:"referenceId"`
+
+	// Title タイトル
+	Title string `json:"title"`
+
+	// Type 通知種別
+	Type string `json:"type"`
+}
+
 // ModelsScoutSettingsResponse スカウト受け入れ設定
 type ModelsScoutSettingsResponse struct {
 	// AcceptingScouts スカウトを受け入れるか
@@ -395,6 +428,12 @@ type ModelsSkillResponse struct {
 
 	// Name スキル名
 	Name string `json:"name"`
+}
+
+// ModelsUnreadCountResponse 未読件数
+type ModelsUnreadCountResponse struct {
+	// Count 未読数
+	Count int32 `json:"count"`
 }
 
 // ModelsUpdateDiagnoseStatusRequest チーム診断ステータス更新リクエスト（指定したキーのみ更新）
@@ -553,6 +592,24 @@ type ModelsUserResponse struct {
 	Username string `json:"username"`
 }
 
+// CompanyNotificationsListCompanyNotificationsParams defines parameters for CompanyNotificationsListCompanyNotifications.
+type CompanyNotificationsListCompanyNotificationsParams struct {
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// UserNotificationsListUserNotificationsParams defines parameters for UserNotificationsListUserNotifications.
+type UserNotificationsListUserNotificationsParams struct {
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // SimilarUsersGetSimilarUsersParams defines parameters for SimilarUsersGetSimilarUsers.
 type SimilarUsersGetSimilarUsersParams struct {
 	// Limit 取得件数（1-50、デフォルト10）
@@ -594,6 +651,18 @@ type SkillsAttachSkillJSONRequestBody = ModelsAttachSkillRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// List notifications for the authenticated company
+	// (GET /api/company/notifications)
+	CompanyNotificationsListCompanyNotifications(ctx echo.Context, params CompanyNotificationsListCompanyNotificationsParams) error
+	// Mark all notifications as read for the authenticated company
+	// (POST /api/company/notifications/read-all)
+	CompanyNotificationsMarkAllCompanyNotificationsRead(ctx echo.Context) error
+	// Count unread notifications for the authenticated company
+	// (GET /api/company/notifications/unread-count)
+	CompanyNotificationsCountCompanyUnreadNotifications(ctx echo.Context) error
+	// Mark a company notification as read
+	// (POST /api/company/notifications/{id}/read)
+	CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Context, id string) error
 	// List scout templates
 	// (GET /api/company/scout-templates)
 	ScoutTemplatesListScoutTemplates(ctx echo.Context) error
@@ -609,6 +678,18 @@ type ServerInterface interface {
 	// Update a scout template
 	// (PUT /api/company/scout-templates/{templateId})
 	ScoutTemplatesUpdateScoutTemplate(ctx echo.Context, templateId string) error
+	// List notifications for the authenticated user
+	// (GET /api/notifications)
+	UserNotificationsListUserNotifications(ctx echo.Context, params UserNotificationsListUserNotificationsParams) error
+	// Mark all notifications as read for the authenticated user
+	// (POST /api/notifications/read-all)
+	UserNotificationsMarkAllUserNotificationsRead(ctx echo.Context) error
+	// Count unread notifications for the authenticated user
+	// (GET /api/notifications/unread-count)
+	UserNotificationsCountUserUnreadNotifications(ctx echo.Context) error
+	// Mark a notification as read
+	// (POST /api/notifications/{id}/read)
+	UserNotificationsMarkUserNotificationRead(ctx echo.Context, id string) error
 	// Get scout settings for the authenticated user
 	// (GET /api/scout-settings)
 	ScoutSettingsGetScoutSettings(ctx echo.Context) error
@@ -671,6 +752,65 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// CompanyNotificationsListCompanyNotifications converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyNotificationsListCompanyNotifications(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CompanyNotificationsListCompanyNotificationsParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyNotificationsListCompanyNotifications(ctx, params)
+	return err
+}
+
+// CompanyNotificationsMarkAllCompanyNotificationsRead converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyNotificationsMarkAllCompanyNotificationsRead(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyNotificationsMarkAllCompanyNotificationsRead(ctx)
+	return err
+}
+
+// CompanyNotificationsCountCompanyUnreadNotifications converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyNotificationsCountCompanyUnreadNotifications(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyNotificationsCountCompanyUnreadNotifications(ctx)
+	return err
+}
+
+// CompanyNotificationsMarkCompanyNotificationRead converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyNotificationsMarkCompanyNotificationRead(ctx, id)
+	return err
 }
 
 // ScoutTemplatesListScoutTemplates converts echo context to params.
@@ -736,6 +876,65 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesUpdateScoutTemplate(ctx echo.Cont
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutTemplatesUpdateScoutTemplate(ctx, templateId)
+	return err
+}
+
+// UserNotificationsListUserNotifications converts echo context to params.
+func (w *ServerInterfaceWrapper) UserNotificationsListUserNotifications(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params UserNotificationsListUserNotificationsParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UserNotificationsListUserNotifications(ctx, params)
+	return err
+}
+
+// UserNotificationsMarkAllUserNotificationsRead converts echo context to params.
+func (w *ServerInterfaceWrapper) UserNotificationsMarkAllUserNotificationsRead(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UserNotificationsMarkAllUserNotificationsRead(ctx)
+	return err
+}
+
+// UserNotificationsCountUserUnreadNotifications converts echo context to params.
+func (w *ServerInterfaceWrapper) UserNotificationsCountUserUnreadNotifications(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UserNotificationsCountUserUnreadNotifications(ctx)
+	return err
+}
+
+// UserNotificationsMarkUserNotificationRead converts echo context to params.
+func (w *ServerInterfaceWrapper) UserNotificationsMarkUserNotificationRead(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UserNotificationsMarkUserNotificationRead(ctx, id)
 	return err
 }
 
@@ -1099,11 +1298,19 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/api/company/notifications", wrapper.CompanyNotificationsListCompanyNotifications)
+	router.POST(baseURL+"/api/company/notifications/read-all", wrapper.CompanyNotificationsMarkAllCompanyNotificationsRead)
+	router.GET(baseURL+"/api/company/notifications/unread-count", wrapper.CompanyNotificationsCountCompanyUnreadNotifications)
+	router.POST(baseURL+"/api/company/notifications/:id/read", wrapper.CompanyNotificationsMarkCompanyNotificationRead)
 	router.GET(baseURL+"/api/company/scout-templates", wrapper.ScoutTemplatesListScoutTemplates)
 	router.POST(baseURL+"/api/company/scout-templates", wrapper.ScoutTemplatesCreateScoutTemplate)
 	router.DELETE(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesDeleteScoutTemplate)
 	router.GET(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesGetScoutTemplate)
 	router.PUT(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesUpdateScoutTemplate)
+	router.GET(baseURL+"/api/notifications", wrapper.UserNotificationsListUserNotifications)
+	router.POST(baseURL+"/api/notifications/read-all", wrapper.UserNotificationsMarkAllUserNotificationsRead)
+	router.GET(baseURL+"/api/notifications/unread-count", wrapper.UserNotificationsCountUserUnreadNotifications)
+	router.POST(baseURL+"/api/notifications/:id/read", wrapper.UserNotificationsMarkUserNotificationRead)
 	router.GET(baseURL+"/api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
 	router.PUT(baseURL+"/api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
 	router.GET(baseURL+"/api/team-diagnose/:token", wrapper.TeamDiagnoseGetDiagnoseByToken)
