@@ -3,24 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NEED_LABELS, type NeedId } from "@/features/work-values/lib/needs";
-
-type Experience = {
-  company_name: string;
-  title: string;
-  is_current: boolean;
-};
-
-type SimilarUser = {
-  user_id: string;
-  username: string;
-  name: string;
-  headline: string | null;
-  avatar_url: string | null;
-  profile_color: string | null;
-  similarity: number;
-  top_needs: string[];
-  experiences: Experience[];
-};
+import "@/external/client/api/client";
+import {
+  similarUsersGetSimilarUsers,
+  type ModelsSimilarUserItem,
+} from "@/external/client/api/generated";
 
 type Props = {
   userId: string;
@@ -29,16 +16,15 @@ type Props = {
 };
 
 export function SimilarUsersCard({ userId, visible, className }: Props) {
-  const [users, setUsers] = useState<SimilarUser[]>([]);
+  const [users, setUsers] = useState<ModelsSimilarUserItem[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetch(`/api/users/id/${userId}/similar?limit=20`)
-      .then((r) => (r.ok ? r.json() : { users: [] }))
-      .then((data) => {
+    similarUsersGetSimilarUsers({ path: { userId }, query: { limit: 20 } })
+      .then(({ data, error }) => {
         if (!cancelled) {
-          setUsers(data.users ?? []);
+          setUsers(error ? [] : (data?.users ?? []));
           setLoading(false);
         }
       })
@@ -73,8 +59,10 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
   );
 }
 
-function SimilarUserRow({ user }: { user: SimilarUser }) {
+function SimilarUserRow({ user }: { user: ModelsSimilarUserItem }) {
   const color = user.profile_color ?? "#3D8B6E";
+  const experiences = user.experiences ?? [];
+  const topNeeds = user.top_needs ?? [];
   const simColor =
     user.similarity >= 80
       ? "text-emerald-600 bg-emerald-50"
@@ -104,9 +92,9 @@ function SimilarUserRow({ user }: { user: SimilarUser }) {
           </span>
         </div>
 
-        {user.experiences.length > 0 && (
+        {experiences.length > 0 && (
           <div className="mt-1.5 space-y-1.5">
-            {user.experiences.map((exp, i) => (
+            {experiences.map((exp, i) => (
               <div key={i} className="flex gap-1.5">
                 <span className={`mt-[5px] inline-block w-1.5 h-1.5 rounded-full shrink-0 ${exp.is_current ? "bg-emerald-400" : "bg-gray-300"}`} />
                 <div className="min-w-0">
@@ -122,9 +110,9 @@ function SimilarUserRow({ user }: { user: SimilarUser }) {
           </div>
         )}
 
-        {user.top_needs.length > 0 && (
+        {topNeeds.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
-            {user.top_needs.map((label) => (
+            {topNeeds.map((label) => (
               <span
                 key={label}
                 className="inline-block text-[12px] px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600"
