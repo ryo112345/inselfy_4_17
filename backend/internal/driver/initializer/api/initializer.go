@@ -347,7 +347,11 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 
 	// --- Company Profile (public) ---
-	companyProfileCtrl := httpcontroller.NewCompanyProfileController(pool, fileStorage)
+	companyProfileGw := sqlcgw.NewCompanyProfileGateway(pool)
+	companyProfileCtrl := httpcontroller.NewCompanyProfileController(
+		usecase.NewCompanyProfileInteractor(companyProfileGw, companyProfileGw),
+		fileStorage,
+	)
 	e.GET("/api/companies/:id", func(c echo.Context) error {
 		return companyProfileCtrl.GetPublicProfile(c)
 	})
