@@ -10,6 +10,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for ModelsBadRequestErrorCode.
@@ -100,6 +101,75 @@ type ModelsApplyJobRequest struct {
 
 	// Message 応募メッセージ
 	Message string `json:"message"`
+}
+
+// ModelsArticleListResponse 記事一覧
+type ModelsArticleListResponse struct {
+	// Items 記事
+	Items []ModelsArticleResponse `json:"items"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsArticleResponse 記事
+type ModelsArticleResponse struct {
+	// AuthorName 著者名
+	AuthorName string `json:"authorName"`
+
+	// AuthorType 著者種別（user / company）
+	AuthorType string `json:"authorType"`
+
+	// AuthorUsername 著者ユーザー名（ユーザー記事のみ）
+	AuthorUsername *string `json:"authorUsername,omitempty"`
+
+	// Body 本文（有料記事は未購入時に空文字）
+	Body string `json:"body"`
+
+	// CharCount 文字数
+	CharCount int `json:"charCount"`
+
+	// CoverImageUrl カバー画像URL
+	CoverImageUrl *string `json:"coverImageUrl,omitempty"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// FreePreview 無料プレビュー部分
+	FreePreview string `json:"freePreview"`
+
+	// Id 記事ID
+	Id string `json:"id"`
+
+	// ImageCount 画像数
+	ImageCount int `json:"imageCount"`
+
+	// IsAuthor 閲覧者が著者か
+	IsAuthor bool `json:"isAuthor"`
+
+	// IsPaid 有料記事か
+	IsPaid bool `json:"isPaid"`
+
+	// PriceYen 価格（円）
+	PriceYen int `json:"priceYen"`
+
+	// PublishedAt 公開日時
+	PublishedAt *time.Time `json:"publishedAt,omitempty"`
+
+	// Purchased 購入済みか
+	Purchased bool `json:"purchased"`
+
+	// Status ステータス
+	Status string `json:"status"`
+
+	// Tags タグ
+	Tags []string `json:"tags"`
+
+	// Title タイトル
+	Title string `json:"title"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // ModelsAttachSkillRequest スキル追加リクエスト
@@ -265,6 +335,12 @@ type ModelsCandidateScoutReplyRequest struct {
 	Body string `json:"body"`
 }
 
+// ModelsCheckoutSessionResponse Stripe チェックアウトセッション
+type ModelsCheckoutSessionResponse struct {
+	// Url チェックアウトURL
+	Url string `json:"url"`
+}
+
 // ModelsCommentListResponse コメント一覧
 type ModelsCommentListResponse struct {
 	// Items コメント
@@ -416,6 +492,27 @@ type ModelsConversationResponse struct {
 
 	// UnreadCount 未読数
 	UnreadCount int `json:"unreadCount"`
+}
+
+// ModelsCreateArticleRequest 記事作成リクエスト
+type ModelsCreateArticleRequest struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// CoverImageUrl カバー画像URL
+	CoverImageUrl *string `json:"coverImageUrl,omitempty"`
+
+	// IsPaid 有料記事か
+	IsPaid bool `json:"isPaid"`
+
+	// PriceYen 価格（円）
+	PriceYen int `json:"priceYen"`
+
+	// Tags タグ
+	Tags []string `json:"tags"`
+
+	// Title タイトル
+	Title string `json:"title"`
 }
 
 // ModelsCreateCommentRequest コメント作成リクエスト
@@ -1273,6 +1370,27 @@ type ModelsUpdateApplicationStatusRequest struct {
 	Status *string `json:"status,omitempty"`
 }
 
+// ModelsUpdateArticleRequest 記事更新リクエスト
+type ModelsUpdateArticleRequest struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// CoverImageUrl カバー画像URL
+	CoverImageUrl *string `json:"coverImageUrl,omitempty"`
+
+	// IsPaid 有料記事か
+	IsPaid bool `json:"isPaid"`
+
+	// PriceYen 価格（円）
+	PriceYen int `json:"priceYen"`
+
+	// Tags タグ
+	Tags []string `json:"tags"`
+
+	// Title タイトル
+	Title string `json:"title"`
+}
+
 // ModelsUpdateDiagnoseStatusRequest チーム診断ステータス更新リクエスト（指定したキーのみ更新）
 type ModelsUpdateDiagnoseStatusRequest struct {
 	// CiStatus Career Interest 診断ステータス
@@ -1379,6 +1497,12 @@ type ModelsUpdateUserProfileRequest struct {
 
 	// Username ユーザー名（3-20文字、半角英数字とアンダースコア）
 	Username *string `json:"username,omitempty"`
+}
+
+// ModelsUploadUrlResponse 画像アップロード結果
+type ModelsUploadUrlResponse struct {
+	// Url アップロードされたファイルのURL
+	Url string `json:"url"`
 }
 
 // ModelsUserResponse ユーザー情報
@@ -1555,6 +1679,26 @@ type CandidateApplicationsCheckAppliedParams struct {
 	JobPostingId string `form:"jobPostingId" json:"jobPostingId"`
 }
 
+// ArticlesListArticlesParams defines parameters for ArticlesListArticles.
+type ArticlesListArticlesParams struct {
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ArticlesListMyArticlesParams defines parameters for ArticlesListMyArticles.
+type ArticlesListMyArticlesParams struct {
+	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// ArticlesUploadArticleImageMultipartBody defines parameters for ArticlesUploadArticleImage.
+type ArticlesUploadArticleImageMultipartBody struct {
+	File openapi_types.File `json:"file"`
+}
+
 // CompanyApplicationsListCompanyApplicationsParams defines parameters for CompanyApplicationsListCompanyApplications.
 type CompanyApplicationsListCompanyApplicationsParams struct {
 	// Status ステータスで絞り込み
@@ -1708,6 +1852,15 @@ type FollowsListFollowingParams struct {
 // CandidateApplicationsApplyToJobJSONRequestBody defines body for CandidateApplicationsApplyToJob for application/json ContentType.
 type CandidateApplicationsApplyToJobJSONRequestBody = ModelsApplyJobRequest
 
+// ArticlesCreateArticleJSONRequestBody defines body for ArticlesCreateArticle for application/json ContentType.
+type ArticlesCreateArticleJSONRequestBody = ModelsCreateArticleRequest
+
+// ArticlesUploadArticleImageMultipartRequestBody defines body for ArticlesUploadArticleImage for multipart/form-data ContentType.
+type ArticlesUploadArticleImageMultipartRequestBody ArticlesUploadArticleImageMultipartBody
+
+// ArticlesUpdateArticleJSONRequestBody defines body for ArticlesUpdateArticle for application/json ContentType.
+type ArticlesUpdateArticleJSONRequestBody = ModelsUpdateArticleRequest
+
 // AuthGoogleLoginJSONRequestBody defines body for AuthGoogleLogin for application/json ContentType.
 type AuthGoogleLoginJSONRequestBody = ModelsGoogleLoginRequest
 
@@ -1719,6 +1872,12 @@ type CareerInterestCiSubmitResultJSONRequestBody = ModelsCISubmitResultRequest
 
 // CompanyApplicationsUpdateApplicationStatusJSONRequestBody defines body for CompanyApplicationsUpdateApplicationStatus for application/json ContentType.
 type CompanyApplicationsUpdateApplicationStatusJSONRequestBody = ModelsUpdateApplicationStatusRequest
+
+// CompanyArticlesCreateCompanyArticleJSONRequestBody defines body for CompanyArticlesCreateCompanyArticle for application/json ContentType.
+type CompanyArticlesCreateCompanyArticleJSONRequestBody = ModelsCreateArticleRequest
+
+// CompanyArticlesUpdateCompanyArticleJSONRequestBody defines body for CompanyArticlesUpdateCompanyArticle for application/json ContentType.
+type CompanyArticlesUpdateCompanyArticleJSONRequestBody = ModelsUpdateArticleRequest
 
 // CompanyAuthCompanyLoginJSONRequestBody defines body for CompanyAuthCompanyLogin for application/json ContentType.
 type CompanyAuthCompanyLoginJSONRequestBody = ModelsCompanyLoginRequest
@@ -1815,6 +1974,33 @@ type ServerInterface interface {
 	// Withdraw an application
 	// (POST /api/applications/{applicationId}/withdraw)
 	CandidateApplicationsWithdrawApplication(ctx echo.Context, applicationId string) error
+	// List published articles
+	// (GET /api/articles)
+	ArticlesListArticles(ctx echo.Context, params ArticlesListArticlesParams) error
+	// Create an article as a user
+	// (POST /api/articles)
+	ArticlesCreateArticle(ctx echo.Context) error
+	// List articles authored by the authenticated user
+	// (GET /api/articles/mine)
+	ArticlesListMyArticles(ctx echo.Context, params ArticlesListMyArticlesParams) error
+	// Upload an article image
+	// (POST /api/articles/upload-image)
+	ArticlesUploadArticleImage(ctx echo.Context) error
+	// Delete an article as a user
+	// (DELETE /api/articles/{articleId})
+	ArticlesDeleteArticle(ctx echo.Context, articleId string) error
+	// Get an article
+	// (GET /api/articles/{articleId})
+	ArticlesGetArticle(ctx echo.Context, articleId string) error
+	// Update an article as a user
+	// (PUT /api/articles/{articleId})
+	ArticlesUpdateArticle(ctx echo.Context, articleId string) error
+	// Create a Stripe checkout session for a paid article
+	// (POST /api/articles/{articleId}/checkout)
+	ArticlesCreateArticleCheckout(ctx echo.Context, articleId string) error
+	// Publish an article as a user
+	// (POST /api/articles/{articleId}/publish)
+	ArticlesPublishArticle(ctx echo.Context, articleId string) error
 	// Login with a Google ID token
 	// (POST /api/auth/google)
 	AuthGoogleLogin(ctx echo.Context) error
@@ -1848,6 +2034,18 @@ type ServerInterface interface {
 	// Update application status
 	// (PATCH /api/company/applications/{applicationId}/status)
 	CompanyApplicationsUpdateApplicationStatus(ctx echo.Context, applicationId string) error
+	// Create an article as a company
+	// (POST /api/company/articles)
+	CompanyArticlesCreateCompanyArticle(ctx echo.Context) error
+	// Delete an article as a company
+	// (DELETE /api/company/articles/{articleId})
+	CompanyArticlesDeleteCompanyArticle(ctx echo.Context, articleId string) error
+	// Update an article as a company
+	// (PUT /api/company/articles/{articleId})
+	CompanyArticlesUpdateCompanyArticle(ctx echo.Context, articleId string) error
+	// Publish an article as a company
+	// (POST /api/company/articles/{articleId}/publish)
+	CompanyArticlesPublishCompanyArticle(ctx echo.Context, articleId string) error
 	// Login as a company
 	// (POST /api/company/auth/login)
 	CompanyAuthCompanyLogin(ctx echo.Context) error
@@ -2159,6 +2357,154 @@ func (w *ServerInterfaceWrapper) CandidateApplicationsWithdrawApplication(ctx ec
 	return err
 }
 
+// ArticlesListArticles converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesListArticles(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ArticlesListArticlesParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesListArticles(ctx, params)
+	return err
+}
+
+// ArticlesCreateArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesCreateArticle(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesCreateArticle(ctx)
+	return err
+}
+
+// ArticlesListMyArticles converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesListMyArticles(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ArticlesListMyArticlesParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesListMyArticles(ctx, params)
+	return err
+}
+
+// ArticlesUploadArticleImage converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesUploadArticleImage(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesUploadArticleImage(ctx)
+	return err
+}
+
+// ArticlesDeleteArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesDeleteArticle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "articleId" -------------
+	var articleId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesDeleteArticle(ctx, articleId)
+	return err
+}
+
+// ArticlesGetArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesGetArticle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "articleId" -------------
+	var articleId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesGetArticle(ctx, articleId)
+	return err
+}
+
+// ArticlesUpdateArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesUpdateArticle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "articleId" -------------
+	var articleId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesUpdateArticle(ctx, articleId)
+	return err
+}
+
+// ArticlesCreateArticleCheckout converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesCreateArticleCheckout(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "articleId" -------------
+	var articleId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesCreateArticleCheckout(ctx, articleId)
+	return err
+}
+
+// ArticlesPublishArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) ArticlesPublishArticle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "articleId" -------------
+	var articleId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ArticlesPublishArticle(ctx, articleId)
+	return err
+}
+
 // AuthGoogleLogin converts echo context to params.
 func (w *ServerInterfaceWrapper) AuthGoogleLogin(ctx echo.Context) error {
 	var err error
@@ -2341,6 +2687,63 @@ func (w *ServerInterfaceWrapper) CompanyApplicationsUpdateApplicationStatus(ctx 
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyApplicationsUpdateApplicationStatus(ctx, applicationId)
+	return err
+}
+
+// CompanyArticlesCreateCompanyArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyArticlesCreateCompanyArticle(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyArticlesCreateCompanyArticle(ctx)
+	return err
+}
+
+// CompanyArticlesDeleteCompanyArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyArticlesDeleteCompanyArticle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "articleId" -------------
+	var articleId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyArticlesDeleteCompanyArticle(ctx, articleId)
+	return err
+}
+
+// CompanyArticlesUpdateCompanyArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyArticlesUpdateCompanyArticle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "articleId" -------------
+	var articleId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyArticlesUpdateCompanyArticle(ctx, articleId)
+	return err
+}
+
+// CompanyArticlesPublishCompanyArticle converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyArticlesPublishCompanyArticle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "articleId" -------------
+	var articleId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyArticlesPublishCompanyArticle(ctx, articleId)
 	return err
 }
 
@@ -3792,6 +4195,15 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/applications", wrapper.CandidateApplicationsApplyToJob)
 	router.GET(baseURL+"/api/applications/check", wrapper.CandidateApplicationsCheckApplied)
 	router.POST(baseURL+"/api/applications/:applicationId/withdraw", wrapper.CandidateApplicationsWithdrawApplication)
+	router.GET(baseURL+"/api/articles", wrapper.ArticlesListArticles)
+	router.POST(baseURL+"/api/articles", wrapper.ArticlesCreateArticle)
+	router.GET(baseURL+"/api/articles/mine", wrapper.ArticlesListMyArticles)
+	router.POST(baseURL+"/api/articles/upload-image", wrapper.ArticlesUploadArticleImage)
+	router.DELETE(baseURL+"/api/articles/:articleId", wrapper.ArticlesDeleteArticle)
+	router.GET(baseURL+"/api/articles/:articleId", wrapper.ArticlesGetArticle)
+	router.PUT(baseURL+"/api/articles/:articleId", wrapper.ArticlesUpdateArticle)
+	router.POST(baseURL+"/api/articles/:articleId/checkout", wrapper.ArticlesCreateArticleCheckout)
+	router.POST(baseURL+"/api/articles/:articleId/publish", wrapper.ArticlesPublishArticle)
 	router.POST(baseURL+"/api/auth/google", wrapper.AuthGoogleLogin)
 	router.POST(baseURL+"/api/auth/logout", wrapper.AuthLogout)
 	router.GET(baseURL+"/api/auth/me", wrapper.AuthGetMe)
@@ -3803,6 +4215,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/company/applications", wrapper.CompanyApplicationsListCompanyApplications)
 	router.GET(baseURL+"/api/company/applications/:applicationId", wrapper.CompanyApplicationsGetApplication)
 	router.PATCH(baseURL+"/api/company/applications/:applicationId/status", wrapper.CompanyApplicationsUpdateApplicationStatus)
+	router.POST(baseURL+"/api/company/articles", wrapper.CompanyArticlesCreateCompanyArticle)
+	router.DELETE(baseURL+"/api/company/articles/:articleId", wrapper.CompanyArticlesDeleteCompanyArticle)
+	router.PUT(baseURL+"/api/company/articles/:articleId", wrapper.CompanyArticlesUpdateCompanyArticle)
+	router.POST(baseURL+"/api/company/articles/:articleId/publish", wrapper.CompanyArticlesPublishCompanyArticle)
 	router.POST(baseURL+"/api/company/auth/login", wrapper.CompanyAuthCompanyLogin)
 	router.POST(baseURL+"/api/company/auth/logout", wrapper.CompanyAuthCompanyLogout)
 	router.GET(baseURL+"/api/company/auth/me", wrapper.CompanyAuthCompanyGetMe)

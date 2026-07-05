@@ -27,6 +27,7 @@ type Server struct {
 	candScout     *CandidateScoutController
 	jobApp        *JobApplicationController
 	messaging     *MessagingController
+	article       *ArticleController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -52,6 +53,7 @@ func NewServer(
 	candScout *CandidateScoutController,
 	jobApp *JobApplicationController,
 	messaging *MessagingController,
+	article *ArticleController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -73,6 +75,7 @@ func NewServer(
 		candScout:     candScout,
 		jobApp:        jobApp,
 		messaging:     messaging,
+		article:       article,
 	}
 }
 
@@ -494,4 +497,58 @@ func (s *Server) CompanyMessagingMarkCompanyConversationRead(ctx echo.Context, c
 
 func (s *Server) CompanyMessagingCountCompanyUnreadMessages(ctx echo.Context) error {
 	return s.messaging.CountUnreadByCompany(ctx)
+}
+
+// --- Articles ---
+
+func (s *Server) ArticlesListArticles(ctx echo.Context, _ openapi.ArticlesListArticlesParams) error {
+	return s.article.List(ctx)
+}
+
+func (s *Server) ArticlesListMyArticles(ctx echo.Context, _ openapi.ArticlesListMyArticlesParams) error {
+	return s.article.ListMine(ctx)
+}
+
+func (s *Server) ArticlesUploadArticleImage(ctx echo.Context) error {
+	return s.article.UploadImage(ctx)
+}
+
+func (s *Server) ArticlesCreateArticle(ctx echo.Context) error {
+	return s.article.CreateAsUser(ctx)
+}
+
+func (s *Server) ArticlesGetArticle(ctx echo.Context, articleID string) error {
+	return s.article.GetByID(ctx, articleID)
+}
+
+func (s *Server) ArticlesUpdateArticle(ctx echo.Context, articleID string) error {
+	return s.article.UpdateAsUser(ctx, articleID)
+}
+
+func (s *Server) ArticlesDeleteArticle(ctx echo.Context, articleID string) error {
+	return s.article.DeleteAsUser(ctx, articleID)
+}
+
+func (s *Server) ArticlesPublishArticle(ctx echo.Context, articleID string) error {
+	return s.article.PublishAsUser(ctx, articleID)
+}
+
+func (s *Server) ArticlesCreateArticleCheckout(ctx echo.Context, articleID string) error {
+	return s.article.CreateCheckout(ctx, articleID)
+}
+
+func (s *Server) CompanyArticlesCreateCompanyArticle(ctx echo.Context) error {
+	return s.article.CreateAsCompany(ctx)
+}
+
+func (s *Server) CompanyArticlesUpdateCompanyArticle(ctx echo.Context, articleID string) error {
+	return s.article.UpdateAsCompany(ctx, articleID)
+}
+
+func (s *Server) CompanyArticlesDeleteCompanyArticle(ctx echo.Context, articleID string) error {
+	return s.article.DeleteAsCompany(ctx, articleID)
+}
+
+func (s *Server) CompanyArticlesPublishCompanyArticle(ctx echo.Context, articleID string) error {
+	return s.article.PublishAsCompany(ctx, articleID)
 }

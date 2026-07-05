@@ -20,6 +20,7 @@ import "./models/scout.tsp";
 import "./models/candidate-scout.tsp";
 import "./models/job-application.tsp";
 import "./models/messaging.tsp";
+import "./models/article.tsp";
 import "./routes/users.tsp";
 import "./routes/experiences.tsp";
 import "./routes/educations.tsp";
@@ -39,6 +40,7 @@ import "./routes/scouts.tsp";
 import "./routes/candidate-scouts.tsp";
 import "./routes/job-applications.tsp";
 import "./routes/messaging.tsp";
+import "./routes/articles.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;

@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
@@ -28,27 +29,9 @@ func NewArticleController(
 	return &ArticleController{input: input, storage: storage}
 }
 
-type createArticleRequest struct {
-	Title         string   `json:"title"`
-	Body          string   `json:"body"`
-	IsPaid        bool     `json:"isPaid"`
-	PriceYen      int      `json:"priceYen"`
-	CoverImageURL *string  `json:"coverImageUrl"`
-	Tags          []string `json:"tags"`
-}
-
-type updateArticleRequest struct {
-	Title         string   `json:"title"`
-	Body          string   `json:"body"`
-	IsPaid        bool     `json:"isPaid"`
-	PriceYen      int      `json:"priceYen"`
-	CoverImageURL *string  `json:"coverImageUrl"`
-	Tags          []string `json:"tags"`
-}
-
 func (c *ArticleController) CreateAsUser(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
-	var body createArticleRequest
+	var body openapi.ModelsCreateArticleRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
@@ -59,7 +42,7 @@ func (c *ArticleController) CreateAsUser(ctx echo.Context) error {
 		Body:          body.Body,
 		IsPaid:        body.IsPaid,
 		PriceYen:      body.PriceYen,
-		CoverImageURL: body.CoverImageURL,
+		CoverImageURL: body.CoverImageUrl,
 		Tags:          body.Tags,
 	})
 	if err != nil {
@@ -70,7 +53,7 @@ func (c *ArticleController) CreateAsUser(ctx echo.Context) error {
 
 func (c *ArticleController) CreateAsCompany(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
-	var body createArticleRequest
+	var body openapi.ModelsCreateArticleRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
@@ -123,7 +106,7 @@ func (c *ArticleController) ListMine(ctx echo.Context) error {
 
 func (c *ArticleController) UpdateAsUser(ctx echo.Context, id string) error {
 	userID := authmw.UserID(ctx)
-	var body updateArticleRequest
+	var body openapi.ModelsUpdateArticleRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
@@ -132,7 +115,7 @@ func (c *ArticleController) UpdateAsUser(ctx echo.Context, id string) error {
 		Body:          body.Body,
 		IsPaid:        body.IsPaid,
 		PriceYen:      body.PriceYen,
-		CoverImageURL: body.CoverImageURL,
+		CoverImageURL: body.CoverImageUrl,
 		Tags:          body.Tags,
 	}, article.AuthorTypeUser, userID)
 	if err != nil {
@@ -143,7 +126,7 @@ func (c *ArticleController) UpdateAsUser(ctx echo.Context, id string) error {
 
 func (c *ArticleController) UpdateAsCompany(ctx echo.Context, id string) error {
 	companyID := authmw.CompanyID(ctx)
-	var body updateArticleRequest
+	var body openapi.ModelsUpdateArticleRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
@@ -152,7 +135,7 @@ func (c *ArticleController) UpdateAsCompany(ctx echo.Context, id string) error {
 		Body:          body.Body,
 		IsPaid:        body.IsPaid,
 		PriceYen:      body.PriceYen,
-		CoverImageURL: body.CoverImageURL,
+		CoverImageURL: body.CoverImageUrl,
 		Tags:          body.Tags,
 	}, article.AuthorTypeCompany, companyID)
 	if err != nil {
@@ -239,7 +222,7 @@ func (c *ArticleController) UploadImage(ctx echo.Context) error {
 	if err != nil {
 		return internalError(ctx, "failed to save file")
 	}
-	return ctx.JSON(http.StatusOK, map[string]string{"url": url})
+	return ctx.JSON(http.StatusOK, openapi.ModelsUploadUrlResponse{Url: url})
 }
 
 var unauthorizedResponse = map[string]string{

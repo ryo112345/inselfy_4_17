@@ -125,7 +125,7 @@ cd ../backend && make oapi
 | 13 | [x] | candidate_scout | 6 | scout presenter 再利用 + ad-hoc map |
 | 14 | [x] | job_application | 7 | フィルタ7種の list、`{"status":"ok"}` |
 | 15 | [x] | messaging | 14 | 対称ペア、`Metadata map` |
-| 16 | [ ] | article | 13 | multipart 1本、21フィールド resp |
+| 16 | [x] | article | 13 | multipart 1本、21フィールド resp |
 | 17 | [ ] | company_profile | 5 | multipart、18/24フィールド |
 | 18 | [ ] | saved_candidate | 6 | talentCard 再利用、ad-hoc map |
 | 19 | [ ] | company_team | 11 | inline struct 7個、**nil→null 維持** |
