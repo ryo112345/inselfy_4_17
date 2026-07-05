@@ -3,59 +3,57 @@
 
 package presenter
 
-import jobapplication "github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
+import (
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	jobapplication "github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
+)
 
 type jobApplicationConverterImpl struct{}
 
-func (c *jobApplicationConverterImpl) ToResponse(source *jobapplication.JobApplicationWithDetails) *JobApplicationResponse {
-	var pPresenterJobApplicationResponse *JobApplicationResponse
+func (c *jobApplicationConverterImpl) ToResponse(source *jobapplication.JobApplicationWithDetails) *openapi.ModelsJobApplicationResponse {
+	var pOpenapiModelsJobApplicationResponse *openapi.ModelsJobApplicationResponse
 	if source != nil {
-		var presenterJobApplicationResponse JobApplicationResponse
-		presenterJobApplicationResponse.ID = (*source).JobApplication.ID
-		presenterJobApplicationResponse.JobPostingID = (*source).JobApplication.JobPostingID
-		presenterJobApplicationResponse.CandidateID = (*source).JobApplication.CandidateID
-		presenterJobApplicationResponse.CompanyID = (*source).JobApplication.CompanyID
-		presenterJobApplicationResponse.Status = string((*source).JobApplication.Status)
-		presenterJobApplicationResponse.Message = (*source).JobApplication.Message
-		presenterJobApplicationResponse.JobTitle = (*source).JobTitle
-		presenterJobApplicationResponse.CompanyName = (*source).CompanyName
-		presenterJobApplicationResponse.CandidateName = (*source).CandidateName
-		presenterJobApplicationResponse.CandidateAvatar = (*source).CandidateAvatar
-		presenterJobApplicationResponse.CandidateUsername = (*source).CandidateUsername
-		presenterJobApplicationResponse.CandidateHeadline = (*source).CandidateHeadline
-		presenterJobApplicationResponse.CandidateProfileColor = (*source).CandidateProfileColor
-		presenterJobApplicationResponse.CandidateSeekingStatus = (*source).CandidateSeekingStatus
-		if (*source).CandidateSkills != nil {
-			presenterJobApplicationResponse.CandidateSkills = make([]string, len((*source).CandidateSkills))
-			for i := 0; i < len((*source).CandidateSkills); i++ {
-				presenterJobApplicationResponse.CandidateSkills[i] = (*source).CandidateSkills[i]
-			}
-		}
-		if (*source).WVSimilarity != nil {
-			xfloat64 := *(*source).WVSimilarity
-			presenterJobApplicationResponse.WVSimilarity = &xfloat64
-		}
+		var openapiModelsJobApplicationResponse openapi.ModelsJobApplicationResponse
+		openapiModelsJobApplicationResponse.CandidateAvatar = (*source).CandidateAvatar
+		openapiModelsJobApplicationResponse.CandidateHeadline = (*source).CandidateHeadline
+		openapiModelsJobApplicationResponse.CandidateId = (*source).JobApplication.CandidateID
+		openapiModelsJobApplicationResponse.CandidateName = (*source).CandidateName
+		openapiModelsJobApplicationResponse.CandidateProfileColor = omitEmptyString((*source).CandidateProfileColor)
+		openapiModelsJobApplicationResponse.CandidateSeekingStatus = omitEmptyString((*source).CandidateSeekingStatus)
+		openapiModelsJobApplicationResponse.CandidateSkills = omitEmptyStringSlice((*source).CandidateSkills)
+		openapiModelsJobApplicationResponse.CandidateUsername = (*source).CandidateUsername
 		if (*source).CISimilarity != nil {
-			xfloat642 := *(*source).CISimilarity
-			presenterJobApplicationResponse.CISimilarity = &xfloat642
+			xfloat64 := *(*source).CISimilarity
+			openapiModelsJobApplicationResponse.CiSimilarity = &xfloat64
 		}
+		openapiModelsJobApplicationResponse.CompanyId = (*source).JobApplication.CompanyID
+		openapiModelsJobApplicationResponse.CompanyName = (*source).CompanyName
+		openapiModelsJobApplicationResponse.CreatedAt = copyTime((*source).JobApplication.CreatedAt)
+		openapiModelsJobApplicationResponse.Id = (*source).JobApplication.ID
 		if (*source).IntSimilarity != nil {
-			xfloat643 := *(*source).IntSimilarity
-			presenterJobApplicationResponse.IntSimilarity = &xfloat643
+			xfloat642 := *(*source).IntSimilarity
+			openapiModelsJobApplicationResponse.IntegratedSimilarity = &xfloat642
 		}
-		presenterJobApplicationResponse.CreatedAt = copyTime((*source).JobApplication.CreatedAt)
-		presenterJobApplicationResponse.UpdatedAt = copyTime((*source).JobApplication.UpdatedAt)
-		pPresenterJobApplicationResponse = &presenterJobApplicationResponse
+		openapiModelsJobApplicationResponse.JobPostingId = (*source).JobApplication.JobPostingID
+		openapiModelsJobApplicationResponse.JobTitle = (*source).JobTitle
+		openapiModelsJobApplicationResponse.Message = (*source).JobApplication.Message
+		openapiModelsJobApplicationResponse.Status = string((*source).JobApplication.Status)
+		openapiModelsJobApplicationResponse.UpdatedAt = copyTime((*source).JobApplication.UpdatedAt)
+		if (*source).WVSimilarity != nil {
+			xfloat643 := *(*source).WVSimilarity
+			openapiModelsJobApplicationResponse.WvSimilarity = &xfloat643
+		}
+		pOpenapiModelsJobApplicationResponse = &openapiModelsJobApplicationResponse
 	}
-	return pPresenterJobApplicationResponse
+	return pOpenapiModelsJobApplicationResponse
 }
-func (c *jobApplicationConverterImpl) ToResponses(source []*jobapplication.JobApplicationWithDetails) []*JobApplicationResponse {
-	var pPresenterJobApplicationResponseList []*JobApplicationResponse
+func (c *jobApplicationConverterImpl) ToResponses(source []*jobapplication.JobApplicationWithDetails) []*openapi.ModelsJobApplicationResponse {
+	var pOpenapiModelsJobApplicationResponseList []*openapi.ModelsJobApplicationResponse
 	if source != nil {
-		pPresenterJobApplicationResponseList = make([]*JobApplicationResponse, len(source))
+		pOpenapiModelsJobApplicationResponseList = make([]*openapi.ModelsJobApplicationResponse, len(source))
 		for i := 0; i < len(source); i++ {
-			pPresenterJobApplicationResponseList[i] = c.ToResponse(source[i])
+			pOpenapiModelsJobApplicationResponseList[i] = c.ToResponse(source[i])
 		}
 	}
-	return pPresenterJobApplicationResponseList
+	return pOpenapiModelsJobApplicationResponseList
 }
