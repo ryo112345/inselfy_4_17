@@ -1,8 +1,7 @@
 package presenter
 
 import (
-	"time"
-
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
 )
@@ -10,17 +9,7 @@ import (
 type CompanyAuthTokenResponse struct {
 	AccessToken  string
 	RefreshToken string
-	Company      *CompanyResponse
-}
-
-type CompanyResponse struct {
-	ID                string    `json:"id"`
-	Email             string    `json:"email"`
-	CompanyName       string    `json:"companyName"`
-	ContactPersonName string    `json:"contactPersonName"`
-	PhoneNumber       string    `json:"phoneNumber"`
-	Status            string    `json:"status"`
-	CreatedAt         time.Time `json:"createdAt"`
+	Company      *openapi.ModelsCompanyResponse
 }
 
 // CompanyTokenResponse builds the token-pair API response (with embedded company).
@@ -42,9 +31,9 @@ func CompanyRegisteredResponse(c *company.CompanyAccount) any {
 	return toCompanyResponse(c)
 }
 
-func toCompanyResponse(c *company.CompanyAccount) *CompanyResponse {
-	return &CompanyResponse{
-		ID:                c.ID,
+func toCompanyResponse(c *company.CompanyAccount) *openapi.ModelsCompanyResponse {
+	return &openapi.ModelsCompanyResponse{
+		Id:                c.ID,
 		Email:             c.Email,
 		CompanyName:       c.CompanyName,
 		ContactPersonName: c.ContactPersonName,
