@@ -364,6 +364,60 @@ type ModelsConflictError struct {
 // ModelsConflictErrorCode defines model for ModelsConflictError.Code.
 type ModelsConflictErrorCode string
 
+// ModelsConversationListResponse 会話一覧
+type ModelsConversationListResponse struct {
+	// Items 会話
+	Items []ModelsConversationResponse `json:"items"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsConversationResponse 会話（プレビュー付き）
+type ModelsConversationResponse struct {
+	// CandidateId 候補者ユーザーID
+	CandidateId string `json:"candidateId"`
+
+	// CandidateName 候補者名
+	CandidateName string `json:"candidateName"`
+
+	// CompanyId 企業ID
+	CompanyId string `json:"companyId"`
+
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// ConversationType 会話種別
+	ConversationType string `json:"conversationType"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id 会話ID
+	Id string `json:"id"`
+
+	// LastMessageAt 最新メッセージ日時
+	LastMessageAt time.Time `json:"lastMessageAt"`
+
+	// LastMessageBody 最新メッセージ本文
+	LastMessageBody *string `json:"lastMessageBody"`
+
+	// Participant1Id 参加者1 ID（ユーザー間会話のみ）
+	Participant1Id *string `json:"participant1Id,omitempty"`
+
+	// Participant1Name 参加者1 名（ユーザー間会話のみ）
+	Participant1Name *string `json:"participant1Name,omitempty"`
+
+	// Participant2Id 参加者2 ID（ユーザー間会話のみ）
+	Participant2Id *string `json:"participant2Id,omitempty"`
+
+	// Participant2Name 参加者2 名（ユーザー間会話のみ）
+	Participant2Name *string `json:"participant2Name,omitempty"`
+
+	// UnreadCount 未読数
+	UnreadCount int `json:"unreadCount"`
+}
+
 // ModelsCreateCommentRequest コメント作成リクエスト
 type ModelsCreateCommentRequest struct {
 	// Content 本文
@@ -692,6 +746,42 @@ type ModelsLikeToggleResponse struct {
 
 	// Liked いいね状態
 	Liked bool `json:"liked"`
+}
+
+// ModelsMessageListResponse メッセージ一覧
+type ModelsMessageListResponse struct {
+	// Items メッセージ
+	Items []ModelsMessageResponse `json:"items"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsMessageResponse メッセージ
+type ModelsMessageResponse struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// ConversationId 会話ID
+	ConversationId string `json:"conversationId"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id メッセージID
+	Id string `json:"id"`
+
+	// MessageType メッセージ種別（text 等）
+	MessageType string `json:"messageType"`
+
+	// Metadata 付加情報
+	Metadata *map[string]interface{} `json:"metadata,omitempty"`
+
+	// SenderId 送信者ID
+	SenderId string `json:"senderId"`
+
+	// SenderType 送信者種別（company / candidate）
+	SenderType string `json:"senderType"`
 }
 
 // ModelsNotFoundError Not Found エラー
@@ -1045,6 +1135,12 @@ type ModelsScoutTemplateResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// ModelsSendMessageRequest メッセージ送信リクエスト
+type ModelsSendMessageRequest struct {
+	// Body 本文
+	Body string `json:"body"`
+}
+
 // ModelsSendScoutRequest スカウト送信リクエスト
 type ModelsSendScoutRequest struct {
 	// Body 本文
@@ -1130,6 +1226,24 @@ type ModelsSkillResponse struct {
 
 	// Name スキル名
 	Name string `json:"name"`
+}
+
+// ModelsStartCandidateConversationRequest 会話開始リクエスト（候補者→候補者/企業）
+type ModelsStartCandidateConversationRequest struct {
+	// Body 最初のメッセージ本文
+	Body string `json:"body"`
+
+	// RecipientId 相手のID
+	RecipientId string `json:"recipientId"`
+}
+
+// ModelsStartConversationRequest 会話開始リクエスト（企業→候補者）
+type ModelsStartConversationRequest struct {
+	// Body 最初のメッセージ本文
+	Body string `json:"body"`
+
+	// CandidateId 候補者ユーザーID
+	CandidateId string `json:"candidateId"`
 }
 
 // ModelsStatusOkResponse 汎用 OK レスポンス
@@ -1465,6 +1579,18 @@ type CompanyApplicationsListCompanyApplicationsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// CompanyMessagingListCompanyConversationsParams defines parameters for CompanyMessagingListCompanyConversations.
+type CompanyMessagingListCompanyConversationsParams struct {
+	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// CompanyMessagingListCompanyMessagesParams defines parameters for CompanyMessagingListCompanyMessages.
+type CompanyMessagingListCompanyMessagesParams struct {
+	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // CompanyNotificationsListCompanyNotificationsParams defines parameters for CompanyNotificationsListCompanyNotifications.
 type CompanyNotificationsListCompanyNotificationsParams struct {
 	// Limit 取得件数
@@ -1483,6 +1609,21 @@ type CompanyScoutsListCompanyScoutsParams struct {
 	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
 
 	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// CandidateMessagingListCandidateConversationsParams defines parameters for CandidateMessagingListCandidateConversations.
+type CandidateMessagingListCandidateConversationsParams struct {
+	// Limit 取得件数（1-100）
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// CandidateMessagingListCandidateMessagesParams defines parameters for CandidateMessagingListCandidateMessages.
+type CandidateMessagingListCandidateMessagesParams struct {
+	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
@@ -1585,6 +1726,12 @@ type CompanyAuthCompanyLoginJSONRequestBody = ModelsCompanyLoginRequest
 // CompanyAuthCompanyRegisterJSONRequestBody defines body for CompanyAuthCompanyRegister for application/json ContentType.
 type CompanyAuthCompanyRegisterJSONRequestBody = ModelsCompanyRegisterRequest
 
+// CompanyMessagingStartCompanyConversationJSONRequestBody defines body for CompanyMessagingStartCompanyConversation for application/json ContentType.
+type CompanyMessagingStartCompanyConversationJSONRequestBody = ModelsStartConversationRequest
+
+// CompanyMessagingSendCompanyMessageJSONRequestBody defines body for CompanyMessagingSendCompanyMessage for application/json ContentType.
+type CompanyMessagingSendCompanyMessageJSONRequestBody = ModelsSendMessageRequest
+
 // ScoutTemplatesCreateScoutTemplateJSONRequestBody defines body for ScoutTemplatesCreateScoutTemplate for application/json ContentType.
 type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplateRequest
 
@@ -1596,6 +1743,12 @@ type CompanyScoutsSendScoutJSONRequestBody = ModelsSendScoutRequest
 
 // CompanyScoutsCompanyScoutReplyJSONRequestBody defines body for CompanyScoutsCompanyScoutReply for application/json ContentType.
 type CompanyScoutsCompanyScoutReplyJSONRequestBody = ModelsCompanyScoutReplyRequest
+
+// CandidateMessagingStartCandidateConversationJSONRequestBody defines body for CandidateMessagingStartCandidateConversation for application/json ContentType.
+type CandidateMessagingStartCandidateConversationJSONRequestBody = ModelsStartCandidateConversationRequest
+
+// CandidateMessagingSendCandidateMessageJSONRequestBody defines body for CandidateMessagingSendCandidateMessage for application/json ContentType.
+type CandidateMessagingSendCandidateMessageJSONRequestBody = ModelsSendMessageRequest
 
 // PostsCreatePostJSONRequestBody defines body for PostsCreatePost for application/json ContentType.
 type PostsCreatePostJSONRequestBody = ModelsCreatePostRequest
@@ -1710,6 +1863,27 @@ type ServerInterface interface {
 	// Register a company account
 	// (POST /api/company/auth/register)
 	CompanyAuthCompanyRegister(ctx echo.Context) error
+	// List conversations for the company
+	// (GET /api/company/messages/conversations)
+	CompanyMessagingListCompanyConversations(ctx echo.Context, params CompanyMessagingListCompanyConversationsParams) error
+	// Start a conversation as the company
+	// (POST /api/company/messages/conversations)
+	CompanyMessagingStartCompanyConversation(ctx echo.Context) error
+	// Get a conversation as the company
+	// (GET /api/company/messages/conversations/{conversationId})
+	CompanyMessagingGetCompanyConversation(ctx echo.Context, conversationId string) error
+	// List messages as the company
+	// (GET /api/company/messages/conversations/{conversationId}/messages)
+	CompanyMessagingListCompanyMessages(ctx echo.Context, conversationId string, params CompanyMessagingListCompanyMessagesParams) error
+	// Send a message as the company
+	// (POST /api/company/messages/conversations/{conversationId}/messages)
+	CompanyMessagingSendCompanyMessage(ctx echo.Context, conversationId string) error
+	// Mark a conversation as read (company)
+	// (POST /api/company/messages/conversations/{conversationId}/read)
+	CompanyMessagingMarkCompanyConversationRead(ctx echo.Context, conversationId string) error
+	// Count unread messages for the company
+	// (GET /api/company/messages/unread-count)
+	CompanyMessagingCountCompanyUnreadMessages(ctx echo.Context) error
 	// List notifications for the authenticated company
 	// (GET /api/company/notifications)
 	CompanyNotificationsListCompanyNotifications(ctx echo.Context, params CompanyNotificationsListCompanyNotificationsParams) error
@@ -1758,6 +1932,27 @@ type ServerInterface interface {
 	// Reply to a scout as the company
 	// (POST /api/company/scouts/{scoutId}/reply)
 	CompanyScoutsCompanyScoutReply(ctx echo.Context, scoutId string) error
+	// List conversations for the candidate
+	// (GET /api/messages/conversations)
+	CandidateMessagingListCandidateConversations(ctx echo.Context, params CandidateMessagingListCandidateConversationsParams) error
+	// Start a conversation as the candidate
+	// (POST /api/messages/conversations)
+	CandidateMessagingStartCandidateConversation(ctx echo.Context) error
+	// Get a conversation as the candidate
+	// (GET /api/messages/conversations/{conversationId})
+	CandidateMessagingGetCandidateConversation(ctx echo.Context, conversationId string) error
+	// List messages as the candidate
+	// (GET /api/messages/conversations/{conversationId}/messages)
+	CandidateMessagingListCandidateMessages(ctx echo.Context, conversationId string, params CandidateMessagingListCandidateMessagesParams) error
+	// Send a message as the candidate
+	// (POST /api/messages/conversations/{conversationId}/messages)
+	CandidateMessagingSendCandidateMessage(ctx echo.Context, conversationId string) error
+	// Mark a conversation as read (candidate)
+	// (POST /api/messages/conversations/{conversationId}/read)
+	CandidateMessagingMarkCandidateConversationRead(ctx echo.Context, conversationId string) error
+	// Count unread messages for the candidate
+	// (GET /api/messages/unread-count)
+	CandidateMessagingCountCandidateUnreadMessages(ctx echo.Context) error
 	// List notifications for the authenticated user
 	// (GET /api/notifications)
 	UserNotificationsListUserNotifications(ctx echo.Context, params UserNotificationsListUserNotificationsParams) error
@@ -2194,6 +2389,129 @@ func (w *ServerInterfaceWrapper) CompanyAuthCompanyRegister(ctx echo.Context) er
 	return err
 }
 
+// CompanyMessagingListCompanyConversations converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyMessagingListCompanyConversations(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CompanyMessagingListCompanyConversationsParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyMessagingListCompanyConversations(ctx, params)
+	return err
+}
+
+// CompanyMessagingStartCompanyConversation converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyMessagingStartCompanyConversation(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyMessagingStartCompanyConversation(ctx)
+	return err
+}
+
+// CompanyMessagingGetCompanyConversation converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyMessagingGetCompanyConversation(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyMessagingGetCompanyConversation(ctx, conversationId)
+	return err
+}
+
+// CompanyMessagingListCompanyMessages converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyMessagingListCompanyMessages(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CompanyMessagingListCompanyMessagesParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyMessagingListCompanyMessages(ctx, conversationId, params)
+	return err
+}
+
+// CompanyMessagingSendCompanyMessage converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyMessagingSendCompanyMessage(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyMessagingSendCompanyMessage(ctx, conversationId)
+	return err
+}
+
+// CompanyMessagingMarkCompanyConversationRead converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyMessagingMarkCompanyConversationRead(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyMessagingMarkCompanyConversationRead(ctx, conversationId)
+	return err
+}
+
+// CompanyMessagingCountCompanyUnreadMessages converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyMessagingCountCompanyUnreadMessages(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyMessagingCountCompanyUnreadMessages(ctx)
+	return err
+}
+
 // CompanyNotificationsListCompanyNotifications converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyNotificationsListCompanyNotifications(ctx echo.Context) error {
 	var err error
@@ -2416,6 +2734,129 @@ func (w *ServerInterfaceWrapper) CompanyScoutsCompanyScoutReply(ctx echo.Context
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyScoutsCompanyScoutReply(ctx, scoutId)
+	return err
+}
+
+// CandidateMessagingListCandidateConversations converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateMessagingListCandidateConversations(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CandidateMessagingListCandidateConversationsParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateMessagingListCandidateConversations(ctx, params)
+	return err
+}
+
+// CandidateMessagingStartCandidateConversation converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateMessagingStartCandidateConversation(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateMessagingStartCandidateConversation(ctx)
+	return err
+}
+
+// CandidateMessagingGetCandidateConversation converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateMessagingGetCandidateConversation(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateMessagingGetCandidateConversation(ctx, conversationId)
+	return err
+}
+
+// CandidateMessagingListCandidateMessages converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateMessagingListCandidateMessages(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CandidateMessagingListCandidateMessagesParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateMessagingListCandidateMessages(ctx, conversationId, params)
+	return err
+}
+
+// CandidateMessagingSendCandidateMessage converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateMessagingSendCandidateMessage(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateMessagingSendCandidateMessage(ctx, conversationId)
+	return err
+}
+
+// CandidateMessagingMarkCandidateConversationRead converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateMessagingMarkCandidateConversationRead(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "conversationId" -------------
+	var conversationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateMessagingMarkCandidateConversationRead(ctx, conversationId)
+	return err
+}
+
+// CandidateMessagingCountCandidateUnreadMessages converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateMessagingCountCandidateUnreadMessages(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateMessagingCountCandidateUnreadMessages(ctx)
 	return err
 }
 
@@ -3367,6 +3808,13 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/company/auth/me", wrapper.CompanyAuthCompanyGetMe)
 	router.POST(baseURL+"/api/company/auth/refresh", wrapper.CompanyAuthCompanyRefreshToken)
 	router.POST(baseURL+"/api/company/auth/register", wrapper.CompanyAuthCompanyRegister)
+	router.GET(baseURL+"/api/company/messages/conversations", wrapper.CompanyMessagingListCompanyConversations)
+	router.POST(baseURL+"/api/company/messages/conversations", wrapper.CompanyMessagingStartCompanyConversation)
+	router.GET(baseURL+"/api/company/messages/conversations/:conversationId", wrapper.CompanyMessagingGetCompanyConversation)
+	router.GET(baseURL+"/api/company/messages/conversations/:conversationId/messages", wrapper.CompanyMessagingListCompanyMessages)
+	router.POST(baseURL+"/api/company/messages/conversations/:conversationId/messages", wrapper.CompanyMessagingSendCompanyMessage)
+	router.POST(baseURL+"/api/company/messages/conversations/:conversationId/read", wrapper.CompanyMessagingMarkCompanyConversationRead)
+	router.GET(baseURL+"/api/company/messages/unread-count", wrapper.CompanyMessagingCountCompanyUnreadMessages)
 	router.GET(baseURL+"/api/company/notifications", wrapper.CompanyNotificationsListCompanyNotifications)
 	router.POST(baseURL+"/api/company/notifications/read-all", wrapper.CompanyNotificationsMarkAllCompanyNotificationsRead)
 	router.GET(baseURL+"/api/company/notifications/unread-count", wrapper.CompanyNotificationsCountCompanyUnreadNotifications)
@@ -3383,6 +3831,13 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/company/scouts/quality", wrapper.CompanyScoutsGetScoutQuality)
 	router.GET(baseURL+"/api/company/scouts/:scoutId", wrapper.CompanyScoutsGetCompanyScoutDetail)
 	router.POST(baseURL+"/api/company/scouts/:scoutId/reply", wrapper.CompanyScoutsCompanyScoutReply)
+	router.GET(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingListCandidateConversations)
+	router.POST(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingStartCandidateConversation)
+	router.GET(baseURL+"/api/messages/conversations/:conversationId", wrapper.CandidateMessagingGetCandidateConversation)
+	router.GET(baseURL+"/api/messages/conversations/:conversationId/messages", wrapper.CandidateMessagingListCandidateMessages)
+	router.POST(baseURL+"/api/messages/conversations/:conversationId/messages", wrapper.CandidateMessagingSendCandidateMessage)
+	router.POST(baseURL+"/api/messages/conversations/:conversationId/read", wrapper.CandidateMessagingMarkCandidateConversationRead)
+	router.GET(baseURL+"/api/messages/unread-count", wrapper.CandidateMessagingCountCandidateUnreadMessages)
 	router.GET(baseURL+"/api/notifications", wrapper.UserNotificationsListUserNotifications)
 	router.POST(baseURL+"/api/notifications/read-all", wrapper.UserNotificationsMarkAllUserNotificationsRead)
 	router.GET(baseURL+"/api/notifications/unread-count", wrapper.UserNotificationsCountUserUnreadNotifications)

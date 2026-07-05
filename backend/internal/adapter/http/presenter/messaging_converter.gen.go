@@ -3,42 +3,45 @@
 
 package presenter
 
-import messaging "github.com/akiyama/inselfy/backend/internal/domain/messaging"
+import (
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	messaging "github.com/akiyama/inselfy/backend/internal/domain/messaging"
+)
 
 type messagingConverterImpl struct{}
 
-func (c *messagingConverterImpl) ToConversationResponse(source *messaging.ConversationWithPreview) *conversationResponse {
-	var pPresenterconversationResponse *conversationResponse
+func (c *messagingConverterImpl) ToConversationResponse(source *messaging.ConversationWithPreview) *openapi.ModelsConversationResponse {
+	var pOpenapiModelsConversationResponse *openapi.ModelsConversationResponse
 	if source != nil {
-		var presenterconversationResponse conversationResponse
-		presenterconversationResponse.ID = (*source).Conversation.ID
-		presenterconversationResponse.ConversationType = (*source).Conversation.ConversationType
-		presenterconversationResponse.CompanyID = (*source).Conversation.CompanyID
-		presenterconversationResponse.CandidateID = (*source).Conversation.CandidateID
-		presenterconversationResponse.CompanyName = (*source).CompanyName
-		presenterconversationResponse.CandidateName = (*source).CandidateName
-		presenterconversationResponse.Participant1ID = (*source).Conversation.Participant1ID
-		presenterconversationResponse.Participant2ID = (*source).Conversation.Participant2ID
-		presenterconversationResponse.Participant1Name = (*source).Participant1Name
-		presenterconversationResponse.Participant2Name = (*source).Participant2Name
+		var openapiModelsConversationResponse openapi.ModelsConversationResponse
+		openapiModelsConversationResponse.CandidateId = (*source).Conversation.CandidateID
+		openapiModelsConversationResponse.CandidateName = (*source).CandidateName
+		openapiModelsConversationResponse.CompanyId = (*source).Conversation.CompanyID
+		openapiModelsConversationResponse.CompanyName = (*source).CompanyName
+		openapiModelsConversationResponse.ConversationType = (*source).Conversation.ConversationType
+		openapiModelsConversationResponse.CreatedAt = copyTime((*source).Conversation.CreatedAt)
+		openapiModelsConversationResponse.Id = (*source).Conversation.ID
+		openapiModelsConversationResponse.LastMessageAt = copyTime((*source).Conversation.LastMessageAt)
 		if (*source).LastMessageBody != nil {
 			xstring := *(*source).LastMessageBody
-			presenterconversationResponse.LastMessageBody = &xstring
+			openapiModelsConversationResponse.LastMessageBody = &xstring
 		}
-		presenterconversationResponse.LastMessageAt = copyTime((*source).Conversation.LastMessageAt)
-		presenterconversationResponse.UnreadCount = (*source).UnreadCount
-		presenterconversationResponse.CreatedAt = copyTime((*source).Conversation.CreatedAt)
-		pPresenterconversationResponse = &presenterconversationResponse
+		openapiModelsConversationResponse.Participant1Id = omitEmptyString((*source).Conversation.Participant1ID)
+		openapiModelsConversationResponse.Participant1Name = omitEmptyString((*source).Participant1Name)
+		openapiModelsConversationResponse.Participant2Id = omitEmptyString((*source).Conversation.Participant2ID)
+		openapiModelsConversationResponse.Participant2Name = omitEmptyString((*source).Participant2Name)
+		openapiModelsConversationResponse.UnreadCount = (*source).UnreadCount
+		pOpenapiModelsConversationResponse = &openapiModelsConversationResponse
 	}
-	return pPresenterconversationResponse
+	return pOpenapiModelsConversationResponse
 }
-func (c *messagingConverterImpl) ToConversationResponses(source []*messaging.ConversationWithPreview) []*conversationResponse {
-	var pPresenterconversationResponseList []*conversationResponse
+func (c *messagingConverterImpl) ToConversationResponses(source []*messaging.ConversationWithPreview) []*openapi.ModelsConversationResponse {
+	var pOpenapiModelsConversationResponseList []*openapi.ModelsConversationResponse
 	if source != nil {
-		pPresenterconversationResponseList = make([]*conversationResponse, len(source))
+		pOpenapiModelsConversationResponseList = make([]*openapi.ModelsConversationResponse, len(source))
 		for i := 0; i < len(source); i++ {
-			pPresenterconversationResponseList[i] = c.ToConversationResponse(source[i])
+			pOpenapiModelsConversationResponseList[i] = c.ToConversationResponse(source[i])
 		}
 	}
-	return pPresenterconversationResponseList
+	return pOpenapiModelsConversationResponseList
 }
