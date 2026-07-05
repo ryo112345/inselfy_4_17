@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import "@/external/client/api/client";
+import { companyAuthCompanyRegister } from "@/external/client/api/generated";
 
 export default function CompanyRegisterPage() {
   const [form, setForm] = useState({
@@ -35,24 +37,21 @@ export default function CompanyRegisterPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/company/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const { error: apiError } = await companyAuthCompanyRegister({
+        body: {
           email: form.email,
           password: form.password,
           companyName: form.companyName,
           contactPersonName: form.contactPersonName,
           phoneNumber: form.phoneNumber,
-        }),
+        },
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        if (data.code === "CONFLICT") {
+      if (apiError) {
+        if (apiError.code === "CONFLICT") {
           setError("このメールアドレスは既に登録されています。");
         } else {
-          setError(data.message || "登録に失敗しました。");
+          setError(apiError.message || "登録に失敗しました。");
         }
         return;
       }

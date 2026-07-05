@@ -130,7 +130,7 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 | 10 | [x] | job-posting: `features/job-posting/api.ts` | 8 | 二形は `Array.isArray` で narrow（クエリなし=裸配列/limit付き=ラッパーを curl 実測確認）。multipart 3種は実アップロードで 200+url 確認。`JobPostingBody` は `ModelsJobPostingRequest` エイリアス化 |
 | 11 | [x] | interview: `features/interview/api.ts` | 8 | propose/select の任意フィールドは `?? ""` / `?? 0` でゼロ値送信（Go デコードでは省略キーと等価、バックエンドがゼロ値にデフォルト適用するのを実装確認済み）。`status` リテラルunion型（`./types`）は既存宣言を維持してキャスト |
 | 12 | [x] | scout: `features/scout/api.ts` | 18関数 | dashboard/quality/credits 含む。`unread-context.tsx` は401正常系のため**スコープ外**（上表のとおり、触っていない）。`ScoutStatus`/`level` のリテラルunion型は既存宣言を維持してキャスト。`updateTemplate` の body は全フィールド必須化（唯一の呼び出し元は常に全指定） |
-| 13 | [ ] | company auth register のみ: `app/company/register/page.tsx` | 1 | context は触らない（スコープ外） |
+| 13 | [x] | company auth register のみ: `app/company/register/page.tsx` | 1 | context は触らない（スコープ外）。エラー分岐（CONFLICT/message）は生成エラー型で維持 |
 | 14 | [ ] | 企業側候補者閲覧ページ群: `app/company/applications/page.tsx`, `saved-candidates/page.tsx`, `talents/page.tsx` | 各7 | 同じ束（users/experiences/skills/WV/CI/teams/jobs）を3ページが重複実装。共通ヘルパーに寄せてよい（挙動不変の範囲で） |
 | 15 | [ ] | 公開企業・求人ページ: `app/companies/[id]/page.tsx`, `app/jobs/page.tsx`, `app/jobs/[jobId]/page.tsx`, `app/company/profile/preview/page.tsx` | 6 | SSR あり（パターンB） |
 | 16 | [ ] | profile 残り: `app/profile/[username]/api.ts`（follow / follow-status）, `fetchPanelData.ts`（followers/following） | 4 | upload-image と users/id は **スペック未収載 → Phase 2B（B0）**。ai-report / integrated-report 部分も Phase 2B へ残す |
