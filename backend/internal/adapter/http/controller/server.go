@@ -28,6 +28,7 @@ type Server struct {
 	jobApp        *JobApplicationController
 	messaging     *MessagingController
 	article       *ArticleController
+	companyProf   *CompanyProfileController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -54,6 +55,7 @@ func NewServer(
 	jobApp *JobApplicationController,
 	messaging *MessagingController,
 	article *ArticleController,
+	companyProf *CompanyProfileController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -76,6 +78,7 @@ func NewServer(
 		jobApp:        jobApp,
 		messaging:     messaging,
 		article:       article,
+		companyProf:   companyProf,
 	}
 }
 
@@ -551,4 +554,26 @@ func (s *Server) CompanyArticlesDeleteCompanyArticle(ctx echo.Context, articleID
 
 func (s *Server) CompanyArticlesPublishCompanyArticle(ctx echo.Context, articleID string) error {
 	return s.article.PublishAsCompany(ctx, articleID)
+}
+
+// --- CompanyProfile ---
+
+func (s *Server) PublicCompanyProfilesGetPublicCompanyProfile(ctx echo.Context, _ string) error {
+	return s.companyProf.GetPublicProfile(ctx)
+}
+
+func (s *Server) CompanyProfilesGetCompanyProfile(ctx echo.Context) error {
+	return s.companyProf.GetProfile(ctx)
+}
+
+func (s *Server) CompanyProfilesUpdateCompanyProfile(ctx echo.Context) error {
+	return s.companyProf.UpdateProfile(ctx)
+}
+
+func (s *Server) CompanyProfilesUploadCompanyProfileImage(ctx echo.Context, _ openapi.CompanyProfilesUploadCompanyProfileImageParams) error {
+	return s.companyProf.UploadImage(ctx)
+}
+
+func (s *Server) CompanyProfilesDeleteCompanyProfileImage(ctx echo.Context, _ openapi.CompanyProfilesDeleteCompanyProfileImageParams) error {
+	return s.companyProf.DeleteImage(ctx)
 }
