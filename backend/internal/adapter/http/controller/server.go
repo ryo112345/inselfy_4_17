@@ -24,6 +24,7 @@ type Server struct {
 	wv            *WorkValuesController
 	post          *PostController
 	scout         *ScoutController
+	candScout     *CandidateScoutController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -46,6 +47,7 @@ func NewServer(
 	wv *WorkValuesController,
 	post *PostController,
 	scout *ScoutController,
+	candScout *CandidateScoutController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -64,6 +66,7 @@ func NewServer(
 		wv:            wv,
 		post:          post,
 		scout:         scout,
+		candScout:     candScout,
 	}
 }
 
@@ -371,4 +374,30 @@ func (s *Server) CompanyScoutsGetCompanyScoutDetail(ctx echo.Context, scoutID st
 
 func (s *Server) CompanyScoutsCompanyScoutReply(ctx echo.Context, scoutID string) error {
 	return s.scout.Reply(ctx, scoutID)
+}
+
+// --- CandidateScouts ---
+
+func (s *Server) CandidateScoutsListCandidateScouts(ctx echo.Context, _ openapi.CandidateScoutsListCandidateScoutsParams) error {
+	return s.candScout.List(ctx)
+}
+
+func (s *Server) CandidateScoutsGetCandidateScoutDetail(ctx echo.Context, scoutID string) error {
+	return s.candScout.GetDetail(ctx, scoutID)
+}
+
+func (s *Server) CandidateScoutsRespondToScout(ctx echo.Context, scoutID string) error {
+	return s.candScout.Respond(ctx, scoutID)
+}
+
+func (s *Server) CandidateScoutsCandidateScoutReply(ctx echo.Context, scoutID string) error {
+	return s.candScout.Reply(ctx, scoutID)
+}
+
+func (s *Server) CandidateScoutsBulkDeclineScouts(ctx echo.Context) error {
+	return s.candScout.BulkDecline(ctx)
+}
+
+func (s *Server) CandidateScoutsBulkRespondScouts(ctx echo.Context) error {
+	return s.candScout.BulkRespond(ctx)
 }

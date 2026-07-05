@@ -127,6 +127,21 @@ type ModelsBadRequestError struct {
 // ModelsBadRequestErrorCode defines model for ModelsBadRequestError.Code.
 type ModelsBadRequestErrorCode string
 
+// ModelsBulkDeclineRequest スカウト一括辞退リクエスト
+type ModelsBulkDeclineRequest struct {
+	// ScoutIds スカウトID一覧
+	ScoutIds []string `json:"scoutIds"`
+}
+
+// ModelsBulkRespondRequest スカウト一括応答リクエスト
+type ModelsBulkRespondRequest struct {
+	// Response 応答種別（interested / declined）
+	Response string `json:"response"`
+
+	// ScoutIds スカウトID一覧
+	ScoutIds []string `json:"scoutIds"`
+}
+
 // ModelsCIBasicScoreResponse 基本興味領域スコア
 type ModelsCIBasicScoreResponse struct {
 	// BasicInterestId 基本興味領域ID
@@ -227,6 +242,12 @@ type ModelsCITypeScoreResponse struct {
 
 	// TypeId タイプID
 	TypeId string `json:"type_id"`
+}
+
+// ModelsCandidateScoutReplyRequest 候補者からのスカウト返信リクエスト
+type ModelsCandidateScoutReplyRequest struct {
+	// Body 本文
+	Body string `json:"body"`
 }
 
 // ModelsCommentListResponse コメント一覧
@@ -889,6 +910,21 @@ type ModelsScoutReplyResponse struct {
 	SenderType string `json:"senderType"`
 }
 
+// ModelsScoutRespondRequest スカウトへの応答リクエスト（interested / declined）
+type ModelsScoutRespondRequest struct {
+	// Response 応答種別
+	Response string `json:"response"`
+}
+
+// ModelsScoutRespondResponse スカウト応答結果
+type ModelsScoutRespondResponse struct {
+	// ConversationId 応答により作成・特定された会話ID
+	ConversationId *string `json:"conversationId,omitempty"`
+
+	// Status 処理結果
+	Status string `json:"status"`
+}
+
 // ModelsScoutSettingsResponse スカウト受け入れ設定
 type ModelsScoutSettingsResponse struct {
 	// AcceptingScouts スカウトを受け入れるか
@@ -1366,6 +1402,15 @@ type PostsListPostCommentsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// CandidateScoutsListCandidateScoutsParams defines parameters for CandidateScoutsListCandidateScouts.
+type CandidateScoutsListCandidateScoutsParams struct {
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // SimilarUsersGetSimilarUsersParams defines parameters for SimilarUsersGetSimilarUsers.
 type SimilarUsersGetSimilarUsersParams struct {
 	// Limit 取得件数（1-50、デフォルト10）
@@ -1425,6 +1470,18 @@ type PostsCreatePostCommentJSONRequestBody = ModelsCreateCommentRequest
 
 // ScoutSettingsUpdateScoutSettingsJSONRequestBody defines body for ScoutSettingsUpdateScoutSettings for application/json ContentType.
 type ScoutSettingsUpdateScoutSettingsJSONRequestBody = ModelsUpdateScoutSettingsRequest
+
+// CandidateScoutsBulkDeclineScoutsJSONRequestBody defines body for CandidateScoutsBulkDeclineScouts for application/json ContentType.
+type CandidateScoutsBulkDeclineScoutsJSONRequestBody = ModelsBulkDeclineRequest
+
+// CandidateScoutsBulkRespondScoutsJSONRequestBody defines body for CandidateScoutsBulkRespondScouts for application/json ContentType.
+type CandidateScoutsBulkRespondScoutsJSONRequestBody = ModelsBulkRespondRequest
+
+// CandidateScoutsCandidateScoutReplyJSONRequestBody defines body for CandidateScoutsCandidateScoutReply for application/json ContentType.
+type CandidateScoutsCandidateScoutReplyJSONRequestBody = ModelsCandidateScoutReplyRequest
+
+// CandidateScoutsRespondToScoutJSONRequestBody defines body for CandidateScoutsRespondToScout for application/json ContentType.
+type CandidateScoutsRespondToScoutJSONRequestBody = ModelsScoutRespondRequest
 
 // TeamDiagnoseUpdateDiagnoseStatusJSONRequestBody defines body for TeamDiagnoseUpdateDiagnoseStatus for application/json ContentType.
 type TeamDiagnoseUpdateDiagnoseStatusJSONRequestBody = ModelsUpdateDiagnoseStatusRequest
@@ -1596,6 +1653,24 @@ type ServerInterface interface {
 	// Update scout settings for the authenticated user
 	// (PUT /api/scout-settings)
 	ScoutSettingsUpdateScoutSettings(ctx echo.Context) error
+	// List scouts received by the candidate
+	// (GET /api/scouts)
+	CandidateScoutsListCandidateScouts(ctx echo.Context, params CandidateScoutsListCandidateScoutsParams) error
+	// Bulk decline scouts
+	// (POST /api/scouts/bulk-decline)
+	CandidateScoutsBulkDeclineScouts(ctx echo.Context) error
+	// Bulk respond to scouts
+	// (POST /api/scouts/bulk-respond)
+	CandidateScoutsBulkRespondScouts(ctx echo.Context) error
+	// Get a received scout with replies
+	// (GET /api/scouts/{scoutId})
+	CandidateScoutsGetCandidateScoutDetail(ctx echo.Context, scoutId string) error
+	// Reply to a scout as the candidate
+	// (POST /api/scouts/{scoutId}/reply)
+	CandidateScoutsCandidateScoutReply(ctx echo.Context, scoutId string) error
+	// Respond to a scout
+	// (POST /api/scouts/{scoutId}/respond)
+	CandidateScoutsRespondToScout(ctx echo.Context, scoutId string) error
 	// Get team-diagnose info by token
 	// (GET /api/team-diagnose/{token})
 	TeamDiagnoseGetDiagnoseByToken(ctx echo.Context, token string) error
@@ -2370,6 +2445,97 @@ func (w *ServerInterfaceWrapper) ScoutSettingsUpdateScoutSettings(ctx echo.Conte
 	return err
 }
 
+// CandidateScoutsListCandidateScouts converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateScoutsListCandidateScouts(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CandidateScoutsListCandidateScoutsParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateScoutsListCandidateScouts(ctx, params)
+	return err
+}
+
+// CandidateScoutsBulkDeclineScouts converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateScoutsBulkDeclineScouts(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateScoutsBulkDeclineScouts(ctx)
+	return err
+}
+
+// CandidateScoutsBulkRespondScouts converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateScoutsBulkRespondScouts(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateScoutsBulkRespondScouts(ctx)
+	return err
+}
+
+// CandidateScoutsGetCandidateScoutDetail converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateScoutsGetCandidateScoutDetail(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "scoutId" -------------
+	var scoutId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateScoutsGetCandidateScoutDetail(ctx, scoutId)
+	return err
+}
+
+// CandidateScoutsCandidateScoutReply converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateScoutsCandidateScoutReply(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "scoutId" -------------
+	var scoutId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateScoutsCandidateScoutReply(ctx, scoutId)
+	return err
+}
+
+// CandidateScoutsRespondToScout converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateScoutsRespondToScout(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "scoutId" -------------
+	var scoutId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateScoutsRespondToScout(ctx, scoutId)
+	return err
+}
+
 // TeamDiagnoseGetDiagnoseByToken converts echo context to params.
 func (w *ServerInterfaceWrapper) TeamDiagnoseGetDiagnoseByToken(ctx echo.Context) error {
 	var err error
@@ -2927,6 +3093,12 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/posts/:postId/repost", wrapper.PostsTogglePostRepost)
 	router.GET(baseURL+"/api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
 	router.PUT(baseURL+"/api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
+	router.GET(baseURL+"/api/scouts", wrapper.CandidateScoutsListCandidateScouts)
+	router.POST(baseURL+"/api/scouts/bulk-decline", wrapper.CandidateScoutsBulkDeclineScouts)
+	router.POST(baseURL+"/api/scouts/bulk-respond", wrapper.CandidateScoutsBulkRespondScouts)
+	router.GET(baseURL+"/api/scouts/:scoutId", wrapper.CandidateScoutsGetCandidateScoutDetail)
+	router.POST(baseURL+"/api/scouts/:scoutId/reply", wrapper.CandidateScoutsCandidateScoutReply)
+	router.POST(baseURL+"/api/scouts/:scoutId/respond", wrapper.CandidateScoutsRespondToScout)
 	router.GET(baseURL+"/api/team-diagnose/:token", wrapper.TeamDiagnoseGetDiagnoseByToken)
 	router.PUT(baseURL+"/api/team-diagnose/:token/status", wrapper.TeamDiagnoseUpdateDiagnoseStatus)
 	router.POST(baseURL+"/api/users", wrapper.UsersCreateUser)

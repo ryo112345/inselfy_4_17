@@ -122,7 +122,7 @@ cd ../backend && make oapi
 | 10 | [x] | workvalues | 4 | 同上 + Mu/SE map |
 | 11 | [x] | post | 11 | goverter 済み presenter |
 | 12 | [x] | scout | 7 | dashboardResponse の深いネスト |
-| 13 | [ ] | candidate_scout | 6 | scout presenter 再利用 + ad-hoc map |
+| 13 | [x] | candidate_scout | 6 | scout presenter 再利用 + ad-hoc map |
 | 14 | [ ] | job_application | 7 | フィルタ7種の list、`{"status":"ok"}` |
 | 15 | [ ] | messaging | 14 | 対称ペア、`Metadata map` |
 | 16 | [ ] | article | 13 | multipart 1本、21フィールド resp |
