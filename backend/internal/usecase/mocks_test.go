@@ -2,9 +2,12 @@ package usecase_test
 
 import (
 	"context"
+	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
+	"github.com/akiyama/inselfy/backend/internal/domain/interview"
+	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 	"github.com/akiyama/inselfy/backend/internal/domain/skill"
 	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
@@ -167,6 +170,223 @@ func (s *talentSearchQueryStub) CIScoresByUserIDs(ctx context.Context, userIDs [
 		return map[string][6]float64{}, nil
 	}
 	return s.ciByUserIDsFn(ctx, userIDs)
+}
+
+type interviewProposalRepoStub struct {
+	createFn                     func(ctx context.Context, p *interview.Proposal) (*interview.Proposal, error)
+	getByIDFn                    func(ctx context.Context, id string) (*interview.Proposal, error)
+	updateStatusFn               func(ctx context.Context, id, status string) error
+	updateMessageIDFn            func(ctx context.Context, id, messageID string) error
+	listPendingByCandidateFn     func(ctx context.Context, candidateID string) ([]*interview.Proposal, error)
+	cancelPendingByApplicationFn func(ctx context.Context, applicationID string) ([]*interview.Proposal, error)
+}
+
+func (s *interviewProposalRepoStub) Create(ctx context.Context, p *interview.Proposal) (*interview.Proposal, error) {
+	return s.createFn(ctx, p)
+}
+func (s *interviewProposalRepoStub) GetByID(ctx context.Context, id string) (*interview.Proposal, error) {
+	return s.getByIDFn(ctx, id)
+}
+func (s *interviewProposalRepoStub) UpdateStatus(ctx context.Context, id, status string) error {
+	if s.updateStatusFn != nil {
+		return s.updateStatusFn(ctx, id, status)
+	}
+	return nil
+}
+func (s *interviewProposalRepoStub) UpdateMessageID(ctx context.Context, id, messageID string) error {
+	if s.updateMessageIDFn != nil {
+		return s.updateMessageIDFn(ctx, id, messageID)
+	}
+	return nil
+}
+func (s *interviewProposalRepoStub) ListPendingByCandidate(ctx context.Context, candidateID string) ([]*interview.Proposal, error) {
+	if s.listPendingByCandidateFn != nil {
+		return s.listPendingByCandidateFn(ctx, candidateID)
+	}
+	return nil, nil
+}
+func (s *interviewProposalRepoStub) CancelPendingByApplication(ctx context.Context, applicationID string) ([]*interview.Proposal, error) {
+	if s.cancelPendingByApplicationFn != nil {
+		return s.cancelPendingByApplicationFn(ctx, applicationID)
+	}
+	return nil, nil
+}
+
+type interviewSlotRepoStub struct {
+	createFn         func(ctx context.Context, sl *interview.Slot) (*interview.Slot, error)
+	getByIDFn        func(ctx context.Context, id string) (*interview.Slot, error)
+	listByProposalFn func(ctx context.Context, proposalID string) ([]*interview.Slot, error)
+	updateStatusFn   func(ctx context.Context, id, status string) error
+	rejectOthersFn   func(ctx context.Context, proposalID, selectedID string) error
+}
+
+func (s *interviewSlotRepoStub) Create(ctx context.Context, sl *interview.Slot) (*interview.Slot, error) {
+	return s.createFn(ctx, sl)
+}
+func (s *interviewSlotRepoStub) GetByID(ctx context.Context, id string) (*interview.Slot, error) {
+	return s.getByIDFn(ctx, id)
+}
+func (s *interviewSlotRepoStub) ListByProposal(ctx context.Context, proposalID string) ([]*interview.Slot, error) {
+	if s.listByProposalFn != nil {
+		return s.listByProposalFn(ctx, proposalID)
+	}
+	return nil, nil
+}
+func (s *interviewSlotRepoStub) UpdateStatus(ctx context.Context, id, status string) error {
+	if s.updateStatusFn != nil {
+		return s.updateStatusFn(ctx, id, status)
+	}
+	return nil
+}
+func (s *interviewSlotRepoStub) RejectOthers(ctx context.Context, proposalID, selectedID string) error {
+	if s.rejectOthersFn != nil {
+		return s.rejectOthersFn(ctx, proposalID, selectedID)
+	}
+	return nil
+}
+
+type interviewRepoStub struct {
+	createFn          func(ctx context.Context, iv *interview.Interview) (*interview.Interview, error)
+	getByIDFn         func(ctx context.Context, id string) (*interview.Interview, error)
+	listByCompanyFn   func(ctx context.Context, companyID string, from, to time.Time) ([]*interview.Interview, error)
+	listByCandidateFn func(ctx context.Context, candidateID string) ([]*interview.Interview, error)
+	updateStatusFn    func(ctx context.Context, id, status string) error
+}
+
+func (s *interviewRepoStub) Create(ctx context.Context, iv *interview.Interview) (*interview.Interview, error) {
+	return s.createFn(ctx, iv)
+}
+func (s *interviewRepoStub) GetByID(ctx context.Context, id string) (*interview.Interview, error) {
+	return s.getByIDFn(ctx, id)
+}
+func (s *interviewRepoStub) ListByCompany(ctx context.Context, companyID string, from, to time.Time) ([]*interview.Interview, error) {
+	return s.listByCompanyFn(ctx, companyID, from, to)
+}
+func (s *interviewRepoStub) ListByCandidate(ctx context.Context, candidateID string) ([]*interview.Interview, error) {
+	return s.listByCandidateFn(ctx, candidateID)
+}
+func (s *interviewRepoStub) UpdateStatus(ctx context.Context, id, status string) error {
+	if s.updateStatusFn != nil {
+		return s.updateStatusFn(ctx, id, status)
+	}
+	return nil
+}
+
+type conversationRepoStub struct {
+	createFn                   func(ctx context.Context, conv *messaging.Conversation) (*messaging.Conversation, error)
+	getByCompanyAndCandidateFn func(ctx context.Context, companyID, candidateID string) (*messaging.Conversation, error)
+	updateLastMessageAtFn      func(ctx context.Context, id string) error
+}
+
+func (s *conversationRepoStub) Create(ctx context.Context, conv *messaging.Conversation) (*messaging.Conversation, error) {
+	return s.createFn(ctx, conv)
+}
+func (s *conversationRepoStub) CreateCandidateConversation(_ context.Context, _ *messaging.Conversation) (*messaging.Conversation, error) {
+	return nil, nil
+}
+func (s *conversationRepoStub) GetByID(_ context.Context, _ string) (*messaging.ConversationWithPreview, error) {
+	return nil, nil
+}
+func (s *conversationRepoStub) GetByCompanyAndCandidate(ctx context.Context, companyID, candidateID string) (*messaging.Conversation, error) {
+	return s.getByCompanyAndCandidateFn(ctx, companyID, candidateID)
+}
+func (s *conversationRepoStub) GetByCandidatePair(_ context.Context, _, _ string) (*messaging.Conversation, error) {
+	return nil, nil
+}
+func (s *conversationRepoStub) ListByCandidate(_ context.Context, _ string, _, _ int) ([]*messaging.ConversationWithPreview, int, error) {
+	return nil, 0, nil
+}
+func (s *conversationRepoStub) ListByCompany(_ context.Context, _ string, _, _ int) ([]*messaging.ConversationWithPreview, int, error) {
+	return nil, 0, nil
+}
+func (s *conversationRepoStub) UpdateLastMessageAt(ctx context.Context, id string) error {
+	if s.updateLastMessageAtFn != nil {
+		return s.updateLastMessageAtFn(ctx, id)
+	}
+	return nil
+}
+func (s *conversationRepoStub) CountUnreadByCandidate(_ context.Context, _ string) (int, error) {
+	return 0, nil
+}
+func (s *conversationRepoStub) CountUnreadByCompany(_ context.Context, _ string) (int, error) {
+	return 0, nil
+}
+
+type messageRepoStub struct {
+	createFn func(ctx context.Context, msg *messaging.Message) (*messaging.Message, error)
+}
+
+func (s *messageRepoStub) Create(ctx context.Context, msg *messaging.Message) (*messaging.Message, error) {
+	if s.createFn != nil {
+		return s.createFn(ctx, msg)
+	}
+	return msg, nil
+}
+func (s *messageRepoStub) ListByConversationID(_ context.Context, _ string, _, _ int) ([]*messaging.Message, int, error) {
+	return nil, 0, nil
+}
+
+type participantRepoStub struct {
+	createFn func(ctx context.Context, p *messaging.ConversationParticipant) error
+}
+
+func (s *participantRepoStub) Create(ctx context.Context, p *messaging.ConversationParticipant) error {
+	if s.createFn != nil {
+		return s.createFn(ctx, p)
+	}
+	return nil
+}
+func (s *participantRepoStub) GetByConversationAndParticipant(_ context.Context, _, _, _ string) (*messaging.ConversationParticipant, error) {
+	return nil, nil
+}
+func (s *participantRepoStub) UpdateLastReadAt(_ context.Context, _, _, _ string) error {
+	return nil
+}
+func (s *participantRepoStub) ListByConversation(_ context.Context, _ string) ([]*messaging.ConversationParticipant, error) {
+	return nil, nil
+}
+
+type interviewQueryStub struct {
+	applicationCandidateIDFn       func(ctx context.Context, applicationID, companyID string) (string, error)
+	markApplicationInterviewingFn  func(ctx context.Context, applicationID string) error
+	candidateNameAndAvatarFn       func(ctx context.Context, userID string) (string, string, error)
+	companyNameFn                  func(ctx context.Context, companyID string) (string, error)
+	jobTitleByApplicationFn        func(ctx context.Context, applicationID string) (string, error)
+	pendingProposalByApplicationFn func(ctx context.Context, applicationID string) (*interview.PendingProposal, error)
+}
+
+func (s *interviewQueryStub) ApplicationCandidateID(ctx context.Context, applicationID, companyID string) (string, error) {
+	return s.applicationCandidateIDFn(ctx, applicationID, companyID)
+}
+func (s *interviewQueryStub) MarkApplicationInterviewing(ctx context.Context, applicationID string) error {
+	if s.markApplicationInterviewingFn != nil {
+		return s.markApplicationInterviewingFn(ctx, applicationID)
+	}
+	return nil
+}
+func (s *interviewQueryStub) CandidateNameAndAvatar(ctx context.Context, userID string) (string, string, error) {
+	if s.candidateNameAndAvatarFn != nil {
+		return s.candidateNameAndAvatarFn(ctx, userID)
+	}
+	return "", "", nil
+}
+func (s *interviewQueryStub) CompanyName(ctx context.Context, companyID string) (string, error) {
+	if s.companyNameFn != nil {
+		return s.companyNameFn(ctx, companyID)
+	}
+	return "", nil
+}
+func (s *interviewQueryStub) JobTitleByApplication(ctx context.Context, applicationID string) (string, error) {
+	if s.jobTitleByApplicationFn != nil {
+		return s.jobTitleByApplicationFn(ctx, applicationID)
+	}
+	return "", nil
+}
+func (s *interviewQueryStub) PendingProposalByApplication(ctx context.Context, applicationID string) (*interview.PendingProposal, error) {
+	if s.pendingProposalByApplicationFn != nil {
+		return s.pendingProposalByApplicationFn(ctx, applicationID)
+	}
+	return nil, nil
 }
 
 // Unused placeholders to avoid "imported and not used" warnings if a test file
