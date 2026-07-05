@@ -102,6 +102,44 @@ export type ModelsCreateUserRequest = {
 };
 
 /**
+ * チーム診断リンク情報
+ */
+export type ModelsDiagnoseInfoResponse = {
+    /**
+     * チームメンバーID
+     */
+    member_id: string;
+    /**
+     * メンバー名
+     */
+    member_name: string;
+    /**
+     * チーム名
+     */
+    team_name: string;
+    /**
+     * 企業名
+     */
+    company_name: string;
+    /**
+     * 紐づくユーザーID（未紐づけは空文字）
+     */
+    user_id: string;
+    /**
+     * Work Values 診断ステータス
+     */
+    wv_status: string;
+    /**
+     * Career Interest 診断ステータス
+     */
+    ci_status: string;
+    /**
+     * 招待メールアドレス
+     */
+    email: string | null;
+};
+
+/**
  * 学歴一覧
  */
 export type ModelsEducationListResponse = {
@@ -364,6 +402,20 @@ export type ModelsSkillResponse = {
 };
 
 /**
+ * チーム診断ステータス更新リクエスト（指定したキーのみ更新）
+ */
+export type ModelsUpdateDiagnoseStatusRequest = {
+    /**
+     * Work Values 診断ステータス
+     */
+    wv_status?: string | null;
+    /**
+     * Career Interest 診断ステータス
+     */
+    ci_status?: string | null;
+};
+
+/**
  * 学歴更新リクエスト
  */
 export type ModelsUpdateEducationRequest = {
@@ -602,6 +654,60 @@ export type ScoutSettingsUpdateScoutSettingsResponses = {
 };
 
 export type ScoutSettingsUpdateScoutSettingsResponse = ScoutSettingsUpdateScoutSettingsResponses[keyof ScoutSettingsUpdateScoutSettingsResponses];
+
+export type TeamDiagnoseGetDiagnoseByTokenData = {
+    body?: never;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/api/team-diagnose/{token}';
+};
+
+export type TeamDiagnoseGetDiagnoseByTokenErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError;
+};
+
+export type TeamDiagnoseGetDiagnoseByTokenError = TeamDiagnoseGetDiagnoseByTokenErrors[keyof TeamDiagnoseGetDiagnoseByTokenErrors];
+
+export type TeamDiagnoseGetDiagnoseByTokenResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsDiagnoseInfoResponse;
+};
+
+export type TeamDiagnoseGetDiagnoseByTokenResponse = TeamDiagnoseGetDiagnoseByTokenResponses[keyof TeamDiagnoseGetDiagnoseByTokenResponses];
+
+export type TeamDiagnoseUpdateDiagnoseStatusData = {
+    body: ModelsUpdateDiagnoseStatusRequest;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/api/team-diagnose/{token}/status';
+};
+
+export type TeamDiagnoseUpdateDiagnoseStatusErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type TeamDiagnoseUpdateDiagnoseStatusError = TeamDiagnoseUpdateDiagnoseStatusErrors[keyof TeamDiagnoseUpdateDiagnoseStatusErrors];
+
+export type TeamDiagnoseUpdateDiagnoseStatusResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type TeamDiagnoseUpdateDiagnoseStatusResponse = TeamDiagnoseUpdateDiagnoseStatusResponses[keyof TeamDiagnoseUpdateDiagnoseStatusResponses];
 
 export type UsersCreateUserData = {
     body: ModelsCreateUserRequest;

@@ -14,6 +14,7 @@ type Server struct {
 	skill         *SkillController
 	scoutSettings *ScoutSettingsController
 	similarUsers  *SimilarUsersController
+	teamDiagnose  *TeamDiagnoseController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -26,6 +27,7 @@ func NewServer(
 	skill *SkillController,
 	scoutSettings *ScoutSettingsController,
 	similarUsers *SimilarUsersController,
+	teamDiagnose *TeamDiagnoseController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -34,6 +36,7 @@ func NewServer(
 		skill:         skill,
 		scoutSettings: scoutSettings,
 		similarUsers:  similarUsers,
+		teamDiagnose:  teamDiagnose,
 	}
 }
 
@@ -113,4 +116,14 @@ func (s *Server) ScoutSettingsUpdateScoutSettings(ctx echo.Context) error {
 
 func (s *Server) SimilarUsersGetSimilarUsers(ctx echo.Context, userID string, _ openapi.SimilarUsersGetSimilarUsersParams) error {
 	return s.similarUsers.GetSimilarUsers(ctx, userID)
+}
+
+// --- TeamDiagnose ---
+
+func (s *Server) TeamDiagnoseGetDiagnoseByToken(ctx echo.Context, token string) error {
+	return s.teamDiagnose.GetByToken(ctx, token)
+}
+
+func (s *Server) TeamDiagnoseUpdateDiagnoseStatus(ctx echo.Context, token string) error {
+	return s.teamDiagnose.UpdateStatus(ctx, token)
 }
