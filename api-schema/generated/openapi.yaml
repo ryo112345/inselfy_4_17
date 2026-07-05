@@ -29,6 +29,7 @@ tags:
   - name: CompanyTeams
   - name: JobPostings
   - name: Interviews
+  - name: IntegratedReport
 paths:
   /api/applications:
     post:
@@ -2905,6 +2906,133 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - CompanyTeams
+  /api/integrated-report/me:
+    get:
+      operationId: IntegratedReport_getMyIntegratedReport
+      summary: Get my latest integrated report
+      description: 自分の最新統合レポート取得（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.IntegratedReportMineResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - IntegratedReport
+  /api/integrated-report/requests:
+    post:
+      operationId: IntegratedReport_createIntegratedReportRequest
+      summary: Create an integrated report request
+      description: 統合レポート生成リクエスト作成（要ログイン）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.IntegratedReportRequestResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - IntegratedReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreateIntegratedReportRequest'
+  /api/integrated-report/requests/{requestId}/report:
+    get:
+      operationId: IntegratedReport_getIntegratedReport
+      summary: Get an integrated report by request ID
+      description: リクエストIDで統合レポート取得（公開）
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.IntegratedReportResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - IntegratedReport
+  /api/integrated-report/status:
+    get:
+      operationId: IntegratedReport_getIntegratedReportStatus
+      summary: Get my integrated report request status
+      description: 自分の統合レポートリクエスト状況取得（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.IntegratedReportStatusResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - IntegratedReport
+  /api/integrated-report/users/{userId}/latest-request:
+    get:
+      operationId: IntegratedReport_getLatestIntegratedRequest
+      summary: Get the latest integrated report request for a user
+      description: ユーザーの最新統合レポートリクエスト取得（公開）
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.IntegratedReportLatestRequestResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - IntegratedReport
   /api/interviews:
     get:
       operationId: CandidateInterviews_listCandidateInterviews
@@ -5943,6 +6071,30 @@ components:
           maxLength: 5000
           description: 業務内容（自然文、5000文字以内）
       description: 職歴作成リクエスト
+    Models.CreateIntegratedReportRequest:
+      type: object
+      required:
+        - topic1
+        - topic2
+        - topic3
+        - free_text
+      properties:
+        topic1:
+          type: integer
+          format: int16
+          description: トピック1（1〜10、topic2/topic3 と重複不可）
+        topic2:
+          type: integer
+          format: int16
+          description: トピック2（1〜10）
+        topic3:
+          type: integer
+          format: int16
+          description: トピック3（1〜10）
+        free_text:
+          type: string
+          description: 自由記述（200文字以内）
+      description: 統合レポート生成リクエスト作成リクエスト
     Models.CreatePostRequest:
       type: object
       required:
@@ -6261,6 +6413,133 @@ components:
           maxLength: 10000
           description: Google ID トークン
       description: Google ログインリクエスト
+    Models.IntegratedReportLatestRequestResponse:
+      type: object
+      required:
+        - request_id
+        - user_id
+        - has_report
+        - created_at
+      properties:
+        request_id:
+          type: string
+          description: リクエストID
+        user_id:
+          type: string
+          description: ユーザーID
+        has_report:
+          type: boolean
+          description: レポートが生成済みかどうか
+        created_at:
+          type: string
+          format: date-time
+          description: リクエスト作成日時
+      description: ユーザーの最新統合レポートリクエスト
+    Models.IntegratedReportMineResponse:
+      type: object
+      required:
+        - id
+        - request_id
+        - content
+        - created_at
+        - first_view
+      properties:
+        id:
+          type: string
+          description: レポートID
+        request_id:
+          type: string
+          description: リクエストID
+        content:
+          type: string
+          description: レポート本文（Markdown）
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+        first_view:
+          type: boolean
+          description: 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
+      description: 自分の最新統合レポート
+    Models.IntegratedReportRequestResponse:
+      type: object
+      required:
+        - id
+        - topic1
+        - topic2
+        - topic3
+        - free_text
+        - created_at
+      properties:
+        id:
+          type: string
+          description: リクエストID
+        topic1:
+          type: integer
+          format: int16
+          description: トピック1
+        topic2:
+          type: integer
+          format: int16
+          description: トピック2
+        topic3:
+          type: integer
+          format: int16
+          description: トピック3
+        free_text:
+          type: string
+          description: 自由記述
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 統合レポート生成リクエスト（作成結果）
+    Models.IntegratedReportResponse:
+      type: object
+      required:
+        - id
+        - request_id
+        - user_id
+        - content
+        - created_at
+        - first_view
+      properties:
+        id:
+          type: string
+          description: レポートID
+        request_id:
+          type: string
+          description: リクエストID
+        user_id:
+          type: string
+          description: ユーザーID
+        content:
+          type: string
+          description: レポート本文（Markdown）
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+        first_view:
+          type: boolean
+          description: 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
+      description: 統合レポート（リクエストID指定）
+    Models.IntegratedReportStatusResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - none
+            - pending
+            - ready
+          description: 'none: リクエストなし / pending: 生成待ち / ready: レポートあり'
+        request_id:
+          type: string
+          description: リクエストID（pending / ready のときのみ）
+      description: 統合レポートのリクエスト状況
     Models.InterviewBase:
       type: object
       required:

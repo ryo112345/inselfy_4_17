@@ -944,6 +944,28 @@ export type ModelsCreateExperienceRequest = {
 };
 
 /**
+ * 統合レポート生成リクエスト作成リクエスト
+ */
+export type ModelsCreateIntegratedReportRequest = {
+    /**
+     * トピック1（1〜10、topic2/topic3 と重複不可）
+     */
+    topic1: number;
+    /**
+     * トピック2（1〜10）
+     */
+    topic2: number;
+    /**
+     * トピック3（1〜10）
+     */
+    topic3: number;
+    /**
+     * 自由記述（200文字以内）
+     */
+    free_text: string;
+};
+
+/**
  * 投稿作成リクエスト
  */
 export type ModelsCreatePostRequest = {
@@ -1245,6 +1267,128 @@ export type ModelsGoogleLoginRequest = {
      * Google ID トークン
      */
     idToken: string;
+};
+
+/**
+ * ユーザーの最新統合レポートリクエスト
+ */
+export type ModelsIntegratedReportLatestRequestResponse = {
+    /**
+     * リクエストID
+     */
+    request_id: string;
+    /**
+     * ユーザーID
+     */
+    user_id: string;
+    /**
+     * レポートが生成済みかどうか
+     */
+    has_report: boolean;
+    /**
+     * リクエスト作成日時
+     */
+    created_at: string;
+};
+
+/**
+ * 自分の最新統合レポート
+ */
+export type ModelsIntegratedReportMineResponse = {
+    /**
+     * レポートID
+     */
+    id: string;
+    /**
+     * リクエストID
+     */
+    request_id: string;
+    /**
+     * レポート本文（Markdown）
+     */
+    content: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+    /**
+     * 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
+     */
+    first_view: boolean;
+};
+
+/**
+ * 統合レポート生成リクエスト（作成結果）
+ */
+export type ModelsIntegratedReportRequestResponse = {
+    /**
+     * リクエストID
+     */
+    id: string;
+    /**
+     * トピック1
+     */
+    topic1: number;
+    /**
+     * トピック2
+     */
+    topic2: number;
+    /**
+     * トピック3
+     */
+    topic3: number;
+    /**
+     * 自由記述
+     */
+    free_text: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+};
+
+/**
+ * 統合レポート（リクエストID指定）
+ */
+export type ModelsIntegratedReportResponse = {
+    /**
+     * レポートID
+     */
+    id: string;
+    /**
+     * リクエストID
+     */
+    request_id: string;
+    /**
+     * ユーザーID
+     */
+    user_id: string;
+    /**
+     * レポート本文（Markdown）
+     */
+    content: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+    /**
+     * 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
+     */
+    first_view: boolean;
+};
+
+/**
+ * 統合レポートのリクエスト状況
+ */
+export type ModelsIntegratedReportStatusResponse = {
+    /**
+     * none: リクエストなし / pending: 生成待ち / ready: レポートあり
+     */
+    status: 'none' | 'pending' | 'ready';
+    /**
+     * リクエストID（pending / ready のときのみ）
+     */
+    request_id?: string;
 };
 
 /**
@@ -6375,6 +6519,135 @@ export type CompanyTeamsGetTeamScoresResponses = {
 };
 
 export type CompanyTeamsGetTeamScoresResponse = CompanyTeamsGetTeamScoresResponses[keyof CompanyTeamsGetTeamScoresResponses];
+
+export type IntegratedReportGetMyIntegratedReportData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/integrated-report/me';
+};
+
+export type IntegratedReportGetMyIntegratedReportErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type IntegratedReportGetMyIntegratedReportError = IntegratedReportGetMyIntegratedReportErrors[keyof IntegratedReportGetMyIntegratedReportErrors];
+
+export type IntegratedReportGetMyIntegratedReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsIntegratedReportMineResponse;
+};
+
+export type IntegratedReportGetMyIntegratedReportResponse = IntegratedReportGetMyIntegratedReportResponses[keyof IntegratedReportGetMyIntegratedReportResponses];
+
+export type IntegratedReportCreateIntegratedReportRequestData = {
+    body: ModelsCreateIntegratedReportRequest;
+    path?: never;
+    query?: never;
+    url: '/api/integrated-report/requests';
+};
+
+export type IntegratedReportCreateIntegratedReportRequestErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type IntegratedReportCreateIntegratedReportRequestError = IntegratedReportCreateIntegratedReportRequestErrors[keyof IntegratedReportCreateIntegratedReportRequestErrors];
+
+export type IntegratedReportCreateIntegratedReportRequestResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsIntegratedReportRequestResponse;
+};
+
+export type IntegratedReportCreateIntegratedReportRequestResponse = IntegratedReportCreateIntegratedReportRequestResponses[keyof IntegratedReportCreateIntegratedReportRequestResponses];
+
+export type IntegratedReportGetIntegratedReportData = {
+    body?: never;
+    path: {
+        requestId: string;
+    };
+    query?: never;
+    url: '/api/integrated-report/requests/{requestId}/report';
+};
+
+export type IntegratedReportGetIntegratedReportErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type IntegratedReportGetIntegratedReportError = IntegratedReportGetIntegratedReportErrors[keyof IntegratedReportGetIntegratedReportErrors];
+
+export type IntegratedReportGetIntegratedReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsIntegratedReportResponse;
+};
+
+export type IntegratedReportGetIntegratedReportResponse = IntegratedReportGetIntegratedReportResponses[keyof IntegratedReportGetIntegratedReportResponses];
+
+export type IntegratedReportGetIntegratedReportStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/integrated-report/status';
+};
+
+export type IntegratedReportGetIntegratedReportStatusErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type IntegratedReportGetIntegratedReportStatusError = IntegratedReportGetIntegratedReportStatusErrors[keyof IntegratedReportGetIntegratedReportStatusErrors];
+
+export type IntegratedReportGetIntegratedReportStatusResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsIntegratedReportStatusResponse;
+};
+
+export type IntegratedReportGetIntegratedReportStatusResponse = IntegratedReportGetIntegratedReportStatusResponses[keyof IntegratedReportGetIntegratedReportStatusResponses];
+
+export type IntegratedReportGetLatestIntegratedRequestData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/integrated-report/users/{userId}/latest-request';
+};
+
+export type IntegratedReportGetLatestIntegratedRequestErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type IntegratedReportGetLatestIntegratedRequestError = IntegratedReportGetLatestIntegratedRequestErrors[keyof IntegratedReportGetLatestIntegratedRequestErrors];
+
+export type IntegratedReportGetLatestIntegratedRequestResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsIntegratedReportLatestRequestResponse;
+};
+
+export type IntegratedReportGetLatestIntegratedRequestResponse = IntegratedReportGetLatestIntegratedRequestResponses[keyof IntegratedReportGetLatestIntegratedRequestResponses];
 
 export type CandidateInterviewsListCandidateInterviewsData = {
     body?: never;

@@ -35,6 +35,9 @@ type Server struct {
 	jobPosting    *JobPostingController
 	interview     *InterviewController
 
+	// User-facing routes served by admin controllers (spec-covered, pool直結のまま).
+	adminIntReport *AdminIntegratedReportController
+
 	// Job image uploads are standalone echo.HandlerFuncs built with
 	// HandleImageUpload(storage, subdir); wired here for interface conformance.
 	uploadTeamMemberPhoto echo.HandlerFunc
@@ -72,6 +75,7 @@ func NewServer(
 	companyTeam *CompanyTeamController,
 	jobPosting *JobPostingController,
 	interview *InterviewController,
+	adminIntReport *AdminIntegratedReportController,
 	uploadTeamMemberPhoto echo.HandlerFunc,
 	uploadGalleryImage echo.HandlerFunc,
 	uploadJobCoverImage echo.HandlerFunc,
@@ -103,6 +107,8 @@ func NewServer(
 		companyTeam:   companyTeam,
 		jobPosting:    jobPosting,
 		interview:     interview,
+
+		adminIntReport: adminIntReport,
 
 		uploadTeamMemberPhoto: uploadTeamMemberPhoto,
 		uploadGalleryImage:    uploadGalleryImage,
@@ -778,4 +784,26 @@ func (s *Server) CandidateInterviewsGetProposalSlots(ctx echo.Context, _ string)
 
 func (s *Server) CandidateInterviewsCancelCandidateInterview(ctx echo.Context, _ string) error {
 	return s.interview.CancelInterview(ctx)
+}
+
+// --- IntegratedReport (user-facing routes served by AdminIntegratedReportController) ---
+
+func (s *Server) IntegratedReportCreateIntegratedReportRequest(ctx echo.Context) error {
+	return s.adminIntReport.CreateRequest(ctx)
+}
+
+func (s *Server) IntegratedReportGetMyIntegratedReport(ctx echo.Context) error {
+	return s.adminIntReport.GetReportByUser(ctx)
+}
+
+func (s *Server) IntegratedReportGetIntegratedReportStatus(ctx echo.Context) error {
+	return s.adminIntReport.GetRequestStatus(ctx)
+}
+
+func (s *Server) IntegratedReportGetIntegratedReport(ctx echo.Context, requestID string) error {
+	return s.adminIntReport.GetReport(ctx, requestID)
+}
+
+func (s *Server) IntegratedReportGetLatestIntegratedRequest(ctx echo.Context, userID string) error {
+	return s.adminIntReport.GetLatestRequest(ctx, userID)
 }
