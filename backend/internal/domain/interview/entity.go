@@ -49,10 +49,10 @@ type Interview struct {
 
 type InterviewWithNames struct {
 	Interview
-	CandidateName     string
-	CandidateAvatar   string
-	JobTitle          string
-	CompanyName       string
+	CandidateName   string
+	CandidateAvatar string
+	JobTitle        string
+	CompanyName     string
 }
 
 type ProposeInput struct {

@@ -88,12 +88,12 @@ type UpdateTemplateInput struct {
 }
 
 type ScoutCredit struct {
-	ID                string
-	CompanyID         string
-	Balance           int
-	MonthlyAllowance  int
-	MaxStock          int
-	LastReplenishedAt time.Time
+	ID                   string
+	CompanyID            string
+	Balance              int
+	MonthlyAllowance     int
+	MaxStock             int
+	LastReplenishedAt    time.Time
 	WarningStartedAt     *time.Time
 	RestrictionStartedAt *time.Time
 	QualityRestricted    bool
@@ -142,12 +142,12 @@ type DashboardStats struct {
 }
 
 type QualityScore struct {
-	ReplyRate14d     float64
-	Level            QualityLevel
-	SentLast14d      int
-	RepliedLast14d   int
-	WarningStartedAt *time.Time
-	WarningDeadline  *time.Time
-	DaysRemaining    *int
+	ReplyRate14d      float64
+	Level             QualityLevel
+	SentLast14d       int
+	RepliedLast14d    int
+	WarningStartedAt  *time.Time
+	WarningDeadline   *time.Time
+	DaysRemaining     *int
 	RestrictionEndsAt *time.Time
 }

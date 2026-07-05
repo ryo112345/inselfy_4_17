@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	MaxPerUser            = 50
-	MaxCompanyNameLength  = 200
-	MaxTitleLength        = 200
-	MaxDescriptionLength  = 5000
-	MinYear         int16 = 1950
+	MaxPerUser                 = 50
+	MaxCompanyNameLength       = 200
+	MaxTitleLength             = 200
+	MaxDescriptionLength       = 5000
+	MinYear              int16 = 1950
 )
 
 var (

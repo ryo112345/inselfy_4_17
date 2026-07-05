@@ -147,8 +147,8 @@ func (r *ConversationRepository) ListByCandidate(ctx context.Context, candidateI
 		return nil, 0, domainerr.ErrBadRequest
 	}
 	rows, err := q.ListConversationsByCandidate(ctx, &generated.ListConversationsByCandidateParams{
-		UserID:   pgCandidateID,
-		RowLimit: int32(limit),
+		UserID:    pgCandidateID,
+		RowLimit:  int32(limit),
 		RowOffset: int32(offset),
 	})
 	if err != nil {

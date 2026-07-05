@@ -6,20 +6,20 @@ import (
 )
 
 const (
-	MaxSubjectLength       = 200
-	MaxBodyLength          = 5000
-	MaxTemplateNameLen     = 100
-	ExpiryMonthsAfterSent  = 3
-	MonthlyAllowance       = 30
-	MaxStock               = 120
-	QualityThreshold            = 0.13
-	QualityMinSamples           = 50
-	WarningImprovementDays      = 14
-	TemporaryRestrictionDays    = 30
-	WarningExtendedLookback     = 20
-	DefaultLookbackDays         = 14
-	MaxResendCount   int16 = 1
-	MaxTemplatesPerCompany = 50
+	MaxSubjectLength               = 200
+	MaxBodyLength                  = 5000
+	MaxTemplateNameLen             = 100
+	ExpiryMonthsAfterSent          = 3
+	MonthlyAllowance               = 30
+	MaxStock                       = 120
+	QualityThreshold               = 0.13
+	QualityMinSamples              = 50
+	WarningImprovementDays         = 14
+	TemporaryRestrictionDays       = 30
+	WarningExtendedLookback        = 20
+	DefaultLookbackDays            = 14
+	MaxResendCount           int16 = 1
+	MaxTemplatesPerCompany         = 50
 )
 
 func ValidateSend(input SendScoutInput) error {
@@ -132,12 +132,12 @@ type QualityInput struct {
 }
 
 type QualityResult struct {
-	Score                QualityScore
-	ShouldSetWarning     bool
-	ShouldClearWarning   bool
-	ShouldTempRestrict   bool
+	Score                  QualityScore
+	ShouldSetWarning       bool
+	ShouldClearWarning     bool
+	ShouldTempRestrict     bool
 	ShouldClearRestriction bool
-	ShouldRestrict       bool
+	ShouldRestrict         bool
 }
 
 func EvaluateQuality(input QualityInput) QualityResult {

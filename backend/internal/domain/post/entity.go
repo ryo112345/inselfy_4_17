@@ -32,7 +32,7 @@ type PostWithUser struct {
 	LikeCount    int
 	CommentCount int
 	RepostCount  int
-	LikedByMe   bool
+	LikedByMe    bool
 	RepostedByMe bool
 	IsRepost     bool
 	QuotedPost   *QuotedPost

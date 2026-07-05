@@ -10,7 +10,7 @@ import (
 
 const (
 	FixedQuestions = 70
-	MuTolerance   = 1e-3
+	MuTolerance    = 1e-3
 )
 
 func GenerateInitialPairs(rng *rand.Rand) []Pair {

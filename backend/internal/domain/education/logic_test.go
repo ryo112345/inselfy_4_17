@@ -53,5 +53,5 @@ func TestValidateCreate(t *testing.T) {
 	}
 }
 
-func strPtr(s string) *string  { return &s }
+func strPtr(s string) *string { return &s }
 func int16Ptr(v int16) *int16 { return &v }

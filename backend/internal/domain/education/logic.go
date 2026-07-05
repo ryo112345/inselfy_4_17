@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	MaxPerUser         = 20
-	MaxSchoolLength    = 200
-	MaxDegreeLength    = 200
-	MinYear      int16 = 1950
+	MaxPerUser            = 20
+	MaxSchoolLength       = 200
+	MaxDegreeLength       = 200
+	MinYear         int16 = 1950
 )
 
 var (

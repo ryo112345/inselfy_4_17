@@ -430,20 +430,20 @@ func buildTextFilters(params jobposting.SearchPublicParams, arg func(any) string
 
 func scanJobPostingWithCompany(rows pgx.Rows) (*jobposting.JobPosting, error) {
 	var (
-		id, companyID, teamID                                                                                   pgtype.UUID
-		title, description, employmentType, status, jobCategory, hiringCount                                    string
-		appealPoints, challenges, teamDescription, teamLabel, skillsGained                                      string
-		reqQual, prefQual, workLocation, wlChangeScope, jdChangeScope                                           string
-		contractType, probationPeriod, workHours, breakTime, holidays                                           string
-		salaryDetail, insurance, remotePolicy, benefits, smokingPolicy, selectionProcess                        string
-		coverImageURL, hlRole, hlAppeal, hlChallenge, hlGrowth                                                  string
-		location                                                                                                pgtype.Text
-		isActive                                                                                                bool
-		salaryMin, salaryMax                                                                                    pgtype.Int4
-		tags                                                                                                    []string
-		teamMembersJSON, galleryURLsJSON                                                                        []byte
-		createdAt, updatedAt                                                                                    pgtype.Timestamptz
-		companyName, companyLogoURL                                                                             string
+		id, companyID, teamID                                                            pgtype.UUID
+		title, description, employmentType, status, jobCategory, hiringCount             string
+		appealPoints, challenges, teamDescription, teamLabel, skillsGained               string
+		reqQual, prefQual, workLocation, wlChangeScope, jdChangeScope                    string
+		contractType, probationPeriod, workHours, breakTime, holidays                    string
+		salaryDetail, insurance, remotePolicy, benefits, smokingPolicy, selectionProcess string
+		coverImageURL, hlRole, hlAppeal, hlChallenge, hlGrowth                           string
+		location                                                                         pgtype.Text
+		isActive                                                                         bool
+		salaryMin, salaryMax                                                             pgtype.Int4
+		tags                                                                             []string
+		teamMembersJSON, galleryURLsJSON                                                 []byte
+		createdAt, updatedAt                                                             pgtype.Timestamptz
+		companyName, companyLogoURL                                                      string
 	)
 
 	err := rows.Scan(
