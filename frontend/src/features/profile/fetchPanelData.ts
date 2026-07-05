@@ -5,18 +5,18 @@ import {
   followsListFollowers,
   followsListFollowing,
   skillsListSkills,
+  usersGetUserById,
   usersGetUserByUsername,
   type ModelsEducationResponse,
   type ModelsExperienceResponse,
   type ModelsSkillResponse,
   type ModelsUserResponse,
 } from "@/external/client/api/generated";
-import { getLatestResult as getLatestWvResult, type ResultDTO as WvResultDTO } from "@/features/work-values/api";
-import { getLatestResult as getLatestCiResult, type ResultDTO as CiResultDTO } from "@/features/career-interest/api";
+import { getAiReport as getWvAiReport, getLatestResult as getLatestWvResult, type ResultDTO as WvResultDTO } from "@/features/work-values/api";
+import { getAiReport as getCiAiReport, getLatestResult as getLatestCiResult, type ResultDTO as CiResultDTO } from "@/features/career-interest/api";
+import { getLatestIntegratedRequest } from "@/features/integrated-report/api";
 import { VALUE_LABELS, type ValueId } from "@/features/work-values/lib/needs";
 import { TYPE_LABELS, type TypeId } from "@/features/career-interest/lib/types";
-
-const INTERNAL_API = process.env.INTERNAL_API_URL ?? "http://localhost:8081";
 
 export type DiagnosticSummary = {
   label: string;
@@ -55,11 +55,9 @@ export async function fetchPanelDataByUsername(username: string): Promise<PanelD
 }
 
 export async function fetchPanelDataByUserId(userId: string): Promise<PanelData | null> {
-  const res = await fetch(`${INTERNAL_API}/api/users/id/${userId}`);
-  if (!res.ok) return null;
-  const user = (await res.json()) as ModelsUserResponse;
-  const username = user.username;
-  return fetchRest(user, username);
+  const userRes = await usersGetUserById({ path: { id: userId } });
+  if (userRes.error || !userRes.data) return null;
+  return fetchRest(userRes.data, userRes.data.username);
 }
 
 function formatDate(iso: string): string {
@@ -85,10 +83,8 @@ function buildCiKeywords(result: CiResultDTO): string {
 
 async function checkReportExists(sessionId: string, kind: "work-values" | "career-interest"): Promise<boolean> {
   try {
-    const res = await fetch(`${INTERNAL_API}/api/${kind}/sessions/${sessionId}/ai-report`);
-    if (!res.ok) return false;
-    const data = await res.json();
-    return !!data?.content;
+    const report = kind === "work-values" ? await getWvAiReport(sessionId) : await getCiAiReport(sessionId);
+    return !!report?.content;
   } catch {
     return false;
   }
@@ -96,10 +92,9 @@ async function checkReportExists(sessionId: string, kind: "work-values" | "caree
 
 async function fetchLatestIntegratedRequest(userId: string): Promise<{ requestId: string; hasReport: boolean } | null> {
   try {
-    const res = await fetch(`${INTERNAL_API}/api/integrated-report/users/${userId}/latest-request`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    return { requestId: data.request_id, hasReport: !!data.has_report };
+    const data = await getLatestIntegratedRequest(userId);
+    if (!data) return null;
+    return { requestId: data.request_id, hasReport: data.has_report };
   } catch {
     return null;
   }

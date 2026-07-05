@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/auth-context";
+import { getIntegratedReportStatus } from "@/features/integrated-report/api";
 import { CheckIcon } from "./Icons";
 import { IntegratedReportModal } from "./IntegratedReportModal";
 
@@ -12,21 +14,24 @@ type Props = {
 };
 
 export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReportRequestId }: Props) {
+  const { isAuthenticated } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [requestStatus, setRequestStatus] = useState<"none" | "pending" | "ready">(
     intReportRequestId ? "pending" : "none",
   );
 
   useEffect(() => {
+    // 未ログインでは呼ばない（401 が正常系になり、SDK の 401 インターセプタが
+    // /login リダイレクトを起こすため）。従来どおり初期ステータス表示のままになる。
+    if (!isAuthenticated) return;
     let cancelled = false;
-    fetch("/api/integrated-report/status", { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
+    getIntegratedReportStatus()
       .then((data) => {
         if (!cancelled && data?.status) setRequestStatus(data.status);
       })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, []);
+  }, [isAuthenticated]);
 
   const steps = [
     { label: "職歴を入力", done: hasExperience },

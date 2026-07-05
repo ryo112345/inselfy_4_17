@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  getAiReport,
   getResultBySessionId,
   type ResultDTO,
   type BasicScoreDTO,
@@ -640,8 +641,7 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/career-interest/sessions/${sessionId}/ai-report`)
-      .then((res) => (res.ok ? res.json() : null))
+    getAiReport(sessionId)
       .then((data) => {
         if (cancelled) return;
         if (data?.content) {
@@ -680,8 +680,7 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
       }
     } else {
       setLoading(true);
-      fetch(`/api/career-interest/sessions/${sessionId}/ai-report`)
-        .then((res) => (res.ok ? res.json() : null))
+      getAiReport(sessionId)
         .then((data) => {
           if (data?.content) {
             setReportContent(data.content);

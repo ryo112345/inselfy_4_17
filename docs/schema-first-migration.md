@@ -16,6 +16,7 @@ FE↔BE の契約ズレをコンパイルエラーで検出できるようにす
 - **フロントエンドの呼び出し側の差し替えは Phase 2（別作業）。** 本移行では生成TS型が
   `frontend/src/external/client/api/generated/` に「使える状態で揃う」ところまで。
   既存の手書き fetch は壊れない（生成は追加的）。
+  → Phase 2 の手順書: `docs/frontend-generated-client-migration.md`
 
 ## 移行済みパターン（user/education/experience/skill と同じ形にする）
 
@@ -142,9 +143,11 @@ credits/applications/teams、候補者 bypass-login→interviews/scouts/scout-se
 
 ### 残タスク（本移行のスコープ外だった漏れ）
 
-- [ ] **初期4機能移行時のスペック漏れルート:** `POST /api/users/:username/upload-image`、
+- [x] **初期4機能移行時のスペック漏れルート:** `POST /api/users/:username/upload-image`、
   `GET /api/users/id/:id`（user 機能だがスペック未記載のまま）。upload は `@multipartBody`
-  パターン（articles 参照）で追加できる。
+  パターン（articles 参照）で追加できる。→ Phase 2B（B0）で spec 化済み（2026-07-05）。
+  あわせて integrated-report（user-facing 5ルート）と WV/CI の ai-report GET も spec 化した
+  （admin コントローラ実装のまま、server.go にデリゲートのみ追加）。
 
 ## Phase 2（本移行完了後の別作業・任意）
 
