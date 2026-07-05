@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
-	"github.com/akiyama/inselfy/backend/internal/domain/user"
 )
 
 type ScoutInputPort interface {
@@ -70,10 +69,4 @@ type ScoutReplyRepository interface {
 type UserScoutSettingsRepository interface {
 	GetByUserID(ctx context.Context, userID string) (*scout.UserScoutSettings, error)
 	Upsert(ctx context.Context, s *scout.UserScoutSettings) (*scout.UserScoutSettings, error)
-}
-
-// TalentSearchInputPort provides candidate search capabilities for companies.
-type TalentSearchInputPort interface {
-	Search(ctx context.Context, companyID string, keyword *string, skills []string, limit, offset int) ([]*user.User, int, error)
-	GetProfile(ctx context.Context, userID string) (*user.User, error)
 }

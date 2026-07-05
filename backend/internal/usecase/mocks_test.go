@@ -6,6 +6,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
 	"github.com/akiyama/inselfy/backend/internal/domain/skill"
+	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
 )
 
@@ -106,6 +107,66 @@ type inlineTxManager struct{}
 
 func (inlineTxManager) WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
 	return fn(ctx)
+}
+
+type talentSearchQueryStub struct {
+	searchCardsFn     func(ctx context.Context, f talentsearch.Filter, limit, offset int) ([]talentsearch.Card, int, error)
+	filteredUserIDsFn func(ctx context.Context, f talentsearch.Filter) ([]string, error)
+	teamCompanyIDFn   func(ctx context.Context, teamID string) (string, error)
+	teamWVFn          func(ctx context.Context, teamID string) (map[string]float64, error)
+	teamCIFn          func(ctx context.Context, teamID string) ([6]float64, error)
+	publicWVFn        func(ctx context.Context, filterUserIDs []string) ([]talentsearch.UserWVScores, error)
+	publicCIFn        func(ctx context.Context, filterUserIDs []string) ([]talentsearch.UserCIScores, error)
+	cardsByUserIDsFn  func(ctx context.Context, userIDs []string) ([]talentsearch.Card, error)
+	wvByUserIDsFn     func(ctx context.Context, userIDs []string) (map[string]map[string]float64, error)
+	ciByUserIDsFn     func(ctx context.Context, userIDs []string) (map[string][6]float64, error)
+}
+
+func (s *talentSearchQueryStub) SearchCards(ctx context.Context, f talentsearch.Filter, limit, offset int) ([]talentsearch.Card, int, error) {
+	return s.searchCardsFn(ctx, f, limit, offset)
+}
+func (s *talentSearchQueryStub) FilteredUserIDs(ctx context.Context, f talentsearch.Filter) ([]string, error) {
+	return s.filteredUserIDsFn(ctx, f)
+}
+func (s *talentSearchQueryStub) TeamCompanyID(ctx context.Context, teamID string) (string, error) {
+	return s.teamCompanyIDFn(ctx, teamID)
+}
+func (s *talentSearchQueryStub) TeamAverageWVDisplayScores(ctx context.Context, teamID string) (map[string]float64, error) {
+	return s.teamWVFn(ctx, teamID)
+}
+func (s *talentSearchQueryStub) TeamAverageCIScores(ctx context.Context, teamID string) ([6]float64, error) {
+	return s.teamCIFn(ctx, teamID)
+}
+func (s *talentSearchQueryStub) PublicUserWVScores(ctx context.Context, filterUserIDs []string) ([]talentsearch.UserWVScores, error) {
+	return s.publicWVFn(ctx, filterUserIDs)
+}
+func (s *talentSearchQueryStub) PublicUserCIScores(ctx context.Context, filterUserIDs []string) ([]talentsearch.UserCIScores, error) {
+	return s.publicCIFn(ctx, filterUserIDs)
+}
+
+// cardsByUserIDs defaults to fabricating a bare card per id, mirroring the
+// gateway's "ordered, missing dropped" contract.
+func (s *talentSearchQueryStub) CardsByUserIDs(ctx context.Context, userIDs []string) ([]talentsearch.Card, error) {
+	if s.cardsByUserIDsFn != nil {
+		return s.cardsByUserIDsFn(ctx, userIDs)
+	}
+	cards := make([]talentsearch.Card, len(userIDs))
+	for i, id := range userIDs {
+		cards[i] = talentsearch.Card{UserID: id, Username: "u-" + id, Name: "user " + id}
+	}
+	return cards, nil
+}
+func (s *talentSearchQueryStub) WVScoresByUserIDs(ctx context.Context, userIDs []string) (map[string]map[string]float64, error) {
+	if s.wvByUserIDsFn == nil {
+		return map[string]map[string]float64{}, nil
+	}
+	return s.wvByUserIDsFn(ctx, userIDs)
+}
+func (s *talentSearchQueryStub) CIScoresByUserIDs(ctx context.Context, userIDs []string) (map[string][6]float64, error) {
+	if s.ciByUserIDsFn == nil {
+		return map[string][6]float64{}, nil
+	}
+	return s.ciByUserIDsFn(ctx, userIDs)
 }
 
 // Unused placeholders to avoid "imported and not used" warnings if a test file
