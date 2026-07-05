@@ -7,6 +7,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
 	"github.com/akiyama/inselfy/backend/internal/domain/interview"
+	"github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 	"github.com/akiyama/inselfy/backend/internal/domain/skill"
 	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
@@ -169,6 +170,62 @@ func (s *talentSearchQueryStub) CIScoresByUserIDs(ctx context.Context, userIDs [
 	if s.ciByUserIDsFn == nil {
 		return map[string][6]float64{}, nil
 	}
+	return s.ciByUserIDsFn(ctx, userIDs)
+}
+
+type jobApplicationRepoStub struct {
+	createFn               func(ctx context.Context, a *jobapplication.JobApplication) (*jobapplication.JobApplication, error)
+	getByIDFn              func(ctx context.Context, id string) (*jobapplication.JobApplicationWithDetails, error)
+	getByCandidateAndJobFn func(ctx context.Context, candidateID, jobPostingID string) (*jobapplication.JobApplication, error)
+	listByCompanyIDFn      func(ctx context.Context, companyID string, filter jobapplication.ListFilter) ([]*jobapplication.JobApplicationWithDetails, int, error)
+	listByCandidateIDFn    func(ctx context.Context, candidateID string) ([]*jobapplication.JobApplicationWithDetails, error)
+	updateStatusFn         func(ctx context.Context, id string, status jobapplication.Status) error
+}
+
+func (s *jobApplicationRepoStub) Create(ctx context.Context, a *jobapplication.JobApplication) (*jobapplication.JobApplication, error) {
+	return s.createFn(ctx, a)
+}
+func (s *jobApplicationRepoStub) GetByID(ctx context.Context, id string) (*jobapplication.JobApplicationWithDetails, error) {
+	return s.getByIDFn(ctx, id)
+}
+func (s *jobApplicationRepoStub) GetByCandidateAndJob(ctx context.Context, candidateID, jobPostingID string) (*jobapplication.JobApplication, error) {
+	return s.getByCandidateAndJobFn(ctx, candidateID, jobPostingID)
+}
+func (s *jobApplicationRepoStub) ListByCompanyID(ctx context.Context, companyID string, filter jobapplication.ListFilter) ([]*jobapplication.JobApplicationWithDetails, int, error) {
+	return s.listByCompanyIDFn(ctx, companyID, filter)
+}
+func (s *jobApplicationRepoStub) ListByCandidateID(ctx context.Context, candidateID string) ([]*jobapplication.JobApplicationWithDetails, error) {
+	return s.listByCandidateIDFn(ctx, candidateID)
+}
+func (s *jobApplicationRepoStub) UpdateStatus(ctx context.Context, id string, status jobapplication.Status) error {
+	return s.updateStatusFn(ctx, id, status)
+}
+
+type jobApplicationQueryStub struct {
+	jobPostingTeamIDsFn func(ctx context.Context, jobPostingIDs []string) (map[string]string, error)
+	teamCompanyIDFn     func(ctx context.Context, teamID string) (string, error)
+	teamWVFn            func(ctx context.Context, teamID string) (map[string]float64, error)
+	teamCIFn            func(ctx context.Context, teamID string) ([6]float64, error)
+	wvByUserIDsFn       func(ctx context.Context, userIDs []string) (map[string]map[string]float64, error)
+	ciByUserIDsFn       func(ctx context.Context, userIDs []string) (map[string][6]float64, error)
+}
+
+func (s *jobApplicationQueryStub) JobPostingTeamIDs(ctx context.Context, jobPostingIDs []string) (map[string]string, error) {
+	return s.jobPostingTeamIDsFn(ctx, jobPostingIDs)
+}
+func (s *jobApplicationQueryStub) TeamCompanyID(ctx context.Context, teamID string) (string, error) {
+	return s.teamCompanyIDFn(ctx, teamID)
+}
+func (s *jobApplicationQueryStub) TeamAverageWVDisplayScores(ctx context.Context, teamID string) (map[string]float64, error) {
+	return s.teamWVFn(ctx, teamID)
+}
+func (s *jobApplicationQueryStub) TeamAverageCIScores(ctx context.Context, teamID string) ([6]float64, error) {
+	return s.teamCIFn(ctx, teamID)
+}
+func (s *jobApplicationQueryStub) WVScoresByUserIDs(ctx context.Context, userIDs []string) (map[string]map[string]float64, error) {
+	return s.wvByUserIDsFn(ctx, userIDs)
+}
+func (s *jobApplicationQueryStub) CIScoresByUserIDs(ctx context.Context, userIDs []string) (map[string][6]float64, error) {
 	return s.ciByUserIDsFn(ctx, userIDs)
 }
 
