@@ -1,3 +1,18 @@
+import "@/external/client/api/client";
+import {
+  candidateMessagingCountCandidateUnreadMessages,
+  candidateMessagingListCandidateConversations,
+  candidateMessagingListCandidateMessages,
+  candidateMessagingMarkCandidateConversationRead,
+  candidateMessagingSendCandidateMessage,
+  candidateMessagingStartCandidateConversation,
+  companyMessagingCountCompanyUnreadMessages,
+  companyMessagingListCompanyConversations,
+  companyMessagingListCompanyMessages,
+  companyMessagingMarkCompanyConversationRead,
+  companyMessagingSendCompanyMessage,
+  companyMessagingStartCompanyConversation,
+} from "@/external/client/api/generated";
 import type {
   Conversation,
   ConversationListResponse,
@@ -6,10 +21,12 @@ import type {
   UnreadCountResponse,
 } from "./types";
 
-const BASE_URL =
-  typeof window === "undefined"
-    ? process.env.INTERNAL_API_URL ?? "http://localhost:8081"
-    : "";
+function buildListQuery(params?: { limit?: number; offset?: number }) {
+  const query: { limit?: number; offset?: number } = {};
+  if (params?.limit) query.limit = params.limit;
+  if (params?.offset) query.offset = params.offset;
+  return query;
+}
 
 // ---------------------------------------------------------------------------
 // Company side
@@ -19,83 +36,61 @@ export async function startConversation(body: {
   candidateId: string;
   body: string;
 }): Promise<Conversation> {
-  const res = await fetch(`${BASE_URL}/api/company/messages/conversations`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "会話の開始に失敗しました");
+  const { data, error } = await companyMessagingStartCompanyConversation({ body });
+  if (error || !data) {
+    throw new Error(error?.message ?? "会話の開始に失敗しました");
   }
-  return res.json();
+  return data as Conversation;
 }
 
 export async function fetchCompanyConversations(
   params?: { limit?: number; offset?: number },
 ): Promise<ConversationListResponse> {
-  const q = new URLSearchParams();
-  if (params?.limit) q.set("limit", String(params.limit));
-  if (params?.offset) q.set("offset", String(params.offset));
-  const res = await fetch(
-    `${BASE_URL}/api/company/messages/conversations?${q}`,
-    { credentials: "include" },
-  );
-  if (!res.ok) throw new Error("会話一覧の取得に失敗しました");
-  return res.json();
+  const { data, error } = await companyMessagingListCompanyConversations({
+    query: buildListQuery(params),
+  });
+  if (error || !data) throw new Error("会話一覧の取得に失敗しました");
+  return data as ConversationListResponse;
 }
 
 export async function fetchCompanyConversationMessages(
   conversationId: string,
   params?: { limit?: number; offset?: number },
 ): Promise<MessageListResponse> {
-  const q = new URLSearchParams();
-  if (params?.limit) q.set("limit", String(params.limit));
-  if (params?.offset) q.set("offset", String(params.offset));
-  const res = await fetch(
-    `${BASE_URL}/api/company/messages/conversations/${conversationId}/messages?${q}`,
-    { credentials: "include" },
-  );
-  if (!res.ok) throw new Error("メッセージの取得に失敗しました");
-  return res.json();
+  const { data, error } = await companyMessagingListCompanyMessages({
+    path: { conversationId },
+    query: buildListQuery(params),
+  });
+  if (error || !data) throw new Error("メッセージの取得に失敗しました");
+  return data as MessageListResponse;
 }
 
 export async function sendMessageAsCompany(
   conversationId: string,
   body: string,
 ): Promise<Message> {
-  const res = await fetch(
-    `${BASE_URL}/api/company/messages/conversations/${conversationId}/messages`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ body }),
-    },
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "メッセージの送信に失敗しました");
+  const { data, error } = await companyMessagingSendCompanyMessage({
+    path: { conversationId },
+    body: { body },
+  });
+  if (error || !data) {
+    throw new Error(error?.message ?? "メッセージの送信に失敗しました");
   }
-  return res.json();
+  return data as Message;
 }
 
 export async function markReadAsCompany(
   conversationId: string,
 ): Promise<void> {
-  await fetch(
-    `${BASE_URL}/api/company/messages/conversations/${conversationId}/read`,
-    { method: "POST", credentials: "include" },
-  );
+  await companyMessagingMarkCompanyConversationRead({
+    path: { conversationId },
+  });
 }
 
 export async function fetchCompanyUnreadCount(): Promise<UnreadCountResponse> {
-  const res = await fetch(`${BASE_URL}/api/company/messages/unread-count`, {
-    credentials: "include",
-  });
-  if (!res.ok) return { count: 0 };
-  return res.json();
+  const { data, error } = await companyMessagingCountCompanyUnreadMessages({});
+  if (error || !data) return { count: 0 };
+  return data;
 }
 
 // ---------------------------------------------------------------------------
@@ -106,81 +101,59 @@ export async function startCandidateConversation(body: {
   recipientId: string;
   body: string;
 }): Promise<Conversation> {
-  const res = await fetch(`${BASE_URL}/api/messages/conversations`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "会話の開始に失敗しました");
+  const { data, error } = await candidateMessagingStartCandidateConversation({ body });
+  if (error || !data) {
+    throw new Error(error?.message ?? "会話の開始に失敗しました");
   }
-  return res.json();
+  return data as Conversation;
 }
 
 export async function fetchCandidateConversations(
   params?: { limit?: number; offset?: number },
 ): Promise<ConversationListResponse> {
-  const q = new URLSearchParams();
-  if (params?.limit) q.set("limit", String(params.limit));
-  if (params?.offset) q.set("offset", String(params.offset));
-  const res = await fetch(
-    `${BASE_URL}/api/messages/conversations?${q}`,
-    { credentials: "include" },
-  );
-  if (!res.ok) throw new Error("会話一覧の取得に失敗しました");
-  return res.json();
+  const { data, error } = await candidateMessagingListCandidateConversations({
+    query: buildListQuery(params),
+  });
+  if (error || !data) throw new Error("会話一覧の取得に失敗しました");
+  return data as ConversationListResponse;
 }
 
 export async function fetchCandidateConversationMessages(
   conversationId: string,
   params?: { limit?: number; offset?: number },
 ): Promise<MessageListResponse> {
-  const q = new URLSearchParams();
-  if (params?.limit) q.set("limit", String(params.limit));
-  if (params?.offset) q.set("offset", String(params.offset));
-  const res = await fetch(
-    `${BASE_URL}/api/messages/conversations/${conversationId}/messages?${q}`,
-    { credentials: "include" },
-  );
-  if (!res.ok) throw new Error("メッセージの取得に失敗しました");
-  return res.json();
+  const { data, error } = await candidateMessagingListCandidateMessages({
+    path: { conversationId },
+    query: buildListQuery(params),
+  });
+  if (error || !data) throw new Error("メッセージの取得に失敗しました");
+  return data as MessageListResponse;
 }
 
 export async function sendMessageAsCandidate(
   conversationId: string,
   body: string,
 ): Promise<Message> {
-  const res = await fetch(
-    `${BASE_URL}/api/messages/conversations/${conversationId}/messages`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ body }),
-    },
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "メッセージの送信に失敗しました");
+  const { data, error } = await candidateMessagingSendCandidateMessage({
+    path: { conversationId },
+    body: { body },
+  });
+  if (error || !data) {
+    throw new Error(error?.message ?? "メッセージの送信に失敗しました");
   }
-  return res.json();
+  return data as Message;
 }
 
 export async function markReadAsCandidate(
   conversationId: string,
 ): Promise<void> {
-  await fetch(
-    `${BASE_URL}/api/messages/conversations/${conversationId}/read`,
-    { method: "POST", credentials: "include" },
-  );
+  await candidateMessagingMarkCandidateConversationRead({
+    path: { conversationId },
+  });
 }
 
 export async function fetchCandidateUnreadCount(): Promise<UnreadCountResponse> {
-  const res = await fetch(`${BASE_URL}/api/messages/unread-count`, {
-    credentials: "include",
-  });
-  if (!res.ok) return { count: 0 };
-  return res.json();
+  const { data, error } = await candidateMessagingCountCandidateUnreadMessages({});
+  if (error || !data) return { count: 0 };
+  return data;
 }
