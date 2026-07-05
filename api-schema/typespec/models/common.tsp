@@ -53,3 +53,9 @@ model UnauthorizedError {
   code: "UNAUTHORIZED";
   message: string;
 }
+
+/** 画像アップロード結果 */
+model UploadUrlResponse {
+  /** アップロードされたファイルのURL */
+  url: string;
+}

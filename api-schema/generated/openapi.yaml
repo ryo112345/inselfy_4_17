@@ -22,6 +22,7 @@ tags:
   - name: CandidateScouts
   - name: JobApplications
   - name: Messaging
+  - name: Articles
 paths:
   /api/applications:
     post:
@@ -129,6 +130,280 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - JobApplications
+  /api/articles:
+    get:
+      operationId: Articles_listArticles
+      summary: List published articles
+      description: 記事一覧
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Articles
+    post:
+      operationId: Articles_createArticle
+      summary: Create an article as a user
+      description: 記事作成（要ログイン）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Articles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreateArticleRequest'
+  /api/articles/mine:
+    get:
+      operationId: Articles_listMyArticles
+      summary: List articles authored by the authenticated user
+      description: 自分の記事一覧（要ログイン）
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Articles
+  /api/articles/upload-image:
+    post:
+      operationId: Articles_uploadArticleImage
+      summary: Upload an article image
+      description: 記事画像アップロード（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UploadUrlResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Articles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+  /api/articles/{articleId}:
+    get:
+      operationId: Articles_getArticle
+      summary: Get an article
+      description: 記事取得
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Articles
+    put:
+      operationId: Articles_updateArticle
+      summary: Update an article as a user
+      description: 記事更新（要ログイン・著者のみ）
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+      tags:
+        - Articles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateArticleRequest'
+    delete:
+      operationId: Articles_deleteArticle
+      summary: Delete an article as a user
+      description: 記事削除（要ログイン・著者のみ）
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Articles
+  /api/articles/{articleId}/checkout:
+    post:
+      operationId: Articles_createArticleCheckout
+      summary: Create a Stripe checkout session for a paid article
+      description: 有料記事のチェックアウト開始（要ログイン）
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CheckoutSessionResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Articles
+  /api/articles/{articleId}/publish:
+    post:
+      operationId: Articles_publishArticle
+      summary: Publish an article as a user
+      description: 記事公開（要ログイン・著者のみ）
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+      tags:
+        - Articles
   /api/auth/google:
     post:
       operationId: Auth_googleLogin
@@ -465,6 +740,121 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateApplicationStatusRequest'
+  /api/company/articles:
+    post:
+      operationId: CompanyArticles_createCompanyArticle
+      summary: Create an article as a company
+      description: 記事作成（企業認証）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Articles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreateArticleRequest'
+  /api/company/articles/{articleId}:
+    put:
+      operationId: CompanyArticles_updateCompanyArticle
+      summary: Update an article as a company
+      description: 記事更新（企業認証・著者のみ）
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+      tags:
+        - Articles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateArticleRequest'
+    delete:
+      operationId: CompanyArticles_deleteCompanyArticle
+      summary: Delete an article as a company
+      description: 記事削除（企業認証・著者のみ）
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Articles
+  /api/company/articles/{articleId}/publish:
+    post:
+      operationId: CompanyArticles_publishCompanyArticle
+      summary: Publish an article as a company
+      description: 記事公開（企業認証・著者のみ）
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ArticleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+      tags:
+        - Articles
   /api/company/auth/login:
     post:
       operationId: CompanyAuth_companyLogin
@@ -2983,6 +3373,104 @@ components:
           type: string
           description: 応募メッセージ
       description: 求人応募リクエスト
+    Models.ArticleListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.ArticleResponse'
+          description: 記事
+        total:
+          type: integer
+          description: 総件数
+      description: 記事一覧
+    Models.ArticleResponse:
+      type: object
+      required:
+        - id
+        - authorType
+        - authorName
+        - title
+        - body
+        - freePreview
+        - isPaid
+        - priceYen
+        - purchased
+        - isAuthor
+        - charCount
+        - imageCount
+        - status
+        - tags
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: 記事ID
+        authorType:
+          type: string
+          description: 著者種別（user / company）
+        authorName:
+          type: string
+          description: 著者名
+        authorUsername:
+          type: string
+          description: 著者ユーザー名（ユーザー記事のみ）
+        title:
+          type: string
+          description: タイトル
+        body:
+          type: string
+          description: 本文（有料記事は未購入時に空文字）
+        freePreview:
+          type: string
+          description: 無料プレビュー部分
+        isPaid:
+          type: boolean
+          description: 有料記事か
+        priceYen:
+          type: integer
+          description: 価格（円）
+        purchased:
+          type: boolean
+          description: 購入済みか
+        isAuthor:
+          type: boolean
+          description: 閲覧者が著者か
+        charCount:
+          type: integer
+          description: 文字数
+        imageCount:
+          type: integer
+          description: 画像数
+        status:
+          type: string
+          description: ステータス
+        coverImageUrl:
+          type: string
+          description: カバー画像URL
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグ
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+        publishedAt:
+          type: string
+          format: date-time
+          description: 公開日時
+      description: 記事
     Models.AttachSkillRequest:
       type: object
       required:
@@ -3234,6 +3722,15 @@ components:
           type: string
           description: 本文
       description: 候補者からのスカウト返信リクエスト
+    Models.CheckoutSessionResponse:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: チェックアウトURL
+      description: Stripe チェックアウトセッション
     Models.CommentListResponse:
       type: object
       required:
@@ -3452,6 +3949,37 @@ components:
           format: date-time
           description: 作成日時
       description: 会話（プレビュー付き）
+    Models.CreateArticleRequest:
+      type: object
+      required:
+        - title
+        - body
+        - isPaid
+        - priceYen
+        - tags
+      properties:
+        title:
+          type: string
+          description: タイトル
+        body:
+          type: string
+          description: 本文
+        isPaid:
+          type: boolean
+          description: 有料記事か
+        priceYen:
+          type: integer
+          description: 価格（円）
+        coverImageUrl:
+          type: string
+          nullable: true
+          description: カバー画像URL
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグ
+      description: 記事作成リクエスト
     Models.CreateCommentRequest:
       type: object
       required:
@@ -4755,6 +5283,37 @@ components:
           type: string
           description: 新しいステータス
       description: 応募ステータス更新リクエスト
+    Models.UpdateArticleRequest:
+      type: object
+      required:
+        - title
+        - body
+        - isPaid
+        - priceYen
+        - tags
+      properties:
+        title:
+          type: string
+          description: タイトル
+        body:
+          type: string
+          description: 本文
+        isPaid:
+          type: boolean
+          description: 有料記事か
+        priceYen:
+          type: integer
+          description: 価格（円）
+        coverImageUrl:
+          type: string
+          nullable: true
+          description: カバー画像URL
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグ
+      description: 記事更新リクエスト
     Models.UpdateDiagnoseStatusRequest:
       type: object
       properties:
@@ -4935,6 +5494,15 @@ components:
           type: boolean
           description: プロフィール公開フラグ
       description: プロフィール更新リクエスト（PATCH。指定したキーのみ差分適用）。値に null を渡すとフィールドをクリア。
+    Models.UploadUrlResponse:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          description: アップロードされたファイルのURL
+      description: 画像アップロード結果
     Models.UserResponse:
       type: object
       required:

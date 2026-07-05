@@ -25,6 +25,102 @@ export type ModelsApplyJobRequest = {
 };
 
 /**
+ * 記事一覧
+ */
+export type ModelsArticleListResponse = {
+    /**
+     * 記事
+     */
+    items: Array<ModelsArticleResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 記事
+ */
+export type ModelsArticleResponse = {
+    /**
+     * 記事ID
+     */
+    id: string;
+    /**
+     * 著者種別（user / company）
+     */
+    authorType: string;
+    /**
+     * 著者名
+     */
+    authorName: string;
+    /**
+     * 著者ユーザー名（ユーザー記事のみ）
+     */
+    authorUsername?: string;
+    /**
+     * タイトル
+     */
+    title: string;
+    /**
+     * 本文（有料記事は未購入時に空文字）
+     */
+    body: string;
+    /**
+     * 無料プレビュー部分
+     */
+    freePreview: string;
+    /**
+     * 有料記事か
+     */
+    isPaid: boolean;
+    /**
+     * 価格（円）
+     */
+    priceYen: number;
+    /**
+     * 購入済みか
+     */
+    purchased: boolean;
+    /**
+     * 閲覧者が著者か
+     */
+    isAuthor: boolean;
+    /**
+     * 文字数
+     */
+    charCount: number;
+    /**
+     * 画像数
+     */
+    imageCount: number;
+    /**
+     * ステータス
+     */
+    status: string;
+    /**
+     * カバー画像URL
+     */
+    coverImageUrl?: string;
+    /**
+     * タグ
+     */
+    tags: Array<string>;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+    /**
+     * 更新日時
+     */
+    updatedAt: string;
+    /**
+     * 公開日時
+     */
+    publishedAt?: string;
+};
+
+/**
  * スキル追加リクエスト
  */
 export type ModelsAttachSkillRequest = {
@@ -264,6 +360,16 @@ export type ModelsCandidateScoutReplyRequest = {
 };
 
 /**
+ * Stripe チェックアウトセッション
+ */
+export type ModelsCheckoutSessionResponse = {
+    /**
+     * チェックアウトURL
+     */
+    url: string;
+};
+
+/**
  * コメント一覧
  */
 export type ModelsCommentListResponse = {
@@ -477,6 +583,36 @@ export type ModelsConversationResponse = {
      * 作成日時
      */
     createdAt: string;
+};
+
+/**
+ * 記事作成リクエスト
+ */
+export type ModelsCreateArticleRequest = {
+    /**
+     * タイトル
+     */
+    title: string;
+    /**
+     * 本文
+     */
+    body: string;
+    /**
+     * 有料記事か
+     */
+    isPaid: boolean;
+    /**
+     * 価格（円）
+     */
+    priceYen: number;
+    /**
+     * カバー画像URL
+     */
+    coverImageUrl?: string | null;
+    /**
+     * タグ
+     */
+    tags: Array<string>;
 };
 
 /**
@@ -1714,6 +1850,36 @@ export type ModelsUpdateApplicationStatusRequest = {
 };
 
 /**
+ * 記事更新リクエスト
+ */
+export type ModelsUpdateArticleRequest = {
+    /**
+     * タイトル
+     */
+    title: string;
+    /**
+     * 本文
+     */
+    body: string;
+    /**
+     * 有料記事か
+     */
+    isPaid: boolean;
+    /**
+     * 価格（円）
+     */
+    priceYen: number;
+    /**
+     * カバー画像URL
+     */
+    coverImageUrl?: string | null;
+    /**
+     * タグ
+     */
+    tags: Array<string>;
+};
+
+/**
  * チーム診断ステータス更新リクエスト（指定したキーのみ更新）
  */
 export type ModelsUpdateDiagnoseStatusRequest = {
@@ -1867,6 +2033,16 @@ export type ModelsUpdateUserProfileRequest = {
      * プロフィール公開フラグ
      */
     isPublic?: boolean;
+};
+
+/**
+ * 画像アップロード結果
+ */
+export type ModelsUploadUrlResponse = {
+    /**
+     * アップロードされたファイルのURL
+     */
+    url: string;
 };
 
 /**
@@ -2224,6 +2400,255 @@ export type CandidateApplicationsWithdrawApplicationResponses = {
 
 export type CandidateApplicationsWithdrawApplicationResponse = CandidateApplicationsWithdrawApplicationResponses[keyof CandidateApplicationsWithdrawApplicationResponses];
 
+export type ArticlesListArticlesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/articles';
+};
+
+export type ArticlesListArticlesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type ArticlesListArticlesError = ArticlesListArticlesErrors[keyof ArticlesListArticlesErrors];
+
+export type ArticlesListArticlesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsArticleListResponse;
+};
+
+export type ArticlesListArticlesResponse = ArticlesListArticlesResponses[keyof ArticlesListArticlesResponses];
+
+export type ArticlesCreateArticleData = {
+    body: ModelsCreateArticleRequest;
+    path?: never;
+    query?: never;
+    url: '/api/articles';
+};
+
+export type ArticlesCreateArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type ArticlesCreateArticleError = ArticlesCreateArticleErrors[keyof ArticlesCreateArticleErrors];
+
+export type ArticlesCreateArticleResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsArticleResponse;
+};
+
+export type ArticlesCreateArticleResponse = ArticlesCreateArticleResponses[keyof ArticlesCreateArticleResponses];
+
+export type ArticlesListMyArticlesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/articles/mine';
+};
+
+export type ArticlesListMyArticlesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type ArticlesListMyArticlesError = ArticlesListMyArticlesErrors[keyof ArticlesListMyArticlesErrors];
+
+export type ArticlesListMyArticlesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsArticleListResponse;
+};
+
+export type ArticlesListMyArticlesResponse = ArticlesListMyArticlesResponses[keyof ArticlesListMyArticlesResponses];
+
+export type ArticlesUploadArticleImageData = {
+    body: {
+        file: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/articles/upload-image';
+};
+
+export type ArticlesUploadArticleImageErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type ArticlesUploadArticleImageError = ArticlesUploadArticleImageErrors[keyof ArticlesUploadArticleImageErrors];
+
+export type ArticlesUploadArticleImageResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUploadUrlResponse;
+};
+
+export type ArticlesUploadArticleImageResponse = ArticlesUploadArticleImageResponses[keyof ArticlesUploadArticleImageResponses];
+
+export type ArticlesDeleteArticleData = {
+    body?: never;
+    path: {
+        articleId: string;
+    };
+    query?: never;
+    url: '/api/articles/{articleId}';
+};
+
+export type ArticlesDeleteArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+};
+
+export type ArticlesDeleteArticleError = ArticlesDeleteArticleErrors[keyof ArticlesDeleteArticleErrors];
+
+export type ArticlesDeleteArticleResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type ArticlesDeleteArticleResponse = ArticlesDeleteArticleResponses[keyof ArticlesDeleteArticleResponses];
+
+export type ArticlesGetArticleData = {
+    body?: never;
+    path: {
+        articleId: string;
+    };
+    query?: never;
+    url: '/api/articles/{articleId}';
+};
+
+export type ArticlesGetArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type ArticlesGetArticleError = ArticlesGetArticleErrors[keyof ArticlesGetArticleErrors];
+
+export type ArticlesGetArticleResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsArticleResponse;
+};
+
+export type ArticlesGetArticleResponse = ArticlesGetArticleResponses[keyof ArticlesGetArticleResponses];
+
+export type ArticlesUpdateArticleData = {
+    body: ModelsUpdateArticleRequest;
+    path: {
+        articleId: string;
+    };
+    query?: never;
+    url: '/api/articles/{articleId}';
+};
+
+export type ArticlesUpdateArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+};
+
+export type ArticlesUpdateArticleError = ArticlesUpdateArticleErrors[keyof ArticlesUpdateArticleErrors];
+
+export type ArticlesUpdateArticleResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsArticleResponse;
+};
+
+export type ArticlesUpdateArticleResponse = ArticlesUpdateArticleResponses[keyof ArticlesUpdateArticleResponses];
+
+export type ArticlesCreateArticleCheckoutData = {
+    body?: never;
+    path: {
+        articleId: string;
+    };
+    query?: never;
+    url: '/api/articles/{articleId}/checkout';
+};
+
+export type ArticlesCreateArticleCheckoutErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type ArticlesCreateArticleCheckoutError = ArticlesCreateArticleCheckoutErrors[keyof ArticlesCreateArticleCheckoutErrors];
+
+export type ArticlesCreateArticleCheckoutResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCheckoutSessionResponse;
+};
+
+export type ArticlesCreateArticleCheckoutResponse = ArticlesCreateArticleCheckoutResponses[keyof ArticlesCreateArticleCheckoutResponses];
+
+export type ArticlesPublishArticleData = {
+    body?: never;
+    path: {
+        articleId: string;
+    };
+    query?: never;
+    url: '/api/articles/{articleId}/publish';
+};
+
+export type ArticlesPublishArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+};
+
+export type ArticlesPublishArticleError = ArticlesPublishArticleErrors[keyof ArticlesPublishArticleErrors];
+
+export type ArticlesPublishArticleResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsArticleResponse;
+};
+
+export type ArticlesPublishArticleResponse = ArticlesPublishArticleResponses[keyof ArticlesPublishArticleResponses];
+
 export type AuthGoogleLoginData = {
     body: ModelsGoogleLoginRequest;
     path?: never;
@@ -2528,6 +2953,112 @@ export type CompanyApplicationsUpdateApplicationStatusResponses = {
 };
 
 export type CompanyApplicationsUpdateApplicationStatusResponse = CompanyApplicationsUpdateApplicationStatusResponses[keyof CompanyApplicationsUpdateApplicationStatusResponses];
+
+export type CompanyArticlesCreateCompanyArticleData = {
+    body: ModelsCreateArticleRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/articles';
+};
+
+export type CompanyArticlesCreateCompanyArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyArticlesCreateCompanyArticleError = CompanyArticlesCreateCompanyArticleErrors[keyof CompanyArticlesCreateCompanyArticleErrors];
+
+export type CompanyArticlesCreateCompanyArticleResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsArticleResponse;
+};
+
+export type CompanyArticlesCreateCompanyArticleResponse = CompanyArticlesCreateCompanyArticleResponses[keyof CompanyArticlesCreateCompanyArticleResponses];
+
+export type CompanyArticlesDeleteCompanyArticleData = {
+    body?: never;
+    path: {
+        articleId: string;
+    };
+    query?: never;
+    url: '/api/company/articles/{articleId}';
+};
+
+export type CompanyArticlesDeleteCompanyArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+};
+
+export type CompanyArticlesDeleteCompanyArticleError = CompanyArticlesDeleteCompanyArticleErrors[keyof CompanyArticlesDeleteCompanyArticleErrors];
+
+export type CompanyArticlesDeleteCompanyArticleResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CompanyArticlesDeleteCompanyArticleResponse = CompanyArticlesDeleteCompanyArticleResponses[keyof CompanyArticlesDeleteCompanyArticleResponses];
+
+export type CompanyArticlesUpdateCompanyArticleData = {
+    body: ModelsUpdateArticleRequest;
+    path: {
+        articleId: string;
+    };
+    query?: never;
+    url: '/api/company/articles/{articleId}';
+};
+
+export type CompanyArticlesUpdateCompanyArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+};
+
+export type CompanyArticlesUpdateCompanyArticleError = CompanyArticlesUpdateCompanyArticleErrors[keyof CompanyArticlesUpdateCompanyArticleErrors];
+
+export type CompanyArticlesUpdateCompanyArticleResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsArticleResponse;
+};
+
+export type CompanyArticlesUpdateCompanyArticleResponse = CompanyArticlesUpdateCompanyArticleResponses[keyof CompanyArticlesUpdateCompanyArticleResponses];
+
+export type CompanyArticlesPublishCompanyArticleData = {
+    body?: never;
+    path: {
+        articleId: string;
+    };
+    query?: never;
+    url: '/api/company/articles/{articleId}/publish';
+};
+
+export type CompanyArticlesPublishCompanyArticleErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+};
+
+export type CompanyArticlesPublishCompanyArticleError = CompanyArticlesPublishCompanyArticleErrors[keyof CompanyArticlesPublishCompanyArticleErrors];
+
+export type CompanyArticlesPublishCompanyArticleResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsArticleResponse;
+};
+
+export type CompanyArticlesPublishCompanyArticleResponse = CompanyArticlesPublishCompanyArticleResponses[keyof CompanyArticlesPublishCompanyArticleResponses];
 
 export type CompanyAuthCompanyLoginData = {
     body: ModelsCompanyLoginRequest;
