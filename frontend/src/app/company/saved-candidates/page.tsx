@@ -2,22 +2,14 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import { SingleRadarChart, WV_ORDER, WV_FULL_LABELS, CI_ORDER, CI_FULL_LABELS } from "@/app/components/SingleRadarChart";
-
-type Candidate = {
-  user_id: string;
-  username: string;
-  name: string;
-  headline: string | null;
-  avatar_url: string | null;
-  profile_color: string | null;
-  job_seeking_status: string | null;
-  skills: string[];
-  experiences: { company_name: string; title: string }[];
-  top_wv_labels: string[];
-  top_ci_labels: string[];
-};
+import {
+  fetchCandidateDetail,
+  fetchSavedCandidates,
+  unsaveCandidate,
+  type CandidateExperience,
+  type TalentCard as Candidate,
+} from "@/features/talent-search/api";
 
 const SEEKING_STATUS_MAP: Record<string, { label: string; bg: string; text: string }> = {
   active:      { label: "スカウト歓迎", bg: "bg-emerald-50", text: "text-emerald-700" },
@@ -28,7 +20,6 @@ const SEEKING_STATUS_MAP: Record<string, { label: string; bg: string; text: stri
 const PAGE_SIZE = 20;
 
 export default function SavedCandidatesPage() {
-  const { companyFetch } = useCompanyAuth();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -42,7 +33,7 @@ export default function SavedCandidatesPage() {
   const [detailWv, setDetailWv] = useState<{ id: string; score: number }[] | null>(null);
   const [detailCi, setDetailCi] = useState<{ id: string; score: number }[] | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [detailExperiences, setDetailExperiences] = useState<{ companyName: string; title: string; startYear: number; startMonth: number; endYear?: number | null; endMonth?: number | null; isCurrent: boolean; description?: string }[]>([]);
+  const [detailExperiences, setDetailExperiences] = useState<CandidateExperience[]>([]);
   const [detailSkills, setDetailSkills] = useState<string[]>([]);
   const [detailAbout, setDetailAbout] = useState<string | null>(null);
 
@@ -50,9 +41,7 @@ export default function SavedCandidatesPage() {
     if (append) setLoadingMore(true); else setLoading(true);
     try {
       const offset = append ? candidates.length : 0;
-      const res = await companyFetch(`/api/company/saved-candidates?limit=${PAGE_SIZE}&offset=${offset}`);
-      const data = await res.json();
-      const newUsers: Candidate[] = data.users ?? [];
+      const { users: newUsers, total } = await fetchSavedCandidates(PAGE_SIZE, offset);
       if (append) {
         setCandidates((prev) => {
           const seen = new Set(prev.map((u) => u.user_id));
@@ -61,17 +50,17 @@ export default function SavedCandidatesPage() {
       } else {
         setCandidates(newUsers);
       }
-      setTotal(data.total ?? 0);
-      setHasMore(offset + newUsers.length < (data.total ?? 0));
+      setTotal(total);
+      setHasMore(offset + newUsers.length < total);
     } catch {
       if (!append) { setCandidates([]); setTotal(0); }
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [companyFetch, candidates.length]);
+  }, [candidates.length]);
 
-  useEffect(() => { fetchCandidates(false); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [companyFetch]);
+  useEffect(() => { fetchCandidates(false); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   // Auto-select first
   useEffect(() => {
@@ -101,22 +90,15 @@ export default function SavedCandidatesPage() {
     const user = candidates.find((u) => u.user_id === selectedUserId);
     if (!user) return;
     setDetailLoading(true);
-    Promise.all([
-      fetch(`/api/work-values/users/${selectedUserId}/results/latest`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      fetch(`/api/career-interest/users/${selectedUserId}/results/latest`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      fetch(`/api/users/${user.username}/experiences`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      fetch(`/api/users/${user.username}/skills`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      fetch(`/api/users/${user.username}`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-    ]).then(([wvData, ciData, expData, skillData, profileData]) => {
-      setDetailWv(wvData?.values?.map((v: { value_id: string; display_score: number }) => ({ id: v.value_id, score: v.display_score })) ?? null);
-      setDetailCi(ciData?.type_scores?.map((s: { type_id: string; score: number }) => ({ id: s.type_id, score: s.score })) ?? null);
-      setDetailExperiences((expData?.items ?? []).map((e: { companyName: string; title: string; startYear: number; startMonth: number; endYear?: number | null; endMonth?: number | null; isCurrent: boolean; description?: string }) => ({
-        companyName: e.companyName, title: e.title, startYear: e.startYear, startMonth: e.startMonth,
-        endYear: e.endYear, endMonth: e.endMonth, isCurrent: e.isCurrent, description: e.description,
-      })));
-      setDetailSkills((skillData?.items ?? []).map((s: { name: string }) => s.name));
-      setDetailAbout(profileData?.about ?? null);
-    }).finally(() => setDetailLoading(false));
+    fetchCandidateDetail(user.username, selectedUserId)
+      .then((detail) => {
+        setDetailWv(detail.wvScores);
+        setDetailCi(detail.ciScores);
+        setDetailExperiences(detail.experiences);
+        setDetailSkills(detail.skills);
+        setDetailAbout(detail.about);
+      })
+      .finally(() => setDetailLoading(false));
   }, [selectedUserId, candidates]);
 
   const selectedUser = useMemo(
@@ -125,10 +107,10 @@ export default function SavedCandidatesPage() {
   );
 
   const handleUnsave = useCallback(async (userId: string) => {
-    await companyFetch(`/api/company/saved-candidates/${userId}`, { method: "DELETE" });
+    await unsaveCandidate(userId);
     setCandidates((prev) => prev.filter((c) => c.user_id !== userId));
     setTotal((prev) => prev - 1);
-  }, [companyFetch]);
+  }, []);
 
   // ── Loading state ──
   if (loading && candidates.length === 0) {

@@ -3,27 +3,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import { SingleRadarChart, WV_ORDER, WV_FULL_LABELS, CI_ORDER, CI_FULL_LABELS } from "@/app/components/SingleRadarChart";
 import { PREFECTURES, INDUSTRIES, JOB_TYPE_GROUPS } from "@/constants/profile-options";
-
-type TalentCard = {
-  user_id: string;
-  username: string;
-  name: string;
-  headline: string | null;
-  avatar_url: string | null;
-  profile_color: string | null;
-  job_seeking_status: string | null;
-  skills: string[];
-  experiences: { company_name: string; title: string }[];
-  top_wv_labels: string[];
-  top_ci_labels: string[];
-  similarity?: number;
-  wv_similarity?: number;
-  ci_similarity?: number;
-  integrated_similarity?: number;
-};
+import {
+  bulkCheckSaved,
+  fetchCandidateDetail,
+  fetchCompanyTeams,
+  fetchTeamScoreAverages,
+  saveCandidate,
+  searchTalents,
+  unsaveCandidate,
+  type CandidateExperience,
+  type TalentCard,
+  type TalentSearchKind,
+} from "@/features/talent-search/api";
 
 type Team = {
   id: string;
@@ -57,7 +50,6 @@ const CI_TYPE_LABELS: Record<string, string> = {
 export default function TalentsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { companyFetch } = useCompanyAuth();
 
   const initialTeamId = searchParams.get("team") ?? "";
 
@@ -88,7 +80,7 @@ export default function TalentsPage() {
   const [detailWv, setDetailWv] = useState<{ id: string; score: number }[] | null>(null);
   const [detailCi, setDetailCi] = useState<{ id: string; score: number }[] | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [detailExperiences, setDetailExperiences] = useState<{ companyName: string; title: string; startYear: number; startMonth: number; endYear?: number | null; endMonth?: number | null; isCurrent: boolean; description?: string }[]>([]);
+  const [detailExperiences, setDetailExperiences] = useState<CandidateExperience[]>([]);
   const [detailSkills, setDetailSkills] = useState<string[]>([]);
   const [detailAbout, setDetailAbout] = useState<string | null>(null);
 
@@ -132,9 +124,7 @@ export default function TalentsPage() {
       return next;
     });
     try {
-      await companyFetch(`/api/company/saved-candidates/${userId}`, {
-        method: isSaved ? "DELETE" : "POST",
-      });
+      await (isSaved ? unsaveCandidate(userId) : saveCandidate(userId));
     } catch {
       setSavedSet((prev) => {
         const next = new Set(prev);
@@ -142,7 +132,7 @@ export default function TalentsPage() {
         return next;
       });
     }
-  }, [savedSet, companyFetch]);
+  }, [savedSet]);
 
   // Team average scores for compare overlay
   const [teamWvAvg, setTeamWvAvg] = useState<{ id: string; score: number }[] | null>(null);
@@ -150,11 +140,10 @@ export default function TalentsPage() {
   const [teamName, setTeamName] = useState<string>("");
 
   useEffect(() => {
-    companyFetch("/api/company/teams")
-      .then((r) => r.json())
-      .then((data) => setTeams(data.teams ?? []))
+    fetchCompanyTeams()
+      .then(setTeams)
       .catch(() => {});
-  }, [companyFetch]);
+  }, []);
 
   // Fetch team scores for comparison overlay
   useEffect(() => {
@@ -167,39 +156,16 @@ export default function TalentsPage() {
     const team = teams.find((t) => t.id === selectedTeamId);
     setTeamName(team?.name ?? "チーム");
 
-    companyFetch(`/api/company/teams/${selectedTeamId}/scores`)
-      .then((r) => r.json())
-      .then((data) => {
-        const members: { wv_scores?: { id: string; display_score: number }[]; ci_scores?: { id: string; display_score: number }[] }[] = data.members ?? [];
-        // Compute WV averages
-        const wvAccum: Record<string, { sum: number; count: number }> = {};
-        const ciAccum: Record<string, { sum: number; count: number }> = {};
-        for (const m of members) {
-          if (m.wv_scores) {
-            for (const s of m.wv_scores) {
-              if (!wvAccum[s.id]) wvAccum[s.id] = { sum: 0, count: 0 };
-              wvAccum[s.id].sum += s.display_score;
-              wvAccum[s.id].count++;
-            }
-          }
-          if (m.ci_scores) {
-            for (const s of m.ci_scores) {
-              if (!ciAccum[s.id]) ciAccum[s.id] = { sum: 0, count: 0 };
-              ciAccum[s.id].sum += s.display_score;
-              ciAccum[s.id].count++;
-            }
-          }
-        }
-        const wvAvg = Object.entries(wvAccum).map(([id, { sum, count }]) => ({ id, score: sum / count }));
-        const ciAvg = Object.entries(ciAccum).map(([id, { sum, count }]) => ({ id, score: sum / count }));
-        setTeamWvAvg(wvAvg.length > 0 ? wvAvg : null);
-        setTeamCiAvg(ciAvg.length > 0 ? ciAvg : null);
+    fetchTeamScoreAverages(selectedTeamId)
+      .then(({ wvAvg, ciAvg }) => {
+        setTeamWvAvg(wvAvg);
+        setTeamCiAvg(ciAvg);
       })
       .catch(() => {
         setTeamWvAvg(null);
         setTeamCiAvg(null);
       });
-  }, [selectedTeamId, diagnosticMode, teams, companyFetch]);
+  }, [selectedTeamId, diagnosticMode, teams]);
 
   // Effective compare scores: from team averages or custom weights
   const compareWv = useMemo(() => {
@@ -285,7 +251,7 @@ export default function TalentsPage() {
     if (initialTeamId || wasSearched) {
       if (diagnosticMode === "team" && !selectedTeamId) return;
       syncFiltersToURL();
-      fetchTalents(getDiagnosticEndpoint(), buildDiagnosticParams(0, restoreLimit), false);
+      fetchTalents(diagnosticType, buildDiagnosticParams(0, restoreLimit), false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -310,38 +276,13 @@ export default function TalentsPage() {
     const user = users.find((u) => u.user_id === selectedUserId);
     if (!user) return;
     setDetailLoading(true);
-    Promise.all([
-      fetch(`/api/work-values/users/${selectedUserId}/results/latest`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-      fetch(`/api/career-interest/users/${selectedUserId}/results/latest`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-      fetch(`/api/users/${user.username}/experiences`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-      fetch(`/api/users/${user.username}/skills`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-      fetch(`/api/users/${user.username}`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
-    ])
-      .then(([wvData, ciData, expData, skillData, profileData]) => {
-        setDetailWv(
-          wvData?.values?.map((v: { value_id: string; display_score: number }) => ({ id: v.value_id, score: v.display_score })) ?? null,
-        );
-        setDetailCi(
-          ciData?.type_scores?.map((s: { type_id: string; score: number }) => ({ id: s.type_id, score: s.score })) ?? null,
-        );
-        setDetailExperiences(
-          (expData?.items ?? []).map((e: { companyName: string; title: string; startYear: number; startMonth: number; endYear?: number | null; endMonth?: number | null; isCurrent: boolean; description?: string }) => ({
-            companyName: e.companyName, title: e.title, startYear: e.startYear, startMonth: e.startMonth,
-            endYear: e.endYear, endMonth: e.endMonth, isCurrent: e.isCurrent, description: e.description,
-          })),
-        );
-        setDetailSkills((skillData?.items ?? []).map((s: { name: string }) => s.name));
-        setDetailAbout(profileData?.about ?? null);
+    fetchCandidateDetail(user.username, selectedUserId)
+      .then((detail) => {
+        setDetailWv(detail.wvScores);
+        setDetailCi(detail.ciScores);
+        setDetailExperiences(detail.experiences);
+        setDetailSkills(detail.skills);
+        setDetailAbout(detail.about);
       })
       .finally(() => setDetailLoading(false));
   }, [selectedUserId, users]);
@@ -433,43 +374,35 @@ export default function TalentsPage() {
     });
   }, [users]);
 
-  const getDiagnosticEndpoint = useCallback(() => {
-    switch (diagnosticType) {
-      case "ci": return "/api/company/talents/search/diagnostic/ci";
-      case "integrated": return "/api/company/talents/search/diagnostic/integrated";
-      default: return "/api/company/talents/search/diagnostic";
-    }
-  }, [diagnosticType]);
-
   const buildDiagnosticParams = useCallback((offset: number, limit?: number) => {
-    const params = new URLSearchParams();
+    const params: Record<string, string> = {};
     if (diagnosticMode === "team" && selectedTeamId) {
-      params.set("team_id", selectedTeamId);
+      params.team_id = selectedTeamId;
     } else if (diagnosticMode === "custom") {
       if (diagnosticType === "wv" || diagnosticType === "integrated") {
         for (const [k, v] of Object.entries(customWeights)) {
-          params.set(`wv_${k}`, String(v));
+          params[`wv_${k}`] = String(v);
         }
       }
       if (diagnosticType === "ci" || diagnosticType === "integrated") {
         for (const [k, v] of Object.entries(customCIWeights)) {
-          params.set(`ci_${k}`, String(v));
+          params[`ci_${k}`] = String(v);
         }
       }
     }
-    if (keyword) params.set("q", keyword);
-    if (skills.length > 0) params.set("skills", skills.join(","));
-    if (location) params.set("location", location);
-    if (industry) params.set("industry", industry);
-    if (seekingStatus) params.set("job_seeking_status", seekingStatus);
-    if (jobType) params.set("job_type", jobType);
-    if (diagnosedOnly) params.set("diagnosed", "1");
-    params.set("limit", String(limit ?? PAGE_SIZE));
-    params.set("offset", String(offset));
+    if (keyword) params.q = keyword;
+    if (skills.length > 0) params.skills = skills.join(",");
+    if (location) params.location = location;
+    if (industry) params.industry = industry;
+    if (seekingStatus) params.job_seeking_status = seekingStatus;
+    if (jobType) params.job_type = jobType;
+    if (diagnosedOnly) params.diagnosed = "1";
+    params.limit = String(limit ?? PAGE_SIZE);
+    params.offset = String(offset);
     return params;
   }, [diagnosticMode, diagnosticType, selectedTeamId, customWeights, customCIWeights, keyword, skills, location, industry, seekingStatus, jobType, diagnosedOnly]);
 
-  const fetchTalents = useCallback(async (endpoint: string, params: URLSearchParams, append: boolean) => {
+  const fetchTalents = useCallback(async (kind: TalentSearchKind, params: Record<string, string>, append: boolean) => {
     if (append) {
       setLoadingMore(true);
     } else {
@@ -477,63 +410,56 @@ export default function TalentsPage() {
       setSearched(true);
     }
     try {
-      const res = await companyFetch(`${endpoint}?${params}`);
-      const data = await res.json();
-      const newUsers = data.users ?? [];
+      const { users: newUsers, total } = await searchTalents(kind, params);
       setUsers((prev) => {
         if (!append) return newUsers;
         const seen = new Set(prev.map((u: TalentCard) => u.user_id));
         return [...prev, ...newUsers.filter((u: TalentCard) => !seen.has(u.user_id))];
       });
-      setTotal(data.total ?? 0);
+      setTotal(total);
     } catch {
       if (!append) { setUsers([]); setTotal(0); }
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [companyFetch]);
+  }, []);
 
   useEffect(() => {
     if (users.length === 0) return;
     const ids = users.map((u) => u.user_id);
-    companyFetch("/api/company/saved-candidates/bulk-check", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_ids: ids }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
+    bulkCheckSaved(ids)
+      .then((saved) => {
         setSavedSet((prev) => {
           const next = new Set(prev);
-          for (const [id, saved] of Object.entries(data.saved ?? {})) {
-            if (saved) next.add(id); else next.delete(id);
+          for (const [id, isSaved] of Object.entries(saved)) {
+            if (isSaved) next.add(id); else next.delete(id);
           }
           return next;
         });
       })
       .catch(() => {});
-  }, [users, companyFetch]);
+  }, [users]);
 
   const hasDiagnosticConfig = diagnosticMode === "custom" || (diagnosticMode === "team" && !!selectedTeamId);
 
-  const getSearchEndpoint = useCallback(() => {
-    if (!hasDiagnosticConfig) return "/api/company/talents/search";
-    return getDiagnosticEndpoint();
-  }, [hasDiagnosticConfig, getDiagnosticEndpoint]);
+  const getSearchKind = useCallback((): TalentSearchKind => {
+    if (!hasDiagnosticConfig) return "plain";
+    return diagnosticType;
+  }, [hasDiagnosticConfig, diagnosticType]);
 
   const buildSearchParams = useCallback((offset: number, limit?: number) => {
     if (!hasDiagnosticConfig) {
-      const params = new URLSearchParams();
-      if (keyword) params.set("q", keyword);
-      if (skills.length > 0) params.set("skills", skills.join(","));
-      if (location) params.set("location", location);
-      if (industry) params.set("industry", industry);
-      if (seekingStatus) params.set("job_seeking_status", seekingStatus);
-      if (jobType) params.set("job_type", jobType);
-      if (diagnosedOnly) params.set("diagnosed", "1");
-      params.set("limit", String(limit ?? PAGE_SIZE));
-      params.set("offset", String(offset));
+      const params: Record<string, string> = {};
+      if (keyword) params.q = keyword;
+      if (skills.length > 0) params.skills = skills.join(",");
+      if (location) params.location = location;
+      if (industry) params.industry = industry;
+      if (seekingStatus) params.job_seeking_status = seekingStatus;
+      if (jobType) params.job_type = jobType;
+      if (diagnosedOnly) params.diagnosed = "1";
+      params.limit = String(limit ?? PAGE_SIZE);
+      params.offset = String(offset);
       return params;
     }
     return buildDiagnosticParams(offset, limit);
@@ -541,13 +467,13 @@ export default function TalentsPage() {
 
   const handleSearch = useCallback(() => {
     syncFiltersToURL();
-    fetchTalents(getSearchEndpoint(), buildSearchParams(0), false);
-  }, [fetchTalents, getSearchEndpoint, buildSearchParams, syncFiltersToURL]);
+    fetchTalents(getSearchKind(), buildSearchParams(0), false);
+  }, [fetchTalents, getSearchKind, buildSearchParams, syncFiltersToURL]);
 
   const handleLoadMore = useCallback(() => {
     const offset = users.length;
-    fetchTalents(getSearchEndpoint(), buildSearchParams(offset), true);
-  }, [users.length, fetchTalents, getSearchEndpoint, buildSearchParams]);
+    fetchTalents(getSearchKind(), buildSearchParams(offset), true);
+  }, [users.length, fetchTalents, getSearchKind, buildSearchParams]);
 
   const hasMore = users.length > 0 && users.length < total;
   const panelSentinelObserver = useRef<IntersectionObserver | null>(null);
