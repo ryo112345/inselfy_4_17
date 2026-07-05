@@ -4,63 +4,62 @@
 package presenter
 
 import (
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	scout "github.com/akiyama/inselfy/backend/internal/domain/scout"
 	"time"
 )
 
 type scoutConverterImpl struct{}
 
-func (c *scoutConverterImpl) ToScoutMessageResponse(source *scout.ScoutMessageWithNames) *scoutMessageResponse {
-	var pPresenterscoutMessageResponse *scoutMessageResponse
+func (c *scoutConverterImpl) ToScoutMessageResponse(source *scout.ScoutMessageWithNames) *openapi.ModelsScoutMessageResponse {
+	var pOpenapiModelsScoutMessageResponse *openapi.ModelsScoutMessageResponse
 	if source != nil {
-		var presenterscoutMessageResponse scoutMessageResponse
-		presenterscoutMessageResponse.ID = (*source).ScoutMessage.ID
-		presenterscoutMessageResponse.CompanyID = (*source).ScoutMessage.CompanyID
-		presenterscoutMessageResponse.CandidateID = (*source).ScoutMessage.CandidateID
+		var openapiModelsScoutMessageResponse openapi.ModelsScoutMessageResponse
+		openapiModelsScoutMessageResponse.Body = (*source).ScoutMessage.Body
+		openapiModelsScoutMessageResponse.CandidateId = (*source).ScoutMessage.CandidateID
+		openapiModelsScoutMessageResponse.CandidateName = (*source).CandidateName
+		openapiModelsScoutMessageResponse.CompanyId = (*source).ScoutMessage.CompanyID
+		openapiModelsScoutMessageResponse.CompanyName = (*source).CompanyName
+		openapiModelsScoutMessageResponse.CreatedAt = copyTime((*source).ScoutMessage.CreatedAt)
+		openapiModelsScoutMessageResponse.ExpiresAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.ExpiresAt)
+		openapiModelsScoutMessageResponse.Id = (*source).ScoutMessage.ID
 		if (*source).ScoutMessage.JobPostingID != nil {
 			xstring := *(*source).ScoutMessage.JobPostingID
-			presenterscoutMessageResponse.JobPostingID = &xstring
+			openapiModelsScoutMessageResponse.JobPostingId = &xstring
 		}
-		presenterscoutMessageResponse.Subject = (*source).ScoutMessage.Subject
-		presenterscoutMessageResponse.Body = (*source).ScoutMessage.Body
-		presenterscoutMessageResponse.Status = scoutStatusToString((*source).ScoutMessage.Status)
-		presenterscoutMessageResponse.CompanyName = (*source).CompanyName
-		presenterscoutMessageResponse.CandidateName = (*source).CandidateName
 		if (*source).JobTitle != nil {
 			xstring2 := *(*source).JobTitle
-			presenterscoutMessageResponse.JobTitle = &xstring2
+			openapiModelsScoutMessageResponse.JobTitle = &xstring2
 		}
-		presenterscoutMessageResponse.SentAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.SentAt)
-		presenterscoutMessageResponse.OpenedAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.OpenedAt)
-		presenterscoutMessageResponse.RepliedAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.RepliedAt)
-		presenterscoutMessageResponse.ExpiresAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.ExpiresAt)
-		presenterscoutMessageResponse.CreatedAt = copyTime((*source).ScoutMessage.CreatedAt)
-		pPresenterscoutMessageResponse = &presenterscoutMessageResponse
+		openapiModelsScoutMessageResponse.OpenedAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.OpenedAt)
+		openapiModelsScoutMessageResponse.RepliedAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.RepliedAt)
+		openapiModelsScoutMessageResponse.SentAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.SentAt)
+		openapiModelsScoutMessageResponse.Status = scoutStatusToString((*source).ScoutMessage.Status)
+		openapiModelsScoutMessageResponse.Subject = (*source).ScoutMessage.Subject
+		pOpenapiModelsScoutMessageResponse = &openapiModelsScoutMessageResponse
 	}
-	return pPresenterscoutMessageResponse
+	return pOpenapiModelsScoutMessageResponse
 }
-func (c *scoutConverterImpl) ToScoutReplyResponses(source []*scout.ScoutReply) []*scoutReplyResponse {
-	var pPresenterscoutReplyResponseList []*scoutReplyResponse
+func (c *scoutConverterImpl) ToScoutReplyResponses(source []*scout.ScoutReply) []openapi.ModelsScoutReplyResponse {
+	var openapiModelsScoutReplyResponseList []openapi.ModelsScoutReplyResponse
 	if source != nil {
-		pPresenterscoutReplyResponseList = make([]*scoutReplyResponse, len(source))
+		openapiModelsScoutReplyResponseList = make([]openapi.ModelsScoutReplyResponse, len(source))
 		for i := 0; i < len(source); i++ {
-			pPresenterscoutReplyResponseList[i] = c.pScoutScoutReplyToPPresenterscoutReplyResponse(source[i])
+			openapiModelsScoutReplyResponseList[i] = c.pScoutScoutReplyToOpenapiModelsScoutReplyResponse(source[i])
 		}
 	}
-	return pPresenterscoutReplyResponseList
+	return openapiModelsScoutReplyResponseList
 }
-func (c *scoutConverterImpl) pScoutScoutReplyToPPresenterscoutReplyResponse(source *scout.ScoutReply) *scoutReplyResponse {
-	var pPresenterscoutReplyResponse *scoutReplyResponse
+func (c *scoutConverterImpl) pScoutScoutReplyToOpenapiModelsScoutReplyResponse(source *scout.ScoutReply) openapi.ModelsScoutReplyResponse {
+	var openapiModelsScoutReplyResponse openapi.ModelsScoutReplyResponse
 	if source != nil {
-		var presenterscoutReplyResponse scoutReplyResponse
-		presenterscoutReplyResponse.ID = (*source).ID
-		presenterscoutReplyResponse.SenderType = (*source).SenderType
-		presenterscoutReplyResponse.SenderID = (*source).SenderID
-		presenterscoutReplyResponse.Body = (*source).Body
-		presenterscoutReplyResponse.CreatedAt = copyTime((*source).CreatedAt)
-		pPresenterscoutReplyResponse = &presenterscoutReplyResponse
+		openapiModelsScoutReplyResponse.Body = (*source).Body
+		openapiModelsScoutReplyResponse.CreatedAt = copyTime((*source).CreatedAt)
+		openapiModelsScoutReplyResponse.Id = (*source).ID
+		openapiModelsScoutReplyResponse.SenderId = (*source).SenderID
+		openapiModelsScoutReplyResponse.SenderType = (*source).SenderType
 	}
-	return pPresenterscoutReplyResponse
+	return openapiModelsScoutReplyResponse
 }
 func (c *scoutConverterImpl) pTimeTimeToPTimeTime(source *time.Time) *time.Time {
 	var pTimeTime *time.Time

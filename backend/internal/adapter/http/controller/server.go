@@ -23,6 +23,7 @@ type Server struct {
 	ci            *CareerInterestController
 	wv            *WorkValuesController
 	post          *PostController
+	scout         *ScoutController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -44,6 +45,7 @@ func NewServer(
 	ci *CareerInterestController,
 	wv *WorkValuesController,
 	post *PostController,
+	scout *ScoutController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -61,6 +63,7 @@ func NewServer(
 		ci:            ci,
 		wv:            wv,
 		post:          post,
+		scout:         scout,
 	}
 }
 
@@ -340,4 +343,32 @@ func (s *Server) PostsCreatePostComment(ctx echo.Context, postID string) error {
 
 func (s *Server) PostsDeletePostComment(ctx echo.Context, commentID string) error {
 	return s.post.DeleteComment(ctx, commentID)
+}
+
+// --- CompanyScouts ---
+
+func (s *Server) CompanyScoutsSendScout(ctx echo.Context) error { return s.scout.Send(ctx) }
+
+func (s *Server) CompanyScoutsListCompanyScouts(ctx echo.Context, _ openapi.CompanyScoutsListCompanyScoutsParams) error {
+	return s.scout.List(ctx)
+}
+
+func (s *Server) CompanyScoutsGetScoutCredits(ctx echo.Context) error {
+	return s.scout.GetCredits(ctx)
+}
+
+func (s *Server) CompanyScoutsGetScoutQuality(ctx echo.Context) error {
+	return s.scout.GetQualityScore(ctx)
+}
+
+func (s *Server) CompanyScoutsGetScoutDashboard(ctx echo.Context) error {
+	return s.scout.GetDashboard(ctx)
+}
+
+func (s *Server) CompanyScoutsGetCompanyScoutDetail(ctx echo.Context, scoutID string) error {
+	return s.scout.GetDetail(ctx, scoutID)
+}
+
+func (s *Server) CompanyScoutsCompanyScoutReply(ctx echo.Context, scoutID string) error {
+	return s.scout.Reply(ctx, scoutID)
 }

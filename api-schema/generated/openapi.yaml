@@ -18,6 +18,7 @@ tags:
   - name: CareerInterest
   - name: WorkValues
   - name: Posts
+  - name: CompanyScouts
 paths:
   /api/auth/google:
     post:
@@ -567,6 +568,200 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - ScoutTemplates
+  /api/company/scouts:
+    post:
+      operationId: CompanyScouts_sendScout
+      summary: Send a scout message
+      description: スカウト送信（企業認証）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutMessageResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+      tags:
+        - CompanyScouts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.SendScoutRequest'
+    get:
+      operationId: CompanyScouts_listCompanyScouts
+      summary: List scouts sent by the company
+      description: 送信済みスカウト一覧（企業認証）
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: ステータスで絞り込み
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyScouts
+  /api/company/scouts/credits:
+    get:
+      operationId: CompanyScouts_getScoutCredits
+      summary: Get scout credits
+      description: スカウトクレジット取得（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutCreditsResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyScouts
+  /api/company/scouts/dashboard:
+    get:
+      operationId: CompanyScouts_getScoutDashboard
+      summary: Get scout dashboard stats
+      description: スカウトダッシュボード取得（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutDashboardResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyScouts
+  /api/company/scouts/quality:
+    get:
+      operationId: CompanyScouts_getScoutQuality
+      summary: Get scout quality score
+      description: スカウト品質スコア取得（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutQualityScoreResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyScouts
+  /api/company/scouts/{scoutId}:
+    get:
+      operationId: CompanyScouts_getCompanyScoutDetail
+      summary: Get scout detail with replies
+      description: スカウト詳細取得（企業認証）
+      parameters:
+        - name: scoutId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutDetailResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyScouts
+  /api/company/scouts/{scoutId}/reply:
+    post:
+      operationId: CompanyScouts_companyScoutReply
+      summary: Reply to a scout as the company
+      description: スカウトへ返信（企業認証）
+      parameters:
+        - name: scoutId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CompanyScouts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CompanyScoutReplyRequest'
   /api/notifications:
     get:
       operationId: UserNotifications_listUserNotifications
@@ -2247,6 +2442,15 @@ components:
           format: date-time
           description: 作成日時
       description: 企業アカウント情報（トークンは HttpOnly cookie で返る）
+    Models.CompanyScoutReplyRequest:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          description: 本文
+      description: 企業からのスカウト返信リクエスト
     Models.ConflictError:
       type: object
       required:
@@ -2851,6 +3055,281 @@ components:
           type: integer
           description: リポスト数
       description: リポストトグル結果
+    Models.ScoutCreditsResponse:
+      type: object
+      required:
+        - balance
+        - monthlyAllowance
+        - maxStock
+        - lastReplenishedAt
+      properties:
+        balance:
+          type: integer
+          description: 残高
+        monthlyAllowance:
+          type: integer
+          description: 月次補充量
+        maxStock:
+          type: integer
+          description: 最大ストック
+        lastReplenishedAt:
+          type: string
+          format: date-time
+          description: 最終補充日時
+      description: スカウトクレジット
+    Models.ScoutDashboardCredits:
+      type: object
+      required:
+        - balance
+        - maxStock
+        - monthlyAllowance
+        - nextReplenishDate
+      properties:
+        balance:
+          type: integer
+          description: 残高
+        maxStock:
+          type: integer
+          description: 最大ストック
+        monthlyAllowance:
+          type: integer
+          description: 月次補充量
+        nextReplenishDate:
+          type: string
+          format: date-time
+          description: 次回補充日
+      description: 'ダッシュボード: クレジット'
+    Models.ScoutDashboardPending:
+      type: object
+      required:
+        - total
+        - byMonth
+      properties:
+        total:
+          type: integer
+          description: 総件数
+        byMonth:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.ScoutDashboardPendingByMonth'
+          description: 月別内訳
+      description: 'ダッシュボード: 未返信'
+    Models.ScoutDashboardPendingByMonth:
+      type: object
+      required:
+        - month
+        - count
+        - daysLeft
+      properties:
+        month:
+          type: string
+          description: 送信月（YYYY-MM）
+        count:
+          type: integer
+          description: 件数
+        daysLeft:
+          type: integer
+          description: 期限までの残日数
+      description: 'ダッシュボード: 月別未返信'
+    Models.ScoutDashboardResponse:
+      type: object
+      required:
+        - credits
+        - pending
+        - replyRate
+        - avgReplyDays
+        - sentLast90d
+      properties:
+        credits:
+          allOf:
+            - $ref: '#/components/schemas/Models.ScoutDashboardCredits'
+          description: クレジット状況
+        pending:
+          allOf:
+            - $ref: '#/components/schemas/Models.ScoutDashboardPending'
+          description: 未返信状況
+        replyRate:
+          type: number
+          format: double
+          description: 返信率
+        avgReplyDays:
+          type: number
+          format: double
+          description: 平均返信日数
+        sentLast90d:
+          type: integer
+          description: 直近90日の送信数
+      description: スカウトダッシュボード
+    Models.ScoutDetailResponse:
+      type: object
+      required:
+        - message
+        - replies
+      properties:
+        message:
+          allOf:
+            - $ref: '#/components/schemas/Models.ScoutMessageResponse'
+          description: スカウトメッセージ
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.ScoutReplyResponse'
+          description: 返信一覧（0件時は空配列）
+      description: スカウト詳細（メッセージ + 返信スレッド）
+    Models.ScoutListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.ScoutMessageResponse'
+          description: スカウト
+        total:
+          type: integer
+          description: 総件数
+      description: スカウト一覧
+    Models.ScoutMessageResponse:
+      type: object
+      required:
+        - id
+        - companyId
+        - candidateId
+        - jobPostingId
+        - subject
+        - body
+        - status
+        - companyName
+        - candidateName
+        - jobTitle
+        - sentAt
+        - openedAt
+        - repliedAt
+        - expiresAt
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: スカウトID
+        companyId:
+          type: string
+          description: 企業ID
+        candidateId:
+          type: string
+          description: 候補者ユーザーID
+        jobPostingId:
+          type: string
+          nullable: true
+          description: 関連求人ID
+        subject:
+          type: string
+          description: 件名
+        body:
+          type: string
+          description: 本文
+        status:
+          type: string
+          description: ステータス
+        companyName:
+          type: string
+          description: 企業名
+        candidateName:
+          type: string
+          description: 候補者名
+        jobTitle:
+          type: string
+          nullable: true
+          description: 求人タイトル
+        sentAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 送信日時
+        openedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 開封日時
+        repliedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 返信日時
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 期限
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: スカウトメッセージ
+    Models.ScoutQualityScoreResponse:
+      type: object
+      required:
+        - replyRate14d
+        - level
+        - sentLast14d
+        - repliedLast14d
+      properties:
+        replyRate14d:
+          type: number
+          format: double
+          description: 直近14日の返信率
+        level:
+          type: string
+          description: 品質レベル
+        sentLast14d:
+          type: integer
+          description: 直近14日の送信数
+        repliedLast14d:
+          type: integer
+          description: 直近14日の返信数
+        warningStartedAt:
+          type: string
+          format: date-time
+          description: 警告開始日時
+        warningDeadline:
+          type: string
+          format: date-time
+          description: 警告期限
+        daysRemaining:
+          type: integer
+          description: 残り日数
+        restrictionEndsAt:
+          type: string
+          format: date-time
+          description: 制限解除日時
+      description: スカウト品質スコア
+    Models.ScoutReplyResponse:
+      type: object
+      required:
+        - id
+        - senderType
+        - senderId
+        - body
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: 返信ID
+        senderType:
+          type: string
+          description: 送信者種別（company / candidate）
+        senderId:
+          type: string
+          description: 送信者ID
+        body:
+          type: string
+          description: 本文
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: スカウト返信
     Models.ScoutSettingsResponse:
       type: object
       required:
@@ -2900,6 +3379,31 @@ components:
           format: date-time
           description: 更新日時
       description: スカウトテンプレート
+    Models.SendScoutRequest:
+      type: object
+      required:
+        - candidateId
+        - subject
+        - body
+      properties:
+        candidateId:
+          type: string
+          description: 候補者ユーザーID
+        jobPostingId:
+          type: string
+          nullable: true
+          description: 関連求人ID
+        templateId:
+          type: string
+          nullable: true
+          description: 使用テンプレートID
+        subject:
+          type: string
+          description: 件名
+        body:
+          type: string
+          description: 本文
+      description: スカウト送信リクエスト
     Models.SimilarUserExperience:
       type: object
       required:

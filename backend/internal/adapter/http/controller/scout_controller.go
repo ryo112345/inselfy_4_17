@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
@@ -22,32 +23,20 @@ func NewScoutController(input port.ScoutInputPort) *ScoutController {
 	return &ScoutController{input: input}
 }
 
-type sendScoutRequest struct {
-	CandidateID  string  `json:"candidateId"`
-	JobPostingID *string `json:"jobPostingId"`
-	TemplateID   *string `json:"templateId"`
-	Subject      string  `json:"subject"`
-	Body         string  `json:"body"`
-}
-
-type companyReplyRequest struct {
-	Body string `json:"body"`
-}
-
 // Send handles POST /api/company/scouts.
 func (c *ScoutController) Send(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body sendScoutRequest
+	var body openapi.ModelsSendScoutRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
 
 	msg, err := c.input.Send(ctx.Request().Context(), scout.SendScoutInput{
 		CompanyID:    companyID,
-		CandidateID:  body.CandidateID,
-		JobPostingID: body.JobPostingID,
-		TemplateID:   body.TemplateID,
+		CandidateID:  body.CandidateId,
+		JobPostingID: body.JobPostingId,
+		TemplateID:   body.TemplateId,
 		Subject:      body.Subject,
 		Body:         body.Body,
 	})
@@ -123,7 +112,7 @@ func (c *ScoutController) GetDashboard(ctx echo.Context) error {
 func (c *ScoutController) Reply(ctx echo.Context, scoutID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body companyReplyRequest
+	var body openapi.ModelsCompanyScoutReplyRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}

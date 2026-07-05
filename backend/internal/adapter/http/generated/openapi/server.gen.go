@@ -313,6 +313,12 @@ type ModelsCompanyResponse struct {
 	Status string `json:"status"`
 }
 
+// ModelsCompanyScoutReplyRequest 企業からのスカウト返信リクエスト
+type ModelsCompanyScoutReplyRequest struct {
+	// Body 本文
+	Body string `json:"body"`
+}
+
 // ModelsConflictError Conflict エラー
 type ModelsConflictError struct {
 	Code    ModelsConflictErrorCode `json:"code"`
@@ -703,6 +709,186 @@ type ModelsRepostToggleResponse struct {
 	Reposted bool `json:"reposted"`
 }
 
+// ModelsScoutCreditsResponse スカウトクレジット
+type ModelsScoutCreditsResponse struct {
+	// Balance 残高
+	Balance int `json:"balance"`
+
+	// LastReplenishedAt 最終補充日時
+	LastReplenishedAt time.Time `json:"lastReplenishedAt"`
+
+	// MaxStock 最大ストック
+	MaxStock int `json:"maxStock"`
+
+	// MonthlyAllowance 月次補充量
+	MonthlyAllowance int `json:"monthlyAllowance"`
+}
+
+// ModelsScoutDashboardCredits ダッシュボード: クレジット
+type ModelsScoutDashboardCredits struct {
+	// Balance 残高
+	Balance int `json:"balance"`
+
+	// MaxStock 最大ストック
+	MaxStock int `json:"maxStock"`
+
+	// MonthlyAllowance 月次補充量
+	MonthlyAllowance int `json:"monthlyAllowance"`
+
+	// NextReplenishDate 次回補充日
+	NextReplenishDate time.Time `json:"nextReplenishDate"`
+}
+
+// ModelsScoutDashboardPending ダッシュボード: 未返信
+type ModelsScoutDashboardPending struct {
+	// ByMonth 月別内訳
+	ByMonth []ModelsScoutDashboardPendingByMonth `json:"byMonth"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsScoutDashboardPendingByMonth ダッシュボード: 月別未返信
+type ModelsScoutDashboardPendingByMonth struct {
+	// Count 件数
+	Count int `json:"count"`
+
+	// DaysLeft 期限までの残日数
+	DaysLeft int `json:"daysLeft"`
+
+	// Month 送信月（YYYY-MM）
+	Month string `json:"month"`
+}
+
+// ModelsScoutDashboardResponse スカウトダッシュボード
+type ModelsScoutDashboardResponse struct {
+	// AvgReplyDays 平均返信日数
+	AvgReplyDays float64 `json:"avgReplyDays"`
+
+	// Credits クレジット状況
+	Credits ModelsScoutDashboardCredits `json:"credits"`
+
+	// Pending 未返信状況
+	Pending ModelsScoutDashboardPending `json:"pending"`
+
+	// ReplyRate 返信率
+	ReplyRate float64 `json:"replyRate"`
+
+	// SentLast90d 直近90日の送信数
+	SentLast90d int `json:"sentLast90d"`
+}
+
+// ModelsScoutDetailResponse スカウト詳細（メッセージ + 返信スレッド）
+type ModelsScoutDetailResponse struct {
+	// Message スカウトメッセージ
+	Message ModelsScoutMessageResponse `json:"message"`
+
+	// Replies 返信一覧（0件時は空配列）
+	Replies []ModelsScoutReplyResponse `json:"replies"`
+}
+
+// ModelsScoutListResponse スカウト一覧
+type ModelsScoutListResponse struct {
+	// Items スカウト
+	Items []ModelsScoutMessageResponse `json:"items"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsScoutMessageResponse スカウトメッセージ
+type ModelsScoutMessageResponse struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// CandidateId 候補者ユーザーID
+	CandidateId string `json:"candidateId"`
+
+	// CandidateName 候補者名
+	CandidateName string `json:"candidateName"`
+
+	// CompanyId 企業ID
+	CompanyId string `json:"companyId"`
+
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// ExpiresAt 期限
+	ExpiresAt *time.Time `json:"expiresAt"`
+
+	// Id スカウトID
+	Id string `json:"id"`
+
+	// JobPostingId 関連求人ID
+	JobPostingId *string `json:"jobPostingId"`
+
+	// JobTitle 求人タイトル
+	JobTitle *string `json:"jobTitle"`
+
+	// OpenedAt 開封日時
+	OpenedAt *time.Time `json:"openedAt"`
+
+	// RepliedAt 返信日時
+	RepliedAt *time.Time `json:"repliedAt"`
+
+	// SentAt 送信日時
+	SentAt *time.Time `json:"sentAt"`
+
+	// Status ステータス
+	Status string `json:"status"`
+
+	// Subject 件名
+	Subject string `json:"subject"`
+}
+
+// ModelsScoutQualityScoreResponse スカウト品質スコア
+type ModelsScoutQualityScoreResponse struct {
+	// DaysRemaining 残り日数
+	DaysRemaining *int `json:"daysRemaining,omitempty"`
+
+	// Level 品質レベル
+	Level string `json:"level"`
+
+	// RepliedLast14d 直近14日の返信数
+	RepliedLast14d int `json:"repliedLast14d"`
+
+	// ReplyRate14d 直近14日の返信率
+	ReplyRate14d float64 `json:"replyRate14d"`
+
+	// RestrictionEndsAt 制限解除日時
+	RestrictionEndsAt *time.Time `json:"restrictionEndsAt,omitempty"`
+
+	// SentLast14d 直近14日の送信数
+	SentLast14d int `json:"sentLast14d"`
+
+	// WarningDeadline 警告期限
+	WarningDeadline *time.Time `json:"warningDeadline,omitempty"`
+
+	// WarningStartedAt 警告開始日時
+	WarningStartedAt *time.Time `json:"warningStartedAt,omitempty"`
+}
+
+// ModelsScoutReplyResponse スカウト返信
+type ModelsScoutReplyResponse struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id 返信ID
+	Id string `json:"id"`
+
+	// SenderId 送信者ID
+	SenderId string `json:"senderId"`
+
+	// SenderType 送信者種別（company / candidate）
+	SenderType string `json:"senderType"`
+}
+
 // ModelsScoutSettingsResponse スカウト受け入れ設定
 type ModelsScoutSettingsResponse struct {
 	// AcceptingScouts スカウトを受け入れるか
@@ -734,6 +920,24 @@ type ModelsScoutTemplateResponse struct {
 
 	// UpdatedAt 更新日時
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// ModelsSendScoutRequest スカウト送信リクエスト
+type ModelsSendScoutRequest struct {
+	// Body 本文
+	Body string `json:"body"`
+
+	// CandidateId 候補者ユーザーID
+	CandidateId string `json:"candidateId"`
+
+	// JobPostingId 関連求人ID
+	JobPostingId *string `json:"jobPostingId,omitempty"`
+
+	// Subject 件名
+	Subject string `json:"subject"`
+
+	// TemplateId 使用テンプレートID
+	TemplateId *string `json:"templateId,omitempty"`
 }
 
 // ModelsSimilarUserExperience 類似ユーザーの職歴（要約）
@@ -1105,6 +1309,18 @@ type CompanyNotificationsListCompanyNotificationsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// CompanyScoutsListCompanyScoutsParams defines parameters for CompanyScoutsListCompanyScouts.
+type CompanyScoutsListCompanyScoutsParams struct {
+	// Status ステータスで絞り込み
+	Status *string `form:"status,omitempty" json:"status,omitempty"`
+
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // UserNotificationsListUserNotificationsParams defines parameters for UserNotificationsListUserNotifications.
 type UserNotificationsListUserNotificationsParams struct {
 	// Limit 取得件数
@@ -1194,6 +1410,12 @@ type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplat
 
 // ScoutTemplatesUpdateScoutTemplateJSONRequestBody defines body for ScoutTemplatesUpdateScoutTemplate for application/json ContentType.
 type ScoutTemplatesUpdateScoutTemplateJSONRequestBody = ModelsUpdateScoutTemplateRequest
+
+// CompanyScoutsSendScoutJSONRequestBody defines body for CompanyScoutsSendScout for application/json ContentType.
+type CompanyScoutsSendScoutJSONRequestBody = ModelsSendScoutRequest
+
+// CompanyScoutsCompanyScoutReplyJSONRequestBody defines body for CompanyScoutsCompanyScoutReply for application/json ContentType.
+type CompanyScoutsCompanyScoutReplyJSONRequestBody = ModelsCompanyScoutReplyRequest
 
 // PostsCreatePostJSONRequestBody defines body for PostsCreatePost for application/json ContentType.
 type PostsCreatePostJSONRequestBody = ModelsCreatePostRequest
@@ -1302,6 +1524,27 @@ type ServerInterface interface {
 	// Update a scout template
 	// (PUT /api/company/scout-templates/{templateId})
 	ScoutTemplatesUpdateScoutTemplate(ctx echo.Context, templateId string) error
+	// List scouts sent by the company
+	// (GET /api/company/scouts)
+	CompanyScoutsListCompanyScouts(ctx echo.Context, params CompanyScoutsListCompanyScoutsParams) error
+	// Send a scout message
+	// (POST /api/company/scouts)
+	CompanyScoutsSendScout(ctx echo.Context) error
+	// Get scout credits
+	// (GET /api/company/scouts/credits)
+	CompanyScoutsGetScoutCredits(ctx echo.Context) error
+	// Get scout dashboard stats
+	// (GET /api/company/scouts/dashboard)
+	CompanyScoutsGetScoutDashboard(ctx echo.Context) error
+	// Get scout quality score
+	// (GET /api/company/scouts/quality)
+	CompanyScoutsGetScoutQuality(ctx echo.Context) error
+	// Get scout detail with replies
+	// (GET /api/company/scouts/{scoutId})
+	CompanyScoutsGetCompanyScoutDetail(ctx echo.Context, scoutId string) error
+	// Reply to a scout as the company
+	// (POST /api/company/scouts/{scoutId}/reply)
+	CompanyScoutsCompanyScoutReply(ctx echo.Context, scoutId string) error
 	// List notifications for the authenticated user
 	// (GET /api/notifications)
 	UserNotificationsListUserNotifications(ctx echo.Context, params UserNotificationsListUserNotificationsParams) error
@@ -1698,6 +1941,106 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesUpdateScoutTemplate(ctx echo.Cont
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutTemplatesUpdateScoutTemplate(ctx, templateId)
+	return err
+}
+
+// CompanyScoutsListCompanyScouts converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyScoutsListCompanyScouts(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CompanyScoutsListCompanyScoutsParams
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "status", ctx.QueryParams(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter status: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyScoutsListCompanyScouts(ctx, params)
+	return err
+}
+
+// CompanyScoutsSendScout converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyScoutsSendScout(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyScoutsSendScout(ctx)
+	return err
+}
+
+// CompanyScoutsGetScoutCredits converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutCredits(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyScoutsGetScoutCredits(ctx)
+	return err
+}
+
+// CompanyScoutsGetScoutDashboard converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutDashboard(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyScoutsGetScoutDashboard(ctx)
+	return err
+}
+
+// CompanyScoutsGetScoutQuality converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutQuality(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyScoutsGetScoutQuality(ctx)
+	return err
+}
+
+// CompanyScoutsGetCompanyScoutDetail converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyScoutsGetCompanyScoutDetail(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "scoutId" -------------
+	var scoutId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyScoutsGetCompanyScoutDetail(ctx, scoutId)
+	return err
+}
+
+// CompanyScoutsCompanyScoutReply converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyScoutsCompanyScoutReply(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "scoutId" -------------
+	var scoutId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyScoutsCompanyScoutReply(ctx, scoutId)
 	return err
 }
 
@@ -2560,6 +2903,13 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.DELETE(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesDeleteScoutTemplate)
 	router.GET(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesGetScoutTemplate)
 	router.PUT(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesUpdateScoutTemplate)
+	router.GET(baseURL+"/api/company/scouts", wrapper.CompanyScoutsListCompanyScouts)
+	router.POST(baseURL+"/api/company/scouts", wrapper.CompanyScoutsSendScout)
+	router.GET(baseURL+"/api/company/scouts/credits", wrapper.CompanyScoutsGetScoutCredits)
+	router.GET(baseURL+"/api/company/scouts/dashboard", wrapper.CompanyScoutsGetScoutDashboard)
+	router.GET(baseURL+"/api/company/scouts/quality", wrapper.CompanyScoutsGetScoutQuality)
+	router.GET(baseURL+"/api/company/scouts/:scoutId", wrapper.CompanyScoutsGetCompanyScoutDetail)
+	router.POST(baseURL+"/api/company/scouts/:scoutId/reply", wrapper.CompanyScoutsCompanyScoutReply)
 	router.GET(baseURL+"/api/notifications", wrapper.UserNotificationsListUserNotifications)
 	router.POST(baseURL+"/api/notifications/read-all", wrapper.UserNotificationsMarkAllUserNotificationsRead)
 	router.GET(baseURL+"/api/notifications/unread-count", wrapper.UserNotificationsCountUserUnreadNotifications)
