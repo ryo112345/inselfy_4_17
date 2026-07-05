@@ -174,6 +174,16 @@ export type ModelsBadRequestError = {
 };
 
 /**
+ * 保存済み候補者一括チェックリクエスト
+ */
+export type ModelsBulkCheckSavedRequest = {
+    /**
+     * ユーザーID一覧
+     */
+    user_ids: Array<string>;
+};
+
+/**
  * スカウト一括辞退リクエスト
  */
 export type ModelsBulkDeclineRequest = {
@@ -195,6 +205,18 @@ export type ModelsBulkRespondRequest = {
      * 応答種別（interested / declined）
      */
     response: string;
+};
+
+/**
+ * 保存済み一括判定（ユーザーID → 保存済みか）
+ */
+export type ModelsBulkSavedResponse = {
+    /**
+     * 判定結果
+     */
+    saved: {
+        [key: string]: boolean;
+    };
 };
 
 /**
@@ -1506,6 +1528,26 @@ export type ModelsRepostToggleResponse = {
 };
 
 /**
+ * 保存済み候補者数
+ */
+export type ModelsSavedCountResponse = {
+    /**
+     * 件数
+     */
+    count: number;
+};
+
+/**
+ * 保存済み判定
+ */
+export type ModelsSavedResponse = {
+    /**
+     * 保存済みか
+     */
+    saved: boolean;
+};
+
+/**
  * スカウトクレジット
  */
 export type ModelsScoutCreditsResponse = {
@@ -2011,6 +2053,100 @@ export type ModelsStatusOkResponse = {
      * 処理結果（"ok"）
      */
     status: string;
+};
+
+/**
+ * 人材カード（検索・保存済み候補者で共通）
+ */
+export type ModelsTalentCard = {
+    /**
+     * ユーザーID
+     */
+    user_id: string;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * ヘッドライン
+     */
+    headline: string | null;
+    /**
+     * アバター画像URL
+     */
+    avatar_url: string | null;
+    /**
+     * プロフィールカラー
+     */
+    profile_color: string | null;
+    /**
+     * 求職ステータス
+     */
+    job_seeking_status: string | null;
+    /**
+     * スキル
+     */
+    skills: Array<string>;
+    /**
+     * 職歴
+     */
+    experiences: Array<ModelsTalentExperience>;
+    /**
+     * Work Values 上位ラベル
+     */
+    top_wv_labels: Array<string>;
+    /**
+     * Career Interest 上位ラベル
+     */
+    top_ci_labels: Array<string>;
+    /**
+     * 類似度
+     */
+    similarity?: number;
+    /**
+     * Work Values 類似度
+     */
+    wv_similarity?: number;
+    /**
+     * Career Interest 類似度
+     */
+    ci_similarity?: number;
+    /**
+     * 統合類似度
+     */
+    integrated_similarity?: number;
+};
+
+/**
+ * 人材カードの職歴（要約）
+ */
+export type ModelsTalentExperience = {
+    /**
+     * 会社名
+     */
+    company_name: string;
+    /**
+     * 役職
+     */
+    title: string;
+};
+
+/**
+ * 人材一覧
+ */
+export type ModelsTalentListResponse = {
+    /**
+     * 人材カード
+     */
+    users: Array<ModelsTalentCard>;
+    /**
+     * 総件数
+     */
+    total: number;
 };
 
 /**
@@ -3893,6 +4029,171 @@ export type CompanyProfilesUploadCompanyProfileImageResponses = {
 
 export type CompanyProfilesUploadCompanyProfileImageResponse = CompanyProfilesUploadCompanyProfileImageResponses[keyof CompanyProfilesUploadCompanyProfileImageResponses];
 
+export type SavedCandidatesListSavedCandidatesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 取得件数（1-100、デフォルト20）
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/company/saved-candidates';
+};
+
+export type SavedCandidatesListSavedCandidatesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type SavedCandidatesListSavedCandidatesError = SavedCandidatesListSavedCandidatesErrors[keyof SavedCandidatesListSavedCandidatesErrors];
+
+export type SavedCandidatesListSavedCandidatesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsTalentListResponse;
+};
+
+export type SavedCandidatesListSavedCandidatesResponse = SavedCandidatesListSavedCandidatesResponses[keyof SavedCandidatesListSavedCandidatesResponses];
+
+export type SavedCandidatesBulkCheckSavedData = {
+    body: ModelsBulkCheckSavedRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/saved-candidates/bulk-check';
+};
+
+export type SavedCandidatesBulkCheckSavedErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type SavedCandidatesBulkCheckSavedError = SavedCandidatesBulkCheckSavedErrors[keyof SavedCandidatesBulkCheckSavedErrors];
+
+export type SavedCandidatesBulkCheckSavedResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsBulkSavedResponse;
+};
+
+export type SavedCandidatesBulkCheckSavedResponse = SavedCandidatesBulkCheckSavedResponses[keyof SavedCandidatesBulkCheckSavedResponses];
+
+export type SavedCandidatesCountSavedCandidatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/saved-candidates/count';
+};
+
+export type SavedCandidatesCountSavedCandidatesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type SavedCandidatesCountSavedCandidatesError = SavedCandidatesCountSavedCandidatesErrors[keyof SavedCandidatesCountSavedCandidatesErrors];
+
+export type SavedCandidatesCountSavedCandidatesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSavedCountResponse;
+};
+
+export type SavedCandidatesCountSavedCandidatesResponse = SavedCandidatesCountSavedCandidatesResponses[keyof SavedCandidatesCountSavedCandidatesResponses];
+
+export type SavedCandidatesUnsaveCandidateData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/company/saved-candidates/{userId}';
+};
+
+export type SavedCandidatesUnsaveCandidateErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type SavedCandidatesUnsaveCandidateError = SavedCandidatesUnsaveCandidateErrors[keyof SavedCandidatesUnsaveCandidateErrors];
+
+export type SavedCandidatesUnsaveCandidateResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type SavedCandidatesUnsaveCandidateResponse = SavedCandidatesUnsaveCandidateResponses[keyof SavedCandidatesUnsaveCandidateResponses];
+
+export type SavedCandidatesIsCandidateSavedData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/company/saved-candidates/{userId}';
+};
+
+export type SavedCandidatesIsCandidateSavedErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type SavedCandidatesIsCandidateSavedError = SavedCandidatesIsCandidateSavedErrors[keyof SavedCandidatesIsCandidateSavedErrors];
+
+export type SavedCandidatesIsCandidateSavedResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSavedResponse;
+};
+
+export type SavedCandidatesIsCandidateSavedResponse = SavedCandidatesIsCandidateSavedResponses[keyof SavedCandidatesIsCandidateSavedResponses];
+
+export type SavedCandidatesSaveCandidateData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/company/saved-candidates/{userId}';
+};
+
+export type SavedCandidatesSaveCandidateErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type SavedCandidatesSaveCandidateError = SavedCandidatesSaveCandidateErrors[keyof SavedCandidatesSaveCandidateErrors];
+
+export type SavedCandidatesSaveCandidateResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type SavedCandidatesSaveCandidateResponse = SavedCandidatesSaveCandidateResponses[keyof SavedCandidatesSaveCandidateResponses];
+
 export type ScoutTemplatesListScoutTemplatesData = {
     body?: never;
     path?: never;
@@ -4213,6 +4514,179 @@ export type CompanyScoutsCompanyScoutReplyResponses = {
      */
     201: unknown;
 };
+
+export type TalentSearchSearchTalentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * フリーワード
+         */
+        q?: string;
+        /**
+         * 居住地
+         */
+        location?: string;
+        /**
+         * 業界
+         */
+        industry?: string;
+        /**
+         * 求職ステータス
+         */
+        job_seeking_status?: string;
+        /**
+         * 職種
+         */
+        job_type?: string;
+        /**
+         * 診断済みのみ（"1" で有効）
+         */
+        diagnosed?: string;
+        /**
+         * スキル（カンマ区切り）
+         */
+        skills?: string;
+        /**
+         * 取得件数（1-200、デフォルト20）
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/company/talents/search';
+};
+
+export type TalentSearchSearchTalentsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type TalentSearchSearchTalentsError = TalentSearchSearchTalentsErrors[keyof TalentSearchSearchTalentsErrors];
+
+export type TalentSearchSearchTalentsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsTalentListResponse;
+};
+
+export type TalentSearchSearchTalentsResponse = TalentSearchSearchTalentsResponses[keyof TalentSearchSearchTalentsResponses];
+
+export type TalentSearchDiagnosticSearchTalentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 比較対象チームID
+         */
+        team_id?: string;
+        q?: string;
+        location?: string;
+        industry?: string;
+        job_seeking_status?: string;
+        job_type?: string;
+        diagnosed?: string;
+        skills?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/company/talents/search/diagnostic';
+};
+
+export type TalentSearchDiagnosticSearchTalentsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type TalentSearchDiagnosticSearchTalentsError = TalentSearchDiagnosticSearchTalentsErrors[keyof TalentSearchDiagnosticSearchTalentsErrors];
+
+export type TalentSearchDiagnosticSearchTalentsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsTalentListResponse;
+};
+
+export type TalentSearchDiagnosticSearchTalentsResponse = TalentSearchDiagnosticSearchTalentsResponses[keyof TalentSearchDiagnosticSearchTalentsResponses];
+
+export type TalentSearchCiDiagnosticSearchTalentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        team_id?: string;
+        q?: string;
+        location?: string;
+        industry?: string;
+        job_seeking_status?: string;
+        job_type?: string;
+        diagnosed?: string;
+        skills?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/company/talents/search/diagnostic/ci';
+};
+
+export type TalentSearchCiDiagnosticSearchTalentsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type TalentSearchCiDiagnosticSearchTalentsError = TalentSearchCiDiagnosticSearchTalentsErrors[keyof TalentSearchCiDiagnosticSearchTalentsErrors];
+
+export type TalentSearchCiDiagnosticSearchTalentsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsTalentListResponse;
+};
+
+export type TalentSearchCiDiagnosticSearchTalentsResponse = TalentSearchCiDiagnosticSearchTalentsResponses[keyof TalentSearchCiDiagnosticSearchTalentsResponses];
+
+export type TalentSearchIntegratedDiagnosticSearchTalentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        team_id?: string;
+        q?: string;
+        location?: string;
+        industry?: string;
+        job_seeking_status?: string;
+        job_type?: string;
+        diagnosed?: string;
+        skills?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/company/talents/search/diagnostic/integrated';
+};
+
+export type TalentSearchIntegratedDiagnosticSearchTalentsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type TalentSearchIntegratedDiagnosticSearchTalentsError = TalentSearchIntegratedDiagnosticSearchTalentsErrors[keyof TalentSearchIntegratedDiagnosticSearchTalentsErrors];
+
+export type TalentSearchIntegratedDiagnosticSearchTalentsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsTalentListResponse;
+};
+
+export type TalentSearchIntegratedDiagnosticSearchTalentsResponse = TalentSearchIntegratedDiagnosticSearchTalentsResponses[keyof TalentSearchIntegratedDiagnosticSearchTalentsResponses];
 
 export type CandidateMessagingListCandidateConversationsData = {
     body?: never;

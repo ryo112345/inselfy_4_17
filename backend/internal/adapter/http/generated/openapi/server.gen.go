@@ -212,6 +212,12 @@ type ModelsBadRequestError struct {
 // ModelsBadRequestErrorCode defines model for ModelsBadRequestError.Code.
 type ModelsBadRequestErrorCode string
 
+// ModelsBulkCheckSavedRequest 保存済み候補者一括チェックリクエスト
+type ModelsBulkCheckSavedRequest struct {
+	// UserIds ユーザーID一覧
+	UserIds []string `json:"user_ids"`
+}
+
 // ModelsBulkDeclineRequest スカウト一括辞退リクエスト
 type ModelsBulkDeclineRequest struct {
 	// ScoutIds スカウトID一覧
@@ -225,6 +231,12 @@ type ModelsBulkRespondRequest struct {
 
 	// ScoutIds スカウトID一覧
 	ScoutIds []string `json:"scoutIds"`
+}
+
+// ModelsBulkSavedResponse 保存済み一括判定（ユーザーID → 保存済みか）
+type ModelsBulkSavedResponse struct {
+	// Saved 判定結果
+	Saved map[string]bool `json:"saved"`
 }
 
 // ModelsCIBasicScoreResponse 基本興味領域スコア
@@ -1145,6 +1157,18 @@ type ModelsRepostToggleResponse struct {
 	Reposted bool `json:"reposted"`
 }
 
+// ModelsSavedCountResponse 保存済み候補者数
+type ModelsSavedCountResponse struct {
+	// Count 件数
+	Count int `json:"count"`
+}
+
+// ModelsSavedResponse 保存済み判定
+type ModelsSavedResponse struct {
+	// Saved 保存済みか
+	Saved bool `json:"saved"`
+}
+
 // ModelsScoutCreditsResponse スカウトクレジット
 type ModelsScoutCreditsResponse struct {
 	// Balance 残高
@@ -1488,6 +1512,72 @@ type ModelsStartConversationRequest struct {
 type ModelsStatusOkResponse struct {
 	// Status 処理結果（"ok"）
 	Status string `json:"status"`
+}
+
+// ModelsTalentCard 人材カード（検索・保存済み候補者で共通）
+type ModelsTalentCard struct {
+	// AvatarUrl アバター画像URL
+	AvatarUrl *string `json:"avatar_url"`
+
+	// CiSimilarity Career Interest 類似度
+	CiSimilarity *float64 `json:"ci_similarity,omitempty"`
+
+	// Experiences 職歴
+	Experiences []ModelsTalentExperience `json:"experiences"`
+
+	// Headline ヘッドライン
+	Headline *string `json:"headline"`
+
+	// IntegratedSimilarity 統合類似度
+	IntegratedSimilarity *float64 `json:"integrated_similarity,omitempty"`
+
+	// JobSeekingStatus 求職ステータス
+	JobSeekingStatus *string `json:"job_seeking_status"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// ProfileColor プロフィールカラー
+	ProfileColor *string `json:"profile_color"`
+
+	// Similarity 類似度
+	Similarity *float64 `json:"similarity,omitempty"`
+
+	// Skills スキル
+	Skills []string `json:"skills"`
+
+	// TopCiLabels Career Interest 上位ラベル
+	TopCiLabels []string `json:"top_ci_labels"`
+
+	// TopWvLabels Work Values 上位ラベル
+	TopWvLabels []string `json:"top_wv_labels"`
+
+	// UserId ユーザーID
+	UserId string `json:"user_id"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+
+	// WvSimilarity Work Values 類似度
+	WvSimilarity *float64 `json:"wv_similarity,omitempty"`
+}
+
+// ModelsTalentExperience 人材カードの職歴（要約）
+type ModelsTalentExperience struct {
+	// CompanyName 会社名
+	CompanyName string `json:"company_name"`
+
+	// Title 役職
+	Title string `json:"title"`
+}
+
+// ModelsTalentListResponse 人材一覧
+type ModelsTalentListResponse struct {
+	// Total 総件数
+	Total int `json:"total"`
+
+	// Users 人材カード
+	Users []ModelsTalentCard `json:"users"`
 }
 
 // ModelsUnauthorizedError Unauthorized エラー
@@ -1965,6 +2055,15 @@ type CompanyProfilesUploadCompanyProfileImageParams struct {
 	Type string `form:"type" json:"type"`
 }
 
+// SavedCandidatesListSavedCandidatesParams defines parameters for SavedCandidatesListSavedCandidates.
+type SavedCandidatesListSavedCandidatesParams struct {
+	// Limit 取得件数（1-100、デフォルト20）
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // CompanyScoutsListCompanyScoutsParams defines parameters for CompanyScoutsListCompanyScouts.
 type CompanyScoutsListCompanyScoutsParams struct {
 	// Status ステータスで絞り込み
@@ -1975,6 +2074,79 @@ type CompanyScoutsListCompanyScoutsParams struct {
 
 	// Offset オフセット
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// TalentSearchSearchTalentsParams defines parameters for TalentSearchSearchTalents.
+type TalentSearchSearchTalentsParams struct {
+	// Q フリーワード
+	Q *string `form:"q,omitempty" json:"q,omitempty"`
+
+	// Location 居住地
+	Location *string `form:"location,omitempty" json:"location,omitempty"`
+
+	// Industry 業界
+	Industry *string `form:"industry,omitempty" json:"industry,omitempty"`
+
+	// JobSeekingStatus 求職ステータス
+	JobSeekingStatus *string `form:"job_seeking_status,omitempty" json:"job_seeking_status,omitempty"`
+
+	// JobType 職種
+	JobType *string `form:"job_type,omitempty" json:"job_type,omitempty"`
+
+	// Diagnosed 診断済みのみ（"1" で有効）
+	Diagnosed *string `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
+
+	// Skills スキル（カンマ区切り）
+	Skills *string `form:"skills,omitempty" json:"skills,omitempty"`
+
+	// Limit 取得件数（1-200、デフォルト20）
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// TalentSearchDiagnosticSearchTalentsParams defines parameters for TalentSearchDiagnosticSearchTalents.
+type TalentSearchDiagnosticSearchTalentsParams struct {
+	// TeamId 比較対象チームID
+	TeamId           *string `form:"team_id,omitempty" json:"team_id,omitempty"`
+	Q                *string `form:"q,omitempty" json:"q,omitempty"`
+	Location         *string `form:"location,omitempty" json:"location,omitempty"`
+	Industry         *string `form:"industry,omitempty" json:"industry,omitempty"`
+	JobSeekingStatus *string `form:"job_seeking_status,omitempty" json:"job_seeking_status,omitempty"`
+	JobType          *string `form:"job_type,omitempty" json:"job_type,omitempty"`
+	Diagnosed        *string `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
+	Skills           *string `form:"skills,omitempty" json:"skills,omitempty"`
+	Limit            *int32  `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset           *int32  `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// TalentSearchCiDiagnosticSearchTalentsParams defines parameters for TalentSearchCiDiagnosticSearchTalents.
+type TalentSearchCiDiagnosticSearchTalentsParams struct {
+	TeamId           *string `form:"team_id,omitempty" json:"team_id,omitempty"`
+	Q                *string `form:"q,omitempty" json:"q,omitempty"`
+	Location         *string `form:"location,omitempty" json:"location,omitempty"`
+	Industry         *string `form:"industry,omitempty" json:"industry,omitempty"`
+	JobSeekingStatus *string `form:"job_seeking_status,omitempty" json:"job_seeking_status,omitempty"`
+	JobType          *string `form:"job_type,omitempty" json:"job_type,omitempty"`
+	Diagnosed        *string `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
+	Skills           *string `form:"skills,omitempty" json:"skills,omitempty"`
+	Limit            *int32  `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset           *int32  `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// TalentSearchIntegratedDiagnosticSearchTalentsParams defines parameters for TalentSearchIntegratedDiagnosticSearchTalents.
+type TalentSearchIntegratedDiagnosticSearchTalentsParams struct {
+	TeamId           *string `form:"team_id,omitempty" json:"team_id,omitempty"`
+	Q                *string `form:"q,omitempty" json:"q,omitempty"`
+	Location         *string `form:"location,omitempty" json:"location,omitempty"`
+	Industry         *string `form:"industry,omitempty" json:"industry,omitempty"`
+	JobSeekingStatus *string `form:"job_seeking_status,omitempty" json:"job_seeking_status,omitempty"`
+	JobType          *string `form:"job_type,omitempty" json:"job_type,omitempty"`
+	Diagnosed        *string `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
+	Skills           *string `form:"skills,omitempty" json:"skills,omitempty"`
+	Limit            *int32  `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset           *int32  `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
 // CandidateMessagingListCandidateConversationsParams defines parameters for CandidateMessagingListCandidateConversations.
@@ -2117,6 +2289,9 @@ type CompanyProfilesUpdateCompanyProfileJSONRequestBody = ModelsUpdateCompanyPro
 
 // CompanyProfilesUploadCompanyProfileImageMultipartRequestBody defines body for CompanyProfilesUploadCompanyProfileImage for multipart/form-data ContentType.
 type CompanyProfilesUploadCompanyProfileImageMultipartRequestBody CompanyProfilesUploadCompanyProfileImageMultipartBody
+
+// SavedCandidatesBulkCheckSavedJSONRequestBody defines body for SavedCandidatesBulkCheckSaved for application/json ContentType.
+type SavedCandidatesBulkCheckSavedJSONRequestBody = ModelsBulkCheckSavedRequest
 
 // ScoutTemplatesCreateScoutTemplateJSONRequestBody defines body for ScoutTemplatesCreateScoutTemplate for application/json ContentType.
 type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplateRequest
@@ -2336,6 +2511,24 @@ type ServerInterface interface {
 	// Upload a company profile image
 	// (POST /api/company/profile/image)
 	CompanyProfilesUploadCompanyProfileImage(ctx echo.Context, params CompanyProfilesUploadCompanyProfileImageParams) error
+	// List saved candidates
+	// (GET /api/company/saved-candidates)
+	SavedCandidatesListSavedCandidates(ctx echo.Context, params SavedCandidatesListSavedCandidatesParams) error
+	// Bulk-check whether candidates are saved
+	// (POST /api/company/saved-candidates/bulk-check)
+	SavedCandidatesBulkCheckSaved(ctx echo.Context) error
+	// Count saved candidates
+	// (GET /api/company/saved-candidates/count)
+	SavedCandidatesCountSavedCandidates(ctx echo.Context) error
+	// Unsave a candidate
+	// (DELETE /api/company/saved-candidates/{userId})
+	SavedCandidatesUnsaveCandidate(ctx echo.Context, userId string) error
+	// Check whether a candidate is saved
+	// (GET /api/company/saved-candidates/{userId})
+	SavedCandidatesIsCandidateSaved(ctx echo.Context, userId string) error
+	// Save a candidate
+	// (POST /api/company/saved-candidates/{userId})
+	SavedCandidatesSaveCandidate(ctx echo.Context, userId string) error
 	// List scout templates
 	// (GET /api/company/scout-templates)
 	ScoutTemplatesListScoutTemplates(ctx echo.Context) error
@@ -2372,6 +2565,18 @@ type ServerInterface interface {
 	// Reply to a scout as the company
 	// (POST /api/company/scouts/{scoutId}/reply)
 	CompanyScoutsCompanyScoutReply(ctx echo.Context, scoutId string) error
+	// Search talents by conditions
+	// (GET /api/company/talents/search)
+	TalentSearchSearchTalents(ctx echo.Context, params TalentSearchSearchTalentsParams) error
+	// Search talents by work-values similarity
+	// (GET /api/company/talents/search/diagnostic)
+	TalentSearchDiagnosticSearchTalents(ctx echo.Context, params TalentSearchDiagnosticSearchTalentsParams) error
+	// Search talents by career-interest similarity
+	// (GET /api/company/talents/search/diagnostic/ci)
+	TalentSearchCiDiagnosticSearchTalents(ctx echo.Context, params TalentSearchCiDiagnosticSearchTalentsParams) error
+	// Search talents by integrated similarity
+	// (GET /api/company/talents/search/diagnostic/integrated)
+	TalentSearchIntegratedDiagnosticSearchTalents(ctx echo.Context, params TalentSearchIntegratedDiagnosticSearchTalentsParams) error
 	// List conversations for the candidate
 	// (GET /api/messages/conversations)
 	CandidateMessagingListCandidateConversations(ctx echo.Context, params CandidateMessagingListCandidateConversationsParams) error
@@ -3293,6 +3498,97 @@ func (w *ServerInterfaceWrapper) CompanyProfilesUploadCompanyProfileImage(ctx ec
 	return err
 }
 
+// SavedCandidatesListSavedCandidates converts echo context to params.
+func (w *ServerInterfaceWrapper) SavedCandidatesListSavedCandidates(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SavedCandidatesListSavedCandidatesParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SavedCandidatesListSavedCandidates(ctx, params)
+	return err
+}
+
+// SavedCandidatesBulkCheckSaved converts echo context to params.
+func (w *ServerInterfaceWrapper) SavedCandidatesBulkCheckSaved(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SavedCandidatesBulkCheckSaved(ctx)
+	return err
+}
+
+// SavedCandidatesCountSavedCandidates converts echo context to params.
+func (w *ServerInterfaceWrapper) SavedCandidatesCountSavedCandidates(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SavedCandidatesCountSavedCandidates(ctx)
+	return err
+}
+
+// SavedCandidatesUnsaveCandidate converts echo context to params.
+func (w *ServerInterfaceWrapper) SavedCandidatesUnsaveCandidate(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SavedCandidatesUnsaveCandidate(ctx, userId)
+	return err
+}
+
+// SavedCandidatesIsCandidateSaved converts echo context to params.
+func (w *ServerInterfaceWrapper) SavedCandidatesIsCandidateSaved(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SavedCandidatesIsCandidateSaved(ctx, userId)
+	return err
+}
+
+// SavedCandidatesSaveCandidate converts echo context to params.
+func (w *ServerInterfaceWrapper) SavedCandidatesSaveCandidate(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SavedCandidatesSaveCandidate(ctx, userId)
+	return err
+}
+
 // ScoutTemplatesListScoutTemplates converts echo context to params.
 func (w *ServerInterfaceWrapper) ScoutTemplatesListScoutTemplates(ctx echo.Context) error {
 	var err error
@@ -3456,6 +3752,323 @@ func (w *ServerInterfaceWrapper) CompanyScoutsCompanyScoutReply(ctx echo.Context
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyScoutsCompanyScoutReply(ctx, scoutId)
+	return err
+}
+
+// TalentSearchSearchTalents converts echo context to params.
+func (w *ServerInterfaceWrapper) TalentSearchSearchTalents(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params TalentSearchSearchTalentsParams
+	// ------------- Optional query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "location" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "location", ctx.QueryParams(), &params.Location, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter location: %s", err))
+	}
+
+	// ------------- Optional query parameter "industry" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "industry", ctx.QueryParams(), &params.Industry, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter industry: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_seeking_status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_seeking_status", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_seeking_status: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_type" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_type", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_type: %s", err))
+	}
+
+	// ------------- Optional query parameter "diagnosed" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "diagnosed", ctx.QueryParams(), &params.Diagnosed, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter diagnosed: %s", err))
+	}
+
+	// ------------- Optional query parameter "skills" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "skills", ctx.QueryParams(), &params.Skills, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter skills: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TalentSearchSearchTalents(ctx, params)
+	return err
+}
+
+// TalentSearchDiagnosticSearchTalents converts echo context to params.
+func (w *ServerInterfaceWrapper) TalentSearchDiagnosticSearchTalents(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params TalentSearchDiagnosticSearchTalentsParams
+	// ------------- Optional query parameter "team_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "team_id", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter team_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "location" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "location", ctx.QueryParams(), &params.Location, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter location: %s", err))
+	}
+
+	// ------------- Optional query parameter "industry" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "industry", ctx.QueryParams(), &params.Industry, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter industry: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_seeking_status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_seeking_status", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_seeking_status: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_type" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_type", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_type: %s", err))
+	}
+
+	// ------------- Optional query parameter "diagnosed" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "diagnosed", ctx.QueryParams(), &params.Diagnosed, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter diagnosed: %s", err))
+	}
+
+	// ------------- Optional query parameter "skills" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "skills", ctx.QueryParams(), &params.Skills, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter skills: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TalentSearchDiagnosticSearchTalents(ctx, params)
+	return err
+}
+
+// TalentSearchCiDiagnosticSearchTalents converts echo context to params.
+func (w *ServerInterfaceWrapper) TalentSearchCiDiagnosticSearchTalents(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params TalentSearchCiDiagnosticSearchTalentsParams
+	// ------------- Optional query parameter "team_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "team_id", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter team_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "location" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "location", ctx.QueryParams(), &params.Location, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter location: %s", err))
+	}
+
+	// ------------- Optional query parameter "industry" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "industry", ctx.QueryParams(), &params.Industry, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter industry: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_seeking_status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_seeking_status", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_seeking_status: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_type" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_type", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_type: %s", err))
+	}
+
+	// ------------- Optional query parameter "diagnosed" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "diagnosed", ctx.QueryParams(), &params.Diagnosed, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter diagnosed: %s", err))
+	}
+
+	// ------------- Optional query parameter "skills" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "skills", ctx.QueryParams(), &params.Skills, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter skills: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TalentSearchCiDiagnosticSearchTalents(ctx, params)
+	return err
+}
+
+// TalentSearchIntegratedDiagnosticSearchTalents converts echo context to params.
+func (w *ServerInterfaceWrapper) TalentSearchIntegratedDiagnosticSearchTalents(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params TalentSearchIntegratedDiagnosticSearchTalentsParams
+	// ------------- Optional query parameter "team_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "team_id", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter team_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "location" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "location", ctx.QueryParams(), &params.Location, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter location: %s", err))
+	}
+
+	// ------------- Optional query parameter "industry" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "industry", ctx.QueryParams(), &params.Industry, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter industry: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_seeking_status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_seeking_status", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_seeking_status: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_type" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_type", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_type: %s", err))
+	}
+
+	// ------------- Optional query parameter "diagnosed" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "diagnosed", ctx.QueryParams(), &params.Diagnosed, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter diagnosed: %s", err))
+	}
+
+	// ------------- Optional query parameter "skills" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "skills", ctx.QueryParams(), &params.Skills, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter skills: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TalentSearchIntegratedDiagnosticSearchTalents(ctx, params)
 	return err
 }
 
@@ -4559,6 +5172,12 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.PUT(baseURL+"/api/company/profile", wrapper.CompanyProfilesUpdateCompanyProfile)
 	router.DELETE(baseURL+"/api/company/profile/image", wrapper.CompanyProfilesDeleteCompanyProfileImage)
 	router.POST(baseURL+"/api/company/profile/image", wrapper.CompanyProfilesUploadCompanyProfileImage)
+	router.GET(baseURL+"/api/company/saved-candidates", wrapper.SavedCandidatesListSavedCandidates)
+	router.POST(baseURL+"/api/company/saved-candidates/bulk-check", wrapper.SavedCandidatesBulkCheckSaved)
+	router.GET(baseURL+"/api/company/saved-candidates/count", wrapper.SavedCandidatesCountSavedCandidates)
+	router.DELETE(baseURL+"/api/company/saved-candidates/:userId", wrapper.SavedCandidatesUnsaveCandidate)
+	router.GET(baseURL+"/api/company/saved-candidates/:userId", wrapper.SavedCandidatesIsCandidateSaved)
+	router.POST(baseURL+"/api/company/saved-candidates/:userId", wrapper.SavedCandidatesSaveCandidate)
 	router.GET(baseURL+"/api/company/scout-templates", wrapper.ScoutTemplatesListScoutTemplates)
 	router.POST(baseURL+"/api/company/scout-templates", wrapper.ScoutTemplatesCreateScoutTemplate)
 	router.DELETE(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesDeleteScoutTemplate)
@@ -4571,6 +5190,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/company/scouts/quality", wrapper.CompanyScoutsGetScoutQuality)
 	router.GET(baseURL+"/api/company/scouts/:scoutId", wrapper.CompanyScoutsGetCompanyScoutDetail)
 	router.POST(baseURL+"/api/company/scouts/:scoutId/reply", wrapper.CompanyScoutsCompanyScoutReply)
+	router.GET(baseURL+"/api/company/talents/search", wrapper.TalentSearchSearchTalents)
+	router.GET(baseURL+"/api/company/talents/search/diagnostic", wrapper.TalentSearchDiagnosticSearchTalents)
+	router.GET(baseURL+"/api/company/talents/search/diagnostic/ci", wrapper.TalentSearchCiDiagnosticSearchTalents)
+	router.GET(baseURL+"/api/company/talents/search/diagnostic/integrated", wrapper.TalentSearchIntegratedDiagnosticSearchTalents)
 	router.GET(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingListCandidateConversations)
 	router.POST(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingStartCandidateConversation)
 	router.GET(baseURL+"/api/messages/conversations/:conversationId", wrapper.CandidateMessagingGetCandidateConversation)
