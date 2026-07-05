@@ -26,7 +26,8 @@
 **いつ goverter にするか（線引き）:**
 - **goverter化する:** 同名フィールドが概ね **15個以上** で、ソースが単一のフラット構造体
   （埋め込みは `goverter:autoMap` で可）、計算・条件分岐がほぼ無いマッパー。
-  例: `JobPosting`(entity↔response, request→Input→entity)、`JobApplicationWithDetails`→response。
+  例: `JobPosting`(entity↔response, request→Input→entity)、`JobApplicationWithDetails`→response、
+  `ScoutMessageWithNames`→response、`PostWithUser`→response（ネストは `goverter:autoMap Post` で可）。
 - **手書きのまま残す:** フィールドが少ない（〜10個程度）／composite read-model で値が複数ソースから来る
   （`a.Article.X`＋著者情報など）／計算フィールド（`CountChars` 等）・条件付き代入・日付整形・
   値オブジェクト変換（`Username.String()`）・デフォルト値（`"" → "text"`）を含むもの。

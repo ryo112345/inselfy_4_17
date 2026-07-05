@@ -61,14 +61,16 @@ type RepostToggleResponse struct {
 	Count    int  `json:"count"`
 }
 
+var postConv postConverter = &postConverterImpl{}
+
 // PostSingleResponse converts a single post to its API response.
-func PostSingleResponse(pw *post.PostWithUser) any { return toPostResponse(pw) }
+func PostSingleResponse(pw *post.PostWithUser) any { return postConv.ToPostResponse(pw) }
 
 // PostsListResponse converts a paginated list of posts to its API response.
 func PostsListResponse(posts []*post.PostWithUser, total int) any {
 	items := make([]*PostResponse, len(posts))
 	for i, pw := range posts {
-		items[i] = toPostResponse(pw)
+		items[i] = postConv.ToPostResponse(pw)
 	}
 	return &PostListResponse{Items: items, Total: total}
 }
@@ -84,53 +86,13 @@ func PostRepostToggleResponse(reposted bool, count int) any {
 }
 
 // PostCommentResponse converts a single comment to its API response.
-func PostCommentResponse(c *post.CommentWithUser) any { return toCommentResponse(c) }
+func PostCommentResponse(c *post.CommentWithUser) any { return postConv.ToCommentResponse(c) }
 
 // PostCommentsListResponse converts a paginated list of comments to its API response.
 func PostCommentsListResponse(comments []*post.CommentWithUser, total int) any {
 	items := make([]*CommentResponse, len(comments))
 	for i, c := range comments {
-		items[i] = toCommentResponse(c)
+		items[i] = postConv.ToCommentResponse(c)
 	}
 	return &CommentListResponse{Items: items, Total: total}
-}
-
-func toPostResponse(pw *post.PostWithUser) *PostResponse {
-	r := &PostResponse{
-		ID:           pw.Post.ID,
-		UserID:       pw.Post.UserID,
-		Username:     pw.Username,
-		Name:         pw.Name,
-		Content:      pw.Post.Content,
-		LikeCount:    pw.LikeCount,
-		CommentCount: pw.CommentCount,
-		RepostCount:  pw.RepostCount,
-		LikedByMe:    pw.LikedByMe,
-		RepostedByMe: pw.RepostedByMe,
-		IsRepost:     pw.IsRepost,
-		CreatedAt:    pw.Post.CreatedAt,
-		UpdatedAt:    pw.Post.UpdatedAt,
-	}
-	if pw.QuotedPost != nil {
-		r.QuotedPost = &QuotedPostResponse{
-			ID:        pw.QuotedPost.ID,
-			Content:   pw.QuotedPost.Content,
-			Username:  pw.QuotedPost.Username,
-			Name:      pw.QuotedPost.Name,
-			CreatedAt: pw.QuotedPost.CreatedAt,
-		}
-	}
-	return r
-}
-
-func toCommentResponse(cw *post.CommentWithUser) *CommentResponse {
-	return &CommentResponse{
-		ID:        cw.Comment.ID,
-		PostID:    cw.Comment.PostID,
-		UserID:    cw.Comment.UserID,
-		Username:  cw.Username,
-		Name:      cw.Name,
-		Content:   cw.Comment.Content,
-		CreatedAt: cw.Comment.CreatedAt,
-	}
 }
