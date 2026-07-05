@@ -7,19 +7,17 @@ import { useWorkValuesQuiz } from "@/features/work-values/useWorkValuesQuiz";
 import { useCareerInterestQuiz } from "@/features/career-interest/useCareerInterestQuiz";
 import type { NeedId } from "@/features/work-values/lib/needs";
 import type { ItemDTO } from "@/features/career-interest/api";
+import "@/external/client/api/client";
+import {
+  teamDiagnoseGetDiagnoseByToken,
+  teamDiagnoseUpdateDiagnoseStatus,
+  type ModelsDiagnoseInfoResponse,
+} from "@/external/client/api/generated";
 
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"], display: "swap" });
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600"], display: "swap" });
 
-type MemberInfo = {
-  member_id: string;
-  member_name: string;
-  team_name: string;
-  company_name: string;
-  user_id: string;
-  wv_status: string;
-  ci_status: string;
-};
+type MemberInfo = ModelsDiagnoseInfoResponse;
 
 type PagePhase = "loading" | "invalid" | "welcome" | "wv" | "wv_done" | "ci" | "done";
 
@@ -39,12 +37,9 @@ export default function DiagnosePage() {
   const [phase, setPhase] = useState<PagePhase>("loading");
 
   useEffect(() => {
-    fetch(`/api/team-diagnose/${token}`)
-      .then((r) => {
-        if (!r.ok) throw new Error();
-        return r.json();
-      })
-      .then((data: MemberInfo) => {
+    teamDiagnoseGetDiagnoseByToken({ path: { token } })
+      .then(({ data, error }) => {
+        if (error || !data) throw new Error();
         setMemberInfo(data);
         if (data.wv_status === "completed" && data.ci_status === "completed") {
           setPhase("done");
@@ -59,10 +54,9 @@ export default function DiagnosePage() {
 
   const updateStatus = useCallback(
     async (field: "wv_status" | "ci_status") => {
-      await fetch(`/api/team-diagnose/${token}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: "completed" }),
+      await teamDiagnoseUpdateDiagnoseStatus({
+        path: { token },
+        body: field === "wv_status" ? { wv_status: "completed" } : { ci_status: "completed" },
       });
     },
     [token],

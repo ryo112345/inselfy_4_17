@@ -122,7 +122,7 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 | 2 | [x] | setup: `app/setup/page.tsx` | 1 | users 系 |
 | 3 | [x] | notifications: `features/notifications/api.ts` | 3 | 移行ではなく**削除**（importゼロの死にコードだった。孤児化した scout/types.ts の Notification 2型も削除） |
 | 4 | [x] | messaging: `features/messaging/api.ts` | 5 | useWebSocket.ts は触らない。`unread-context.tsx` は401正常系のため**スコープ外に変更**（上表参照） |
-| 5 | [ ] | team-diagnose: `app/diagnose/[token]/page.tsx` | 2 | |
+| 5 | [x] | team-diagnose: `app/diagnose/[token]/page.tsx` | 2 | |
 | 6 | [ ] | timeline/posts: `features/timeline/api.ts` | 7 | クエリ文字列組み立てを query オプションへ |
 | 7 | [ ] | articles: `features/articles/api.ts`, `CoverImageUpload.tsx`, `PrevNextNav.tsx`, `RelatedArticles.tsx`, `RichEditor.tsx`, `features/timeline/ArticlePreviewCard.tsx` | 9 | **multipart 2箇所は実アップロード確認** |
 | 8 | [ ] | work-values + career-interest: `features/work-values/api.ts`, `features/career-interest/api.ts` | 6 | sessions/results/latest のみ。ai-report GET は Phase 2B |
