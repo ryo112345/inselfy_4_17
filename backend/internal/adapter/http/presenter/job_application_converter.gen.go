@@ -31,6 +31,18 @@ func (c *jobApplicationConverterImpl) ToResponse(source *jobapplication.JobAppli
 				presenterJobApplicationResponse.CandidateSkills[i] = (*source).CandidateSkills[i]
 			}
 		}
+		if (*source).WVSimilarity != nil {
+			xfloat64 := *(*source).WVSimilarity
+			presenterJobApplicationResponse.WVSimilarity = &xfloat64
+		}
+		if (*source).CISimilarity != nil {
+			xfloat642 := *(*source).CISimilarity
+			presenterJobApplicationResponse.CISimilarity = &xfloat642
+		}
+		if (*source).IntSimilarity != nil {
+			xfloat643 := *(*source).IntSimilarity
+			presenterJobApplicationResponse.IntSimilarity = &xfloat643
+		}
 		presenterJobApplicationResponse.CreatedAt = copyTime((*source).JobApplication.CreatedAt)
 		presenterJobApplicationResponse.UpdatedAt = copyTime((*source).JobApplication.UpdatedAt)
 		pPresenterJobApplicationResponse = &presenterJobApplicationResponse

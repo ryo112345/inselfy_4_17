@@ -3,16 +3,19 @@ package usecase
 import (
 	"context"
 	"errors"
+	"math"
 	"strings"
 
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
+	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type JobApplicationInteractor struct {
 	repo    port.JobApplicationRepository
 	jobRepo port.JobPostingRepository
+	query   port.JobApplicationQueryService
 }
 
 var _ port.JobApplicationInputPort = (*JobApplicationInteractor)(nil)
@@ -20,8 +23,9 @@ var _ port.JobApplicationInputPort = (*JobApplicationInteractor)(nil)
 func NewJobApplicationInteractor(
 	repo port.JobApplicationRepository,
 	jobRepo port.JobPostingRepository,
+	query port.JobApplicationQueryService,
 ) *JobApplicationInteractor {
-	return &JobApplicationInteractor{repo: repo, jobRepo: jobRepo}
+	return &JobApplicationInteractor{repo: repo, jobRepo: jobRepo, query: query}
 }
 
 func (i *JobApplicationInteractor) Apply(ctx context.Context, input jobapplication.ApplyInput) (*jobapplication.JobApplicationWithDetails, error) {
@@ -60,7 +64,94 @@ func (i *JobApplicationInteractor) ListByCompany(ctx context.Context, companyID 
 	if err != nil {
 		return nil, 0, err
 	}
+	i.enrichWithSimilarity(ctx, companyID, apps)
 	return apps, total, nil
+}
+
+// enrichWithSimilarity fills each application's WV/CI/integrated similarity
+// between the candidate and the applied job's team. Teams owned by other
+// companies are skipped; missing diagnostics and read errors degrade silently
+// so the list stays usable without similarity.
+func (i *JobApplicationInteractor) enrichWithSimilarity(ctx context.Context, companyID string, apps []*jobapplication.JobApplicationWithDetails) {
+	if len(apps) == 0 {
+		return
+	}
+
+	jpIDSet := map[string]bool{}
+	candidateIDSet := map[string]bool{}
+	for _, a := range apps {
+		jpIDSet[a.JobPostingID] = true
+		candidateIDSet[a.CandidateID] = true
+	}
+
+	jpTeams, err := i.query.JobPostingTeamIDs(ctx, keys(jpIDSet))
+	if err != nil || len(jpTeams) == 0 {
+		return
+	}
+
+	uniqueTeams := map[string]bool{}
+	for _, tid := range jpTeams {
+		uniqueTeams[tid] = true
+	}
+
+	teamWV := map[string]map[string]float64{}
+	teamCI := map[string][6]float64{}
+	for tid := range uniqueTeams {
+		owner, err := i.query.TeamCompanyID(ctx, tid)
+		if err != nil || owner != companyID {
+			continue
+		}
+		if scores, err := i.query.TeamAverageWVDisplayScores(ctx, tid); err == nil {
+			teamWV[tid] = scores
+		}
+		if scores, err := i.query.TeamAverageCIScores(ctx, tid); err == nil {
+			teamCI[tid] = scores
+		}
+	}
+	if len(teamWV) == 0 && len(teamCI) == 0 {
+		return
+	}
+
+	candidateIDs := keys(candidateIDSet)
+	candidateWV, err := i.query.WVScoresByUserIDs(ctx, candidateIDs)
+	if err != nil {
+		candidateWV = nil
+	}
+	candidateCI, err := i.query.CIScoresByUserIDs(ctx, candidateIDs)
+	if err != nil {
+		candidateCI = nil
+	}
+
+	for _, a := range apps {
+		teamID, ok := jpTeams[a.JobPostingID]
+		if !ok {
+			continue
+		}
+		if twv, ok := teamWV[teamID]; ok {
+			if cwv, ok := candidateWV[a.CandidateID]; ok {
+				sim := talentsearch.GaussianWVSimilarity(cwv, twv)
+				a.WVSimilarity = &sim
+			}
+		}
+		if tci, ok := teamCI[teamID]; ok {
+			if cci, ok := candidateCI[a.CandidateID]; ok {
+				sim := talentsearch.GaussianCISimilarity(cci, tci)
+				a.CISimilarity = &sim
+			}
+		}
+		if a.WVSimilarity != nil && a.CISimilarity != nil {
+			avg := math.Round((*a.WVSimilarity+*a.CISimilarity)/2.0*10) / 10
+			a.IntSimilarity = &avg
+		}
+	}
+}
+
+func keys(set map[string]bool) []string {
+	out := make([]string, 0, len(set))
+	for k := range set {
+		out = append(out, k)
+	}
+	return out
 }
 
 func (i *JobApplicationInteractor) ListByCandidate(ctx context.Context, candidateID string) ([]*jobapplication.JobApplicationWithDetails, int, error) {

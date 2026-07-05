@@ -113,8 +113,11 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	))
 
 	jobApplicationCtrl := httpcontroller.NewJobApplicationController(
-		usecase.NewJobApplicationInteractor(sqlcgw.NewJobApplicationRepository(pool), jobPostingRepo),
-		pool,
+		usecase.NewJobApplicationInteractor(
+			sqlcgw.NewJobApplicationRepository(pool),
+			jobPostingRepo,
+			sqlcgw.NewJobApplicationQueryService(pool),
+		),
 	)
 
 	messagingCtrl := httpcontroller.NewMessagingController(usecase.NewMessagingInteractor(

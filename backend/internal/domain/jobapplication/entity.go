@@ -62,6 +62,11 @@ type JobApplicationWithDetails struct {
 	CandidateProfileColor  string
 	CandidateSeekingStatus string
 	CandidateSkills        []string
+	// Similarity between the candidate and the applied job's team; nil when
+	// diagnostics are missing on either side.
+	WVSimilarity  *float64
+	CISimilarity  *float64
+	IntSimilarity *float64
 }
 
 type ApplyInput struct {

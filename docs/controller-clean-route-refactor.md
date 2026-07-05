@@ -32,7 +32,7 @@ backend には現在2系統の経路が混在している:
 | 2 | [x] | saved_candidate_controller.go | 192 | 単純CRUD |
 | 3 | [x] | similar_users_controller.go | 251 | 類似度読み取り |
 | 4 | [x] | company_profile_controller.go | 365 | `port.FileStorage` も併用中 |
-| 5 | [ ] | job_application_controller.go | 413 | **ハイブリッド**: InputPort と pool を両方持つ。pool 側だけ移行 |
+| 5 | [x] | job_application_controller.go | 413 | **ハイブリッド**: InputPort と pool を両方持つ。pool 側だけ移行 |
 | 6 | [x] | interview_controller.go | 642 | **ハイブリッド**: pool + ConversationRepository 等の port + TxManager を持つ。日程調整ロジックの interactor 抽出が本体。**事前分析済み → `docs/interview-controller-migration-notes.md` を必ず読む** |
 | 7 | [ ] | company_team_controller.go | 910 | ハンドラ13個。public/company 両方から使われる（initializer.go の2箇所で生成） |
 | 8 | [x] | talent_search_controller.go | 1261 | 最難関。動的WHERE句組み立て＋類似度スコアリング。スコアリングは interactor でユニットテスト必須 |
