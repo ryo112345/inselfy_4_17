@@ -128,7 +128,7 @@ cd ../backend && make oapi
 | 16 | [x] | article | 13 | multipart 1本、21フィールド resp |
 | 17 | [x] | company_profile | 5 | multipart、18/24フィールド |
 | 18 | [x] | saved_candidate | 6 | talentCard 再利用、ad-hoc map |
-| 19 | [ ] | company_team | 11 | inline struct 7個、**nil→null 維持** |
+| 19 | [x] | company_team | 11 | inline struct 7個、**nil→null 維持** |
 | 20 | [x] | talent_search | 4 | **動的 wv_*/ci_* クエリ** |
 | 21 | [ ] | job_posting | 10 | 40/41フィールド、TeamMember、二形 ListPublic、multipart 3本 |
 | 22 | [ ] | interview | 8 | **presenter なし・全部 ad-hoc map。curl 実測必須** |

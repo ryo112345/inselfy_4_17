@@ -88,6 +88,15 @@ func (e ModelsUnauthorizedErrorCode) Valid() bool {
 	}
 }
 
+// ModelsAddTeamMemberRequest チームメンバー追加リクエスト
+type ModelsAddTeamMemberRequest struct {
+	// Email 招待メールアドレス
+	Email *string `json:"email,omitempty"`
+
+	// Name メンバー名
+	Name string `json:"name"`
+}
+
 // ModelsAppliedResponse 応募済み判定
 type ModelsAppliedResponse struct {
 	// Applied 応募済みか
@@ -671,6 +680,15 @@ type ModelsCreateScoutTemplateRequest struct {
 	Subject string `json:"subject"`
 }
 
+// ModelsCreateTeamRequest チーム作成リクエスト
+type ModelsCreateTeamRequest struct {
+	// Description 説明
+	Description *string `json:"description,omitempty"`
+
+	// Name チーム名
+	Name string `json:"name"`
+}
+
 // ModelsCreateUserRequest ユーザー作成リクエスト
 type ModelsCreateUserRequest struct {
 	// Name 表示名（1-100文字）
@@ -932,6 +950,33 @@ type ModelsLikeToggleResponse struct {
 	Liked bool `json:"liked"`
 }
 
+// ModelsMemberScoreResponse メンバーごとの診断スコア
+type ModelsMemberScoreResponse struct {
+	// CiScores Career Interest スコア
+	CiScores *[]ModelsTeamScoreEntry `json:"ci_scores,omitempty"`
+
+	// CiStatus Career Interest 診断ステータス
+	CiStatus string `json:"ci_status"`
+
+	// IsAce エースメンバーか
+	IsAce bool `json:"is_ace"`
+
+	// MemberId メンバーID
+	MemberId string `json:"member_id"`
+
+	// MemberName メンバー名
+	MemberName string `json:"member_name"`
+
+	// UserId 紐づくユーザーID
+	UserId string `json:"user_id"`
+
+	// WvScores Work Values スコア
+	WvScores *[]ModelsTeamScoreEntry `json:"wv_scores,omitempty"`
+
+	// WvStatus Work Values 診断ステータス
+	WvStatus string `json:"wv_status"`
+}
+
 // ModelsMessageListResponse メッセージ一覧
 type ModelsMessageListResponse struct {
 	// Items メッセージ
@@ -1128,6 +1173,45 @@ type ModelsPublicCompanyProfileResponse struct {
 
 	// WebsiteUrl WebサイトURL
 	WebsiteUrl string `json:"websiteUrl"`
+}
+
+// ModelsPublicScoreEntry 公開スコアエントリ
+type ModelsPublicScoreEntry struct {
+	// Id スコアID
+	Id string `json:"id"`
+
+	// Score 集計スコア
+	Score float64 `json:"score"`
+}
+
+// ModelsPublicTeamScoreResponse チームの公開集計スコア
+type ModelsPublicTeamScoreResponse struct {
+	// CiScores Career Interest 集計（完了者不足時は null）
+	CiScores *[]ModelsPublicScoreEntry `json:"ci_scores"`
+
+	// CompletedCount 診断完了者数
+	CompletedCount int `json:"completed_count"`
+
+	// MemberCount メンバー数
+	MemberCount int `json:"member_count"`
+
+	// TeamId チームID
+	TeamId string `json:"team_id"`
+
+	// TeamName チーム名
+	TeamName string `json:"team_name"`
+
+	// WnScores Work Needs 集計（完了者不足時は null）
+	WnScores *[]ModelsPublicScoreEntry `json:"wn_scores"`
+
+	// WvScores Work Values 集計（完了者不足時は null）
+	WvScores *[]ModelsPublicScoreEntry `json:"wv_scores"`
+}
+
+// ModelsPublicTeamScoresResponse 公開チームスコア一覧
+type ModelsPublicTeamScoresResponse struct {
+	// Teams チーム
+	Teams []ModelsPublicTeamScoreResponse `json:"teams"`
 }
 
 // ModelsQuotedPostResponse 引用投稿（要約）
@@ -1580,6 +1664,111 @@ type ModelsTalentListResponse struct {
 	Users []ModelsTalentCard `json:"users"`
 }
 
+// ModelsTeamDetailResponse チーム詳細（メンバー付き）
+type ModelsTeamDetailResponse struct {
+	// CompanyId 企業ID
+	CompanyId string `json:"company_id"`
+
+	// CreatedAt 作成日時（RFC3339 文字列）
+	CreatedAt string `json:"created_at"`
+
+	// Description 説明
+	Description *string `json:"description"`
+
+	// Id チームID
+	Id string `json:"id"`
+
+	// IsPublic 公開フラグ
+	IsPublic bool `json:"is_public"`
+
+	// Members メンバー一覧
+	Members []ModelsTeamMemberResponse `json:"members"`
+
+	// Name チーム名
+	Name string `json:"name"`
+}
+
+// ModelsTeamListResponse チーム一覧
+type ModelsTeamListResponse struct {
+	// Teams チーム
+	Teams []ModelsTeamResponse `json:"teams"`
+}
+
+// ModelsTeamMemberResponse チームメンバー
+type ModelsTeamMemberResponse struct {
+	// CiStatus Career Interest 診断ステータス
+	CiStatus string `json:"ci_status"`
+
+	// CreatedAt 作成日時（RFC3339 文字列）
+	CreatedAt string `json:"created_at"`
+
+	// Email 招待メールアドレス
+	Email *string `json:"email"`
+
+	// Id メンバーID
+	Id string `json:"id"`
+
+	// InviteToken 診断招待トークン
+	InviteToken string `json:"invite_token"`
+
+	// IsAce エースメンバーか
+	IsAce bool `json:"is_ace"`
+
+	// Name メンバー名
+	Name string `json:"name"`
+
+	// WvStatus Work Values 診断ステータス
+	WvStatus string `json:"wv_status"`
+}
+
+// ModelsTeamResponse チーム（サマリー）
+type ModelsTeamResponse struct {
+	// CiCompleted Career Interest 完了数
+	CiCompleted int `json:"ci_completed"`
+
+	// CompanyId 企業ID
+	CompanyId string `json:"company_id"`
+
+	// CreatedAt 作成日時（RFC3339 文字列）
+	CreatedAt string `json:"created_at"`
+
+	// Description 説明
+	Description *string `json:"description"`
+
+	// Id チームID
+	Id string `json:"id"`
+
+	// IsPublic 公開フラグ
+	IsPublic bool `json:"is_public"`
+
+	// MemberCount メンバー数
+	MemberCount int `json:"member_count"`
+
+	// Name チーム名
+	Name string `json:"name"`
+
+	// WvCompleted Work Values 完了数
+	WvCompleted int `json:"wv_completed"`
+}
+
+// ModelsTeamScoreEntry 診断スコア（ID・表示スコア・順位）
+type ModelsTeamScoreEntry struct {
+	// DisplayScore 表示スコア
+	DisplayScore float64 `json:"display_score"`
+
+	// Id スコアID（need/value/type）
+	Id string `json:"id"`
+
+	// Rank 順位
+	Rank int `json:"rank"`
+}
+
+// ModelsTeamScoresResponse チームスコア一覧
+type ModelsTeamScoresResponse struct {
+	// Members メンバーごとのスコア
+	Members []ModelsMemberScoreResponse `json:"members"`
+}
+
 // ModelsUnauthorizedError Unauthorized エラー
 type ModelsUnauthorizedError struct {
 	Code    ModelsUnauthorizedErrorCode `json:"code"`
@@ -1749,6 +1938,18 @@ type ModelsUpdateScoutTemplateRequest struct {
 
 	// Subject 件名
 	Subject string `json:"subject"`
+}
+
+// ModelsUpdateTeamRequest チーム更新リクエスト
+type ModelsUpdateTeamRequest struct {
+	// Description 説明
+	Description *string `json:"description,omitempty"`
+
+	// IsPublic 公開フラグ（未指定なら変更しない）
+	IsPublic *bool `json:"is_public,omitempty"`
+
+	// Name チーム名
+	Name string `json:"name"`
 }
 
 // ModelsUpdateUserProfileRequest プロフィール更新リクエスト（PATCH。指定したキーのみ差分適用）。値に null を渡すとフィールドをクリア。
@@ -2305,6 +2506,15 @@ type CompanyScoutsSendScoutJSONRequestBody = ModelsSendScoutRequest
 // CompanyScoutsCompanyScoutReplyJSONRequestBody defines body for CompanyScoutsCompanyScoutReply for application/json ContentType.
 type CompanyScoutsCompanyScoutReplyJSONRequestBody = ModelsCompanyScoutReplyRequest
 
+// CompanyTeamsCreateTeamJSONRequestBody defines body for CompanyTeamsCreateTeam for application/json ContentType.
+type CompanyTeamsCreateTeamJSONRequestBody = ModelsCreateTeamRequest
+
+// CompanyTeamsUpdateTeamJSONRequestBody defines body for CompanyTeamsUpdateTeam for application/json ContentType.
+type CompanyTeamsUpdateTeamJSONRequestBody = ModelsUpdateTeamRequest
+
+// CompanyTeamsAddTeamMemberJSONRequestBody defines body for CompanyTeamsAddTeamMember for application/json ContentType.
+type CompanyTeamsAddTeamMemberJSONRequestBody = ModelsAddTeamMemberRequest
+
 // CandidateMessagingStartCandidateConversationJSONRequestBody defines body for CandidateMessagingStartCandidateConversation for application/json ContentType.
 type CandidateMessagingStartCandidateConversationJSONRequestBody = ModelsStartCandidateConversationRequest
 
@@ -2430,6 +2640,9 @@ type ServerInterface interface {
 	// Get a public company profile
 	// (GET /api/companies/{id})
 	PublicCompanyProfilesGetPublicCompanyProfile(ctx echo.Context, id string) error
+	// Get public team scores of a company
+	// (GET /api/companies/{id}/teams/scores)
+	PublicTeamScoresGetPublicTeamScores(ctx echo.Context, id string) error
 	// List applications for the company
 	// (GET /api/company/applications)
 	CompanyApplicationsListCompanyApplications(ctx echo.Context, params CompanyApplicationsListCompanyApplicationsParams) error
@@ -2577,6 +2790,36 @@ type ServerInterface interface {
 	// Search talents by integrated similarity
 	// (GET /api/company/talents/search/diagnostic/integrated)
 	TalentSearchIntegratedDiagnosticSearchTalents(ctx echo.Context, params TalentSearchIntegratedDiagnosticSearchTalentsParams) error
+	// List teams of the authenticated company
+	// (GET /api/company/teams)
+	CompanyTeamsListTeams(ctx echo.Context) error
+	// Create a team
+	// (POST /api/company/teams)
+	CompanyTeamsCreateTeam(ctx echo.Context) error
+	// Delete a team
+	// (DELETE /api/company/teams/{teamId})
+	CompanyTeamsDeleteTeam(ctx echo.Context, teamId string) error
+	// Get a team with members
+	// (GET /api/company/teams/{teamId})
+	CompanyTeamsGetTeam(ctx echo.Context, teamId string) error
+	// Update a team
+	// (PUT /api/company/teams/{teamId})
+	CompanyTeamsUpdateTeam(ctx echo.Context, teamId string) error
+	// Unset the ace member of a team
+	// (DELETE /api/company/teams/{teamId}/ace)
+	CompanyTeamsUnsetAceMember(ctx echo.Context, teamId string) error
+	// Set the ace member of a team
+	// (PUT /api/company/teams/{teamId}/ace/{memberId})
+	CompanyTeamsSetAceMember(ctx echo.Context, teamId string, memberId string) error
+	// Add a team member
+	// (POST /api/company/teams/{teamId}/members)
+	CompanyTeamsAddTeamMember(ctx echo.Context, teamId string) error
+	// Remove a team member
+	// (DELETE /api/company/teams/{teamId}/members/{memberId})
+	CompanyTeamsRemoveTeamMember(ctx echo.Context, teamId string, memberId string) error
+	// Get diagnostic scores of team members
+	// (GET /api/company/teams/{teamId}/scores)
+	CompanyTeamsGetTeamScores(ctx echo.Context, teamId string) error
 	// List conversations for the candidate
 	// (GET /api/messages/conversations)
 	CandidateMessagingListCandidateConversations(ctx echo.Context, params CandidateMessagingListCandidateConversationsParams) error
@@ -3058,6 +3301,22 @@ func (w *ServerInterfaceWrapper) PublicCompanyProfilesGetPublicCompanyProfile(ct
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PublicCompanyProfilesGetPublicCompanyProfile(ctx, id)
+	return err
+}
+
+// PublicTeamScoresGetPublicTeamScores converts echo context to params.
+func (w *ServerInterfaceWrapper) PublicTeamScoresGetPublicTeamScores(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PublicTeamScoresGetPublicTeamScores(ctx, id)
 	return err
 }
 
@@ -4069,6 +4328,168 @@ func (w *ServerInterfaceWrapper) TalentSearchIntegratedDiagnosticSearchTalents(c
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.TalentSearchIntegratedDiagnosticSearchTalents(ctx, params)
+	return err
+}
+
+// CompanyTeamsListTeams converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsListTeams(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsListTeams(ctx)
+	return err
+}
+
+// CompanyTeamsCreateTeam converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsCreateTeam(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsCreateTeam(ctx)
+	return err
+}
+
+// CompanyTeamsDeleteTeam converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsDeleteTeam(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "teamId" -------------
+	var teamId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsDeleteTeam(ctx, teamId)
+	return err
+}
+
+// CompanyTeamsGetTeam converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsGetTeam(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "teamId" -------------
+	var teamId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsGetTeam(ctx, teamId)
+	return err
+}
+
+// CompanyTeamsUpdateTeam converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsUpdateTeam(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "teamId" -------------
+	var teamId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsUpdateTeam(ctx, teamId)
+	return err
+}
+
+// CompanyTeamsUnsetAceMember converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsUnsetAceMember(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "teamId" -------------
+	var teamId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsUnsetAceMember(ctx, teamId)
+	return err
+}
+
+// CompanyTeamsSetAceMember converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsSetAceMember(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "teamId" -------------
+	var teamId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
+	}
+
+	// ------------- Path parameter "memberId" -------------
+	var memberId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "memberId", ctx.Param("memberId"), &memberId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter memberId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsSetAceMember(ctx, teamId, memberId)
+	return err
+}
+
+// CompanyTeamsAddTeamMember converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsAddTeamMember(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "teamId" -------------
+	var teamId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsAddTeamMember(ctx, teamId)
+	return err
+}
+
+// CompanyTeamsRemoveTeamMember converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsRemoveTeamMember(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "teamId" -------------
+	var teamId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
+	}
+
+	// ------------- Path parameter "memberId" -------------
+	var memberId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "memberId", ctx.Param("memberId"), &memberId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter memberId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsRemoveTeamMember(ctx, teamId, memberId)
+	return err
+}
+
+// CompanyTeamsGetTeamScores converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyTeamsGetTeamScores(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "teamId" -------------
+	var teamId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyTeamsGetTeamScores(ctx, teamId)
 	return err
 }
 
@@ -5145,6 +5566,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiSubmitResult)
 	router.GET(baseURL+"/api/career-interest/users/:userId/results/latest", wrapper.CareerInterestCiGetLatestResult)
 	router.GET(baseURL+"/api/companies/:id", wrapper.PublicCompanyProfilesGetPublicCompanyProfile)
+	router.GET(baseURL+"/api/companies/:id/teams/scores", wrapper.PublicTeamScoresGetPublicTeamScores)
 	router.GET(baseURL+"/api/company/applications", wrapper.CompanyApplicationsListCompanyApplications)
 	router.GET(baseURL+"/api/company/applications/:applicationId", wrapper.CompanyApplicationsGetApplication)
 	router.PATCH(baseURL+"/api/company/applications/:applicationId/status", wrapper.CompanyApplicationsUpdateApplicationStatus)
@@ -5194,6 +5616,16 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/company/talents/search/diagnostic", wrapper.TalentSearchDiagnosticSearchTalents)
 	router.GET(baseURL+"/api/company/talents/search/diagnostic/ci", wrapper.TalentSearchCiDiagnosticSearchTalents)
 	router.GET(baseURL+"/api/company/talents/search/diagnostic/integrated", wrapper.TalentSearchIntegratedDiagnosticSearchTalents)
+	router.GET(baseURL+"/api/company/teams", wrapper.CompanyTeamsListTeams)
+	router.POST(baseURL+"/api/company/teams", wrapper.CompanyTeamsCreateTeam)
+	router.DELETE(baseURL+"/api/company/teams/:teamId", wrapper.CompanyTeamsDeleteTeam)
+	router.GET(baseURL+"/api/company/teams/:teamId", wrapper.CompanyTeamsGetTeam)
+	router.PUT(baseURL+"/api/company/teams/:teamId", wrapper.CompanyTeamsUpdateTeam)
+	router.DELETE(baseURL+"/api/company/teams/:teamId/ace", wrapper.CompanyTeamsUnsetAceMember)
+	router.PUT(baseURL+"/api/company/teams/:teamId/ace/:memberId", wrapper.CompanyTeamsSetAceMember)
+	router.POST(baseURL+"/api/company/teams/:teamId/members", wrapper.CompanyTeamsAddTeamMember)
+	router.DELETE(baseURL+"/api/company/teams/:teamId/members/:memberId", wrapper.CompanyTeamsRemoveTeamMember)
+	router.GET(baseURL+"/api/company/teams/:teamId/scores", wrapper.CompanyTeamsGetTeamScores)
 	router.GET(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingListCandidateConversations)
 	router.POST(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingStartCandidateConversation)
 	router.GET(baseURL+"/api/messages/conversations/:conversationId", wrapper.CandidateMessagingGetCandidateConversation)

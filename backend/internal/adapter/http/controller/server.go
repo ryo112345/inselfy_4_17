@@ -31,6 +31,7 @@ type Server struct {
 	companyProf   *CompanyProfileController
 	savedCand     *SavedCandidateController
 	talentSearch  *TalentSearchController
+	companyTeam   *CompanyTeamController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -60,6 +61,7 @@ func NewServer(
 	companyProf *CompanyProfileController,
 	savedCand *SavedCandidateController,
 	talentSearch *TalentSearchController,
+	companyTeam *CompanyTeamController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -85,6 +87,7 @@ func NewServer(
 		companyProf:   companyProf,
 		savedCand:     savedCand,
 		talentSearch:  talentSearch,
+		companyTeam:   companyTeam,
 	}
 }
 
@@ -626,4 +629,50 @@ func (s *Server) TalentSearchCiDiagnosticSearchTalents(ctx echo.Context, _ opena
 
 func (s *Server) TalentSearchIntegratedDiagnosticSearchTalents(ctx echo.Context, _ openapi.TalentSearchIntegratedDiagnosticSearchTalentsParams) error {
 	return s.talentSearch.IntegratedDiagnosticSearch(ctx)
+}
+
+// --- CompanyTeams ---
+
+func (s *Server) PublicTeamScoresGetPublicTeamScores(ctx echo.Context, id string) error {
+	return s.companyTeam.GetPublicTeamScores(ctx, id)
+}
+
+func (s *Server) CompanyTeamsListTeams(ctx echo.Context) error {
+	return s.companyTeam.ListTeams(ctx)
+}
+
+func (s *Server) CompanyTeamsCreateTeam(ctx echo.Context) error {
+	return s.companyTeam.CreateTeam(ctx)
+}
+
+func (s *Server) CompanyTeamsGetTeam(ctx echo.Context, teamID string) error {
+	return s.companyTeam.GetTeam(ctx, teamID)
+}
+
+func (s *Server) CompanyTeamsUpdateTeam(ctx echo.Context, teamID string) error {
+	return s.companyTeam.UpdateTeam(ctx, teamID)
+}
+
+func (s *Server) CompanyTeamsDeleteTeam(ctx echo.Context, teamID string) error {
+	return s.companyTeam.DeleteTeam(ctx, teamID)
+}
+
+func (s *Server) CompanyTeamsAddTeamMember(ctx echo.Context, teamID string) error {
+	return s.companyTeam.AddMember(ctx, teamID)
+}
+
+func (s *Server) CompanyTeamsRemoveTeamMember(ctx echo.Context, teamID, memberID string) error {
+	return s.companyTeam.RemoveMember(ctx, teamID, memberID)
+}
+
+func (s *Server) CompanyTeamsGetTeamScores(ctx echo.Context, teamID string) error {
+	return s.companyTeam.GetTeamScores(ctx, teamID)
+}
+
+func (s *Server) CompanyTeamsSetAceMember(ctx echo.Context, teamID, memberID string) error {
+	return s.companyTeam.SetAceMember(ctx, teamID, memberID)
+}
+
+func (s *Server) CompanyTeamsUnsetAceMember(ctx echo.Context, teamID string) error {
+	return s.companyTeam.UnsetAceMember(ctx, teamID)
 }

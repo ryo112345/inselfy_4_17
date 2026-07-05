@@ -26,6 +26,7 @@ tags:
   - name: CompanyProfile
   - name: SavedCandidates
   - name: TalentSearch
+  - name: CompanyTeams
 paths:
   /api/applications:
     post:
@@ -637,6 +638,34 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - CompanyProfile
+  /api/companies/{id}/teams/scores:
+    get:
+      operationId: PublicTeamScores_getPublicTeamScores
+      summary: Get public team scores of a company
+      description: 企業の公開チームスコア取得
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.PublicTeamScoresResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
   /api/company/applications:
     get:
       operationId: CompanyApplications_listCompanyApplications
@@ -2252,6 +2281,277 @@ paths:
                 $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - TalentSearch
+  /api/company/teams:
+    get:
+      operationId: CompanyTeams_listTeams
+      summary: List teams of the authenticated company
+      description: チーム一覧（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TeamListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
+    post:
+      operationId: CompanyTeams_createTeam
+      summary: Create a team
+      description: チーム作成（企業認証）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TeamDetailResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreateTeamRequest'
+  /api/company/teams/{teamId}:
+    get:
+      operationId: CompanyTeams_getTeam
+      summary: Get a team with members
+      description: チーム詳細（企業認証）
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TeamDetailResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
+    put:
+      operationId: CompanyTeams_updateTeam
+      summary: Update a team
+      description: チーム更新（企業認証）
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CompanyTeams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateTeamRequest'
+    delete:
+      operationId: CompanyTeams_deleteTeam
+      summary: Delete a team
+      description: チーム削除（企業認証）
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
+  /api/company/teams/{teamId}/ace:
+    delete:
+      operationId: CompanyTeams_unsetAceMember
+      summary: Unset the ace member of a team
+      description: エースメンバー解除（企業認証）
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
+  /api/company/teams/{teamId}/ace/{memberId}:
+    put:
+      operationId: CompanyTeams_setAceMember
+      summary: Set the ace member of a team
+      description: エースメンバー設定（企業認証）
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
+  /api/company/teams/{teamId}/members:
+    post:
+      operationId: CompanyTeams_addTeamMember
+      summary: Add a team member
+      description: メンバー追加（企業認証）
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TeamMemberResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CompanyTeams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.AddTeamMemberRequest'
+  /api/company/teams/{teamId}/members/{memberId}:
+    delete:
+      operationId: CompanyTeams_removeTeamMember
+      summary: Remove a team member
+      description: メンバー削除（企業認証）
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
+  /api/company/teams/{teamId}/scores:
+    get:
+      operationId: CompanyTeams_getTeamScores
+      summary: Get diagnostic scores of team members
+      description: チームスコア取得（企業認証）
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TeamScoresResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyTeams
   /api/messages/conversations:
     post:
       operationId: CandidateMessaging_startCandidateConversation
@@ -3990,6 +4290,19 @@ paths:
         - WorkValues
 components:
   schemas:
+    Models.AddTeamMemberRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: メンバー名
+        email:
+          type: string
+          nullable: true
+          description: 招待メールアドレス
+      description: チームメンバー追加リクエスト
     Models.AppliedResponse:
       type: object
       required:
@@ -4869,6 +5182,19 @@ components:
           type: string
           description: 本文
       description: スカウトテンプレート作成リクエスト
+    Models.CreateTeamRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: チーム名
+        description:
+          type: string
+          nullable: true
+          description: 説明
+      description: チーム作成リクエスト
     Models.CreateUserRequest:
       type: object
       required:
@@ -5259,6 +5585,45 @@ components:
           type: integer
           description: いいね数
       description: いいねトグル結果
+    Models.MemberScoreResponse:
+      type: object
+      required:
+        - member_id
+        - member_name
+        - user_id
+        - wv_status
+        - ci_status
+        - is_ace
+      properties:
+        member_id:
+          type: string
+          description: メンバーID
+        member_name:
+          type: string
+          description: メンバー名
+        user_id:
+          type: string
+          description: 紐づくユーザーID
+        wv_status:
+          type: string
+          description: Work Values 診断ステータス
+        ci_status:
+          type: string
+          description: Career Interest 診断ステータス
+        is_ace:
+          type: boolean
+          description: エースメンバーか
+        wv_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.TeamScoreEntry'
+          description: Work Values スコア
+        ci_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.TeamScoreEntry'
+          description: Career Interest スコア
+      description: メンバーごとの診断スコア
     Models.MessageListResponse:
       type: object
       required:
@@ -5549,6 +5914,73 @@ components:
             type: string
           description: ギャラリー画像URL
       description: 企業プロフィール（公開向け）
+    Models.PublicScoreEntry:
+      type: object
+      required:
+        - id
+        - score
+      properties:
+        id:
+          type: string
+          description: スコアID
+        score:
+          type: number
+          format: double
+          description: 集計スコア
+      description: 公開スコアエントリ
+    Models.PublicTeamScoreResponse:
+      type: object
+      required:
+        - team_id
+        - team_name
+        - wv_scores
+        - wn_scores
+        - ci_scores
+        - member_count
+        - completed_count
+      properties:
+        team_id:
+          type: string
+          description: チームID
+        team_name:
+          type: string
+          description: チーム名
+        wv_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.PublicScoreEntry'
+          nullable: true
+          description: Work Values 集計（完了者不足時は null）
+        wn_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.PublicScoreEntry'
+          nullable: true
+          description: Work Needs 集計（完了者不足時は null）
+        ci_scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.PublicScoreEntry'
+          nullable: true
+          description: Career Interest 集計（完了者不足時は null）
+        member_count:
+          type: integer
+          description: メンバー数
+        completed_count:
+          type: integer
+          description: 診断完了者数
+      description: チームの公開集計スコア
+    Models.PublicTeamScoresResponse:
+      type: object
+      required:
+        - teams
+      properties:
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.PublicTeamScoreResponse'
+          description: チーム
+      description: 公開チームスコア一覧
     Models.QuotedPostResponse:
       type: object
       required:
@@ -6239,6 +6671,162 @@ components:
           type: integer
           description: 総件数
       description: 人材一覧
+    Models.TeamDetailResponse:
+      type: object
+      required:
+        - id
+        - company_id
+        - name
+        - description
+        - is_public
+        - members
+        - created_at
+      properties:
+        id:
+          type: string
+          description: チームID
+        company_id:
+          type: string
+          description: 企業ID
+        name:
+          type: string
+          description: チーム名
+        description:
+          type: string
+          nullable: true
+          description: 説明
+        is_public:
+          type: boolean
+          description: 公開フラグ
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.TeamMemberResponse'
+          description: メンバー一覧
+        created_at:
+          type: string
+          description: 作成日時（RFC3339 文字列）
+      description: チーム詳細（メンバー付き）
+    Models.TeamListResponse:
+      type: object
+      required:
+        - teams
+      properties:
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.TeamResponse'
+          description: チーム
+      description: チーム一覧
+    Models.TeamMemberResponse:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - invite_token
+        - wv_status
+        - ci_status
+        - is_ace
+        - created_at
+      properties:
+        id:
+          type: string
+          description: メンバーID
+        name:
+          type: string
+          description: メンバー名
+        email:
+          type: string
+          nullable: true
+          description: 招待メールアドレス
+        invite_token:
+          type: string
+          description: 診断招待トークン
+        wv_status:
+          type: string
+          description: Work Values 診断ステータス
+        ci_status:
+          type: string
+          description: Career Interest 診断ステータス
+        is_ace:
+          type: boolean
+          description: エースメンバーか
+        created_at:
+          type: string
+          description: 作成日時（RFC3339 文字列）
+      description: チームメンバー
+    Models.TeamResponse:
+      type: object
+      required:
+        - id
+        - company_id
+        - name
+        - description
+        - is_public
+        - member_count
+        - wv_completed
+        - ci_completed
+        - created_at
+      properties:
+        id:
+          type: string
+          description: チームID
+        company_id:
+          type: string
+          description: 企業ID
+        name:
+          type: string
+          description: チーム名
+        description:
+          type: string
+          nullable: true
+          description: 説明
+        is_public:
+          type: boolean
+          description: 公開フラグ
+        member_count:
+          type: integer
+          description: メンバー数
+        wv_completed:
+          type: integer
+          description: Work Values 完了数
+        ci_completed:
+          type: integer
+          description: Career Interest 完了数
+        created_at:
+          type: string
+          description: 作成日時（RFC3339 文字列）
+      description: チーム（サマリー）
+    Models.TeamScoreEntry:
+      type: object
+      required:
+        - id
+        - display_score
+        - rank
+      properties:
+        id:
+          type: string
+          description: スコアID（need/value/type）
+        display_score:
+          type: number
+          format: double
+          description: 表示スコア
+        rank:
+          type: integer
+          description: 順位
+      description: 診断スコア（ID・表示スコア・順位）
+    Models.TeamScoresResponse:
+      type: object
+      required:
+        - members
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.MemberScoreResponse'
+          description: メンバーごとのスコア
+      description: チームスコア一覧
     Models.UnauthorizedError:
       type: object
       required:
@@ -6506,6 +7094,23 @@ components:
           type: string
           description: 本文
       description: スカウトテンプレート更新リクエスト
+    Models.UpdateTeamRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: チーム名
+        description:
+          type: string
+          nullable: true
+          description: 説明
+        is_public:
+          type: boolean
+          nullable: true
+          description: 公開フラグ（未指定なら変更しない）
+      description: チーム更新リクエスト
     Models.UpdateUserProfileRequest:
       type: object
       properties:
