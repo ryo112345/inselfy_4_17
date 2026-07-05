@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ArticleItem } from "./api";
+import { fetchArticles, type ArticleItem } from "./api";
 import { ArticleCard } from "./ArticleCard";
 
 type Props = {
@@ -12,8 +12,7 @@ export function RelatedArticles({ currentArticle }: Props) {
   const [articles, setArticles] = useState<ArticleItem[]>([]);
 
   useEffect(() => {
-    fetch("/api/articles?limit=50&offset=0")
-      .then((res) => (res.ok ? res.json() : null))
+    fetchArticles(50, 0)
       .then((data) => {
         if (!data?.items) return;
         const all: ArticleItem[] = data.items;

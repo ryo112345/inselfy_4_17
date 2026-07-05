@@ -1,71 +1,51 @@
-const BASE_URL =
-  typeof window === "undefined"
-    ? process.env.INTERNAL_API_URL ?? "http://localhost:8081"
-    : "";
+import "@/external/client/api/client";
+import {
+  articlesCreateArticle,
+  articlesCreateArticleCheckout,
+  articlesDeleteArticle,
+  articlesGetArticle,
+  articlesListArticles,
+  articlesListMyArticles,
+  articlesPublishArticle,
+  articlesUpdateArticle,
+  articlesUploadArticleImage,
+  type ModelsArticleListResponse,
+  type ModelsArticleResponse,
+  type ModelsCreateArticleRequest,
+  type ModelsUpdateArticleRequest,
+} from "@/external/client/api/generated";
 
-export type ArticleItem = {
-  id: string;
-  authorType: "user" | "company";
-  authorName: string;
-  authorUsername?: string;
-  title: string;
-  body: string;
-  freePreview: string;
-  isPaid: boolean;
-  priceYen: number;
-  purchased: boolean;
-  isAuthor: boolean;
-  charCount: number;
-  imageCount: number;
-  status: string;
-  coverImageUrl?: string;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-  publishedAt?: string;
-};
-
-export type ArticleListResponse = {
-  items: ArticleItem[];
-  total: number;
-};
+export type ArticleItem = ModelsArticleResponse;
+export type ArticleListResponse = ModelsArticleListResponse;
 
 export async function fetchArticles(
   limit = 20,
   offset = 0,
 ): Promise<ArticleListResponse> {
-  const res = await fetch(
-    `${BASE_URL}/api/articles?limit=${limit}&offset=${offset}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) throw new Error("Failed to fetch articles");
-  return res.json();
+  const { data, error } = await articlesListArticles({ query: { limit, offset } });
+  if (error || !data) throw new Error("Failed to fetch articles");
+  return data;
 }
 
 export async function fetchMyArticles(
   limit = 50,
   offset = 0,
 ): Promise<ArticleListResponse> {
-  const res = await fetch(
-    `${BASE_URL}/api/articles/mine?limit=${limit}&offset=${offset}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) throw new Error("Failed to fetch articles");
-  return res.json();
+  const { data, error } = await articlesListMyArticles({ query: { limit, offset } });
+  if (error || !data) throw new Error("Failed to fetch articles");
+  return data;
 }
 
 export async function fetchArticle(
   id: string,
   opts?: { cookie?: string },
 ): Promise<ArticleItem> {
-  const headers: Record<string, string> = {};
-  if (opts?.cookie) headers.cookie = opts.cookie;
-  const res = await fetch(`${BASE_URL}/api/articles/${id}`, {
-    cache: "no-store",
-    headers,
+  const { data, error } = await articlesGetArticle({
+    path: { articleId: id },
+    headers: opts?.cookie ? { cookie: opts.cookie } : undefined,
   });
-  if (!res.ok) throw new Error("Failed to fetch article");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch article");
+  return data;
 }
 
 export async function createArticle(data: {
@@ -76,16 +56,13 @@ export async function createArticle(data: {
   coverImageUrl?: string | null;
   tags?: string[];
 }): Promise<ArticleItem> {
-  const res = await fetch(`/api/articles`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+  const { data: created, error } = await articlesCreateArticle({
+    body: data as ModelsCreateArticleRequest,
   });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? "Failed to create article");
+  if (error || !created) {
+    throw new Error(error?.message ?? "Failed to create article");
   }
-  return res.json();
+  return created;
 }
 
 export async function updateArticle(
@@ -99,45 +76,41 @@ export async function updateArticle(
     tags?: string[];
   },
 ): Promise<ArticleItem> {
-  const res = await fetch(`/api/articles/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+  const { data: updated, error } = await articlesUpdateArticle({
+    path: { articleId: id },
+    body: data as ModelsUpdateArticleRequest,
   });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? "Failed to update article");
+  if (error || !updated) {
+    throw new Error(error?.message ?? "Failed to update article");
   }
-  return res.json();
+  return updated;
 }
 
 export async function publishArticle(id: string): Promise<ArticleItem> {
-  const res = await fetch(`/api/articles/${id}/publish`, {
-    method: "POST",
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? "Failed to publish article");
+  const { data, error } = await articlesPublishArticle({ path: { articleId: id } });
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to publish article");
   }
-  return res.json();
+  return data;
 }
 
 export async function deleteArticle(id: string): Promise<void> {
-  const res = await fetch(`/api/articles/${id}`, {
-    method: "DELETE",
-  });
-  if (!res.ok) throw new Error("Failed to delete article");
+  const { error } = await articlesDeleteArticle({ path: { articleId: id } });
+  if (error) throw new Error("Failed to delete article");
 }
 
 export async function createCheckoutSession(
   articleId: string,
 ): Promise<{ url: string }> {
-  const res = await fetch(`/api/articles/${articleId}/checkout`, {
-    method: "POST",
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? "Failed to create checkout session");
+  const { data, error } = await articlesCreateArticleCheckout({ path: { articleId } });
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to create checkout session");
   }
-  return res.json();
+  return data;
+}
+
+export async function uploadArticleImage(file: File): Promise<string> {
+  const { data, error } = await articlesUploadArticleImage({ body: { file } });
+  if (error || !data) throw new Error("Failed to upload image");
+  return data.url;
 }

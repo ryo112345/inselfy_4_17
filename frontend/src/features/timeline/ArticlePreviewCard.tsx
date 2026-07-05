@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { ArticleItem } from "@/features/articles/api";
+import { fetchArticle, type ArticleItem } from "@/features/articles/api";
 
 const articleUrlPattern = /\/articles\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 
@@ -28,12 +28,8 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
   useEffect(() => {
     if (article || failed) return;
     let cancelled = false;
-    fetch(`/api/articles/${articleId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data: ArticleItem) => {
+    fetchArticle(articleId)
+      .then((data) => {
         if (cancelled) return;
         cache.set(articleId, data);
         setArticle(data);
