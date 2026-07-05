@@ -6,6 +6,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -18,17 +20,6 @@ func NewTeamDiagnoseController(input port.TeamDiagnoseInputPort) *TeamDiagnoseCo
 	return &TeamDiagnoseController{input: input}
 }
 
-type diagnoseInfoResponse struct {
-	MemberID    string  `json:"member_id"`
-	MemberName  string  `json:"member_name"`
-	TeamName    string  `json:"team_name"`
-	CompanyName string  `json:"company_name"`
-	UserID      string  `json:"user_id"`
-	WVStatus    string  `json:"wv_status"`
-	CIStatus    string  `json:"ci_status"`
-	Email       *string `json:"email"`
-}
-
 func (c *TeamDiagnoseController) GetByToken(ctx echo.Context, token string) error {
 	info, err := c.input.GetByToken(ctx.Request().Context(), token)
 	if err != nil {
@@ -38,28 +29,16 @@ func (c *TeamDiagnoseController) GetByToken(ctx echo.Context, token string) erro
 		return internalError(ctx, err.Error())
 	}
 
-	return ctx.JSON(http.StatusOK, diagnoseInfoResponse{
-		MemberID:    info.MemberID,
-		MemberName:  info.MemberName,
-		TeamName:    info.TeamName,
-		CompanyName: info.CompanyName,
-		UserID:      info.UserID,
-		WVStatus:    info.WVStatus,
-		CIStatus:    info.CIStatus,
-		Email:       info.Email,
-	})
+	return ctx.JSON(http.StatusOK, presenter.DiagnoseInfoResponse(info))
 }
 
 func (c *TeamDiagnoseController) UpdateStatus(ctx echo.Context, token string) error {
-	var body struct {
-		WVStatus *string `json:"wv_status"`
-		CIStatus *string `json:"ci_status"`
-	}
+	var body openapi.ModelsUpdateDiagnoseStatusRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request")
 	}
 
-	if err := c.input.UpdateStatus(ctx.Request().Context(), token, body.WVStatus, body.CIStatus); err != nil {
+	if err := c.input.UpdateStatus(ctx.Request().Context(), token, body.WvStatus, body.CiStatus); err != nil {
 		switch {
 		case errors.Is(err, domainerr.ErrBadRequest):
 			return badRequest(ctx, err.Error())

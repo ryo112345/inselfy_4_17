@@ -9,6 +9,7 @@ tags:
   - name: Skills
   - name: ScoutSettings
   - name: SimilarUsers
+  - name: TeamDiagnose
 paths:
   /api/scout-settings:
     get:
@@ -61,6 +62,62 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateScoutSettingsRequest'
+  /api/team-diagnose/{token}:
+    get:
+      operationId: TeamDiagnose_getDiagnoseByToken
+      summary: Get team-diagnose info by token
+      description: 診断リンクのトークンからメンバー情報を取得
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.DiagnoseInfoResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - TeamDiagnose
+  /api/team-diagnose/{token}/status:
+    put:
+      operationId: TeamDiagnose_updateDiagnoseStatus
+      summary: Update diagnose status by token
+      description: 診断ステータス更新
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - TeamDiagnose
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateDiagnoseStatusRequest'
   /api/users:
     post:
       operationId: Users_createUser
@@ -677,6 +734,44 @@ components:
           pattern: ^[a-zA-Z0-9_]{3,20}$
           description: ユーザー名（3-20文字、半角英数字とアンダースコア）
       description: ユーザー作成リクエスト
+    Models.DiagnoseInfoResponse:
+      type: object
+      required:
+        - member_id
+        - member_name
+        - team_name
+        - company_name
+        - user_id
+        - wv_status
+        - ci_status
+        - email
+      properties:
+        member_id:
+          type: string
+          description: チームメンバーID
+        member_name:
+          type: string
+          description: メンバー名
+        team_name:
+          type: string
+          description: チーム名
+        company_name:
+          type: string
+          description: 企業名
+        user_id:
+          type: string
+          description: 紐づくユーザーID（未紐づけは空文字）
+        wv_status:
+          type: string
+          description: Work Values 診断ステータス
+        ci_status:
+          type: string
+          description: Career Interest 診断ステータス
+        email:
+          type: string
+          nullable: true
+          description: 招待メールアドレス
+      description: チーム診断リンク情報
     Models.EducationListResponse:
       type: object
       required:
@@ -968,6 +1063,18 @@ components:
           format: date-time
           description: 追加日時（user_skills.created_at）
       description: スキル
+    Models.UpdateDiagnoseStatusRequest:
+      type: object
+      properties:
+        wv_status:
+          type: string
+          nullable: true
+          description: Work Values 診断ステータス
+        ci_status:
+          type: string
+          nullable: true
+          description: Career Interest 診断ステータス
+      description: チーム診断ステータス更新リクエスト（指定したキーのみ更新）
     Models.UpdateEducationRequest:
       type: object
       required:

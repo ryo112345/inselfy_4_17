@@ -148,6 +148,33 @@ type ModelsCreateUserRequest struct {
 	Username string `json:"username"`
 }
 
+// ModelsDiagnoseInfoResponse チーム診断リンク情報
+type ModelsDiagnoseInfoResponse struct {
+	// CiStatus Career Interest 診断ステータス
+	CiStatus string `json:"ci_status"`
+
+	// CompanyName 企業名
+	CompanyName string `json:"company_name"`
+
+	// Email 招待メールアドレス
+	Email *string `json:"email"`
+
+	// MemberId チームメンバーID
+	MemberId string `json:"member_id"`
+
+	// MemberName メンバー名
+	MemberName string `json:"member_name"`
+
+	// TeamName チーム名
+	TeamName string `json:"team_name"`
+
+	// UserId 紐づくユーザーID（未紐づけは空文字）
+	UserId string `json:"user_id"`
+
+	// WvStatus Work Values 診断ステータス
+	WvStatus string `json:"wv_status"`
+}
+
 // ModelsEducationListResponse 学歴一覧
 type ModelsEducationListResponse struct {
 	// Items 学歴
@@ -334,6 +361,15 @@ type ModelsSkillResponse struct {
 	Name string `json:"name"`
 }
 
+// ModelsUpdateDiagnoseStatusRequest チーム診断ステータス更新リクエスト（指定したキーのみ更新）
+type ModelsUpdateDiagnoseStatusRequest struct {
+	// CiStatus Career Interest 診断ステータス
+	CiStatus *string `json:"ci_status,omitempty"`
+
+	// WvStatus Work Values 診断ステータス
+	WvStatus *string `json:"wv_status,omitempty"`
+}
+
 // ModelsUpdateEducationRequest 学歴更新リクエスト
 type ModelsUpdateEducationRequest struct {
 	// Degree 学部・学科・学位
@@ -478,6 +514,9 @@ type SimilarUsersGetSimilarUsersParams struct {
 // ScoutSettingsUpdateScoutSettingsJSONRequestBody defines body for ScoutSettingsUpdateScoutSettings for application/json ContentType.
 type ScoutSettingsUpdateScoutSettingsJSONRequestBody = ModelsUpdateScoutSettingsRequest
 
+// TeamDiagnoseUpdateDiagnoseStatusJSONRequestBody defines body for TeamDiagnoseUpdateDiagnoseStatus for application/json ContentType.
+type TeamDiagnoseUpdateDiagnoseStatusJSONRequestBody = ModelsUpdateDiagnoseStatusRequest
+
 // UsersCreateUserJSONRequestBody defines body for UsersCreateUser for application/json ContentType.
 type UsersCreateUserJSONRequestBody = ModelsCreateUserRequest
 
@@ -507,6 +546,12 @@ type ServerInterface interface {
 	// Update scout settings for the authenticated user
 	// (PUT /api/scout-settings)
 	ScoutSettingsUpdateScoutSettings(ctx echo.Context) error
+	// Get team-diagnose info by token
+	// (GET /api/team-diagnose/{token})
+	TeamDiagnoseGetDiagnoseByToken(ctx echo.Context, token string) error
+	// Update diagnose status by token
+	// (PUT /api/team-diagnose/{token}/status)
+	TeamDiagnoseUpdateDiagnoseStatus(ctx echo.Context, token string) error
 	// Create a new user
 	// (POST /api/users)
 	UsersCreateUser(ctx echo.Context) error
@@ -574,6 +619,38 @@ func (w *ServerInterfaceWrapper) ScoutSettingsUpdateScoutSettings(ctx echo.Conte
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutSettingsUpdateScoutSettings(ctx)
+	return err
+}
+
+// TeamDiagnoseGetDiagnoseByToken converts echo context to params.
+func (w *ServerInterfaceWrapper) TeamDiagnoseGetDiagnoseByToken(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", ctx.Param("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TeamDiagnoseGetDiagnoseByToken(ctx, token)
+	return err
+}
+
+// TeamDiagnoseUpdateDiagnoseStatus converts echo context to params.
+func (w *ServerInterfaceWrapper) TeamDiagnoseUpdateDiagnoseStatus(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", ctx.Param("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TeamDiagnoseUpdateDiagnoseStatus(ctx, token)
 	return err
 }
 
@@ -889,6 +966,8 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
 	router.PUT(baseURL+"/api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
+	router.GET(baseURL+"/api/team-diagnose/:token", wrapper.TeamDiagnoseGetDiagnoseByToken)
+	router.PUT(baseURL+"/api/team-diagnose/:token/status", wrapper.TeamDiagnoseUpdateDiagnoseStatus)
 	router.POST(baseURL+"/api/users", wrapper.UsersCreateUser)
 	router.GET(baseURL+"/api/users/id/:userId/similar", wrapper.SimilarUsersGetSimilarUsers)
 	router.GET(baseURL+"/api/users/:username", wrapper.UsersGetUserByUsername)
