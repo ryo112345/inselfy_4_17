@@ -288,6 +288,64 @@ export type ModelsExperienceResponse = {
 };
 
 /**
+ * フォロー状態
+ */
+export type ModelsFollowStatusResponse = {
+    /**
+     * 自分が相手をフォローしているか
+     */
+    following: boolean;
+    /**
+     * 相手にフォローされているか
+     */
+    followedBy: boolean;
+};
+
+/**
+ * フォロー関係のユーザー一覧
+ */
+export type ModelsFollowUserListResponse = {
+    /**
+     * ユーザー
+     */
+    items: Array<ModelsFollowUserResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * フォロー関係のユーザー
+ */
+export type ModelsFollowUserResponse = {
+    /**
+     * ユーザーID
+     */
+    userId: string;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * アバター画像URL
+     */
+    avatarUrl: string | null;
+    /**
+     * ヘッドライン
+     */
+    headline: string | null;
+    /**
+     * フォロー日時
+     */
+    createdAt: string;
+};
+
+/**
  * Forbidden エラー
  */
 export type ModelsForbiddenError = {
@@ -1520,6 +1578,159 @@ export type ExperiencesUpdateExperienceResponses = {
 };
 
 export type ExperiencesUpdateExperienceResponse = ExperiencesUpdateExperienceResponses[keyof ExperiencesUpdateExperienceResponses];
+
+export type FollowsUnfollowUserData = {
+    body?: never;
+    path: {
+        username: string;
+    };
+    query?: never;
+    url: '/api/users/{username}/follow';
+};
+
+export type FollowsUnfollowUserErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type FollowsUnfollowUserError = FollowsUnfollowUserErrors[keyof FollowsUnfollowUserErrors];
+
+export type FollowsUnfollowUserResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type FollowsUnfollowUserResponse = FollowsUnfollowUserResponses[keyof FollowsUnfollowUserResponses];
+
+export type FollowsFollowUserData = {
+    body?: never;
+    path: {
+        username: string;
+    };
+    query?: never;
+    url: '/api/users/{username}/follow';
+};
+
+export type FollowsFollowUserErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError | ModelsConflictError;
+};
+
+export type FollowsFollowUserError = FollowsFollowUserErrors[keyof FollowsFollowUserErrors];
+
+export type FollowsFollowUserResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type FollowsFollowUserResponse = FollowsFollowUserResponses[keyof FollowsFollowUserResponses];
+
+export type FollowsGetFollowStatusData = {
+    body?: never;
+    path: {
+        username: string;
+    };
+    query?: never;
+    url: '/api/users/{username}/follow-status';
+};
+
+export type FollowsGetFollowStatusErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type FollowsGetFollowStatusError = FollowsGetFollowStatusErrors[keyof FollowsGetFollowStatusErrors];
+
+export type FollowsGetFollowStatusResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsFollowStatusResponse;
+};
+
+export type FollowsGetFollowStatusResponse = FollowsGetFollowStatusResponses[keyof FollowsGetFollowStatusResponses];
+
+export type FollowsListFollowersData = {
+    body?: never;
+    path: {
+        username: string;
+    };
+    query?: {
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/users/{username}/followers';
+};
+
+export type FollowsListFollowersErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type FollowsListFollowersError = FollowsListFollowersErrors[keyof FollowsListFollowersErrors];
+
+export type FollowsListFollowersResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsFollowUserListResponse;
+};
+
+export type FollowsListFollowersResponse = FollowsListFollowersResponses[keyof FollowsListFollowersResponses];
+
+export type FollowsListFollowingData = {
+    body?: never;
+    path: {
+        username: string;
+    };
+    query?: {
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/users/{username}/following';
+};
+
+export type FollowsListFollowingErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type FollowsListFollowingError = FollowsListFollowingErrors[keyof FollowsListFollowingErrors];
+
+export type FollowsListFollowingResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsFollowUserListResponse;
+};
+
+export type FollowsListFollowingResponse = FollowsListFollowingResponses[keyof FollowsListFollowingResponses];
 
 export type SkillsListSkillsData = {
     body?: never;

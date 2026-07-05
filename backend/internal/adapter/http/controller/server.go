@@ -17,6 +17,7 @@ type Server struct {
 	teamDiagnose  *TeamDiagnoseController
 	scoutTemplate *ScoutTemplateController
 	notification  *NotificationController
+	follow        *FollowController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -32,6 +33,7 @@ func NewServer(
 	teamDiagnose *TeamDiagnoseController,
 	scoutTemplate *ScoutTemplateController,
 	notification *NotificationController,
+	follow *FollowController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -43,6 +45,7 @@ func NewServer(
 		teamDiagnose:  teamDiagnose,
 		scoutTemplate: scoutTemplate,
 		notification:  notification,
+		follow:        follow,
 	}
 }
 
@@ -188,4 +191,26 @@ func (s *Server) CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Contex
 
 func (s *Server) CompanyNotificationsMarkAllCompanyNotificationsRead(ctx echo.Context) error {
 	return s.notification.MarkAllAsReadByCompany(ctx)
+}
+
+// --- Follows ---
+
+func (s *Server) FollowsFollowUser(ctx echo.Context, username string) error {
+	return s.follow.Follow(ctx, username)
+}
+
+func (s *Server) FollowsUnfollowUser(ctx echo.Context, username string) error {
+	return s.follow.Unfollow(ctx, username)
+}
+
+func (s *Server) FollowsListFollowers(ctx echo.Context, username string, _ openapi.FollowsListFollowersParams) error {
+	return s.follow.GetFollowers(ctx, username)
+}
+
+func (s *Server) FollowsListFollowing(ctx echo.Context, username string, _ openapi.FollowsListFollowingParams) error {
+	return s.follow.GetFollowing(ctx, username)
+}
+
+func (s *Server) FollowsGetFollowStatus(ctx echo.Context, username string) error {
+	return s.follow.GetFollowStatus(ctx, username)
 }

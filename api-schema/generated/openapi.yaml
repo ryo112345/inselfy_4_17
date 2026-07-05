@@ -12,6 +12,7 @@ tags:
   - name: TeamDiagnose
   - name: ScoutTemplates
   - name: Notifications
+  - name: Follows
 paths:
   /api/company/notifications:
     get:
@@ -837,6 +838,170 @@ paths:
                   - $ref: '#/components/schemas/Models.ForbiddenError'
       tags:
         - Experiences
+  /api/users/{username}/follow:
+    post:
+      operationId: Follows_followUser
+      summary: Follow a user
+      description: フォローする（要ログイン）
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Follows
+    delete:
+      operationId: Follows_unfollowUser
+      summary: Unfollow a user
+      description: フォロー解除（要ログイン）
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Follows
+  /api/users/{username}/follow-status:
+    get:
+      operationId: Follows_getFollowStatus
+      summary: Get follow status between the authenticated user and a user
+      description: フォロー状態取得（要ログイン）
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.FollowStatusResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Follows
+  /api/users/{username}/followers:
+    get:
+      operationId: Follows_listFollowers
+      summary: List followers of a user
+      description: フォロワー一覧
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.FollowUserListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Follows
+  /api/users/{username}/following:
+    get:
+      operationId: Follows_listFollowing
+      summary: List users a user is following
+      description: フォロー中一覧
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.FollowUserListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Follows
   /api/users/{username}/skills:
     get:
       operationId: Skills_listSkills
@@ -1259,6 +1424,67 @@ components:
           format: date-time
           description: 更新日時
       description: 職歴
+    Models.FollowStatusResponse:
+      type: object
+      required:
+        - following
+        - followedBy
+      properties:
+        following:
+          type: boolean
+          description: 自分が相手をフォローしているか
+        followedBy:
+          type: boolean
+          description: 相手にフォローされているか
+      description: フォロー状態
+    Models.FollowUserListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.FollowUserResponse'
+          description: ユーザー
+        total:
+          type: integer
+          format: int32
+          description: 総件数
+      description: フォロー関係のユーザー一覧
+    Models.FollowUserResponse:
+      type: object
+      required:
+        - userId
+        - username
+        - name
+        - avatarUrl
+        - headline
+        - createdAt
+      properties:
+        userId:
+          type: string
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        avatarUrl:
+          type: string
+          nullable: true
+          description: アバター画像URL
+        headline:
+          type: string
+          nullable: true
+          description: ヘッドライン
+        createdAt:
+          type: string
+          format: date-time
+          description: フォロー日時
+      description: フォロー関係のユーザー
     Models.ForbiddenError:
       type: object
       required:
