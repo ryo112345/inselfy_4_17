@@ -19,6 +19,7 @@ tags:
   - name: WorkValues
   - name: Posts
   - name: CompanyScouts
+  - name: CandidateScouts
 paths:
   /api/auth/google:
     post:
@@ -1288,6 +1289,181 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateScoutSettingsRequest'
+  /api/scouts:
+    get:
+      operationId: CandidateScouts_listCandidateScouts
+      summary: List scouts received by the candidate
+      description: 受信スカウト一覧（要ログイン）
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CandidateScouts
+  /api/scouts/bulk-decline:
+    post:
+      operationId: CandidateScouts_bulkDeclineScouts
+      summary: Bulk decline scouts
+      description: スカウト一括辞退
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CandidateScouts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.BulkDeclineRequest'
+  /api/scouts/bulk-respond:
+    post:
+      operationId: CandidateScouts_bulkRespondScouts
+      summary: Bulk respond to scouts
+      description: スカウト一括応答
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CandidateScouts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.BulkRespondRequest'
+  /api/scouts/{scoutId}:
+    get:
+      operationId: CandidateScouts_getCandidateScoutDetail
+      summary: Get a received scout with replies
+      description: 受信スカウト詳細（要ログイン）
+      parameters:
+        - name: scoutId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutDetailResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CandidateScouts
+  /api/scouts/{scoutId}/reply:
+    post:
+      operationId: CandidateScouts_candidateScoutReply
+      summary: Reply to a scout as the candidate
+      description: スカウトへ返信（要ログイン）
+      parameters:
+        - name: scoutId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CandidateScouts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CandidateScoutReplyRequest'
+  /api/scouts/{scoutId}/respond:
+    post:
+      operationId: CandidateScouts_respondToScout
+      summary: Respond to a scout
+      description: スカウトへ応答（interested / declined）
+      parameters:
+        - name: scoutId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutRespondResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CandidateScouts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.ScoutRespondRequest'
   /api/team-diagnose/{token}:
     get:
       operationId: TeamDiagnose_getDiagnoseByToken
@@ -2162,6 +2338,32 @@ components:
           type: string
         details: {}
       description: Bad Request エラー
+    Models.BulkDeclineRequest:
+      type: object
+      required:
+        - scoutIds
+      properties:
+        scoutIds:
+          type: array
+          items:
+            type: string
+          description: スカウトID一覧
+      description: スカウト一括辞退リクエスト
+    Models.BulkRespondRequest:
+      type: object
+      required:
+        - scoutIds
+        - response
+      properties:
+        scoutIds:
+          type: array
+          items:
+            type: string
+          description: スカウトID一覧
+        response:
+          type: string
+          description: 応答種別（interested / declined）
+      description: スカウト一括応答リクエスト
     Models.CIBasicScoreResponse:
       type: object
       required:
@@ -2321,6 +2523,15 @@ components:
           format: int32
           description: 順位
       description: RIASEC タイプスコア
+    Models.CandidateScoutReplyRequest:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          description: 本文
+      description: 候補者からのスカウト返信リクエスト
     Models.CommentListResponse:
       type: object
       required:
@@ -3330,6 +3541,27 @@ components:
           format: date-time
           description: 作成日時
       description: スカウト返信
+    Models.ScoutRespondRequest:
+      type: object
+      required:
+        - response
+      properties:
+        response:
+          type: string
+          description: 応答種別
+      description: スカウトへの応答リクエスト（interested / declined）
+    Models.ScoutRespondResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: 処理結果
+        conversationId:
+          type: string
+          description: 応答により作成・特定された会話ID
+      description: スカウト応答結果
     Models.ScoutSettingsResponse:
       type: object
       required:

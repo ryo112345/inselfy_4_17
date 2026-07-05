@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
@@ -32,23 +33,6 @@ func NewCandidateScoutController(
 		msgRepo:  msgRepo,
 		convRepo: convRepo,
 	}
-}
-
-type respondRequest struct {
-	Response string `json:"response"`
-}
-
-type candidateReplyRequest struct {
-	Body string `json:"body"`
-}
-
-type bulkDeclineRequest struct {
-	ScoutIDs []string `json:"scoutIds"`
-}
-
-type bulkRespondRequest struct {
-	ScoutIDs []string `json:"scoutIds"`
-	Response string   `json:"response"`
 }
 
 // List handles GET /api/scouts.
@@ -80,7 +64,7 @@ func (c *CandidateScoutController) GetDetail(ctx echo.Context, scoutID string) e
 func (c *CandidateScoutController) Respond(ctx echo.Context, scoutID string) error {
 	userID := authmw.UserID(ctx)
 
-	var body respondRequest
+	var body openapi.ModelsScoutRespondRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
@@ -89,12 +73,12 @@ func (c *CandidateScoutController) Respond(ctx echo.Context, scoutID string) err
 		return handleError(ctx, err)
 	}
 
-	resp := map[string]string{"status": "ok"}
+	resp := openapi.ModelsScoutRespondResponse{Status: "ok"}
 	msg, err := c.msgRepo.GetByID(ctx.Request().Context(), scoutID)
 	if err == nil {
 		conv, err := c.convRepo.GetByCompanyAndCandidate(ctx.Request().Context(), msg.CompanyID, msg.CandidateID)
 		if err == nil && conv != nil {
-			resp["conversationId"] = conv.ID
+			resp.ConversationId = &conv.ID
 		}
 	}
 	return ctx.JSON(http.StatusOK, resp)
@@ -104,7 +88,7 @@ func (c *CandidateScoutController) Respond(ctx echo.Context, scoutID string) err
 func (c *CandidateScoutController) Reply(ctx echo.Context, scoutID string) error {
 	userID := authmw.UserID(ctx)
 
-	var body candidateReplyRequest
+	var body openapi.ModelsCandidateScoutReplyRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
@@ -119,12 +103,12 @@ func (c *CandidateScoutController) Reply(ctx echo.Context, scoutID string) error
 func (c *CandidateScoutController) BulkDecline(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	var body bulkDeclineRequest
+	var body openapi.ModelsBulkDeclineRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	if err := c.input.BulkDecline(ctx.Request().Context(), userID, body.ScoutIDs); err != nil {
+	if err := c.input.BulkDecline(ctx.Request().Context(), userID, body.ScoutIds); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -134,7 +118,7 @@ func (c *CandidateScoutController) BulkDecline(ctx echo.Context) error {
 func (c *CandidateScoutController) BulkRespond(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	var body bulkRespondRequest
+	var body openapi.ModelsBulkRespondRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
@@ -144,7 +128,7 @@ func (c *CandidateScoutController) BulkRespond(ctx echo.Context) error {
 		return badRequest(ctx, "invalid response: must be 'interested' or 'declined'")
 	}
 
-	if err := c.input.BulkRespond(ctx.Request().Context(), userID, body.ScoutIDs, response); err != nil {
+	if err := c.input.BulkRespond(ctx.Request().Context(), userID, body.ScoutIds, response); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)

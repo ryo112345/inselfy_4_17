@@ -54,6 +54,30 @@ export type ModelsBadRequestError = {
 };
 
 /**
+ * スカウト一括辞退リクエスト
+ */
+export type ModelsBulkDeclineRequest = {
+    /**
+     * スカウトID一覧
+     */
+    scoutIds: Array<string>;
+};
+
+/**
+ * スカウト一括応答リクエスト
+ */
+export type ModelsBulkRespondRequest = {
+    /**
+     * スカウトID一覧
+     */
+    scoutIds: Array<string>;
+    /**
+     * 応答種別（interested / declined）
+     */
+    response: string;
+};
+
+/**
  * 基本興味領域スコア
  */
 export type ModelsCiBasicScoreResponse = {
@@ -203,6 +227,16 @@ export type ModelsCiTypeScoreResponse = {
      * 順位
      */
     rank: number;
+};
+
+/**
+ * 候補者からのスカウト返信リクエスト
+ */
+export type ModelsCandidateScoutReplyRequest = {
+    /**
+     * 本文
+     */
+    body: string;
 };
 
 /**
@@ -1149,6 +1183,30 @@ export type ModelsScoutReplyResponse = {
      * 作成日時
      */
     createdAt: string;
+};
+
+/**
+ * スカウトへの応答リクエスト（interested / declined）
+ */
+export type ModelsScoutRespondRequest = {
+    /**
+     * 応答種別
+     */
+    response: string;
+};
+
+/**
+ * スカウト応答結果
+ */
+export type ModelsScoutRespondResponse = {
+    /**
+     * 処理結果
+     */
+    status: string;
+    /**
+     * 応答により作成・特定された会話ID
+     */
+    conversationId?: string;
 };
 
 /**
@@ -2972,6 +3030,169 @@ export type ScoutSettingsUpdateScoutSettingsResponses = {
 };
 
 export type ScoutSettingsUpdateScoutSettingsResponse = ScoutSettingsUpdateScoutSettingsResponses[keyof ScoutSettingsUpdateScoutSettingsResponses];
+
+export type CandidateScoutsListCandidateScoutsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/scouts';
+};
+
+export type CandidateScoutsListCandidateScoutsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CandidateScoutsListCandidateScoutsError = CandidateScoutsListCandidateScoutsErrors[keyof CandidateScoutsListCandidateScoutsErrors];
+
+export type CandidateScoutsListCandidateScoutsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutListResponse;
+};
+
+export type CandidateScoutsListCandidateScoutsResponse = CandidateScoutsListCandidateScoutsResponses[keyof CandidateScoutsListCandidateScoutsResponses];
+
+export type CandidateScoutsBulkDeclineScoutsData = {
+    body: ModelsBulkDeclineRequest;
+    path?: never;
+    query?: never;
+    url: '/api/scouts/bulk-decline';
+};
+
+export type CandidateScoutsBulkDeclineScoutsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CandidateScoutsBulkDeclineScoutsError = CandidateScoutsBulkDeclineScoutsErrors[keyof CandidateScoutsBulkDeclineScoutsErrors];
+
+export type CandidateScoutsBulkDeclineScoutsResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CandidateScoutsBulkDeclineScoutsResponse = CandidateScoutsBulkDeclineScoutsResponses[keyof CandidateScoutsBulkDeclineScoutsResponses];
+
+export type CandidateScoutsBulkRespondScoutsData = {
+    body: ModelsBulkRespondRequest;
+    path?: never;
+    query?: never;
+    url: '/api/scouts/bulk-respond';
+};
+
+export type CandidateScoutsBulkRespondScoutsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CandidateScoutsBulkRespondScoutsError = CandidateScoutsBulkRespondScoutsErrors[keyof CandidateScoutsBulkRespondScoutsErrors];
+
+export type CandidateScoutsBulkRespondScoutsResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CandidateScoutsBulkRespondScoutsResponse = CandidateScoutsBulkRespondScoutsResponses[keyof CandidateScoutsBulkRespondScoutsResponses];
+
+export type CandidateScoutsGetCandidateScoutDetailData = {
+    body?: never;
+    path: {
+        scoutId: string;
+    };
+    query?: never;
+    url: '/api/scouts/{scoutId}';
+};
+
+export type CandidateScoutsGetCandidateScoutDetailErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CandidateScoutsGetCandidateScoutDetailError = CandidateScoutsGetCandidateScoutDetailErrors[keyof CandidateScoutsGetCandidateScoutDetailErrors];
+
+export type CandidateScoutsGetCandidateScoutDetailResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutDetailResponse;
+};
+
+export type CandidateScoutsGetCandidateScoutDetailResponse = CandidateScoutsGetCandidateScoutDetailResponses[keyof CandidateScoutsGetCandidateScoutDetailResponses];
+
+export type CandidateScoutsCandidateScoutReplyData = {
+    body: ModelsCandidateScoutReplyRequest;
+    path: {
+        scoutId: string;
+    };
+    query?: never;
+    url: '/api/scouts/{scoutId}/reply';
+};
+
+export type CandidateScoutsCandidateScoutReplyErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CandidateScoutsCandidateScoutReplyError = CandidateScoutsCandidateScoutReplyErrors[keyof CandidateScoutsCandidateScoutReplyErrors];
+
+export type CandidateScoutsCandidateScoutReplyResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: unknown;
+};
+
+export type CandidateScoutsRespondToScoutData = {
+    body: ModelsScoutRespondRequest;
+    path: {
+        scoutId: string;
+    };
+    query?: never;
+    url: '/api/scouts/{scoutId}/respond';
+};
+
+export type CandidateScoutsRespondToScoutErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CandidateScoutsRespondToScoutError = CandidateScoutsRespondToScoutErrors[keyof CandidateScoutsRespondToScoutErrors];
+
+export type CandidateScoutsRespondToScoutResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutRespondResponse;
+};
+
+export type CandidateScoutsRespondToScoutResponse = CandidateScoutsRespondToScoutResponses[keyof CandidateScoutsRespondToScoutResponses];
 
 export type TeamDiagnoseGetDiagnoseByTokenData = {
     body?: never;
