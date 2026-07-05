@@ -248,6 +248,20 @@ export type ModelsNotFoundError = {
 };
 
 /**
+ * スカウト受け入れ設定
+ */
+export type ModelsScoutSettingsResponse = {
+    /**
+     * スカウトを受け入れるか
+     */
+    acceptingScouts: boolean;
+    /**
+     * 更新日時
+     */
+    updatedAt: string;
+};
+
+/**
  * スキル一覧
  */
 export type ModelsSkillListResponse = {
@@ -333,6 +347,16 @@ export type ModelsUpdateExperienceRequest = {
      * 業務内容（自然文、5000文字以内）
      */
     description?: string;
+};
+
+/**
+ * スカウト受け入れ設定更新リクエスト
+ */
+export type ModelsUpdateScoutSettingsRequest = {
+    /**
+     * スカウトを受け入れるか
+     */
+    acceptingScouts: boolean;
 };
 
 /**
@@ -454,6 +478,56 @@ export type ModelsUserResponse = {
      */
     updatedAt: string;
 };
+
+export type ScoutSettingsGetScoutSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/scout-settings';
+};
+
+export type ScoutSettingsGetScoutSettingsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type ScoutSettingsGetScoutSettingsError = ScoutSettingsGetScoutSettingsErrors[keyof ScoutSettingsGetScoutSettingsErrors];
+
+export type ScoutSettingsGetScoutSettingsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutSettingsResponse;
+};
+
+export type ScoutSettingsGetScoutSettingsResponse = ScoutSettingsGetScoutSettingsResponses[keyof ScoutSettingsGetScoutSettingsResponses];
+
+export type ScoutSettingsUpdateScoutSettingsData = {
+    body: ModelsUpdateScoutSettingsRequest;
+    path?: never;
+    query?: never;
+    url: '/api/scout-settings';
+};
+
+export type ScoutSettingsUpdateScoutSettingsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type ScoutSettingsUpdateScoutSettingsError = ScoutSettingsUpdateScoutSettingsErrors[keyof ScoutSettingsUpdateScoutSettingsErrors];
+
+export type ScoutSettingsUpdateScoutSettingsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsScoutSettingsResponse;
+};
+
+export type ScoutSettingsUpdateScoutSettingsResponse = ScoutSettingsUpdateScoutSettingsResponses[keyof ScoutSettingsUpdateScoutSettingsResponses];
 
 export type UsersCreateUserData = {
     body: ModelsCreateUserRequest;

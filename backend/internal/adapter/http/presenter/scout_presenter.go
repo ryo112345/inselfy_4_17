@@ -4,6 +4,7 @@ import (
 	"math"
 	"time"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
 )
 
@@ -59,11 +60,6 @@ type qualityScoreResponse struct {
 	WarningDeadline   *time.Time `json:"warningDeadline,omitempty"`
 	DaysRemaining     *int       `json:"daysRemaining,omitempty"`
 	RestrictionEndsAt *time.Time `json:"restrictionEndsAt,omitempty"`
-}
-
-type scoutSettingsResponse struct {
-	AcceptingScouts bool      `json:"acceptingScouts"`
-	UpdatedAt       time.Time `json:"updatedAt"`
 }
 
 type dashboardPendingByMonthResponse struct {
@@ -142,7 +138,7 @@ func ScoutQualityResponse(q *scout.QualityScore) any {
 
 // ScoutSettingsResponse builds the scout-settings API response.
 func ScoutSettingsResponse(s *scout.UserScoutSettings) any {
-	return &scoutSettingsResponse{
+	return &openapi.ModelsScoutSettingsResponse{
 		AcceptingScouts: s.AcceptingScouts,
 		UpdatedAt:       s.UpdatedAt,
 	}

@@ -7,7 +7,59 @@ tags:
   - name: Experiences
   - name: Educations
   - name: Skills
+  - name: ScoutSettings
 paths:
+  /api/scout-settings:
+    get:
+      operationId: ScoutSettings_getScoutSettings
+      summary: Get scout settings for the authenticated user
+      description: スカウト受け入れ設定取得（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutSettingsResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - ScoutSettings
+    put:
+      operationId: ScoutSettings_updateScoutSettings
+      summary: Update scout settings for the authenticated user
+      description: スカウト受け入れ設定更新（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ScoutSettingsResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - ScoutSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateScoutSettingsRequest'
   /api/users:
     post:
       operationId: Users_createUser
@@ -753,6 +805,20 @@ components:
         message:
           type: string
       description: Not Found エラー
+    Models.ScoutSettingsResponse:
+      type: object
+      required:
+        - acceptingScouts
+        - updatedAt
+      properties:
+        acceptingScouts:
+          type: boolean
+          description: スカウトを受け入れるか
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+      description: スカウト受け入れ設定
     Models.SkillListResponse:
       type: object
       required:
@@ -865,6 +931,15 @@ components:
           maxLength: 5000
           description: 業務内容（自然文、5000文字以内）
       description: 職歴更新リクエスト（全項目置換）
+    Models.UpdateScoutSettingsRequest:
+      type: object
+      required:
+        - acceptingScouts
+      properties:
+        acceptingScouts:
+          type: boolean
+          description: スカウトを受け入れるか
+      description: スカウト受け入れ設定更新リクエスト
     Models.UpdateUserProfileRequest:
       type: object
       properties:

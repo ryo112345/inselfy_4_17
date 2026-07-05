@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -18,10 +19,6 @@ type ScoutSettingsController struct {
 // NewScoutSettingsController creates a ScoutSettingsController.
 func NewScoutSettingsController(input port.ScoutInputPort) *ScoutSettingsController {
 	return &ScoutSettingsController{input: input}
-}
-
-type updateScoutSettingsRequest struct {
-	AcceptingScouts bool `json:"acceptingScouts"`
 }
 
 // Get handles GET /api/scout-settings.
@@ -39,7 +36,7 @@ func (c *ScoutSettingsController) Get(ctx echo.Context) error {
 func (c *ScoutSettingsController) Update(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	var body updateScoutSettingsRequest
+	var body openapi.ModelsUpdateScoutSettingsRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}

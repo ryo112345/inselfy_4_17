@@ -8,10 +8,11 @@ import (
 
 // Server implements the generated ServerInterface by delegating to domain controllers.
 type Server struct {
-	user       *UserController
-	experience *ExperienceController
-	education  *EducationController
-	skill      *SkillController
+	user          *UserController
+	experience    *ExperienceController
+	education     *EducationController
+	skill         *SkillController
+	scoutSettings *ScoutSettingsController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -22,12 +23,14 @@ func NewServer(
 	experience *ExperienceController,
 	education *EducationController,
 	skill *SkillController,
+	scoutSettings *ScoutSettingsController,
 ) *Server {
 	return &Server{
-		user:       user,
-		experience: experience,
-		education:  education,
-		skill:      skill,
+		user:          user,
+		experience:    experience,
+		education:     education,
+		skill:         skill,
+		scoutSettings: scoutSettings,
 	}
 }
 
@@ -91,4 +94,14 @@ func (s *Server) SkillsAttachSkill(ctx echo.Context, username string) error {
 
 func (s *Server) SkillsDetachSkill(ctx echo.Context, username, name string) error {
 	return s.skill.Detach(ctx, username, name)
+}
+
+// --- ScoutSettings ---
+
+func (s *Server) ScoutSettingsGetScoutSettings(ctx echo.Context) error {
+	return s.scoutSettings.Get(ctx)
+}
+
+func (s *Server) ScoutSettingsUpdateScoutSettings(ctx echo.Context) error {
+	return s.scoutSettings.Update(ctx)
 }
