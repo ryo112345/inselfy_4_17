@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
@@ -22,22 +23,21 @@ func NewPostController(
 	return &PostController{input: input}
 }
 
-type createPostRequest struct {
-	Content     string `json:"content"`
-	QuotePostID string `json:"quotePostId,omitempty"`
-}
-
 func (c *PostController) Create(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	var body createPostRequest
+	var body openapi.ModelsCreatePostRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
+	}
+	quotePostID := ""
+	if body.QuotePostId != nil {
+		quotePostID = *body.QuotePostId
 	}
 	pw, err := c.input.Create(ctx.Request().Context(), post.CreatePostInput{
 		UserID:      userID,
 		Content:     body.Content,
-		QuotePostID: body.QuotePostID,
+		QuotePostID: quotePostID,
 	})
 	if err != nil {
 		return handleError(ctx, err)
@@ -115,14 +115,10 @@ func (c *PostController) ToggleRepost(ctx echo.Context, postID string) error {
 	return ctx.JSON(http.StatusOK, presenter.PostRepostToggleResponse(reposted, count))
 }
 
-type createCommentRequest struct {
-	Content string `json:"content"`
-}
-
 func (c *PostController) CreateComment(ctx echo.Context, postID string) error {
 	userID := authmw.UserID(ctx)
 
-	var body createCommentRequest
+	var body openapi.ModelsCreateCommentRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
