@@ -1,52 +1,9 @@
 package presenter
 
 import (
-	"time"
-
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 )
-
-type conversationResponse struct {
-	ID               string    `json:"id"`
-	ConversationType string    `json:"conversationType"`
-	CompanyID        string    `json:"companyId"`
-	CandidateID      string    `json:"candidateId"`
-	CompanyName      string    `json:"companyName"`
-	CandidateName    string    `json:"candidateName"`
-	Participant1ID   string    `json:"participant1Id,omitempty"`
-	Participant2ID   string    `json:"participant2Id,omitempty"`
-	Participant1Name string    `json:"participant1Name,omitempty"`
-	Participant2Name string    `json:"participant2Name,omitempty"`
-	LastMessageBody  *string   `json:"lastMessageBody"`
-	LastMessageAt    time.Time `json:"lastMessageAt"`
-	UnreadCount      int       `json:"unreadCount"`
-	CreatedAt        time.Time `json:"createdAt"`
-}
-
-type conversationListResponse struct {
-	Items []*conversationResponse `json:"items"`
-	Total int                     `json:"total"`
-}
-
-type messageResponse struct {
-	ID             string                 `json:"id"`
-	ConversationID string                 `json:"conversationId"`
-	SenderType     string                 `json:"senderType"`
-	SenderID       string                 `json:"senderId"`
-	Body           string                 `json:"body"`
-	MessageType    string                 `json:"messageType"`
-	Metadata       map[string]interface{} `json:"metadata,omitempty"`
-	CreatedAt      time.Time              `json:"createdAt"`
-}
-
-type messageListResponse struct {
-	Items []*messageResponse `json:"items"`
-	Total int                `json:"total"`
-}
-
-type messagingUnreadCountResponse struct {
-	Count int `json:"count"`
-}
 
 // messagingConv is the goverter-generated conversation read-model→response mapper.
 // See messaging_converter.go for its declaration.
@@ -59,7 +16,11 @@ func MessagingConversationResponse(conv *messaging.ConversationWithPreview) any 
 
 // MessagingConversationsResponse builds the paginated conversation list API response.
 func MessagingConversationsResponse(convs []*messaging.ConversationWithPreview, total int) any {
-	return &conversationListResponse{Items: messagingConv.ToConversationResponses(convs), Total: total}
+	items := make([]openapi.ModelsConversationResponse, 0, len(convs))
+	for _, c := range messagingConv.ToConversationResponses(convs) {
+		items = append(items, *c)
+	}
+	return &openapi.ModelsConversationListResponse{Items: items, Total: total}
 }
 
 // MessagingMessageResponse builds the single-message API response.
@@ -69,36 +30,39 @@ func MessagingMessageResponse(msg *messaging.Message) any {
 
 // MessagingMessagesResponse builds the paginated message list API response.
 func MessagingMessagesResponse(msgs []*messaging.Message, total int) any {
-	items := make([]*messageResponse, len(msgs))
+	items := make([]openapi.ModelsMessageResponse, len(msgs))
 	for i, m := range msgs {
-		items[i] = toMessageResponse(m)
+		items[i] = *toMessageResponse(m)
 	}
-	return &messageListResponse{Items: items, Total: total}
+	return &openapi.ModelsMessageListResponse{Items: items, Total: total}
 }
 
 // MessagingUnreadCountResponse builds the unread-count API response.
 func MessagingUnreadCountResponse(count int) any {
-	return &messagingUnreadCountResponse{Count: count}
+	return &openapi.ModelsUnreadCountResponse{Count: int32(count)}
 }
 
 // MessagingOKResponse builds the fixed OK API response.
 func MessagingOKResponse() any {
-	return map[string]string{"status": "ok"}
+	return &openapi.ModelsStatusOkResponse{Status: "ok"}
 }
 
-func toMessageResponse(m *messaging.Message) *messageResponse {
+func toMessageResponse(m *messaging.Message) *openapi.ModelsMessageResponse {
 	msgType := m.MessageType
 	if msgType == "" {
 		msgType = "text"
 	}
-	return &messageResponse{
-		ID:             m.ID,
-		ConversationID: m.ConversationID,
+	resp := &openapi.ModelsMessageResponse{
+		Id:             m.ID,
+		ConversationId: m.ConversationID,
 		SenderType:     m.SenderType,
-		SenderID:       m.SenderID,
+		SenderId:       m.SenderID,
 		Body:           m.Body,
 		MessageType:    msgType,
-		Metadata:       m.Metadata,
 		CreatedAt:      m.CreatedAt,
 	}
+	if len(m.Metadata) > 0 {
+		resp.Metadata = &m.Metadata
+	}
+	return resp
 }

@@ -21,6 +21,7 @@ tags:
   - name: CompanyScouts
   - name: CandidateScouts
   - name: JobApplications
+  - name: Messaging
 paths:
   /api/applications:
     post:
@@ -578,6 +579,224 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CompanyRegisterRequest'
+  /api/company/messages/conversations:
+    post:
+      operationId: CompanyMessaging_startCompanyConversation
+      summary: Start a conversation as the company
+      description: 会話開始（企業認証）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConversationResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Messaging
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.StartConversationRequest'
+    get:
+      operationId: CompanyMessaging_listCompanyConversations
+      summary: List conversations for the company
+      description: 会話一覧（企業認証）
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConversationListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
+  /api/company/messages/conversations/{conversationId}:
+    get:
+      operationId: CompanyMessaging_getCompanyConversation
+      summary: Get a conversation as the company
+      description: 会話取得（企業認証）
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConversationResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
+  /api/company/messages/conversations/{conversationId}/messages:
+    get:
+      operationId: CompanyMessaging_listCompanyMessages
+      summary: List messages as the company
+      description: メッセージ一覧（企業認証）
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.MessageListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
+    post:
+      operationId: CompanyMessaging_sendCompanyMessage
+      summary: Send a message as the company
+      description: メッセージ送信（企業認証）
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.MessageResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+      tags:
+        - Messaging
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.SendMessageRequest'
+  /api/company/messages/conversations/{conversationId}/read:
+    post:
+      operationId: CompanyMessaging_markCompanyConversationRead
+      summary: Mark a conversation as read (company)
+      description: 既読化（企業認証）
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.StatusOkResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
+  /api/company/messages/unread-count:
+    get:
+      operationId: CompanyMessaging_countCompanyUnreadMessages
+      summary: Count unread messages for the company
+      description: 未読メッセージ数（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnreadCountResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
   /api/company/notifications:
     get:
       operationId: CompanyNotifications_listCompanyNotifications
@@ -1004,6 +1223,226 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CompanyScoutReplyRequest'
+  /api/messages/conversations:
+    post:
+      operationId: CandidateMessaging_startCandidateConversation
+      summary: Start a conversation as the candidate
+      description: 会話開始（要ログイン）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConversationResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Messaging
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.StartCandidateConversationRequest'
+    get:
+      operationId: CandidateMessaging_listCandidateConversations
+      summary: List conversations for the candidate
+      description: 会話一覧（要ログイン）
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数（1-100）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConversationListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
+  /api/messages/conversations/{conversationId}:
+    get:
+      operationId: CandidateMessaging_getCandidateConversation
+      summary: Get a conversation as the candidate
+      description: 会話取得（要ログイン）
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConversationResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
+  /api/messages/conversations/{conversationId}/messages:
+    get:
+      operationId: CandidateMessaging_listCandidateMessages
+      summary: List messages as the candidate
+      description: メッセージ一覧（要ログイン）
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.MessageListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
+    post:
+      operationId: CandidateMessaging_sendCandidateMessage
+      summary: Send a message as the candidate
+      description: メッセージ送信（要ログイン）
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.MessageResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+      tags:
+        - Messaging
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.SendMessageRequest'
+  /api/messages/conversations/{conversationId}/read:
+    post:
+      operationId: CandidateMessaging_markCandidateConversationRead
+      summary: Mark a conversation as read (candidate)
+      description: 既読化（要ログイン）
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.StatusOkResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
+  /api/messages/unread-count:
+    get:
+      operationId: CandidateMessaging_countCandidateUnreadMessages
+      summary: Count unread messages for the candidate
+      description: 未読メッセージ数（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnreadCountResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Messaging
   /api/notifications:
     get:
       operationId: UserNotifications_listUserNotifications
@@ -2938,6 +3377,81 @@ components:
         message:
           type: string
       description: Conflict エラー
+    Models.ConversationListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.ConversationResponse'
+          description: 会話
+        total:
+          type: integer
+          description: 総件数
+      description: 会話一覧
+    Models.ConversationResponse:
+      type: object
+      required:
+        - id
+        - conversationType
+        - companyId
+        - candidateId
+        - companyName
+        - candidateName
+        - lastMessageBody
+        - lastMessageAt
+        - unreadCount
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: 会話ID
+        conversationType:
+          type: string
+          description: 会話種別
+        companyId:
+          type: string
+          description: 企業ID
+        candidateId:
+          type: string
+          description: 候補者ユーザーID
+        companyName:
+          type: string
+          description: 企業名
+        candidateName:
+          type: string
+          description: 候補者名
+        participant1Id:
+          type: string
+          description: 参加者1 ID（ユーザー間会話のみ）
+        participant2Id:
+          type: string
+          description: 参加者2 ID（ユーザー間会話のみ）
+        participant1Name:
+          type: string
+          description: 参加者1 名（ユーザー間会話のみ）
+        participant2Name:
+          type: string
+          description: 参加者2 名（ユーザー間会話のみ）
+        lastMessageBody:
+          type: string
+          nullable: true
+          description: 最新メッセージ本文
+        lastMessageAt:
+          type: string
+          format: date-time
+          description: 最新メッセージ日時
+        unreadCount:
+          type: integer
+          description: 未読数
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 会話（プレビュー付き）
     Models.CreateCommentRequest:
       type: object
       required:
@@ -3449,6 +3963,59 @@ components:
           type: integer
           description: いいね数
       description: いいねトグル結果
+    Models.MessageListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.MessageResponse'
+          description: メッセージ
+        total:
+          type: integer
+          description: 総件数
+      description: メッセージ一覧
+    Models.MessageResponse:
+      type: object
+      required:
+        - id
+        - conversationId
+        - senderType
+        - senderId
+        - body
+        - messageType
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: メッセージID
+        conversationId:
+          type: string
+          description: 会話ID
+        senderType:
+          type: string
+          description: 送信者種別（company / candidate）
+        senderId:
+          type: string
+          description: 送信者ID
+        body:
+          type: string
+          description: 本文
+        messageType:
+          type: string
+          description: メッセージ種別（text 等）
+        metadata:
+          type: object
+          additionalProperties: {}
+          description: 付加情報
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: メッセージ
     Models.NotFoundError:
       type: object
       required:
@@ -3975,6 +4542,15 @@ components:
           format: date-time
           description: 更新日時
       description: スカウトテンプレート
+    Models.SendMessageRequest:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          description: 本文
+      description: メッセージ送信リクエスト
     Models.SendScoutRequest:
       type: object
       required:
@@ -4114,6 +4690,32 @@ components:
           format: date-time
           description: 追加日時（user_skills.created_at）
       description: スキル
+    Models.StartCandidateConversationRequest:
+      type: object
+      required:
+        - recipientId
+        - body
+      properties:
+        recipientId:
+          type: string
+          description: 相手のID
+        body:
+          type: string
+          description: 最初のメッセージ本文
+      description: 会話開始リクエスト（候補者→候補者/企業）
+    Models.StartConversationRequest:
+      type: object
+      required:
+        - candidateId
+        - body
+      properties:
+        candidateId:
+          type: string
+          description: 候補者ユーザーID
+        body:
+          type: string
+          description: 最初のメッセージ本文
+      description: 会話開始リクエスト（企業→候補者）
     Models.StatusOkResponse:
       type: object
       required:

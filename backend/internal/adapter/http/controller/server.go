@@ -26,6 +26,7 @@ type Server struct {
 	scout         *ScoutController
 	candScout     *CandidateScoutController
 	jobApp        *JobApplicationController
+	messaging     *MessagingController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -50,6 +51,7 @@ func NewServer(
 	scout *ScoutController,
 	candScout *CandidateScoutController,
 	jobApp *JobApplicationController,
+	messaging *MessagingController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -70,6 +72,7 @@ func NewServer(
 		scout:         scout,
 		candScout:     candScout,
 		jobApp:        jobApp,
+		messaging:     messaging,
 	}
 }
 
@@ -433,4 +436,62 @@ func (s *Server) CompanyApplicationsGetApplication(ctx echo.Context, application
 
 func (s *Server) CompanyApplicationsUpdateApplicationStatus(ctx echo.Context, applicationID string) error {
 	return s.jobApp.UpdateStatus(ctx, applicationID)
+}
+
+// --- Messaging ---
+
+func (s *Server) CandidateMessagingStartCandidateConversation(ctx echo.Context) error {
+	return s.messaging.StartCandidateConversation(ctx)
+}
+
+func (s *Server) CandidateMessagingListCandidateConversations(ctx echo.Context, _ openapi.CandidateMessagingListCandidateConversationsParams) error {
+	return s.messaging.ListConversationsByCandidate(ctx)
+}
+
+func (s *Server) CandidateMessagingGetCandidateConversation(ctx echo.Context, conversationID string) error {
+	return s.messaging.GetConversationAsCandidate(ctx, conversationID)
+}
+
+func (s *Server) CandidateMessagingListCandidateMessages(ctx echo.Context, conversationID string, _ openapi.CandidateMessagingListCandidateMessagesParams) error {
+	return s.messaging.ListMessagesAsCandidate(ctx, conversationID)
+}
+
+func (s *Server) CandidateMessagingSendCandidateMessage(ctx echo.Context, conversationID string) error {
+	return s.messaging.SendMessageAsCandidate(ctx, conversationID)
+}
+
+func (s *Server) CandidateMessagingMarkCandidateConversationRead(ctx echo.Context, conversationID string) error {
+	return s.messaging.MarkReadAsCandidate(ctx, conversationID)
+}
+
+func (s *Server) CandidateMessagingCountCandidateUnreadMessages(ctx echo.Context) error {
+	return s.messaging.CountUnreadByCandidate(ctx)
+}
+
+func (s *Server) CompanyMessagingStartCompanyConversation(ctx echo.Context) error {
+	return s.messaging.StartConversation(ctx)
+}
+
+func (s *Server) CompanyMessagingListCompanyConversations(ctx echo.Context, _ openapi.CompanyMessagingListCompanyConversationsParams) error {
+	return s.messaging.ListConversationsByCompany(ctx)
+}
+
+func (s *Server) CompanyMessagingGetCompanyConversation(ctx echo.Context, conversationID string) error {
+	return s.messaging.GetConversationAsCompany(ctx, conversationID)
+}
+
+func (s *Server) CompanyMessagingListCompanyMessages(ctx echo.Context, conversationID string, _ openapi.CompanyMessagingListCompanyMessagesParams) error {
+	return s.messaging.ListMessagesAsCompany(ctx, conversationID)
+}
+
+func (s *Server) CompanyMessagingSendCompanyMessage(ctx echo.Context, conversationID string) error {
+	return s.messaging.SendMessageAsCompany(ctx, conversationID)
+}
+
+func (s *Server) CompanyMessagingMarkCompanyConversationRead(ctx echo.Context, conversationID string) error {
+	return s.messaging.MarkReadAsCompany(ctx, conversationID)
+}
+
+func (s *Server) CompanyMessagingCountCompanyUnreadMessages(ctx echo.Context) error {
+	return s.messaging.CountUnreadByCompany(ctx)
 }

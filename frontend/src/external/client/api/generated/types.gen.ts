@@ -404,6 +404,82 @@ export type ModelsConflictError = {
 };
 
 /**
+ * 会話一覧
+ */
+export type ModelsConversationListResponse = {
+    /**
+     * 会話
+     */
+    items: Array<ModelsConversationResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 会話（プレビュー付き）
+ */
+export type ModelsConversationResponse = {
+    /**
+     * 会話ID
+     */
+    id: string;
+    /**
+     * 会話種別
+     */
+    conversationType: string;
+    /**
+     * 企業ID
+     */
+    companyId: string;
+    /**
+     * 候補者ユーザーID
+     */
+    candidateId: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 候補者名
+     */
+    candidateName: string;
+    /**
+     * 参加者1 ID（ユーザー間会話のみ）
+     */
+    participant1Id?: string;
+    /**
+     * 参加者2 ID（ユーザー間会話のみ）
+     */
+    participant2Id?: string;
+    /**
+     * 参加者1 名（ユーザー間会話のみ）
+     */
+    participant1Name?: string;
+    /**
+     * 参加者2 名（ユーザー間会話のみ）
+     */
+    participant2Name?: string;
+    /**
+     * 最新メッセージ本文
+     */
+    lastMessageBody: string | null;
+    /**
+     * 最新メッセージ日時
+     */
+    lastMessageAt: string;
+    /**
+     * 未読数
+     */
+    unreadCount: number;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
  * コメント作成リクエスト
  */
 export type ModelsCreateCommentRequest = {
@@ -875,6 +951,58 @@ export type ModelsLikeToggleResponse = {
      * いいね数
      */
     count: number;
+};
+
+/**
+ * メッセージ一覧
+ */
+export type ModelsMessageListResponse = {
+    /**
+     * メッセージ
+     */
+    items: Array<ModelsMessageResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * メッセージ
+ */
+export type ModelsMessageResponse = {
+    /**
+     * メッセージID
+     */
+    id: string;
+    /**
+     * 会話ID
+     */
+    conversationId: string;
+    /**
+     * 送信者種別（company / candidate）
+     */
+    senderType: string;
+    /**
+     * 送信者ID
+     */
+    senderId: string;
+    /**
+     * 本文
+     */
+    body: string;
+    /**
+     * メッセージ種別（text 等）
+     */
+    messageType: string;
+    /**
+     * 付加情報
+     */
+    metadata?: {};
+    /**
+     * 作成日時
+     */
+    createdAt: string;
 };
 
 /**
@@ -1382,6 +1510,16 @@ export type ModelsScoutTemplateResponse = {
 };
 
 /**
+ * メッセージ送信リクエスト
+ */
+export type ModelsSendMessageRequest = {
+    /**
+     * 本文
+     */
+    body: string;
+};
+
+/**
  * スカウト送信リクエスト
  */
 export type ModelsSendScoutRequest = {
@@ -1507,6 +1645,34 @@ export type ModelsSkillResponse = {
      * 追加日時（user_skills.created_at）
      */
     attachedAt: string;
+};
+
+/**
+ * 会話開始リクエスト（候補者→候補者/企業）
+ */
+export type ModelsStartCandidateConversationRequest = {
+    /**
+     * 相手のID
+     */
+    recipientId: string;
+    /**
+     * 最初のメッセージ本文
+     */
+    body: string;
+};
+
+/**
+ * 会話開始リクエスト（企業→候補者）
+ */
+export type ModelsStartConversationRequest = {
+    /**
+     * 候補者ユーザーID
+     */
+    candidateId: string;
+    /**
+     * 最初のメッセージ本文
+     */
+    body: string;
 };
 
 /**
@@ -2479,6 +2645,195 @@ export type CompanyAuthCompanyRegisterResponses = {
 
 export type CompanyAuthCompanyRegisterResponse = CompanyAuthCompanyRegisterResponses[keyof CompanyAuthCompanyRegisterResponses];
 
+export type CompanyMessagingListCompanyConversationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/company/messages/conversations';
+};
+
+export type CompanyMessagingListCompanyConversationsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyMessagingListCompanyConversationsError = CompanyMessagingListCompanyConversationsErrors[keyof CompanyMessagingListCompanyConversationsErrors];
+
+export type CompanyMessagingListCompanyConversationsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsConversationListResponse;
+};
+
+export type CompanyMessagingListCompanyConversationsResponse = CompanyMessagingListCompanyConversationsResponses[keyof CompanyMessagingListCompanyConversationsResponses];
+
+export type CompanyMessagingStartCompanyConversationData = {
+    body: ModelsStartConversationRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/messages/conversations';
+};
+
+export type CompanyMessagingStartCompanyConversationErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CompanyMessagingStartCompanyConversationError = CompanyMessagingStartCompanyConversationErrors[keyof CompanyMessagingStartCompanyConversationErrors];
+
+export type CompanyMessagingStartCompanyConversationResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsConversationResponse;
+};
+
+export type CompanyMessagingStartCompanyConversationResponse = CompanyMessagingStartCompanyConversationResponses[keyof CompanyMessagingStartCompanyConversationResponses];
+
+export type CompanyMessagingGetCompanyConversationData = {
+    body?: never;
+    path: {
+        conversationId: string;
+    };
+    query?: never;
+    url: '/api/company/messages/conversations/{conversationId}';
+};
+
+export type CompanyMessagingGetCompanyConversationErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+};
+
+export type CompanyMessagingGetCompanyConversationError = CompanyMessagingGetCompanyConversationErrors[keyof CompanyMessagingGetCompanyConversationErrors];
+
+export type CompanyMessagingGetCompanyConversationResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsConversationResponse;
+};
+
+export type CompanyMessagingGetCompanyConversationResponse = CompanyMessagingGetCompanyConversationResponses[keyof CompanyMessagingGetCompanyConversationResponses];
+
+export type CompanyMessagingListCompanyMessagesData = {
+    body?: never;
+    path: {
+        conversationId: string;
+    };
+    query?: {
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/company/messages/conversations/{conversationId}/messages';
+};
+
+export type CompanyMessagingListCompanyMessagesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+};
+
+export type CompanyMessagingListCompanyMessagesError = CompanyMessagingListCompanyMessagesErrors[keyof CompanyMessagingListCompanyMessagesErrors];
+
+export type CompanyMessagingListCompanyMessagesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsMessageListResponse;
+};
+
+export type CompanyMessagingListCompanyMessagesResponse = CompanyMessagingListCompanyMessagesResponses[keyof CompanyMessagingListCompanyMessagesResponses];
+
+export type CompanyMessagingSendCompanyMessageData = {
+    body: ModelsSendMessageRequest;
+    path: {
+        conversationId: string;
+    };
+    query?: never;
+    url: '/api/company/messages/conversations/{conversationId}/messages';
+};
+
+export type CompanyMessagingSendCompanyMessageErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+};
+
+export type CompanyMessagingSendCompanyMessageError = CompanyMessagingSendCompanyMessageErrors[keyof CompanyMessagingSendCompanyMessageErrors];
+
+export type CompanyMessagingSendCompanyMessageResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsMessageResponse;
+};
+
+export type CompanyMessagingSendCompanyMessageResponse = CompanyMessagingSendCompanyMessageResponses[keyof CompanyMessagingSendCompanyMessageResponses];
+
+export type CompanyMessagingMarkCompanyConversationReadData = {
+    body?: never;
+    path: {
+        conversationId: string;
+    };
+    query?: never;
+    url: '/api/company/messages/conversations/{conversationId}/read';
+};
+
+export type CompanyMessagingMarkCompanyConversationReadErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CompanyMessagingMarkCompanyConversationReadError = CompanyMessagingMarkCompanyConversationReadErrors[keyof CompanyMessagingMarkCompanyConversationReadErrors];
+
+export type CompanyMessagingMarkCompanyConversationReadResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsStatusOkResponse;
+};
+
+export type CompanyMessagingMarkCompanyConversationReadResponse = CompanyMessagingMarkCompanyConversationReadResponses[keyof CompanyMessagingMarkCompanyConversationReadResponses];
+
+export type CompanyMessagingCountCompanyUnreadMessagesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/messages/unread-count';
+};
+
+export type CompanyMessagingCountCompanyUnreadMessagesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyMessagingCountCompanyUnreadMessagesError = CompanyMessagingCountCompanyUnreadMessagesErrors[keyof CompanyMessagingCountCompanyUnreadMessagesErrors];
+
+export type CompanyMessagingCountCompanyUnreadMessagesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUnreadCountResponse;
+};
+
+export type CompanyMessagingCountCompanyUnreadMessagesResponse = CompanyMessagingCountCompanyUnreadMessagesResponses[keyof CompanyMessagingCountCompanyUnreadMessagesResponses];
+
 export type CompanyNotificationsListCompanyNotificationsData = {
     body?: never;
     path?: never;
@@ -2910,6 +3265,201 @@ export type CompanyScoutsCompanyScoutReplyResponses = {
      */
     201: unknown;
 };
+
+export type CandidateMessagingListCandidateConversationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 取得件数（1-100）
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/messages/conversations';
+};
+
+export type CandidateMessagingListCandidateConversationsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CandidateMessagingListCandidateConversationsError = CandidateMessagingListCandidateConversationsErrors[keyof CandidateMessagingListCandidateConversationsErrors];
+
+export type CandidateMessagingListCandidateConversationsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsConversationListResponse;
+};
+
+export type CandidateMessagingListCandidateConversationsResponse = CandidateMessagingListCandidateConversationsResponses[keyof CandidateMessagingListCandidateConversationsResponses];
+
+export type CandidateMessagingStartCandidateConversationData = {
+    body: ModelsStartCandidateConversationRequest;
+    path?: never;
+    query?: never;
+    url: '/api/messages/conversations';
+};
+
+export type CandidateMessagingStartCandidateConversationErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CandidateMessagingStartCandidateConversationError = CandidateMessagingStartCandidateConversationErrors[keyof CandidateMessagingStartCandidateConversationErrors];
+
+export type CandidateMessagingStartCandidateConversationResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsConversationResponse;
+};
+
+export type CandidateMessagingStartCandidateConversationResponse = CandidateMessagingStartCandidateConversationResponses[keyof CandidateMessagingStartCandidateConversationResponses];
+
+export type CandidateMessagingGetCandidateConversationData = {
+    body?: never;
+    path: {
+        conversationId: string;
+    };
+    query?: never;
+    url: '/api/messages/conversations/{conversationId}';
+};
+
+export type CandidateMessagingGetCandidateConversationErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+};
+
+export type CandidateMessagingGetCandidateConversationError = CandidateMessagingGetCandidateConversationErrors[keyof CandidateMessagingGetCandidateConversationErrors];
+
+export type CandidateMessagingGetCandidateConversationResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsConversationResponse;
+};
+
+export type CandidateMessagingGetCandidateConversationResponse = CandidateMessagingGetCandidateConversationResponses[keyof CandidateMessagingGetCandidateConversationResponses];
+
+export type CandidateMessagingListCandidateMessagesData = {
+    body?: never;
+    path: {
+        conversationId: string;
+    };
+    query?: {
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/messages/conversations/{conversationId}/messages';
+};
+
+export type CandidateMessagingListCandidateMessagesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+};
+
+export type CandidateMessagingListCandidateMessagesError = CandidateMessagingListCandidateMessagesErrors[keyof CandidateMessagingListCandidateMessagesErrors];
+
+export type CandidateMessagingListCandidateMessagesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsMessageListResponse;
+};
+
+export type CandidateMessagingListCandidateMessagesResponse = CandidateMessagingListCandidateMessagesResponses[keyof CandidateMessagingListCandidateMessagesResponses];
+
+export type CandidateMessagingSendCandidateMessageData = {
+    body: ModelsSendMessageRequest;
+    path: {
+        conversationId: string;
+    };
+    query?: never;
+    url: '/api/messages/conversations/{conversationId}/messages';
+};
+
+export type CandidateMessagingSendCandidateMessageErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+};
+
+export type CandidateMessagingSendCandidateMessageError = CandidateMessagingSendCandidateMessageErrors[keyof CandidateMessagingSendCandidateMessageErrors];
+
+export type CandidateMessagingSendCandidateMessageResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsMessageResponse;
+};
+
+export type CandidateMessagingSendCandidateMessageResponse = CandidateMessagingSendCandidateMessageResponses[keyof CandidateMessagingSendCandidateMessageResponses];
+
+export type CandidateMessagingMarkCandidateConversationReadData = {
+    body?: never;
+    path: {
+        conversationId: string;
+    };
+    query?: never;
+    url: '/api/messages/conversations/{conversationId}/read';
+};
+
+export type CandidateMessagingMarkCandidateConversationReadErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CandidateMessagingMarkCandidateConversationReadError = CandidateMessagingMarkCandidateConversationReadErrors[keyof CandidateMessagingMarkCandidateConversationReadErrors];
+
+export type CandidateMessagingMarkCandidateConversationReadResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsStatusOkResponse;
+};
+
+export type CandidateMessagingMarkCandidateConversationReadResponse = CandidateMessagingMarkCandidateConversationReadResponses[keyof CandidateMessagingMarkCandidateConversationReadResponses];
+
+export type CandidateMessagingCountCandidateUnreadMessagesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/messages/unread-count';
+};
+
+export type CandidateMessagingCountCandidateUnreadMessagesErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CandidateMessagingCountCandidateUnreadMessagesError = CandidateMessagingCountCandidateUnreadMessagesErrors[keyof CandidateMessagingCountCandidateUnreadMessagesErrors];
+
+export type CandidateMessagingCountCandidateUnreadMessagesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUnreadCountResponse;
+};
+
+export type CandidateMessagingCountCandidateUnreadMessagesResponse = CandidateMessagingCountCandidateUnreadMessagesResponses[keyof CandidateMessagingCountCandidateUnreadMessagesResponses];
 
 export type UserNotificationsListUserNotificationsData = {
     body?: never;

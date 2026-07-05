@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
@@ -22,26 +23,17 @@ func NewMessagingController(
 	return &MessagingController{input: input}
 }
 
-type startConversationRequest struct {
-	CandidateID string `json:"candidateId"`
-	Body        string `json:"body"`
-}
-
-type sendMessageRequest struct {
-	Body string `json:"body"`
-}
-
 func (c *MessagingController) StartConversation(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body startConversationRequest
+	var body openapi.ModelsStartConversationRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
 
 	conv, err := c.input.StartConversation(ctx.Request().Context(), messaging.StartConversationInput{
 		CompanyID:   companyID,
-		CandidateID: body.CandidateID,
+		CandidateID: body.CandidateId,
 		SenderType:  "company",
 		SenderID:    companyID,
 		Body:        body.Body,
@@ -87,7 +79,7 @@ func (c *MessagingController) ListMessagesAsCompany(ctx echo.Context, conversati
 func (c *MessagingController) SendMessageAsCompany(ctx echo.Context, conversationID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body sendMessageRequest
+	var body openapi.ModelsSendMessageRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
@@ -123,22 +115,17 @@ func (c *MessagingController) CountUnreadByCompany(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, presenter.MessagingUnreadCountResponse(count))
 }
 
-type startCandidateConversationRequest struct {
-	RecipientID string `json:"recipientId"`
-	Body        string `json:"body"`
-}
-
 func (c *MessagingController) StartCandidateConversation(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	var body startCandidateConversationRequest
+	var body openapi.ModelsStartCandidateConversationRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
 
 	conv, err := c.input.StartCandidateConversation(ctx.Request().Context(), messaging.StartCandidateConversationInput{
 		SenderID:    userID,
-		RecipientID: body.RecipientID,
+		RecipientID: body.RecipientId,
 		Body:        body.Body,
 	})
 	if err != nil {
@@ -182,7 +169,7 @@ func (c *MessagingController) ListMessagesAsCandidate(ctx echo.Context, conversa
 func (c *MessagingController) SendMessageAsCandidate(ctx echo.Context, conversationID string) error {
 	userID := authmw.UserID(ctx)
 
-	var body sendMessageRequest
+	var body openapi.ModelsSendMessageRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
