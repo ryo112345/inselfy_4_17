@@ -304,6 +304,54 @@ export type ModelsNotFoundError = {
 };
 
 /**
+ * 通知一覧
+ */
+export type ModelsNotificationListResponse = {
+    /**
+     * 通知
+     */
+    items: Array<ModelsNotificationResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 通知
+ */
+export type ModelsNotificationResponse = {
+    /**
+     * ID
+     */
+    id: string;
+    /**
+     * 通知種別
+     */
+    type: string;
+    /**
+     * タイトル
+     */
+    title: string;
+    /**
+     * 本文
+     */
+    body: string;
+    /**
+     * 関連リソースID
+     */
+    referenceId: string | null;
+    /**
+     * 既読か
+     */
+    isRead: boolean;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
  * スカウト受け入れ設定
  */
 export type ModelsScoutSettingsResponse = {
@@ -451,6 +499,16 @@ export type ModelsSkillResponse = {
      * 追加日時（user_skills.created_at）
      */
     attachedAt: string;
+};
+
+/**
+ * 未読件数
+ */
+export type ModelsUnreadCountResponse = {
+    /**
+     * 未読数
+     */
+    count: number;
 };
 
 /**
@@ -675,6 +733,117 @@ export type ModelsUserResponse = {
     updatedAt: string;
 };
 
+export type CompanyNotificationsListCompanyNotificationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/company/notifications';
+};
+
+export type CompanyNotificationsListCompanyNotificationsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyNotificationsListCompanyNotificationsError = CompanyNotificationsListCompanyNotificationsErrors[keyof CompanyNotificationsListCompanyNotificationsErrors];
+
+export type CompanyNotificationsListCompanyNotificationsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsNotificationListResponse;
+};
+
+export type CompanyNotificationsListCompanyNotificationsResponse = CompanyNotificationsListCompanyNotificationsResponses[keyof CompanyNotificationsListCompanyNotificationsResponses];
+
+export type CompanyNotificationsMarkAllCompanyNotificationsReadData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/notifications/read-all';
+};
+
+export type CompanyNotificationsMarkAllCompanyNotificationsReadErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyNotificationsMarkAllCompanyNotificationsReadError = CompanyNotificationsMarkAllCompanyNotificationsReadErrors[keyof CompanyNotificationsMarkAllCompanyNotificationsReadErrors];
+
+export type CompanyNotificationsMarkAllCompanyNotificationsReadResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CompanyNotificationsMarkAllCompanyNotificationsReadResponse = CompanyNotificationsMarkAllCompanyNotificationsReadResponses[keyof CompanyNotificationsMarkAllCompanyNotificationsReadResponses];
+
+export type CompanyNotificationsCountCompanyUnreadNotificationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/notifications/unread-count';
+};
+
+export type CompanyNotificationsCountCompanyUnreadNotificationsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyNotificationsCountCompanyUnreadNotificationsError = CompanyNotificationsCountCompanyUnreadNotificationsErrors[keyof CompanyNotificationsCountCompanyUnreadNotificationsErrors];
+
+export type CompanyNotificationsCountCompanyUnreadNotificationsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUnreadCountResponse;
+};
+
+export type CompanyNotificationsCountCompanyUnreadNotificationsResponse = CompanyNotificationsCountCompanyUnreadNotificationsResponses[keyof CompanyNotificationsCountCompanyUnreadNotificationsResponses];
+
+export type CompanyNotificationsMarkCompanyNotificationReadData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/company/notifications/{id}/read';
+};
+
+export type CompanyNotificationsMarkCompanyNotificationReadErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CompanyNotificationsMarkCompanyNotificationReadError = CompanyNotificationsMarkCompanyNotificationReadErrors[keyof CompanyNotificationsMarkCompanyNotificationReadErrors];
+
+export type CompanyNotificationsMarkCompanyNotificationReadResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CompanyNotificationsMarkCompanyNotificationReadResponse = CompanyNotificationsMarkCompanyNotificationReadResponses[keyof CompanyNotificationsMarkCompanyNotificationReadResponses];
+
 export type ScoutTemplatesListScoutTemplatesData = {
     body?: never;
     path?: never;
@@ -805,6 +974,117 @@ export type ScoutTemplatesUpdateScoutTemplateResponses = {
 };
 
 export type ScoutTemplatesUpdateScoutTemplateResponse = ScoutTemplatesUpdateScoutTemplateResponses[keyof ScoutTemplatesUpdateScoutTemplateResponses];
+
+export type UserNotificationsListUserNotificationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/notifications';
+};
+
+export type UserNotificationsListUserNotificationsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type UserNotificationsListUserNotificationsError = UserNotificationsListUserNotificationsErrors[keyof UserNotificationsListUserNotificationsErrors];
+
+export type UserNotificationsListUserNotificationsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsNotificationListResponse;
+};
+
+export type UserNotificationsListUserNotificationsResponse = UserNotificationsListUserNotificationsResponses[keyof UserNotificationsListUserNotificationsResponses];
+
+export type UserNotificationsMarkAllUserNotificationsReadData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/notifications/read-all';
+};
+
+export type UserNotificationsMarkAllUserNotificationsReadErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type UserNotificationsMarkAllUserNotificationsReadError = UserNotificationsMarkAllUserNotificationsReadErrors[keyof UserNotificationsMarkAllUserNotificationsReadErrors];
+
+export type UserNotificationsMarkAllUserNotificationsReadResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type UserNotificationsMarkAllUserNotificationsReadResponse = UserNotificationsMarkAllUserNotificationsReadResponses[keyof UserNotificationsMarkAllUserNotificationsReadResponses];
+
+export type UserNotificationsCountUserUnreadNotificationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/notifications/unread-count';
+};
+
+export type UserNotificationsCountUserUnreadNotificationsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type UserNotificationsCountUserUnreadNotificationsError = UserNotificationsCountUserUnreadNotificationsErrors[keyof UserNotificationsCountUserUnreadNotificationsErrors];
+
+export type UserNotificationsCountUserUnreadNotificationsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUnreadCountResponse;
+};
+
+export type UserNotificationsCountUserUnreadNotificationsResponse = UserNotificationsCountUserUnreadNotificationsResponses[keyof UserNotificationsCountUserUnreadNotificationsResponses];
+
+export type UserNotificationsMarkUserNotificationReadData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/notifications/{id}/read';
+};
+
+export type UserNotificationsMarkUserNotificationReadErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type UserNotificationsMarkUserNotificationReadError = UserNotificationsMarkUserNotificationReadErrors[keyof UserNotificationsMarkUserNotificationReadErrors];
+
+export type UserNotificationsMarkUserNotificationReadResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type UserNotificationsMarkUserNotificationReadResponse = UserNotificationsMarkUserNotificationReadResponses[keyof UserNotificationsMarkUserNotificationReadResponses];
 
 export type ScoutSettingsGetScoutSettingsData = {
     body?: never;

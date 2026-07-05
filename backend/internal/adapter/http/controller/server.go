@@ -16,6 +16,7 @@ type Server struct {
 	similarUsers  *SimilarUsersController
 	teamDiagnose  *TeamDiagnoseController
 	scoutTemplate *ScoutTemplateController
+	notification  *NotificationController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -30,6 +31,7 @@ func NewServer(
 	similarUsers *SimilarUsersController,
 	teamDiagnose *TeamDiagnoseController,
 	scoutTemplate *ScoutTemplateController,
+	notification *NotificationController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -40,6 +42,7 @@ func NewServer(
 		similarUsers:  similarUsers,
 		teamDiagnose:  teamDiagnose,
 		scoutTemplate: scoutTemplate,
+		notification:  notification,
 	}
 }
 
@@ -151,4 +154,38 @@ func (s *Server) ScoutTemplatesUpdateScoutTemplate(ctx echo.Context, templateID 
 
 func (s *Server) ScoutTemplatesDeleteScoutTemplate(ctx echo.Context, templateID string) error {
 	return s.scoutTemplate.Delete(ctx, templateID)
+}
+
+// --- Notifications ---
+
+func (s *Server) UserNotificationsListUserNotifications(ctx echo.Context, _ openapi.UserNotificationsListUserNotificationsParams) error {
+	return s.notification.ListByUser(ctx)
+}
+
+func (s *Server) UserNotificationsCountUserUnreadNotifications(ctx echo.Context) error {
+	return s.notification.CountUnreadByUser(ctx)
+}
+
+func (s *Server) UserNotificationsMarkUserNotificationRead(ctx echo.Context, id string) error {
+	return s.notification.MarkAsRead(ctx, id)
+}
+
+func (s *Server) UserNotificationsMarkAllUserNotificationsRead(ctx echo.Context) error {
+	return s.notification.MarkAllAsReadByUser(ctx)
+}
+
+func (s *Server) CompanyNotificationsListCompanyNotifications(ctx echo.Context, _ openapi.CompanyNotificationsListCompanyNotificationsParams) error {
+	return s.notification.ListByCompany(ctx)
+}
+
+func (s *Server) CompanyNotificationsCountCompanyUnreadNotifications(ctx echo.Context) error {
+	return s.notification.CountUnreadByCompany(ctx)
+}
+
+func (s *Server) CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Context, id string) error {
+	return s.notification.MarkAsRead(ctx, id)
+}
+
+func (s *Server) CompanyNotificationsMarkAllCompanyNotificationsRead(ctx echo.Context) error {
+	return s.notification.MarkAllAsReadByCompany(ctx)
 }
