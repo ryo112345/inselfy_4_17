@@ -21,6 +21,7 @@ type Server struct {
 	auth          *AuthController
 	companyAuth   *CompanyAuthController
 	ci            *CareerInterestController
+	wv            *WorkValuesController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -40,6 +41,7 @@ func NewServer(
 	auth *AuthController,
 	companyAuth *CompanyAuthController,
 	ci *CareerInterestController,
+	wv *WorkValuesController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -55,6 +57,7 @@ func NewServer(
 		auth:          auth,
 		companyAuth:   companyAuth,
 		ci:            ci,
+		wv:            wv,
 	}
 }
 
@@ -272,4 +275,22 @@ func (s *Server) CareerInterestCiGetLatestResult(ctx echo.Context, userID string
 
 func (s *Server) CareerInterestCiGetResultBySession(ctx echo.Context, sessionID string) error {
 	return s.ci.GetResultBySessionID(ctx, sessionID)
+}
+
+// --- WorkValues ---
+
+func (s *Server) WorkValuesWvStartSession(ctx echo.Context) error {
+	return s.wv.StartSession(ctx)
+}
+
+func (s *Server) WorkValuesWvSubmitResult(ctx echo.Context, sessionID string) error {
+	return s.wv.SubmitResult(ctx, sessionID)
+}
+
+func (s *Server) WorkValuesWvGetLatestResult(ctx echo.Context, userID string) error {
+	return s.wv.GetLatestResult(ctx, userID)
+}
+
+func (s *Server) WorkValuesWvGetResultBySession(ctx echo.Context, sessionID string) error {
+	return s.wv.GetResultBySessionID(ctx, sessionID)
 }

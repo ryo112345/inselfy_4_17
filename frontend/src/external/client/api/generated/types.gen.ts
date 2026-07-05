@@ -1069,6 +1069,188 @@ export type ModelsUserResponse = {
     updatedAt: string;
 };
 
+/**
+ * Work Need 定義
+ */
+export type ModelsWvNeedDefResponse = {
+    /**
+     * ニーズID
+     */
+    id: string;
+    /**
+     * ラベル
+     */
+    label: string;
+    /**
+     * 説明（日本語）
+     */
+    description_ja: string;
+};
+
+/**
+ * Work Need スコア
+ */
+export type ModelsWvNeedScore = {
+    /**
+     * ニーズID
+     */
+    need_id: string;
+    /**
+     * ラベル
+     */
+    label: string;
+    /**
+     * 説明（日本語）
+     */
+    description_ja: string;
+    /**
+     * 表示スコア（0-100）
+     */
+    display_score: number;
+    /**
+     * 順位
+     */
+    rank: number;
+};
+
+/**
+ * 一対比較ペア
+ */
+export type ModelsWvPairResponse = {
+    /**
+     * ニーズA
+     */
+    need_a: string;
+    /**
+     * ニーズB
+     */
+    need_b: string;
+};
+
+/**
+ * Work Values 一対比較の回答（1問分）
+ */
+export type ModelsWvResponseItem = {
+    /**
+     * ニーズA
+     */
+    need_a: string;
+    /**
+     * ニーズB
+     */
+    need_b: string;
+    /**
+     * 勝者（need_a か need_b の ID）
+     */
+    winner: string;
+    /**
+     * 質問番号
+     */
+    question_number: number;
+};
+
+/**
+ * Work Values 診断結果
+ */
+export type ModelsWvResultResponse = {
+    /**
+     * 結果ID
+     */
+    id: string;
+    /**
+     * セッションID
+     */
+    session_id: string;
+    /**
+     * ユーザーID
+     */
+    user_id: string;
+    /**
+     * ニーズスコア（スコア降順）
+     */
+    needs: Array<ModelsWvNeedScore>;
+    /**
+     * Value スコア
+     */
+    values: Array<ModelsWvValueScoreResponse>;
+    /**
+     * 作成日時（RFC3339 文字列）
+     */
+    created_at: string;
+};
+
+/**
+ * Work Values セッション
+ */
+export type ModelsWvSessionResponse = {
+    /**
+     * セッションID
+     */
+    id: string;
+    /**
+     * ステータス
+     */
+    status: string;
+    /**
+     * 初期ペア
+     */
+    initial_pairs: Array<ModelsWvPairResponse>;
+    /**
+     * ニーズ定義一覧
+     */
+    needs: Array<ModelsWvNeedDefResponse>;
+};
+
+/**
+ * Work Values セッション開始リクエスト
+ */
+export type ModelsWvStartSessionRequest = {
+    /**
+     * ユーザーID
+     */
+    user_id: string;
+};
+
+/**
+ * Work Values 結果送信リクエスト
+ */
+export type ModelsWvSubmitResultRequest = {
+    /**
+     * 回答一覧
+     */
+    responses: Array<ModelsWvResponseItem>;
+    /**
+     * フロント推定の μ（ニーズID → 値）
+     */
+    mu: {
+        [key: string]: number;
+    };
+    /**
+     * フロント推定の SE（ニーズID → 値）
+     */
+    se: {
+        [key: string]: number;
+    };
+};
+
+/**
+ * Work Value スコア
+ */
+export type ModelsWvValueScoreResponse = {
+    /**
+     * Value ID
+     */
+    value_id: string;
+    /**
+     * 表示スコア（0-100）
+     */
+    display_score: number;
+    /**
+     * 順位
+     */
+    rank: number;
+};
+
 export type AuthGoogleLoginData = {
     body: ModelsGoogleLoginRequest;
     path?: never;
@@ -2404,6 +2586,112 @@ export type SkillsDetachSkillResponses = {
 };
 
 export type SkillsDetachSkillResponse = SkillsDetachSkillResponses[keyof SkillsDetachSkillResponses];
+
+export type WorkValuesWvStartSessionData = {
+    body: ModelsWvStartSessionRequest;
+    path?: never;
+    query?: never;
+    url: '/api/work-values/sessions';
+};
+
+export type WorkValuesWvStartSessionErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type WorkValuesWvStartSessionError = WorkValuesWvStartSessionErrors[keyof WorkValuesWvStartSessionErrors];
+
+export type WorkValuesWvStartSessionResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsWvSessionResponse;
+};
+
+export type WorkValuesWvStartSessionResponse = WorkValuesWvStartSessionResponses[keyof WorkValuesWvStartSessionResponses];
+
+export type WorkValuesWvGetResultBySessionData = {
+    body?: never;
+    path: {
+        sessionId: string;
+    };
+    query?: never;
+    url: '/api/work-values/sessions/{sessionId}/results';
+};
+
+export type WorkValuesWvGetResultBySessionErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type WorkValuesWvGetResultBySessionError = WorkValuesWvGetResultBySessionErrors[keyof WorkValuesWvGetResultBySessionErrors];
+
+export type WorkValuesWvGetResultBySessionResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsWvResultResponse;
+};
+
+export type WorkValuesWvGetResultBySessionResponse = WorkValuesWvGetResultBySessionResponses[keyof WorkValuesWvGetResultBySessionResponses];
+
+export type WorkValuesWvSubmitResultData = {
+    body: ModelsWvSubmitResultRequest;
+    path: {
+        sessionId: string;
+    };
+    query?: never;
+    url: '/api/work-values/sessions/{sessionId}/results';
+};
+
+export type WorkValuesWvSubmitResultErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type WorkValuesWvSubmitResultError = WorkValuesWvSubmitResultErrors[keyof WorkValuesWvSubmitResultErrors];
+
+export type WorkValuesWvSubmitResultResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsWvResultResponse;
+};
+
+export type WorkValuesWvSubmitResultResponse = WorkValuesWvSubmitResultResponses[keyof WorkValuesWvSubmitResultResponses];
+
+export type WorkValuesWvGetLatestResultData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/work-values/users/{userId}/results/latest';
+};
+
+export type WorkValuesWvGetLatestResultErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type WorkValuesWvGetLatestResultError = WorkValuesWvGetLatestResultErrors[keyof WorkValuesWvGetLatestResultErrors];
+
+export type WorkValuesWvGetLatestResultResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsWvResultResponse;
+};
+
+export type WorkValuesWvGetLatestResultResponse = WorkValuesWvGetLatestResultResponses[keyof WorkValuesWvGetLatestResultResponses];
 
 export type ClientOptions = {
     baseUrl: 'http://localhost:8081' | (string & {});

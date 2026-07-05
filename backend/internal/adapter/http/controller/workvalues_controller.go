@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -20,42 +21,41 @@ func NewWorkValuesController(
 	return &WorkValuesController{input: input}
 }
 
-type startSessionRequest struct {
-	UserID string `json:"user_id"`
-}
-
 func (c *WorkValuesController) StartSession(ctx echo.Context) error {
-	var body startSessionRequest
+	var body openapi.ModelsWVStartSessionRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	if body.UserID == "" {
+	if body.UserId == "" {
 		return badRequest(ctx, "user_id is required")
 	}
 
-	s, err := c.input.StartSession(ctx.Request().Context(), body.UserID)
+	s, err := c.input.StartSession(ctx.Request().Context(), body.UserId)
 	if err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusCreated, presenter.WorkValuesSessionResponse(s))
 }
 
-type submitResultRequest struct {
-	Responses []workvalues.Response `json:"responses"`
-	Mu        map[string]float64    `json:"mu"`
-	SE        map[string]float64    `json:"se"`
-}
-
 func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) error {
-	var body submitResultRequest
+	var body openapi.ModelsWVSubmitResultRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
 
+	responses := make([]workvalues.Response, len(body.Responses))
+	for i, r := range body.Responses {
+		responses[i] = workvalues.Response{
+			NeedA:          r.NeedA,
+			NeedB:          r.NeedB,
+			Winner:         r.Winner,
+			QuestionNumber: int(r.QuestionNumber),
+		}
+	}
 	input := workvalues.SubmitInput{
-		Responses: body.Responses,
+		Responses: responses,
 		Mu:        body.Mu,
-		SE:        body.SE,
+		SE:        body.Se,
 	}
 	r, err := c.input.SubmitResult(ctx.Request().Context(), sessionID, input)
 	if err != nil {

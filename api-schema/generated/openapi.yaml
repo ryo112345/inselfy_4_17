@@ -16,6 +16,7 @@ tags:
   - name: Auth
   - name: CompanyAuth
   - name: CareerInterest
+  - name: WorkValues
 paths:
   /api/auth/google:
     post:
@@ -1412,6 +1413,124 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - Skills
+  /api/work-values/sessions:
+    post:
+      operationId: WorkValues_wvStartSession
+      summary: Start a work values session
+      description: 診断セッション開始
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.WVSessionResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - WorkValues
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.WVStartSessionRequest'
+  /api/work-values/sessions/{sessionId}/results:
+    post:
+      operationId: WorkValues_wvSubmitResult
+      summary: Submit work values responses and estimates
+      description: 診断結果送信
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.WVResultResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - WorkValues
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.WVSubmitResultRequest'
+    get:
+      operationId: WorkValues_wvGetResultBySession
+      summary: Get the work values result by session
+      description: セッションIDで診断結果取得
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.WVResultResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - WorkValues
+  /api/work-values/users/{userId}/results/latest:
+    get:
+      operationId: WorkValues_wvGetLatestResult
+      summary: Get the latest work values result for a user
+      description: 最新の診断結果取得
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.WVResultResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - WorkValues
 components:
   schemas:
     Models.AttachSkillRequest:
@@ -2588,6 +2707,196 @@ components:
           format: date-time
           description: 更新日時
       description: ユーザー情報
+    Models.WVNeedDefResponse:
+      type: object
+      required:
+        - id
+        - label
+        - description_ja
+      properties:
+        id:
+          type: string
+          description: ニーズID
+        label:
+          type: string
+          description: ラベル
+        description_ja:
+          type: string
+          description: 説明（日本語）
+      description: Work Need 定義
+    Models.WVNeedScore:
+      type: object
+      required:
+        - need_id
+        - label
+        - description_ja
+        - display_score
+        - rank
+      properties:
+        need_id:
+          type: string
+          description: ニーズID
+        label:
+          type: string
+          description: ラベル
+        description_ja:
+          type: string
+          description: 説明（日本語）
+        display_score:
+          type: number
+          format: double
+          description: 表示スコア（0-100）
+        rank:
+          type: integer
+          format: int32
+          description: 順位
+      description: Work Need スコア
+    Models.WVPairResponse:
+      type: object
+      required:
+        - need_a
+        - need_b
+      properties:
+        need_a:
+          type: string
+          description: ニーズA
+        need_b:
+          type: string
+          description: ニーズB
+      description: 一対比較ペア
+    Models.WVResponseItem:
+      type: object
+      required:
+        - need_a
+        - need_b
+        - winner
+        - question_number
+      properties:
+        need_a:
+          type: string
+          description: ニーズA
+        need_b:
+          type: string
+          description: ニーズB
+        winner:
+          type: string
+          description: 勝者（need_a か need_b の ID）
+        question_number:
+          type: integer
+          format: int32
+          description: 質問番号
+      description: Work Values 一対比較の回答（1問分）
+    Models.WVResultResponse:
+      type: object
+      required:
+        - id
+        - session_id
+        - user_id
+        - needs
+        - values
+        - created_at
+      properties:
+        id:
+          type: string
+          description: 結果ID
+        session_id:
+          type: string
+          description: セッションID
+        user_id:
+          type: string
+          description: ユーザーID
+        needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.WVNeedScore'
+          description: ニーズスコア（スコア降順）
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.WVValueScoreResponse'
+          description: Value スコア
+        created_at:
+          type: string
+          description: 作成日時（RFC3339 文字列）
+      description: Work Values 診断結果
+    Models.WVSessionResponse:
+      type: object
+      required:
+        - id
+        - status
+        - initial_pairs
+        - needs
+      properties:
+        id:
+          type: string
+          description: セッションID
+        status:
+          type: string
+          description: ステータス
+        initial_pairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.WVPairResponse'
+          description: 初期ペア
+        needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.WVNeedDefResponse'
+          description: ニーズ定義一覧
+      description: Work Values セッション
+    Models.WVStartSessionRequest:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: ユーザーID
+      description: Work Values セッション開始リクエスト
+    Models.WVSubmitResultRequest:
+      type: object
+      required:
+        - responses
+        - mu
+        - se
+      properties:
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.WVResponseItem'
+          description: 回答一覧
+        mu:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: フロント推定の μ（ニーズID → 値）
+        se:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: フロント推定の SE（ニーズID → 値）
+      description: Work Values 結果送信リクエスト
+    Models.WVValueScoreResponse:
+      type: object
+      required:
+        - value_id
+        - display_score
+        - rank
+      properties:
+        value_id:
+          type: string
+          description: Value ID
+        display_score:
+          type: number
+          format: double
+          description: 表示スコア（0-100）
+        rank:
+          type: integer
+          format: int32
+          description: 順位
+      description: Work Value スコア
 servers:
   - url: http://localhost:8081
     description: Development server
