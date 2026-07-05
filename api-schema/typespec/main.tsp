@@ -14,6 +14,7 @@ import "./models/follow.tsp";
 import "./models/auth.tsp";
 import "./models/company-auth.tsp";
 import "./models/career-interest.tsp";
+import "./models/work-values.tsp";
 import "./routes/users.tsp";
 import "./routes/experiences.tsp";
 import "./routes/educations.tsp";
@@ -27,6 +28,7 @@ import "./routes/follows.tsp";
 import "./routes/auth.tsp";
 import "./routes/company-auth.tsp";
 import "./routes/career-interest.tsp";
+import "./routes/work-values.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;

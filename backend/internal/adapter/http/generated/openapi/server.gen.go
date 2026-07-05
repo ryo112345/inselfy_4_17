@@ -838,6 +838,126 @@ type ModelsUserResponse struct {
 	Username string `json:"username"`
 }
 
+// ModelsWVNeedDefResponse Work Need 定義
+type ModelsWVNeedDefResponse struct {
+	// DescriptionJa 説明（日本語）
+	DescriptionJa string `json:"description_ja"`
+
+	// Id ニーズID
+	Id string `json:"id"`
+
+	// Label ラベル
+	Label string `json:"label"`
+}
+
+// ModelsWVNeedScore Work Need スコア
+type ModelsWVNeedScore struct {
+	// DescriptionJa 説明（日本語）
+	DescriptionJa string `json:"description_ja"`
+
+	// DisplayScore 表示スコア（0-100）
+	DisplayScore float64 `json:"display_score"`
+
+	// Label ラベル
+	Label string `json:"label"`
+
+	// NeedId ニーズID
+	NeedId string `json:"need_id"`
+
+	// Rank 順位
+	Rank int32 `json:"rank"`
+}
+
+// ModelsWVPairResponse 一対比較ペア
+type ModelsWVPairResponse struct {
+	// NeedA ニーズA
+	NeedA string `json:"need_a"`
+
+	// NeedB ニーズB
+	NeedB string `json:"need_b"`
+}
+
+// ModelsWVResponseItem Work Values 一対比較の回答（1問分）
+type ModelsWVResponseItem struct {
+	// NeedA ニーズA
+	NeedA string `json:"need_a"`
+
+	// NeedB ニーズB
+	NeedB string `json:"need_b"`
+
+	// QuestionNumber 質問番号
+	QuestionNumber int32 `json:"question_number"`
+
+	// Winner 勝者（need_a か need_b の ID）
+	Winner string `json:"winner"`
+}
+
+// ModelsWVResultResponse Work Values 診断結果
+type ModelsWVResultResponse struct {
+	// CreatedAt 作成日時（RFC3339 文字列）
+	CreatedAt string `json:"created_at"`
+
+	// Id 結果ID
+	Id string `json:"id"`
+
+	// Needs ニーズスコア（スコア降順）
+	Needs []ModelsWVNeedScore `json:"needs"`
+
+	// SessionId セッションID
+	SessionId string `json:"session_id"`
+
+	// UserId ユーザーID
+	UserId string `json:"user_id"`
+
+	// Values Value スコア
+	Values []ModelsWVValueScoreResponse `json:"values"`
+}
+
+// ModelsWVSessionResponse Work Values セッション
+type ModelsWVSessionResponse struct {
+	// Id セッションID
+	Id string `json:"id"`
+
+	// InitialPairs 初期ペア
+	InitialPairs []ModelsWVPairResponse `json:"initial_pairs"`
+
+	// Needs ニーズ定義一覧
+	Needs []ModelsWVNeedDefResponse `json:"needs"`
+
+	// Status ステータス
+	Status string `json:"status"`
+}
+
+// ModelsWVStartSessionRequest Work Values セッション開始リクエスト
+type ModelsWVStartSessionRequest struct {
+	// UserId ユーザーID
+	UserId string `json:"user_id"`
+}
+
+// ModelsWVSubmitResultRequest Work Values 結果送信リクエスト
+type ModelsWVSubmitResultRequest struct {
+	// Mu フロント推定の μ（ニーズID → 値）
+	Mu map[string]float64 `json:"mu"`
+
+	// Responses 回答一覧
+	Responses []ModelsWVResponseItem `json:"responses"`
+
+	// Se フロント推定の SE（ニーズID → 値）
+	Se map[string]float64 `json:"se"`
+}
+
+// ModelsWVValueScoreResponse Work Value スコア
+type ModelsWVValueScoreResponse struct {
+	// DisplayScore 表示スコア（0-100）
+	DisplayScore float64 `json:"display_score"`
+
+	// Rank 順位
+	Rank int32 `json:"rank"`
+
+	// ValueId Value ID
+	ValueId string `json:"value_id"`
+}
+
 // CompanyNotificationsListCompanyNotificationsParams defines parameters for CompanyNotificationsListCompanyNotifications.
 type CompanyNotificationsListCompanyNotificationsParams struct {
 	// Limit 取得件数
@@ -927,6 +1047,12 @@ type ExperiencesUpdateExperienceJSONRequestBody = ModelsUpdateExperienceRequest
 
 // SkillsAttachSkillJSONRequestBody defines body for SkillsAttachSkill for application/json ContentType.
 type SkillsAttachSkillJSONRequestBody = ModelsAttachSkillRequest
+
+// WorkValuesWvStartSessionJSONRequestBody defines body for WorkValuesWvStartSession for application/json ContentType.
+type WorkValuesWvStartSessionJSONRequestBody = ModelsWVStartSessionRequest
+
+// WorkValuesWvSubmitResultJSONRequestBody defines body for WorkValuesWvSubmitResult for application/json ContentType.
+type WorkValuesWvSubmitResultJSONRequestBody = ModelsWVSubmitResultRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -1080,6 +1206,18 @@ type ServerInterface interface {
 	// Detach a skill by name
 	// (DELETE /api/users/{username}/skills/{name})
 	SkillsDetachSkill(ctx echo.Context, username string, name string) error
+	// Start a work values session
+	// (POST /api/work-values/sessions)
+	WorkValuesWvStartSession(ctx echo.Context) error
+	// Get the work values result by session
+	// (GET /api/work-values/sessions/{sessionId}/results)
+	WorkValuesWvGetResultBySession(ctx echo.Context, sessionId string) error
+	// Submit work values responses and estimates
+	// (POST /api/work-values/sessions/{sessionId}/results)
+	WorkValuesWvSubmitResult(ctx echo.Context, sessionId string) error
+	// Get the latest work values result for a user
+	// (GET /api/work-values/users/{userId}/results/latest)
+	WorkValuesWvGetLatestResult(ctx echo.Context, userId string) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -1853,6 +1991,63 @@ func (w *ServerInterfaceWrapper) SkillsDetachSkill(ctx echo.Context) error {
 	return err
 }
 
+// WorkValuesWvStartSession converts echo context to params.
+func (w *ServerInterfaceWrapper) WorkValuesWvStartSession(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.WorkValuesWvStartSession(ctx)
+	return err
+}
+
+// WorkValuesWvGetResultBySession converts echo context to params.
+func (w *ServerInterfaceWrapper) WorkValuesWvGetResultBySession(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.WorkValuesWvGetResultBySession(ctx, sessionId)
+	return err
+}
+
+// WorkValuesWvSubmitResult converts echo context to params.
+func (w *ServerInterfaceWrapper) WorkValuesWvSubmitResult(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.WorkValuesWvSubmitResult(ctx, sessionId)
+	return err
+}
+
+// WorkValuesWvGetLatestResult converts echo context to params.
+func (w *ServerInterfaceWrapper) WorkValuesWvGetLatestResult(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.WorkValuesWvGetLatestResult(ctx, userId)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -1931,5 +2126,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/users/:username/skills", wrapper.SkillsListSkills)
 	router.POST(baseURL+"/api/users/:username/skills", wrapper.SkillsAttachSkill)
 	router.DELETE(baseURL+"/api/users/:username/skills/:name", wrapper.SkillsDetachSkill)
+	router.POST(baseURL+"/api/work-values/sessions", wrapper.WorkValuesWvStartSession)
+	router.GET(baseURL+"/api/work-values/sessions/:sessionId/results", wrapper.WorkValuesWvGetResultBySession)
+	router.POST(baseURL+"/api/work-values/sessions/:sessionId/results", wrapper.WorkValuesWvSubmitResult)
+	router.GET(baseURL+"/api/work-values/users/:userId/results/latest", wrapper.WorkValuesWvGetLatestResult)
 
 }
