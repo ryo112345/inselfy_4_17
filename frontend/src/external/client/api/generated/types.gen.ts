@@ -340,6 +340,10 @@ export type ModelsUpdateExperienceRequest = {
  */
 export type ModelsUpdateUserProfileRequest = {
     /**
+     * ユーザー名（3-20文字、半角英数字とアンダースコア）
+     */
+    username?: string;
+    /**
      * 表示名
      */
     name?: string;

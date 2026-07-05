@@ -868,6 +868,10 @@ components:
     Models.UpdateUserProfileRequest:
       type: object
       properties:
+        username:
+          type: string
+          pattern: ^[a-zA-Z0-9_]{3,20}$
+          description: ユーザー名（3-20文字、半角英数字とアンダースコア）
         name:
           type: string
           minLength: 1
@@ -908,6 +912,14 @@ components:
           nullable: true
           pattern: ^#[0-9A-Fa-f]{6}$
           description: プロフィールカラー（`#RRGGBB`）
+        avatarUrl:
+          type: string
+          nullable: true
+          description: アバター画像URL
+        coverPhotoUrl:
+          type: string
+          nullable: true
+          description: カバー写真URL
         isPublic:
           type: boolean
           description: プロフィール公開フラグ
@@ -959,6 +971,14 @@ components:
           type: string
           nullable: true
           description: プロフィールカラー
+        avatarUrl:
+          type: string
+          nullable: true
+          description: アバター画像URL
+        coverPhotoUrl:
+          type: string
+          nullable: true
+          description: カバー写真URL
         isPublic:
           type: boolean
           description: 公開フラグ

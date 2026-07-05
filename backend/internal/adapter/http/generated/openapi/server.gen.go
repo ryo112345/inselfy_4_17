@@ -321,6 +321,12 @@ type ModelsUpdateUserProfileRequest struct {
 	// About 自己紹介
 	About *string `json:"about,omitempty"`
 
+	// AvatarUrl アバター画像URL
+	AvatarUrl *string `json:"avatarUrl,omitempty"`
+
+	// CoverPhotoUrl カバー写真URL
+	CoverPhotoUrl *string `json:"coverPhotoUrl,omitempty"`
+
 	// Headline ヘッドライン（肩書き・一言）
 	Headline *string `json:"headline,omitempty"`
 
@@ -344,6 +350,9 @@ type ModelsUpdateUserProfileRequest struct {
 
 	// ProfileColor プロフィールカラー（`#RRGGBB`）
 	ProfileColor *string `json:"profileColor,omitempty"`
+
+	// Username ユーザー名（3-20文字、半角英数字とアンダースコア）
+	Username *string `json:"username,omitempty"`
 }
 
 // ModelsUserResponse ユーザー情報

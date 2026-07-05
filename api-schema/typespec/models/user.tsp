@@ -19,6 +19,10 @@ model CreateUserRequest {
 
 /** プロフィール更新リクエスト（PATCH。指定したキーのみ差分適用）。値に null を渡すとフィールドをクリア。 */
 model UpdateUserProfileRequest {
+  /** ユーザー名（3-20文字、半角英数字とアンダースコア） */
+  @pattern("^[a-zA-Z0-9_]{3,20}$")
+  username?: string;
+
   /** 表示名 */
   @minLength(1)
   @maxLength(100)
@@ -51,6 +55,12 @@ model UpdateUserProfileRequest {
   /** プロフィールカラー（`#RRGGBB`） */
   @pattern("^#[0-9A-Fa-f]{6}$")
   profileColor?: string | null;
+
+  /** アバター画像URL */
+  avatarUrl?: string | null;
+
+  /** カバー写真URL */
+  coverPhotoUrl?: string | null;
 
   /** プロフィール公開フラグ */
   isPublic?: boolean;
@@ -87,6 +97,12 @@ model UserResponse {
 
   /** プロフィールカラー */
   profileColor?: string | null;
+
+  /** アバター画像URL */
+  avatarUrl?: string | null;
+
+  /** カバー写真URL */
+  coverPhotoUrl?: string | null;
 
   /** 公開フラグ */
   isPublic: boolean;
