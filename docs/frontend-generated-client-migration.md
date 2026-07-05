@@ -143,7 +143,7 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 
 | # | 状態 | 項目 | ルート |
 |---|------|------|--------|
-| B0 | [ ] | user 機能のスペック漏れ2ルート（schema-first 移行時からの既知の残） | `GET /api/users/id/:userId`, `POST /api/users/:username/upload-image?type=...`（multipart） |
+| B0 | [x] | user 機能のスペック漏れ2ルート（schema-first 移行時からの既知の残） | `GET /api/users/id/:userId`, `POST /api/users/:username/upload-image?type=...`（multipart）。`UserImageUploadResponse` は `{url, user}`（現行 UploadImage 実装どおり） |
 | B1 | [ ] | integrated-report の spec 化 | `POST /api/integrated-report/requests`, `GET .../me`, `GET .../status`, `GET .../requests/:id/report`, `GET .../users/:userId/latest-request`（initializer.go の intGroup 参照） |
 | B2 | [ ] | WV/CI ai-report GET の spec 化 | `GET /api/work-values/sessions/:id/ai-report`, `GET /api/career-interest/sessions/:id/ai-report` |
 | B3 | [ ] | B0〜B2 対象の FE 移行 | `app/profile/[username]/AiReportCard.tsx`, `IntegratedReportModal.tsx`, `api.ts`（upload-image）, `app/integrated-report/[requestId]/*`（2ファイル）, `app/work_values/[sessionId]/WorkValuesContent.tsx`, `app/career_interest/[sessionId]/CareerInterestContent.tsx`, `fetchPanelData.ts` 残り（users/id, ai-report, integrated-report） |
