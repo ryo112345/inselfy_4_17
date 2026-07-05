@@ -13,7 +13,6 @@ import (
 type EducationInteractor struct {
 	repo     port.EducationRepository
 	userRepo port.UserRepository
-	output   port.EducationOutputPort
 }
 
 var _ port.EducationInputPort = (*EducationInteractor)(nil)
@@ -22,15 +21,14 @@ var _ port.EducationInputPort = (*EducationInteractor)(nil)
 func NewEducationInteractor(
 	repo port.EducationRepository,
 	userRepo port.UserRepository,
-	output port.EducationOutputPort,
 ) *EducationInteractor {
-	return &EducationInteractor{repo: repo, userRepo: userRepo, output: output}
+	return &EducationInteractor{repo: repo, userRepo: userRepo}
 }
 
-func (i *EducationInteractor) Create(ctx context.Context, rawUsername string, input education.CreateInput) error {
+func (i *EducationInteractor) Create(ctx context.Context, rawUsername string, input education.CreateInput) (*education.Education, error) {
 	u, err := i.resolveUser(ctx, rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	input.UserID = u.ID
 	input.School = strings.TrimSpace(input.School)
@@ -43,14 +41,14 @@ func (i *EducationInteractor) Create(ctx context.Context, rawUsername string, in
 		}
 	}
 	if err := education.ValidateCreate(input); err != nil {
-		return err
+		return nil, err
 	}
 	count, err := i.repo.CountByUserID(ctx, u.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if count >= education.MaxPerUser {
-		return education.ErrTooManyEntries
+		return nil, education.ErrTooManyEntries
 	}
 	entity := &education.Education{
 		UserID:    input.UserID,
@@ -59,24 +57,20 @@ func (i *EducationInteractor) Create(ctx context.Context, rawUsername string, in
 		StartYear: input.StartYear,
 		EndYear:   input.EndYear,
 	}
-	created, err := i.repo.Create(ctx, entity)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentEducation(ctx, created)
+	return i.repo.Create(ctx, entity)
 }
 
-func (i *EducationInteractor) Update(ctx context.Context, rawUsername, educationID string, input education.UpdateInput) error {
+func (i *EducationInteractor) Update(ctx context.Context, rawUsername, educationID string, input education.UpdateInput) (*education.Education, error) {
 	u, err := i.resolveUser(ctx, rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	existing, err := i.repo.GetByID(ctx, educationID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if existing.UserID != u.ID {
-		return port.ErrForbidden
+		return nil, port.ErrForbidden
 	}
 	input.ID = existing.ID
 	input.School = strings.TrimSpace(input.School)
@@ -89,7 +83,7 @@ func (i *EducationInteractor) Update(ctx context.Context, rawUsername, education
 		}
 	}
 	if err := education.ValidateUpdate(input); err != nil {
-		return err
+		return nil, err
 	}
 	entity := &education.Education{
 		ID:        existing.ID,
@@ -99,11 +93,7 @@ func (i *EducationInteractor) Update(ctx context.Context, rawUsername, education
 		StartYear: input.StartYear,
 		EndYear:   input.EndYear,
 	}
-	updated, err := i.repo.Update(ctx, entity)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentEducation(ctx, updated)
+	return i.repo.Update(ctx, entity)
 }
 
 func (i *EducationInteractor) Delete(ctx context.Context, rawUsername, educationID string) error {
@@ -121,16 +111,12 @@ func (i *EducationInteractor) Delete(ctx context.Context, rawUsername, education
 	return i.repo.Delete(ctx, existing.ID)
 }
 
-func (i *EducationInteractor) List(ctx context.Context, rawUsername string) error {
+func (i *EducationInteractor) List(ctx context.Context, rawUsername string) ([]*education.Education, error) {
 	u, err := i.resolveUser(ctx, rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	list, err := i.repo.ListByUserID(ctx, u.ID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentEducations(ctx, list)
+	return i.repo.ListByUserID(ctx, u.ID)
 }
 
 func (i *EducationInteractor) resolveUser(ctx context.Context, raw string) (*user.User, error) {

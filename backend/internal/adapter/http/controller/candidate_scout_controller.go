@@ -26,9 +26,7 @@ type CandidateScoutController struct {
 		convMsgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.ScoutOutputPort,
 	) port.ScoutInputPort
-	outputFactory          func() *presenter.ScoutPresenter
 	msgRepoFactory         func() port.ScoutMessageRepository
 	creditRepoFactory      func() port.ScoutCreditRepository
 	ledgerRepoFactory      func() port.ScoutCreditLedgerRepository
@@ -56,9 +54,7 @@ func NewCandidateScoutController(
 		convMsgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.ScoutOutputPort,
 	) port.ScoutInputPort,
-	outputFactory func() *presenter.ScoutPresenter,
 	msgRepoFactory func() port.ScoutMessageRepository,
 	creditRepoFactory func() port.ScoutCreditRepository,
 	ledgerRepoFactory func() port.ScoutCreditLedgerRepository,
@@ -73,7 +69,6 @@ func NewCandidateScoutController(
 ) *CandidateScoutController {
 	return &CandidateScoutController{
 		inputFactory:           inputFactory,
-		outputFactory:          outputFactory,
 		msgRepoFactory:         msgRepoFactory,
 		creditRepoFactory:      creditRepoFactory,
 		ledgerRepoFactory:      ledgerRepoFactory,
@@ -112,22 +107,22 @@ func (c *CandidateScoutController) List(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	input, p := c.newIO()
-	if err := input.ListByCandidate(ctx.Request().Context(), userID, limit, offset); err != nil {
+	msgs, total, err := c.newInput().ListByCandidate(ctx.Request().Context(), userID, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutMessagesResponse(msgs, total))
 }
 
 // GetDetail handles GET /api/scouts/:scoutID.
 func (c *CandidateScoutController) GetDetail(ctx echo.Context, scoutID string) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetReceivedDetail(ctx.Request().Context(), userID, scoutID); err != nil {
+	msg, replies, err := c.newInput().GetReceivedDetail(ctx.Request().Context(), userID, scoutID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.DetailResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutDetailResponse(msg, replies))
 }
 
 // Respond handles POST /api/scouts/:scoutID/respond.
@@ -139,8 +134,7 @@ func (c *CandidateScoutController) Respond(ctx echo.Context, scoutID string) err
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, _ := c.newIO()
-	if err := input.Respond(ctx.Request().Context(), userID, scoutID, scout.CandidateResponse(body.Response)); err != nil {
+	if err := c.newInput().Respond(ctx.Request().Context(), userID, scoutID, scout.CandidateResponse(body.Response)); err != nil {
 		return handleError(ctx, err)
 	}
 
@@ -166,11 +160,10 @@ func (c *CandidateScoutController) Reply(ctx echo.Context, scoutID string) error
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.CandidateReply(ctx.Request().Context(), userID, scoutID, body.Body); err != nil {
+	if err := c.newInput().CandidateReply(ctx.Request().Context(), userID, scoutID, body.Body); err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.DetailResponse())
+	return ctx.JSON(http.StatusCreated, nil)
 }
 
 // BulkDecline handles POST /api/scouts/bulk-decline.
@@ -182,8 +175,7 @@ func (c *CandidateScoutController) BulkDecline(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, _ := c.newIO()
-	if err := input.BulkDecline(ctx.Request().Context(), userID, body.ScoutIDs); err != nil {
+	if err := c.newInput().BulkDecline(ctx.Request().Context(), userID, body.ScoutIDs); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -203,16 +195,14 @@ func (c *CandidateScoutController) BulkRespond(ctx echo.Context) error {
 		return badRequest(ctx, "invalid response: must be 'interested' or 'declined'")
 	}
 
-	input, _ := c.newIO()
-	if err := input.BulkRespond(ctx.Request().Context(), userID, body.ScoutIDs, response); err != nil {
+	if err := c.newInput().BulkRespond(ctx.Request().Context(), userID, body.ScoutIDs, response); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (c *CandidateScoutController) newIO() (port.ScoutInputPort, *presenter.ScoutPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(
+func (c *CandidateScoutController) newInput() port.ScoutInputPort {
+	return c.inputFactory(
 		c.msgRepoFactory(),
 		c.creditRepoFactory(),
 		c.ledgerRepoFactory(),
@@ -224,7 +214,5 @@ func (c *CandidateScoutController) newIO() (port.ScoutInputPort, *presenter.Scou
 		c.convMsgRepoFactory(),
 		c.participantRepoFactory(),
 		c.tx,
-		output,
 	)
-	return input, output
 }

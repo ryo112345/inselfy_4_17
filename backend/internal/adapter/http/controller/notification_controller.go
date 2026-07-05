@@ -13,21 +13,18 @@ import (
 
 // NotificationController handles notification HTTP endpoints.
 type NotificationController struct {
-	inputFactory  func(repo port.NotificationRepository, output port.NotificationOutputPort) port.NotificationInputPort
-	outputFactory func() *presenter.NotificationPresenter
-	repoFactory   func() port.NotificationRepository
+	inputFactory func(repo port.NotificationRepository) port.NotificationInputPort
+	repoFactory  func() port.NotificationRepository
 }
 
 // NewNotificationController creates a NotificationController.
 func NewNotificationController(
-	inputFactory func(repo port.NotificationRepository, output port.NotificationOutputPort) port.NotificationInputPort,
-	outputFactory func() *presenter.NotificationPresenter,
+	inputFactory func(repo port.NotificationRepository) port.NotificationInputPort,
 	repoFactory func() port.NotificationRepository,
 ) *NotificationController {
 	return &NotificationController{
-		inputFactory:  inputFactory,
-		outputFactory: outputFactory,
-		repoFactory:   repoFactory,
+		inputFactory: inputFactory,
+		repoFactory:  repoFactory,
 	}
 }
 
@@ -38,11 +35,11 @@ func (c *NotificationController) ListByUser(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	input, p := c.newIO()
-	if err := input.ListByUser(ctx.Request().Context(), userID, limit, offset); err != nil {
+	ns, total, err := c.newInput().ListByUser(ctx.Request().Context(), userID, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.NotificationsResponse(ns, total))
 }
 
 // ListByCompany handles GET /api/company/notifications.
@@ -52,43 +49,39 @@ func (c *NotificationController) ListByCompany(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	input, p := c.newIO()
-	if err := input.ListByCompany(ctx.Request().Context(), companyID, limit, offset); err != nil {
+	ns, total, err := c.newInput().ListByCompany(ctx.Request().Context(), companyID, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.NotificationsResponse(ns, total))
 }
 
 // CountUnreadByUser handles GET /api/notifications/unread-count.
 func (c *NotificationController) CountUnreadByUser(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.CountUnreadByUser(ctx.Request().Context(), userID); err != nil {
+	count, err := c.newInput().CountUnreadByUser(ctx.Request().Context(), userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.CountResponse())
+	return ctx.JSON(http.StatusOK, presenter.NotificationUnreadCountResponse(count))
 }
 
 // CountUnreadByCompany handles GET /api/company/notifications/unread-count.
 func (c *NotificationController) CountUnreadByCompany(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.CountUnreadByCompany(ctx.Request().Context(), companyID); err != nil {
+	count, err := c.newInput().CountUnreadByCompany(ctx.Request().Context(), companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.CountResponse())
+	return ctx.JSON(http.StatusOK, presenter.NotificationUnreadCountResponse(count))
 }
 
 // MarkAsRead handles PUT /api/notifications/:id/read.
 func (c *NotificationController) MarkAsRead(ctx echo.Context, id string) error {
-	input, p := c.newIO()
-	if err := input.MarkAsRead(ctx.Request().Context(), id); err != nil {
+	if err := c.newInput().MarkAsRead(ctx.Request().Context(), id); err != nil {
 		return handleError(ctx, err)
-	}
-	if !p.IsOK() {
-		return ctx.NoContent(http.StatusInternalServerError)
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
@@ -97,12 +90,8 @@ func (c *NotificationController) MarkAsRead(ctx echo.Context, id string) error {
 func (c *NotificationController) MarkAllAsReadByUser(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.MarkAllAsReadByUser(ctx.Request().Context(), userID); err != nil {
+	if err := c.newInput().MarkAllAsReadByUser(ctx.Request().Context(), userID); err != nil {
 		return handleError(ctx, err)
-	}
-	if !p.IsOK() {
-		return ctx.NoContent(http.StatusInternalServerError)
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
@@ -111,18 +100,12 @@ func (c *NotificationController) MarkAllAsReadByUser(ctx echo.Context) error {
 func (c *NotificationController) MarkAllAsReadByCompany(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.MarkAllAsReadByCompany(ctx.Request().Context(), companyID); err != nil {
+	if err := c.newInput().MarkAllAsReadByCompany(ctx.Request().Context(), companyID); err != nil {
 		return handleError(ctx, err)
-	}
-	if !p.IsOK() {
-		return ctx.NoContent(http.StatusInternalServerError)
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (c *NotificationController) newIO() (port.NotificationInputPort, *presenter.NotificationPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), output)
-	return input, output
+func (c *NotificationController) newInput() port.NotificationInputPort {
+	return c.inputFactory(c.repoFactory())
 }

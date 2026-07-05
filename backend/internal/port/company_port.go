@@ -8,16 +8,10 @@ import (
 )
 
 type CompanyAuthInputPort interface {
-	Register(ctx context.Context, input company.RegisterInput) error
-	Login(ctx context.Context, email, password string) error
-	RefreshToken(ctx context.Context, refreshToken string) error
-	GetCurrentCompany(ctx context.Context, companyID string) error
-}
-
-type CompanyAuthOutputPort interface {
-	PresentTokenPair(ctx context.Context, pair *auth.TokenPair, c *company.CompanyAccount) error
-	PresentCompany(ctx context.Context, c *company.CompanyAccount) error
-	PresentRegistered(ctx context.Context, c *company.CompanyAccount) error
+	Register(ctx context.Context, input company.RegisterInput) (*company.CompanyAccount, error)
+	Login(ctx context.Context, email, password string) (*auth.TokenPair, *company.CompanyAccount, error)
+	RefreshToken(ctx context.Context, refreshToken string) (*auth.TokenPair, *company.CompanyAccount, error)
+	GetCurrentCompany(ctx context.Context, companyID string) (*company.CompanyAccount, error)
 }
 
 type CompanyAccountRepository interface {

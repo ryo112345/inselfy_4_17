@@ -35,15 +35,6 @@ func (s *userRepoStub) UpdateProfile(ctx context.Context, id string, in user.Upd
 	return s.updateProfile(ctx, id, in)
 }
 
-type userOutputStub struct {
-	presented *user.User
-}
-
-func (s *userOutputStub) PresentUser(_ context.Context, u *user.User) error {
-	s.presented = u
-	return nil
-}
-
 type experienceRepoStub struct {
 	createFn        func(ctx context.Context, e *experience.Experience) (*experience.Experience, error)
 	updateFn        func(ctx context.Context, e *experience.Experience) (*experience.Experience, error)
@@ -73,20 +64,6 @@ func (s *experienceRepoStub) CountByUserID(ctx context.Context, userID string) (
 		return 0, nil
 	}
 	return s.countByUserIDFn(ctx, userID)
-}
-
-type experienceOutputStub struct {
-	presentedSingle *experience.Experience
-	presentedList   []*experience.Experience
-}
-
-func (s *experienceOutputStub) PresentExperience(_ context.Context, e *experience.Experience) error {
-	s.presentedSingle = e
-	return nil
-}
-func (s *experienceOutputStub) PresentExperiences(_ context.Context, es []*experience.Experience) error {
-	s.presentedList = es
-	return nil
 }
 
 type skillRepoStub struct {
@@ -121,20 +98,6 @@ func (s *skillRepoStub) UserHasSkillName(ctx context.Context, userID, name strin
 		return false, nil
 	}
 	return s.userHasSkillNameFn(ctx, userID, name)
-}
-
-type skillOutputStub struct {
-	presentedSingle *skill.UserSkill
-	presentedList   []*skill.UserSkill
-}
-
-func (s *skillOutputStub) PresentSkill(_ context.Context, us *skill.UserSkill) error {
-	s.presentedSingle = us
-	return nil
-}
-func (s *skillOutputStub) PresentSkills(_ context.Context, list []*skill.UserSkill) error {
-	s.presentedList = list
-	return nil
 }
 
 // inlineTxManager runs fn within the same context (no real transaction). Good

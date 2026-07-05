@@ -24,9 +24,7 @@ type ScoutSettingsController struct {
 		convMsgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.ScoutOutputPort,
 	) port.ScoutInputPort
-	outputFactory          func() *presenter.ScoutPresenter
 	msgRepoFactory         func() port.ScoutMessageRepository
 	creditRepoFactory      func() port.ScoutCreditRepository
 	ledgerRepoFactory      func() port.ScoutCreditLedgerRepository
@@ -54,9 +52,7 @@ func NewScoutSettingsController(
 		convMsgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.ScoutOutputPort,
 	) port.ScoutInputPort,
-	outputFactory func() *presenter.ScoutPresenter,
 	msgRepoFactory func() port.ScoutMessageRepository,
 	creditRepoFactory func() port.ScoutCreditRepository,
 	ledgerRepoFactory func() port.ScoutCreditLedgerRepository,
@@ -71,7 +67,6 @@ func NewScoutSettingsController(
 ) *ScoutSettingsController {
 	return &ScoutSettingsController{
 		inputFactory:           inputFactory,
-		outputFactory:          outputFactory,
 		msgRepoFactory:         msgRepoFactory,
 		creditRepoFactory:      creditRepoFactory,
 		ledgerRepoFactory:      ledgerRepoFactory,
@@ -94,11 +89,11 @@ type updateScoutSettingsRequest struct {
 func (c *ScoutSettingsController) Get(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetScoutSettings(ctx.Request().Context(), userID); err != nil {
+	settings, err := c.newInput().GetScoutSettings(ctx.Request().Context(), userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SettingsResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutSettingsResponse(settings))
 }
 
 // Update handles PUT /api/scout-settings.
@@ -110,16 +105,15 @@ func (c *ScoutSettingsController) Update(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.UpdateScoutSettings(ctx.Request().Context(), userID, body.AcceptingScouts); err != nil {
+	settings, err := c.newInput().UpdateScoutSettings(ctx.Request().Context(), userID, body.AcceptingScouts)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SettingsResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutSettingsResponse(settings))
 }
 
-func (c *ScoutSettingsController) newIO() (port.ScoutInputPort, *presenter.ScoutPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(
+func (c *ScoutSettingsController) newInput() port.ScoutInputPort {
+	return c.inputFactory(
 		c.msgRepoFactory(),
 		c.creditRepoFactory(),
 		c.ledgerRepoFactory(),
@@ -131,7 +125,5 @@ func (c *ScoutSettingsController) newIO() (port.ScoutInputPort, *presenter.Scout
 		c.convMsgRepoFactory(),
 		c.participantRepoFactory(),
 		c.tx,
-		output,
 	)
-	return input, output
 }

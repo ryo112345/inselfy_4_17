@@ -18,7 +18,6 @@ type SkillInteractor struct {
 	repo     port.SkillRepository
 	userRepo port.UserRepository
 	tx       port.TxManager
-	output   port.SkillOutputPort
 }
 
 var _ port.SkillInputPort = (*SkillInteractor)(nil)
@@ -28,37 +27,36 @@ func NewSkillInteractor(
 	repo port.SkillRepository,
 	userRepo port.UserRepository,
 	tx port.TxManager,
-	output port.SkillOutputPort,
 ) *SkillInteractor {
-	return &SkillInteractor{repo: repo, userRepo: userRepo, tx: tx, output: output}
+	return &SkillInteractor{repo: repo, userRepo: userRepo, tx: tx}
 }
 
 // Attach adds a skill by name to the user. Idempotent at the DB layer (ON
 // CONFLICT DO NOTHING) but surfaces a conflict to the caller so the frontend
 // can distinguish "already attached" from "newly attached".
-func (i *SkillInteractor) Attach(ctx context.Context, rawUsername, rawName string) error {
+func (i *SkillInteractor) Attach(ctx context.Context, rawUsername, rawName string) (*skill.UserSkill, error) {
 	u, err := i.resolveUser(ctx, rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	name, err := skill.ValidateName(rawName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	has, err := i.repo.UserHasSkillName(ctx, u.ID, name)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if has {
-		return domainerr.ErrConflict
+		return nil, domainerr.ErrConflict
 	}
 	count, err := i.repo.CountByUserID(ctx, u.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if count >= skill.MaxPerUser {
-		return skill.ErrTooManyEntries
+		return nil, skill.ErrTooManyEntries
 	}
 
 	var attached *skill.UserSkill
@@ -83,9 +81,9 @@ func (i *SkillInteractor) Attach(ctx context.Context, rawUsername, rawName strin
 		return domainerr.ErrNotFound
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentSkill(ctx, attached)
+	return attached, nil
 }
 
 // DetachByName removes the user's attachment to a skill by skill name.
@@ -102,16 +100,12 @@ func (i *SkillInteractor) DetachByName(ctx context.Context, rawUsername, rawName
 }
 
 // List returns the user's attached skills.
-func (i *SkillInteractor) List(ctx context.Context, rawUsername string) error {
+func (i *SkillInteractor) List(ctx context.Context, rawUsername string) ([]*skill.UserSkill, error) {
 	u, err := i.resolveUser(ctx, rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	list, err := i.repo.ListByUserID(ctx, u.ID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentSkills(ctx, list)
+	return i.repo.ListByUserID(ctx, u.ID)
 }
 
 func (i *SkillInteractor) resolveUser(ctx context.Context, raw string) (*user.User, error) {

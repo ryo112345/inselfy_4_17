@@ -1,11 +1,9 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/follow"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type FollowUserResponse struct {
@@ -22,24 +20,13 @@ type FollowUserListResponse struct {
 	Total int                   `json:"total"`
 }
 
-type FollowPresenter struct {
-	status *follow.FollowStatus
-	list   *FollowUserListResponse
-	ok     bool
+// FollowStatusResponse converts a follow status to its API response.
+func FollowStatusResponse(status *follow.FollowStatus) any {
+	return status
 }
 
-var _ port.FollowOutputPort = (*FollowPresenter)(nil)
-
-func NewFollowPresenter() *FollowPresenter {
-	return &FollowPresenter{}
-}
-
-func (p *FollowPresenter) PresentFollowStatus(_ context.Context, status *follow.FollowStatus) error {
-	p.status = status
-	return nil
-}
-
-func (p *FollowPresenter) PresentFollowUsers(_ context.Context, users []*follow.FollowWithUser, total int) error {
+// FollowUsersResponse converts a list of follow users to their API response.
+func FollowUsersResponse(users []*follow.FollowWithUser, total int) any {
 	items := make([]*FollowUserResponse, len(users))
 	for i, u := range users {
 		items[i] = &FollowUserResponse{
@@ -51,23 +38,5 @@ func (p *FollowPresenter) PresentFollowUsers(_ context.Context, users []*follow.
 			CreatedAt: u.CreatedAt,
 		}
 	}
-	p.list = &FollowUserListResponse{Items: items, Total: total}
-	return nil
-}
-
-func (p *FollowPresenter) PresentOK(_ context.Context) error {
-	p.ok = true
-	return nil
-}
-
-func (p *FollowPresenter) StatusResponse() *follow.FollowStatus {
-	return p.status
-}
-
-func (p *FollowPresenter) ListResponse() *FollowUserListResponse {
-	return p.list
-}
-
-func (p *FollowPresenter) IsOK() bool {
-	return p.ok
+	return &FollowUserListResponse{Items: items, Total: total}
 }

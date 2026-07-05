@@ -18,9 +18,7 @@ type MessagingController struct {
 		msgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.MessagingOutputPort,
 	) port.MessagingInputPort
-	outputFactory          func() *presenter.MessagingPresenter
 	convRepoFactory        func() port.ConversationRepository
 	msgRepoFactory         func() port.MessageRepository
 	participantRepoFactory func() port.ConversationParticipantRepository
@@ -33,9 +31,7 @@ func NewMessagingController(
 		msgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.MessagingOutputPort,
 	) port.MessagingInputPort,
-	outputFactory func() *presenter.MessagingPresenter,
 	convRepoFactory func() port.ConversationRepository,
 	msgRepoFactory func() port.MessageRepository,
 	participantRepoFactory func() port.ConversationParticipantRepository,
@@ -43,7 +39,6 @@ func NewMessagingController(
 ) *MessagingController {
 	return &MessagingController{
 		inputFactory:           inputFactory,
-		outputFactory:          outputFactory,
 		convRepoFactory:        convRepoFactory,
 		msgRepoFactory:         msgRepoFactory,
 		participantRepoFactory: participantRepoFactory,
@@ -51,16 +46,13 @@ func NewMessagingController(
 	}
 }
 
-func (c *MessagingController) newIO() (port.MessagingInputPort, *presenter.MessagingPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(
+func (c *MessagingController) newInput() port.MessagingInputPort {
+	return c.inputFactory(
 		c.convRepoFactory(),
 		c.msgRepoFactory(),
 		c.participantRepoFactory(),
 		c.tx,
-		output,
 	)
-	return input, output
 }
 
 type startConversationRequest struct {
@@ -80,49 +72,49 @@ func (c *MessagingController) StartConversation(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.StartConversation(ctx.Request().Context(), messaging.StartConversationInput{
+	conv, err := c.newInput().StartConversation(ctx.Request().Context(), messaging.StartConversationInput{
 		CompanyID:   companyID,
 		CandidateID: body.CandidateID,
 		SenderType:  "company",
 		SenderID:    companyID,
 		Body:        body.Body,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.ConversationResponse())
+	return ctx.JSON(http.StatusCreated, presenter.MessagingConversationResponse(conv))
 }
 
 func (c *MessagingController) ListConversationsByCompany(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
 	limit, offset := parsePagination(ctx)
-	input, p := c.newIO()
-	if err := input.ListConversationsByCompany(ctx.Request().Context(), companyID, limit, offset); err != nil {
+	convs, total, err := c.newInput().ListConversationsByCompany(ctx.Request().Context(), companyID, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ConversationListResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingConversationsResponse(convs, total))
 }
 
 func (c *MessagingController) GetConversationAsCompany(ctx echo.Context, conversationID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetConversation(ctx.Request().Context(), conversationID, "company", companyID); err != nil {
+	conv, err := c.newInput().GetConversation(ctx.Request().Context(), conversationID, "company", companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ConversationResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingConversationResponse(conv))
 }
 
 func (c *MessagingController) ListMessagesAsCompany(ctx echo.Context, conversationID string) error {
 	companyID := authmw.CompanyID(ctx)
 
 	limit, offset := parsePagination(ctx)
-	input, p := c.newIO()
-	if err := input.ListMessages(ctx.Request().Context(), conversationID, "company", companyID, limit, offset); err != nil {
+	msgs, total, err := c.newInput().ListMessages(ctx.Request().Context(), conversationID, "company", companyID, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.MessageListResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingMessagesResponse(msgs, total))
 }
 
 func (c *MessagingController) SendMessageAsCompany(ctx echo.Context, conversationID string) error {
@@ -133,36 +125,35 @@ func (c *MessagingController) SendMessageAsCompany(ctx echo.Context, conversatio
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.SendMessage(ctx.Request().Context(), messaging.SendMessageInput{
+	msg, err := c.newInput().SendMessage(ctx.Request().Context(), messaging.SendMessageInput{
 		ConversationID: conversationID,
 		SenderType:     "company",
 		SenderID:       companyID,
 		Body:           body.Body,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.MessageResponse())
+	return ctx.JSON(http.StatusCreated, presenter.MessagingMessageResponse(msg))
 }
 
 func (c *MessagingController) MarkReadAsCompany(ctx echo.Context, conversationID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.MarkRead(ctx.Request().Context(), conversationID, "company", companyID); err != nil {
+	if err := c.newInput().MarkRead(ctx.Request().Context(), conversationID, "company", companyID); err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.OKResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingOKResponse())
 }
 
 func (c *MessagingController) CountUnreadByCompany(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.CountUnreadByCompany(ctx.Request().Context(), companyID); err != nil {
+	count, err := c.newInput().CountUnreadByCompany(ctx.Request().Context(), companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.UnreadCountResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingUnreadCountResponse(count))
 }
 
 type startCandidateConversationRequest struct {
@@ -178,47 +169,47 @@ func (c *MessagingController) StartCandidateConversation(ctx echo.Context) error
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.StartCandidateConversation(ctx.Request().Context(), messaging.StartCandidateConversationInput{
+	conv, err := c.newInput().StartCandidateConversation(ctx.Request().Context(), messaging.StartCandidateConversationInput{
 		SenderID:    userID,
 		RecipientID: body.RecipientID,
 		Body:        body.Body,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.ConversationResponse())
+	return ctx.JSON(http.StatusCreated, presenter.MessagingConversationResponse(conv))
 }
 
 func (c *MessagingController) ListConversationsByCandidate(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
 	limit, offset := parsePagination(ctx)
-	input, p := c.newIO()
-	if err := input.ListConversationsByCandidate(ctx.Request().Context(), userID, limit, offset); err != nil {
+	convs, total, err := c.newInput().ListConversationsByCandidate(ctx.Request().Context(), userID, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ConversationListResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingConversationsResponse(convs, total))
 }
 
 func (c *MessagingController) GetConversationAsCandidate(ctx echo.Context, conversationID string) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetConversation(ctx.Request().Context(), conversationID, "candidate", userID); err != nil {
+	conv, err := c.newInput().GetConversation(ctx.Request().Context(), conversationID, "candidate", userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ConversationResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingConversationResponse(conv))
 }
 
 func (c *MessagingController) ListMessagesAsCandidate(ctx echo.Context, conversationID string) error {
 	userID := authmw.UserID(ctx)
 
 	limit, offset := parsePagination(ctx)
-	input, p := c.newIO()
-	if err := input.ListMessages(ctx.Request().Context(), conversationID, "candidate", userID, limit, offset); err != nil {
+	msgs, total, err := c.newInput().ListMessages(ctx.Request().Context(), conversationID, "candidate", userID, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.MessageListResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingMessagesResponse(msgs, total))
 }
 
 func (c *MessagingController) SendMessageAsCandidate(ctx echo.Context, conversationID string) error {
@@ -229,36 +220,35 @@ func (c *MessagingController) SendMessageAsCandidate(ctx echo.Context, conversat
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.SendMessage(ctx.Request().Context(), messaging.SendMessageInput{
+	msg, err := c.newInput().SendMessage(ctx.Request().Context(), messaging.SendMessageInput{
 		ConversationID: conversationID,
 		SenderType:     "candidate",
 		SenderID:       userID,
 		Body:           body.Body,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.MessageResponse())
+	return ctx.JSON(http.StatusCreated, presenter.MessagingMessageResponse(msg))
 }
 
 func (c *MessagingController) MarkReadAsCandidate(ctx echo.Context, conversationID string) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.MarkRead(ctx.Request().Context(), conversationID, "candidate", userID); err != nil {
+	if err := c.newInput().MarkRead(ctx.Request().Context(), conversationID, "candidate", userID); err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.OKResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingOKResponse())
 }
 
 func (c *MessagingController) CountUnreadByCandidate(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.CountUnreadByCandidate(ctx.Request().Context(), userID); err != nil {
+	count, err := c.newInput().CountUnreadByCandidate(ctx.Request().Context(), userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.UnreadCountResponse())
+	return ctx.JSON(http.StatusOK, presenter.MessagingUnreadCountResponse(count))
 }
 
 func parsePagination(ctx echo.Context) (int, int) {

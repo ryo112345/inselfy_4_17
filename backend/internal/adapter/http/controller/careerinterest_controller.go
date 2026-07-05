@@ -16,9 +16,7 @@ type CareerInterestController struct {
 		resultRepo port.CareerInterestResultRepository,
 		basicScoreRepo port.CareerInterestBasicScoreRepository,
 		typeScoreRepo port.CareerInterestTypeScoreRepository,
-		output port.CareerInterestOutputPort,
 	) port.CareerInterestInputPort
-	outputFactory         func() *presenter.CareerInterestPresenter
 	sessionRepoFactory    func() port.CareerInterestSessionRepository
 	resultRepoFactory     func() port.CareerInterestResultRepository
 	basicScoreRepoFactory func() port.CareerInterestBasicScoreRepository
@@ -31,9 +29,7 @@ func NewCareerInterestController(
 		resultRepo port.CareerInterestResultRepository,
 		basicScoreRepo port.CareerInterestBasicScoreRepository,
 		typeScoreRepo port.CareerInterestTypeScoreRepository,
-		output port.CareerInterestOutputPort,
 	) port.CareerInterestInputPort,
-	outputFactory func() *presenter.CareerInterestPresenter,
 	sessionRepoFactory func() port.CareerInterestSessionRepository,
 	resultRepoFactory func() port.CareerInterestResultRepository,
 	basicScoreRepoFactory func() port.CareerInterestBasicScoreRepository,
@@ -41,7 +37,6 @@ func NewCareerInterestController(
 ) *CareerInterestController {
 	return &CareerInterestController{
 		inputFactory:          inputFactory,
-		outputFactory:         outputFactory,
 		sessionRepoFactory:    sessionRepoFactory,
 		resultRepoFactory:     resultRepoFactory,
 		basicScoreRepoFactory: basicScoreRepoFactory,
@@ -62,11 +57,11 @@ func (c *CareerInterestController) StartSession(ctx echo.Context) error {
 		return badRequest(ctx, "user_id is required")
 	}
 
-	in, p := c.newIO()
-	if err := in.StartSession(ctx.Request().Context(), body.UserID); err != nil {
+	s, err := c.newInput().StartSession(ctx.Request().Context(), body.UserID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.Session())
+	return ctx.JSON(http.StatusCreated, presenter.CareerInterestSessionResponse(s))
 }
 
 type ciSubmitResultRequest struct {
@@ -79,37 +74,35 @@ func (c *CareerInterestController) SubmitResult(ctx echo.Context, sessionID stri
 		return badRequest(ctx, "invalid body")
 	}
 
-	in, p := c.newIO()
 	input := careerinterest.SubmitInput{
 		Responses: body.Responses,
 	}
-	if err := in.SubmitResult(ctx.Request().Context(), sessionID, input); err != nil {
+	r, err := c.newInput().SubmitResult(ctx.Request().Context(), sessionID, input)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.Result())
+	return ctx.JSON(http.StatusCreated, presenter.CareerInterestResultResponse(r))
 }
 
 func (c *CareerInterestController) GetLatestResult(ctx echo.Context, userID string) error {
-	in, p := c.newIO()
-	if err := in.GetLatestResult(ctx.Request().Context(), userID); err != nil {
+	r, err := c.newInput().GetLatestResult(ctx.Request().Context(), userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Result())
+	return ctx.JSON(http.StatusOK, presenter.CareerInterestResultResponse(r))
 }
 
 func (c *CareerInterestController) GetResultBySessionID(ctx echo.Context, sessionID string) error {
-	in, p := c.newIO()
-	if err := in.GetResultBySessionID(ctx.Request().Context(), sessionID); err != nil {
+	r, err := c.newInput().GetResultBySessionID(ctx.Request().Context(), sessionID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Result())
+	return ctx.JSON(http.StatusOK, presenter.CareerInterestResultResponse(r))
 }
 
-func (c *CareerInterestController) newIO() (port.CareerInterestInputPort, *presenter.CareerInterestPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(
+func (c *CareerInterestController) newInput() port.CareerInterestInputPort {
+	return c.inputFactory(
 		c.sessionRepoFactory(), c.resultRepoFactory(),
-		c.basicScoreRepoFactory(), c.typeScoreRepoFactory(), output,
+		c.basicScoreRepoFactory(), c.typeScoreRepoFactory(),
 	)
-	return input, output
 }

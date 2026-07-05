@@ -17,7 +17,6 @@ type CompanyAuthInteractor struct {
 	refreshRepo port.CompanyRefreshTokenRepository
 	jwtService  port.JWTService
 	hasher      port.PasswordHasher
-	output      port.CompanyAuthOutputPort
 }
 
 var _ port.CompanyAuthInputPort = (*CompanyAuthInteractor)(nil)
@@ -27,30 +26,28 @@ func NewCompanyAuthInteractor(
 	refreshRepo port.CompanyRefreshTokenRepository,
 	jwtService port.JWTService,
 	hasher port.PasswordHasher,
-	output port.CompanyAuthOutputPort,
 ) *CompanyAuthInteractor {
 	return &CompanyAuthInteractor{
 		companyRepo: companyRepo,
 		refreshRepo: refreshRepo,
 		jwtService:  jwtService,
 		hasher:      hasher,
-		output:      output,
 	}
 }
 
-func (i *CompanyAuthInteractor) Register(ctx context.Context, input company.RegisterInput) error {
+func (i *CompanyAuthInteractor) Register(ctx context.Context, input company.RegisterInput) (*company.CompanyAccount, error) {
 	input.Email = strings.TrimSpace(input.Email)
 	input.CompanyName = strings.TrimSpace(input.CompanyName)
 	input.ContactPersonName = strings.TrimSpace(input.ContactPersonName)
 	input.PhoneNumber = strings.TrimSpace(input.PhoneNumber)
 
 	if err := company.ValidateRegistration(input); err != nil {
-		return err
+		return nil, err
 	}
 
 	hash, err := i.hasher.Hash(input.Password)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	account := &company.CompanyAccount{
@@ -64,74 +61,74 @@ func (i *CompanyAuthInteractor) Register(ctx context.Context, input company.Regi
 
 	created, err := i.companyRepo.Create(ctx, account)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return i.output.PresentRegistered(ctx, created)
+	return created, nil
 }
 
-func (i *CompanyAuthInteractor) Login(ctx context.Context, email, password string) error {
+func (i *CompanyAuthInteractor) Login(ctx context.Context, email, password string) (*auth.TokenPair, *company.CompanyAccount, error) {
 	account, err := i.companyRepo.GetByEmail(ctx, strings.TrimSpace(email))
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return company.ErrInvalidCredentials
+			return nil, nil, company.ErrInvalidCredentials
 		}
-		return err
+		return nil, nil, err
 	}
 
 	if err := i.hasher.Compare(account.PasswordHash, password); err != nil {
-		return company.ErrInvalidCredentials
+		return nil, nil, company.ErrInvalidCredentials
 	}
 
 	switch account.Status {
 	case company.StatusPending:
-		return company.ErrAccountPending
+		return nil, nil, company.ErrAccountPending
 	case company.StatusRejected:
-		return company.ErrAccountRejected
+		return nil, nil, company.ErrAccountRejected
 	}
 
 	return i.issueTokenPair(ctx, account)
 }
 
-func (i *CompanyAuthInteractor) RefreshToken(ctx context.Context, refreshToken string) error {
+func (i *CompanyAuthInteractor) RefreshToken(ctx context.Context, refreshToken string) (*auth.TokenPair, *company.CompanyAccount, error) {
 	hash := i.jwtService.HashRefreshToken(refreshToken)
 	rt, err := i.refreshRepo.GetByTokenHash(ctx, hash)
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return auth.ErrRefreshTokenRevoked
+			return nil, nil, auth.ErrRefreshTokenRevoked
 		}
-		return err
+		return nil, nil, err
 	}
 
 	if err := i.refreshRepo.RevokeByCompanyID(ctx, rt.CompanyID); err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	account, err := i.companyRepo.GetByID(ctx, rt.CompanyID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	return i.issueTokenPair(ctx, account)
 }
 
-func (i *CompanyAuthInteractor) GetCurrentCompany(ctx context.Context, companyID string) error {
+func (i *CompanyAuthInteractor) GetCurrentCompany(ctx context.Context, companyID string) (*company.CompanyAccount, error) {
 	account, err := i.companyRepo.GetByID(ctx, companyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentCompany(ctx, account)
+	return account, nil
 }
 
-func (i *CompanyAuthInteractor) issueTokenPair(ctx context.Context, account *company.CompanyAccount) error {
+func (i *CompanyAuthInteractor) issueTokenPair(ctx context.Context, account *company.CompanyAccount) (*auth.TokenPair, *company.CompanyAccount, error) {
 	accessToken, err := i.jwtService.GenerateCompanyAccessToken(account.ID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	rawRefresh, err := i.jwtService.GenerateRefreshToken()
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	rt := &company.CompanyRefreshToken{
@@ -140,12 +137,12 @@ func (i *CompanyAuthInteractor) issueTokenPair(ctx context.Context, account *com
 		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 	}
 	if err := i.refreshRepo.Create(ctx, rt); err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	pair := &auth.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: rawRefresh,
 	}
-	return i.output.PresentTokenPair(ctx, pair, account)
+	return pair, account, nil
 }

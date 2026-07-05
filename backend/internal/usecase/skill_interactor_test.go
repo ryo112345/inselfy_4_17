@@ -29,14 +29,14 @@ func TestSkillInteractor_Attach_HappyPath(t *testing.T) {
 	userRepo := &userRepoStub{
 		getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return owner, nil },
 	}
-	out := &skillOutputStub{}
-	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{}, out)
+	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{})
 
-	if err := it.Attach(ctx, "alice", "Go"); err != nil {
+	attached, err := it.Attach(ctx, "alice", "Go")
+	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
-	if out.presentedSingle == nil || out.presentedSingle.Name != "Go" {
-		t.Fatalf("presenter not invoked with skill")
+	if attached == nil || attached.Name != "Go" {
+		t.Fatalf("expected the attached skill to be returned")
 	}
 	if listCall == 0 {
 		t.Fatalf("list should be used to retrieve attachment timestamp")
@@ -52,9 +52,9 @@ func TestSkillInteractor_Attach_AlreadyAttached(t *testing.T) {
 	userRepo := &userRepoStub{
 		getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return owner, nil },
 	}
-	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{}, &skillOutputStub{})
+	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{})
 
-	err := it.Attach(ctx, "alice", "Go")
+	_, err := it.Attach(ctx, "alice", "Go")
 	if !errors.Is(err, domainerr.ErrConflict) {
 		t.Fatalf("expected ErrConflict, got %v", err)
 	}
@@ -72,9 +72,9 @@ func TestSkillInteractor_Attach_RejectsOverLimit(t *testing.T) {
 	userRepo := &userRepoStub{
 		getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return owner, nil },
 	}
-	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{}, &skillOutputStub{})
+	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{})
 
-	err := it.Attach(ctx, "alice", "Go")
+	_, err := it.Attach(ctx, "alice", "Go")
 	if !errors.Is(err, skill.ErrTooManyEntries) {
 		t.Fatalf("expected ErrTooManyEntries, got %v", err)
 	}

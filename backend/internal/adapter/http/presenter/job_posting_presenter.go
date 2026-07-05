@@ -1,11 +1,9 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/jobposting"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type jobPostingResponse struct {
@@ -62,37 +60,17 @@ type jobPostingListResponse struct {
 	Total int                   `json:"total"`
 }
 
-type JobPostingPresenter struct {
-	single        *jobPostingResponse
-	list          []*jobPostingResponse
-	paginatedList *jobPostingListResponse
-}
-
-var _ port.JobPostingOutputPort = (*JobPostingPresenter)(nil)
-
 // jobPostingConv is the goverter-generated entity→response mapper.
 // See job_posting_converter.go for its declaration.
 var jobPostingConv jobPostingConverter = &jobPostingConverterImpl{}
 
-func NewJobPostingPresenter() *JobPostingPresenter {
-	return &JobPostingPresenter{}
-}
+// JobPostingResponse converts a single job posting entity to its API response.
+func JobPostingResponse(j *jobposting.JobPosting) any { return jobPostingConv.ToResponse(j) }
 
-func (p *JobPostingPresenter) PresentJobPosting(_ context.Context, j *jobposting.JobPosting) error {
-	p.single = jobPostingConv.ToResponse(j)
-	return nil
-}
+// JobPostingsResponse converts a list of job posting entities to API responses.
+func JobPostingsResponse(js []*jobposting.JobPosting) any { return jobPostingConv.ToResponses(js) }
 
-func (p *JobPostingPresenter) PresentJobPostings(_ context.Context, js []*jobposting.JobPosting) error {
-	p.list = jobPostingConv.ToResponses(js)
-	return nil
-}
-
-func (p *JobPostingPresenter) SingleResponse() *jobPostingResponse        { return p.single }
-func (p *JobPostingPresenter) ListResponse() []*jobPostingResponse        { return p.list }
-func (p *JobPostingPresenter) PaginatedResponse() *jobPostingListResponse { return p.paginatedList }
-
-func (p *JobPostingPresenter) PresentJobPostingsPaginated(_ context.Context, js []*jobposting.JobPosting, total int) error {
-	p.paginatedList = &jobPostingListResponse{Items: jobPostingConv.ToResponses(js), Total: total}
-	return nil
+// JobPostingsPaginatedResponse converts a paginated list of job postings to its API response.
+func JobPostingsPaginatedResponse(js []*jobposting.JobPosting, total int) any {
+	return &jobPostingListResponse{Items: jobPostingConv.ToResponses(js), Total: total}
 }

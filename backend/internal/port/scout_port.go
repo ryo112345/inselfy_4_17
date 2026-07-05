@@ -8,35 +8,23 @@ import (
 )
 
 type ScoutInputPort interface {
-	Send(ctx context.Context, input scout.SendScoutInput) error
-	ListByCompany(ctx context.Context, companyID string, status *string, limit, offset int) error
-	GetDetail(ctx context.Context, companyID, scoutID string) error
-	GetCredits(ctx context.Context, companyID string) error
-	GetQualityScore(ctx context.Context, companyID string) error
+	Send(ctx context.Context, input scout.SendScoutInput) (*scout.ScoutMessageWithNames, error)
+	ListByCompany(ctx context.Context, companyID string, status *string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error)
+	GetDetail(ctx context.Context, companyID, scoutID string) (*scout.ScoutMessageWithNames, []*scout.ScoutReply, error)
+	GetCredits(ctx context.Context, companyID string) (*scout.ScoutCredit, error)
+	GetQualityScore(ctx context.Context, companyID string) (*scout.QualityScore, error)
 	CompanyReply(ctx context.Context, companyID, scoutID, body string) error
 
-	ListByCandidate(ctx context.Context, candidateID string, limit, offset int) error
-	GetReceivedDetail(ctx context.Context, candidateID, scoutID string) error
+	ListByCandidate(ctx context.Context, candidateID string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error)
+	GetReceivedDetail(ctx context.Context, candidateID, scoutID string) (*scout.ScoutMessageWithNames, []*scout.ScoutReply, error)
 	Respond(ctx context.Context, candidateID, scoutID string, response scout.CandidateResponse) error
 	CandidateReply(ctx context.Context, candidateID, scoutID, body string) error
 	BulkDecline(ctx context.Context, candidateID string, scoutIDs []string) error
 	BulkRespond(ctx context.Context, candidateID string, scoutIDs []string, response scout.CandidateResponse) error
 
-	UpdateScoutSettings(ctx context.Context, userID string, accepting bool) error
-	GetScoutSettings(ctx context.Context, userID string) error
-	GetDashboard(ctx context.Context, companyID string) error
-}
-
-type ScoutOutputPort interface {
-	PresentScoutMessage(ctx context.Context, m *scout.ScoutMessageWithNames) error
-	PresentScoutMessages(ctx context.Context, msgs []*scout.ScoutMessageWithNames, total int) error
-	PresentScoutDetail(ctx context.Context, m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) error
-	PresentCredits(ctx context.Context, c *scout.ScoutCredit) error
-	PresentQualityScore(ctx context.Context, q *scout.QualityScore) error
-	PresentScoutSettings(ctx context.Context, s *scout.UserScoutSettings) error
-	PresentReceivedDetail(ctx context.Context, m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) error
-	PresentDashboard(ctx context.Context, stats *scout.DashboardStats) error
-	PresentOK(ctx context.Context) error
+	UpdateScoutSettings(ctx context.Context, userID string, accepting bool) (*scout.UserScoutSettings, error)
+	GetScoutSettings(ctx context.Context, userID string) (*scout.UserScoutSettings, error)
+	GetDashboard(ctx context.Context, companyID string) (*scout.DashboardStats, error)
 }
 
 type ScoutMessageRepository interface {
@@ -86,12 +74,6 @@ type UserScoutSettingsRepository interface {
 
 // TalentSearchInputPort provides candidate search capabilities for companies.
 type TalentSearchInputPort interface {
-	Search(ctx context.Context, companyID string, keyword *string, skills []string, limit, offset int) error
-	GetProfile(ctx context.Context, userID string) error
-}
-
-// TalentSearchOutputPort renders search results.
-type TalentSearchOutputPort interface {
-	PresentCandidates(ctx context.Context, users []*user.User, total int) error
-	PresentCandidateProfile(ctx context.Context, u *user.User) error
+	Search(ctx context.Context, companyID string, keyword *string, skills []string, limit, offset int) ([]*user.User, int, error)
+	GetProfile(ctx context.Context, userID string) (*user.User, error)
 }

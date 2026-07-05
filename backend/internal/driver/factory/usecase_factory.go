@@ -11,16 +11,16 @@ func NewAuthInputFactory(
 	googleVerifier port.GoogleTokenVerifier,
 	jwtService port.JWTService,
 	googleClientID string,
-) func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository, output port.AuthOutputPort) port.AuthInputPort {
-	return func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository, output port.AuthOutputPort) port.AuthInputPort {
-		return usecase.NewAuthInteractor(userRepo, refreshRepo, googleVerifier, jwtService, output, googleClientID)
+) func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository) port.AuthInputPort {
+	return func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository) port.AuthInputPort {
+		return usecase.NewAuthInteractor(userRepo, refreshRepo, googleVerifier, jwtService, googleClientID)
 	}
 }
 
 // NewUserInputFactory returns a factory function that builds a UserInputPort.
-func NewUserInputFactory() func(repo port.UserRepository, output port.UserOutputPort) port.UserInputPort {
-	return func(repo port.UserRepository, output port.UserOutputPort) port.UserInputPort {
-		return usecase.NewUserInteractor(repo, output)
+func NewUserInputFactory() func(repo port.UserRepository) port.UserInputPort {
+	return func(repo port.UserRepository) port.UserInputPort {
+		return usecase.NewUserInteractor(repo)
 	}
 }
 
@@ -28,14 +28,12 @@ func NewUserInputFactory() func(repo port.UserRepository, output port.UserOutput
 func NewExperienceInputFactory() func(
 	repo port.ExperienceRepository,
 	userRepo port.UserRepository,
-	output port.ExperienceOutputPort,
 ) port.ExperienceInputPort {
 	return func(
 		repo port.ExperienceRepository,
 		userRepo port.UserRepository,
-		output port.ExperienceOutputPort,
 	) port.ExperienceInputPort {
-		return usecase.NewExperienceInteractor(repo, userRepo, output)
+		return usecase.NewExperienceInteractor(repo, userRepo)
 	}
 }
 
@@ -43,14 +41,12 @@ func NewExperienceInputFactory() func(
 func NewEducationInputFactory() func(
 	repo port.EducationRepository,
 	userRepo port.UserRepository,
-	output port.EducationOutputPort,
 ) port.EducationInputPort {
 	return func(
 		repo port.EducationRepository,
 		userRepo port.UserRepository,
-		output port.EducationOutputPort,
 	) port.EducationInputPort {
-		return usecase.NewEducationInteractor(repo, userRepo, output)
+		return usecase.NewEducationInteractor(repo, userRepo)
 	}
 }
 
@@ -59,15 +55,13 @@ func NewWorkValuesInputFactory() func(
 	sessionRepo port.WorkValuesSessionRepository,
 	resultRepo port.WorkValuesResultRepository,
 	scoreRepo port.WorkValuesScoreRepository,
-	output port.WorkValuesOutputPort,
 ) port.WorkValuesInputPort {
 	return func(
 		sessionRepo port.WorkValuesSessionRepository,
 		resultRepo port.WorkValuesResultRepository,
 		scoreRepo port.WorkValuesScoreRepository,
-		output port.WorkValuesOutputPort,
 	) port.WorkValuesInputPort {
-		return usecase.NewWorkValuesInteractor(sessionRepo, resultRepo, scoreRepo, output)
+		return usecase.NewWorkValuesInteractor(sessionRepo, resultRepo, scoreRepo)
 	}
 }
 
@@ -77,46 +71,42 @@ func NewCareerInterestInputFactory() func(
 	resultRepo port.CareerInterestResultRepository,
 	basicScoreRepo port.CareerInterestBasicScoreRepository,
 	typeScoreRepo port.CareerInterestTypeScoreRepository,
-	output port.CareerInterestOutputPort,
 ) port.CareerInterestInputPort {
 	return func(
 		sessionRepo port.CareerInterestSessionRepository,
 		resultRepo port.CareerInterestResultRepository,
 		basicScoreRepo port.CareerInterestBasicScoreRepository,
 		typeScoreRepo port.CareerInterestTypeScoreRepository,
-		output port.CareerInterestOutputPort,
 	) port.CareerInterestInputPort {
-		return usecase.NewCareerInterestInteractor(sessionRepo, resultRepo, basicScoreRepo, typeScoreRepo, output)
+		return usecase.NewCareerInterestInteractor(sessionRepo, resultRepo, basicScoreRepo, typeScoreRepo)
 	}
 }
 
 // NewPostInputFactory returns a factory function that builds a PostInputPort.
-func NewPostInputFactory() func(repo port.PostRepository, output port.PostOutputPort) port.PostInputPort {
-	return func(repo port.PostRepository, output port.PostOutputPort) port.PostInputPort {
-		return usecase.NewPostInteractor(repo, output)
+func NewPostInputFactory() func(repo port.PostRepository) port.PostInputPort {
+	return func(repo port.PostRepository) port.PostInputPort {
+		return usecase.NewPostInteractor(repo)
 	}
 }
 
 func NewCompanyAuthInputFactory(
 	jwtService port.JWTService,
-) func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort {
+) func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository) port.CompanyAuthInputPort {
 	hasher := bcryptgw.NewService()
-	return func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort {
-		return usecase.NewCompanyAuthInteractor(companyRepo, refreshRepo, jwtService, hasher, output)
+	return func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository) port.CompanyAuthInputPort {
+		return usecase.NewCompanyAuthInteractor(companyRepo, refreshRepo, jwtService, hasher)
 	}
 }
 
 func NewArticleInputFactory(stripeService port.StripeService) func(
 	repo port.ArticleRepository,
 	purchaseRepo port.ArticlePurchaseRepository,
-	output port.ArticleOutputPort,
 ) port.ArticleInputPort {
 	return func(
 		repo port.ArticleRepository,
 		purchaseRepo port.ArticlePurchaseRepository,
-		output port.ArticleOutputPort,
 	) port.ArticleInputPort {
-		return usecase.NewArticleInteractor(repo, purchaseRepo, stripeService, output)
+		return usecase.NewArticleInteractor(repo, purchaseRepo, stripeService)
 	}
 }
 
@@ -132,7 +122,6 @@ func NewScoutInputFactory() func(
 	convMsgRepo port.MessageRepository,
 	participantRepo port.ConversationParticipantRepository,
 	tx port.TxManager,
-	output port.ScoutOutputPort,
 ) port.ScoutInputPort {
 	return func(
 		msgRepo port.ScoutMessageRepository,
@@ -146,45 +135,38 @@ func NewScoutInputFactory() func(
 		convMsgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.ScoutOutputPort,
 	) port.ScoutInputPort {
-		return usecase.NewScoutInteractor(msgRepo, creditRepo, ledgerRepo, replyRepo, settingsRepo, notifRepo, userRepo, convRepo, convMsgRepo, participantRepo, tx, output)
+		return usecase.NewScoutInteractor(msgRepo, creditRepo, ledgerRepo, replyRepo, settingsRepo, notifRepo, userRepo, convRepo, convMsgRepo, participantRepo, tx)
 	}
 }
 
 func NewScoutTemplateInputFactory() func(
 	repo port.ScoutTemplateRepository,
-	output port.ScoutTemplateOutputPort,
 ) port.ScoutTemplateInputPort {
 	return func(
 		repo port.ScoutTemplateRepository,
-		output port.ScoutTemplateOutputPort,
 	) port.ScoutTemplateInputPort {
-		return usecase.NewScoutTemplateInteractor(repo, output)
+		return usecase.NewScoutTemplateInteractor(repo)
 	}
 }
 
 func NewNotificationInputFactory() func(
 	repo port.NotificationRepository,
-	output port.NotificationOutputPort,
 ) port.NotificationInputPort {
 	return func(
 		repo port.NotificationRepository,
-		output port.NotificationOutputPort,
 	) port.NotificationInputPort {
-		return usecase.NewNotificationInteractor(repo, output)
+		return usecase.NewNotificationInteractor(repo)
 	}
 }
 
 func NewJobPostingInputFactory() func(
 	repo port.JobPostingRepository,
-	output port.JobPostingOutputPort,
 ) port.JobPostingInputPort {
 	return func(
 		repo port.JobPostingRepository,
-		output port.JobPostingOutputPort,
 	) port.JobPostingInputPort {
-		return usecase.NewJobPostingInteractor(repo, output)
+		return usecase.NewJobPostingInteractor(repo)
 	}
 }
 
@@ -193,35 +175,31 @@ func NewSkillInputFactory() func(
 	repo port.SkillRepository,
 	userRepo port.UserRepository,
 	tx port.TxManager,
-	output port.SkillOutputPort,
 ) port.SkillInputPort {
 	return func(
 		repo port.SkillRepository,
 		userRepo port.UserRepository,
 		tx port.TxManager,
-		output port.SkillOutputPort,
 	) port.SkillInputPort {
-		return usecase.NewSkillInteractor(repo, userRepo, tx, output)
+		return usecase.NewSkillInteractor(repo, userRepo, tx)
 	}
 }
 
-func NewFollowInputFactory() func(repo port.FollowRepository, userRepo port.UserRepository, output port.FollowOutputPort) port.FollowInputPort {
-	return func(repo port.FollowRepository, userRepo port.UserRepository, output port.FollowOutputPort) port.FollowInputPort {
-		return usecase.NewFollowInteractor(repo, userRepo, output)
+func NewFollowInputFactory() func(repo port.FollowRepository, userRepo port.UserRepository) port.FollowInputPort {
+	return func(repo port.FollowRepository, userRepo port.UserRepository) port.FollowInputPort {
+		return usecase.NewFollowInteractor(repo, userRepo)
 	}
 }
 
 func NewJobApplicationInputFactory() func(
 	repo port.JobApplicationRepository,
 	jobRepo port.JobPostingRepository,
-	output port.JobApplicationOutputPort,
 ) port.JobApplicationInputPort {
 	return func(
 		repo port.JobApplicationRepository,
 		jobRepo port.JobPostingRepository,
-		output port.JobApplicationOutputPort,
 	) port.JobApplicationInputPort {
-		return usecase.NewJobApplicationInteractor(repo, jobRepo, output)
+		return usecase.NewJobApplicationInteractor(repo, jobRepo)
 	}
 }
 
@@ -230,15 +208,13 @@ func NewMessagingInputFactory() func(
 	msgRepo port.MessageRepository,
 	participantRepo port.ConversationParticipantRepository,
 	tx port.TxManager,
-	output port.MessagingOutputPort,
 ) port.MessagingInputPort {
 	return func(
 		convRepo port.ConversationRepository,
 		msgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.MessagingOutputPort,
 	) port.MessagingInputPort {
-		return usecase.NewMessagingInteractor(convRepo, msgRepo, participantRepo, tx, output)
+		return usecase.NewMessagingInteractor(convRepo, msgRepo, participantRepo, tx)
 	}
 }

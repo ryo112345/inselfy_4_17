@@ -20,29 +20,28 @@ func TestUserInteractor_Create(t *testing.T) {
 				return u, nil
 			},
 		}
-		out := &userOutputStub{}
-		it := usecase.NewUserInteractor(repo, out)
+		it := usecase.NewUserInteractor(repo)
 
-		err := it.Create(ctx, user.CreateUserInput{Name: "Alice", Username: "alice"})
+		created, err := it.Create(ctx, user.CreateUserInput{Name: "Alice", Username: "alice"})
 		if err != nil {
 			t.Fatalf("unexpected err: %v", err)
 		}
-		if out.presented == nil || out.presented.ID != "00000000-0000-0000-0000-000000000001" {
-			t.Fatalf("expected presenter to be invoked with the created user")
+		if created == nil || created.ID != "00000000-0000-0000-0000-000000000001" {
+			t.Fatalf("expected the created user to be returned")
 		}
 	})
 
 	t.Run("invalid username", func(t *testing.T) {
-		it := usecase.NewUserInteractor(&userRepoStub{}, &userOutputStub{})
-		err := it.Create(ctx, user.CreateUserInput{Name: "Alice", Username: "x"})
+		it := usecase.NewUserInteractor(&userRepoStub{})
+		_, err := it.Create(ctx, user.CreateUserInput{Name: "Alice", Username: "x"})
 		if !errors.Is(err, user.ErrInvalidUsername) {
 			t.Fatalf("expected ErrInvalidUsername, got %v", err)
 		}
 	})
 
 	t.Run("empty name", func(t *testing.T) {
-		it := usecase.NewUserInteractor(&userRepoStub{}, &userOutputStub{})
-		err := it.Create(ctx, user.CreateUserInput{Name: " ", Username: "alice"})
+		it := usecase.NewUserInteractor(&userRepoStub{})
+		_, err := it.Create(ctx, user.CreateUserInput{Name: " ", Username: "alice"})
 		if !errors.Is(err, user.ErrNameRequired) {
 			t.Fatalf("expected ErrNameRequired, got %v", err)
 		}
@@ -67,12 +66,11 @@ func TestUserInteractor_UpdateProfile(t *testing.T) {
 				return &returned, nil
 			},
 		}
-		out := &userOutputStub{}
-		it := usecase.NewUserInteractor(repo, out)
+		it := usecase.NewUserInteractor(repo)
 
 		hl := "Backend Engineer"
 		input := user.UpdateProfileInput{Headline: ptrPtrString(&hl)}
-		if err := it.UpdateProfile(ctx, "alice", input); err != nil {
+		if _, err := it.UpdateProfile(ctx, "alice", input); err != nil {
 			t.Fatalf("unexpected err: %v", err)
 		}
 		if received.Name != nil {
@@ -87,8 +85,8 @@ func TestUserInteractor_UpdateProfile(t *testing.T) {
 		repo := &userRepoStub{
 			getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return nil, domainerr.ErrNotFound },
 		}
-		it := usecase.NewUserInteractor(repo, &userOutputStub{})
-		err := it.UpdateProfile(ctx, "ghost", user.UpdateProfileInput{})
+		it := usecase.NewUserInteractor(repo)
+		_, err := it.UpdateProfile(ctx, "ghost", user.UpdateProfileInput{})
 		if !errors.Is(err, domainerr.ErrNotFound) {
 			t.Fatalf("expected ErrNotFound, got %v", err)
 		}
@@ -102,9 +100,9 @@ func TestUserInteractor_UpdateProfile(t *testing.T) {
 				return existing, nil
 			},
 		}
-		it := usecase.NewUserInteractor(repo, &userOutputStub{})
+		it := usecase.NewUserInteractor(repo)
 		bad := "not-a-color"
-		err := it.UpdateProfile(ctx, "alice", user.UpdateProfileInput{ProfileColor: ptrPtrString(&bad)})
+		_, err := it.UpdateProfile(ctx, "alice", user.UpdateProfileInput{ProfileColor: ptrPtrString(&bad)})
 		if !errors.Is(err, user.ErrInvalidProfileColor) {
 			t.Fatalf("expected ErrInvalidProfileColor, got %v", err)
 		}

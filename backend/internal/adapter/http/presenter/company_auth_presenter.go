@@ -1,19 +1,11 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
-
-type CompanyAuthPresenter struct {
-	tokenResponse      *CompanyAuthTokenResponse
-	companyResponse    *CompanyResponse
-	registeredResponse *CompanyResponse
-}
 
 type CompanyAuthTokenResponse struct {
 	AccessToken  string
@@ -31,41 +23,23 @@ type CompanyResponse struct {
 	CreatedAt         time.Time `json:"createdAt"`
 }
 
-var _ port.CompanyAuthOutputPort = (*CompanyAuthPresenter)(nil)
-
-func NewCompanyAuthPresenter() *CompanyAuthPresenter {
-	return &CompanyAuthPresenter{}
-}
-
-func (p *CompanyAuthPresenter) PresentTokenPair(_ context.Context, pair *auth.TokenPair, c *company.CompanyAccount) error {
-	p.tokenResponse = &CompanyAuthTokenResponse{
+// CompanyTokenResponse builds the token-pair API response (with embedded company).
+func CompanyTokenResponse(pair *auth.TokenPair, c *company.CompanyAccount) any {
+	return &CompanyAuthTokenResponse{
 		AccessToken:  pair.AccessToken,
 		RefreshToken: pair.RefreshToken,
 		Company:      toCompanyResponse(c),
 	}
-	return nil
 }
 
-func (p *CompanyAuthPresenter) PresentCompany(_ context.Context, c *company.CompanyAccount) error {
-	p.companyResponse = toCompanyResponse(c)
-	return nil
+// CompanyMeResponse builds the current-company API response.
+func CompanyMeResponse(c *company.CompanyAccount) any {
+	return toCompanyResponse(c)
 }
 
-func (p *CompanyAuthPresenter) PresentRegistered(_ context.Context, c *company.CompanyAccount) error {
-	p.registeredResponse = toCompanyResponse(c)
-	return nil
-}
-
-func (p *CompanyAuthPresenter) TokenResponse() *CompanyAuthTokenResponse {
-	return p.tokenResponse
-}
-
-func (p *CompanyAuthPresenter) CompanyResponse() *CompanyResponse {
-	return p.companyResponse
-}
-
-func (p *CompanyAuthPresenter) RegisteredResponse() *CompanyResponse {
-	return p.registeredResponse
+// CompanyRegisteredResponse builds the newly-registered-company API response.
+func CompanyRegisteredResponse(c *company.CompanyAccount) any {
+	return toCompanyResponse(c)
 }
 
 func toCompanyResponse(c *company.CompanyAccount) *CompanyResponse {

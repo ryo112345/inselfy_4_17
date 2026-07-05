@@ -7,20 +7,13 @@ import (
 )
 
 type JobApplicationInputPort interface {
-	Apply(ctx context.Context, input jobapplication.ApplyInput) error
-	ListByCompany(ctx context.Context, companyID string, filter jobapplication.ListFilter) error
-	ListByCandidate(ctx context.Context, candidateID string) error
-	GetByID(ctx context.Context, companyID, applicationID string) error
+	Apply(ctx context.Context, input jobapplication.ApplyInput) (*jobapplication.JobApplicationWithDetails, error)
+	ListByCompany(ctx context.Context, companyID string, filter jobapplication.ListFilter) ([]*jobapplication.JobApplicationWithDetails, int, error)
+	ListByCandidate(ctx context.Context, candidateID string) ([]*jobapplication.JobApplicationWithDetails, int, error)
+	GetByID(ctx context.Context, companyID, applicationID string) (*jobapplication.JobApplicationWithDetails, error)
 	UpdateStatus(ctx context.Context, companyID, applicationID string, status jobapplication.Status) error
 	Withdraw(ctx context.Context, candidateID, applicationID string) error
-	CheckApplied(ctx context.Context, candidateID, jobPostingID string) error
-}
-
-type JobApplicationOutputPort interface {
-	PresentJobApplication(ctx context.Context, a *jobapplication.JobApplicationWithDetails) error
-	PresentJobApplications(ctx context.Context, apps []*jobapplication.JobApplicationWithDetails, total int) error
-	PresentApplied(ctx context.Context, applied bool) error
-	PresentOK(ctx context.Context) error
+	CheckApplied(ctx context.Context, candidateID, jobPostingID string) (bool, error)
 }
 
 type JobApplicationRepository interface {

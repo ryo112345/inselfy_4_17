@@ -18,33 +18,28 @@ import (
 )
 
 type JobApplicationController struct {
-	inputFactory   func(repo port.JobApplicationRepository, jobRepo port.JobPostingRepository, output port.JobApplicationOutputPort) port.JobApplicationInputPort
-	outputFactory  func() *presenter.JobApplicationPresenter
+	inputFactory   func(repo port.JobApplicationRepository, jobRepo port.JobPostingRepository) port.JobApplicationInputPort
 	repoFactory    func() port.JobApplicationRepository
 	jobRepoFactory func() port.JobPostingRepository
 	pool           *pgxpool.Pool
 }
 
 func NewJobApplicationController(
-	inputFactory func(repo port.JobApplicationRepository, jobRepo port.JobPostingRepository, output port.JobApplicationOutputPort) port.JobApplicationInputPort,
-	outputFactory func() *presenter.JobApplicationPresenter,
+	inputFactory func(repo port.JobApplicationRepository, jobRepo port.JobPostingRepository) port.JobApplicationInputPort,
 	repoFactory func() port.JobApplicationRepository,
 	jobRepoFactory func() port.JobPostingRepository,
 	pool *pgxpool.Pool,
 ) *JobApplicationController {
 	return &JobApplicationController{
 		inputFactory:   inputFactory,
-		outputFactory:  outputFactory,
 		repoFactory:    repoFactory,
 		jobRepoFactory: jobRepoFactory,
 		pool:           pool,
 	}
 }
 
-func (c *JobApplicationController) newIO() (port.JobApplicationInputPort, *presenter.JobApplicationPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), c.jobRepoFactory(), output)
-	return input, output
+func (c *JobApplicationController) newInput() port.JobApplicationInputPort {
+	return c.inputFactory(c.repoFactory(), c.jobRepoFactory())
 }
 
 type applyRequest struct {
@@ -67,15 +62,15 @@ func (c *JobApplicationController) Apply(ctx echo.Context) error {
 		return badRequest(ctx, "jobPostingId is required")
 	}
 
-	input, p := c.newIO()
-	if err := input.Apply(ctx.Request().Context(), jobapplication.ApplyInput{
+	a, err := c.newInput().Apply(ctx.Request().Context(), jobapplication.ApplyInput{
 		JobPostingID: body.JobPostingID,
 		CandidateID:  userID,
 		Message:      body.Message,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.SingleResponse())
+	return ctx.JSON(http.StatusCreated, presenter.JobApplicationSingleResponse(a))
 }
 
 func (c *JobApplicationController) ListByCompany(ctx echo.Context) error {
@@ -104,11 +99,11 @@ func (c *JobApplicationController) ListByCompany(ctx echo.Context) error {
 	filter.Limit, _ = strconv.Atoi(ctx.QueryParam("limit"))
 	filter.Offset, _ = strconv.Atoi(ctx.QueryParam("offset"))
 
-	input, p := c.newIO()
-	if err := input.ListByCompany(ctx.Request().Context(), companyID, filter); err != nil {
+	apps, total, err := c.newInput().ListByCompany(ctx.Request().Context(), companyID, filter)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	resp := p.ListResponse()
+	resp := presenter.JobApplicationsListResponse(apps, total).(*presenter.JobApplicationListResponse)
 	c.enrichWithSimilarity(ctx.Request().Context(), companyID, resp.Items)
 	return ctx.JSON(http.StatusOK, resp)
 }
@@ -116,21 +111,21 @@ func (c *JobApplicationController) ListByCompany(ctx echo.Context) error {
 func (c *JobApplicationController) ListByCandidate(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.ListByCandidate(ctx.Request().Context(), userID); err != nil {
+	apps, total, err := c.newInput().ListByCandidate(ctx.Request().Context(), userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.JobApplicationsListResponse(apps, total))
 }
 
 func (c *JobApplicationController) GetByID(ctx echo.Context, applicationID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetByID(ctx.Request().Context(), companyID, applicationID); err != nil {
+	a, err := c.newInput().GetByID(ctx.Request().Context(), companyID, applicationID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.JobApplicationSingleResponse(a))
 }
 
 func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID string) error {
@@ -141,22 +136,18 @@ func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID 
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(body.Status)); err != nil {
+	if err := c.newInput().UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(body.Status)); err != nil {
 		return handleError(ctx, err)
 	}
-	_ = p
 	return ctx.JSON(http.StatusOK, map[string]string{"status": "ok"})
 }
 
 func (c *JobApplicationController) Withdraw(ctx echo.Context, applicationID string) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.Withdraw(ctx.Request().Context(), userID, applicationID); err != nil {
+	if err := c.newInput().Withdraw(ctx.Request().Context(), userID, applicationID); err != nil {
 		return handleError(ctx, err)
 	}
-	_ = p
 	return ctx.JSON(http.StatusOK, map[string]string{"status": "ok"})
 }
 
@@ -168,11 +159,11 @@ func (c *JobApplicationController) CheckApplied(ctx echo.Context) error {
 		return badRequest(ctx, "jobPostingId is required")
 	}
 
-	input, p := c.newIO()
-	if err := input.CheckApplied(ctx.Request().Context(), userID, jobPostingID); err != nil {
+	applied, err := c.newInput().CheckApplied(ctx.Request().Context(), userID, jobPostingID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.AppliedResponse())
+	return ctx.JSON(http.StatusOK, presenter.JobApplicationAppliedResponse(applied))
 }
 
 const (

@@ -15,9 +15,7 @@ type WorkValuesController struct {
 		sessionRepo port.WorkValuesSessionRepository,
 		resultRepo port.WorkValuesResultRepository,
 		scoreRepo port.WorkValuesScoreRepository,
-		output port.WorkValuesOutputPort,
 	) port.WorkValuesInputPort
-	outputFactory      func() *presenter.WorkValuesPresenter
 	sessionRepoFactory func() port.WorkValuesSessionRepository
 	resultRepoFactory  func() port.WorkValuesResultRepository
 	scoreRepoFactory   func() port.WorkValuesScoreRepository
@@ -28,16 +26,13 @@ func NewWorkValuesController(
 		sessionRepo port.WorkValuesSessionRepository,
 		resultRepo port.WorkValuesResultRepository,
 		scoreRepo port.WorkValuesScoreRepository,
-		output port.WorkValuesOutputPort,
 	) port.WorkValuesInputPort,
-	outputFactory func() *presenter.WorkValuesPresenter,
 	sessionRepoFactory func() port.WorkValuesSessionRepository,
 	resultRepoFactory func() port.WorkValuesResultRepository,
 	scoreRepoFactory func() port.WorkValuesScoreRepository,
 ) *WorkValuesController {
 	return &WorkValuesController{
 		inputFactory:       inputFactory,
-		outputFactory:      outputFactory,
 		sessionRepoFactory: sessionRepoFactory,
 		resultRepoFactory:  resultRepoFactory,
 		scoreRepoFactory:   scoreRepoFactory,
@@ -57,11 +52,11 @@ func (c *WorkValuesController) StartSession(ctx echo.Context) error {
 		return badRequest(ctx, "user_id is required")
 	}
 
-	in, p := c.newIO()
-	if err := in.StartSession(ctx.Request().Context(), body.UserID); err != nil {
+	s, err := c.newInput().StartSession(ctx.Request().Context(), body.UserID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.Session())
+	return ctx.JSON(http.StatusCreated, presenter.WorkValuesSessionResponse(s))
 }
 
 type submitResultRequest struct {
@@ -76,36 +71,34 @@ func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) 
 		return badRequest(ctx, "invalid body")
 	}
 
-	in, p := c.newIO()
 	input := workvalues.SubmitInput{
 		Responses: body.Responses,
 		Mu:        body.Mu,
 		SE:        body.SE,
 	}
-	if err := in.SubmitResult(ctx.Request().Context(), sessionID, input); err != nil {
+	r, err := c.newInput().SubmitResult(ctx.Request().Context(), sessionID, input)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.Result())
+	return ctx.JSON(http.StatusCreated, presenter.WorkValuesResultResponse(r))
 }
 
 func (c *WorkValuesController) GetLatestResult(ctx echo.Context, userID string) error {
-	in, p := c.newIO()
-	if err := in.GetLatestResult(ctx.Request().Context(), userID); err != nil {
+	r, err := c.newInput().GetLatestResult(ctx.Request().Context(), userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Result())
+	return ctx.JSON(http.StatusOK, presenter.WorkValuesResultResponse(r))
 }
 
 func (c *WorkValuesController) GetResultBySessionID(ctx echo.Context, sessionID string) error {
-	in, p := c.newIO()
-	if err := in.GetResultBySessionID(ctx.Request().Context(), sessionID); err != nil {
+	r, err := c.newInput().GetResultBySessionID(ctx.Request().Context(), sessionID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Result())
+	return ctx.JSON(http.StatusOK, presenter.WorkValuesResultResponse(r))
 }
 
-func (c *WorkValuesController) newIO() (port.WorkValuesInputPort, *presenter.WorkValuesPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.sessionRepoFactory(), c.resultRepoFactory(), c.scoreRepoFactory(), output)
-	return input, output
+func (c *WorkValuesController) newInput() port.WorkValuesInputPort {
+	return c.inputFactory(c.sessionRepoFactory(), c.resultRepoFactory(), c.scoreRepoFactory())
 }

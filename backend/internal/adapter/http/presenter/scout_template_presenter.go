@@ -1,11 +1,9 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type templateResponse struct {
@@ -18,33 +16,17 @@ type templateResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-type ScoutTemplatePresenter struct {
-	single *templateResponse
-	list   []*templateResponse
-}
+// ScoutTemplateResponse converts a single scout template entity to its API response.
+func ScoutTemplateResponse(t *scout.ScoutTemplate) any { return toTemplateResponse(t) }
 
-var _ port.ScoutTemplateOutputPort = (*ScoutTemplatePresenter)(nil)
-
-func NewScoutTemplatePresenter() *ScoutTemplatePresenter {
-	return &ScoutTemplatePresenter{}
-}
-
-func (p *ScoutTemplatePresenter) PresentTemplate(_ context.Context, t *scout.ScoutTemplate) error {
-	p.single = toTemplateResponse(t)
-	return nil
-}
-
-func (p *ScoutTemplatePresenter) PresentTemplates(_ context.Context, ts []*scout.ScoutTemplate) error {
+// ScoutTemplatesResponse converts a list of scout template entities to their API response.
+func ScoutTemplatesResponse(ts []*scout.ScoutTemplate) any {
 	items := make([]*templateResponse, len(ts))
 	for i, t := range ts {
 		items[i] = toTemplateResponse(t)
 	}
-	p.list = items
-	return nil
+	return items
 }
-
-func (p *ScoutTemplatePresenter) SingleResponse() *templateResponse   { return p.single }
-func (p *ScoutTemplatePresenter) ListResponse() []*templateResponse   { return p.list }
 
 func toTemplateResponse(t *scout.ScoutTemplate) *templateResponse {
 	return &templateResponse{

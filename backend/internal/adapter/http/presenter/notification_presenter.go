@@ -1,11 +1,9 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/notification"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type notificationResponse struct {
@@ -27,19 +25,8 @@ type unreadCountResponse struct {
 	Count int `json:"count"`
 }
 
-type NotificationPresenter struct {
-	list   *notificationListResponse
-	count  *unreadCountResponse
-	ok     bool
-}
-
-var _ port.NotificationOutputPort = (*NotificationPresenter)(nil)
-
-func NewNotificationPresenter() *NotificationPresenter {
-	return &NotificationPresenter{}
-}
-
-func (p *NotificationPresenter) PresentNotifications(_ context.Context, ns []*notification.Notification, total int) error {
+// NotificationsResponse converts a list of notification entities to their API response.
+func NotificationsResponse(ns []*notification.Notification, total int) any {
 	items := make([]*notificationResponse, len(ns))
 	for i, n := range ns {
 		items[i] = &notificationResponse{
@@ -52,20 +39,10 @@ func (p *NotificationPresenter) PresentNotifications(_ context.Context, ns []*no
 			CreatedAt:   n.CreatedAt,
 		}
 	}
-	p.list = &notificationListResponse{Items: items, Total: total}
-	return nil
+	return &notificationListResponse{Items: items, Total: total}
 }
 
-func (p *NotificationPresenter) PresentUnreadCount(_ context.Context, count int) error {
-	p.count = &unreadCountResponse{Count: count}
-	return nil
+// NotificationUnreadCountResponse converts an unread count to its API response.
+func NotificationUnreadCountResponse(count int) any {
+	return &unreadCountResponse{Count: count}
 }
-
-func (p *NotificationPresenter) PresentOK(_ context.Context) error {
-	p.ok = true
-	return nil
-}
-
-func (p *NotificationPresenter) ListResponse() *notificationListResponse { return p.list }
-func (p *NotificationPresenter) CountResponse() *unreadCountResponse     { return p.count }
-func (p *NotificationPresenter) IsOK() bool                              { return p.ok }

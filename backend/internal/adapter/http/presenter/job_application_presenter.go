@@ -1,11 +1,9 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type JobApplicationResponse struct {
@@ -40,44 +38,21 @@ type appliedResponse struct {
 	Applied bool `json:"applied"`
 }
 
-type JobApplicationPresenter struct {
-	single  *JobApplicationResponse
-	list    *JobApplicationListResponse
-	applied *appliedResponse
-	ok      bool
-}
-
-var _ port.JobApplicationOutputPort = (*JobApplicationPresenter)(nil)
-
-func NewJobApplicationPresenter() *JobApplicationPresenter {
-	return &JobApplicationPresenter{}
-}
-
 // jobApplicationConv is the goverter-generated read-model→response mapper.
 // See job_application_converter.go for its declaration.
 var jobApplicationConv jobApplicationConverter = &jobApplicationConverterImpl{}
 
-func (p *JobApplicationPresenter) PresentJobApplication(_ context.Context, a *jobapplication.JobApplicationWithDetails) error {
-	p.single = jobApplicationConv.ToResponse(a)
-	return nil
+// JobApplicationSingleResponse converts a single job application to its API response.
+func JobApplicationSingleResponse(a *jobapplication.JobApplicationWithDetails) any {
+	return jobApplicationConv.ToResponse(a)
 }
 
-func (p *JobApplicationPresenter) PresentJobApplications(_ context.Context, apps []*jobapplication.JobApplicationWithDetails, total int) error {
-	p.list = &JobApplicationListResponse{Items: jobApplicationConv.ToResponses(apps), Total: total}
-	return nil
+// JobApplicationsListResponse converts a paginated list of job applications to its API response.
+func JobApplicationsListResponse(apps []*jobapplication.JobApplicationWithDetails, total int) any {
+	return &JobApplicationListResponse{Items: jobApplicationConv.ToResponses(apps), Total: total}
 }
 
-func (p *JobApplicationPresenter) PresentApplied(_ context.Context, applied bool) error {
-	p.applied = &appliedResponse{Applied: applied}
-	return nil
+// JobApplicationAppliedResponse builds the applied-check API response.
+func JobApplicationAppliedResponse(applied bool) any {
+	return &appliedResponse{Applied: applied}
 }
-
-func (p *JobApplicationPresenter) PresentOK(_ context.Context) error {
-	p.ok = true
-	return nil
-}
-
-func (p *JobApplicationPresenter) SingleResponse() *JobApplicationResponse   { return p.single }
-func (p *JobApplicationPresenter) ListResponse() *JobApplicationListResponse { return p.list }
-func (p *JobApplicationPresenter) AppliedResponse() *appliedResponse         { return p.applied }
-func (p *JobApplicationPresenter) IsOK() bool                                { return p.ok }

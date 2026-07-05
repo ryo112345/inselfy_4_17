@@ -1,11 +1,9 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type conversationResponse struct {
@@ -50,65 +48,43 @@ type messagingUnreadCountResponse struct {
 	Count int `json:"count"`
 }
 
-type MessagingPresenter struct {
-	conversation  *conversationResponse
-	conversations *conversationListResponse
-	message       *messageResponse
-	messages      *messageListResponse
-	unreadCount   *messagingUnreadCountResponse
-	ok            bool
-}
-
-var _ port.MessagingOutputPort = (*MessagingPresenter)(nil)
-
-func NewMessagingPresenter() *MessagingPresenter {
-	return &MessagingPresenter{}
-}
-
 // messagingConv is the goverter-generated conversation read-model→response mapper.
 // See messaging_converter.go for its declaration.
 var messagingConv messagingConverter = &messagingConverterImpl{}
 
-func (p *MessagingPresenter) PresentConversation(_ context.Context, conv *messaging.ConversationWithPreview) error {
-	p.conversation = messagingConv.ToConversationResponse(conv)
-	return nil
+// MessagingConversationResponse builds the single-conversation API response.
+func MessagingConversationResponse(conv *messaging.ConversationWithPreview) any {
+	return messagingConv.ToConversationResponse(conv)
 }
 
-func (p *MessagingPresenter) PresentConversations(_ context.Context, convs []*messaging.ConversationWithPreview, total int) error {
-	p.conversations = &conversationListResponse{Items: messagingConv.ToConversationResponses(convs), Total: total}
-	return nil
+// MessagingConversationsResponse builds the paginated conversation list API response.
+func MessagingConversationsResponse(convs []*messaging.ConversationWithPreview, total int) any {
+	return &conversationListResponse{Items: messagingConv.ToConversationResponses(convs), Total: total}
 }
 
-func (p *MessagingPresenter) PresentMessage(_ context.Context, msg *messaging.Message) error {
-	p.message = toMessageResponse(msg)
-	return nil
+// MessagingMessageResponse builds the single-message API response.
+func MessagingMessageResponse(msg *messaging.Message) any {
+	return toMessageResponse(msg)
 }
 
-func (p *MessagingPresenter) PresentMessages(_ context.Context, msgs []*messaging.Message, total int) error {
+// MessagingMessagesResponse builds the paginated message list API response.
+func MessagingMessagesResponse(msgs []*messaging.Message, total int) any {
 	items := make([]*messageResponse, len(msgs))
 	for i, m := range msgs {
 		items[i] = toMessageResponse(m)
 	}
-	p.messages = &messageListResponse{Items: items, Total: total}
-	return nil
+	return &messageListResponse{Items: items, Total: total}
 }
 
-func (p *MessagingPresenter) PresentUnreadCount(_ context.Context, count int) error {
-	p.unreadCount = &messagingUnreadCountResponse{Count: count}
-	return nil
+// MessagingUnreadCountResponse builds the unread-count API response.
+func MessagingUnreadCountResponse(count int) any {
+	return &messagingUnreadCountResponse{Count: count}
 }
 
-func (p *MessagingPresenter) PresentOK(_ context.Context) error {
-	p.ok = true
-	return nil
+// MessagingOKResponse builds the fixed OK API response.
+func MessagingOKResponse() any {
+	return map[string]string{"status": "ok"}
 }
-
-func (p *MessagingPresenter) ConversationResponse() interface{}     { return p.conversation }
-func (p *MessagingPresenter) ConversationListResponse() interface{} { return p.conversations }
-func (p *MessagingPresenter) MessageResponse() interface{}          { return p.message }
-func (p *MessagingPresenter) MessageListResponse() interface{}      { return p.messages }
-func (p *MessagingPresenter) UnreadCountResponse() interface{}      { return p.unreadCount }
-func (p *MessagingPresenter) OKResponse() interface{}               { return map[string]string{"status": "ok"} }
 
 func toMessageResponse(m *messaging.Message) *messageResponse {
 	msgType := m.MessageType

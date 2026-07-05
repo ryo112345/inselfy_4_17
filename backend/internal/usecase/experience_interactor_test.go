@@ -28,10 +28,9 @@ func TestExperienceInteractor_Update_OwnershipCheck(t *testing.T) {
 	userRepo := &userRepoStub{
 		getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return owner, nil },
 	}
-	out := &experienceOutputStub{}
-	it := usecase.NewExperienceInteractor(repo, userRepo, out)
+	it := usecase.NewExperienceInteractor(repo, userRepo)
 
-	err := it.Update(ctx, "alice", "exp-1", experience.UpdateInput{
+	_, err := it.Update(ctx, "alice", "exp-1", experience.UpdateInput{
 		CompanyName: "Acme", Title: "Engineer",
 		StartYear: 2020, StartMonth: 4, IsCurrent: true,
 	})
@@ -51,9 +50,9 @@ func TestExperienceInteractor_Create_RejectsOverLimit(t *testing.T) {
 	userRepo := &userRepoStub{
 		getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return owner, nil },
 	}
-	it := usecase.NewExperienceInteractor(repo, userRepo, &experienceOutputStub{})
+	it := usecase.NewExperienceInteractor(repo, userRepo)
 
-	err := it.Create(ctx, "alice", experience.CreateInput{
+	_, err := it.Create(ctx, "alice", experience.CreateInput{
 		CompanyName: "Acme", Title: "Engineer",
 		StartYear: 2020, StartMonth: 1, IsCurrent: true,
 	})

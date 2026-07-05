@@ -16,9 +16,7 @@ type EducationController struct {
 	inputFactory func(
 		repo port.EducationRepository,
 		userRepo port.UserRepository,
-		output port.EducationOutputPort,
 	) port.EducationInputPort
-	outputFactory   func() *presenter.EducationPresenter
 	repoFactory     func() port.EducationRepository
 	userRepoFactory func() port.UserRepository
 }
@@ -28,15 +26,12 @@ func NewEducationController(
 	inputFactory func(
 		repo port.EducationRepository,
 		userRepo port.UserRepository,
-		output port.EducationOutputPort,
 	) port.EducationInputPort,
-	outputFactory func() *presenter.EducationPresenter,
 	repoFactory func() port.EducationRepository,
 	userRepoFactory func() port.UserRepository,
 ) *EducationController {
 	return &EducationController{
 		inputFactory:    inputFactory,
-		outputFactory:   outputFactory,
 		repoFactory:     repoFactory,
 		userRepoFactory: userRepoFactory,
 	}
@@ -44,11 +39,11 @@ func NewEducationController(
 
 // List handles GET /api/users/:username/educations.
 func (c *EducationController) List(ctx echo.Context, username string) error {
-	in, p := c.newIO()
-	if err := in.List(ctx.Request().Context(), username); err != nil {
+	es, err := c.newInput().List(ctx.Request().Context(), username)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.List())
+	return ctx.JSON(http.StatusOK, presenter.EducationsResponse(es))
 }
 
 // Create handles POST /api/users/:username/educations.
@@ -57,11 +52,11 @@ func (c *EducationController) Create(ctx echo.Context, username string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	in, p := c.newIO()
-	if err := in.Create(ctx.Request().Context(), username, toCreateEducationInput(body)); err != nil {
+	e, err := c.newInput().Create(ctx.Request().Context(), username, toCreateEducationInput(body))
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.Single())
+	return ctx.JSON(http.StatusCreated, presenter.EducationResponse(e))
 }
 
 // Update handles PUT /api/users/:username/educations/:educationId.
@@ -70,26 +65,23 @@ func (c *EducationController) Update(ctx echo.Context, username, educationID str
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	in, p := c.newIO()
-	if err := in.Update(ctx.Request().Context(), username, educationID, toUpdateEducationInput(body)); err != nil {
+	e, err := c.newInput().Update(ctx.Request().Context(), username, educationID, toUpdateEducationInput(body))
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Single())
+	return ctx.JSON(http.StatusOK, presenter.EducationResponse(e))
 }
 
 // Delete handles DELETE /api/users/:username/educations/:educationId.
 func (c *EducationController) Delete(ctx echo.Context, username, educationID string) error {
-	in, _ := c.newIO()
-	if err := in.Delete(ctx.Request().Context(), username, educationID); err != nil {
+	if err := c.newInput().Delete(ctx.Request().Context(), username, educationID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (c *EducationController) newIO() (port.EducationInputPort, *presenter.EducationPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), c.userRepoFactory(), output)
-	return input, output
+func (c *EducationController) newInput() port.EducationInputPort {
+	return c.inputFactory(c.repoFactory(), c.userRepoFactory())
 }
 
 func toCreateEducationInput(body openapi.ModelsCreateEducationRequest) education.CreateInput {

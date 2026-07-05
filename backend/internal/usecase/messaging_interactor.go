@@ -14,7 +14,6 @@ type MessagingInteractor struct {
 	msgRepo         port.MessageRepository
 	participantRepo port.ConversationParticipantRepository
 	tx              port.TxManager
-	output          port.MessagingOutputPort
 }
 
 var _ port.MessagingInputPort = (*MessagingInteractor)(nil)
@@ -24,29 +23,27 @@ func NewMessagingInteractor(
 	msgRepo port.MessageRepository,
 	participantRepo port.ConversationParticipantRepository,
 	tx port.TxManager,
-	output port.MessagingOutputPort,
 ) *MessagingInteractor {
 	return &MessagingInteractor{
 		convRepo:        convRepo,
 		msgRepo:         msgRepo,
 		participantRepo: participantRepo,
 		tx:              tx,
-		output:          output,
 	}
 }
 
-func (i *MessagingInteractor) StartConversation(ctx context.Context, input messaging.StartConversationInput) error {
+func (i *MessagingInteractor) StartConversation(ctx context.Context, input messaging.StartConversationInput) (*messaging.ConversationWithPreview, error) {
 	input.Body = strings.TrimSpace(input.Body)
 	if err := messaging.ValidateMessageBody(input.Body); err != nil {
-		return err
+		return nil, err
 	}
 
 	existing, err := i.convRepo.GetByCompanyAndCandidate(ctx, input.CompanyID, input.CandidateID)
 	if err != nil && !isNotFound(err) {
-		return err
+		return nil, err
 	}
 	if existing != nil {
-		return messaging.ErrConversationExists
+		return nil, messaging.ErrConversationExists
 	}
 
 	var conv *messaging.Conversation
@@ -87,23 +84,23 @@ func (i *MessagingInteractor) StartConversation(ctx context.Context, input messa
 		return txErr
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	result, err := i.convRepo.GetByID(ctx, conv.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentConversation(ctx, result)
+	return result, nil
 }
 
-func (i *MessagingInteractor) StartCandidateConversation(ctx context.Context, input messaging.StartCandidateConversationInput) error {
+func (i *MessagingInteractor) StartCandidateConversation(ctx context.Context, input messaging.StartCandidateConversationInput) (*messaging.ConversationWithPreview, error) {
 	input.Body = strings.TrimSpace(input.Body)
 	if err := messaging.ValidateMessageBody(input.Body); err != nil {
-		return err
+		return nil, err
 	}
 	if input.SenderID == input.RecipientID {
-		return messaging.ErrSelfConversation
+		return nil, messaging.ErrSelfConversation
 	}
 
 	p1, p2 := input.SenderID, input.RecipientID
@@ -113,14 +110,14 @@ func (i *MessagingInteractor) StartCandidateConversation(ctx context.Context, in
 
 	existing, err := i.convRepo.GetByCandidatePair(ctx, p1, p2)
 	if err != nil && !isNotFound(err) {
-		return err
+		return nil, err
 	}
 	if existing != nil {
 		result, err := i.convRepo.GetByID(ctx, existing.ID)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return i.output.PresentConversation(ctx, result)
+		return result, nil
 	}
 
 	var conv *messaging.Conversation
@@ -161,28 +158,28 @@ func (i *MessagingInteractor) StartCandidateConversation(ctx context.Context, in
 		return txErr
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	result, err := i.convRepo.GetByID(ctx, conv.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentConversation(ctx, result)
+	return result, nil
 }
 
-func (i *MessagingInteractor) SendMessage(ctx context.Context, input messaging.SendMessageInput) error {
+func (i *MessagingInteractor) SendMessage(ctx context.Context, input messaging.SendMessageInput) (*messaging.Message, error) {
 	input.Body = strings.TrimSpace(input.Body)
 	if err := messaging.ValidateMessageBody(input.Body); err != nil {
-		return err
+		return nil, err
 	}
 
 	_, err := i.participantRepo.GetByConversationAndParticipant(ctx, input.ConversationID, input.SenderType, input.SenderID)
 	if err != nil {
 		if isNotFound(err) {
-			return messaging.ErrNotParticipant
+			return nil, messaging.ErrNotParticipant
 		}
-		return err
+		return nil, err
 	}
 
 	msg, err := i.msgRepo.Create(ctx, &messaging.Message{
@@ -194,66 +191,66 @@ func (i *MessagingInteractor) SendMessage(ctx context.Context, input messaging.S
 		Metadata:       input.Metadata,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := i.convRepo.UpdateLastMessageAt(ctx, input.ConversationID); err != nil {
-		return err
+		return nil, err
 	}
 
-	return i.output.PresentMessage(ctx, msg)
+	return msg, nil
 }
 
-func (i *MessagingInteractor) ListConversationsByCandidate(ctx context.Context, candidateID string, limit, offset int) error {
+func (i *MessagingInteractor) ListConversationsByCandidate(ctx context.Context, candidateID string, limit, offset int) ([]*messaging.ConversationWithPreview, int, error) {
 	convs, total, err := i.convRepo.ListByCandidate(ctx, candidateID, limit, offset)
 	if err != nil {
-		return err
+		return nil, 0, err
 	}
-	return i.output.PresentConversations(ctx, convs, total)
+	return convs, total, nil
 }
 
-func (i *MessagingInteractor) ListConversationsByCompany(ctx context.Context, companyID string, limit, offset int) error {
+func (i *MessagingInteractor) ListConversationsByCompany(ctx context.Context, companyID string, limit, offset int) ([]*messaging.ConversationWithPreview, int, error) {
 	convs, total, err := i.convRepo.ListByCompany(ctx, companyID, limit, offset)
 	if err != nil {
-		return err
+		return nil, 0, err
 	}
-	return i.output.PresentConversations(ctx, convs, total)
+	return convs, total, nil
 }
 
-func (i *MessagingInteractor) GetConversation(ctx context.Context, conversationID, participantType, participantID string) error {
+func (i *MessagingInteractor) GetConversation(ctx context.Context, conversationID, participantType, participantID string) (*messaging.ConversationWithPreview, error) {
 	_, err := i.participantRepo.GetByConversationAndParticipant(ctx, conversationID, participantType, participantID)
 	if err != nil {
 		if isNotFound(err) {
-			return messaging.ErrNotParticipant
+			return nil, messaging.ErrNotParticipant
 		}
-		return err
+		return nil, err
 	}
 
 	conv, err := i.convRepo.GetByID(ctx, conversationID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return i.output.PresentConversation(ctx, conv)
+	return conv, nil
 }
 
-func (i *MessagingInteractor) ListMessages(ctx context.Context, conversationID, participantType, participantID string, limit, offset int) error {
+func (i *MessagingInteractor) ListMessages(ctx context.Context, conversationID, participantType, participantID string, limit, offset int) ([]*messaging.Message, int, error) {
 	_, err := i.participantRepo.GetByConversationAndParticipant(ctx, conversationID, participantType, participantID)
 	if err != nil {
 		if isNotFound(err) {
-			return messaging.ErrNotParticipant
+			return nil, 0, messaging.ErrNotParticipant
 		}
-		return err
+		return nil, 0, err
 	}
 
 	msgs, total, err := i.msgRepo.ListByConversationID(ctx, conversationID, limit, offset)
 	if err != nil {
-		return err
+		return nil, 0, err
 	}
 
 	_ = i.participantRepo.UpdateLastReadAt(ctx, conversationID, participantType, participantID)
 
-	return i.output.PresentMessages(ctx, msgs, total)
+	return msgs, total, nil
 }
 
 func (i *MessagingInteractor) MarkRead(ctx context.Context, conversationID, participantType, participantID string) error {
@@ -268,29 +265,29 @@ func (i *MessagingInteractor) MarkRead(ctx context.Context, conversationID, part
 	if err := i.participantRepo.UpdateLastReadAt(ctx, conversationID, participantType, participantID); err != nil {
 		return err
 	}
-	return i.output.PresentOK(ctx)
+	return nil
 }
 
-func (i *MessagingInteractor) CountUnreadByCandidate(ctx context.Context, candidateID string) error {
+func (i *MessagingInteractor) CountUnreadByCandidate(ctx context.Context, candidateID string) (int, error) {
 	count, err := i.convRepo.CountUnreadByCandidate(ctx, candidateID)
 	if err != nil {
 		if isNotFound(err) {
-			return i.output.PresentUnreadCount(ctx, 0)
+			return 0, nil
 		}
-		return err
+		return 0, err
 	}
-	return i.output.PresentUnreadCount(ctx, count)
+	return count, nil
 }
 
-func (i *MessagingInteractor) CountUnreadByCompany(ctx context.Context, companyID string) error {
+func (i *MessagingInteractor) CountUnreadByCompany(ctx context.Context, companyID string) (int, error) {
 	count, err := i.convRepo.CountUnreadByCompany(ctx, companyID)
 	if err != nil {
 		if isNotFound(err) {
-			return i.output.PresentUnreadCount(ctx, 0)
+			return 0, nil
 		}
-		return err
+		return 0, err
 	}
-	return i.output.PresentUnreadCount(ctx, count)
+	return count, nil
 }
 
 func (i *MessagingInteractor) findConversationForParticipant(ctx context.Context, conversationID, participantType, participantID string) error {

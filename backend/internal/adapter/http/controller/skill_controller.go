@@ -16,9 +16,7 @@ type SkillController struct {
 		repo port.SkillRepository,
 		userRepo port.UserRepository,
 		tx port.TxManager,
-		output port.SkillOutputPort,
 	) port.SkillInputPort
-	outputFactory   func() *presenter.SkillPresenter
 	repoFactory     func() port.SkillRepository
 	userRepoFactory func() port.UserRepository
 	tx              port.TxManager
@@ -30,16 +28,13 @@ func NewSkillController(
 		repo port.SkillRepository,
 		userRepo port.UserRepository,
 		tx port.TxManager,
-		output port.SkillOutputPort,
 	) port.SkillInputPort,
-	outputFactory func() *presenter.SkillPresenter,
 	repoFactory func() port.SkillRepository,
 	userRepoFactory func() port.UserRepository,
 	tx port.TxManager,
 ) *SkillController {
 	return &SkillController{
 		inputFactory:    inputFactory,
-		outputFactory:   outputFactory,
 		repoFactory:     repoFactory,
 		userRepoFactory: userRepoFactory,
 		tx:              tx,
@@ -48,11 +43,11 @@ func NewSkillController(
 
 // List handles GET /api/users/:username/skills.
 func (c *SkillController) List(ctx echo.Context, username string) error {
-	in, p := c.newIO()
-	if err := in.List(ctx.Request().Context(), username); err != nil {
+	list, err := c.newInput().List(ctx.Request().Context(), username)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.List())
+	return ctx.JSON(http.StatusOK, presenter.SkillsResponse(list))
 }
 
 // Attach handles POST /api/users/:username/skills.
@@ -61,24 +56,21 @@ func (c *SkillController) Attach(ctx echo.Context, username string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	in, p := c.newIO()
-	if err := in.Attach(ctx.Request().Context(), username, body.Name); err != nil {
+	s, err := c.newInput().Attach(ctx.Request().Context(), username, body.Name)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.Single())
+	return ctx.JSON(http.StatusCreated, presenter.SkillResponse(s))
 }
 
 // Detach handles DELETE /api/users/:username/skills/:name.
 func (c *SkillController) Detach(ctx echo.Context, username, name string) error {
-	in, _ := c.newIO()
-	if err := in.DetachByName(ctx.Request().Context(), username, name); err != nil {
+	if err := c.newInput().DetachByName(ctx.Request().Context(), username, name); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (c *SkillController) newIO() (port.SkillInputPort, *presenter.SkillPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), c.userRepoFactory(), c.tx, output)
-	return input, output
+func (c *SkillController) newInput() port.SkillInputPort {
+	return c.inputFactory(c.repoFactory(), c.userRepoFactory(), c.tx)
 }

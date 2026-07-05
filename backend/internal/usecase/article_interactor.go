@@ -13,7 +13,6 @@ type ArticleInteractor struct {
 	repo         port.ArticleRepository
 	purchaseRepo port.ArticlePurchaseRepository
 	stripe       port.StripeService
-	output       port.ArticleOutputPort
 }
 
 var _ port.ArticleInputPort = (*ArticleInteractor)(nil)
@@ -22,20 +21,18 @@ func NewArticleInteractor(
 	repo port.ArticleRepository,
 	purchaseRepo port.ArticlePurchaseRepository,
 	stripe port.StripeService,
-	output port.ArticleOutputPort,
 ) *ArticleInteractor {
 	return &ArticleInteractor{
 		repo:         repo,
 		purchaseRepo: purchaseRepo,
 		stripe:       stripe,
-		output:       output,
 	}
 }
 
-func (i *ArticleInteractor) Create(ctx context.Context, input article.CreateArticleInput) error {
+func (i *ArticleInteractor) Create(ctx context.Context, input article.CreateArticleInput) (*article.ArticleWithAuthor, bool, bool, error) {
 	input.Title = strings.TrimSpace(input.Title)
 	if err := article.ValidateCreate(input); err != nil {
-		return err
+		return nil, false, false, err
 	}
 	entity := &article.Article{
 		AuthorType:      input.AuthorType,
@@ -50,15 +47,15 @@ func (i *ArticleInteractor) Create(ctx context.Context, input article.CreateArti
 	}
 	created, err := i.repo.Create(ctx, entity)
 	if err != nil {
-		return err
+		return nil, false, false, err
 	}
-	return i.output.PresentArticle(ctx, &article.ArticleWithAuthor{Article: *created}, false, true)
+	return &article.ArticleWithAuthor{Article: *created}, false, true, nil
 }
 
-func (i *ArticleInteractor) GetByID(ctx context.Context, id string, viewerUserID *string) error {
+func (i *ArticleInteractor) GetByID(ctx context.Context, id string, viewerUserID *string) (*article.ArticleWithAuthor, bool, bool, error) {
 	a, err := i.repo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return nil, false, false, err
 	}
 
 	purchased := false
@@ -68,15 +65,15 @@ func (i *ArticleInteractor) GetByID(ctx context.Context, id string, viewerUserID
 		if a.Article.IsPaid && !author {
 			purchased, err = i.purchaseRepo.HasPurchased(ctx, a.Article.ID, *viewerUserID)
 			if err != nil {
-				return err
+				return nil, false, false, err
 			}
 		}
 	}
 
-	return i.output.PresentArticle(ctx, a, purchased, author)
+	return a, purchased, author, nil
 }
 
-func (i *ArticleInteractor) List(ctx context.Context, limit, offset int) error {
+func (i *ArticleInteractor) List(ctx context.Context, limit, offset int) ([]*article.ArticleWithAuthor, int, error) {
 	if limit <= 0 || limit > 50 {
 		limit = 20
 	}
@@ -85,12 +82,12 @@ func (i *ArticleInteractor) List(ctx context.Context, limit, offset int) error {
 	}
 	articles, total, err := i.repo.List(ctx, limit, offset)
 	if err != nil {
-		return err
+		return nil, 0, err
 	}
-	return i.output.PresentArticles(ctx, articles, total)
+	return articles, total, nil
 }
 
-func (i *ArticleInteractor) ListByAuthor(ctx context.Context, authorType article.AuthorType, authorID string, limit, offset int) error {
+func (i *ArticleInteractor) ListByAuthor(ctx context.Context, authorType article.AuthorType, authorID string, limit, offset int) ([]*article.ArticleWithAuthor, int, error) {
 	if limit <= 0 || limit > 50 {
 		limit = 20
 	}
@@ -99,22 +96,22 @@ func (i *ArticleInteractor) ListByAuthor(ctx context.Context, authorType article
 	}
 	articles, total, err := i.repo.ListByAuthor(ctx, authorType, authorID, limit, offset)
 	if err != nil {
-		return err
+		return nil, 0, err
 	}
-	return i.output.PresentArticles(ctx, articles, total)
+	return articles, total, nil
 }
 
-func (i *ArticleInteractor) Update(ctx context.Context, id string, input article.UpdateArticleInput, authorType article.AuthorType, authorID string) error {
+func (i *ArticleInteractor) Update(ctx context.Context, id string, input article.UpdateArticleInput, authorType article.AuthorType, authorID string) (*article.ArticleWithAuthor, bool, bool, error) {
 	input.Title = strings.TrimSpace(input.Title)
 	if err := article.ValidateUpdate(input); err != nil {
-		return err
+		return nil, false, false, err
 	}
 	existing, err := i.repo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return nil, false, false, err
 	}
 	if !isAuthorByType(existing, authorType, authorID) {
-		return article.ErrNotAuthor
+		return nil, false, false, article.ErrNotAuthor
 	}
 	existing.Article.Title = input.Title
 	existing.Article.Body = input.Body
@@ -124,13 +121,13 @@ func (i *ArticleInteractor) Update(ctx context.Context, id string, input article
 	existing.Article.Tags = input.Tags
 	updated, err := i.repo.Update(ctx, &existing.Article)
 	if err != nil {
-		return err
+		return nil, false, false, err
 	}
-	return i.output.PresentArticle(ctx, &article.ArticleWithAuthor{
+	return &article.ArticleWithAuthor{
 		Article:        *updated,
 		AuthorName:     existing.AuthorName,
 		AuthorUsername: existing.AuthorUsername,
-	}, false, true)
+	}, false, true, nil
 }
 
 func (i *ArticleInteractor) Delete(ctx context.Context, id string, authorType article.AuthorType, authorID string) error {
@@ -144,50 +141,50 @@ func (i *ArticleInteractor) Delete(ctx context.Context, id string, authorType ar
 	return i.repo.Delete(ctx, id)
 }
 
-func (i *ArticleInteractor) Publish(ctx context.Context, id string, authorType article.AuthorType, authorID string) error {
+func (i *ArticleInteractor) Publish(ctx context.Context, id string, authorType article.AuthorType, authorID string) (*article.ArticleWithAuthor, bool, bool, error) {
 	existing, err := i.repo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return nil, false, false, err
 	}
 	if !isAuthorByType(existing, authorType, authorID) {
-		return article.ErrNotAuthor
+		return nil, false, false, article.ErrNotAuthor
 	}
 	_, err = i.repo.Publish(ctx, id)
 	if err != nil {
-		return err
+		return nil, false, false, err
 	}
 	a, err := i.repo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return nil, false, false, err
 	}
-	return i.output.PresentArticle(ctx, a, false, true)
+	return a, false, true, nil
 }
 
-func (i *ArticleInteractor) CreateCheckoutSession(ctx context.Context, articleID, buyerUserID string) error {
+func (i *ArticleInteractor) CreateCheckoutSession(ctx context.Context, articleID, buyerUserID string) (string, error) {
 	a, err := i.repo.GetByID(ctx, articleID)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if a.Article.Status != article.StatusPublished {
-		return article.ErrNotPublished
+		return "", article.ErrNotPublished
 	}
 	if !a.Article.IsPaid {
-		return article.ErrNotPaid
+		return "", article.ErrNotPaid
 	}
 	if isAuthor(a, buyerUserID) {
-		return article.ErrCannotBuyOwn
+		return "", article.ErrCannotBuyOwn
 	}
 	purchased, err := i.purchaseRepo.HasPurchased(ctx, articleID, buyerUserID)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if purchased {
-		return article.ErrAlreadyPurchased
+		return "", article.ErrAlreadyPurchased
 	}
 
 	sessionURL, sessionID, err := i.stripe.CreateCheckoutSession(ctx, &a.Article, buyerUserID)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	_, err = i.purchaseRepo.Create(ctx, &article.Purchase{
@@ -197,10 +194,10 @@ func (i *ArticleInteractor) CreateCheckoutSession(ctx context.Context, articleID
 		AmountYen:       a.Article.PriceYen,
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return i.output.PresentCheckoutSession(ctx, sessionURL)
+	return sessionURL, nil
 }
 
 func isAuthor(a *article.ArticleWithAuthor, userID string) bool {

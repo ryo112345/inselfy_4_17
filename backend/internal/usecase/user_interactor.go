@@ -11,71 +11,58 @@ import (
 
 // UserInteractor handles user use cases.
 type UserInteractor struct {
-	repo   port.UserRepository
-	output port.UserOutputPort
+	repo port.UserRepository
 }
 
 var _ port.UserInputPort = (*UserInteractor)(nil)
 
 // NewUserInteractor creates a UserInteractor.
-func NewUserInteractor(repo port.UserRepository, output port.UserOutputPort) *UserInteractor {
-	return &UserInteractor{repo: repo, output: output}
+func NewUserInteractor(repo port.UserRepository) *UserInteractor {
+	return &UserInteractor{repo: repo}
 }
 
 // Create creates a new user from the given input.
-func (u *UserInteractor) Create(ctx context.Context, input user.CreateUserInput) error {
+func (u *UserInteractor) Create(ctx context.Context, input user.CreateUserInput) (*user.User, error) {
 	username, err := user.ParseUsername(input.Username)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	name := strings.TrimSpace(input.Name)
 	if err := user.ValidateName(name); err != nil {
-		return err
+		return nil, err
 	}
 	entity := &user.User{
 		Username: username,
 		Name:     name,
 	}
-	created, err := u.repo.Create(ctx, entity)
-	if err != nil {
-		return err
-	}
-	return u.output.PresentUser(ctx, created)
+	return u.repo.Create(ctx, entity)
 }
 
 // GetByUsername fetches a user by username.
-func (u *UserInteractor) GetByUsername(ctx context.Context, raw string) error {
+func (u *UserInteractor) GetByUsername(ctx context.Context, raw string) (*user.User, error) {
 	username, err := user.ParseUsername(raw)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	usr, err := u.repo.GetByUsername(ctx, username)
-	if err != nil {
-		return err
-	}
-	return u.output.PresentUser(ctx, usr)
+	return u.repo.GetByUsername(ctx, username)
 }
 
 // GetByID fetches a user by ID.
-func (u *UserInteractor) GetByID(ctx context.Context, id string) error {
-	usr, err := u.repo.GetByID(ctx, id)
-	if err != nil {
-		return err
-	}
-	return u.output.PresentUser(ctx, usr)
+func (u *UserInteractor) GetByID(ctx context.Context, id string) (*user.User, error) {
+	return u.repo.GetByID(ctx, id)
 }
 
 // UpdateProfile patches a user's profile. The update is scoped to a single row
 // so no transaction boundary is required.
-func (u *UserInteractor) UpdateProfile(ctx context.Context, rawUsername string, input user.UpdateProfileInput) error {
+func (u *UserInteractor) UpdateProfile(ctx context.Context, rawUsername string, input user.UpdateProfileInput) (*user.User, error) {
 	username, err := user.ParseUsername(rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if input.Username != nil {
 		trimmed := strings.TrimSpace(*input.Username)
 		if _, err := user.ParseUsername(trimmed); err != nil {
-			return err
+			return nil, err
 		}
 		input.Username = &trimmed
 	}
@@ -84,15 +71,11 @@ func (u *UserInteractor) UpdateProfile(ctx context.Context, rawUsername string, 
 		input.Name = &trimmed
 	}
 	if err := user.ValidateUpdateProfile(input); err != nil {
-		return err
+		return nil, err
 	}
 	existing, err := u.repo.GetByUsername(ctx, username)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	updated, err := u.repo.UpdateProfile(ctx, existing.ID, input)
-	if err != nil {
-		return err
-	}
-	return u.output.PresentUser(ctx, updated)
+	return u.repo.UpdateProfile(ctx, existing.ID, input)
 }

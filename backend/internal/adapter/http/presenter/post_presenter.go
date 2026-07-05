@@ -1,28 +1,26 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type PostResponse struct {
-	ID           string    `json:"id"`
-	UserID       string    `json:"userId"`
-	Username     string    `json:"username"`
-	Name         string    `json:"name"`
-	Content      string    `json:"content"`
-	LikeCount    int       `json:"likeCount"`
-	CommentCount int       `json:"commentCount"`
-	RepostCount  int       `json:"repostCount"`
-	LikedByMe   bool      `json:"likedByMe"`
-	RepostedByMe bool      `json:"repostedByMe"`
-	IsRepost     bool               `json:"isRepost"`
+	ID           string              `json:"id"`
+	UserID       string              `json:"userId"`
+	Username     string              `json:"username"`
+	Name         string              `json:"name"`
+	Content      string              `json:"content"`
+	LikeCount    int                 `json:"likeCount"`
+	CommentCount int                 `json:"commentCount"`
+	RepostCount  int                 `json:"repostCount"`
+	LikedByMe    bool                `json:"likedByMe"`
+	RepostedByMe bool                `json:"repostedByMe"`
+	IsRepost     bool                `json:"isRepost"`
 	QuotedPost   *QuotedPostResponse `json:"quotedPost,omitempty"`
-	CreatedAt    time.Time          `json:"createdAt"`
-	UpdatedAt    time.Time          `json:"updatedAt"`
+	CreatedAt    time.Time           `json:"createdAt"`
+	UpdatedAt    time.Time           `json:"updatedAt"`
 }
 
 type QuotedPostResponse struct {
@@ -63,65 +61,39 @@ type RepostToggleResponse struct {
 	Count    int  `json:"count"`
 }
 
-type PostPresenter struct {
-	single       *PostResponse
-	list         *PostListResponse
-	likeToggle   *LikeToggleResponse
-	repostToggle *RepostToggleResponse
-	comment      *CommentResponse
-	commentList  *CommentListResponse
-}
+// PostSingleResponse converts a single post to its API response.
+func PostSingleResponse(pw *post.PostWithUser) any { return toPostResponse(pw) }
 
-var _ port.PostOutputPort = (*PostPresenter)(nil)
-
-func NewPostPresenter() *PostPresenter {
-	return &PostPresenter{}
-}
-
-func (p *PostPresenter) PresentPost(_ context.Context, pw *post.PostWithUser) error {
-	p.single = toPostResponse(pw)
-	return nil
-}
-
-func (p *PostPresenter) PresentPosts(_ context.Context, posts []*post.PostWithUser, total int) error {
+// PostsListResponse converts a paginated list of posts to its API response.
+func PostsListResponse(posts []*post.PostWithUser, total int) any {
 	items := make([]*PostResponse, len(posts))
 	for i, pw := range posts {
 		items[i] = toPostResponse(pw)
 	}
-	p.list = &PostListResponse{Items: items, Total: total}
-	return nil
+	return &PostListResponse{Items: items, Total: total}
 }
 
-func (p *PostPresenter) PresentLikeToggle(_ context.Context, liked bool, count int) error {
-	p.likeToggle = &LikeToggleResponse{Liked: liked, Count: count}
-	return nil
+// PostLikeToggleResponse builds the like-toggle API response.
+func PostLikeToggleResponse(liked bool, count int) any {
+	return &LikeToggleResponse{Liked: liked, Count: count}
 }
 
-func (p *PostPresenter) PresentRepostToggle(_ context.Context, reposted bool, count int) error {
-	p.repostToggle = &RepostToggleResponse{Reposted: reposted, Count: count}
-	return nil
+// PostRepostToggleResponse builds the repost-toggle API response.
+func PostRepostToggleResponse(reposted bool, count int) any {
+	return &RepostToggleResponse{Reposted: reposted, Count: count}
 }
 
-func (p *PostPresenter) PresentComment(_ context.Context, c *post.CommentWithUser) error {
-	p.comment = toCommentResponse(c)
-	return nil
-}
+// PostCommentResponse converts a single comment to its API response.
+func PostCommentResponse(c *post.CommentWithUser) any { return toCommentResponse(c) }
 
-func (p *PostPresenter) PresentComments(_ context.Context, comments []*post.CommentWithUser, total int) error {
+// PostCommentsListResponse converts a paginated list of comments to its API response.
+func PostCommentsListResponse(comments []*post.CommentWithUser, total int) any {
 	items := make([]*CommentResponse, len(comments))
 	for i, c := range comments {
 		items[i] = toCommentResponse(c)
 	}
-	p.commentList = &CommentListResponse{Items: items, Total: total}
-	return nil
+	return &CommentListResponse{Items: items, Total: total}
 }
-
-func (p *PostPresenter) SingleResponse() *PostResponse       { return p.single }
-func (p *PostPresenter) ListResponse() *PostListResponse     { return p.list }
-func (p *PostPresenter) LikeToggleResponse() *LikeToggleResponse     { return p.likeToggle }
-func (p *PostPresenter) RepostToggleResponse() *RepostToggleResponse { return p.repostToggle }
-func (p *PostPresenter) CommentResponse() *CommentResponse       { return p.comment }
-func (p *PostPresenter) CommentListResponse() *CommentListResponse { return p.commentList }
 
 func toPostResponse(pw *post.PostWithUser) *PostResponse {
 	r := &PostResponse{
@@ -133,7 +105,7 @@ func toPostResponse(pw *post.PostWithUser) *PostResponse {
 		LikeCount:    pw.LikeCount,
 		CommentCount: pw.CommentCount,
 		RepostCount:  pw.RepostCount,
-		LikedByMe:   pw.LikedByMe,
+		LikedByMe:    pw.LikedByMe,
 		RepostedByMe: pw.RepostedByMe,
 		IsRepost:     pw.IsRepost,
 		CreatedAt:    pw.Post.CreatedAt,
