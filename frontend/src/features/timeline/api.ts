@@ -1,73 +1,41 @@
-const BASE_URL =
-  typeof window === "undefined"
-    ? process.env.INTERNAL_API_URL ?? "http://localhost:8081"
-    : "";
+import "@/external/client/api/client";
+import {
+  postsCreatePost,
+  postsCreatePostComment,
+  postsDeletePost,
+  postsGetPost,
+  postsListLikedPostsByUser,
+  postsListPostComments,
+  postsListPostsByUser,
+  postsListTimelinePosts,
+  postsTogglePostLike,
+  postsTogglePostRepost,
+  type ModelsCommentListResponse,
+  type ModelsCommentResponse,
+  type ModelsCreatePostRequest,
+  type ModelsLikeToggleResponse,
+  type ModelsPostListResponse,
+  type ModelsPostResponse,
+  type ModelsRepostToggleResponse,
+} from "@/external/client/api/generated";
 
-export type PostItem = {
-  id: string;
-  userId: string;
-  username: string;
-  name: string;
-  content: string;
-  likeCount: number;
-  commentCount: number;
-  repostCount: number;
-  likedByMe: boolean;
-  repostedByMe: boolean;
-  isRepost: boolean;
-  quotedPost?: {
-    id: string;
-    content: string;
-    username: string;
-    name: string;
-    createdAt: string;
-  } | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type PostListResponse = {
-  items: PostItem[];
-  total: number;
-};
-
-export type CommentItem = {
-  id: string;
-  postId: string;
-  userId: string;
-  username: string;
-  name: string;
-  content: string;
-  createdAt: string;
-};
-
-export type CommentListResponse = {
-  items: CommentItem[];
-  total: number;
-};
-
-export type LikeToggleResponse = {
-  liked: boolean;
-  count: number;
-};
-
-export type RepostToggleResponse = {
-  reposted: boolean;
-  count: number;
-};
+export type PostItem = ModelsPostResponse;
+export type PostListResponse = ModelsPostListResponse;
+export type CommentItem = ModelsCommentResponse;
+export type CommentListResponse = ModelsCommentListResponse;
+export type LikeToggleResponse = ModelsLikeToggleResponse;
+export type RepostToggleResponse = ModelsRepostToggleResponse;
 
 export async function fetchPost(
   postId: string,
   viewerId = "",
 ): Promise<PostItem> {
-  const params = new URLSearchParams();
-  if (viewerId) params.set("viewerId", viewerId);
-  const qs = params.toString();
-  const res = await fetch(`${BASE_URL}/api/posts/${postId}${qs ? `?${qs}` : ""}`, {
-    cache: "no-store",
+  const { data, error } = await postsGetPost({
+    path: { postId },
+    query: viewerId ? { viewerId } : undefined,
   });
-  if (!res.ok) throw new Error("Failed to fetch post");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch post");
+  return data;
 }
 
 export async function fetchTimeline(
@@ -75,43 +43,32 @@ export async function fetchTimeline(
   offset = 0,
   viewerId = "",
 ): Promise<PostListResponse> {
-  const params = new URLSearchParams({
-    limit: String(limit),
-    offset: String(offset),
-  });
-  if (viewerId) params.set("viewerId", viewerId);
-  const res = await fetch(`${BASE_URL}/api/posts?${params}`, {
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error("Failed to fetch timeline");
-  return res.json();
+  const query: { limit: number; offset: number; viewerId?: string } = { limit, offset };
+  if (viewerId) query.viewerId = viewerId;
+  const { data, error } = await postsListTimelinePosts({ query });
+  if (error || !data) throw new Error("Failed to fetch timeline");
+  return data;
 }
 
+// userId は認証セッションからサーバ側で解決されるため送信しない（旧実装の送信分は無視されていた）
 export async function createPost(
-  userId: string,
+  _userId: string,
   content: string,
   quotePostId?: string,
 ): Promise<PostItem> {
-  const body: Record<string, string> = { userId, content };
+  const body: ModelsCreatePostRequest = { content };
   if (quotePostId) body.quotePostId = quotePostId;
-  const res = await fetch(`/api/posts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? "Failed to create post");
+  const { data, error } = await postsCreatePost({ body });
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to create post");
   }
-  return res.json();
+  return data;
 }
 
 export async function toggleRepost(postId: string): Promise<RepostToggleResponse> {
-  const res = await fetch(`/api/posts/${postId}/repost`, {
-    method: "POST",
-  });
-  if (!res.ok) throw new Error("Failed to toggle repost");
-  return res.json();
+  const { data, error } = await postsTogglePostRepost({ path: { postId } });
+  if (error || !data) throw new Error("Failed to toggle repost");
+  return data;
 }
 
 export async function fetchUserPosts(
@@ -119,12 +76,12 @@ export async function fetchUserPosts(
   limit = 20,
   offset = 0,
 ): Promise<PostListResponse> {
-  const res = await fetch(
-    `${BASE_URL}/api/posts/users/${userId}?limit=${limit}&offset=${offset}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) throw new Error("Failed to fetch user posts");
-  return res.json();
+  const { data, error } = await postsListPostsByUser({
+    path: { userId },
+    query: { limit, offset },
+  });
+  if (error || !data) throw new Error("Failed to fetch user posts");
+  return data;
 }
 
 export async function fetchLikedPosts(
@@ -132,30 +89,26 @@ export async function fetchLikedPosts(
   limit = 20,
   offset = 0,
 ): Promise<PostListResponse> {
-  const res = await fetch(
-    `${BASE_URL}/api/posts/users/${userId}/likes?limit=${limit}&offset=${offset}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) throw new Error("Failed to fetch liked posts");
-  return res.json();
+  const { data, error } = await postsListLikedPostsByUser({
+    path: { userId },
+    query: { limit, offset },
+  });
+  if (error || !data) throw new Error("Failed to fetch liked posts");
+  return data;
 }
 
 export async function deletePost(
   postId: string,
-  userId: string,
+  _userId: string,
 ): Promise<void> {
-  const res = await fetch(`/api/posts/${postId}?userId=${userId}`, {
-    method: "DELETE",
-  });
-  if (!res.ok) throw new Error("Failed to delete post");
+  const { error } = await postsDeletePost({ path: { postId } });
+  if (error) throw new Error("Failed to delete post");
 }
 
 export async function toggleLike(postId: string): Promise<LikeToggleResponse> {
-  const res = await fetch(`/api/posts/${postId}/like`, {
-    method: "POST",
-  });
-  if (!res.ok) throw new Error("Failed to toggle like");
-  return res.json();
+  const { data, error } = await postsTogglePostLike({ path: { postId } });
+  if (error || !data) throw new Error("Failed to toggle like");
+  return data;
 }
 
 export async function fetchComments(
@@ -163,25 +116,24 @@ export async function fetchComments(
   limit = 20,
   offset = 0,
 ): Promise<CommentListResponse> {
-  const res = await fetch(
-    `${BASE_URL}/api/posts/${postId}/comments?limit=${limit}&offset=${offset}`,
-  );
-  if (!res.ok) throw new Error("Failed to fetch comments");
-  return res.json();
+  const { data, error } = await postsListPostComments({
+    path: { postId },
+    query: { limit, offset },
+  });
+  if (error || !data) throw new Error("Failed to fetch comments");
+  return data;
 }
 
 export async function createComment(
   postId: string,
   content: string,
 ): Promise<CommentItem> {
-  const res = await fetch(`/api/posts/${postId}/comments`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content }),
+  const { data, error } = await postsCreatePostComment({
+    path: { postId },
+    body: { content },
   });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? "Failed to create comment");
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to create comment");
   }
-  return res.json();
+  return data;
 }
