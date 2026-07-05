@@ -2,71 +2,15 @@ import { notFound } from "next/navigation";
 import { Gallery } from "./Gallery";
 import { ExpandableText } from "./ExpandableText";
 import { TeamScoresSection } from "./TeamScoresSection";
+import {
+  fetchPublicCompanyProfile,
+  fetchPublicTeamScores,
+} from "@/features/company-profile/api";
 
 export const dynamic = "force-dynamic";
 
-const BACKEND = process.env.INTERNAL_API_URL ?? "http://localhost:8081";
-
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
-
-type CompanyProfile = {
-  id: string;
-  companyName: string;
-  headline: string;
-  description: string;
-  industry: string;
-  location: string;
-  employeeCount: string;
-  foundedYear: number | null;
-  foundedMonth: number | null;
-  websiteUrl: string;
-  logoUrl: string;
-  coverImageUrl: string;
-  representativeName: string;
-  capital: string;
-  revenue: string;
-  benefits: string[];
-  averageAge: string;
-  averageOvertimeHours: string;
-  paidLeaveRate: string;
-  smokingPolicy: string;
-  galleryUrls: string[];
-};
-
-async function fetchCompany(id: string): Promise<CompanyProfile | null> {
-  try {
-    const res = await fetch(`${BACKEND}/api/companies/${id}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
-}
-
-type PublicTeamScore = {
-  team_id: string;
-  team_name: string;
-  wv_scores: { id: string; score: number }[] | null;
-  ci_scores: { id: string; score: number }[] | null;
-  member_count: number;
-  completed_count: number;
-};
-
-async function fetchTeamScores(id: string): Promise<PublicTeamScore[]> {
-  try {
-    const res = await fetch(`${BACKEND}/api/companies/${id}/teams/scores`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.teams ?? [];
-  } catch {
-    return [];
-  }
-}
 
 export default async function PublicCompanyProfilePage({
   params,
@@ -75,8 +19,8 @@ export default async function PublicCompanyProfilePage({
 }) {
   const { id } = await params;
   const [company, teamScores] = await Promise.all([
-    fetchCompany(id),
-    fetchTeamScores(id),
+    fetchPublicCompanyProfile(id, "no-store"),
+    fetchPublicTeamScores(id, "no-store"),
   ]);
   if (!company) notFound();
 
