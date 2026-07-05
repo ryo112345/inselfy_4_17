@@ -5,10 +5,12 @@ import "./models/user.tsp";
 import "./models/experience.tsp";
 import "./models/education.tsp";
 import "./models/skill.tsp";
+import "./models/scout-settings.tsp";
 import "./routes/users.tsp";
 import "./routes/experiences.tsp";
 import "./routes/educations.tsp";
 import "./routes/skills.tsp";
+import "./routes/scout-settings.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;

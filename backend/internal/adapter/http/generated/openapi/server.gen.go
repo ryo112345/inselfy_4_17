@@ -256,6 +256,15 @@ type ModelsNotFoundError struct {
 // ModelsNotFoundErrorCode defines model for ModelsNotFoundError.Code.
 type ModelsNotFoundErrorCode string
 
+// ModelsScoutSettingsResponse スカウト受け入れ設定
+type ModelsScoutSettingsResponse struct {
+	// AcceptingScouts スカウトを受け入れるか
+	AcceptingScouts bool `json:"acceptingScouts"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
 // ModelsSkillListResponse スキル一覧
 type ModelsSkillListResponse struct {
 	// Items スキル
@@ -314,6 +323,12 @@ type ModelsUpdateExperienceRequest struct {
 
 	// Title 役職・タイトル
 	Title string `json:"title"`
+}
+
+// ModelsUpdateScoutSettingsRequest スカウト受け入れ設定更新リクエスト
+type ModelsUpdateScoutSettingsRequest struct {
+	// AcceptingScouts スカウトを受け入れるか
+	AcceptingScouts bool `json:"acceptingScouts"`
 }
 
 // ModelsUpdateUserProfileRequest プロフィール更新リクエスト（PATCH。指定したキーのみ差分適用）。値に null を渡すとフィールドをクリア。
@@ -403,6 +418,9 @@ type ModelsUserResponse struct {
 	Username string `json:"username"`
 }
 
+// ScoutSettingsUpdateScoutSettingsJSONRequestBody defines body for ScoutSettingsUpdateScoutSettings for application/json ContentType.
+type ScoutSettingsUpdateScoutSettingsJSONRequestBody = ModelsUpdateScoutSettingsRequest
+
 // UsersCreateUserJSONRequestBody defines body for UsersCreateUser for application/json ContentType.
 type UsersCreateUserJSONRequestBody = ModelsCreateUserRequest
 
@@ -426,6 +444,12 @@ type SkillsAttachSkillJSONRequestBody = ModelsAttachSkillRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get scout settings for the authenticated user
+	// (GET /api/scout-settings)
+	ScoutSettingsGetScoutSettings(ctx echo.Context) error
+	// Update scout settings for the authenticated user
+	// (PUT /api/scout-settings)
+	ScoutSettingsUpdateScoutSettings(ctx echo.Context) error
 	// Create a new user
 	// (POST /api/users)
 	UsersCreateUser(ctx echo.Context) error
@@ -473,6 +497,24 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// ScoutSettingsGetScoutSettings converts echo context to params.
+func (w *ServerInterfaceWrapper) ScoutSettingsGetScoutSettings(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ScoutSettingsGetScoutSettings(ctx)
+	return err
+}
+
+// ScoutSettingsUpdateScoutSettings converts echo context to params.
+func (w *ServerInterfaceWrapper) ScoutSettingsUpdateScoutSettings(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ScoutSettingsUpdateScoutSettings(ctx)
+	return err
 }
 
 // UsersCreateUser converts echo context to params.
@@ -760,6 +802,8 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
+	router.PUT(baseURL+"/api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
 	router.POST(baseURL+"/api/users", wrapper.UsersCreateUser)
 	router.GET(baseURL+"/api/users/:username", wrapper.UsersGetUserByUsername)
 	router.PATCH(baseURL+"/api/users/:username", wrapper.UsersUpdateUserProfile)
