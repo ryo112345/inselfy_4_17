@@ -16,28 +16,17 @@ import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 import { ValuesFilterDrawer } from "@/features/work-values/ValuesFilterDrawer";
 import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
 import { applyToJob, checkApplied } from "@/features/job-application/api";
+import {
+  fetchPublicTeamScores,
+  type PublicTeamScore as TeamScores,
+} from "@/features/company-profile/api";
 
 const ACCENT = "#3D8B6E";
 
 const WV_ORDER = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"];
 const CI_ORDER = ["R", "I", "A", "S", "E", "C"];
 
-type TeamScoreEntry = { id: string; score: number };
-type TeamScores = {
-  team_id: string;
-  wv_scores: TeamScoreEntry[] | null;
-  wn_scores: TeamScoreEntry[] | null;
-  ci_scores: TeamScoreEntry[] | null;
-};
-
 type MatchScores = { overall: number; culture: number; aptitude: number; commonPoints: string[] };
-
-async function fetchTeamScores(companyId: string): Promise<TeamScores[]> {
-  const res = await fetch(`/api/companies/${companyId}/teams/scores`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.teams ?? [];
-}
 
 const SIGMA_WV = 18;
 const SIGMA_CI = 0.7;
@@ -294,7 +283,7 @@ export default function JobsPage() {
   useEffect(() => {
     if (!hasDiagnosis || jobs.length === 0) return;
     const companyIds = [...new Set(jobs.map((j) => j.companyId))];
-    Promise.all(companyIds.map((id) => fetchTeamScores(id))).then((results) => {
+    Promise.all(companyIds.map((id) => fetchPublicTeamScores(id))).then((results) => {
       const map = new Map<string, TeamScores>();
       results.flat().forEach((t) => map.set(t.team_id, t));
       setTeamScoresMap(map);

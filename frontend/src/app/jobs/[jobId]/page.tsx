@@ -15,6 +15,11 @@ import {
 } from "@/app/components/SingleRadarChart";
 import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
 import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
+import {
+  fetchPublicCompanyProfile,
+  fetchPublicTeamScores,
+  type PublicCompanyProfile as CompanyData,
+} from "@/features/company-profile/api";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
@@ -239,18 +244,6 @@ function ConditionGroup({
   );
 }
 
-type CompanyData = {
-  id: string;
-  companyName: string;
-  logoUrl: string;
-  industry: string;
-  location: string;
-  employeeCount: string;
-  benefits: string[];
-  smokingPolicy: string;
-  galleryUrls: string[];
-};
-
 export default function JobDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -303,18 +296,12 @@ export default function JobDetailPage() {
     fetchPublicJobPosting(jobId)
       .then((data) => {
         setJob(data);
-        fetch(`/api/companies/${data.companyId}`).then(async (res) => {
-          if (res.ok) {
-            const c = await res.json();
-            if (!Array.isArray(c.benefits)) c.benefits = [];
-            setCompany(c);
-          }
+        fetchPublicCompanyProfile(data.companyId).then((c) => {
+          if (c) setCompany(c);
         });
         if (data.teamId) {
-          fetch(`/api/companies/${data.companyId}/teams/scores`).then(async (res) => {
-            if (!res.ok) return;
-            const d = await res.json();
-            const team = (d.teams ?? []).find((t: { team_id: string }) => t.team_id === data.teamId);
+          fetchPublicTeamScores(data.companyId).then((teams) => {
+            const team = teams.find((t) => t.team_id === data.teamId);
             if (team) {
               setTeamWVScores(team.wv_scores ?? null);
               setTeamCIScores(team.ci_scores ?? null);
