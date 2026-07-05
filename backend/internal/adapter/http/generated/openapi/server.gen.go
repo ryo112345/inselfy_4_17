@@ -383,6 +383,81 @@ type ModelsCompanyLoginRequest struct {
 	Password string `json:"password"`
 }
 
+// ModelsCompanyProfileResponse 企業プロフィール（企業本人向け）
+type ModelsCompanyProfileResponse struct {
+	// AverageAge 平均年齢
+	AverageAge string `json:"averageAge"`
+
+	// AverageOvertimeHours 平均残業時間
+	AverageOvertimeHours string `json:"averageOvertimeHours"`
+
+	// Benefits 福利厚生
+	Benefits []string `json:"benefits"`
+
+	// Capital 資本金
+	Capital string `json:"capital"`
+
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// ContactPersonName 担当者名
+	ContactPersonName string `json:"contactPersonName"`
+
+	// CoverImageUrl カバー画像URL
+	CoverImageUrl string `json:"coverImageUrl"`
+
+	// Description 会社紹介
+	Description string `json:"description"`
+
+	// Email メールアドレス
+	Email string `json:"email"`
+
+	// EmployeeCount 従業員数
+	EmployeeCount string `json:"employeeCount"`
+
+	// FoundedMonth 設立月
+	FoundedMonth *int `json:"foundedMonth"`
+
+	// FoundedYear 設立年
+	FoundedYear *int `json:"foundedYear"`
+
+	// GalleryUrls ギャラリー画像URL
+	GalleryUrls []string `json:"galleryUrls"`
+
+	// Headline ヘッドライン
+	Headline string `json:"headline"`
+
+	// Id 企業ID
+	Id string `json:"id"`
+
+	// Industry 業界
+	Industry string `json:"industry"`
+
+	// Location 所在地
+	Location string `json:"location"`
+
+	// LogoUrl ロゴURL
+	LogoUrl string `json:"logoUrl"`
+
+	// PaidLeaveRate 有給取得率
+	PaidLeaveRate string `json:"paidLeaveRate"`
+
+	// PhoneNumber 電話番号
+	PhoneNumber string `json:"phoneNumber"`
+
+	// RepresentativeName 代表者名
+	RepresentativeName string `json:"representativeName"`
+
+	// Revenue 売上高
+	Revenue string `json:"revenue"`
+
+	// SmokingPolicy 受動喫煙対策
+	SmokingPolicy string `json:"smokingPolicy"`
+
+	// WebsiteUrl WebサイトURL
+	WebsiteUrl string `json:"websiteUrl"`
+}
+
 // ModelsCompanyRegisterRequest 企業アカウント登録リクエスト
 type ModelsCompanyRegisterRequest struct {
 	// CompanyName 企業名
@@ -977,6 +1052,72 @@ type ModelsPostResponse struct {
 	Username string `json:"username"`
 }
 
+// ModelsPublicCompanyProfileResponse 企業プロフィール（公開向け）
+type ModelsPublicCompanyProfileResponse struct {
+	// AverageAge 平均年齢
+	AverageAge string `json:"averageAge"`
+
+	// AverageOvertimeHours 平均残業時間
+	AverageOvertimeHours string `json:"averageOvertimeHours"`
+
+	// Benefits 福利厚生
+	Benefits []string `json:"benefits"`
+
+	// Capital 資本金
+	Capital string `json:"capital"`
+
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// CoverImageUrl カバー画像URL
+	CoverImageUrl string `json:"coverImageUrl"`
+
+	// Description 会社紹介
+	Description string `json:"description"`
+
+	// EmployeeCount 従業員数
+	EmployeeCount string `json:"employeeCount"`
+
+	// FoundedMonth 設立月
+	FoundedMonth *int `json:"foundedMonth"`
+
+	// FoundedYear 設立年
+	FoundedYear *int `json:"foundedYear"`
+
+	// GalleryUrls ギャラリー画像URL
+	GalleryUrls []string `json:"galleryUrls"`
+
+	// Headline ヘッドライン
+	Headline string `json:"headline"`
+
+	// Id 企業ID
+	Id string `json:"id"`
+
+	// Industry 業界
+	Industry string `json:"industry"`
+
+	// Location 所在地
+	Location string `json:"location"`
+
+	// LogoUrl ロゴURL
+	LogoUrl string `json:"logoUrl"`
+
+	// PaidLeaveRate 有給取得率
+	PaidLeaveRate string `json:"paidLeaveRate"`
+
+	// RepresentativeName 代表者名
+	RepresentativeName string `json:"representativeName"`
+
+	// Revenue 売上高
+	Revenue string `json:"revenue"`
+
+	// SmokingPolicy 受動喫煙対策
+	SmokingPolicy string `json:"smokingPolicy"`
+
+	// WebsiteUrl WebサイトURL
+	WebsiteUrl string `json:"websiteUrl"`
+}
+
 // ModelsQuotedPostResponse 引用投稿（要約）
 type ModelsQuotedPostResponse struct {
 	// Content 本文
@@ -1391,6 +1532,66 @@ type ModelsUpdateArticleRequest struct {
 	Title string `json:"title"`
 }
 
+// ModelsUpdateCompanyProfileRequest 企業プロフィール更新リクエスト
+type ModelsUpdateCompanyProfileRequest struct {
+	// AverageAge 平均年齢
+	AverageAge string `json:"averageAge"`
+
+	// AverageOvertimeHours 平均残業時間
+	AverageOvertimeHours string `json:"averageOvertimeHours"`
+
+	// Benefits 福利厚生
+	Benefits []string `json:"benefits"`
+
+	// Capital 資本金
+	Capital string `json:"capital"`
+
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// ContactPersonName 担当者名
+	ContactPersonName string `json:"contactPersonName"`
+
+	// Description 会社紹介
+	Description string `json:"description"`
+
+	// EmployeeCount 従業員数
+	EmployeeCount string `json:"employeeCount"`
+
+	// FoundedMonth 設立月
+	FoundedMonth *int `json:"foundedMonth"`
+
+	// FoundedYear 設立年
+	FoundedYear *int `json:"foundedYear"`
+
+	// Headline ヘッドライン
+	Headline string `json:"headline"`
+
+	// Industry 業界
+	Industry string `json:"industry"`
+
+	// Location 所在地
+	Location string `json:"location"`
+
+	// PaidLeaveRate 有給取得率
+	PaidLeaveRate string `json:"paidLeaveRate"`
+
+	// PhoneNumber 電話番号
+	PhoneNumber string `json:"phoneNumber"`
+
+	// RepresentativeName 代表者名
+	RepresentativeName string `json:"representativeName"`
+
+	// Revenue 売上高
+	Revenue string `json:"revenue"`
+
+	// SmokingPolicy 受動喫煙対策
+	SmokingPolicy string `json:"smokingPolicy"`
+
+	// WebsiteUrl WebサイトURL
+	WebsiteUrl string `json:"websiteUrl"`
+}
+
 // ModelsUpdateDiagnoseStatusRequest チーム診断ステータス更新リクエスト（指定したキーのみ更新）
 type ModelsUpdateDiagnoseStatusRequest struct {
 	// CiStatus Career Interest 診断ステータス
@@ -1744,6 +1945,26 @@ type CompanyNotificationsListCompanyNotificationsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// CompanyProfilesDeleteCompanyProfileImageParams defines parameters for CompanyProfilesDeleteCompanyProfileImage.
+type CompanyProfilesDeleteCompanyProfileImageParams struct {
+	// Type 画像種別（logo / cover / gallery）
+	Type string `form:"type" json:"type"`
+
+	// Url 削除するギャラリー画像URL（type=gallery のとき）
+	Url *string `form:"url,omitempty" json:"url,omitempty"`
+}
+
+// CompanyProfilesUploadCompanyProfileImageMultipartBody defines parameters for CompanyProfilesUploadCompanyProfileImage.
+type CompanyProfilesUploadCompanyProfileImageMultipartBody struct {
+	File openapi_types.File `json:"file"`
+}
+
+// CompanyProfilesUploadCompanyProfileImageParams defines parameters for CompanyProfilesUploadCompanyProfileImage.
+type CompanyProfilesUploadCompanyProfileImageParams struct {
+	// Type 画像種別（logo / cover / gallery）
+	Type string `form:"type" json:"type"`
+}
+
 // CompanyScoutsListCompanyScoutsParams defines parameters for CompanyScoutsListCompanyScouts.
 type CompanyScoutsListCompanyScoutsParams struct {
 	// Status ステータスで絞り込み
@@ -1891,6 +2112,12 @@ type CompanyMessagingStartCompanyConversationJSONRequestBody = ModelsStartConver
 // CompanyMessagingSendCompanyMessageJSONRequestBody defines body for CompanyMessagingSendCompanyMessage for application/json ContentType.
 type CompanyMessagingSendCompanyMessageJSONRequestBody = ModelsSendMessageRequest
 
+// CompanyProfilesUpdateCompanyProfileJSONRequestBody defines body for CompanyProfilesUpdateCompanyProfile for application/json ContentType.
+type CompanyProfilesUpdateCompanyProfileJSONRequestBody = ModelsUpdateCompanyProfileRequest
+
+// CompanyProfilesUploadCompanyProfileImageMultipartRequestBody defines body for CompanyProfilesUploadCompanyProfileImage for multipart/form-data ContentType.
+type CompanyProfilesUploadCompanyProfileImageMultipartRequestBody CompanyProfilesUploadCompanyProfileImageMultipartBody
+
 // ScoutTemplatesCreateScoutTemplateJSONRequestBody defines body for ScoutTemplatesCreateScoutTemplate for application/json ContentType.
 type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplateRequest
 
@@ -2025,6 +2252,9 @@ type ServerInterface interface {
 	// Get the latest career interest result for a user
 	// (GET /api/career-interest/users/{userId}/results/latest)
 	CareerInterestCiGetLatestResult(ctx echo.Context, userId string) error
+	// Get a public company profile
+	// (GET /api/companies/{id})
+	PublicCompanyProfilesGetPublicCompanyProfile(ctx echo.Context, id string) error
 	// List applications for the company
 	// (GET /api/company/applications)
 	CompanyApplicationsListCompanyApplications(ctx echo.Context, params CompanyApplicationsListCompanyApplicationsParams) error
@@ -2094,6 +2324,18 @@ type ServerInterface interface {
 	// Mark a company notification as read
 	// (POST /api/company/notifications/{id}/read)
 	CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Context, id string) error
+	// Get the authenticated company's profile
+	// (GET /api/company/profile)
+	CompanyProfilesGetCompanyProfile(ctx echo.Context) error
+	// Update the authenticated company's profile
+	// (PUT /api/company/profile)
+	CompanyProfilesUpdateCompanyProfile(ctx echo.Context) error
+	// Delete a company profile image
+	// (DELETE /api/company/profile/image)
+	CompanyProfilesDeleteCompanyProfileImage(ctx echo.Context, params CompanyProfilesDeleteCompanyProfileImageParams) error
+	// Upload a company profile image
+	// (POST /api/company/profile/image)
+	CompanyProfilesUploadCompanyProfileImage(ctx echo.Context, params CompanyProfilesUploadCompanyProfileImageParams) error
 	// List scout templates
 	// (GET /api/company/scout-templates)
 	ScoutTemplatesListScoutTemplates(ctx echo.Context) error
@@ -2598,6 +2840,22 @@ func (w *ServerInterfaceWrapper) CareerInterestCiGetLatestResult(ctx echo.Contex
 	return err
 }
 
+// PublicCompanyProfilesGetPublicCompanyProfile converts echo context to params.
+func (w *ServerInterfaceWrapper) PublicCompanyProfilesGetPublicCompanyProfile(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PublicCompanyProfilesGetPublicCompanyProfile(ctx, id)
+	return err
+}
+
 // CompanyApplicationsListCompanyApplications converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyApplicationsListCompanyApplications(ctx echo.Context) error {
 	var err error
@@ -2971,6 +3229,67 @@ func (w *ServerInterfaceWrapper) CompanyNotificationsMarkCompanyNotificationRead
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyNotificationsMarkCompanyNotificationRead(ctx, id)
+	return err
+}
+
+// CompanyProfilesGetCompanyProfile converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyProfilesGetCompanyProfile(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyProfilesGetCompanyProfile(ctx)
+	return err
+}
+
+// CompanyProfilesUpdateCompanyProfile converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyProfilesUpdateCompanyProfile(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyProfilesUpdateCompanyProfile(ctx)
+	return err
+}
+
+// CompanyProfilesDeleteCompanyProfileImage converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyProfilesDeleteCompanyProfileImage(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CompanyProfilesDeleteCompanyProfileImageParams
+	// ------------- Required query parameter "type" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "type", ctx.QueryParams(), &params.Type, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter type: %s", err))
+	}
+
+	// ------------- Optional query parameter "url" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "url", ctx.QueryParams(), &params.Url, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter url: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyProfilesDeleteCompanyProfileImage(ctx, params)
+	return err
+}
+
+// CompanyProfilesUploadCompanyProfileImage converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyProfilesUploadCompanyProfileImage(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CompanyProfilesUploadCompanyProfileImageParams
+	// ------------- Required query parameter "type" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "type", ctx.QueryParams(), &params.Type, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter type: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyProfilesUploadCompanyProfileImage(ctx, params)
 	return err
 }
 
@@ -4212,6 +4531,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiGetResultBySession)
 	router.POST(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiSubmitResult)
 	router.GET(baseURL+"/api/career-interest/users/:userId/results/latest", wrapper.CareerInterestCiGetLatestResult)
+	router.GET(baseURL+"/api/companies/:id", wrapper.PublicCompanyProfilesGetPublicCompanyProfile)
 	router.GET(baseURL+"/api/company/applications", wrapper.CompanyApplicationsListCompanyApplications)
 	router.GET(baseURL+"/api/company/applications/:applicationId", wrapper.CompanyApplicationsGetApplication)
 	router.PATCH(baseURL+"/api/company/applications/:applicationId/status", wrapper.CompanyApplicationsUpdateApplicationStatus)
@@ -4235,6 +4555,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/company/notifications/read-all", wrapper.CompanyNotificationsMarkAllCompanyNotificationsRead)
 	router.GET(baseURL+"/api/company/notifications/unread-count", wrapper.CompanyNotificationsCountCompanyUnreadNotifications)
 	router.POST(baseURL+"/api/company/notifications/:id/read", wrapper.CompanyNotificationsMarkCompanyNotificationRead)
+	router.GET(baseURL+"/api/company/profile", wrapper.CompanyProfilesGetCompanyProfile)
+	router.PUT(baseURL+"/api/company/profile", wrapper.CompanyProfilesUpdateCompanyProfile)
+	router.DELETE(baseURL+"/api/company/profile/image", wrapper.CompanyProfilesDeleteCompanyProfileImage)
+	router.POST(baseURL+"/api/company/profile/image", wrapper.CompanyProfilesUploadCompanyProfileImage)
 	router.GET(baseURL+"/api/company/scout-templates", wrapper.ScoutTemplatesListScoutTemplates)
 	router.POST(baseURL+"/api/company/scout-templates", wrapper.ScoutTemplatesCreateScoutTemplate)
 	router.DELETE(baseURL+"/api/company/scout-templates/:templateId", wrapper.ScoutTemplatesDeleteScoutTemplate)

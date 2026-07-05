@@ -432,6 +432,108 @@ export type ModelsCompanyLoginRequest = {
 };
 
 /**
+ * 企業プロフィール（企業本人向け）
+ */
+export type ModelsCompanyProfileResponse = {
+    /**
+     * 企業ID
+     */
+    id: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 担当者名
+     */
+    contactPersonName: string;
+    /**
+     * 電話番号
+     */
+    phoneNumber: string;
+    /**
+     * メールアドレス
+     */
+    email: string;
+    /**
+     * ヘッドライン
+     */
+    headline: string;
+    /**
+     * 会社紹介
+     */
+    description: string;
+    /**
+     * 業界
+     */
+    industry: string;
+    /**
+     * 所在地
+     */
+    location: string;
+    /**
+     * 従業員数
+     */
+    employeeCount: string;
+    /**
+     * 設立年
+     */
+    foundedYear: number | null;
+    /**
+     * 設立月
+     */
+    foundedMonth: number | null;
+    /**
+     * WebサイトURL
+     */
+    websiteUrl: string;
+    /**
+     * ロゴURL
+     */
+    logoUrl: string;
+    /**
+     * カバー画像URL
+     */
+    coverImageUrl: string;
+    /**
+     * 代表者名
+     */
+    representativeName: string;
+    /**
+     * 資本金
+     */
+    capital: string;
+    /**
+     * 売上高
+     */
+    revenue: string;
+    /**
+     * 福利厚生
+     */
+    benefits: Array<string>;
+    /**
+     * 平均年齢
+     */
+    averageAge: string;
+    /**
+     * 平均残業時間
+     */
+    averageOvertimeHours: string;
+    /**
+     * 有給取得率
+     */
+    paidLeaveRate: string;
+    /**
+     * 受動喫煙対策
+     */
+    smokingPolicy: string;
+    /**
+     * ギャラリー画像URL
+     */
+    galleryUrls: Array<string>;
+};
+
+/**
  * 企業アカウント登録リクエスト
  */
 export type ModelsCompanyRegisterRequest = {
@@ -1274,6 +1376,96 @@ export type ModelsPostResponse = {
 };
 
 /**
+ * 企業プロフィール（公開向け）
+ */
+export type ModelsPublicCompanyProfileResponse = {
+    /**
+     * 企業ID
+     */
+    id: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * ヘッドライン
+     */
+    headline: string;
+    /**
+     * 会社紹介
+     */
+    description: string;
+    /**
+     * 業界
+     */
+    industry: string;
+    /**
+     * 所在地
+     */
+    location: string;
+    /**
+     * 従業員数
+     */
+    employeeCount: string;
+    /**
+     * 設立年
+     */
+    foundedYear: number | null;
+    /**
+     * 設立月
+     */
+    foundedMonth: number | null;
+    /**
+     * WebサイトURL
+     */
+    websiteUrl: string;
+    /**
+     * ロゴURL
+     */
+    logoUrl: string;
+    /**
+     * カバー画像URL
+     */
+    coverImageUrl: string;
+    /**
+     * 代表者名
+     */
+    representativeName: string;
+    /**
+     * 資本金
+     */
+    capital: string;
+    /**
+     * 売上高
+     */
+    revenue: string;
+    /**
+     * 福利厚生
+     */
+    benefits: Array<string>;
+    /**
+     * 平均年齢
+     */
+    averageAge: string;
+    /**
+     * 平均残業時間
+     */
+    averageOvertimeHours: string;
+    /**
+     * 有給取得率
+     */
+    paidLeaveRate: string;
+    /**
+     * 受動喫煙対策
+     */
+    smokingPolicy: string;
+    /**
+     * ギャラリー画像URL
+     */
+    galleryUrls: Array<string>;
+};
+
+/**
  * 引用投稿（要約）
  */
 export type ModelsQuotedPostResponse = {
@@ -1877,6 +2069,88 @@ export type ModelsUpdateArticleRequest = {
      * タグ
      */
     tags: Array<string>;
+};
+
+/**
+ * 企業プロフィール更新リクエスト
+ */
+export type ModelsUpdateCompanyProfileRequest = {
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 担当者名
+     */
+    contactPersonName: string;
+    /**
+     * 電話番号
+     */
+    phoneNumber: string;
+    /**
+     * ヘッドライン
+     */
+    headline: string;
+    /**
+     * 会社紹介
+     */
+    description: string;
+    /**
+     * 業界
+     */
+    industry: string;
+    /**
+     * 所在地
+     */
+    location: string;
+    /**
+     * 従業員数
+     */
+    employeeCount: string;
+    /**
+     * 設立年
+     */
+    foundedYear: number | null;
+    /**
+     * 設立月
+     */
+    foundedMonth: number | null;
+    /**
+     * WebサイトURL
+     */
+    websiteUrl: string;
+    /**
+     * 代表者名
+     */
+    representativeName: string;
+    /**
+     * 資本金
+     */
+    capital: string;
+    /**
+     * 売上高
+     */
+    revenue: string;
+    /**
+     * 福利厚生
+     */
+    benefits: Array<string>;
+    /**
+     * 平均年齢
+     */
+    averageAge: string;
+    /**
+     * 平均残業時間
+     */
+    averageOvertimeHours: string;
+    /**
+     * 有給取得率
+     */
+    paidLeaveRate: string;
+    /**
+     * 受動喫煙対策
+     */
+    smokingPolicy: string;
 };
 
 /**
@@ -2846,6 +3120,33 @@ export type CareerInterestCiGetLatestResultResponses = {
 
 export type CareerInterestCiGetLatestResultResponse = CareerInterestCiGetLatestResultResponses[keyof CareerInterestCiGetLatestResultResponses];
 
+export type PublicCompanyProfilesGetPublicCompanyProfileData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/companies/{id}';
+};
+
+export type PublicCompanyProfilesGetPublicCompanyProfileErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type PublicCompanyProfilesGetPublicCompanyProfileError = PublicCompanyProfilesGetPublicCompanyProfileErrors[keyof PublicCompanyProfilesGetPublicCompanyProfileErrors];
+
+export type PublicCompanyProfilesGetPublicCompanyProfileResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsPublicCompanyProfileResponse;
+};
+
+export type PublicCompanyProfilesGetPublicCompanyProfileResponse = PublicCompanyProfilesGetPublicCompanyProfileResponses[keyof PublicCompanyProfilesGetPublicCompanyProfileResponses];
+
 export type CompanyApplicationsListCompanyApplicationsData = {
     body?: never;
     path?: never;
@@ -3475,6 +3776,122 @@ export type CompanyNotificationsMarkCompanyNotificationReadResponses = {
 };
 
 export type CompanyNotificationsMarkCompanyNotificationReadResponse = CompanyNotificationsMarkCompanyNotificationReadResponses[keyof CompanyNotificationsMarkCompanyNotificationReadResponses];
+
+export type CompanyProfilesGetCompanyProfileData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/profile';
+};
+
+export type CompanyProfilesGetCompanyProfileErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CompanyProfilesGetCompanyProfileError = CompanyProfilesGetCompanyProfileErrors[keyof CompanyProfilesGetCompanyProfileErrors];
+
+export type CompanyProfilesGetCompanyProfileResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCompanyProfileResponse;
+};
+
+export type CompanyProfilesGetCompanyProfileResponse = CompanyProfilesGetCompanyProfileResponses[keyof CompanyProfilesGetCompanyProfileResponses];
+
+export type CompanyProfilesUpdateCompanyProfileData = {
+    body: ModelsUpdateCompanyProfileRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/profile';
+};
+
+export type CompanyProfilesUpdateCompanyProfileErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyProfilesUpdateCompanyProfileError = CompanyProfilesUpdateCompanyProfileErrors[keyof CompanyProfilesUpdateCompanyProfileErrors];
+
+export type CompanyProfilesUpdateCompanyProfileResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCompanyProfileResponse;
+};
+
+export type CompanyProfilesUpdateCompanyProfileResponse = CompanyProfilesUpdateCompanyProfileResponses[keyof CompanyProfilesUpdateCompanyProfileResponses];
+
+export type CompanyProfilesDeleteCompanyProfileImageData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * 画像種別（logo / cover / gallery）
+         */
+        type: string;
+        /**
+         * 削除するギャラリー画像URL（type=gallery のとき）
+         */
+        url?: string;
+    };
+    url: '/api/company/profile/image';
+};
+
+export type CompanyProfilesDeleteCompanyProfileImageErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyProfilesDeleteCompanyProfileImageError = CompanyProfilesDeleteCompanyProfileImageErrors[keyof CompanyProfilesDeleteCompanyProfileImageErrors];
+
+export type CompanyProfilesDeleteCompanyProfileImageResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CompanyProfilesDeleteCompanyProfileImageResponse = CompanyProfilesDeleteCompanyProfileImageResponses[keyof CompanyProfilesDeleteCompanyProfileImageResponses];
+
+export type CompanyProfilesUploadCompanyProfileImageData = {
+    body: {
+        file: Blob | File;
+    };
+    path?: never;
+    query: {
+        /**
+         * 画像種別（logo / cover / gallery）
+         */
+        type: string;
+    };
+    url: '/api/company/profile/image';
+};
+
+export type CompanyProfilesUploadCompanyProfileImageErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyProfilesUploadCompanyProfileImageError = CompanyProfilesUploadCompanyProfileImageErrors[keyof CompanyProfilesUploadCompanyProfileImageErrors];
+
+export type CompanyProfilesUploadCompanyProfileImageResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUploadUrlResponse;
+};
+
+export type CompanyProfilesUploadCompanyProfileImageResponse = CompanyProfilesUploadCompanyProfileImageResponses[keyof CompanyProfilesUploadCompanyProfileImageResponses];
 
 export type ScoutTemplatesListScoutTemplatesData = {
     body?: never;

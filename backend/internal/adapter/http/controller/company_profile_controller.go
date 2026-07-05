@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
@@ -65,27 +66,7 @@ func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
 		return badRequest(ctx, "invalid company id")
 	}
 
-	var body struct {
-		CompanyName          string   `json:"companyName"`
-		ContactPersonName    string   `json:"contactPersonName"`
-		PhoneNumber          string   `json:"phoneNumber"`
-		Headline             string   `json:"headline"`
-		Description          string   `json:"description"`
-		Industry             string   `json:"industry"`
-		Location             string   `json:"location"`
-		EmployeeCount        string   `json:"employeeCount"`
-		FoundedYear          *int     `json:"foundedYear"`
-		FoundedMonth         *int     `json:"foundedMonth"`
-		WebsiteURL           string   `json:"websiteUrl"`
-		RepresentativeName   string   `json:"representativeName"`
-		Capital              string   `json:"capital"`
-		Revenue              string   `json:"revenue"`
-		Benefits             []string `json:"benefits"`
-		AverageAge           string   `json:"averageAge"`
-		AverageOvertimeHours string   `json:"averageOvertimeHours"`
-		PaidLeaveRate        string   `json:"paidLeaveRate"`
-		SmokingPolicy        string   `json:"smokingPolicy"`
-	}
+	var body openapi.ModelsUpdateCompanyProfileRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request")
 	}
@@ -101,7 +82,7 @@ func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
 		EmployeeCount:        body.EmployeeCount,
 		FoundedYear:          body.FoundedYear,
 		FoundedMonth:         body.FoundedMonth,
-		WebsiteURL:           body.WebsiteURL,
+		WebsiteURL:           body.WebsiteUrl,
 		RepresentativeName:   body.RepresentativeName,
 		Capital:              body.Capital,
 		Revenue:              body.Revenue,
@@ -174,7 +155,7 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 		return internalError(ctx, err.Error())
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{"url": imageURL})
+	return ctx.JSON(http.StatusOK, openapi.ModelsUploadUrlResponse{Url: imageURL})
 }
 
 func (c *CompanyProfileController) DeleteImage(ctx echo.Context) error {

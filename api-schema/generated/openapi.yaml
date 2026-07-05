@@ -23,6 +23,7 @@ tags:
   - name: JobApplications
   - name: Messaging
   - name: Articles
+  - name: CompanyProfile
 paths:
   /api/applications:
     post:
@@ -606,6 +607,34 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - CareerInterest
+  /api/companies/{id}:
+    get:
+      operationId: PublicCompanyProfiles_getPublicCompanyProfile
+      summary: Get a public company profile
+      description: 企業公開プロフィール取得
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.PublicCompanyProfileResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyProfile
   /api/company/applications:
     get:
       operationId: CompanyApplications_listCompanyApplications
@@ -1286,6 +1315,125 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - Notifications
+  /api/company/profile:
+    get:
+      operationId: CompanyProfiles_getCompanyProfile
+      summary: Get the authenticated company's profile
+      description: 自社プロフィール取得（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyProfileResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyProfile
+    put:
+      operationId: CompanyProfiles_updateCompanyProfile
+      summary: Update the authenticated company's profile
+      description: 自社プロフィール更新（企業認証）。更新後の全プロフィールを返す
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyProfileResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateCompanyProfileRequest'
+  /api/company/profile/image:
+    post:
+      operationId: CompanyProfiles_uploadCompanyProfileImage
+      summary: Upload a company profile image
+      description: 画像アップロード（企業認証）。type=logo|cover|gallery
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: 画像種別（logo / cover / gallery）
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UploadUrlResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyProfile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+    delete:
+      operationId: CompanyProfiles_deleteCompanyProfileImage
+      summary: Delete a company profile image
+      description: 画像削除（企業認証）。type=logo|cover|gallery、gallery は url 指定
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: 画像種別（logo / cover / gallery）
+          schema:
+            type: string
+          explode: false
+        - name: url
+          in: query
+          required: false
+          description: 削除するギャラリー画像URL（type=gallery のとき）
+          schema:
+            type: string
+          explode: false
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - CompanyProfile
   /api/company/scout-templates:
     post:
       operationId: ScoutTemplates_createScoutTemplate
@@ -3793,6 +3941,113 @@ components:
           type: string
           description: パスワード
       description: 企業ログインリクエスト
+    Models.CompanyProfileResponse:
+      type: object
+      required:
+        - id
+        - companyName
+        - contactPersonName
+        - phoneNumber
+        - email
+        - headline
+        - description
+        - industry
+        - location
+        - employeeCount
+        - foundedYear
+        - foundedMonth
+        - websiteUrl
+        - logoUrl
+        - coverImageUrl
+        - representativeName
+        - capital
+        - revenue
+        - benefits
+        - averageAge
+        - averageOvertimeHours
+        - paidLeaveRate
+        - smokingPolicy
+        - galleryUrls
+      properties:
+        id:
+          type: string
+          description: 企業ID
+        companyName:
+          type: string
+          description: 企業名
+        contactPersonName:
+          type: string
+          description: 担当者名
+        phoneNumber:
+          type: string
+          description: 電話番号
+        email:
+          type: string
+          description: メールアドレス
+        headline:
+          type: string
+          description: ヘッドライン
+        description:
+          type: string
+          description: 会社紹介
+        industry:
+          type: string
+          description: 業界
+        location:
+          type: string
+          description: 所在地
+        employeeCount:
+          type: string
+          description: 従業員数
+        foundedYear:
+          type: integer
+          nullable: true
+          description: 設立年
+        foundedMonth:
+          type: integer
+          nullable: true
+          description: 設立月
+        websiteUrl:
+          type: string
+          description: WebサイトURL
+        logoUrl:
+          type: string
+          description: ロゴURL
+        coverImageUrl:
+          type: string
+          description: カバー画像URL
+        representativeName:
+          type: string
+          description: 代表者名
+        capital:
+          type: string
+          description: 資本金
+        revenue:
+          type: string
+          description: 売上高
+        benefits:
+          type: array
+          items:
+            type: string
+          description: 福利厚生
+        averageAge:
+          type: string
+          description: 平均年齢
+        averageOvertimeHours:
+          type: string
+          description: 平均残業時間
+        paidLeaveRate:
+          type: string
+          description: 有給取得率
+        smokingPolicy:
+          type: string
+          description: 受動喫煙対策
+        galleryUrls:
+          type: array
+          items:
+            type: string
+          description: ギャラリー画像URL
+      description: 企業プロフィール（企業本人向け）
     Models.CompanyRegisterRequest:
       type: object
       required:
@@ -4686,6 +4941,101 @@ components:
           format: date-time
           description: 更新日時
       description: 投稿
+    Models.PublicCompanyProfileResponse:
+      type: object
+      required:
+        - id
+        - companyName
+        - headline
+        - description
+        - industry
+        - location
+        - employeeCount
+        - foundedYear
+        - foundedMonth
+        - websiteUrl
+        - logoUrl
+        - coverImageUrl
+        - representativeName
+        - capital
+        - revenue
+        - benefits
+        - averageAge
+        - averageOvertimeHours
+        - paidLeaveRate
+        - smokingPolicy
+        - galleryUrls
+      properties:
+        id:
+          type: string
+          description: 企業ID
+        companyName:
+          type: string
+          description: 企業名
+        headline:
+          type: string
+          description: ヘッドライン
+        description:
+          type: string
+          description: 会社紹介
+        industry:
+          type: string
+          description: 業界
+        location:
+          type: string
+          description: 所在地
+        employeeCount:
+          type: string
+          description: 従業員数
+        foundedYear:
+          type: integer
+          nullable: true
+          description: 設立年
+        foundedMonth:
+          type: integer
+          nullable: true
+          description: 設立月
+        websiteUrl:
+          type: string
+          description: WebサイトURL
+        logoUrl:
+          type: string
+          description: ロゴURL
+        coverImageUrl:
+          type: string
+          description: カバー画像URL
+        representativeName:
+          type: string
+          description: 代表者名
+        capital:
+          type: string
+          description: 資本金
+        revenue:
+          type: string
+          description: 売上高
+        benefits:
+          type: array
+          items:
+            type: string
+          description: 福利厚生
+        averageAge:
+          type: string
+          description: 平均年齢
+        averageOvertimeHours:
+          type: string
+          description: 平均残業時間
+        paidLeaveRate:
+          type: string
+          description: 有給取得率
+        smokingPolicy:
+          type: string
+          description: 受動喫煙対策
+        galleryUrls:
+          type: array
+          items:
+            type: string
+          description: ギャラリー画像URL
+      description: 企業プロフィール（公開向け）
     Models.QuotedPostResponse:
       type: object
       required:
@@ -5314,6 +5664,91 @@ components:
             type: string
           description: タグ
       description: 記事更新リクエスト
+    Models.UpdateCompanyProfileRequest:
+      type: object
+      required:
+        - companyName
+        - contactPersonName
+        - phoneNumber
+        - headline
+        - description
+        - industry
+        - location
+        - employeeCount
+        - foundedYear
+        - foundedMonth
+        - websiteUrl
+        - representativeName
+        - capital
+        - revenue
+        - benefits
+        - averageAge
+        - averageOvertimeHours
+        - paidLeaveRate
+        - smokingPolicy
+      properties:
+        companyName:
+          type: string
+          description: 企業名
+        contactPersonName:
+          type: string
+          description: 担当者名
+        phoneNumber:
+          type: string
+          description: 電話番号
+        headline:
+          type: string
+          description: ヘッドライン
+        description:
+          type: string
+          description: 会社紹介
+        industry:
+          type: string
+          description: 業界
+        location:
+          type: string
+          description: 所在地
+        employeeCount:
+          type: string
+          description: 従業員数
+        foundedYear:
+          type: integer
+          nullable: true
+          description: 設立年
+        foundedMonth:
+          type: integer
+          nullable: true
+          description: 設立月
+        websiteUrl:
+          type: string
+          description: WebサイトURL
+        representativeName:
+          type: string
+          description: 代表者名
+        capital:
+          type: string
+          description: 資本金
+        revenue:
+          type: string
+          description: 売上高
+        benefits:
+          type: array
+          items:
+            type: string
+          description: 福利厚生
+        averageAge:
+          type: string
+          description: 平均年齢
+        averageOvertimeHours:
+          type: string
+          description: 平均残業時間
+        paidLeaveRate:
+          type: string
+          description: 有給取得率
+        smokingPolicy:
+          type: string
+          description: 受動喫煙対策
+      description: 企業プロフィール更新リクエスト
     Models.UpdateDiagnoseStatusRequest:
       type: object
       properties:
