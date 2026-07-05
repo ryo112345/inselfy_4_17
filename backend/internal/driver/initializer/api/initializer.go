@@ -363,10 +363,16 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return companyProfileCtrl.GetPublicProfile(c)
 	})
 
-	// --- Company Teams (public) ---
-	publicTeamCtrl := httpcontroller.NewCompanyTeamController(pool)
+	// --- Company Teams (public + authenticated) ---
+	teamCtrl := httpcontroller.NewCompanyTeamController(
+		usecase.NewCompanyTeamInteractor(
+			sqlcgw.NewCompanyTeamRepository(pool),
+			sqlcgw.NewCompanyTeamQueryService(pool),
+			tx,
+		),
+	)
 	e.GET("/api/companies/:id/teams/scores", func(c echo.Context) error {
-		return publicTeamCtrl.GetPublicTeamScores(c, c.Param("id"))
+		return teamCtrl.GetPublicTeamScores(c, c.Param("id"))
 	})
 
 	// --- Company Profile (authenticated) ---
@@ -377,7 +383,6 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	companyProfileGroup.DELETE("/image", companyProfileCtrl.DeleteImage)
 
 	// --- Company Teams ---
-	teamCtrl := httpcontroller.NewCompanyTeamController(pool)
 	teamGroup := e.Group("/api/company/teams", companyJwtMW)
 	teamGroup.GET("", teamCtrl.ListTeams)
 	teamGroup.POST("", teamCtrl.CreateTeam)
