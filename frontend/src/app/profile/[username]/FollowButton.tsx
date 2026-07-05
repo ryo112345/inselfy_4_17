@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 
+import { useAuth } from "@/features/auth/auth-context";
 import { fetchFollowStatus, followUser, unfollowUser } from "./api";
 
 type Props = {
@@ -10,14 +11,21 @@ type Props = {
 };
 
 export function FollowButton({ username, profileColor }: Props) {
+  const { isAuthenticated } = useAuth();
   const [following, setFollowing] = useState<boolean | null>(null);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    // 未ログインでは呼ばない（401 が正常系になり、SDK の 401 インターセプタが
+    // /login リダイレクトを起こすため）。従来どおりスペーサー表示のままになる。
+    if (!isAuthenticated) {
+      setFollowing(null);
+      return;
+    }
     fetchFollowStatus(username)
       .then((s) => setFollowing(s.following))
       .catch(() => setFollowing(null));
-  }, [username]);
+  }, [username, isAuthenticated]);
 
   if (following === null) return <div className="w-[120px]" />;
 

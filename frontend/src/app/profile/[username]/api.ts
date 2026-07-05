@@ -8,11 +8,15 @@ import {
   experiencesCreateExperience,
   experiencesDeleteExperience,
   experiencesUpdateExperience,
+  followsFollowUser,
+  followsGetFollowStatus,
+  followsUnfollowUser,
   skillsAttachSkill,
   skillsDetachSkill,
   usersUpdateUserProfile,
   type ModelsCreateEducationRequest,
   type ModelsCreateExperienceRequest,
+  type ModelsFollowStatusResponse,
   type ModelsUpdateEducationRequest,
   type ModelsUpdateExperienceRequest,
   type ModelsUpdateUserProfileRequest,
@@ -82,39 +86,24 @@ export async function detachSkill(username: string, name: string) {
   return run(skillsDetachSkill({ path: { username, name } }));
 }
 
-export type FollowStatus = {
-  following: boolean;
-  followedBy: boolean;
-};
+export type FollowStatus = ModelsFollowStatusResponse;
 
+// 注意: /follow-status は jwtMW 付きで未ログインだと 401 が返る。呼び出し元
+// （FollowButton）が isAuthenticated ガードを持ち、未ログインでは呼ばない前提。
 export async function fetchFollowStatus(username: string): Promise<FollowStatus> {
-  const res = await fetch(`/api/users/${username}/follow-status`, {
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Failed to fetch follow status");
-  return res.json();
+  const { data, error } = await followsGetFollowStatus({ path: { username } });
+  if (error || !data) throw new Error("Failed to fetch follow status");
+  return data;
 }
 
 export async function followUser(username: string): Promise<void> {
-  const res = await fetch(`/api/users/${username}/follow`, {
-    method: "POST",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to follow");
-  }
+  const { error } = await followsFollowUser({ path: { username } });
+  if (error) throw new Error(error.message ?? "Failed to follow");
 }
 
 export async function unfollowUser(username: string): Promise<void> {
-  const res = await fetch(`/api/users/${username}/follow`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to unfollow");
-  }
+  const { error } = await followsUnfollowUser({ path: { username } });
+  if (error) throw new Error(error.message ?? "Failed to unfollow");
 }
 
 export type FollowCounts = {
