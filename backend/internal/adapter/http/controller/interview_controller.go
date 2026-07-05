@@ -9,7 +9,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/interview"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -31,22 +33,10 @@ func (ctrl *InterviewController) SetWS(ws WSNotifier) {
 	ctrl.ws = ws
 }
 
-type proposeRequest struct {
-	ApplicationID   string `json:"applicationId"`
-	Message         string `json:"message"`
-	Location        string `json:"location"`
-	DurationMinutes int    `json:"durationMinutes"`
-	Slots           []struct {
-		StartTime string `json:"startTime"`
-		EndTime   string `json:"endTime"`
-	} `json:"slots"`
-	ExpiresInDays int `json:"expiresInDays"`
-}
-
 func (ctrl *InterviewController) Propose(c echo.Context) error {
 	companyID := authmw.CompanyID(c)
 
-	var req proposeRequest
+	var req openapi.ModelsProposeInterviewRequest
 	if err := c.Bind(&req); err != nil {
 		return badRequest(c, "invalid request")
 	}
@@ -75,7 +65,7 @@ func (ctrl *InterviewController) Propose(c echo.Context) error {
 	}
 
 	out, err := ctrl.input.Propose(c.Request().Context(), interview.ProposeInput{
-		ApplicationID:   req.ApplicationID,
+		ApplicationID:   req.ApplicationId,
 		CompanyID:       companyID,
 		Message:         req.Message,
 		Location:        req.Location,
@@ -100,30 +90,21 @@ func (ctrl *InterviewController) Propose(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"proposalId": out.Proposal.ID,
-		"slots":      slotsToResponse(out.Slots),
-	})
-}
-
-type selectSlotRequest struct {
-	SlotID    string `json:"slotId"`
-	StartTime string `json:"startTime"`
-	EndTime   string `json:"endTime"`
+	return c.JSON(http.StatusCreated, presenter.ProposeInterviewResponse(out.Proposal.ID, out.Slots))
 }
 
 func (ctrl *InterviewController) SelectSlot(c echo.Context) error {
 	userID := authmw.UserID(c)
 
 	proposalID := c.Param("proposalId")
-	var req selectSlotRequest
+	var req openapi.ModelsSelectSlotRequest
 	if err := c.Bind(&req); err != nil {
 		return badRequest(c, "invalid request")
 	}
 
 	input := interview.SelectSlotInput{
 		ProposalID:  proposalID,
-		SlotID:      req.SlotID,
+		SlotID:      req.SlotId,
 		CandidateID: userID,
 	}
 	if req.StartTime != "" && req.EndTime != "" {
@@ -144,14 +125,7 @@ func (ctrl *InterviewController) SelectSlot(c echo.Context) error {
 		return handleError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"interview": map[string]interface{}{
-			"id":        iv.ID,
-			"startTime": iv.StartTime,
-			"endTime":   iv.EndTime,
-			"status":    iv.Status,
-		},
-	})
+	return c.JSON(http.StatusOK, presenter.SelectSlotResponse(iv))
 }
 
 func (ctrl *InterviewController) ListByCompany(c echo.Context) error {
@@ -173,18 +147,7 @@ func (ctrl *InterviewController) ListByCompany(c echo.Context) error {
 		return internalError(c, err.Error())
 	}
 
-	result := make([]map[string]interface{}, len(interviews))
-	for i, iv := range interviews {
-		item := interviewToResponse(&iv.Interview)
-		item["candidateName"] = iv.CandidateName
-		item["candidateAvatarUrl"] = iv.CandidateAvatar
-		item["jobTitle"] = iv.JobTitle
-		result[i] = item
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"interviews": result,
-	})
+	return c.JSON(http.StatusOK, presenter.CompanyInterviewsResponse(interviews))
 }
 
 func (ctrl *InterviewController) ListByCandidate(c echo.Context) error {
@@ -195,32 +158,7 @@ func (ctrl *InterviewController) ListByCandidate(c echo.Context) error {
 		return internalError(c, err.Error())
 	}
 
-	result := make([]map[string]interface{}, len(interviews))
-	for i, iv := range interviews {
-		item := interviewToResponse(&iv.Interview)
-		item["companyName"] = iv.CompanyName
-		item["jobTitle"] = iv.JobTitle
-		result[i] = item
-	}
-
-	pendingProposals := make([]map[string]interface{}, 0, len(proposals))
-	for _, p := range proposals {
-		pendingProposals = append(pendingProposals, map[string]interface{}{
-			"id":              p.ID,
-			"companyName":     p.CompanyName,
-			"jobTitle":        p.JobTitle,
-			"message":         p.Message,
-			"durationMinutes": p.DurationMinutes,
-			"slots":           slotsToResponse(p.Slots),
-			"expiresAt":       p.ExpiresAt,
-			"createdAt":       p.CreatedAt,
-		})
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"interviews":       result,
-		"pendingProposals": pendingProposals,
-	})
+	return c.JSON(http.StatusOK, presenter.CandidateInterviewsResponse(interviews, proposals))
 }
 
 func (ctrl *InterviewController) CancelInterview(c echo.Context) error {
@@ -237,7 +175,7 @@ func (ctrl *InterviewController) CancelInterview(c echo.Context) error {
 		return handleError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"status": "cancelled"})
+	return c.JSON(http.StatusOK, openapi.ModelsStatusOkResponse{Status: "cancelled"})
 }
 
 func (ctrl *InterviewController) GetPendingProposal(c echo.Context) error {
@@ -246,13 +184,13 @@ func (ctrl *InterviewController) GetPendingProposal(c echo.Context) error {
 
 	pending, err := ctrl.input.GetPendingProposal(c.Request().Context(), applicationID)
 	if err != nil {
-		return c.JSON(http.StatusOK, map[string]interface{}{"hasPending": false})
+		return c.JSON(http.StatusOK, openapi.ModelsPendingProposalCheckResponse{HasPending: false})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"hasPending": true,
-		"proposalId": pending.ProposalID,
-		"createdAt":  pending.CreatedAt,
+	return c.JSON(http.StatusOK, openapi.ModelsPendingProposalCheckResponse{
+		HasPending: true,
+		ProposalId: &pending.ProposalID,
+		CreatedAt:  &pending.CreatedAt,
 	})
 }
 
@@ -264,39 +202,6 @@ func (ctrl *InterviewController) GetProposalSlots(c echo.Context) error {
 		return handleError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"proposal": map[string]interface{}{
-			"id":        proposal.ID,
-			"message":   proposal.Message,
-			"status":    proposal.Status,
-			"expiresAt": proposal.ExpiresAt,
-		},
-		"slots": slotsToResponse(slots),
-	})
+	return c.JSON(http.StatusOK, presenter.ProposalSlotsResponse(proposal, slots))
 }
 
-func slotsToResponse(slots []*interview.Slot) []map[string]interface{} {
-	result := make([]map[string]interface{}, len(slots))
-	for i, s := range slots {
-		result[i] = map[string]interface{}{
-			"id":        s.ID,
-			"startTime": s.StartTime,
-			"endTime":   s.EndTime,
-			"status":    s.Status,
-		}
-	}
-	return result
-}
-
-func interviewToResponse(iv *interview.Interview) map[string]interface{} {
-	return map[string]interface{}{
-		"id":            iv.ID,
-		"applicationId": iv.ApplicationID,
-		"startTime":     iv.StartTime,
-		"endTime":       iv.EndTime,
-		"location":      iv.Location,
-		"meetingUrl":    iv.MeetingURL,
-		"status":        iv.Status,
-		"title":         iv.Title,
-	}
-}

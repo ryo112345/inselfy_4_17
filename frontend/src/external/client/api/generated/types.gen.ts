@@ -386,6 +386,66 @@ export type ModelsCiTypeScoreResponse = {
 };
 
 /**
+ * 面接（候補者向け・企業情報付き）
+ */
+export type ModelsCandidateInterviewItem = {
+    /**
+     * 面接ID
+     */
+    id: string;
+    /**
+     * 応募ID
+     */
+    applicationId: string;
+    /**
+     * 開始日時
+     */
+    startTime: string;
+    /**
+     * 終了日時
+     */
+    endTime: string;
+    /**
+     * 場所
+     */
+    location: string;
+    /**
+     * ミーティングURL
+     */
+    meetingUrl: string;
+    /**
+     * ステータス（scheduled / completed / cancelled / no_show）
+     */
+    status: string;
+    /**
+     * タイトル
+     */
+    title: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 求人タイトル
+     */
+    jobTitle: string;
+};
+
+/**
+ * 候補者向け面接一覧（未回答の提案付き）
+ */
+export type ModelsCandidateInterviewListResponse = {
+    /**
+     * 確定済み面接
+     */
+    interviews: Array<ModelsCandidateInterviewItem>;
+    /**
+     * 未回答の日程提案
+     */
+    pendingProposals: Array<ModelsPendingProposalItem>;
+};
+
+/**
  * 候補者からのスカウト返信リクエスト
  */
 export type ModelsCandidateScoutReplyRequest = {
@@ -451,6 +511,66 @@ export type ModelsCommentResponse = {
      * 作成日時
      */
     createdAt: string;
+};
+
+/**
+ * 面接（企業向け・候補者情報付き）
+ */
+export type ModelsCompanyInterviewItem = {
+    /**
+     * 面接ID
+     */
+    id: string;
+    /**
+     * 応募ID
+     */
+    applicationId: string;
+    /**
+     * 開始日時
+     */
+    startTime: string;
+    /**
+     * 終了日時
+     */
+    endTime: string;
+    /**
+     * 場所
+     */
+    location: string;
+    /**
+     * ミーティングURL
+     */
+    meetingUrl: string;
+    /**
+     * ステータス（scheduled / completed / cancelled / no_show）
+     */
+    status: string;
+    /**
+     * タイトル
+     */
+    title: string;
+    /**
+     * 候補者名
+     */
+    candidateName: string;
+    /**
+     * 候補者アバターURL
+     */
+    candidateAvatarUrl: string;
+    /**
+     * 求人タイトル
+     */
+    jobTitle: string;
+};
+
+/**
+ * 企業向け面接一覧
+ */
+export type ModelsCompanyInterviewListResponse = {
+    /**
+     * 面接
+     */
+    interviews: Array<ModelsCompanyInterviewItem>;
 };
 
 /**
@@ -1128,6 +1248,66 @@ export type ModelsGoogleLoginRequest = {
 };
 
 /**
+ * 面接（共通フィールド）
+ */
+export type ModelsInterviewBase = {
+    /**
+     * 面接ID
+     */
+    id: string;
+    /**
+     * 応募ID
+     */
+    applicationId: string;
+    /**
+     * 開始日時
+     */
+    startTime: string;
+    /**
+     * 終了日時
+     */
+    endTime: string;
+    /**
+     * 場所
+     */
+    location: string;
+    /**
+     * ミーティングURL
+     */
+    meetingUrl: string;
+    /**
+     * ステータス（scheduled / completed / cancelled / no_show）
+     */
+    status: string;
+    /**
+     * タイトル
+     */
+    title: string;
+};
+
+/**
+ * 面接候補スロット
+ */
+export type ModelsInterviewSlotResponse = {
+    /**
+     * スロットID
+     */
+    id: string;
+    /**
+     * 開始日時
+     */
+    startTime: string;
+    /**
+     * 終了日時
+     */
+    endTime: string;
+    /**
+     * ステータス（proposed / selected / rejected）
+     */
+    status: string;
+};
+
+/**
  * 応募一覧
  */
 export type ModelsJobApplicationListResponse = {
@@ -1768,6 +1948,62 @@ export type ModelsNotificationResponse = {
 };
 
 /**
+ * 未回答提案の有無
+ */
+export type ModelsPendingProposalCheckResponse = {
+    /**
+     * 未回答の提案があるか
+     */
+    hasPending: boolean;
+    /**
+     * 提案ID
+     */
+    proposalId?: string;
+    /**
+     * 提案作成日時
+     */
+    createdAt?: string;
+};
+
+/**
+ * 候補者に届いている日程提案
+ */
+export type ModelsPendingProposalItem = {
+    /**
+     * 提案ID
+     */
+    id: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 求人タイトル
+     */
+    jobTitle: string;
+    /**
+     * メッセージ
+     */
+    message: string;
+    /**
+     * 所要時間（分）
+     */
+    durationMinutes: number;
+    /**
+     * 候補スロット
+     */
+    slots: Array<ModelsInterviewSlotResponse>;
+    /**
+     * 有効期限
+     */
+    expiresAt: string;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
  * 投稿一覧
  */
 export type ModelsPostListResponse = {
@@ -1841,6 +2077,100 @@ export type ModelsPostResponse = {
      * 更新日時
      */
     updatedAt: string;
+};
+
+/**
+ * 提案とスロット一覧
+ */
+export type ModelsProposalSlotsResponse = {
+    /**
+     * 提案
+     */
+    proposal: ModelsProposalSummary;
+    /**
+     * 候補スロット
+     */
+    slots: Array<ModelsInterviewSlotResponse>;
+};
+
+/**
+ * 提案サマリー
+ */
+export type ModelsProposalSummary = {
+    /**
+     * 提案ID
+     */
+    id: string;
+    /**
+     * メッセージ
+     */
+    message: string;
+    /**
+     * ステータス（pending / confirmed / expired / cancelled）
+     */
+    status: string;
+    /**
+     * 有効期限
+     */
+    expiresAt: string;
+};
+
+/**
+ * 面接日程提案リクエスト
+ */
+export type ModelsProposeInterviewRequest = {
+    /**
+     * 応募ID
+     */
+    applicationId: string;
+    /**
+     * メッセージ
+     */
+    message: string;
+    /**
+     * 場所
+     */
+    location: string;
+    /**
+     * 所要時間（分）
+     */
+    durationMinutes: number;
+    /**
+     * 候補日時（1-10件）
+     */
+    slots: Array<ModelsProposeSlotInput>;
+    /**
+     * 有効期限（日数）
+     */
+    expiresInDays: number;
+};
+
+/**
+ * 面接日程提案結果
+ */
+export type ModelsProposeInterviewResponse = {
+    /**
+     * 提案ID
+     */
+    proposalId: string;
+    /**
+     * 登録されたスロット
+     */
+    slots: Array<ModelsInterviewSlotResponse>;
+};
+
+/**
+ * 面接候補日時（提案リクエスト用、RFC3339 文字列）
+ */
+export type ModelsProposeSlotInput = {
+    /**
+     * 開始日時（RFC3339）
+     */
+    startTime: string;
+    /**
+     * 終了日時（RFC3339）
+     */
+    endTime: string;
 };
 
 /**
@@ -2381,6 +2711,56 @@ export type ModelsScoutTemplateResponse = {
      * 更新日時
      */
     updatedAt: string;
+};
+
+/**
+ * スロット選択リクエスト。slotId 指定か、startTime/endTime の直接指定
+ */
+export type ModelsSelectSlotRequest = {
+    /**
+     * 選択するスロットID
+     */
+    slotId: string;
+    /**
+     * 直接指定の開始日時（RFC3339、空文字可）
+     */
+    startTime: string;
+    /**
+     * 直接指定の終了日時（RFC3339、空文字可）
+     */
+    endTime: string;
+};
+
+/**
+ * スロット選択結果
+ */
+export type ModelsSelectSlotResponse = {
+    /**
+     * 確定した面接
+     */
+    interview: ModelsSelectedInterview;
+};
+
+/**
+ * 確定した面接（スロット選択結果）
+ */
+export type ModelsSelectedInterview = {
+    /**
+     * 面接ID
+     */
+    id: string;
+    /**
+     * 開始日時
+     */
+    startTime: string;
+    /**
+     * 終了日時
+     */
+    endTime: string;
+    /**
+     * ステータス
+     */
+    status: string;
 };
 
 /**
@@ -4314,6 +4694,119 @@ export type CompanyAuthCompanyRegisterResponses = {
 
 export type CompanyAuthCompanyRegisterResponse = CompanyAuthCompanyRegisterResponses[keyof CompanyAuthCompanyRegisterResponses];
 
+export type CompanyInterviewsListCompanyInterviewsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 開始日（YYYY-MM-DD、デフォルト今日）
+         */
+        from?: string;
+        /**
+         * 終了日（YYYY-MM-DD、デフォルト from+7日）
+         */
+        to?: string;
+    };
+    url: '/api/company/interviews';
+};
+
+export type CompanyInterviewsListCompanyInterviewsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyInterviewsListCompanyInterviewsError = CompanyInterviewsListCompanyInterviewsErrors[keyof CompanyInterviewsListCompanyInterviewsErrors];
+
+export type CompanyInterviewsListCompanyInterviewsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCompanyInterviewListResponse;
+};
+
+export type CompanyInterviewsListCompanyInterviewsResponse = CompanyInterviewsListCompanyInterviewsResponses[keyof CompanyInterviewsListCompanyInterviewsResponses];
+
+export type CompanyInterviewsGetPendingProposalData = {
+    body?: never;
+    path: {
+        applicationId: string;
+    };
+    query?: never;
+    url: '/api/company/interviews/pending/{applicationId}';
+};
+
+export type CompanyInterviewsGetPendingProposalErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CompanyInterviewsGetPendingProposalError = CompanyInterviewsGetPendingProposalErrors[keyof CompanyInterviewsGetPendingProposalErrors];
+
+export type CompanyInterviewsGetPendingProposalResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsPendingProposalCheckResponse;
+};
+
+export type CompanyInterviewsGetPendingProposalResponse = CompanyInterviewsGetPendingProposalResponses[keyof CompanyInterviewsGetPendingProposalResponses];
+
+export type CompanyInterviewsProposeInterviewData = {
+    body: ModelsProposeInterviewRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/interviews/propose';
+};
+
+export type CompanyInterviewsProposeInterviewErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CompanyInterviewsProposeInterviewError = CompanyInterviewsProposeInterviewErrors[keyof CompanyInterviewsProposeInterviewErrors];
+
+export type CompanyInterviewsProposeInterviewResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsProposeInterviewResponse;
+};
+
+export type CompanyInterviewsProposeInterviewResponse = CompanyInterviewsProposeInterviewResponses[keyof CompanyInterviewsProposeInterviewResponses];
+
+export type CompanyInterviewsCancelCompanyInterviewData = {
+    body?: never;
+    path: {
+        interviewId: string;
+    };
+    query?: never;
+    url: '/api/company/interviews/{interviewId}/cancel';
+};
+
+export type CompanyInterviewsCancelCompanyInterviewErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsUnauthorizedError | ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CompanyInterviewsCancelCompanyInterviewError = CompanyInterviewsCancelCompanyInterviewErrors[keyof CompanyInterviewsCancelCompanyInterviewErrors];
+
+export type CompanyInterviewsCancelCompanyInterviewResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsStatusOkResponse;
+};
+
+export type CompanyInterviewsCancelCompanyInterviewResponse = CompanyInterviewsCancelCompanyInterviewResponses[keyof CompanyInterviewsCancelCompanyInterviewResponses];
+
 export type CompanyJobPostingsListCompanyJobPostingsData = {
     body?: never;
     path?: never;
@@ -5868,6 +6361,112 @@ export type CompanyTeamsGetTeamScoresResponses = {
 };
 
 export type CompanyTeamsGetTeamScoresResponse = CompanyTeamsGetTeamScoresResponses[keyof CompanyTeamsGetTeamScoresResponses];
+
+export type CandidateInterviewsListCandidateInterviewsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/interviews';
+};
+
+export type CandidateInterviewsListCandidateInterviewsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type CandidateInterviewsListCandidateInterviewsError = CandidateInterviewsListCandidateInterviewsErrors[keyof CandidateInterviewsListCandidateInterviewsErrors];
+
+export type CandidateInterviewsListCandidateInterviewsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCandidateInterviewListResponse;
+};
+
+export type CandidateInterviewsListCandidateInterviewsResponse = CandidateInterviewsListCandidateInterviewsResponses[keyof CandidateInterviewsListCandidateInterviewsResponses];
+
+export type CandidateInterviewsSelectInterviewSlotData = {
+    body: ModelsSelectSlotRequest;
+    path: {
+        proposalId: string;
+    };
+    query?: never;
+    url: '/api/interviews/proposals/{proposalId}/select';
+};
+
+export type CandidateInterviewsSelectInterviewSlotErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError | ModelsConflictError;
+};
+
+export type CandidateInterviewsSelectInterviewSlotError = CandidateInterviewsSelectInterviewSlotErrors[keyof CandidateInterviewsSelectInterviewSlotErrors];
+
+export type CandidateInterviewsSelectInterviewSlotResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSelectSlotResponse;
+};
+
+export type CandidateInterviewsSelectInterviewSlotResponse = CandidateInterviewsSelectInterviewSlotResponses[keyof CandidateInterviewsSelectInterviewSlotResponses];
+
+export type CandidateInterviewsGetProposalSlotsData = {
+    body?: never;
+    path: {
+        proposalId: string;
+    };
+    query?: never;
+    url: '/api/interviews/proposals/{proposalId}/slots';
+};
+
+export type CandidateInterviewsGetProposalSlotsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CandidateInterviewsGetProposalSlotsError = CandidateInterviewsGetProposalSlotsErrors[keyof CandidateInterviewsGetProposalSlotsErrors];
+
+export type CandidateInterviewsGetProposalSlotsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsProposalSlotsResponse;
+};
+
+export type CandidateInterviewsGetProposalSlotsResponse = CandidateInterviewsGetProposalSlotsResponses[keyof CandidateInterviewsGetProposalSlotsResponses];
+
+export type CandidateInterviewsCancelCandidateInterviewData = {
+    body?: never;
+    path: {
+        interviewId: string;
+    };
+    query?: never;
+    url: '/api/interviews/{interviewId}/cancel';
+};
+
+export type CandidateInterviewsCancelCandidateInterviewErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsUnauthorizedError | ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CandidateInterviewsCancelCandidateInterviewError = CandidateInterviewsCancelCandidateInterviewErrors[keyof CandidateInterviewsCancelCandidateInterviewErrors];
+
+export type CandidateInterviewsCancelCandidateInterviewResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsStatusOkResponse;
+};
+
+export type CandidateInterviewsCancelCandidateInterviewResponse = CandidateInterviewsCancelCandidateInterviewResponses[keyof CandidateInterviewsCancelCandidateInterviewResponses];
 
 export type PublicJobPostingsListPublicJobPostingsData = {
     body?: never;

@@ -131,10 +131,20 @@ cd ../backend && make oapi
 | 19 | [x] | company_team | 11 | inline struct 7個、**nil→null 維持** |
 | 20 | [x] | talent_search | 4 | **動的 wv_*/ci_* クエリ** |
 | 21 | [x] | job_posting | 10 | 40/41フィールド、TeamMember、二形 ListPublic、multipart 3本 |
-| 22 | [ ] | interview | 8 | **presenter なし・全部 ad-hoc map。curl 実測必須** |
+| 22 | [x] | interview | 8 | **presenter なし・全部 ad-hoc map。curl 実測必須** |
 
 全エンドポイントの詳細（ルート表・DTOフィールド数・特記事項）は 2026-07-05 の調査結果を
 このファイルの末尾に貼らず、着手時に controller を直接読む（行番号ズレ防止）。
+
+**22/22 完了（2026-07-05）。** 実サーバ起動での smoke 検証済み（企業ログイン→interviews/dashboard/
+credits/applications/teams、候補者 bypass-login→interviews/scouts/scout-settings、公開 jobs/team scores、
+テンプレート bare array）。
+
+### 残タスク（本移行のスコープ外だった漏れ）
+
+- [ ] **初期4機能移行時のスペック漏れルート:** `POST /api/users/:username/upload-image`、
+  `GET /api/users/id/:id`（user 機能だがスペック未記載のまま）。upload は `@multipartBody`
+  パターン（articles 参照）で追加できる。
 
 ## Phase 2（本移行完了後の別作業・任意）
 
