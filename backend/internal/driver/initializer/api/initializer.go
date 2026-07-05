@@ -178,7 +178,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	}, jwtMW)
 
 	// --- Similar Users ---
-	similarUsersCtrl := httpcontroller.NewSimilarUsersController(pool)
+	similarUsersCtrl := httpcontroller.NewSimilarUsersController(
+		usecase.NewSimilarUsersInteractor(sqlcgw.NewSimilarUsersQueryService(pool)),
+	)
 	e.GET("/api/users/id/:id/similar", func(c echo.Context) error {
 		return similarUsersCtrl.GetSimilarUsers(c, c.Param("id"))
 	})
