@@ -12,12 +12,10 @@ import (
 	stripegw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/stripe"
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
-	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	ws "github.com/akiyama/inselfy/backend/internal/adapter/ws"
 	"github.com/akiyama/inselfy/backend/internal/driver/config"
 	driverdb "github.com/akiyama/inselfy/backend/internal/driver/db"
 	"github.com/akiyama/inselfy/backend/internal/driver/factory"
-	httpfactory "github.com/akiyama/inselfy/backend/internal/driver/factory/http"
 	"github.com/akiyama/inselfy/backend/internal/driver/scheduler"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -88,55 +86,36 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	notificationInputFactory := factory.NewNotificationInputFactory()
 	jobPostingInputFactory := factory.NewJobPostingInputFactory()
 
-	userOutputFactory := httpfactory.NewUserOutputFactory()
-	authOutputFactory := httpfactory.NewAuthOutputFactory()
-	experienceOutputFactory := httpfactory.NewExperienceOutputFactory()
-	educationOutputFactory := httpfactory.NewEducationOutputFactory()
-	skillOutputFactory := httpfactory.NewSkillOutputFactory()
-	postOutputFactory := httpfactory.NewPostOutputFactory()
-	wvOutputFactory := httpfactory.NewWorkValuesOutputFactory()
-	ciOutputFactory := httpfactory.NewCareerInterestOutputFactory()
 	articleInputFactory := factory.NewArticleInputFactory(stripeService)
-	articleOutputFactory := httpfactory.NewArticleOutputFactory()
-
-	companyAuthOutputFactory := httpfactory.NewCompanyAuthOutputFactory()
-	scoutOutputFactory := httpfactory.NewScoutOutputFactory()
-	scoutTemplateOutputFactory := httpfactory.NewScoutTemplateOutputFactory()
-	notificationOutputFactory := httpfactory.NewNotificationOutputFactory()
-	jobPostingOutputFactory := httpfactory.NewJobPostingOutputFactory()
 
 	followRepoFactory := factory.NewFollowRepoFactory(pool)
 	followInputFactory := factory.NewFollowInputFactory()
-	followOutputFactory := httpfactory.NewFollowOutputFactory()
 
 	conversationRepoFactory := factory.NewConversationRepoFactory(pool)
 	messageRepoFactory := factory.NewMessageRepoFactory(pool)
 	participantRepoFactory := factory.NewConversationParticipantRepoFactory(pool)
 	messagingInputFactory := factory.NewMessagingInputFactory()
-	messagingOutputFactory := httpfactory.NewMessagingOutputFactory()
 
 	jobApplicationRepoFactory := factory.NewJobApplicationRepoFactory(pool)
 	jobApplicationInputFactory := factory.NewJobApplicationInputFactory()
-	jobApplicationOutputFactory := httpfactory.NewJobApplicationOutputFactory()
 
-	userCtrl := httpcontroller.NewUserController(userInputFactory, userOutputFactory, userRepoFactory, fileStorage)
-	authCtrl := httpcontroller.NewAuthController(authInputFactory, authOutputFactory, userRepoFactory, refreshTokenRepoFactory)
-	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceOutputFactory, experienceRepoFactory, userRepoFactory)
-	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationOutputFactory, educationRepoFactory, userRepoFactory)
-	skillCtrl := httpcontroller.NewSkillController(skillInputFactory, skillOutputFactory, skillRepoFactory, userRepoFactory, tx)
-	postCtrl := httpcontroller.NewPostController(postInputFactory, postOutputFactory, postRepoFactory)
-	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvOutputFactory, wvSessionRepoFactory, wvResultRepoFactory, wvScoreRepoFactory)
-	ciCtrl := httpcontroller.NewCareerInterestController(ciInputFactory, ciOutputFactory, ciSessionRepoFactory, ciResultRepoFactory, ciBasicScoreRepoFactory, ciTypeScoreRepoFactory)
+	userCtrl := httpcontroller.NewUserController(userInputFactory, userRepoFactory, fileStorage)
+	authCtrl := httpcontroller.NewAuthController(authInputFactory, userRepoFactory, refreshTokenRepoFactory)
+	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceRepoFactory, userRepoFactory)
+	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationRepoFactory, userRepoFactory)
+	skillCtrl := httpcontroller.NewSkillController(skillInputFactory, skillRepoFactory, userRepoFactory, tx)
+	postCtrl := httpcontroller.NewPostController(postInputFactory, postRepoFactory)
+	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvSessionRepoFactory, wvResultRepoFactory, wvScoreRepoFactory)
+	ciCtrl := httpcontroller.NewCareerInterestController(ciInputFactory, ciSessionRepoFactory, ciResultRepoFactory, ciBasicScoreRepoFactory, ciTypeScoreRepoFactory)
 	articleCtrl := httpcontroller.NewArticleController(
 		articleInputFactory,
-		articleOutputFactory,
 		articleRepoFactory,
 		articlePurchaseRepoFactory,
 		fileStorage,
 	)
 
 	scoutCtrl := httpcontroller.NewScoutController(
-		scoutInputFactory, scoutOutputFactory,
+		scoutInputFactory,
 		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
 		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
 		userRepoFactory,
@@ -144,7 +123,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		tx,
 	)
 	candidateScoutCtrl := httpcontroller.NewCandidateScoutController(
-		scoutInputFactory, scoutOutputFactory,
+		scoutInputFactory,
 		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
 		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
 		userRepoFactory,
@@ -152,7 +131,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		tx,
 	)
 	scoutSettingsCtrl := httpcontroller.NewScoutSettingsController(
-		scoutInputFactory, scoutOutputFactory,
+		scoutInputFactory,
 		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
 		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
 		userRepoFactory,
@@ -160,26 +139,26 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		tx,
 	)
 	scoutTemplateCtrl := httpcontroller.NewScoutTemplateController(
-		scoutTemplateInputFactory, scoutTemplateOutputFactory, scoutTemplateRepoFactory,
+		scoutTemplateInputFactory, scoutTemplateRepoFactory,
 	)
 	notifCtrl := httpcontroller.NewNotificationController(
-		notificationInputFactory, notificationOutputFactory, notificationRepoFactory,
+		notificationInputFactory, notificationRepoFactory,
 	)
 	jobPostingCtrl := httpcontroller.NewJobPostingController(
-		jobPostingInputFactory, jobPostingOutputFactory, jobPostingRepoFactory,
+		jobPostingInputFactory, jobPostingRepoFactory,
 	)
 
 	followCtrl := httpcontroller.NewFollowController(
-		followInputFactory, followOutputFactory, followRepoFactory, userRepoFactory,
+		followInputFactory, followRepoFactory, userRepoFactory,
 	)
 
 	jobApplicationCtrl := httpcontroller.NewJobApplicationController(
-		jobApplicationInputFactory, jobApplicationOutputFactory,
+		jobApplicationInputFactory,
 		jobApplicationRepoFactory, jobPostingRepoFactory, pool,
 	)
 
 	messagingCtrl := httpcontroller.NewMessagingController(
-		messagingInputFactory, messagingOutputFactory,
+		messagingInputFactory,
 		conversationRepoFactory, messageRepoFactory, participantRepoFactory, tx,
 	)
 
@@ -189,10 +168,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	)
 
 	companyAuthCtrl := httpcontroller.NewCompanyAuthController(
-		func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository, output port.CompanyAuthOutputPort) port.CompanyAuthInputPort {
-			return companyAuthInputFactory(companyRepo, refreshRepo, output)
+		func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository) port.CompanyAuthInputPort {
+			return companyAuthInputFactory(companyRepo, refreshRepo)
 		},
-		func() *presenter.CompanyAuthPresenter { return companyAuthOutputFactory() },
 		companyAccountRepoFactory,
 		companyRefreshTokenRepoFactory,
 	)

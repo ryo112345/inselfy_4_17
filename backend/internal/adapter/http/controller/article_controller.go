@@ -17,23 +17,20 @@ import (
 )
 
 type ArticleController struct {
-	inputFactory        func(repo port.ArticleRepository, purchaseRepo port.ArticlePurchaseRepository, output port.ArticleOutputPort) port.ArticleInputPort
-	outputFactory       func() *presenter.ArticlePresenter
+	inputFactory        func(repo port.ArticleRepository, purchaseRepo port.ArticlePurchaseRepository) port.ArticleInputPort
 	repoFactory         func() port.ArticleRepository
 	purchaseRepoFactory func() port.ArticlePurchaseRepository
 	storage             port.FileStorage
 }
 
 func NewArticleController(
-	inputFactory func(repo port.ArticleRepository, purchaseRepo port.ArticlePurchaseRepository, output port.ArticleOutputPort) port.ArticleInputPort,
-	outputFactory func() *presenter.ArticlePresenter,
+	inputFactory func(repo port.ArticleRepository, purchaseRepo port.ArticlePurchaseRepository) port.ArticleInputPort,
 	repoFactory func() port.ArticleRepository,
 	purchaseRepoFactory func() port.ArticlePurchaseRepository,
 	storage port.FileStorage,
 ) *ArticleController {
 	return &ArticleController{
 		inputFactory:        inputFactory,
-		outputFactory:       outputFactory,
 		repoFactory:         repoFactory,
 		purchaseRepoFactory: purchaseRepoFactory,
 		storage:             storage,
@@ -64,8 +61,7 @@ func (c *ArticleController) CreateAsUser(ctx echo.Context) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	input, p := c.newIO()
-	if err := input.Create(ctx.Request().Context(), article.CreateArticleInput{
+	a, purchased, isAuthor, err := c.newInput().Create(ctx.Request().Context(), article.CreateArticleInput{
 		AuthorType:    article.AuthorTypeUser,
 		AuthorUserID:  &userID,
 		Title:         body.Title,
@@ -74,10 +70,11 @@ func (c *ArticleController) CreateAsUser(ctx echo.Context) error {
 		PriceYen:      body.PriceYen,
 		CoverImageURL: body.CoverImageURL,
 		Tags:          body.Tags,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.SingleResponse())
+	return ctx.JSON(http.StatusCreated, presenter.ArticleSingleResponse(a, purchased, isAuthor))
 }
 
 func (c *ArticleController) CreateAsCompany(ctx echo.Context) error {
@@ -86,18 +83,18 @@ func (c *ArticleController) CreateAsCompany(ctx echo.Context) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	input, p := c.newIO()
-	if err := input.Create(ctx.Request().Context(), article.CreateArticleInput{
+	a, purchased, isAuthor, err := c.newInput().Create(ctx.Request().Context(), article.CreateArticleInput{
 		AuthorType:      article.AuthorTypeCompany,
 		AuthorCompanyID: &companyID,
 		Title:           body.Title,
 		Body:            body.Body,
 		IsPaid:          body.IsPaid,
 		PriceYen:        body.PriceYen,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.SingleResponse())
+	return ctx.JSON(http.StatusCreated, presenter.ArticleSingleResponse(a, purchased, isAuthor))
 }
 
 func (c *ArticleController) GetByID(ctx echo.Context, id string) error {
@@ -105,32 +102,32 @@ func (c *ArticleController) GetByID(ctx echo.Context, id string) error {
 	if uid, ok := ctx.Get(authmw.UserIDKey).(string); ok && uid != "" {
 		viewerUserID = &uid
 	}
-	input, p := c.newIO()
-	if err := input.GetByID(ctx.Request().Context(), id, viewerUserID); err != nil {
+	a, purchased, isAuthor, err := c.newInput().GetByID(ctx.Request().Context(), id, viewerUserID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
 }
 
 func (c *ArticleController) List(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	input, p := c.newIO()
-	if err := input.List(ctx.Request().Context(), limit, offset); err != nil {
+	articles, total, err := c.newInput().List(ctx.Request().Context(), limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.ArticlesListResponse(articles, total))
 }
 
 func (c *ArticleController) ListMine(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	input, p := c.newIO()
-	if err := input.ListByAuthor(ctx.Request().Context(), article.AuthorTypeUser, userID, limit, offset); err != nil {
+	articles, total, err := c.newInput().ListByAuthor(ctx.Request().Context(), article.AuthorTypeUser, userID, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.ArticlesListResponse(articles, total))
 }
 
 func (c *ArticleController) UpdateAsUser(ctx echo.Context, id string) error {
@@ -139,18 +136,18 @@ func (c *ArticleController) UpdateAsUser(ctx echo.Context, id string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	input, p := c.newIO()
-	if err := input.Update(ctx.Request().Context(), id, article.UpdateArticleInput{
+	a, purchased, isAuthor, err := c.newInput().Update(ctx.Request().Context(), id, article.UpdateArticleInput{
 		Title:         body.Title,
 		Body:          body.Body,
 		IsPaid:        body.IsPaid,
 		PriceYen:      body.PriceYen,
 		CoverImageURL: body.CoverImageURL,
 		Tags:          body.Tags,
-	}, article.AuthorTypeUser, userID); err != nil {
+	}, article.AuthorTypeUser, userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
 }
 
 func (c *ArticleController) UpdateAsCompany(ctx echo.Context, id string) error {
@@ -159,24 +156,23 @@ func (c *ArticleController) UpdateAsCompany(ctx echo.Context, id string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	input, p := c.newIO()
-	if err := input.Update(ctx.Request().Context(), id, article.UpdateArticleInput{
+	a, purchased, isAuthor, err := c.newInput().Update(ctx.Request().Context(), id, article.UpdateArticleInput{
 		Title:         body.Title,
 		Body:          body.Body,
 		IsPaid:        body.IsPaid,
 		PriceYen:      body.PriceYen,
 		CoverImageURL: body.CoverImageURL,
 		Tags:          body.Tags,
-	}, article.AuthorTypeCompany, companyID); err != nil {
+	}, article.AuthorTypeCompany, companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
 }
 
 func (c *ArticleController) DeleteAsUser(ctx echo.Context, id string) error {
 	userID := authmw.UserID(ctx)
-	input, _ := c.newIO()
-	if err := input.Delete(ctx.Request().Context(), id, article.AuthorTypeUser, userID); err != nil {
+	if err := c.newInput().Delete(ctx.Request().Context(), id, article.AuthorTypeUser, userID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -184,8 +180,7 @@ func (c *ArticleController) DeleteAsUser(ctx echo.Context, id string) error {
 
 func (c *ArticleController) DeleteAsCompany(ctx echo.Context, id string) error {
 	companyID := authmw.CompanyID(ctx)
-	input, _ := c.newIO()
-	if err := input.Delete(ctx.Request().Context(), id, article.AuthorTypeCompany, companyID); err != nil {
+	if err := c.newInput().Delete(ctx.Request().Context(), id, article.AuthorTypeCompany, companyID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -193,35 +188,33 @@ func (c *ArticleController) DeleteAsCompany(ctx echo.Context, id string) error {
 
 func (c *ArticleController) PublishAsUser(ctx echo.Context, id string) error {
 	userID := authmw.UserID(ctx)
-	input, p := c.newIO()
-	if err := input.Publish(ctx.Request().Context(), id, article.AuthorTypeUser, userID); err != nil {
+	a, purchased, isAuthor, err := c.newInput().Publish(ctx.Request().Context(), id, article.AuthorTypeUser, userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
 }
 
 func (c *ArticleController) PublishAsCompany(ctx echo.Context, id string) error {
 	companyID := authmw.CompanyID(ctx)
-	input, p := c.newIO()
-	if err := input.Publish(ctx.Request().Context(), id, article.AuthorTypeCompany, companyID); err != nil {
+	a, purchased, isAuthor, err := c.newInput().Publish(ctx.Request().Context(), id, article.AuthorTypeCompany, companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
 }
 
 func (c *ArticleController) CreateCheckout(ctx echo.Context, id string) error {
 	userID := authmw.UserID(ctx)
-	input, p := c.newIO()
-	if err := input.CreateCheckoutSession(ctx.Request().Context(), id, userID); err != nil {
+	sessionURL, err := c.newInput().CreateCheckoutSession(ctx.Request().Context(), id, userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.CheckoutResponse())
+	return ctx.JSON(http.StatusOK, presenter.ArticleCheckoutResponse(sessionURL))
 }
 
-func (c *ArticleController) newIO() (port.ArticleInputPort, *presenter.ArticlePresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), c.purchaseRepoFactory(), output)
-	return input, output
+func (c *ArticleController) newInput() port.ArticleInputPort {
+	return c.inputFactory(c.repoFactory(), c.purchaseRepoFactory())
 }
 
 func (c *ArticleController) UploadImage(ctx echo.Context) error {

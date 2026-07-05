@@ -1,24 +1,11 @@
 package presenter
 
 import (
-	"context"
-
 	"github.com/akiyama/inselfy/backend/internal/domain/careerinterest"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
-type CareerInterestPresenter struct {
-	session *CISessionResponse
-	result  *CIResultResponse
-}
-
-var _ port.CareerInterestOutputPort = (*CareerInterestPresenter)(nil)
-
-func NewCareerInterestPresenter() *CareerInterestPresenter {
-	return &CareerInterestPresenter{}
-}
-
-func (p *CareerInterestPresenter) PresentSession(_ context.Context, s *careerinterest.Session) error {
+// CareerInterestSessionResponse converts a session entity to its API response.
+func CareerInterestSessionResponse(s *careerinterest.Session) any {
 	items := make([]CIItemResponse, len(s.Items))
 	for i, item := range s.Items {
 		items[i] = CIItemResponse{
@@ -30,15 +17,15 @@ func (p *CareerInterestPresenter) PresentSession(_ context.Context, s *careerint
 			TextJa:          item.TextJa,
 		}
 	}
-	p.session = &CISessionResponse{
+	return &CISessionResponse{
 		ID:     s.ID,
 		Status: s.Status,
 		Items:  items,
 	}
-	return nil
 }
 
-func (p *CareerInterestPresenter) PresentResult(_ context.Context, r *careerinterest.Result) error {
+// CareerInterestResultResponse converts a result entity to its API response.
+func CareerInterestResultResponse(r *careerinterest.Result) any {
 	basicScores := make([]CIBasicScoreResponse, len(r.BasicScores))
 	for i, s := range r.BasicScores {
 		basicScores[i] = CIBasicScoreResponse{
@@ -57,7 +44,7 @@ func (p *CareerInterestPresenter) PresentResult(_ context.Context, r *careerinte
 		}
 	}
 
-	p.result = &CIResultResponse{
+	return &CIResultResponse{
 		ID:          r.ID,
 		SessionID:   r.SessionID,
 		UserID:      r.UserID,
@@ -65,11 +52,7 @@ func (p *CareerInterestPresenter) PresentResult(_ context.Context, r *careerinte
 		TypeScores:  typeScores,
 		CreatedAt:   r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
-	return nil
 }
-
-func (p *CareerInterestPresenter) Session() *CISessionResponse { return p.session }
-func (p *CareerInterestPresenter) Result() *CIResultResponse   { return p.result }
 
 type CISessionResponse struct {
 	ID     string           `json:"id"`

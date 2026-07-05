@@ -1,11 +1,9 @@
 package presenter
 
 import (
-	"context"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type ArticleResponse struct {
@@ -39,19 +37,8 @@ type CheckoutSessionResponse struct {
 	URL string `json:"url"`
 }
 
-type ArticlePresenter struct {
-	single   *ArticleResponse
-	list     *ArticleListResponse
-	checkout *CheckoutSessionResponse
-}
-
-var _ port.ArticleOutputPort = (*ArticlePresenter)(nil)
-
-func NewArticlePresenter() *ArticlePresenter {
-	return &ArticlePresenter{}
-}
-
-func (p *ArticlePresenter) PresentArticle(_ context.Context, a *article.ArticleWithAuthor, purchased bool, isAuthor bool) error {
+// ArticleSingleResponse converts a single article to its API response.
+func ArticleSingleResponse(a *article.ArticleWithAuthor, purchased, isAuthor bool) any {
 	freePreview, _ := article.SplitBody(a.Article.Body)
 
 	resp := &ArticleResponse{
@@ -79,11 +66,11 @@ func (p *ArticlePresenter) PresentArticle(_ context.Context, a *article.ArticleW
 		resp.Body = a.Article.Body
 	}
 
-	p.single = resp
-	return nil
+	return resp
 }
 
-func (p *ArticlePresenter) PresentArticles(_ context.Context, articles []*article.ArticleWithAuthor, total int) error {
+// ArticlesListResponse converts a paginated list of articles to its API response.
+func ArticlesListResponse(articles []*article.ArticleWithAuthor, total int) any {
 	items := make([]*ArticleResponse, len(articles))
 	for i, a := range articles {
 		freePreview, _ := article.SplitBody(a.Article.Body)
@@ -104,23 +91,10 @@ func (p *ArticlePresenter) PresentArticles(_ context.Context, articles []*articl
 			PublishedAt:    a.Article.PublishedAt,
 		}
 	}
-	p.list = &ArticleListResponse{Items: items, Total: total}
-	return nil
+	return &ArticleListResponse{Items: items, Total: total}
 }
 
-func (p *ArticlePresenter) PresentCheckoutSession(_ context.Context, sessionURL string) error {
-	p.checkout = &CheckoutSessionResponse{URL: sessionURL}
-	return nil
-}
-
-func (p *ArticlePresenter) SingleResponse() *ArticleResponse {
-	return p.single
-}
-
-func (p *ArticlePresenter) ListResponse() *ArticleListResponse {
-	return p.list
-}
-
-func (p *ArticlePresenter) CheckoutResponse() *CheckoutSessionResponse {
-	return p.checkout
+// ArticleCheckoutResponse builds the Stripe checkout-session API response.
+func ArticleCheckoutResponse(sessionURL string) any {
+	return &CheckoutSessionResponse{URL: sessionURL}
 }

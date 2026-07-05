@@ -24,7 +24,6 @@ type ScoutInteractor struct {
 	convMsgRepo     port.MessageRepository
 	participantRepo port.ConversationParticipantRepository
 	tx              port.TxManager
-	output          port.ScoutOutputPort
 }
 
 var _ port.ScoutInputPort = (*ScoutInteractor)(nil)
@@ -41,7 +40,6 @@ func NewScoutInteractor(
 	convMsgRepo port.MessageRepository,
 	participantRepo port.ConversationParticipantRepository,
 	tx port.TxManager,
-	output port.ScoutOutputPort,
 ) *ScoutInteractor {
 	return &ScoutInteractor{
 		msgRepo:         msgRepo,
@@ -55,67 +53,66 @@ func NewScoutInteractor(
 		convMsgRepo:     convMsgRepo,
 		participantRepo: participantRepo,
 		tx:              tx,
-		output:          output,
 	}
 }
 
-func (i *ScoutInteractor) Send(ctx context.Context, input scout.SendScoutInput) error {
+func (i *ScoutInteractor) Send(ctx context.Context, input scout.SendScoutInput) (*scout.ScoutMessageWithNames, error) {
 	input.Subject = strings.TrimSpace(input.Subject)
 	input.Body = strings.TrimSpace(input.Body)
 	if err := scout.ValidateSend(input); err != nil {
-		return err
+		return nil, err
 	}
 
 	settings, err := i.settingsRepo.GetByUserID(ctx, input.CandidateID)
 	if err != nil && !isNotFound(err) {
-		return err
+		return nil, err
 	}
 	if settings != nil && !settings.AcceptingScouts {
-		return scout.ErrScoutingDisabled
+		return nil, scout.ErrScoutingDisabled
 	}
 
 	credit, err := i.creditRepo.GetOrCreate(ctx, input.CompanyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if credit.QualityRestricted {
-		return scout.ErrQualityRestricted
+		return nil, scout.ErrQualityRestricted
 	}
 
 	qResult, err := i.evaluateQuality(ctx, input.CompanyID, credit)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := i.applyQualityTransitions(ctx, input.CompanyID, qResult); err != nil {
-		return err
+		return nil, err
 	}
 	if qResult.Score.Level == scout.QualityRestricted || qResult.Score.Level == scout.QualityTemporarilyRestricted {
-		return scout.ErrQualityRestricted
+		return nil, scout.ErrQualityRestricted
 	}
 
 	active, err := i.msgRepo.GetActiveByCompanyAndCandidate(ctx, input.CompanyID, input.CandidateID)
 	if err != nil && !isNotFound(err) {
-		return err
+		return nil, err
 	}
 	if active != nil {
-		return scout.ErrDuplicateScout
+		return nil, scout.ErrDuplicateScout
 	}
 
 	var resendCount int16
 	latest, err := i.msgRepo.GetLatestByCompanyAndCandidate(ctx, input.CompanyID, input.CandidateID)
 	if err != nil && !isNotFound(err) {
-		return err
+		return nil, err
 	}
 	if latest != nil {
 		if err := scout.CanResend(latest); err != nil {
-			return err
+			return nil, err
 		}
 		resendCount = latest.ResendCount + 1
 	}
 
 	candidate, err := i.userRepo.GetByID(ctx, input.CandidateID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	vars := map[string]string{
 		"candidate_name": candidate.Name,
@@ -174,17 +171,17 @@ func (i *ScoutInteractor) Send(ctx context.Context, input scout.SendScoutInput) 
 		return err
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	msg, err := i.msgRepo.GetByID(ctx, created.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentScoutMessage(ctx, msg)
+	return msg, nil
 }
 
-func (i *ScoutInteractor) ListByCompany(ctx context.Context, companyID string, status *string, limit, offset int) error {
+func (i *ScoutInteractor) ListByCompany(ctx context.Context, companyID string, status *string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error) {
 	if limit <= 0 {
 		limit = 20
 	}
@@ -193,47 +190,47 @@ func (i *ScoutInteractor) ListByCompany(ctx context.Context, companyID string, s
 	}
 	msgs, total, err := i.msgRepo.ListByCompanyID(ctx, companyID, status, limit, offset)
 	if err != nil {
-		return err
+		return nil, 0, err
 	}
-	return i.output.PresentScoutMessages(ctx, msgs, total)
+	return msgs, total, nil
 }
 
-func (i *ScoutInteractor) GetDetail(ctx context.Context, companyID, scoutID string) error {
+func (i *ScoutInteractor) GetDetail(ctx context.Context, companyID, scoutID string) (*scout.ScoutMessageWithNames, []*scout.ScoutReply, error) {
 	msg, err := i.msgRepo.GetByID(ctx, scoutID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	if msg.CompanyID != companyID {
-		return scout.ErrNotOwner
+		return nil, nil, scout.ErrNotOwner
 	}
 	replies, err := i.replyRepo.ListByScoutMessageID(ctx, scoutID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	return i.output.PresentScoutDetail(ctx, msg, replies)
+	return msg, replies, nil
 }
 
-func (i *ScoutInteractor) GetCredits(ctx context.Context, companyID string) error {
+func (i *ScoutInteractor) GetCredits(ctx context.Context, companyID string) (*scout.ScoutCredit, error) {
 	credit, err := i.creditRepo.GetOrCreate(ctx, companyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentCredits(ctx, credit)
+	return credit, nil
 }
 
-func (i *ScoutInteractor) GetQualityScore(ctx context.Context, companyID string) error {
+func (i *ScoutInteractor) GetQualityScore(ctx context.Context, companyID string) (*scout.QualityScore, error) {
 	credit, err := i.creditRepo.GetOrCreate(ctx, companyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	qResult, err := i.evaluateQuality(ctx, companyID, credit)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := i.applyQualityTransitions(ctx, companyID, qResult); err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentQualityScore(ctx, &qResult.Score)
+	return &qResult.Score, nil
 }
 
 func (i *ScoutInteractor) evaluateQuality(ctx context.Context, companyID string, credit *scout.ScoutCredit) (scout.QualityResult, error) {
@@ -326,10 +323,10 @@ func (i *ScoutInteractor) CompanyReply(ctx context.Context, companyID, scoutID, 
 		ReferenceID: &scoutID,
 	})
 
-	return i.output.PresentOK(ctx)
+	return nil
 }
 
-func (i *ScoutInteractor) ListByCandidate(ctx context.Context, candidateID string, limit, offset int) error {
+func (i *ScoutInteractor) ListByCandidate(ctx context.Context, candidateID string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error) {
 	if limit <= 0 {
 		limit = 20
 	}
@@ -338,18 +335,18 @@ func (i *ScoutInteractor) ListByCandidate(ctx context.Context, candidateID strin
 	}
 	msgs, total, err := i.msgRepo.ListByCandidateID(ctx, candidateID, limit, offset)
 	if err != nil {
-		return err
+		return nil, 0, err
 	}
-	return i.output.PresentScoutMessages(ctx, msgs, total)
+	return msgs, total, nil
 }
 
-func (i *ScoutInteractor) GetReceivedDetail(ctx context.Context, candidateID, scoutID string) error {
+func (i *ScoutInteractor) GetReceivedDetail(ctx context.Context, candidateID, scoutID string) (*scout.ScoutMessageWithNames, []*scout.ScoutReply, error) {
 	msg, err := i.msgRepo.GetByID(ctx, scoutID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	if msg.CandidateID != candidateID {
-		return scout.ErrNotOwner
+		return nil, nil, scout.ErrNotOwner
 	}
 
 	if msg.Status == scout.StatusSent {
@@ -359,9 +356,9 @@ func (i *ScoutInteractor) GetReceivedDetail(ctx context.Context, candidateID, sc
 
 	replies, err := i.replyRepo.ListByScoutMessageID(ctx, scoutID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	return i.output.PresentReceivedDetail(ctx, msg, replies)
+	return msg, replies, nil
 }
 
 func (i *ScoutInteractor) Respond(ctx context.Context, candidateID, scoutID string, response scout.CandidateResponse) error {
@@ -379,7 +376,7 @@ func (i *ScoutInteractor) Respond(ctx context.Context, candidateID, scoutID stri
 	if err := i.processResponse(ctx, msg, scoutID, response); err != nil {
 		return err
 	}
-	return i.output.PresentOK(ctx)
+	return nil
 }
 
 func (i *ScoutInteractor) processResponse(ctx context.Context, msg *scout.ScoutMessageWithNames, scoutID string, response scout.CandidateResponse) error {
@@ -551,7 +548,7 @@ func (i *ScoutInteractor) CandidateReply(ctx context.Context, candidateID, scout
 	if err != nil {
 		return err
 	}
-	return i.output.PresentOK(ctx)
+	return nil
 }
 
 func (i *ScoutInteractor) BulkDecline(ctx context.Context, candidateID string, scoutIDs []string) error {
@@ -574,43 +571,43 @@ func (i *ScoutInteractor) BulkRespond(ctx context.Context, candidateID string, s
 			return err
 		}
 	}
-	return i.output.PresentOK(ctx)
+	return nil
 }
 
-func (i *ScoutInteractor) UpdateScoutSettings(ctx context.Context, userID string, accepting bool) error {
+func (i *ScoutInteractor) UpdateScoutSettings(ctx context.Context, userID string, accepting bool) (*scout.UserScoutSettings, error) {
 	s, err := i.settingsRepo.Upsert(ctx, &scout.UserScoutSettings{
 		UserID:          userID,
 		AcceptingScouts: accepting,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentScoutSettings(ctx, s)
+	return s, nil
 }
 
-func (i *ScoutInteractor) GetScoutSettings(ctx context.Context, userID string) error {
+func (i *ScoutInteractor) GetScoutSettings(ctx context.Context, userID string) (*scout.UserScoutSettings, error) {
 	s, err := i.settingsRepo.GetByUserID(ctx, userID)
 	if err != nil {
 		if isNotFound(err) {
-			return i.output.PresentScoutSettings(ctx, &scout.UserScoutSettings{
+			return &scout.UserScoutSettings{
 				UserID:          userID,
 				AcceptingScouts: true,
-			})
+			}, nil
 		}
-		return err
+		return nil, err
 	}
-	return i.output.PresentScoutSettings(ctx, s)
+	return s, nil
 }
 
-func (i *ScoutInteractor) GetDashboard(ctx context.Context, companyID string) error {
+func (i *ScoutInteractor) GetDashboard(ctx context.Context, companyID string) (*scout.DashboardStats, error) {
 	credit, err := i.creditRepo.GetOrCreate(ctx, companyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbPending, err := i.msgRepo.CountPendingByMonth(ctx, companyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	countByMonth := make(map[string]int)
 	for _, p := range dbPending {
@@ -639,11 +636,11 @@ func (i *ScoutInteractor) GetDashboard(ctx context.Context, companyID string) er
 
 	sent90, err := i.msgRepo.CountSentLastNDays(ctx, companyID, 90)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	replied90, err := i.msgRepo.CountRepliedLastNDays(ctx, companyID, 90)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var replyRate float64
 	if sent90 > 0 {
@@ -652,17 +649,17 @@ func (i *ScoutInteractor) GetDashboard(ctx context.Context, companyID string) er
 
 	avgReplyDays, err := i.msgRepo.AvgReplyDays(ctx, companyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return i.output.PresentDashboard(ctx, &scout.DashboardStats{
+	return &scout.DashboardStats{
 		Credits:        credit,
 		PendingTotal:   pendingTotal,
 		PendingByMonth: pendingByMonth,
 		ReplyRate:      replyRate,
 		AvgReplyDays:   avgReplyDays,
 		SentLast90d:    sent90,
-	})
+	}, nil
 }
 
 func isNotFound(err error) bool {

@@ -1,45 +1,21 @@
 package presenter
 
 import (
-	"context"
-
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
-// ExperiencePresenter converts a domain experience to the generated OpenAPI response type.
-type ExperiencePresenter struct {
-	single *openapi.ModelsExperienceResponse
-	list   *openapi.ModelsExperienceListResponse
-}
+// ExperienceResponse converts a single experience to its API response.
+func ExperienceResponse(e *experience.Experience) any { return toExperienceResponse(e) }
 
-var _ port.ExperienceOutputPort = (*ExperiencePresenter)(nil)
-
-// NewExperiencePresenter creates an ExperiencePresenter.
-func NewExperiencePresenter() *ExperiencePresenter {
-	return &ExperiencePresenter{}
-}
-
-func (p *ExperiencePresenter) PresentExperience(_ context.Context, e *experience.Experience) error {
-	p.single = toExperienceResponse(e)
-	return nil
-}
-
-func (p *ExperiencePresenter) PresentExperiences(_ context.Context, es []*experience.Experience) error {
+// ExperiencesResponse converts a list of experiences to its API response.
+func ExperiencesResponse(es []*experience.Experience) any {
 	items := make([]openapi.ModelsExperienceResponse, 0, len(es))
 	for _, e := range es {
 		items = append(items, *toExperienceResponse(e))
 	}
-	p.list = &openapi.ModelsExperienceListResponse{Items: items}
-	return nil
+	return &openapi.ModelsExperienceListResponse{Items: items}
 }
-
-// Single returns the last single-experience response.
-func (p *ExperiencePresenter) Single() *openapi.ModelsExperienceResponse { return p.single }
-
-// List returns the last list response.
-func (p *ExperiencePresenter) List() *openapi.ModelsExperienceListResponse { return p.list }
 
 func toExperienceResponse(e *experience.Experience) *openapi.ModelsExperienceResponse {
 	return &openapi.ModelsExperienceResponse{

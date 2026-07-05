@@ -1,12 +1,10 @@
 package presenter
 
 import (
-	"context"
 	"math"
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 type scoutMessageResponse struct {
@@ -83,46 +81,29 @@ type dashboardResponse struct {
 	} `json:"credits"`
 	Pending struct {
 		Total   int                               `json:"total"`
-		ByMonth []dashboardPendingByMonthResponse  `json:"byMonth"`
+		ByMonth []dashboardPendingByMonthResponse `json:"byMonth"`
 	} `json:"pending"`
 	ReplyRate    float64 `json:"replyRate"`
 	AvgReplyDays float64 `json:"avgReplyDays"`
 	SentLast90d  int     `json:"sentLast90d"`
 }
 
-type ScoutPresenter struct {
-	message   *scoutMessageResponse
-	list      *scoutListResponse
-	detail    *scoutDetailResponse
-	credits   *creditsResponse
-	quality   *qualityScoreResponse
-	settings  *scoutSettingsResponse
-	dashboard *dashboardResponse
-	ok             bool
-	conversationID string
+// ScoutMessageResponse builds the single scout-message API response.
+func ScoutMessageResponse(m *scout.ScoutMessageWithNames) any {
+	return toScoutMessageResponse(m)
 }
 
-var _ port.ScoutOutputPort = (*ScoutPresenter)(nil)
-
-func NewScoutPresenter() *ScoutPresenter {
-	return &ScoutPresenter{}
-}
-
-func (p *ScoutPresenter) PresentScoutMessage(_ context.Context, m *scout.ScoutMessageWithNames) error {
-	p.message = toScoutMessageResponse(m)
-	return nil
-}
-
-func (p *ScoutPresenter) PresentScoutMessages(_ context.Context, msgs []*scout.ScoutMessageWithNames, total int) error {
+// ScoutMessagesResponse builds the paginated scout-message list API response.
+func ScoutMessagesResponse(msgs []*scout.ScoutMessageWithNames, total int) any {
 	items := make([]*scoutMessageResponse, len(msgs))
 	for i, m := range msgs {
 		items[i] = toScoutMessageResponse(m)
 	}
-	p.list = &scoutListResponse{Items: items, Total: total}
-	return nil
+	return &scoutListResponse{Items: items, Total: total}
 }
 
-func (p *ScoutPresenter) PresentScoutDetail(_ context.Context, m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) error {
+// ScoutDetailResponse builds the scout-detail API response.
+func ScoutDetailResponse(m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) any {
 	rr := make([]*scoutReplyResponse, len(replies))
 	for i, r := range replies {
 		rr[i] = &scoutReplyResponse{
@@ -133,25 +114,25 @@ func (p *ScoutPresenter) PresentScoutDetail(_ context.Context, m *scout.ScoutMes
 			CreatedAt:  r.CreatedAt,
 		}
 	}
-	p.detail = &scoutDetailResponse{
+	return &scoutDetailResponse{
 		Message: toScoutMessageResponse(m),
 		Replies: rr,
 	}
-	return nil
 }
 
-func (p *ScoutPresenter) PresentCredits(_ context.Context, c *scout.ScoutCredit) error {
-	p.credits = &creditsResponse{
+// ScoutCreditsResponse builds the scout-credits API response.
+func ScoutCreditsResponse(c *scout.ScoutCredit) any {
+	return &creditsResponse{
 		Balance:          c.Balance,
 		MonthlyAllowance: c.MonthlyAllowance,
 		MaxStock:         c.MaxStock,
 		LastReplenished:  c.LastReplenishedAt,
 	}
-	return nil
 }
 
-func (p *ScoutPresenter) PresentQualityScore(_ context.Context, q *scout.QualityScore) error {
-	p.quality = &qualityScoreResponse{
+// ScoutQualityResponse builds the scout quality-score API response.
+func ScoutQualityResponse(q *scout.QualityScore) any {
+	return &qualityScoreResponse{
 		ReplyRate14d:      q.ReplyRate14d,
 		Level:             string(q.Level),
 		SentLast14d:       q.SentLast14d,
@@ -161,22 +142,18 @@ func (p *ScoutPresenter) PresentQualityScore(_ context.Context, q *scout.Quality
 		DaysRemaining:     q.DaysRemaining,
 		RestrictionEndsAt: q.RestrictionEndsAt,
 	}
-	return nil
 }
 
-func (p *ScoutPresenter) PresentScoutSettings(_ context.Context, s *scout.UserScoutSettings) error {
-	p.settings = &scoutSettingsResponse{
+// ScoutSettingsResponse builds the scout-settings API response.
+func ScoutSettingsResponse(s *scout.UserScoutSettings) any {
+	return &scoutSettingsResponse{
 		AcceptingScouts: s.AcceptingScouts,
 		UpdatedAt:       s.UpdatedAt,
 	}
-	return nil
 }
 
-func (p *ScoutPresenter) PresentReceivedDetail(_ context.Context, m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) error {
-	return p.PresentScoutDetail(nil, m, replies)
-}
-
-func (p *ScoutPresenter) PresentDashboard(_ context.Context, stats *scout.DashboardStats) error {
+// ScoutDashboardResponse builds the scout-dashboard API response.
+func ScoutDashboardResponse(stats *scout.DashboardStats) any {
 	last := stats.Credits.LastReplenishedAt
 	nextReplenish := time.Date(last.Year(), last.Month()+1, 1, 0, 0, 0, 0, last.Location())
 
@@ -205,25 +182,8 @@ func (p *ScoutPresenter) PresentDashboard(_ context.Context, stats *scout.Dashbo
 	resp.Pending.Total = stats.PendingTotal
 	resp.Pending.ByMonth = byMonth
 
-	p.dashboard = resp
-	return nil
+	return resp
 }
-
-func (p *ScoutPresenter) PresentOK(_ context.Context) error {
-	p.ok = true
-	return nil
-}
-
-func (p *ScoutPresenter) MessageResponse() *scoutMessageResponse   { return p.message }
-func (p *ScoutPresenter) ListResponse() *scoutListResponse         { return p.list }
-func (p *ScoutPresenter) DetailResponse() *scoutDetailResponse     { return p.detail }
-func (p *ScoutPresenter) CreditsResponse() *creditsResponse        { return p.credits }
-func (p *ScoutPresenter) QualityResponse() *qualityScoreResponse   { return p.quality }
-func (p *ScoutPresenter) SettingsResponse() *scoutSettingsResponse  { return p.settings }
-func (p *ScoutPresenter) DashboardResponse() *dashboardResponse     { return p.dashboard }
-func (p *ScoutPresenter) IsOK() bool                               { return p.ok }
-func (p *ScoutPresenter) SetConversationID(id string)              { p.conversationID = id }
-func (p *ScoutPresenter) ConversationID() string                   { return p.conversationID }
 
 func toScoutMessageResponse(m *scout.ScoutMessageWithNames) *scoutMessageResponse {
 	return &scoutMessageResponse{

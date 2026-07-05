@@ -16,7 +16,6 @@ type CareerInterestInteractor struct {
 	resultRepo     port.CareerInterestResultRepository
 	basicScoreRepo port.CareerInterestBasicScoreRepository
 	typeScoreRepo  port.CareerInterestTypeScoreRepository
-	output         port.CareerInterestOutputPort
 }
 
 var _ port.CareerInterestInputPort = (*CareerInterestInteractor)(nil)
@@ -26,18 +25,16 @@ func NewCareerInterestInteractor(
 	resultRepo port.CareerInterestResultRepository,
 	basicScoreRepo port.CareerInterestBasicScoreRepository,
 	typeScoreRepo port.CareerInterestTypeScoreRepository,
-	output port.CareerInterestOutputPort,
 ) *CareerInterestInteractor {
 	return &CareerInterestInteractor{
 		sessionRepo:    sessionRepo,
 		resultRepo:     resultRepo,
 		basicScoreRepo: basicScoreRepo,
 		typeScoreRepo:  typeScoreRepo,
-		output:         output,
 	}
 }
 
-func (i *CareerInterestInteractor) StartSession(ctx context.Context, userID string) error {
+func (i *CareerInterestInteractor) StartSession(ctx context.Context, userID string) (*careerinterest.Session, error) {
 	seed := uint64(time.Now().UnixNano())
 	rng := rand.New(rand.NewPCG(seed, 0))
 	items := careerinterest.GenerateItems(rng)
@@ -48,48 +45,43 @@ func (i *CareerInterestInteractor) StartSession(ctx context.Context, userID stri
 		Items:  items,
 	}
 
-	created, err := i.sessionRepo.Create(ctx, session)
-	if err != nil {
-		return err
-	}
-
-	return i.output.PresentSession(ctx, created)
+	return i.sessionRepo.Create(ctx, session)
 }
 
-func (i *CareerInterestInteractor) SubmitResult(ctx context.Context, sessionID string, input careerinterest.SubmitInput) error {
+func (i *CareerInterestInteractor) SubmitResult(ctx context.Context, sessionID string, input careerinterest.SubmitInput) (*careerinterest.Result, error) {
 	session, err := i.sessionRepo.GetByID(ctx, sessionID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	result, err := careerinterest.ValidateAndCompute(session, input)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	created, err := i.resultRepo.Create(ctx, result)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := i.basicScoreRepo.Save(ctx, sessionID, created.BasicScores); err != nil {
-		return err
+		return nil, err
 	}
 	if err := i.typeScoreRepo.Save(ctx, sessionID, created.TypeScores); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := i.sessionRepo.UpdateStatus(ctx, sessionID, careerinterest.StatusCompleted); err != nil {
-		return err
+		return nil, err
 	}
 
-	return i.output.PresentResult(ctx, created)
+	return created, nil
 }
 
-func (i *CareerInterestInteractor) GetLatestResult(ctx context.Context, userID string) error {
+func (i *CareerInterestInteractor) GetLatestResult(ctx context.Context, userID string) (*careerinterest.Result, error) {
 	result, err := i.resultRepo.GetLatestByUserID(ctx, userID)
 	if err != nil && !errors.Is(err, domainerr.ErrNotFound) {
-		return err
+		return nil, err
 	}
 
 	var sessionID string
@@ -98,7 +90,7 @@ func (i *CareerInterestInteractor) GetLatestResult(ctx context.Context, userID s
 	} else {
 		session, sessErr := i.sessionRepo.GetLatestCompletedByUserID(ctx, userID)
 		if sessErr != nil {
-			return sessErr
+			return nil, sessErr
 		}
 		sessionID = session.ID
 		result = &careerinterest.Result{
@@ -110,34 +102,34 @@ func (i *CareerInterestInteractor) GetLatestResult(ctx context.Context, userID s
 
 	basicScores, err := i.basicScoreRepo.GetBySessionID(ctx, sessionID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	typeScores, err := i.typeScoreRepo.GetBySessionID(ctx, sessionID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	result.BasicScores = basicScores
 	result.TypeScores = typeScores
 
-	return i.output.PresentResult(ctx, result)
+	return result, nil
 }
 
-func (i *CareerInterestInteractor) GetResultBySessionID(ctx context.Context, sessionID string) error {
+func (i *CareerInterestInteractor) GetResultBySessionID(ctx context.Context, sessionID string) (*careerinterest.Result, error) {
 	result, err := i.resultRepo.GetBySessionID(ctx, sessionID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	basicScores, err := i.basicScoreRepo.GetBySessionID(ctx, result.SessionID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	typeScores, err := i.typeScoreRepo.GetBySessionID(ctx, result.SessionID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	result.BasicScores = basicScores
 	result.TypeScores = typeScores
 
-	return i.output.PresentResult(ctx, result)
+	return result, nil
 }

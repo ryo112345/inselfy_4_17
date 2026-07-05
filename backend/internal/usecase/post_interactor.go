@@ -10,20 +10,19 @@ import (
 )
 
 type PostInteractor struct {
-	repo   port.PostRepository
-	output port.PostOutputPort
+	repo port.PostRepository
 }
 
 var _ port.PostInputPort = (*PostInteractor)(nil)
 
-func NewPostInteractor(repo port.PostRepository, output port.PostOutputPort) *PostInteractor {
-	return &PostInteractor{repo: repo, output: output}
+func NewPostInteractor(repo port.PostRepository) *PostInteractor {
+	return &PostInteractor{repo: repo}
 }
 
-func (i *PostInteractor) Create(ctx context.Context, input post.CreatePostInput) error {
+func (i *PostInteractor) Create(ctx context.Context, input post.CreatePostInput) (*post.PostWithUser, error) {
 	input.Content = strings.TrimSpace(input.Content)
 	if err := post.ValidateCreate(input); err != nil {
-		return err
+		return nil, err
 	}
 	entity := &post.Post{
 		UserID:      input.UserID,
@@ -32,63 +31,47 @@ func (i *PostInteractor) Create(ctx context.Context, input post.CreatePostInput)
 	}
 	created, err := i.repo.Create(ctx, entity)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentPost(ctx, &post.PostWithUser{
+	return &post.PostWithUser{
 		Post:     *created,
 		Username: "",
 		Name:     "",
-	})
+	}, nil
 }
 
-func (i *PostInteractor) GetByID(ctx context.Context, postID, viewerID string) error {
-	pw, err := i.repo.GetWithUserByID(ctx, postID, viewerID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentPost(ctx, pw)
+func (i *PostInteractor) GetByID(ctx context.Context, postID, viewerID string) (*post.PostWithUser, error) {
+	return i.repo.GetWithUserByID(ctx, postID, viewerID)
 }
 
-func (i *PostInteractor) ListTimeline(ctx context.Context, limit, offset int, viewerID string) error {
+func (i *PostInteractor) ListTimeline(ctx context.Context, limit, offset int, viewerID string) ([]*post.PostWithUser, int, error) {
 	if limit <= 0 || limit > 50 {
 		limit = 20
 	}
 	if offset < 0 {
 		offset = 0
 	}
-	posts, total, err := i.repo.ListTimeline(ctx, limit, offset, viewerID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentPosts(ctx, posts, total)
+	return i.repo.ListTimeline(ctx, limit, offset, viewerID)
 }
 
-func (i *PostInteractor) ListByUserID(ctx context.Context, userID string, limit, offset int, viewerID string) error {
+func (i *PostInteractor) ListByUserID(ctx context.Context, userID string, limit, offset int, viewerID string) ([]*post.PostWithUser, int, error) {
 	if limit <= 0 || limit > 50 {
 		limit = 20
 	}
 	if offset < 0 {
 		offset = 0
 	}
-	posts, total, err := i.repo.ListByUserID(ctx, userID, limit, offset, viewerID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentPosts(ctx, posts, total)
+	return i.repo.ListByUserID(ctx, userID, limit, offset, viewerID)
 }
 
-func (i *PostInteractor) ListLikedByUserID(ctx context.Context, userID string, limit, offset int) error {
+func (i *PostInteractor) ListLikedByUserID(ctx context.Context, userID string, limit, offset int) ([]*post.PostWithUser, int, error) {
 	if limit <= 0 || limit > 50 {
 		limit = 20
 	}
 	if offset < 0 {
 		offset = 0
 	}
-	posts, total, err := i.repo.ListLikedByUserID(ctx, userID, limit, offset)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentPosts(ctx, posts, total)
+	return i.repo.ListLikedByUserID(ctx, userID, limit, offset)
 }
 
 func (i *PostInteractor) Delete(ctx context.Context, postID, userID string) error {
@@ -102,61 +85,61 @@ func (i *PostInteractor) Delete(ctx context.Context, postID, userID string) erro
 	return i.repo.Delete(ctx, postID)
 }
 
-func (i *PostInteractor) ToggleLike(ctx context.Context, postID, userID string) error {
+func (i *PostInteractor) ToggleLike(ctx context.Context, postID, userID string) (bool, int, error) {
 	if _, err := i.repo.GetByID(ctx, postID); err != nil {
-		return err
+		return false, 0, err
 	}
 	liked, err := i.repo.IsPostLiked(ctx, postID, userID)
 	if err != nil {
-		return err
+		return false, 0, err
 	}
 	if liked {
 		if err := i.repo.UnlikePost(ctx, postID, userID); err != nil {
-			return err
+			return false, 0, err
 		}
 	} else {
 		if err := i.repo.LikePost(ctx, postID, userID); err != nil {
-			return err
+			return false, 0, err
 		}
 	}
 	count, err := i.repo.CountPostLikes(ctx, postID)
 	if err != nil {
-		return err
+		return false, 0, err
 	}
-	return i.output.PresentLikeToggle(ctx, !liked, count)
+	return !liked, count, nil
 }
 
-func (i *PostInteractor) ToggleRepost(ctx context.Context, postID, userID string) error {
+func (i *PostInteractor) ToggleRepost(ctx context.Context, postID, userID string) (bool, int, error) {
 	if _, err := i.repo.GetByID(ctx, postID); err != nil {
-		return err
+		return false, 0, err
 	}
 	reposted, err := i.repo.IsPostReposted(ctx, postID, userID)
 	if err != nil {
-		return err
+		return false, 0, err
 	}
 	if reposted {
 		if err := i.repo.UndoRepost(ctx, postID, userID); err != nil {
-			return err
+			return false, 0, err
 		}
 	} else {
 		if err := i.repo.RepostPost(ctx, postID, userID); err != nil {
-			return err
+			return false, 0, err
 		}
 	}
 	count, err := i.repo.CountPostReposts(ctx, postID)
 	if err != nil {
-		return err
+		return false, 0, err
 	}
-	return i.output.PresentRepostToggle(ctx, !reposted, count)
+	return !reposted, count, nil
 }
 
-func (i *PostInteractor) CreateComment(ctx context.Context, input post.CreateCommentInput) error {
+func (i *PostInteractor) CreateComment(ctx context.Context, input post.CreateCommentInput) (*post.CommentWithUser, error) {
 	input.Content = strings.TrimSpace(input.Content)
 	if err := post.ValidateComment(input); err != nil {
-		return err
+		return nil, err
 	}
 	if _, err := i.repo.GetByID(ctx, input.PostID); err != nil {
-		return err
+		return nil, err
 	}
 	entity := &post.Comment{
 		PostID:  input.PostID,
@@ -165,27 +148,23 @@ func (i *PostInteractor) CreateComment(ctx context.Context, input post.CreateCom
 	}
 	created, err := i.repo.CreateComment(ctx, entity)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return i.output.PresentComment(ctx, &post.CommentWithUser{
+	return &post.CommentWithUser{
 		Comment:  *created,
 		Username: "",
 		Name:     "",
-	})
+	}, nil
 }
 
-func (i *PostInteractor) ListComments(ctx context.Context, postID string, limit, offset int) error {
+func (i *PostInteractor) ListComments(ctx context.Context, postID string, limit, offset int) ([]*post.CommentWithUser, int, error) {
 	if limit <= 0 || limit > 50 {
 		limit = 20
 	}
 	if offset < 0 {
 		offset = 0
 	}
-	comments, total, err := i.repo.ListComments(ctx, postID, limit, offset)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentComments(ctx, comments, total)
+	return i.repo.ListComments(ctx, postID, limit, offset)
 }
 
 func (i *PostInteractor) DeleteComment(ctx context.Context, commentID, userID string) error {

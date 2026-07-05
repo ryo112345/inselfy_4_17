@@ -19,7 +19,6 @@ type AuthInteractor struct {
 	refreshRepo    port.RefreshTokenRepository
 	googleVerifier port.GoogleTokenVerifier
 	jwtService     port.JWTService
-	output         port.AuthOutputPort
 	googleClientID string
 }
 
@@ -30,7 +29,6 @@ func NewAuthInteractor(
 	refreshRepo port.RefreshTokenRepository,
 	googleVerifier port.GoogleTokenVerifier,
 	jwtService port.JWTService,
-	output port.AuthOutputPort,
 	googleClientID string,
 ) *AuthInteractor {
 	return &AuthInteractor{
@@ -38,20 +36,19 @@ func NewAuthInteractor(
 		refreshRepo:    refreshRepo,
 		googleVerifier: googleVerifier,
 		jwtService:     jwtService,
-		output:         output,
 		googleClientID: googleClientID,
 	}
 }
 
-func (a *AuthInteractor) GoogleLogin(ctx context.Context, idToken string) error {
+func (a *AuthInteractor) GoogleLogin(ctx context.Context, idToken string) (*auth.TokenPair, *user.User, error) {
 	claims, err := a.googleVerifier.Verify(ctx, idToken, a.googleClientID)
 	if err != nil {
-		return auth.ErrInvalidGoogleToken
+		return nil, nil, auth.ErrInvalidGoogleToken
 	}
 
 	u, err := a.userRepo.GetByOAuthProvider(ctx, "google", claims.Sub)
 	if err != nil && !errors.Is(err, domainerr.ErrNotFound) {
-		return err
+		return nil, nil, err
 	}
 
 	if u == nil {
@@ -75,52 +72,52 @@ func (a *AuthInteractor) GoogleLogin(ctx context.Context, idToken string) error 
 		}
 		u, err = a.userRepo.Create(ctx, u)
 		if err != nil {
-			return err
+			return nil, nil, err
 		}
 	}
 
 	return a.issueTokenPair(ctx, u)
 }
 
-func (a *AuthInteractor) RefreshToken(ctx context.Context, refreshToken string) error {
+func (a *AuthInteractor) RefreshToken(ctx context.Context, refreshToken string) (*auth.TokenPair, *user.User, error) {
 	hash := a.jwtService.HashRefreshToken(refreshToken)
 	rt, err := a.refreshRepo.GetByTokenHash(ctx, hash)
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return auth.ErrRefreshTokenRevoked
+			return nil, nil, auth.ErrRefreshTokenRevoked
 		}
-		return err
+		return nil, nil, err
 	}
 
 	if err := a.refreshRepo.RevokeByUserID(ctx, rt.UserID); err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	u, err := a.userRepo.GetByID(ctx, rt.UserID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	return a.issueTokenPair(ctx, u)
 }
 
-func (a *AuthInteractor) GetCurrentUser(ctx context.Context, userID string) error {
+func (a *AuthInteractor) GetCurrentUser(ctx context.Context, userID string) (*user.User, error) {
 	u, err := a.userRepo.GetByID(ctx, userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return a.output.PresentUser(ctx, u)
+	return u, nil
 }
 
-func (a *AuthInteractor) issueTokenPair(ctx context.Context, u *user.User) error {
+func (a *AuthInteractor) issueTokenPair(ctx context.Context, u *user.User) (*auth.TokenPair, *user.User, error) {
 	accessToken, err := a.jwtService.GenerateAccessToken(u.ID)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	rawRefresh, err := a.jwtService.GenerateRefreshToken()
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	rt := &auth.RefreshToken{
@@ -129,12 +126,12 @@ func (a *AuthInteractor) issueTokenPair(ctx context.Context, u *user.User) error
 		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 	}
 	if err := a.refreshRepo.Create(ctx, rt); err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	pair := &auth.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: rawRefresh,
 	}
-	return a.output.PresentTokenPair(ctx, pair, u)
+	return pair, u, nil
 }

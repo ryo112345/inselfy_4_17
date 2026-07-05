@@ -13,21 +13,18 @@ import (
 
 // ScoutTemplateController handles scout template CRUD HTTP endpoints.
 type ScoutTemplateController struct {
-	inputFactory  func(repo port.ScoutTemplateRepository, output port.ScoutTemplateOutputPort) port.ScoutTemplateInputPort
-	outputFactory func() *presenter.ScoutTemplatePresenter
-	repoFactory   func() port.ScoutTemplateRepository
+	inputFactory func(repo port.ScoutTemplateRepository) port.ScoutTemplateInputPort
+	repoFactory  func() port.ScoutTemplateRepository
 }
 
 // NewScoutTemplateController creates a ScoutTemplateController.
 func NewScoutTemplateController(
-	inputFactory func(repo port.ScoutTemplateRepository, output port.ScoutTemplateOutputPort) port.ScoutTemplateInputPort,
-	outputFactory func() *presenter.ScoutTemplatePresenter,
+	inputFactory func(repo port.ScoutTemplateRepository) port.ScoutTemplateInputPort,
 	repoFactory func() port.ScoutTemplateRepository,
 ) *ScoutTemplateController {
 	return &ScoutTemplateController{
-		inputFactory:  inputFactory,
-		outputFactory: outputFactory,
-		repoFactory:   repoFactory,
+		inputFactory: inputFactory,
+		repoFactory:  repoFactory,
 	}
 }
 
@@ -52,38 +49,38 @@ func (c *ScoutTemplateController) Create(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.Create(ctx.Request().Context(), scout.CreateTemplateInput{
+	t, err := c.newInput().Create(ctx.Request().Context(), scout.CreateTemplateInput{
 		CompanyID: companyID,
 		Name:      body.Name,
 		Subject:   body.Subject,
 		Body:      body.Body,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.SingleResponse())
+	return ctx.JSON(http.StatusCreated, presenter.ScoutTemplateResponse(t))
 }
 
 // List handles GET /api/company/scout-templates.
 func (c *ScoutTemplateController) List(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.List(ctx.Request().Context(), companyID); err != nil {
+	ts, err := c.newInput().List(ctx.Request().Context(), companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutTemplatesResponse(ts))
 }
 
 // Get handles GET /api/company/scout-templates/:templateID.
 func (c *ScoutTemplateController) Get(ctx echo.Context, templateID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.Get(ctx.Request().Context(), companyID, templateID); err != nil {
+	t, err := c.newInput().Get(ctx.Request().Context(), companyID, templateID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutTemplateResponse(t))
 }
 
 // Update handles PUT /api/company/scout-templates/:templateID.
@@ -95,30 +92,27 @@ func (c *ScoutTemplateController) Update(ctx echo.Context, templateID string) er
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.Update(ctx.Request().Context(), companyID, templateID, scout.UpdateTemplateInput{
+	t, err := c.newInput().Update(ctx.Request().Context(), companyID, templateID, scout.UpdateTemplateInput{
 		Name:    body.Name,
 		Subject: body.Subject,
 		Body:    body.Body,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutTemplateResponse(t))
 }
 
 // Delete handles DELETE /api/company/scout-templates/:templateID.
 func (c *ScoutTemplateController) Delete(ctx echo.Context, templateID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, _ := c.newIO()
-	if err := input.Delete(ctx.Request().Context(), companyID, templateID); err != nil {
+	if err := c.newInput().Delete(ctx.Request().Context(), companyID, templateID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (c *ScoutTemplateController) newIO() (port.ScoutTemplateInputPort, *presenter.ScoutTemplatePresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), output)
-	return input, output
+func (c *ScoutTemplateController) newInput() port.ScoutTemplateInputPort {
+	return c.inputFactory(c.repoFactory())
 }

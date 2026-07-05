@@ -26,9 +26,7 @@ type ScoutController struct {
 		convMsgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.ScoutOutputPort,
 	) port.ScoutInputPort
-	outputFactory          func() *presenter.ScoutPresenter
 	msgRepoFactory         func() port.ScoutMessageRepository
 	creditRepoFactory      func() port.ScoutCreditRepository
 	ledgerRepoFactory      func() port.ScoutCreditLedgerRepository
@@ -56,9 +54,7 @@ func NewScoutController(
 		convMsgRepo port.MessageRepository,
 		participantRepo port.ConversationParticipantRepository,
 		tx port.TxManager,
-		output port.ScoutOutputPort,
 	) port.ScoutInputPort,
-	outputFactory func() *presenter.ScoutPresenter,
 	msgRepoFactory func() port.ScoutMessageRepository,
 	creditRepoFactory func() port.ScoutCreditRepository,
 	ledgerRepoFactory func() port.ScoutCreditLedgerRepository,
@@ -73,7 +69,6 @@ func NewScoutController(
 ) *ScoutController {
 	return &ScoutController{
 		inputFactory:           inputFactory,
-		outputFactory:          outputFactory,
 		msgRepoFactory:         msgRepoFactory,
 		creditRepoFactory:      creditRepoFactory,
 		ledgerRepoFactory:      ledgerRepoFactory,
@@ -109,18 +104,18 @@ func (c *ScoutController) Send(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.Send(ctx.Request().Context(), scout.SendScoutInput{
+	msg, err := c.newInput().Send(ctx.Request().Context(), scout.SendScoutInput{
 		CompanyID:    companyID,
 		CandidateID:  body.CandidateID,
 		JobPostingID: body.JobPostingID,
 		TemplateID:   body.TemplateID,
 		Subject:      body.Subject,
 		Body:         body.Body,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.MessageResponse())
+	return ctx.JSON(http.StatusCreated, presenter.ScoutMessageResponse(msg))
 }
 
 // List handles GET /api/company/scouts.
@@ -134,55 +129,55 @@ func (c *ScoutController) List(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	input, p := c.newIO()
-	if err := input.ListByCompany(ctx.Request().Context(), companyID, status, limit, offset); err != nil {
+	msgs, total, err := c.newInput().ListByCompany(ctx.Request().Context(), companyID, status, limit, offset)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutMessagesResponse(msgs, total))
 }
 
 // GetDetail handles GET /api/company/scouts/:scoutID.
 func (c *ScoutController) GetDetail(ctx echo.Context, scoutID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetDetail(ctx.Request().Context(), companyID, scoutID); err != nil {
+	msg, replies, err := c.newInput().GetDetail(ctx.Request().Context(), companyID, scoutID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.DetailResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutDetailResponse(msg, replies))
 }
 
 // GetCredits handles GET /api/company/scouts/credits.
 func (c *ScoutController) GetCredits(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetCredits(ctx.Request().Context(), companyID); err != nil {
+	credit, err := c.newInput().GetCredits(ctx.Request().Context(), companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.CreditsResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutCreditsResponse(credit))
 }
 
 // GetQualityScore handles GET /api/company/scouts/quality.
 func (c *ScoutController) GetQualityScore(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetQualityScore(ctx.Request().Context(), companyID); err != nil {
+	quality, err := c.newInput().GetQualityScore(ctx.Request().Context(), companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.QualityResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutQualityResponse(quality))
 }
 
 // GetDashboard handles GET /api/company/scouts/dashboard.
 func (c *ScoutController) GetDashboard(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetDashboard(ctx.Request().Context(), companyID); err != nil {
+	stats, err := c.newInput().GetDashboard(ctx.Request().Context(), companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.DashboardResponse())
+	return ctx.JSON(http.StatusOK, presenter.ScoutDashboardResponse(stats))
 }
 
 // Reply handles POST /api/company/scouts/:scoutID/replies.
@@ -194,16 +189,14 @@ func (c *ScoutController) Reply(ctx echo.Context, scoutID string) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.CompanyReply(ctx.Request().Context(), companyID, scoutID, body.Body); err != nil {
+	if err := c.newInput().CompanyReply(ctx.Request().Context(), companyID, scoutID, body.Body); err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.DetailResponse())
+	return ctx.JSON(http.StatusCreated, nil)
 }
 
-func (c *ScoutController) newIO() (port.ScoutInputPort, *presenter.ScoutPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(
+func (c *ScoutController) newInput() port.ScoutInputPort {
+	return c.inputFactory(
 		c.msgRepoFactory(),
 		c.creditRepoFactory(),
 		c.ledgerRepoFactory(),
@@ -215,7 +208,5 @@ func (c *ScoutController) newIO() (port.ScoutInputPort, *presenter.ScoutPresente
 		c.convMsgRepoFactory(),
 		c.participantRepoFactory(),
 		c.tx,
-		output,
 	)
-	return input, output
 }

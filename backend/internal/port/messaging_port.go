@@ -7,25 +7,16 @@ import (
 )
 
 type MessagingInputPort interface {
-	StartConversation(ctx context.Context, input messaging.StartConversationInput) error
-	StartCandidateConversation(ctx context.Context, input messaging.StartCandidateConversationInput) error
-	SendMessage(ctx context.Context, input messaging.SendMessageInput) error
-	ListConversationsByCandidate(ctx context.Context, candidateID string, limit, offset int) error
-	ListConversationsByCompany(ctx context.Context, companyID string, limit, offset int) error
-	GetConversation(ctx context.Context, conversationID, participantType, participantID string) error
-	ListMessages(ctx context.Context, conversationID, participantType, participantID string, limit, offset int) error
+	StartConversation(ctx context.Context, input messaging.StartConversationInput) (*messaging.ConversationWithPreview, error)
+	StartCandidateConversation(ctx context.Context, input messaging.StartCandidateConversationInput) (*messaging.ConversationWithPreview, error)
+	SendMessage(ctx context.Context, input messaging.SendMessageInput) (*messaging.Message, error)
+	ListConversationsByCandidate(ctx context.Context, candidateID string, limit, offset int) ([]*messaging.ConversationWithPreview, int, error)
+	ListConversationsByCompany(ctx context.Context, companyID string, limit, offset int) ([]*messaging.ConversationWithPreview, int, error)
+	GetConversation(ctx context.Context, conversationID, participantType, participantID string) (*messaging.ConversationWithPreview, error)
+	ListMessages(ctx context.Context, conversationID, participantType, participantID string, limit, offset int) ([]*messaging.Message, int, error)
 	MarkRead(ctx context.Context, conversationID, participantType, participantID string) error
-	CountUnreadByCandidate(ctx context.Context, candidateID string) error
-	CountUnreadByCompany(ctx context.Context, companyID string) error
-}
-
-type MessagingOutputPort interface {
-	PresentConversation(ctx context.Context, conv *messaging.ConversationWithPreview) error
-	PresentConversations(ctx context.Context, convs []*messaging.ConversationWithPreview, total int) error
-	PresentMessage(ctx context.Context, msg *messaging.Message) error
-	PresentMessages(ctx context.Context, msgs []*messaging.Message, total int) error
-	PresentUnreadCount(ctx context.Context, count int) error
-	PresentOK(ctx context.Context) error
+	CountUnreadByCandidate(ctx context.Context, candidateID string) (int, error)
+	CountUnreadByCompany(ctx context.Context, companyID string) (int, error)
 }
 
 type ConversationRepository interface {

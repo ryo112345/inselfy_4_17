@@ -18,21 +18,18 @@ import (
 
 // JobPostingController handles job posting CRUD HTTP endpoints.
 type JobPostingController struct {
-	inputFactory  func(repo port.JobPostingRepository, output port.JobPostingOutputPort) port.JobPostingInputPort
-	outputFactory func() *presenter.JobPostingPresenter
-	repoFactory   func() port.JobPostingRepository
+	inputFactory func(repo port.JobPostingRepository) port.JobPostingInputPort
+	repoFactory  func() port.JobPostingRepository
 }
 
 // NewJobPostingController creates a JobPostingController.
 func NewJobPostingController(
-	inputFactory func(repo port.JobPostingRepository, output port.JobPostingOutputPort) port.JobPostingInputPort,
-	outputFactory func() *presenter.JobPostingPresenter,
+	inputFactory func(repo port.JobPostingRepository) port.JobPostingInputPort,
 	repoFactory func() port.JobPostingRepository,
 ) *JobPostingController {
 	return &JobPostingController{
-		inputFactory:  inputFactory,
-		outputFactory: outputFactory,
-		repoFactory:   repoFactory,
+		inputFactory: inputFactory,
+		repoFactory:  repoFactory,
 	}
 }
 
@@ -90,33 +87,33 @@ func (c *JobPostingController) Create(ctx echo.Context) error {
 	in := jobPostingReqConv.ToCreateInput(body)
 	in.CompanyID = companyID
 
-	input, p := c.newIO()
-	if err := input.Create(ctx.Request().Context(), in); err != nil {
+	j, err := c.newInput().Create(ctx.Request().Context(), in)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.SingleResponse())
+	return ctx.JSON(http.StatusCreated, presenter.JobPostingResponse(j))
 }
 
 // List handles GET /api/company/jobs.
 func (c *JobPostingController) List(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.List(ctx.Request().Context(), companyID); err != nil {
+	js, err := c.newInput().List(ctx.Request().Context(), companyID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.JobPostingsResponse(js))
 }
 
 // Get handles GET /api/company/jobs/:jobId.
 func (c *JobPostingController) Get(ctx echo.Context, jobID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, p := c.newIO()
-	if err := input.Get(ctx.Request().Context(), companyID, jobID); err != nil {
+	j, err := c.newInput().Get(ctx.Request().Context(), companyID, jobID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.JobPostingResponse(j))
 }
 
 // ListPublic handles GET /api/jobs (no auth).
@@ -163,27 +160,27 @@ func (c *JobPostingController) ListPublic(ctx echo.Context) error {
 			}
 		}
 
-		input, p := c.newIO()
-		if err := input.SearchPublic(ctx.Request().Context(), params); err != nil {
+		js, total, err := c.newInput().SearchPublic(ctx.Request().Context(), params)
+		if err != nil {
 			return handleError(ctx, err)
 		}
-		return ctx.JSON(http.StatusOK, p.PaginatedResponse())
+		return ctx.JSON(http.StatusOK, presenter.JobPostingsPaginatedResponse(js, total))
 	}
 
-	input, p := c.newIO()
-	if err := input.ListPublic(ctx.Request().Context()); err != nil {
+	js, err := c.newInput().ListPublic(ctx.Request().Context())
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.ListResponse())
+	return ctx.JSON(http.StatusOK, presenter.JobPostingsResponse(js))
 }
 
 // GetPublic handles GET /api/jobs/:jobId (no auth).
 func (c *JobPostingController) GetPublic(ctx echo.Context, jobID string) error {
-	input, p := c.newIO()
-	if err := input.GetPublic(ctx.Request().Context(), jobID); err != nil {
+	j, err := c.newInput().GetPublic(ctx.Request().Context(), jobID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.JobPostingResponse(j))
 }
 
 // Update handles PUT /api/company/jobs/:jobId.
@@ -195,19 +192,18 @@ func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	input, p := c.newIO()
-	if err := input.Update(ctx.Request().Context(), companyID, jobID, jobPostingReqConv.ToUpdateInput(body)); err != nil {
+	j, err := c.newInput().Update(ctx.Request().Context(), companyID, jobID, jobPostingReqConv.ToUpdateInput(body))
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.SingleResponse())
+	return ctx.JSON(http.StatusOK, presenter.JobPostingResponse(j))
 }
 
 // Delete handles DELETE /api/company/jobs/:jobId.
 func (c *JobPostingController) Delete(ctx echo.Context, jobID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	input, _ := c.newIO()
-	if err := input.Delete(ctx.Request().Context(), companyID, jobID); err != nil {
+	if err := c.newInput().Delete(ctx.Request().Context(), companyID, jobID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -217,10 +213,8 @@ func (c *JobPostingController) Delete(ctx echo.Context, jobID string) error {
 // See job_posting_request_converter.go for its declaration.
 var jobPostingReqConv jobPostingRequestConverter = &jobPostingRequestConverterImpl{}
 
-func (c *JobPostingController) newIO() (port.JobPostingInputPort, *presenter.JobPostingPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), output)
-	return input, output
+func (c *JobPostingController) newInput() port.JobPostingInputPort {
+	return c.inputFactory(c.repoFactory())
 }
 
 // HandleImageUpload returns a handler that saves an uploaded image via FileStorage.

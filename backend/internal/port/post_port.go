@@ -7,26 +7,17 @@ import (
 )
 
 type PostInputPort interface {
-	Create(ctx context.Context, input post.CreatePostInput) error
-	GetByID(ctx context.Context, postID, viewerID string) error
-	ListTimeline(ctx context.Context, limit, offset int, viewerID string) error
-	ListByUserID(ctx context.Context, userID string, limit, offset int, viewerID string) error
-	ListLikedByUserID(ctx context.Context, userID string, limit, offset int) error
+	Create(ctx context.Context, input post.CreatePostInput) (*post.PostWithUser, error)
+	GetByID(ctx context.Context, postID, viewerID string) (*post.PostWithUser, error)
+	ListTimeline(ctx context.Context, limit, offset int, viewerID string) ([]*post.PostWithUser, int, error)
+	ListByUserID(ctx context.Context, userID string, limit, offset int, viewerID string) ([]*post.PostWithUser, int, error)
+	ListLikedByUserID(ctx context.Context, userID string, limit, offset int) ([]*post.PostWithUser, int, error)
 	Delete(ctx context.Context, postID, userID string) error
-	ToggleLike(ctx context.Context, postID, userID string) error
-	ToggleRepost(ctx context.Context, postID, userID string) error
-	CreateComment(ctx context.Context, input post.CreateCommentInput) error
-	ListComments(ctx context.Context, postID string, limit, offset int) error
+	ToggleLike(ctx context.Context, postID, userID string) (bool, int, error)
+	ToggleRepost(ctx context.Context, postID, userID string) (bool, int, error)
+	CreateComment(ctx context.Context, input post.CreateCommentInput) (*post.CommentWithUser, error)
+	ListComments(ctx context.Context, postID string, limit, offset int) ([]*post.CommentWithUser, int, error)
 	DeleteComment(ctx context.Context, commentID, userID string) error
-}
-
-type PostOutputPort interface {
-	PresentPost(ctx context.Context, p *post.PostWithUser) error
-	PresentPosts(ctx context.Context, posts []*post.PostWithUser, total int) error
-	PresentLikeToggle(ctx context.Context, liked bool, count int) error
-	PresentRepostToggle(ctx context.Context, reposted bool, count int) error
-	PresentComment(ctx context.Context, c *post.CommentWithUser) error
-	PresentComments(ctx context.Context, comments []*post.CommentWithUser, total int) error
 }
 
 type PostRepository interface {

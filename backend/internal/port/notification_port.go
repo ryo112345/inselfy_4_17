@@ -7,19 +7,13 @@ import (
 )
 
 type NotificationInputPort interface {
-	ListByUser(ctx context.Context, userID string, limit, offset int) error
-	ListByCompany(ctx context.Context, companyID string, limit, offset int) error
-	CountUnreadByUser(ctx context.Context, userID string) error
-	CountUnreadByCompany(ctx context.Context, companyID string) error
+	ListByUser(ctx context.Context, userID string, limit, offset int) ([]*notification.Notification, int, error)
+	ListByCompany(ctx context.Context, companyID string, limit, offset int) ([]*notification.Notification, int, error)
+	CountUnreadByUser(ctx context.Context, userID string) (int, error)
+	CountUnreadByCompany(ctx context.Context, companyID string) (int, error)
 	MarkAsRead(ctx context.Context, id string) error
 	MarkAllAsReadByUser(ctx context.Context, userID string) error
 	MarkAllAsReadByCompany(ctx context.Context, companyID string) error
-}
-
-type NotificationOutputPort interface {
-	PresentNotifications(ctx context.Context, ns []*notification.Notification, total int) error
-	PresentUnreadCount(ctx context.Context, count int) error
-	PresentOK(ctx context.Context) error
 }
 
 type NotificationRepository interface {

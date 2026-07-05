@@ -12,25 +12,25 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
-	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 // stubInput records the UpdateProfile invocation for assertions.
 type stubInput struct {
-	createFn  func(ctx context.Context, in user.CreateUserInput) error
-	getFn     func(ctx context.Context, username string) error
-	updateFn  func(ctx context.Context, username string, in user.UpdateProfileInput) error
-	presenter *presenter.UserPresenter
+	createFn func(ctx context.Context, in user.CreateUserInput) (*user.User, error)
+	getFn    func(ctx context.Context, username string) (*user.User, error)
+	updateFn func(ctx context.Context, username string, in user.UpdateProfileInput) (*user.User, error)
 }
 
-func (s *stubInput) Create(ctx context.Context, in user.CreateUserInput) error {
+func (s *stubInput) Create(ctx context.Context, in user.CreateUserInput) (*user.User, error) {
 	return s.createFn(ctx, in)
 }
-func (s *stubInput) GetByUsername(ctx context.Context, u string) error { return s.getFn(ctx, u) }
-func (s *stubInput) GetByID(_ context.Context, _ string) error         { return nil }
-func (s *stubInput) UpdateProfile(ctx context.Context, u string, in user.UpdateProfileInput) error {
+func (s *stubInput) GetByUsername(ctx context.Context, u string) (*user.User, error) {
+	return s.getFn(ctx, u)
+}
+func (s *stubInput) GetByID(_ context.Context, _ string) (*user.User, error) { return nil, nil }
+func (s *stubInput) UpdateProfile(ctx context.Context, u string, in user.UpdateProfileInput) (*user.User, error) {
 	return s.updateFn(ctx, u, in)
 }
 
@@ -49,8 +49,7 @@ func (stubRepo) UpdateProfile(context.Context, string, user.UpdateProfileInput) 
 // controllerWith builds a UserController bound to the provided stub input.
 func controllerWith(stub *stubInput) *controller.UserController {
 	return controller.NewUserController(
-		func(port.UserRepository, port.UserOutputPort) port.UserInputPort { return stub },
-		func() *presenter.UserPresenter { return stub.presenter },
+		func(port.UserRepository) port.UserInputPort { return stub },
 		func() port.UserRepository { return stubRepo{} },
 		nil, // storage (FileStorage) is unused in the profile-update path under test
 	)
@@ -59,16 +58,13 @@ func controllerWith(stub *stubInput) *controller.UserController {
 func TestUpdateProfile_DistinguishesAbsentFromNull(t *testing.T) {
 	received := make(chan user.UpdateProfileInput, 1)
 	stub := &stubInput{
-		updateFn: func(_ context.Context, _ string, in user.UpdateProfileInput) error {
+		updateFn: func(_ context.Context, _ string, in user.UpdateProfileInput) (*user.User, error) {
 			received <- in
-			return nil
+			return &user.User{
+				ID: "uid-1", Username: mustParseUsername(t, "alice"), Name: "Alice", CreatedAt: time.Now(), UpdatedAt: time.Now(),
+			}, nil
 		},
-		presenter: presenter.NewUserPresenter(),
 	}
-	// Seed a response so JSON serialization has data
-	_ = stub.presenter.PresentUser(context.Background(), &user.User{
-		ID: "uid-1", Username: mustParseUsername(t, "alice"), Name: "Alice", CreatedAt: time.Now(), UpdatedAt: time.Now(),
-	})
 
 	c := controllerWith(stub)
 	e := echo.New()
@@ -103,11 +99,10 @@ func TestUpdateProfile_DistinguishesAbsentFromNull(t *testing.T) {
 
 func TestUpdateProfile_RejectsNullName(t *testing.T) {
 	stub := &stubInput{
-		updateFn: func(_ context.Context, _ string, _ user.UpdateProfileInput) error {
+		updateFn: func(_ context.Context, _ string, _ user.UpdateProfileInput) (*user.User, error) {
 			t.Fatal("usecase should not be called when name is null")
-			return nil
+			return nil, nil
 		},
-		presenter: presenter.NewUserPresenter(),
 	}
 	c := controllerWith(stub)
 	e := echo.New()

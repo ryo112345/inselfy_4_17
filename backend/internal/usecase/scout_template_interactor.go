@@ -9,91 +9,77 @@ import (
 )
 
 type ScoutTemplateInteractor struct {
-	repo   port.ScoutTemplateRepository
-	output port.ScoutTemplateOutputPort
+	repo port.ScoutTemplateRepository
 }
 
 var _ port.ScoutTemplateInputPort = (*ScoutTemplateInteractor)(nil)
 
 func NewScoutTemplateInteractor(
 	repo port.ScoutTemplateRepository,
-	output port.ScoutTemplateOutputPort,
 ) *ScoutTemplateInteractor {
-	return &ScoutTemplateInteractor{repo: repo, output: output}
+	return &ScoutTemplateInteractor{repo: repo}
 }
 
-func (i *ScoutTemplateInteractor) Create(ctx context.Context, input scout.CreateTemplateInput) error {
+func (i *ScoutTemplateInteractor) Create(ctx context.Context, input scout.CreateTemplateInput) (*scout.ScoutTemplate, error) {
 	input.Name = strings.TrimSpace(input.Name)
 	input.Subject = strings.TrimSpace(input.Subject)
 	input.Body = strings.TrimSpace(input.Body)
 	if err := scout.ValidateTemplate(input); err != nil {
-		return err
+		return nil, err
 	}
 
 	count, err := i.repo.CountByCompanyID(ctx, input.CompanyID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if count >= scout.MaxTemplatesPerCompany {
-		return scout.ErrTooManyTemplates
+		return nil, scout.ErrTooManyTemplates
 	}
 
-	t, err := i.repo.Create(ctx, &scout.ScoutTemplate{
+	return i.repo.Create(ctx, &scout.ScoutTemplate{
 		CompanyID: input.CompanyID,
 		Name:      input.Name,
 		Subject:   input.Subject,
 		Body:      input.Body,
 	})
-	if err != nil {
-		return err
-	}
-	return i.output.PresentTemplate(ctx, t)
 }
 
-func (i *ScoutTemplateInteractor) List(ctx context.Context, companyID string) error {
-	ts, err := i.repo.ListByCompanyID(ctx, companyID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentTemplates(ctx, ts)
+func (i *ScoutTemplateInteractor) List(ctx context.Context, companyID string) ([]*scout.ScoutTemplate, error) {
+	return i.repo.ListByCompanyID(ctx, companyID)
 }
 
-func (i *ScoutTemplateInteractor) Get(ctx context.Context, companyID, templateID string) error {
+func (i *ScoutTemplateInteractor) Get(ctx context.Context, companyID, templateID string) (*scout.ScoutTemplate, error) {
 	t, err := i.repo.GetByID(ctx, templateID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if t.CompanyID != companyID {
-		return scout.ErrNotOwner
+		return nil, scout.ErrNotOwner
 	}
-	return i.output.PresentTemplate(ctx, t)
+	return t, nil
 }
 
-func (i *ScoutTemplateInteractor) Update(ctx context.Context, companyID, templateID string, input scout.UpdateTemplateInput) error {
+func (i *ScoutTemplateInteractor) Update(ctx context.Context, companyID, templateID string, input scout.UpdateTemplateInput) (*scout.ScoutTemplate, error) {
 	input.Name = strings.TrimSpace(input.Name)
 	input.Subject = strings.TrimSpace(input.Subject)
 	input.Body = strings.TrimSpace(input.Body)
 	if err := scout.ValidateTemplateUpdate(input); err != nil {
-		return err
+		return nil, err
 	}
 
 	existing, err := i.repo.GetByID(ctx, templateID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if existing.CompanyID != companyID {
-		return scout.ErrNotOwner
+		return nil, scout.ErrNotOwner
 	}
 
 	existing.Name = input.Name
 	existing.Subject = input.Subject
 	existing.Body = input.Body
 
-	t, err := i.repo.Update(ctx, existing)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentTemplate(ctx, t)
+	return i.repo.Update(ctx, existing)
 }
 
 func (i *ScoutTemplateInteractor) Delete(ctx context.Context, companyID, templateID string) error {

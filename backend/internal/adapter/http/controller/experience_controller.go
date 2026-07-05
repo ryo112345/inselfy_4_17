@@ -16,9 +16,7 @@ type ExperienceController struct {
 	inputFactory func(
 		repo port.ExperienceRepository,
 		userRepo port.UserRepository,
-		output port.ExperienceOutputPort,
 	) port.ExperienceInputPort
-	outputFactory   func() *presenter.ExperiencePresenter
 	repoFactory     func() port.ExperienceRepository
 	userRepoFactory func() port.UserRepository
 }
@@ -28,15 +26,12 @@ func NewExperienceController(
 	inputFactory func(
 		repo port.ExperienceRepository,
 		userRepo port.UserRepository,
-		output port.ExperienceOutputPort,
 	) port.ExperienceInputPort,
-	outputFactory func() *presenter.ExperiencePresenter,
 	repoFactory func() port.ExperienceRepository,
 	userRepoFactory func() port.UserRepository,
 ) *ExperienceController {
 	return &ExperienceController{
 		inputFactory:    inputFactory,
-		outputFactory:   outputFactory,
 		repoFactory:     repoFactory,
 		userRepoFactory: userRepoFactory,
 	}
@@ -44,11 +39,11 @@ func NewExperienceController(
 
 // List handles GET /api/users/:username/experiences.
 func (c *ExperienceController) List(ctx echo.Context, username string) error {
-	in, p := c.newIO()
-	if err := in.List(ctx.Request().Context(), username); err != nil {
+	list, err := c.newInput().List(ctx.Request().Context(), username)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.List())
+	return ctx.JSON(http.StatusOK, presenter.ExperiencesResponse(list))
 }
 
 // Create handles POST /api/users/:username/experiences.
@@ -57,11 +52,11 @@ func (c *ExperienceController) Create(ctx echo.Context, username string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	in, p := c.newIO()
-	if err := in.Create(ctx.Request().Context(), username, toCreateExperienceInput(body)); err != nil {
+	e, err := c.newInput().Create(ctx.Request().Context(), username, toCreateExperienceInput(body))
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.Single())
+	return ctx.JSON(http.StatusCreated, presenter.ExperienceResponse(e))
 }
 
 // Update handles PUT /api/users/:username/experiences/:experienceId.
@@ -70,26 +65,23 @@ func (c *ExperienceController) Update(ctx echo.Context, username, experienceID s
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	in, p := c.newIO()
-	if err := in.Update(ctx.Request().Context(), username, experienceID, toUpdateExperienceInput(body)); err != nil {
+	e, err := c.newInput().Update(ctx.Request().Context(), username, experienceID, toUpdateExperienceInput(body))
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Single())
+	return ctx.JSON(http.StatusOK, presenter.ExperienceResponse(e))
 }
 
 // Delete handles DELETE /api/users/:username/experiences/:experienceId.
 func (c *ExperienceController) Delete(ctx echo.Context, username, experienceID string) error {
-	in, _ := c.newIO()
-	if err := in.Delete(ctx.Request().Context(), username, experienceID); err != nil {
+	if err := c.newInput().Delete(ctx.Request().Context(), username, experienceID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (c *ExperienceController) newIO() (port.ExperienceInputPort, *presenter.ExperiencePresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), c.userRepoFactory(), output)
-	return input, output
+func (c *ExperienceController) newInput() port.ExperienceInputPort {
+	return c.inputFactory(c.repoFactory(), c.userRepoFactory())
 }
 
 func toCreateExperienceInput(body openapi.ModelsCreateExperienceRequest) experience.CreateInput {

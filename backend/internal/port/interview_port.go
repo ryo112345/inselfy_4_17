@@ -8,18 +8,11 @@ import (
 )
 
 type InterviewInputPort interface {
-	Propose(ctx context.Context, input interview.ProposeInput) error
-	SelectSlot(ctx context.Context, input interview.SelectSlotInput) error
-	ListByCompany(ctx context.Context, companyID string, from, to time.Time) error
-	ListByCandidate(ctx context.Context, candidateID string) error
+	Propose(ctx context.Context, input interview.ProposeInput) (*interview.Proposal, error)
+	SelectSlot(ctx context.Context, input interview.SelectSlotInput) (*interview.Interview, error)
+	ListByCompany(ctx context.Context, companyID string, from, to time.Time) ([]*interview.InterviewWithNames, []*interview.Proposal, error)
+	ListByCandidate(ctx context.Context, candidateID string) ([]*interview.InterviewWithNames, []*interview.Proposal, error)
 	CancelInterview(ctx context.Context, interviewID, actorID, actorType string) error
-}
-
-type InterviewOutputPort interface {
-	PresentProposal(ctx context.Context, proposal *interview.Proposal) error
-	PresentInterview(ctx context.Context, iv *interview.Interview) error
-	PresentCompanyInterviews(ctx context.Context, interviews []*interview.InterviewWithNames, proposals []*interview.Proposal) error
-	PresentCandidateInterviews(ctx context.Context, interviews []*interview.InterviewWithNames, proposals []*interview.Proposal) error
 }
 
 type InterviewProposalRepository interface {

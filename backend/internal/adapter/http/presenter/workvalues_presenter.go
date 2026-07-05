@@ -1,26 +1,14 @@
 package presenter
 
 import (
-	"context"
 	"math"
 	"sort"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
-	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
-type WorkValuesPresenter struct {
-	session *SessionResponse
-	result  *ResultResponse
-}
-
-var _ port.WorkValuesOutputPort = (*WorkValuesPresenter)(nil)
-
-func NewWorkValuesPresenter() *WorkValuesPresenter {
-	return &WorkValuesPresenter{}
-}
-
-func (p *WorkValuesPresenter) PresentSession(_ context.Context, s *workvalues.Session) error {
+// WorkValuesSessionResponse converts a session entity to its API response.
+func WorkValuesSessionResponse(s *workvalues.Session) any {
 	pairs := make([]PairResponse, len(s.InitialPairs))
 	for i, pair := range s.InitialPairs {
 		pairs[i] = PairResponse{NeedA: pair.NeedA, NeedB: pair.NeedB}
@@ -29,16 +17,16 @@ func (p *WorkValuesPresenter) PresentSession(_ context.Context, s *workvalues.Se
 	for i, d := range workvalues.NeedDefs {
 		needs[i] = NeedDefResponse{ID: d.ID, Label: d.Label, DescriptionJa: d.DescriptionJa}
 	}
-	p.session = &SessionResponse{
+	return &SessionResponse{
 		ID:           s.ID,
 		Status:       s.Status,
 		InitialPairs: pairs,
 		Needs:        needs,
 	}
-	return nil
 }
 
-func (p *WorkValuesPresenter) PresentResult(_ context.Context, r *workvalues.Result) error {
+// WorkValuesResultResponse converts a result entity to its API response.
+func WorkValuesResultResponse(r *workvalues.Result) any {
 	needs := make([]NeedScore, 0, len(r.Mu))
 	for key, mu := range r.Mu {
 		ds := 100.0 / (1.0 + math.Exp(-mu))
@@ -68,7 +56,7 @@ func (p *WorkValuesPresenter) PresentResult(_ context.Context, r *workvalues.Res
 		}
 	}
 
-	p.result = &ResultResponse{
+	return &ResultResponse{
 		ID:        r.ID,
 		SessionID: r.SessionID,
 		UserID:    r.UserID,
@@ -76,11 +64,7 @@ func (p *WorkValuesPresenter) PresentResult(_ context.Context, r *workvalues.Res
 		Values:    values,
 		CreatedAt: r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
-	return nil
 }
-
-func (p *WorkValuesPresenter) Session() *SessionResponse { return p.session }
-func (p *WorkValuesPresenter) Result() *ResultResponse    { return p.result }
 
 type SessionResponse struct {
 	ID           string            `json:"id"`

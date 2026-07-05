@@ -11,8 +11,7 @@ import (
 )
 
 type JobPostingInteractor struct {
-	repo   port.JobPostingRepository
-	output port.JobPostingOutputPort
+	repo port.JobPostingRepository
 }
 
 var _ port.JobPostingInputPort = (*JobPostingInteractor)(nil)
@@ -23,21 +22,20 @@ var jobPostingEntityConv jobPostingEntityConverter = &jobPostingEntityConverterI
 
 func NewJobPostingInteractor(
 	repo port.JobPostingRepository,
-	output port.JobPostingOutputPort,
 ) *JobPostingInteractor {
-	return &JobPostingInteractor{repo: repo, output: output}
+	return &JobPostingInteractor{repo: repo}
 }
 
-func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.CreateJobPostingInput) error {
+func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.CreateJobPostingInput) (*jobposting.JobPosting, error) {
 	input.Title = strings.TrimSpace(input.Title)
 	input.Description = strings.TrimSpace(input.Description)
 	input.EmploymentType = strings.TrimSpace(input.EmploymentType)
 
 	if len(input.TeamMembers) > 5 {
-		return fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
+		return nil, fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
 	}
 	if err := validateSalary(input.SalaryMin, input.SalaryMax); err != nil {
-		return err
+		return nil, err
 	}
 
 	status := input.Status
@@ -49,76 +47,56 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 	entity.Status = status
 	entity.IsActive = status == "open"
 
-	j, err := i.repo.Create(ctx, entity)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentJobPosting(ctx, j)
+	return i.repo.Create(ctx, entity)
 }
 
-func (i *JobPostingInteractor) List(ctx context.Context, companyID string) error {
-	js, err := i.repo.ListByCompanyID(ctx, companyID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentJobPostings(ctx, js)
+func (i *JobPostingInteractor) List(ctx context.Context, companyID string) ([]*jobposting.JobPosting, error) {
+	return i.repo.ListByCompanyID(ctx, companyID)
 }
 
-func (i *JobPostingInteractor) Get(ctx context.Context, companyID, jobID string) error {
+func (i *JobPostingInteractor) Get(ctx context.Context, companyID, jobID string) (*jobposting.JobPosting, error) {
 	j, err := i.repo.GetByID(ctx, jobID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if j.CompanyID != companyID {
-		return port.ErrForbidden
+		return nil, port.ErrForbidden
 	}
-	return i.output.PresentJobPosting(ctx, j)
+	return j, nil
 }
 
-func (i *JobPostingInteractor) GetPublic(ctx context.Context, jobID string) error {
-	j, err := i.repo.GetPublicByID(ctx, jobID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentJobPosting(ctx, j)
+func (i *JobPostingInteractor) GetPublic(ctx context.Context, jobID string) (*jobposting.JobPosting, error) {
+	return i.repo.GetPublicByID(ctx, jobID)
 }
 
-func (i *JobPostingInteractor) ListPublic(ctx context.Context) error {
-	js, err := i.repo.ListPublic(ctx)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentJobPostings(ctx, js)
+func (i *JobPostingInteractor) ListPublic(ctx context.Context) ([]*jobposting.JobPosting, error) {
+	return i.repo.ListPublic(ctx)
 }
 
-func (i *JobPostingInteractor) SearchPublic(ctx context.Context, params jobposting.SearchPublicParams) error {
+func (i *JobPostingInteractor) SearchPublic(ctx context.Context, params jobposting.SearchPublicParams) ([]*jobposting.JobPosting, int, error) {
 	if params.Limit <= 0 || params.Limit > 50 {
 		params.Limit = 20
 	}
 	if params.Offset < 0 {
 		params.Offset = 0
 	}
-	js, total, err := i.repo.SearchPublic(ctx, params)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentJobPostingsPaginated(ctx, js, total)
+	return i.repo.SearchPublic(ctx, params)
 }
 
-func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID string, input jobposting.UpdateJobPostingInput) error {
+func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID string, input jobposting.UpdateJobPostingInput) (*jobposting.JobPosting, error) {
 	existing, err := i.repo.GetByID(ctx, jobID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if existing.CompanyID != companyID {
-		return port.ErrForbidden
+		return nil, port.ErrForbidden
 	}
 
 	if len(input.TeamMembers) > 5 {
-		return fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
+		return nil, fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
 	}
 	if err := validateSalary(input.SalaryMin, input.SalaryMax); err != nil {
-		return err
+		return nil, err
 	}
 
 	existing.Title = strings.TrimSpace(input.Title)
@@ -162,11 +140,7 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 	existing.HighlightTitleGrowth = input.HighlightTitleGrowth
 	existing.GalleryURLs = input.GalleryURLs
 
-	j, err := i.repo.Update(ctx, existing)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentJobPosting(ctx, j)
+	return i.repo.Update(ctx, existing)
 }
 
 func (i *JobPostingInteractor) Delete(ctx context.Context, companyID, jobID string) error {

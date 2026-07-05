@@ -19,24 +19,21 @@ import (
 
 // UserController handles user HTTP endpoints.
 type UserController struct {
-	inputFactory  func(repo port.UserRepository, output port.UserOutputPort) port.UserInputPort
-	outputFactory func() *presenter.UserPresenter
-	repoFactory   func() port.UserRepository
-	storage       port.FileStorage
+	inputFactory func(repo port.UserRepository) port.UserInputPort
+	repoFactory  func() port.UserRepository
+	storage      port.FileStorage
 }
 
 // NewUserController creates a UserController.
 func NewUserController(
-	inputFactory func(repo port.UserRepository, output port.UserOutputPort) port.UserInputPort,
-	outputFactory func() *presenter.UserPresenter,
+	inputFactory func(repo port.UserRepository) port.UserInputPort,
 	repoFactory func() port.UserRepository,
 	storage port.FileStorage,
 ) *UserController {
 	return &UserController{
-		inputFactory:  inputFactory,
-		outputFactory: outputFactory,
-		repoFactory:   repoFactory,
-		storage:       storage,
+		inputFactory: inputFactory,
+		repoFactory:  repoFactory,
+		storage:      storage,
 	}
 }
 
@@ -46,32 +43,32 @@ func (c *UserController) Create(ctx echo.Context) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	input, p := c.newIO()
-	if err := input.Create(ctx.Request().Context(), user.CreateUserInput{
+	usr, err := c.newInput().Create(ctx.Request().Context(), user.CreateUserInput{
 		Name:     body.Name,
 		Username: body.Username,
-	}); err != nil {
+	})
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusCreated, p.Response())
+	return ctx.JSON(http.StatusCreated, presenter.UserResponse(usr))
 }
 
 // GetByUsername handles GET /api/users/:username.
 func (c *UserController) GetByUsername(ctx echo.Context, username string) error {
-	input, p := c.newIO()
-	if err := input.GetByUsername(ctx.Request().Context(), username); err != nil {
+	usr, err := c.newInput().GetByUsername(ctx.Request().Context(), username)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Response())
+	return ctx.JSON(http.StatusOK, presenter.UserResponse(usr))
 }
 
 // GetByID handles GET /api/users/id/:id.
 func (c *UserController) GetByID(ctx echo.Context, id string) error {
-	input, p := c.newIO()
-	if err := input.GetByID(ctx.Request().Context(), id); err != nil {
+	usr, err := c.newInput().GetByID(ctx.Request().Context(), id)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Response())
+	return ctx.JSON(http.StatusOK, presenter.UserResponse(usr))
 }
 
 // UpdateProfile handles PATCH /api/users/:username.
@@ -89,11 +86,11 @@ func (c *UserController) UpdateProfile(ctx echo.Context, username string) error 
 	if err != nil {
 		return badRequest(ctx, err.Error())
 	}
-	in, p := c.newIO()
-	if err := in.UpdateProfile(ctx.Request().Context(), username, input); err != nil {
+	usr, err := c.newInput().UpdateProfile(ctx.Request().Context(), username, input)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.Response())
+	return ctx.JSON(http.StatusOK, presenter.UserResponse(usr))
 }
 
 func decodeUpdateProfile(raw map[string]json.RawMessage) (user.UpdateProfileInput, error) {
@@ -213,11 +210,11 @@ func (c *UserController) UploadImage(ctx echo.Context, username string) error {
 		updateInput.CoverPhotoURL = ptrPtr(imageURL)
 	}
 
-	in, p := c.newIO()
-	if err := in.UpdateProfile(ctx.Request().Context(), username, updateInput); err != nil {
+	usr, err := c.newInput().UpdateProfile(ctx.Request().Context(), username, updateInput)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, map[string]any{"url": imageURL, "user": p.Response()})
+	return ctx.JSON(http.StatusOK, map[string]any{"url": imageURL, "user": presenter.UserResponse(usr)})
 }
 
 func ptrPtr(s string) **string {
@@ -225,8 +222,6 @@ func ptrPtr(s string) **string {
 	return &p
 }
 
-func (c *UserController) newIO() (port.UserInputPort, *presenter.UserPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), output)
-	return input, output
+func (c *UserController) newInput() port.UserInputPort {
+	return c.inputFactory(c.repoFactory())
 }

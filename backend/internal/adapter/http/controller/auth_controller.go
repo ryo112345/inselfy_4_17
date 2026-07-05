@@ -13,21 +13,18 @@ import (
 )
 
 type AuthController struct {
-	inputFactory   func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository, output port.AuthOutputPort) port.AuthInputPort
-	outputFactory  func() *presenter.AuthPresenter
+	inputFactory   func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository) port.AuthInputPort
 	repoFactory    func() port.UserRepository
 	refreshFactory func() port.RefreshTokenRepository
 }
 
 func NewAuthController(
-	inputFactory func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository, output port.AuthOutputPort) port.AuthInputPort,
-	outputFactory func() *presenter.AuthPresenter,
+	inputFactory func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository) port.AuthInputPort,
 	repoFactory func() port.UserRepository,
 	refreshFactory func() port.RefreshTokenRepository,
 ) *AuthController {
 	return &AuthController{
 		inputFactory:   inputFactory,
-		outputFactory:  outputFactory,
 		repoFactory:    repoFactory,
 		refreshFactory: refreshFactory,
 	}
@@ -41,12 +38,13 @@ func (c *AuthController) GoogleLogin(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request")
 	}
 
-	input, p := c.newIO()
-	if err := input.GoogleLogin(ctx.Request().Context(), body.IDToken); err != nil {
+	pair, u, err := c.newInput().GoogleLogin(ctx.Request().Context(), body.IDToken)
+	if err != nil {
 		return handleAuthError(ctx, err)
 	}
-	setAuthCookies(ctx, p.TokenResponse())
-	return ctx.JSON(http.StatusOK, p.TokenResponse().User)
+	tokenResp := presenter.AuthTokenPairResponse(pair, u).(*presenter.AuthTokenResponse)
+	setAuthCookies(ctx, tokenResp)
+	return ctx.JSON(http.StatusOK, tokenResp.User)
 }
 
 func (c *AuthController) Refresh(ctx echo.Context) error {
@@ -55,23 +53,24 @@ func (c *AuthController) Refresh(ctx echo.Context) error {
 		return handleAuthError(ctx, nil)
 	}
 
-	input, p := c.newIO()
-	if err := input.RefreshToken(ctx.Request().Context(), cookie.Value); err != nil {
+	pair, u, err := c.newInput().RefreshToken(ctx.Request().Context(), cookie.Value)
+	if err != nil {
 		clearAuthCookies(ctx)
 		return handleAuthError(ctx, err)
 	}
-	setAuthCookies(ctx, p.TokenResponse())
-	return ctx.JSON(http.StatusOK, p.TokenResponse().User)
+	tokenResp := presenter.AuthTokenPairResponse(pair, u).(*presenter.AuthTokenResponse)
+	setAuthCookies(ctx, tokenResp)
+	return ctx.JSON(http.StatusOK, tokenResp.User)
 }
 
 func (c *AuthController) GetMe(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	input, p := c.newIO()
-	if err := input.GetCurrentUser(ctx.Request().Context(), userID); err != nil {
+	u, err := c.newInput().GetCurrentUser(ctx.Request().Context(), userID)
+	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, p.UserResponse())
+	return ctx.JSON(http.StatusOK, presenter.AuthMeResponse(u))
 }
 
 func (c *AuthController) Logout(ctx echo.Context) error {
@@ -79,10 +78,8 @@ func (c *AuthController) Logout(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (c *AuthController) newIO() (port.AuthInputPort, *presenter.AuthPresenter) {
-	output := c.outputFactory()
-	input := c.inputFactory(c.repoFactory(), c.refreshFactory(), output)
-	return input, output
+func (c *AuthController) newInput() port.AuthInputPort {
+	return c.inputFactory(c.repoFactory(), c.refreshFactory())
 }
 
 func setAuthCookies(ctx echo.Context, resp *presenter.AuthTokenResponse) {

@@ -8,14 +8,9 @@ import (
 )
 
 type AuthInputPort interface {
-	GoogleLogin(ctx context.Context, idToken string) error
-	RefreshToken(ctx context.Context, refreshToken string) error
-	GetCurrentUser(ctx context.Context, userID string) error
-}
-
-type AuthOutputPort interface {
-	PresentTokenPair(ctx context.Context, pair *auth.TokenPair, u *user.User) error
-	PresentUser(ctx context.Context, u *user.User) error
+	GoogleLogin(ctx context.Context, idToken string) (*auth.TokenPair, *user.User, error)
+	RefreshToken(ctx context.Context, refreshToken string) (*auth.TokenPair, *user.User, error)
+	GetCurrentUser(ctx context.Context, userID string) (*user.User, error)
 }
 
 type RefreshTokenRepository interface {

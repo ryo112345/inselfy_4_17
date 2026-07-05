@@ -13,7 +13,6 @@ import (
 type ExperienceInteractor struct {
 	repo     port.ExperienceRepository
 	userRepo port.UserRepository
-	output   port.ExperienceOutputPort
 }
 
 var _ port.ExperienceInputPort = (*ExperienceInteractor)(nil)
@@ -22,29 +21,28 @@ var _ port.ExperienceInputPort = (*ExperienceInteractor)(nil)
 func NewExperienceInteractor(
 	repo port.ExperienceRepository,
 	userRepo port.UserRepository,
-	output port.ExperienceOutputPort,
 ) *ExperienceInteractor {
-	return &ExperienceInteractor{repo: repo, userRepo: userRepo, output: output}
+	return &ExperienceInteractor{repo: repo, userRepo: userRepo}
 }
 
-// Create validates and persists a new experience, then presents it.
-func (i *ExperienceInteractor) Create(ctx context.Context, rawUsername string, input experience.CreateInput) error {
+// Create validates and persists a new experience, then returns it.
+func (i *ExperienceInteractor) Create(ctx context.Context, rawUsername string, input experience.CreateInput) (*experience.Experience, error) {
 	u, err := i.resolveUser(ctx, rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	input.UserID = u.ID
 	input.CompanyName = strings.TrimSpace(input.CompanyName)
 	input.Title = strings.TrimSpace(input.Title)
 	if err := experience.ValidateCreate(input); err != nil {
-		return err
+		return nil, err
 	}
 	count, err := i.repo.CountByUserID(ctx, u.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if count >= experience.MaxPerUser {
-		return experience.ErrTooManyEntries
+		return nil, experience.ErrTooManyEntries
 	}
 	entity := &experience.Experience{
 		UserID:      input.UserID,
@@ -57,31 +55,27 @@ func (i *ExperienceInteractor) Create(ctx context.Context, rawUsername string, i
 		IsCurrent:   input.IsCurrent,
 		Description: input.Description,
 	}
-	created, err := i.repo.Create(ctx, entity)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentExperience(ctx, created)
+	return i.repo.Create(ctx, entity)
 }
 
 // Update replaces an existing experience. Ownership is verified before mutation.
-func (i *ExperienceInteractor) Update(ctx context.Context, rawUsername, experienceID string, input experience.UpdateInput) error {
+func (i *ExperienceInteractor) Update(ctx context.Context, rawUsername, experienceID string, input experience.UpdateInput) (*experience.Experience, error) {
 	u, err := i.resolveUser(ctx, rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	existing, err := i.repo.GetByID(ctx, experienceID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if existing.UserID != u.ID {
-		return port.ErrForbidden
+		return nil, port.ErrForbidden
 	}
 	input.ID = existing.ID
 	input.CompanyName = strings.TrimSpace(input.CompanyName)
 	input.Title = strings.TrimSpace(input.Title)
 	if err := experience.ValidateUpdate(input); err != nil {
-		return err
+		return nil, err
 	}
 	entity := &experience.Experience{
 		ID:          existing.ID,
@@ -95,11 +89,7 @@ func (i *ExperienceInteractor) Update(ctx context.Context, rawUsername, experien
 		IsCurrent:   input.IsCurrent,
 		Description: input.Description,
 	}
-	updated, err := i.repo.Update(ctx, entity)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentExperience(ctx, updated)
+	return i.repo.Update(ctx, entity)
 }
 
 // Delete removes an experience after verifying ownership.
@@ -119,16 +109,12 @@ func (i *ExperienceInteractor) Delete(ctx context.Context, rawUsername, experien
 }
 
 // List returns all experiences for a user.
-func (i *ExperienceInteractor) List(ctx context.Context, rawUsername string) error {
+func (i *ExperienceInteractor) List(ctx context.Context, rawUsername string) ([]*experience.Experience, error) {
 	u, err := i.resolveUser(ctx, rawUsername)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	list, err := i.repo.ListByUserID(ctx, u.ID)
-	if err != nil {
-		return err
-	}
-	return i.output.PresentExperiences(ctx, list)
+	return i.repo.ListByUserID(ctx, u.ID)
 }
 
 func (i *ExperienceInteractor) resolveUser(ctx context.Context, raw string) (*user.User, error) {
