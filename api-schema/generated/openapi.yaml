@@ -20,7 +20,114 @@ tags:
   - name: Posts
   - name: CompanyScouts
   - name: CandidateScouts
+  - name: JobApplications
 paths:
+  /api/applications:
+    post:
+      operationId: CandidateApplications_applyToJob
+      summary: Apply to a job posting
+      description: 求人へ応募（要ログイン）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.JobApplicationResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - JobApplications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.ApplyJobRequest'
+    get:
+      operationId: CandidateApplications_listCandidateApplications
+      summary: List applications by the candidate
+      description: 自分の応募一覧（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.JobApplicationListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobApplications
+  /api/applications/check:
+    get:
+      operationId: CandidateApplications_checkApplied
+      summary: Check whether the candidate has applied to a job
+      description: 応募済みチェック（要ログイン）
+      parameters:
+        - name: jobPostingId
+          in: query
+          required: true
+          description: 求人ID
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AppliedResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobApplications
+  /api/applications/{applicationId}/withdraw:
+    post:
+      operationId: CandidateApplications_withdrawApplication
+      summary: Withdraw an application
+      description: 応募取り下げ（要ログイン）
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.StatusOkResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobApplications
   /api/auth/google:
     post:
       operationId: Auth_googleLogin
@@ -223,6 +330,140 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - CareerInterest
+  /api/company/applications:
+    get:
+      operationId: CompanyApplications_listCompanyApplications
+      summary: List applications for the company
+      description: 企業への応募一覧（企業認証）
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: ステータスで絞り込み
+          schema:
+            type: string
+          explode: false
+        - name: job_posting_id
+          in: query
+          required: false
+          description: 求人IDで絞り込み
+          schema:
+            type: string
+          explode: false
+        - name: keyword
+          in: query
+          required: false
+          description: キーワード検索
+          schema:
+            type: string
+          explode: false
+        - name: date_from
+          in: query
+          required: false
+          description: 応募日時 from（RFC3339）
+          schema:
+            type: string
+          explode: false
+        - name: date_to
+          in: query
+          required: false
+          description: 応募日時 to（RFC3339）
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.JobApplicationListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobApplications
+  /api/company/applications/{applicationId}:
+    get:
+      operationId: CompanyApplications_getApplication
+      summary: Get an application
+      description: 応募詳細（企業認証）
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.JobApplicationResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - JobApplications
+  /api/company/applications/{applicationId}/status:
+    patch:
+      operationId: CompanyApplications_updateApplicationStatus
+      summary: Update application status
+      description: 応募ステータス更新（企業認証）
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.StatusOkResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - JobApplications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateApplicationStatusRequest'
   /api/company/auth/login:
     post:
       operationId: CompanyAuth_companyLogin
@@ -2281,6 +2522,28 @@ paths:
         - WorkValues
 components:
   schemas:
+    Models.AppliedResponse:
+      type: object
+      required:
+        - applied
+      properties:
+        applied:
+          type: boolean
+          description: 応募済みか
+      description: 応募済み判定
+    Models.ApplyJobRequest:
+      type: object
+      required:
+        - jobPostingId
+        - message
+      properties:
+        jobPostingId:
+          type: string
+          description: 求人ID
+        message:
+          type: string
+          description: 応募メッセージ
+      description: 求人応募リクエスト
     Models.AttachSkillRequest:
       type: object
       required:
@@ -3072,6 +3335,107 @@ components:
           maxLength: 10000
           description: Google ID トークン
       description: Google ログインリクエスト
+    Models.JobApplicationListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.JobApplicationResponse'
+          description: 応募
+        total:
+          type: integer
+          description: 総件数
+      description: 応募一覧
+    Models.JobApplicationResponse:
+      type: object
+      required:
+        - id
+        - jobPostingId
+        - candidateId
+        - companyId
+        - status
+        - message
+        - jobTitle
+        - companyName
+        - candidateName
+        - candidateAvatar
+        - candidateUsername
+        - candidateHeadline
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: 応募ID
+        jobPostingId:
+          type: string
+          description: 求人ID
+        candidateId:
+          type: string
+          description: 候補者ユーザーID
+        companyId:
+          type: string
+          description: 企業ID
+        status:
+          type: string
+          description: ステータス
+        message:
+          type: string
+          description: 応募メッセージ
+        jobTitle:
+          type: string
+          description: 求人タイトル
+        companyName:
+          type: string
+          description: 企業名
+        candidateName:
+          type: string
+          description: 候補者名
+        candidateAvatar:
+          type: string
+          description: 候補者アバターURL
+        candidateUsername:
+          type: string
+          description: 候補者ユーザー名
+        candidateHeadline:
+          type: string
+          description: 候補者ヘッドライン
+        candidateProfileColor:
+          type: string
+          description: 候補者プロフィールカラー
+        candidateSeekingStatus:
+          type: string
+          description: 候補者の求職ステータス
+        candidateSkills:
+          type: array
+          items:
+            type: string
+          description: 候補者スキル
+        wvSimilarity:
+          type: number
+          format: double
+          description: Work Values 類似度
+        ciSimilarity:
+          type: number
+          format: double
+          description: Career Interest 類似度
+        integratedSimilarity:
+          type: number
+          format: double
+          description: 統合類似度
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+      description: 応募（詳細付き）
     Models.LikeToggleResponse:
       type: object
       required:
@@ -3750,6 +4114,15 @@ components:
           format: date-time
           description: 追加日時（user_skills.created_at）
       description: スキル
+    Models.StatusOkResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: 処理結果（"ok"）
+      description: 汎用 OK レスポンス
     Models.UnauthorizedError:
       type: object
       required:
@@ -3773,6 +4146,13 @@ components:
           format: int32
           description: 未読数
       description: 未読件数
+    Models.UpdateApplicationStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          description: 新しいステータス
+      description: 応募ステータス更新リクエスト
     Models.UpdateDiagnoseStatusRequest:
       type: object
       properties:

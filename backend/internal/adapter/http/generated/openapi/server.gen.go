@@ -87,6 +87,21 @@ func (e ModelsUnauthorizedErrorCode) Valid() bool {
 	}
 }
 
+// ModelsAppliedResponse 応募済み判定
+type ModelsAppliedResponse struct {
+	// Applied 応募済みか
+	Applied bool `json:"applied"`
+}
+
+// ModelsApplyJobRequest 求人応募リクエスト
+type ModelsApplyJobRequest struct {
+	// JobPostingId 求人ID
+	JobPostingId string `json:"jobPostingId"`
+
+	// Message 応募メッセージ
+	Message string `json:"message"`
+}
+
 // ModelsAttachSkillRequest スキル追加リクエスト
 type ModelsAttachSkillRequest struct {
 	// Name スキル名（1-100文字）
@@ -598,6 +613,78 @@ type ModelsGoogleLoginRequest struct {
 	IdToken string `json:"idToken"`
 }
 
+// ModelsJobApplicationListResponse 応募一覧
+type ModelsJobApplicationListResponse struct {
+	// Items 応募
+	Items []ModelsJobApplicationResponse `json:"items"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsJobApplicationResponse 応募（詳細付き）
+type ModelsJobApplicationResponse struct {
+	// CandidateAvatar 候補者アバターURL
+	CandidateAvatar string `json:"candidateAvatar"`
+
+	// CandidateHeadline 候補者ヘッドライン
+	CandidateHeadline string `json:"candidateHeadline"`
+
+	// CandidateId 候補者ユーザーID
+	CandidateId string `json:"candidateId"`
+
+	// CandidateName 候補者名
+	CandidateName string `json:"candidateName"`
+
+	// CandidateProfileColor 候補者プロフィールカラー
+	CandidateProfileColor *string `json:"candidateProfileColor,omitempty"`
+
+	// CandidateSeekingStatus 候補者の求職ステータス
+	CandidateSeekingStatus *string `json:"candidateSeekingStatus,omitempty"`
+
+	// CandidateSkills 候補者スキル
+	CandidateSkills *[]string `json:"candidateSkills,omitempty"`
+
+	// CandidateUsername 候補者ユーザー名
+	CandidateUsername string `json:"candidateUsername"`
+
+	// CiSimilarity Career Interest 類似度
+	CiSimilarity *float64 `json:"ciSimilarity,omitempty"`
+
+	// CompanyId 企業ID
+	CompanyId string `json:"companyId"`
+
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id 応募ID
+	Id string `json:"id"`
+
+	// IntegratedSimilarity 統合類似度
+	IntegratedSimilarity *float64 `json:"integratedSimilarity,omitempty"`
+
+	// JobPostingId 求人ID
+	JobPostingId string `json:"jobPostingId"`
+
+	// JobTitle 求人タイトル
+	JobTitle string `json:"jobTitle"`
+
+	// Message 応募メッセージ
+	Message string `json:"message"`
+
+	// Status ステータス
+	Status string `json:"status"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// WvSimilarity Work Values 類似度
+	WvSimilarity *float64 `json:"wvSimilarity,omitempty"`
+}
+
 // ModelsLikeToggleResponse いいねトグル結果
 type ModelsLikeToggleResponse struct {
 	// Count いいね数
@@ -1045,6 +1132,12 @@ type ModelsSkillResponse struct {
 	Name string `json:"name"`
 }
 
+// ModelsStatusOkResponse 汎用 OK レスポンス
+type ModelsStatusOkResponse struct {
+	// Status 処理結果（"ok"）
+	Status string `json:"status"`
+}
+
 // ModelsUnauthorizedError Unauthorized エラー
 type ModelsUnauthorizedError struct {
 	Code    ModelsUnauthorizedErrorCode `json:"code"`
@@ -1058,6 +1151,12 @@ type ModelsUnauthorizedErrorCode string
 type ModelsUnreadCountResponse struct {
 	// Count 未読数
 	Count int32 `json:"count"`
+}
+
+// ModelsUpdateApplicationStatusRequest 応募ステータス更新リクエスト
+type ModelsUpdateApplicationStatusRequest struct {
+	// Status 新しいステータス
+	Status *string `json:"status,omitempty"`
 }
 
 // ModelsUpdateDiagnoseStatusRequest チーム診断ステータス更新リクエスト（指定したキーのみ更新）
@@ -1336,6 +1435,36 @@ type ModelsWVValueScoreResponse struct {
 	ValueId string `json:"value_id"`
 }
 
+// CandidateApplicationsCheckAppliedParams defines parameters for CandidateApplicationsCheckApplied.
+type CandidateApplicationsCheckAppliedParams struct {
+	// JobPostingId 求人ID
+	JobPostingId string `form:"jobPostingId" json:"jobPostingId"`
+}
+
+// CompanyApplicationsListCompanyApplicationsParams defines parameters for CompanyApplicationsListCompanyApplications.
+type CompanyApplicationsListCompanyApplicationsParams struct {
+	// Status ステータスで絞り込み
+	Status *string `form:"status,omitempty" json:"status,omitempty"`
+
+	// JobPostingId 求人IDで絞り込み
+	JobPostingId *string `form:"job_posting_id,omitempty" json:"job_posting_id,omitempty"`
+
+	// Keyword キーワード検索
+	Keyword *string `form:"keyword,omitempty" json:"keyword,omitempty"`
+
+	// DateFrom 応募日時 from（RFC3339）
+	DateFrom *string `form:"date_from,omitempty" json:"date_from,omitempty"`
+
+	// DateTo 応募日時 to（RFC3339）
+	DateTo *string `form:"date_to,omitempty" json:"date_to,omitempty"`
+
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // CompanyNotificationsListCompanyNotificationsParams defines parameters for CompanyNotificationsListCompanyNotifications.
 type CompanyNotificationsListCompanyNotificationsParams struct {
 	// Limit 取得件数
@@ -1435,6 +1564,9 @@ type FollowsListFollowingParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// CandidateApplicationsApplyToJobJSONRequestBody defines body for CandidateApplicationsApplyToJob for application/json ContentType.
+type CandidateApplicationsApplyToJobJSONRequestBody = ModelsApplyJobRequest
+
 // AuthGoogleLoginJSONRequestBody defines body for AuthGoogleLogin for application/json ContentType.
 type AuthGoogleLoginJSONRequestBody = ModelsGoogleLoginRequest
 
@@ -1443,6 +1575,9 @@ type CareerInterestCiStartSessionJSONRequestBody = ModelsCIStartSessionRequest
 
 // CareerInterestCiSubmitResultJSONRequestBody defines body for CareerInterestCiSubmitResult for application/json ContentType.
 type CareerInterestCiSubmitResultJSONRequestBody = ModelsCISubmitResultRequest
+
+// CompanyApplicationsUpdateApplicationStatusJSONRequestBody defines body for CompanyApplicationsUpdateApplicationStatus for application/json ContentType.
+type CompanyApplicationsUpdateApplicationStatusJSONRequestBody = ModelsUpdateApplicationStatusRequest
 
 // CompanyAuthCompanyLoginJSONRequestBody defines body for CompanyAuthCompanyLogin for application/json ContentType.
 type CompanyAuthCompanyLoginJSONRequestBody = ModelsCompanyLoginRequest
@@ -1515,6 +1650,18 @@ type WorkValuesWvSubmitResultJSONRequestBody = ModelsWVSubmitResultRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// List applications by the candidate
+	// (GET /api/applications)
+	CandidateApplicationsListCandidateApplications(ctx echo.Context) error
+	// Apply to a job posting
+	// (POST /api/applications)
+	CandidateApplicationsApplyToJob(ctx echo.Context) error
+	// Check whether the candidate has applied to a job
+	// (GET /api/applications/check)
+	CandidateApplicationsCheckApplied(ctx echo.Context, params CandidateApplicationsCheckAppliedParams) error
+	// Withdraw an application
+	// (POST /api/applications/{applicationId}/withdraw)
+	CandidateApplicationsWithdrawApplication(ctx echo.Context, applicationId string) error
 	// Login with a Google ID token
 	// (POST /api/auth/google)
 	AuthGoogleLogin(ctx echo.Context) error
@@ -1539,6 +1686,15 @@ type ServerInterface interface {
 	// Get the latest career interest result for a user
 	// (GET /api/career-interest/users/{userId}/results/latest)
 	CareerInterestCiGetLatestResult(ctx echo.Context, userId string) error
+	// List applications for the company
+	// (GET /api/company/applications)
+	CompanyApplicationsListCompanyApplications(ctx echo.Context, params CompanyApplicationsListCompanyApplicationsParams) error
+	// Get an application
+	// (GET /api/company/applications/{applicationId})
+	CompanyApplicationsGetApplication(ctx echo.Context, applicationId string) error
+	// Update application status
+	// (PATCH /api/company/applications/{applicationId}/status)
+	CompanyApplicationsUpdateApplicationStatus(ctx echo.Context, applicationId string) error
 	// Login as a company
 	// (POST /api/company/auth/login)
 	CompanyAuthCompanyLogin(ctx echo.Context) error
@@ -1756,6 +1912,58 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
+// CandidateApplicationsListCandidateApplications converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateApplicationsListCandidateApplications(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateApplicationsListCandidateApplications(ctx)
+	return err
+}
+
+// CandidateApplicationsApplyToJob converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateApplicationsApplyToJob(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateApplicationsApplyToJob(ctx)
+	return err
+}
+
+// CandidateApplicationsCheckApplied converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateApplicationsCheckApplied(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CandidateApplicationsCheckAppliedParams
+	// ------------- Required query parameter "jobPostingId" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "jobPostingId", ctx.QueryParams(), &params.JobPostingId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobPostingId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateApplicationsCheckApplied(ctx, params)
+	return err
+}
+
+// CandidateApplicationsWithdrawApplication converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateApplicationsWithdrawApplication(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "applicationId" -------------
+	var applicationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "applicationId", ctx.Param("applicationId"), &applicationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter applicationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateApplicationsWithdrawApplication(ctx, applicationId)
+	return err
+}
+
 // AuthGoogleLogin converts echo context to params.
 func (w *ServerInterfaceWrapper) AuthGoogleLogin(ctx echo.Context) error {
 	var err error
@@ -1846,6 +2054,98 @@ func (w *ServerInterfaceWrapper) CareerInterestCiGetLatestResult(ctx echo.Contex
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CareerInterestCiGetLatestResult(ctx, userId)
+	return err
+}
+
+// CompanyApplicationsListCompanyApplications converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyApplicationsListCompanyApplications(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CompanyApplicationsListCompanyApplicationsParams
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "status", ctx.QueryParams(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter status: %s", err))
+	}
+
+	// ------------- Optional query parameter "job_posting_id" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_posting_id", ctx.QueryParams(), &params.JobPostingId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_posting_id: %s", err))
+	}
+
+	// ------------- Optional query parameter "keyword" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "keyword", ctx.QueryParams(), &params.Keyword, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter keyword: %s", err))
+	}
+
+	// ------------- Optional query parameter "date_from" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "date_from", ctx.QueryParams(), &params.DateFrom, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter date_from: %s", err))
+	}
+
+	// ------------- Optional query parameter "date_to" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "date_to", ctx.QueryParams(), &params.DateTo, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter date_to: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyApplicationsListCompanyApplications(ctx, params)
+	return err
+}
+
+// CompanyApplicationsGetApplication converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyApplicationsGetApplication(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "applicationId" -------------
+	var applicationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "applicationId", ctx.Param("applicationId"), &applicationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter applicationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyApplicationsGetApplication(ctx, applicationId)
+	return err
+}
+
+// CompanyApplicationsUpdateApplicationStatus converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyApplicationsUpdateApplicationStatus(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "applicationId" -------------
+	var applicationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "applicationId", ctx.Param("applicationId"), &applicationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter applicationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyApplicationsUpdateApplicationStatus(ctx, applicationId)
 	return err
 }
 
@@ -3047,6 +3347,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/api/applications", wrapper.CandidateApplicationsListCandidateApplications)
+	router.POST(baseURL+"/api/applications", wrapper.CandidateApplicationsApplyToJob)
+	router.GET(baseURL+"/api/applications/check", wrapper.CandidateApplicationsCheckApplied)
+	router.POST(baseURL+"/api/applications/:applicationId/withdraw", wrapper.CandidateApplicationsWithdrawApplication)
 	router.POST(baseURL+"/api/auth/google", wrapper.AuthGoogleLogin)
 	router.POST(baseURL+"/api/auth/logout", wrapper.AuthLogout)
 	router.GET(baseURL+"/api/auth/me", wrapper.AuthGetMe)
@@ -3055,6 +3359,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiGetResultBySession)
 	router.POST(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiSubmitResult)
 	router.GET(baseURL+"/api/career-interest/users/:userId/results/latest", wrapper.CareerInterestCiGetLatestResult)
+	router.GET(baseURL+"/api/company/applications", wrapper.CompanyApplicationsListCompanyApplications)
+	router.GET(baseURL+"/api/company/applications/:applicationId", wrapper.CompanyApplicationsGetApplication)
+	router.PATCH(baseURL+"/api/company/applications/:applicationId/status", wrapper.CompanyApplicationsUpdateApplicationStatus)
 	router.POST(baseURL+"/api/company/auth/login", wrapper.CompanyAuthCompanyLogin)
 	router.POST(baseURL+"/api/company/auth/logout", wrapper.CompanyAuthCompanyLogout)
 	router.GET(baseURL+"/api/company/auth/me", wrapper.CompanyAuthCompanyGetMe)

@@ -25,6 +25,7 @@ type Server struct {
 	post          *PostController
 	scout         *ScoutController
 	candScout     *CandidateScoutController
+	jobApp        *JobApplicationController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -48,6 +49,7 @@ func NewServer(
 	post *PostController,
 	scout *ScoutController,
 	candScout *CandidateScoutController,
+	jobApp *JobApplicationController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -67,6 +69,7 @@ func NewServer(
 		post:          post,
 		scout:         scout,
 		candScout:     candScout,
+		jobApp:        jobApp,
 	}
 }
 
@@ -400,4 +403,34 @@ func (s *Server) CandidateScoutsBulkDeclineScouts(ctx echo.Context) error {
 
 func (s *Server) CandidateScoutsBulkRespondScouts(ctx echo.Context) error {
 	return s.candScout.BulkRespond(ctx)
+}
+
+// --- JobApplications ---
+
+func (s *Server) CandidateApplicationsApplyToJob(ctx echo.Context) error {
+	return s.jobApp.Apply(ctx)
+}
+
+func (s *Server) CandidateApplicationsListCandidateApplications(ctx echo.Context) error {
+	return s.jobApp.ListByCandidate(ctx)
+}
+
+func (s *Server) CandidateApplicationsCheckApplied(ctx echo.Context, _ openapi.CandidateApplicationsCheckAppliedParams) error {
+	return s.jobApp.CheckApplied(ctx)
+}
+
+func (s *Server) CandidateApplicationsWithdrawApplication(ctx echo.Context, applicationID string) error {
+	return s.jobApp.Withdraw(ctx, applicationID)
+}
+
+func (s *Server) CompanyApplicationsListCompanyApplications(ctx echo.Context, _ openapi.CompanyApplicationsListCompanyApplicationsParams) error {
+	return s.jobApp.ListByCompany(ctx)
+}
+
+func (s *Server) CompanyApplicationsGetApplication(ctx echo.Context, applicationID string) error {
+	return s.jobApp.GetByID(ctx, applicationID)
+}
+
+func (s *Server) CompanyApplicationsUpdateApplicationStatus(ctx echo.Context, applicationID string) error {
+	return s.jobApp.UpdateStatus(ctx, applicationID)
 }

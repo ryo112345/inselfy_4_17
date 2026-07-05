@@ -123,7 +123,7 @@ cd ../backend && make oapi
 | 11 | [x] | post | 11 | goverter 済み presenter |
 | 12 | [x] | scout | 7 | dashboardResponse の深いネスト |
 | 13 | [x] | candidate_scout | 6 | scout presenter 再利用 + ad-hoc map |
-| 14 | [ ] | job_application | 7 | フィルタ7種の list、`{"status":"ok"}` |
+| 14 | [x] | job_application | 7 | フィルタ7種の list、`{"status":"ok"}` |
 | 15 | [ ] | messaging | 14 | 対称ペア、`Metadata map` |
 | 16 | [ ] | article | 13 | multipart 1本、21フィールド resp |
 | 17 | [ ] | company_profile | 5 | multipart、18/24フィールド |

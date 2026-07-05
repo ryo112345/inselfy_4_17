@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
@@ -21,28 +22,19 @@ func NewJobApplicationController(input port.JobApplicationInputPort) *JobApplica
 	return &JobApplicationController{input: input}
 }
 
-type applyRequest struct {
-	JobPostingID string `json:"jobPostingId"`
-	Message      string `json:"message"`
-}
-
-type updateStatusRequest struct {
-	Status string `json:"status"`
-}
-
 func (c *JobApplicationController) Apply(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	var body applyRequest
+	var body openapi.ModelsApplyJobRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
-	if body.JobPostingID == "" {
+	if body.JobPostingId == "" {
 		return badRequest(ctx, "jobPostingId is required")
 	}
 
 	a, err := c.input.Apply(ctx.Request().Context(), jobapplication.ApplyInput{
-		JobPostingID: body.JobPostingID,
+		JobPostingID: body.JobPostingId,
 		CandidateID:  userID,
 		Message:      body.Message,
 	})
@@ -108,15 +100,19 @@ func (c *JobApplicationController) GetByID(ctx echo.Context, applicationID strin
 func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	var body updateStatusRequest
+	var body openapi.ModelsUpdateApplicationStatusRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	if err := c.input.UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(body.Status)); err != nil {
+	status := ""
+	if body.Status != nil {
+		status = *body.Status
+	}
+	if err := c.input.UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(status)); err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, map[string]string{"status": "ok"})
+	return ctx.JSON(http.StatusOK, openapi.ModelsStatusOkResponse{Status: "ok"})
 }
 
 func (c *JobApplicationController) Withdraw(ctx echo.Context, applicationID string) error {
@@ -125,7 +121,7 @@ func (c *JobApplicationController) Withdraw(ctx echo.Context, applicationID stri
 	if err := c.input.Withdraw(ctx.Request().Context(), userID, applicationID); err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, map[string]string{"status": "ok"})
+	return ctx.JSON(http.StatusOK, openapi.ModelsStatusOkResponse{Status: "ok"})
 }
 
 func (c *JobApplicationController) CheckApplied(ctx echo.Context) error {
