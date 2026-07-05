@@ -127,6 +127,108 @@ type ModelsBadRequestError struct {
 // ModelsBadRequestErrorCode defines model for ModelsBadRequestError.Code.
 type ModelsBadRequestErrorCode string
 
+// ModelsCIBasicScoreResponse 基本興味領域スコア
+type ModelsCIBasicScoreResponse struct {
+	// BasicInterestId 基本興味領域ID
+	BasicInterestId string `json:"basic_interest_id"`
+
+	// Rank 順位
+	Rank int32 `json:"rank"`
+
+	// Score スコア
+	Score float64 `json:"score"`
+}
+
+// ModelsCIItemResponse Career Interest 設問
+type ModelsCIItemResponse struct {
+	// ActivityType 活動種別
+	ActivityType string `json:"activity_type"`
+
+	// BasicInterestId 基本興味領域ID
+	BasicInterestId string `json:"basic_interest_id"`
+
+	// ItemCode 項目コード
+	ItemCode string `json:"item_code"`
+
+	// QuestionNumber 質問番号
+	QuestionNumber int32 `json:"question_number"`
+
+	// SkillLevel スキルレベル
+	SkillLevel string `json:"skill_level"`
+
+	// TextJa 設問文（日本語）
+	TextJa string `json:"text_ja"`
+}
+
+// ModelsCIResponseItem Career Interest 回答（1問分）
+type ModelsCIResponseItem struct {
+	// ItemCode 項目コード
+	ItemCode string `json:"item_code"`
+
+	// QuestionNumber 質問番号
+	QuestionNumber int32 `json:"question_number"`
+
+	// Score 回答スコア
+	Score int32 `json:"score"`
+}
+
+// ModelsCIResultResponse Career Interest 診断結果
+type ModelsCIResultResponse struct {
+	// BasicScores 基本興味領域スコア
+	BasicScores []ModelsCIBasicScoreResponse `json:"basic_scores"`
+
+	// CreatedAt 作成日時（RFC3339 文字列）
+	CreatedAt string `json:"created_at"`
+
+	// Id 結果ID
+	Id string `json:"id"`
+
+	// SessionId セッションID
+	SessionId string `json:"session_id"`
+
+	// TypeScores RIASEC タイプスコア
+	TypeScores []ModelsCITypeScoreResponse `json:"type_scores"`
+
+	// UserId ユーザーID
+	UserId string `json:"user_id"`
+}
+
+// ModelsCISessionResponse Career Interest セッション
+type ModelsCISessionResponse struct {
+	// Id セッションID
+	Id string `json:"id"`
+
+	// Items 設問一覧
+	Items []ModelsCIItemResponse `json:"items"`
+
+	// Status ステータス
+	Status string `json:"status"`
+}
+
+// ModelsCIStartSessionRequest Career Interest セッション開始リクエスト
+type ModelsCIStartSessionRequest struct {
+	// UserId ユーザーID
+	UserId string `json:"user_id"`
+}
+
+// ModelsCISubmitResultRequest Career Interest 結果送信リクエスト
+type ModelsCISubmitResultRequest struct {
+	// Responses 回答一覧
+	Responses []ModelsCIResponseItem `json:"responses"`
+}
+
+// ModelsCITypeScoreResponse RIASEC タイプスコア
+type ModelsCITypeScoreResponse struct {
+	// Rank 順位
+	Rank int32 `json:"rank"`
+
+	// Score スコア
+	Score float64 `json:"score"`
+
+	// TypeId タイプID
+	TypeId string `json:"type_id"`
+}
+
 // ModelsCompanyLoginRequest 企業ログインリクエスト
 type ModelsCompanyLoginRequest struct {
 	// Email メールアドレス
@@ -781,6 +883,12 @@ type FollowsListFollowingParams struct {
 // AuthGoogleLoginJSONRequestBody defines body for AuthGoogleLogin for application/json ContentType.
 type AuthGoogleLoginJSONRequestBody = ModelsGoogleLoginRequest
 
+// CareerInterestCiStartSessionJSONRequestBody defines body for CareerInterestCiStartSession for application/json ContentType.
+type CareerInterestCiStartSessionJSONRequestBody = ModelsCIStartSessionRequest
+
+// CareerInterestCiSubmitResultJSONRequestBody defines body for CareerInterestCiSubmitResult for application/json ContentType.
+type CareerInterestCiSubmitResultJSONRequestBody = ModelsCISubmitResultRequest
+
 // CompanyAuthCompanyLoginJSONRequestBody defines body for CompanyAuthCompanyLogin for application/json ContentType.
 type CompanyAuthCompanyLoginJSONRequestBody = ModelsCompanyLoginRequest
 
@@ -834,6 +942,18 @@ type ServerInterface interface {
 	// Refresh the access token via cookie
 	// (POST /api/auth/refresh)
 	AuthRefreshToken(ctx echo.Context) error
+	// Start a career interest session
+	// (POST /api/career-interest/sessions)
+	CareerInterestCiStartSession(ctx echo.Context) error
+	// Get the career interest result by session
+	// (GET /api/career-interest/sessions/{sessionId}/results)
+	CareerInterestCiGetResultBySession(ctx echo.Context, sessionId string) error
+	// Submit career interest responses
+	// (POST /api/career-interest/sessions/{sessionId}/results)
+	CareerInterestCiSubmitResult(ctx echo.Context, sessionId string) error
+	// Get the latest career interest result for a user
+	// (GET /api/career-interest/users/{userId}/results/latest)
+	CareerInterestCiGetLatestResult(ctx echo.Context, userId string) error
 	// Login as a company
 	// (POST /api/company/auth/login)
 	CompanyAuthCompanyLogin(ctx echo.Context) error
@@ -1000,6 +1120,63 @@ func (w *ServerInterfaceWrapper) AuthRefreshToken(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AuthRefreshToken(ctx)
+	return err
+}
+
+// CareerInterestCiStartSession converts echo context to params.
+func (w *ServerInterfaceWrapper) CareerInterestCiStartSession(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CareerInterestCiStartSession(ctx)
+	return err
+}
+
+// CareerInterestCiGetResultBySession converts echo context to params.
+func (w *ServerInterfaceWrapper) CareerInterestCiGetResultBySession(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CareerInterestCiGetResultBySession(ctx, sessionId)
+	return err
+}
+
+// CareerInterestCiSubmitResult converts echo context to params.
+func (w *ServerInterfaceWrapper) CareerInterestCiSubmitResult(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CareerInterestCiSubmitResult(ctx, sessionId)
+	return err
+}
+
+// CareerInterestCiGetLatestResult converts echo context to params.
+func (w *ServerInterfaceWrapper) CareerInterestCiGetLatestResult(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CareerInterestCiGetLatestResult(ctx, userId)
 	return err
 }
 
@@ -1708,6 +1885,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/auth/logout", wrapper.AuthLogout)
 	router.GET(baseURL+"/api/auth/me", wrapper.AuthGetMe)
 	router.POST(baseURL+"/api/auth/refresh", wrapper.AuthRefreshToken)
+	router.POST(baseURL+"/api/career-interest/sessions", wrapper.CareerInterestCiStartSession)
+	router.GET(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiGetResultBySession)
+	router.POST(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiSubmitResult)
+	router.GET(baseURL+"/api/career-interest/users/:userId/results/latest", wrapper.CareerInterestCiGetLatestResult)
 	router.POST(baseURL+"/api/company/auth/login", wrapper.CompanyAuthCompanyLogin)
 	router.POST(baseURL+"/api/company/auth/logout", wrapper.CompanyAuthCompanyLogout)
 	router.GET(baseURL+"/api/company/auth/me", wrapper.CompanyAuthCompanyGetMe)

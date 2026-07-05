@@ -13,6 +13,7 @@ import "./models/notification.tsp";
 import "./models/follow.tsp";
 import "./models/auth.tsp";
 import "./models/company-auth.tsp";
+import "./models/career-interest.tsp";
 import "./routes/users.tsp";
 import "./routes/experiences.tsp";
 import "./routes/educations.tsp";
@@ -25,6 +26,7 @@ import "./routes/notifications.tsp";
 import "./routes/follows.tsp";
 import "./routes/auth.tsp";
 import "./routes/company-auth.tsp";
+import "./routes/career-interest.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;

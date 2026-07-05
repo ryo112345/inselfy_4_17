@@ -54,6 +54,158 @@ export type ModelsBadRequestError = {
 };
 
 /**
+ * 基本興味領域スコア
+ */
+export type ModelsCiBasicScoreResponse = {
+    /**
+     * 基本興味領域ID
+     */
+    basic_interest_id: string;
+    /**
+     * スコア
+     */
+    score: number;
+    /**
+     * 順位
+     */
+    rank: number;
+};
+
+/**
+ * Career Interest 設問
+ */
+export type ModelsCiItemResponse = {
+    /**
+     * 質問番号
+     */
+    question_number: number;
+    /**
+     * 項目コード
+     */
+    item_code: string;
+    /**
+     * 基本興味領域ID
+     */
+    basic_interest_id: string;
+    /**
+     * スキルレベル
+     */
+    skill_level: string;
+    /**
+     * 活動種別
+     */
+    activity_type: string;
+    /**
+     * 設問文（日本語）
+     */
+    text_ja: string;
+};
+
+/**
+ * Career Interest 回答（1問分）
+ */
+export type ModelsCiResponseItem = {
+    /**
+     * 質問番号
+     */
+    question_number: number;
+    /**
+     * 項目コード
+     */
+    item_code: string;
+    /**
+     * 回答スコア
+     */
+    score: number;
+};
+
+/**
+ * Career Interest 診断結果
+ */
+export type ModelsCiResultResponse = {
+    /**
+     * 結果ID
+     */
+    id: string;
+    /**
+     * セッションID
+     */
+    session_id: string;
+    /**
+     * ユーザーID
+     */
+    user_id: string;
+    /**
+     * 基本興味領域スコア
+     */
+    basic_scores: Array<ModelsCiBasicScoreResponse>;
+    /**
+     * RIASEC タイプスコア
+     */
+    type_scores: Array<ModelsCiTypeScoreResponse>;
+    /**
+     * 作成日時（RFC3339 文字列）
+     */
+    created_at: string;
+};
+
+/**
+ * Career Interest セッション
+ */
+export type ModelsCiSessionResponse = {
+    /**
+     * セッションID
+     */
+    id: string;
+    /**
+     * ステータス
+     */
+    status: string;
+    /**
+     * 設問一覧
+     */
+    items: Array<ModelsCiItemResponse>;
+};
+
+/**
+ * Career Interest セッション開始リクエスト
+ */
+export type ModelsCiStartSessionRequest = {
+    /**
+     * ユーザーID
+     */
+    user_id: string;
+};
+
+/**
+ * Career Interest 結果送信リクエスト
+ */
+export type ModelsCiSubmitResultRequest = {
+    /**
+     * 回答一覧
+     */
+    responses: Array<ModelsCiResponseItem>;
+};
+
+/**
+ * RIASEC タイプスコア
+ */
+export type ModelsCiTypeScoreResponse = {
+    /**
+     * タイプID
+     */
+    type_id: string;
+    /**
+     * スコア
+     */
+    score: number;
+    /**
+     * 順位
+     */
+    rank: number;
+};
+
+/**
  * 企業ログインリクエスト
  */
 export type ModelsCompanyLoginRequest = {
@@ -1007,6 +1159,112 @@ export type AuthRefreshTokenResponses = {
 };
 
 export type AuthRefreshTokenResponse = AuthRefreshTokenResponses[keyof AuthRefreshTokenResponses];
+
+export type CareerInterestCiStartSessionData = {
+    body: ModelsCiStartSessionRequest;
+    path?: never;
+    query?: never;
+    url: '/api/career-interest/sessions';
+};
+
+export type CareerInterestCiStartSessionErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CareerInterestCiStartSessionError = CareerInterestCiStartSessionErrors[keyof CareerInterestCiStartSessionErrors];
+
+export type CareerInterestCiStartSessionResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsCiSessionResponse;
+};
+
+export type CareerInterestCiStartSessionResponse = CareerInterestCiStartSessionResponses[keyof CareerInterestCiStartSessionResponses];
+
+export type CareerInterestCiGetResultBySessionData = {
+    body?: never;
+    path: {
+        sessionId: string;
+    };
+    query?: never;
+    url: '/api/career-interest/sessions/{sessionId}/results';
+};
+
+export type CareerInterestCiGetResultBySessionErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CareerInterestCiGetResultBySessionError = CareerInterestCiGetResultBySessionErrors[keyof CareerInterestCiGetResultBySessionErrors];
+
+export type CareerInterestCiGetResultBySessionResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCiResultResponse;
+};
+
+export type CareerInterestCiGetResultBySessionResponse = CareerInterestCiGetResultBySessionResponses[keyof CareerInterestCiGetResultBySessionResponses];
+
+export type CareerInterestCiSubmitResultData = {
+    body: ModelsCiSubmitResultRequest;
+    path: {
+        sessionId: string;
+    };
+    query?: never;
+    url: '/api/career-interest/sessions/{sessionId}/results';
+};
+
+export type CareerInterestCiSubmitResultErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type CareerInterestCiSubmitResultError = CareerInterestCiSubmitResultErrors[keyof CareerInterestCiSubmitResultErrors];
+
+export type CareerInterestCiSubmitResultResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsCiResultResponse;
+};
+
+export type CareerInterestCiSubmitResultResponse = CareerInterestCiSubmitResultResponses[keyof CareerInterestCiSubmitResultResponses];
+
+export type CareerInterestCiGetLatestResultData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/career-interest/users/{userId}/results/latest';
+};
+
+export type CareerInterestCiGetLatestResultErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type CareerInterestCiGetLatestResultError = CareerInterestCiGetLatestResultErrors[keyof CareerInterestCiGetLatestResultErrors];
+
+export type CareerInterestCiGetLatestResultResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCiResultResponse;
+};
+
+export type CareerInterestCiGetLatestResultResponse = CareerInterestCiGetLatestResultResponses[keyof CareerInterestCiGetLatestResultResponses];
 
 export type CompanyAuthCompanyLoginData = {
     body: ModelsCompanyLoginRequest;
