@@ -128,7 +128,7 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 | 8 | [x] | work-values + career-interest: `features/work-values/api.ts`, `features/career-interest/api.ts` | 6 | sessions/results/latest のみ。ai-report GET は Phase 2B。DTO型名（`ResultDTO` 等）は生成型のエイリアスとして維持（消費側12ファイル無変更） |
 | 9 | [x] | job-application: `features/job-application/api.ts` | 1 | 実際は6EP（候補者4＋企業2）。`JobApplication` 型は生成型エイリアス化 |
 | 10 | [x] | job-posting: `features/job-posting/api.ts` | 8 | 二形は `Array.isArray` で narrow（クエリなし=裸配列/limit付き=ラッパーを curl 実測確認）。multipart 3種は実アップロードで 200+url 確認。`JobPostingBody` は `ModelsJobPostingRequest` エイリアス化 |
-| 11 | [ ] | interview: `features/interview/api.ts` | 7 | 候補者側と企業側の両方 |
+| 11 | [x] | interview: `features/interview/api.ts` | 8 | propose/select の任意フィールドは `?? ""` / `?? 0` でゼロ値送信（Go デコードでは省略キーと等価、バックエンドがゼロ値にデフォルト適用するのを実装確認済み）。`status` リテラルunion型（`./types`）は既存宣言を維持してキャスト |
 | 12 | [ ] | scout: `features/scout/api.ts`, `unread-context.tsx` | 13 | 最大。dashboard/quality/credits 含む |
 | 13 | [ ] | company auth register のみ: `app/company/register/page.tsx` | 1 | context は触らない（スコープ外） |
 | 14 | [ ] | 企業側候補者閲覧ページ群: `app/company/applications/page.tsx`, `saved-candidates/page.tsx`, `talents/page.tsx` | 各7 | 同じ束（users/experiences/skills/WV/CI/teams/jobs）を3ページが重複実装。共通ヘルパーに寄せてよい（挙動不変の範囲で） |

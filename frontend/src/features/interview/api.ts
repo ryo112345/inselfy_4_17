@@ -1,3 +1,15 @@
+import "@/external/client/api/client";
+import {
+  candidateInterviewsCancelCandidateInterview,
+  candidateInterviewsGetProposalSlots,
+  candidateInterviewsListCandidateInterviews,
+  candidateInterviewsSelectInterviewSlot,
+  companyInterviewsCancelCompanyInterview,
+  companyInterviewsGetPendingProposal,
+  companyInterviewsListCompanyInterviews,
+  companyInterviewsProposeInterview,
+  type ModelsProposalSlotsResponse,
+} from "@/external/client/api/generated";
 import type {
   CompanyInterviewsResponse,
   CandidateInterviewsResponse,
@@ -13,57 +25,59 @@ export async function proposeInterview(body: {
   slots: { startTime: string; endTime: string }[];
   expiresInDays?: number;
 }): Promise<{ proposalId: string }> {
-  const res = await fetch("/api/company/interviews/propose", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
+  // location/durationMinutes/expiresInDays の未指定はゼロ値扱い（バックエンドがデフォルト適用）
+  const { data, error } = await companyInterviewsProposeInterview({
+    body: {
+      applicationId: body.applicationId,
+      message: body.message,
+      location: body.location ?? "",
+      durationMinutes: body.durationMinutes ?? 0,
+      slots: body.slots,
+      expiresInDays: body.expiresInDays ?? 0,
+    },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? err.error ?? "日程提案に失敗しました");
+  if (error || !data) {
+    throw new Error(error?.message ?? "日程提案に失敗しました");
   }
-  return res.json();
+  return data;
 }
 
 export async function checkPendingProposal(
   applicationId: string,
 ): Promise<{ hasPending: boolean; proposalId?: string; createdAt?: string }> {
-  const res = await fetch(`/api/company/interviews/pending/${applicationId}`, {
-    credentials: "include",
+  const { data, error } = await companyInterviewsGetPendingProposal({
+    path: { applicationId },
   });
-  if (!res.ok) return { hasPending: false };
-  return res.json();
+  if (error || !data) return { hasPending: false };
+  return data;
 }
 
 export async function fetchCompanyInterviews(
   from: string,
   to: string,
 ): Promise<CompanyInterviewsResponse> {
-  const res = await fetch(
-    `/api/company/interviews?from=${from}&to=${to}`,
-    { credentials: "include" },
-  );
-  if (!res.ok) throw new Error("面接一覧の取得に失敗しました");
-  return res.json();
+  const { data, error } = await companyInterviewsListCompanyInterviews({
+    query: { from, to },
+  });
+  if (error || !data) throw new Error("面接一覧の取得に失敗しました");
+  return data as CompanyInterviewsResponse;
 }
 
 export async function cancelInterviewAsCompany(
   interviewId: string,
 ): Promise<void> {
-  const res = await fetch(`/api/company/interviews/${interviewId}/cancel`, {
-    method: "POST",
-    credentials: "include",
+  const { error } = await companyInterviewsCancelCompanyInterview({
+    path: { interviewId },
   });
-  if (!res.ok) throw new Error("キャンセルに失敗しました");
+  if (error) throw new Error("キャンセルに失敗しました");
 }
 
 // --- Candidate side ---
 
 export async function fetchCandidateInterviews(): Promise<CandidateInterviewsResponse> {
-  const res = await fetch("/api/interviews", { credentials: "include" });
-  if (!res.ok) throw new Error("面接一覧の取得に失敗しました");
-  return res.json();
+  const { data, error } = await candidateInterviewsListCandidateInterviews();
+  if (error || !data) throw new Error("面接一覧の取得に失敗しました");
+  return data as CandidateInterviewsResponse;
 }
 
 export async function selectSlot(
@@ -72,33 +86,31 @@ export async function selectSlot(
   startTime?: string,
   endTime?: string,
 ): Promise<{ interview: { id: string; startTime: string; endTime: string; status: string } }> {
-  const res = await fetch(`/api/interviews/proposals/${proposalId}/select`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ slotId, startTime, endTime }),
+  const { data, error } = await candidateInterviewsSelectInterviewSlot({
+    path: { proposalId },
+    body: { slotId, startTime: startTime ?? "", endTime: endTime ?? "" },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? err.error ?? "日程選択に失敗しました");
+  if (error || !data) {
+    throw new Error(error?.message ?? "日程選択に失敗しました");
   }
-  return res.json();
+  return data;
 }
 
-export async function fetchProposalSlots(proposalId: string) {
-  const res = await fetch(`/api/interviews/proposals/${proposalId}/slots`, {
-    credentials: "include",
+export async function fetchProposalSlots(
+  proposalId: string,
+): Promise<ModelsProposalSlotsResponse> {
+  const { data, error } = await candidateInterviewsGetProposalSlots({
+    path: { proposalId },
   });
-  if (!res.ok) throw new Error("提案の取得に失敗しました");
-  return res.json();
+  if (error || !data) throw new Error("提案の取得に失敗しました");
+  return data;
 }
 
 export async function cancelInterviewAsCandidate(
   interviewId: string,
 ): Promise<void> {
-  const res = await fetch(`/api/interviews/${interviewId}/cancel`, {
-    method: "POST",
-    credentials: "include",
+  const { error } = await candidateInterviewsCancelCandidateInterview({
+    path: { interviewId },
   });
-  if (!res.ok) throw new Error("キャンセルに失敗しました");
+  if (error) throw new Error("キャンセルに失敗しました");
 }
