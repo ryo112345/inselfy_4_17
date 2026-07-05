@@ -1,65 +1,9 @@
 package presenter
 
 import (
-	"time"
-
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
 )
-
-type PostResponse struct {
-	ID           string              `json:"id"`
-	UserID       string              `json:"userId"`
-	Username     string              `json:"username"`
-	Name         string              `json:"name"`
-	Content      string              `json:"content"`
-	LikeCount    int                 `json:"likeCount"`
-	CommentCount int                 `json:"commentCount"`
-	RepostCount  int                 `json:"repostCount"`
-	LikedByMe    bool                `json:"likedByMe"`
-	RepostedByMe bool                `json:"repostedByMe"`
-	IsRepost     bool                `json:"isRepost"`
-	QuotedPost   *QuotedPostResponse `json:"quotedPost,omitempty"`
-	CreatedAt    time.Time           `json:"createdAt"`
-	UpdatedAt    time.Time           `json:"updatedAt"`
-}
-
-type QuotedPostResponse struct {
-	ID        string    `json:"id"`
-	Content   string    `json:"content"`
-	Username  string    `json:"username"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"createdAt"`
-}
-
-type PostListResponse struct {
-	Items []*PostResponse `json:"items"`
-	Total int             `json:"total"`
-}
-
-type LikeToggleResponse struct {
-	Liked bool `json:"liked"`
-	Count int  `json:"count"`
-}
-
-type CommentResponse struct {
-	ID        string    `json:"id"`
-	PostID    string    `json:"postId"`
-	UserID    string    `json:"userId"`
-	Username  string    `json:"username"`
-	Name      string    `json:"name"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"createdAt"`
-}
-
-type CommentListResponse struct {
-	Items []*CommentResponse `json:"items"`
-	Total int                `json:"total"`
-}
-
-type RepostToggleResponse struct {
-	Reposted bool `json:"reposted"`
-	Count    int  `json:"count"`
-}
 
 var postConv postConverter = &postConverterImpl{}
 
@@ -68,21 +12,21 @@ func PostSingleResponse(pw *post.PostWithUser) any { return postConv.ToPostRespo
 
 // PostsListResponse converts a paginated list of posts to its API response.
 func PostsListResponse(posts []*post.PostWithUser, total int) any {
-	items := make([]*PostResponse, len(posts))
+	items := make([]openapi.ModelsPostResponse, len(posts))
 	for i, pw := range posts {
-		items[i] = postConv.ToPostResponse(pw)
+		items[i] = *postConv.ToPostResponse(pw)
 	}
-	return &PostListResponse{Items: items, Total: total}
+	return &openapi.ModelsPostListResponse{Items: items, Total: total}
 }
 
 // PostLikeToggleResponse builds the like-toggle API response.
 func PostLikeToggleResponse(liked bool, count int) any {
-	return &LikeToggleResponse{Liked: liked, Count: count}
+	return &openapi.ModelsLikeToggleResponse{Liked: liked, Count: count}
 }
 
 // PostRepostToggleResponse builds the repost-toggle API response.
 func PostRepostToggleResponse(reposted bool, count int) any {
-	return &RepostToggleResponse{Reposted: reposted, Count: count}
+	return &openapi.ModelsRepostToggleResponse{Reposted: reposted, Count: count}
 }
 
 // PostCommentResponse converts a single comment to its API response.
@@ -90,9 +34,9 @@ func PostCommentResponse(c *post.CommentWithUser) any { return postConv.ToCommen
 
 // PostCommentsListResponse converts a paginated list of comments to its API response.
 func PostCommentsListResponse(comments []*post.CommentWithUser, total int) any {
-	items := make([]*CommentResponse, len(comments))
+	items := make([]openapi.ModelsCommentResponse, len(comments))
 	for i, c := range comments {
-		items[i] = postConv.ToCommentResponse(c)
+		items[i] = *postConv.ToCommentResponse(c)
 	}
-	return &CommentListResponse{Items: items, Total: total}
+	return &openapi.ModelsCommentListResponse{Items: items, Total: total}
 }

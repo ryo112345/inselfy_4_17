@@ -3,57 +3,60 @@
 
 package presenter
 
-import post "github.com/akiyama/inselfy/backend/internal/domain/post"
+import (
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	post "github.com/akiyama/inselfy/backend/internal/domain/post"
+)
 
 type postConverterImpl struct{}
 
-func (c *postConverterImpl) ToCommentResponse(source *post.CommentWithUser) *CommentResponse {
-	var pPresenterCommentResponse *CommentResponse
+func (c *postConverterImpl) ToCommentResponse(source *post.CommentWithUser) *openapi.ModelsCommentResponse {
+	var pOpenapiModelsCommentResponse *openapi.ModelsCommentResponse
 	if source != nil {
-		var presenterCommentResponse CommentResponse
-		presenterCommentResponse.ID = (*source).Comment.ID
-		presenterCommentResponse.PostID = (*source).Comment.PostID
-		presenterCommentResponse.UserID = (*source).Comment.UserID
-		presenterCommentResponse.Username = (*source).Username
-		presenterCommentResponse.Name = (*source).Name
-		presenterCommentResponse.Content = (*source).Comment.Content
-		presenterCommentResponse.CreatedAt = copyTime((*source).Comment.CreatedAt)
-		pPresenterCommentResponse = &presenterCommentResponse
+		var openapiModelsCommentResponse openapi.ModelsCommentResponse
+		openapiModelsCommentResponse.Content = (*source).Comment.Content
+		openapiModelsCommentResponse.CreatedAt = copyTime((*source).Comment.CreatedAt)
+		openapiModelsCommentResponse.Id = (*source).Comment.ID
+		openapiModelsCommentResponse.Name = (*source).Name
+		openapiModelsCommentResponse.PostId = (*source).Comment.PostID
+		openapiModelsCommentResponse.UserId = (*source).Comment.UserID
+		openapiModelsCommentResponse.Username = (*source).Username
+		pOpenapiModelsCommentResponse = &openapiModelsCommentResponse
 	}
-	return pPresenterCommentResponse
+	return pOpenapiModelsCommentResponse
 }
-func (c *postConverterImpl) ToPostResponse(source *post.PostWithUser) *PostResponse {
-	var pPresenterPostResponse *PostResponse
+func (c *postConverterImpl) ToPostResponse(source *post.PostWithUser) *openapi.ModelsPostResponse {
+	var pOpenapiModelsPostResponse *openapi.ModelsPostResponse
 	if source != nil {
-		var presenterPostResponse PostResponse
-		presenterPostResponse.ID = (*source).Post.ID
-		presenterPostResponse.UserID = (*source).Post.UserID
-		presenterPostResponse.Username = (*source).Username
-		presenterPostResponse.Name = (*source).Name
-		presenterPostResponse.Content = (*source).Post.Content
-		presenterPostResponse.LikeCount = (*source).LikeCount
-		presenterPostResponse.CommentCount = (*source).CommentCount
-		presenterPostResponse.RepostCount = (*source).RepostCount
-		presenterPostResponse.LikedByMe = (*source).LikedByMe
-		presenterPostResponse.RepostedByMe = (*source).RepostedByMe
-		presenterPostResponse.IsRepost = (*source).IsRepost
-		presenterPostResponse.QuotedPost = c.pPostQuotedPostToPPresenterQuotedPostResponse((*source).QuotedPost)
-		presenterPostResponse.CreatedAt = copyTime((*source).Post.CreatedAt)
-		presenterPostResponse.UpdatedAt = copyTime((*source).Post.UpdatedAt)
-		pPresenterPostResponse = &presenterPostResponse
+		var openapiModelsPostResponse openapi.ModelsPostResponse
+		openapiModelsPostResponse.CommentCount = (*source).CommentCount
+		openapiModelsPostResponse.Content = (*source).Post.Content
+		openapiModelsPostResponse.CreatedAt = copyTime((*source).Post.CreatedAt)
+		openapiModelsPostResponse.Id = (*source).Post.ID
+		openapiModelsPostResponse.IsRepost = (*source).IsRepost
+		openapiModelsPostResponse.LikeCount = (*source).LikeCount
+		openapiModelsPostResponse.LikedByMe = (*source).LikedByMe
+		openapiModelsPostResponse.Name = (*source).Name
+		openapiModelsPostResponse.QuotedPost = c.pPostQuotedPostToPOpenapiModelsQuotedPostResponse((*source).QuotedPost)
+		openapiModelsPostResponse.RepostCount = (*source).RepostCount
+		openapiModelsPostResponse.RepostedByMe = (*source).RepostedByMe
+		openapiModelsPostResponse.UpdatedAt = copyTime((*source).Post.UpdatedAt)
+		openapiModelsPostResponse.UserId = (*source).Post.UserID
+		openapiModelsPostResponse.Username = (*source).Username
+		pOpenapiModelsPostResponse = &openapiModelsPostResponse
 	}
-	return pPresenterPostResponse
+	return pOpenapiModelsPostResponse
 }
-func (c *postConverterImpl) pPostQuotedPostToPPresenterQuotedPostResponse(source *post.QuotedPost) *QuotedPostResponse {
-	var pPresenterQuotedPostResponse *QuotedPostResponse
+func (c *postConverterImpl) pPostQuotedPostToPOpenapiModelsQuotedPostResponse(source *post.QuotedPost) *openapi.ModelsQuotedPostResponse {
+	var pOpenapiModelsQuotedPostResponse *openapi.ModelsQuotedPostResponse
 	if source != nil {
-		var presenterQuotedPostResponse QuotedPostResponse
-		presenterQuotedPostResponse.ID = (*source).ID
-		presenterQuotedPostResponse.Content = (*source).Content
-		presenterQuotedPostResponse.Username = (*source).Username
-		presenterQuotedPostResponse.Name = (*source).Name
-		presenterQuotedPostResponse.CreatedAt = copyTime((*source).CreatedAt)
-		pPresenterQuotedPostResponse = &presenterQuotedPostResponse
+		var openapiModelsQuotedPostResponse openapi.ModelsQuotedPostResponse
+		openapiModelsQuotedPostResponse.Content = (*source).Content
+		openapiModelsQuotedPostResponse.CreatedAt = copyTime((*source).CreatedAt)
+		openapiModelsQuotedPostResponse.Id = (*source).ID
+		openapiModelsQuotedPostResponse.Name = (*source).Name
+		openapiModelsQuotedPostResponse.Username = (*source).Username
+		pOpenapiModelsQuotedPostResponse = &openapiModelsQuotedPostResponse
 	}
-	return pPresenterQuotedPostResponse
+	return pOpenapiModelsQuotedPostResponse
 }

@@ -229,6 +229,39 @@ type ModelsCITypeScoreResponse struct {
 	TypeId string `json:"type_id"`
 }
 
+// ModelsCommentListResponse コメント一覧
+type ModelsCommentListResponse struct {
+	// Items コメント
+	Items []ModelsCommentResponse `json:"items"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsCommentResponse コメント
+type ModelsCommentResponse struct {
+	// Content 本文
+	Content string `json:"content"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id コメントID
+	Id string `json:"id"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// PostId 投稿ID
+	PostId string `json:"postId"`
+
+	// UserId コメント投稿者ユーザーID
+	UserId string `json:"userId"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+}
+
 // ModelsCompanyLoginRequest 企業ログインリクエスト
 type ModelsCompanyLoginRequest struct {
 	// Email メールアドレス
@@ -289,6 +322,12 @@ type ModelsConflictError struct {
 // ModelsConflictErrorCode defines model for ModelsConflictError.Code.
 type ModelsConflictErrorCode string
 
+// ModelsCreateCommentRequest コメント作成リクエスト
+type ModelsCreateCommentRequest struct {
+	// Content 本文
+	Content string `json:"content"`
+}
+
 // ModelsCreateEducationRequest 学歴作成リクエスト
 type ModelsCreateEducationRequest struct {
 	// Degree 学部・学科・学位
@@ -329,6 +368,15 @@ type ModelsCreateExperienceRequest struct {
 
 	// Title 役職・タイトル
 	Title string `json:"title"`
+}
+
+// ModelsCreatePostRequest 投稿作成リクエスト
+type ModelsCreatePostRequest struct {
+	// Content 本文
+	Content string `json:"content"`
+
+	// QuotePostId 引用元投稿ID
+	QuotePostId *string `json:"quotePostId,omitempty"`
 }
 
 // ModelsCreateScoutTemplateRequest スカウトテンプレート作成リクエスト
@@ -523,6 +571,15 @@ type ModelsGoogleLoginRequest struct {
 	IdToken string `json:"idToken"`
 }
 
+// ModelsLikeToggleResponse いいねトグル結果
+type ModelsLikeToggleResponse struct {
+	// Count いいね数
+	Count int `json:"count"`
+
+	// Liked いいね状態
+	Liked bool `json:"liked"`
+}
+
 // ModelsNotFoundError Not Found エラー
 type ModelsNotFoundError struct {
 	Code    ModelsNotFoundErrorCode `json:"code"`
@@ -563,6 +620,87 @@ type ModelsNotificationResponse struct {
 
 	// Type 通知種別
 	Type string `json:"type"`
+}
+
+// ModelsPostListResponse 投稿一覧
+type ModelsPostListResponse struct {
+	// Items 投稿
+	Items []ModelsPostResponse `json:"items"`
+
+	// Total 総件数
+	Total int `json:"total"`
+}
+
+// ModelsPostResponse 投稿
+type ModelsPostResponse struct {
+	// CommentCount コメント数
+	CommentCount int `json:"commentCount"`
+
+	// Content 本文
+	Content string `json:"content"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id 投稿ID
+	Id string `json:"id"`
+
+	// IsRepost リポストか
+	IsRepost bool `json:"isRepost"`
+
+	// LikeCount いいね数
+	LikeCount int `json:"likeCount"`
+
+	// LikedByMe 自分がいいね済みか
+	LikedByMe bool `json:"likedByMe"`
+
+	// Name 投稿者表示名
+	Name string `json:"name"`
+
+	// QuotedPost 引用元投稿
+	QuotedPost *ModelsQuotedPostResponse `json:"quotedPost,omitempty"`
+
+	// RepostCount リポスト数
+	RepostCount int `json:"repostCount"`
+
+	// RepostedByMe 自分がリポスト済みか
+	RepostedByMe bool `json:"repostedByMe"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// UserId 投稿者ユーザーID
+	UserId string `json:"userId"`
+
+	// Username 投稿者ユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsQuotedPostResponse 引用投稿（要約）
+type ModelsQuotedPostResponse struct {
+	// Content 本文
+	Content string `json:"content"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id 投稿ID
+	Id string `json:"id"`
+
+	// Name 投稿者表示名
+	Name string `json:"name"`
+
+	// Username 投稿者ユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsRepostToggleResponse リポストトグル結果
+type ModelsRepostToggleResponse struct {
+	// Count リポスト数
+	Count int `json:"count"`
+
+	// Reposted リポスト状態
+	Reposted bool `json:"reposted"`
 }
 
 // ModelsScoutSettingsResponse スカウト受け入れ設定
@@ -976,6 +1114,42 @@ type UserNotificationsListUserNotificationsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// PostsListTimelinePostsParams defines parameters for PostsListTimelinePosts.
+type PostsListTimelinePostsParams struct {
+	// ViewerId 閲覧者ユーザーID（いいね済み判定に使用）
+	ViewerId *string `form:"viewerId,omitempty" json:"viewerId,omitempty"`
+
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// PostsListPostsByUserParams defines parameters for PostsListPostsByUser.
+type PostsListPostsByUserParams struct {
+	ViewerId *string `form:"viewerId,omitempty" json:"viewerId,omitempty"`
+	Limit    *int32  `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset   *int32  `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// PostsListLikedPostsByUserParams defines parameters for PostsListLikedPostsByUser.
+type PostsListLikedPostsByUserParams struct {
+	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// PostsGetPostParams defines parameters for PostsGetPost.
+type PostsGetPostParams struct {
+	ViewerId *string `form:"viewerId,omitempty" json:"viewerId,omitempty"`
+}
+
+// PostsListPostCommentsParams defines parameters for PostsListPostComments.
+type PostsListPostCommentsParams struct {
+	Limit  *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // SimilarUsersGetSimilarUsersParams defines parameters for SimilarUsersGetSimilarUsers.
 type SimilarUsersGetSimilarUsersParams struct {
 	// Limit 取得件数（1-50、デフォルト10）
@@ -1020,6 +1194,12 @@ type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplat
 
 // ScoutTemplatesUpdateScoutTemplateJSONRequestBody defines body for ScoutTemplatesUpdateScoutTemplate for application/json ContentType.
 type ScoutTemplatesUpdateScoutTemplateJSONRequestBody = ModelsUpdateScoutTemplateRequest
+
+// PostsCreatePostJSONRequestBody defines body for PostsCreatePost for application/json ContentType.
+type PostsCreatePostJSONRequestBody = ModelsCreatePostRequest
+
+// PostsCreatePostCommentJSONRequestBody defines body for PostsCreatePostComment for application/json ContentType.
+type PostsCreatePostCommentJSONRequestBody = ModelsCreateCommentRequest
 
 // ScoutSettingsUpdateScoutSettingsJSONRequestBody defines body for ScoutSettingsUpdateScoutSettings for application/json ContentType.
 type ScoutSettingsUpdateScoutSettingsJSONRequestBody = ModelsUpdateScoutSettingsRequest
@@ -1134,6 +1314,39 @@ type ServerInterface interface {
 	// Mark a notification as read
 	// (POST /api/notifications/{id}/read)
 	UserNotificationsMarkUserNotificationRead(ctx echo.Context, id string) error
+	// List timeline posts
+	// (GET /api/posts)
+	PostsListTimelinePosts(ctx echo.Context, params PostsListTimelinePostsParams) error
+	// Create a post
+	// (POST /api/posts)
+	PostsCreatePost(ctx echo.Context) error
+	// Delete a comment
+	// (DELETE /api/posts/comments/{commentId})
+	PostsDeletePostComment(ctx echo.Context, commentId string) error
+	// List posts by a user
+	// (GET /api/posts/users/{userId})
+	PostsListPostsByUser(ctx echo.Context, userId string, params PostsListPostsByUserParams) error
+	// List posts liked by a user
+	// (GET /api/posts/users/{userId}/likes)
+	PostsListLikedPostsByUser(ctx echo.Context, userId string, params PostsListLikedPostsByUserParams) error
+	// Delete a post
+	// (DELETE /api/posts/{postId})
+	PostsDeletePost(ctx echo.Context, postId string) error
+	// Get a post
+	// (GET /api/posts/{postId})
+	PostsGetPost(ctx echo.Context, postId string, params PostsGetPostParams) error
+	// List comments on a post
+	// (GET /api/posts/{postId}/comments)
+	PostsListPostComments(ctx echo.Context, postId string, params PostsListPostCommentsParams) error
+	// Create a comment on a post
+	// (POST /api/posts/{postId}/comments)
+	PostsCreatePostComment(ctx echo.Context, postId string) error
+	// Toggle like on a post
+	// (POST /api/posts/{postId}/like)
+	PostsTogglePostLike(ctx echo.Context, postId string) error
+	// Toggle repost on a post
+	// (POST /api/posts/{postId}/repost)
+	PostsTogglePostRepost(ctx echo.Context, postId string) error
 	// Get scout settings for the authenticated user
 	// (GET /api/scout-settings)
 	ScoutSettingsGetScoutSettings(ctx echo.Context) error
@@ -1544,6 +1757,255 @@ func (w *ServerInterfaceWrapper) UserNotificationsMarkUserNotificationRead(ctx e
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UserNotificationsMarkUserNotificationRead(ctx, id)
+	return err
+}
+
+// PostsListTimelinePosts converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsListTimelinePosts(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostsListTimelinePostsParams
+	// ------------- Optional query parameter "viewerId" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "viewerId", ctx.QueryParams(), &params.ViewerId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter viewerId: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsListTimelinePosts(ctx, params)
+	return err
+}
+
+// PostsCreatePost converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsCreatePost(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsCreatePost(ctx)
+	return err
+}
+
+// PostsDeletePostComment converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsDeletePostComment(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "commentId" -------------
+	var commentId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "commentId", ctx.Param("commentId"), &commentId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter commentId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsDeletePostComment(ctx, commentId)
+	return err
+}
+
+// PostsListPostsByUser converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsListPostsByUser(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostsListPostsByUserParams
+	// ------------- Optional query parameter "viewerId" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "viewerId", ctx.QueryParams(), &params.ViewerId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter viewerId: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsListPostsByUser(ctx, userId, params)
+	return err
+}
+
+// PostsListLikedPostsByUser converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsListLikedPostsByUser(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostsListLikedPostsByUserParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsListLikedPostsByUser(ctx, userId, params)
+	return err
+}
+
+// PostsDeletePost converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsDeletePost(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "postId" -------------
+	var postId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsDeletePost(ctx, postId)
+	return err
+}
+
+// PostsGetPost converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsGetPost(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "postId" -------------
+	var postId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostsGetPostParams
+	// ------------- Optional query parameter "viewerId" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "viewerId", ctx.QueryParams(), &params.ViewerId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter viewerId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsGetPost(ctx, postId, params)
+	return err
+}
+
+// PostsListPostComments converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsListPostComments(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "postId" -------------
+	var postId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PostsListPostCommentsParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsListPostComments(ctx, postId, params)
+	return err
+}
+
+// PostsCreatePostComment converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsCreatePostComment(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "postId" -------------
+	var postId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsCreatePostComment(ctx, postId)
+	return err
+}
+
+// PostsTogglePostLike converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsTogglePostLike(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "postId" -------------
+	var postId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsTogglePostLike(ctx, postId)
+	return err
+}
+
+// PostsTogglePostRepost converts echo context to params.
+func (w *ServerInterfaceWrapper) PostsTogglePostRepost(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "postId" -------------
+	var postId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostsTogglePostRepost(ctx, postId)
 	return err
 }
 
@@ -2102,6 +2564,17 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/notifications/read-all", wrapper.UserNotificationsMarkAllUserNotificationsRead)
 	router.GET(baseURL+"/api/notifications/unread-count", wrapper.UserNotificationsCountUserUnreadNotifications)
 	router.POST(baseURL+"/api/notifications/:id/read", wrapper.UserNotificationsMarkUserNotificationRead)
+	router.GET(baseURL+"/api/posts", wrapper.PostsListTimelinePosts)
+	router.POST(baseURL+"/api/posts", wrapper.PostsCreatePost)
+	router.DELETE(baseURL+"/api/posts/comments/:commentId", wrapper.PostsDeletePostComment)
+	router.GET(baseURL+"/api/posts/users/:userId", wrapper.PostsListPostsByUser)
+	router.GET(baseURL+"/api/posts/users/:userId/likes", wrapper.PostsListLikedPostsByUser)
+	router.DELETE(baseURL+"/api/posts/:postId", wrapper.PostsDeletePost)
+	router.GET(baseURL+"/api/posts/:postId", wrapper.PostsGetPost)
+	router.GET(baseURL+"/api/posts/:postId/comments", wrapper.PostsListPostComments)
+	router.POST(baseURL+"/api/posts/:postId/comments", wrapper.PostsCreatePostComment)
+	router.POST(baseURL+"/api/posts/:postId/like", wrapper.PostsTogglePostLike)
+	router.POST(baseURL+"/api/posts/:postId/repost", wrapper.PostsTogglePostRepost)
 	router.GET(baseURL+"/api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
 	router.PUT(baseURL+"/api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
 	router.GET(baseURL+"/api/team-diagnose/:token", wrapper.TeamDiagnoseGetDiagnoseByToken)

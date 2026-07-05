@@ -206,6 +206,54 @@ export type ModelsCiTypeScoreResponse = {
 };
 
 /**
+ * コメント一覧
+ */
+export type ModelsCommentListResponse = {
+    /**
+     * コメント
+     */
+    items: Array<ModelsCommentResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * コメント
+ */
+export type ModelsCommentResponse = {
+    /**
+     * コメントID
+     */
+    id: string;
+    /**
+     * 投稿ID
+     */
+    postId: string;
+    /**
+     * コメント投稿者ユーザーID
+     */
+    userId: string;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * 本文
+     */
+    content: string;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
  * 企業ログインリクエスト
  */
 export type ModelsCompanyLoginRequest = {
@@ -288,6 +336,16 @@ export type ModelsConflictError = {
 };
 
 /**
+ * コメント作成リクエスト
+ */
+export type ModelsCreateCommentRequest = {
+    /**
+     * 本文
+     */
+    content: string;
+};
+
+/**
  * 学歴作成リクエスト
  */
 export type ModelsCreateEducationRequest = {
@@ -345,6 +403,20 @@ export type ModelsCreateExperienceRequest = {
      * 業務内容（自然文、5000文字以内）
      */
     description?: string;
+};
+
+/**
+ * 投稿作成リクエスト
+ */
+export type ModelsCreatePostRequest = {
+    /**
+     * 本文
+     */
+    content: string;
+    /**
+     * 引用元投稿ID
+     */
+    quotePostId?: string;
 };
 
 /**
@@ -624,6 +696,20 @@ export type ModelsGoogleLoginRequest = {
 };
 
 /**
+ * いいねトグル結果
+ */
+export type ModelsLikeToggleResponse = {
+    /**
+     * いいね状態
+     */
+    liked: boolean;
+    /**
+     * いいね数
+     */
+    count: number;
+};
+
+/**
  * Not Found エラー
  */
 export type ModelsNotFoundError = {
@@ -677,6 +763,122 @@ export type ModelsNotificationResponse = {
      * 作成日時
      */
     createdAt: string;
+};
+
+/**
+ * 投稿一覧
+ */
+export type ModelsPostListResponse = {
+    /**
+     * 投稿
+     */
+    items: Array<ModelsPostResponse>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 投稿
+ */
+export type ModelsPostResponse = {
+    /**
+     * 投稿ID
+     */
+    id: string;
+    /**
+     * 投稿者ユーザーID
+     */
+    userId: string;
+    /**
+     * 投稿者ユーザー名
+     */
+    username: string;
+    /**
+     * 投稿者表示名
+     */
+    name: string;
+    /**
+     * 本文
+     */
+    content: string;
+    /**
+     * いいね数
+     */
+    likeCount: number;
+    /**
+     * コメント数
+     */
+    commentCount: number;
+    /**
+     * リポスト数
+     */
+    repostCount: number;
+    /**
+     * 自分がいいね済みか
+     */
+    likedByMe: boolean;
+    /**
+     * 自分がリポスト済みか
+     */
+    repostedByMe: boolean;
+    /**
+     * リポストか
+     */
+    isRepost: boolean;
+    /**
+     * 引用元投稿
+     */
+    quotedPost?: ModelsQuotedPostResponse;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+    /**
+     * 更新日時
+     */
+    updatedAt: string;
+};
+
+/**
+ * 引用投稿（要約）
+ */
+export type ModelsQuotedPostResponse = {
+    /**
+     * 投稿ID
+     */
+    id: string;
+    /**
+     * 本文
+     */
+    content: string;
+    /**
+     * 投稿者ユーザー名
+     */
+    username: string;
+    /**
+     * 投稿者表示名
+     */
+    name: string;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
+ * リポストトグル結果
+ */
+export type ModelsRepostToggleResponse = {
+    /**
+     * リポスト状態
+     */
+    reposted: boolean;
+    /**
+     * リポスト数
+     */
+    count: number;
 };
 
 /**
@@ -1916,6 +2118,324 @@ export type UserNotificationsMarkUserNotificationReadResponses = {
 };
 
 export type UserNotificationsMarkUserNotificationReadResponse = UserNotificationsMarkUserNotificationReadResponses[keyof UserNotificationsMarkUserNotificationReadResponses];
+
+export type PostsListTimelinePostsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 閲覧者ユーザーID（いいね済み判定に使用）
+         */
+        viewerId?: string;
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/posts';
+};
+
+export type PostsListTimelinePostsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError;
+};
+
+export type PostsListTimelinePostsError = PostsListTimelinePostsErrors[keyof PostsListTimelinePostsErrors];
+
+export type PostsListTimelinePostsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsPostListResponse;
+};
+
+export type PostsListTimelinePostsResponse = PostsListTimelinePostsResponses[keyof PostsListTimelinePostsResponses];
+
+export type PostsCreatePostData = {
+    body: ModelsCreatePostRequest;
+    path?: never;
+    query?: never;
+    url: '/api/posts';
+};
+
+export type PostsCreatePostErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type PostsCreatePostError = PostsCreatePostErrors[keyof PostsCreatePostErrors];
+
+export type PostsCreatePostResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsPostResponse;
+};
+
+export type PostsCreatePostResponse = PostsCreatePostResponses[keyof PostsCreatePostResponses];
+
+export type PostsDeletePostCommentData = {
+    body?: never;
+    path: {
+        commentId: string;
+    };
+    query?: never;
+    url: '/api/posts/comments/{commentId}';
+};
+
+export type PostsDeletePostCommentErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+};
+
+export type PostsDeletePostCommentError = PostsDeletePostCommentErrors[keyof PostsDeletePostCommentErrors];
+
+export type PostsDeletePostCommentResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type PostsDeletePostCommentResponse = PostsDeletePostCommentResponses[keyof PostsDeletePostCommentResponses];
+
+export type PostsListPostsByUserData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: {
+        viewerId?: string;
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/posts/users/{userId}';
+};
+
+export type PostsListPostsByUserErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type PostsListPostsByUserError = PostsListPostsByUserErrors[keyof PostsListPostsByUserErrors];
+
+export type PostsListPostsByUserResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsPostListResponse;
+};
+
+export type PostsListPostsByUserResponse = PostsListPostsByUserResponses[keyof PostsListPostsByUserResponses];
+
+export type PostsListLikedPostsByUserData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: {
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/posts/users/{userId}/likes';
+};
+
+export type PostsListLikedPostsByUserErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type PostsListLikedPostsByUserError = PostsListLikedPostsByUserErrors[keyof PostsListLikedPostsByUserErrors];
+
+export type PostsListLikedPostsByUserResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsPostListResponse;
+};
+
+export type PostsListLikedPostsByUserResponse = PostsListLikedPostsByUserResponses[keyof PostsListLikedPostsByUserResponses];
+
+export type PostsDeletePostData = {
+    body?: never;
+    path: {
+        postId: string;
+    };
+    query?: never;
+    url: '/api/posts/{postId}';
+};
+
+export type PostsDeletePostErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+};
+
+export type PostsDeletePostError = PostsDeletePostErrors[keyof PostsDeletePostErrors];
+
+export type PostsDeletePostResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type PostsDeletePostResponse = PostsDeletePostResponses[keyof PostsDeletePostResponses];
+
+export type PostsGetPostData = {
+    body?: never;
+    path: {
+        postId: string;
+    };
+    query?: {
+        viewerId?: string;
+    };
+    url: '/api/posts/{postId}';
+};
+
+export type PostsGetPostErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type PostsGetPostError = PostsGetPostErrors[keyof PostsGetPostErrors];
+
+export type PostsGetPostResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsPostResponse;
+};
+
+export type PostsGetPostResponse = PostsGetPostResponses[keyof PostsGetPostResponses];
+
+export type PostsListPostCommentsData = {
+    body?: never;
+    path: {
+        postId: string;
+    };
+    query?: {
+        limit?: number;
+        offset?: number;
+    };
+    url: '/api/posts/{postId}/comments';
+};
+
+export type PostsListPostCommentsErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type PostsListPostCommentsError = PostsListPostCommentsErrors[keyof PostsListPostCommentsErrors];
+
+export type PostsListPostCommentsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCommentListResponse;
+};
+
+export type PostsListPostCommentsResponse = PostsListPostCommentsResponses[keyof PostsListPostCommentsResponses];
+
+export type PostsCreatePostCommentData = {
+    body: ModelsCreateCommentRequest;
+    path: {
+        postId: string;
+    };
+    query?: never;
+    url: '/api/posts/{postId}/comments';
+};
+
+export type PostsCreatePostCommentErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsNotFoundError;
+};
+
+export type PostsCreatePostCommentError = PostsCreatePostCommentErrors[keyof PostsCreatePostCommentErrors];
+
+export type PostsCreatePostCommentResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsCommentResponse;
+};
+
+export type PostsCreatePostCommentResponse = PostsCreatePostCommentResponses[keyof PostsCreatePostCommentResponses];
+
+export type PostsTogglePostLikeData = {
+    body?: never;
+    path: {
+        postId: string;
+    };
+    query?: never;
+    url: '/api/posts/{postId}/like';
+};
+
+export type PostsTogglePostLikeErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type PostsTogglePostLikeError = PostsTogglePostLikeErrors[keyof PostsTogglePostLikeErrors];
+
+export type PostsTogglePostLikeResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsLikeToggleResponse;
+};
+
+export type PostsTogglePostLikeResponse = PostsTogglePostLikeResponses[keyof PostsTogglePostLikeResponses];
+
+export type PostsTogglePostRepostData = {
+    body?: never;
+    path: {
+        postId: string;
+    };
+    query?: never;
+    url: '/api/posts/{postId}/repost';
+};
+
+export type PostsTogglePostRepostErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsNotFoundError | ModelsBadRequestError;
+};
+
+export type PostsTogglePostRepostError = PostsTogglePostRepostErrors[keyof PostsTogglePostRepostErrors];
+
+export type PostsTogglePostRepostResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsRepostToggleResponse;
+};
+
+export type PostsTogglePostRepostResponse = PostsTogglePostRepostResponses[keyof PostsTogglePostRepostResponses];
 
 export type ScoutSettingsGetScoutSettingsData = {
     body?: never;

@@ -22,6 +22,7 @@ type Server struct {
 	companyAuth   *CompanyAuthController
 	ci            *CareerInterestController
 	wv            *WorkValuesController
+	post          *PostController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -42,6 +43,7 @@ func NewServer(
 	companyAuth *CompanyAuthController,
 	ci *CareerInterestController,
 	wv *WorkValuesController,
+	post *PostController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -58,6 +60,7 @@ func NewServer(
 		companyAuth:   companyAuth,
 		ci:            ci,
 		wv:            wv,
+		post:          post,
 	}
 }
 
@@ -293,4 +296,48 @@ func (s *Server) WorkValuesWvGetLatestResult(ctx echo.Context, userID string) er
 
 func (s *Server) WorkValuesWvGetResultBySession(ctx echo.Context, sessionID string) error {
 	return s.wv.GetResultBySessionID(ctx, sessionID)
+}
+
+// --- Posts ---
+
+func (s *Server) PostsCreatePost(ctx echo.Context) error { return s.post.Create(ctx) }
+
+func (s *Server) PostsListTimelinePosts(ctx echo.Context, _ openapi.PostsListTimelinePostsParams) error {
+	return s.post.ListTimeline(ctx)
+}
+
+func (s *Server) PostsListPostsByUser(ctx echo.Context, userID string, _ openapi.PostsListPostsByUserParams) error {
+	return s.post.ListByUserID(ctx, userID)
+}
+
+func (s *Server) PostsListLikedPostsByUser(ctx echo.Context, userID string, _ openapi.PostsListLikedPostsByUserParams) error {
+	return s.post.ListLikedByUserID(ctx, userID)
+}
+
+func (s *Server) PostsGetPost(ctx echo.Context, postID string, _ openapi.PostsGetPostParams) error {
+	return s.post.GetByID(ctx, postID)
+}
+
+func (s *Server) PostsDeletePost(ctx echo.Context, postID string) error {
+	return s.post.Delete(ctx, postID)
+}
+
+func (s *Server) PostsTogglePostLike(ctx echo.Context, postID string) error {
+	return s.post.ToggleLike(ctx, postID)
+}
+
+func (s *Server) PostsTogglePostRepost(ctx echo.Context, postID string) error {
+	return s.post.ToggleRepost(ctx, postID)
+}
+
+func (s *Server) PostsListPostComments(ctx echo.Context, postID string, _ openapi.PostsListPostCommentsParams) error {
+	return s.post.ListComments(ctx, postID)
+}
+
+func (s *Server) PostsCreatePostComment(ctx echo.Context, postID string) error {
+	return s.post.CreateComment(ctx, postID)
+}
+
+func (s *Server) PostsDeletePostComment(ctx echo.Context, commentID string) error {
+	return s.post.DeleteComment(ctx, commentID)
 }

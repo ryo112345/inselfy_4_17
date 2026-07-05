@@ -1,6 +1,9 @@
 package presenter
 
-import "github.com/akiyama/inselfy/backend/internal/domain/post"
+import (
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	"github.com/akiyama/inselfy/backend/internal/domain/post"
+)
 
 // postConverter declares the post/comment read-model→response mappings.
 // Run `make goverter` to regenerate.
@@ -9,9 +12,10 @@ import "github.com/akiyama/inselfy/backend/internal/domain/post"
 // goverter:output:file ./post_converter.gen.go
 // goverter:output:package github.com/akiyama/inselfy/backend/internal/adapter/http/presenter
 // goverter:extend copyTime
+// goverter:matchIgnoreCase
 type postConverter interface {
 	// goverter:autoMap Post
-	ToPostResponse(pw *post.PostWithUser) *PostResponse
+	ToPostResponse(pw *post.PostWithUser) *openapi.ModelsPostResponse
 	// goverter:autoMap Comment
-	ToCommentResponse(cw *post.CommentWithUser) *CommentResponse
+	ToCommentResponse(cw *post.CommentWithUser) *openapi.ModelsCommentResponse
 }

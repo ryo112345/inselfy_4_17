@@ -17,6 +17,7 @@ tags:
   - name: CompanyAuth
   - name: CareerInterest
   - name: WorkValues
+  - name: Posts
 paths:
   /api/auth/google:
     post:
@@ -665,6 +666,382 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - Notifications
+  /api/posts:
+    post:
+      operationId: Posts_createPost
+      summary: Create a post
+      description: 投稿作成（要ログイン）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.PostResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreatePostRequest'
+    get:
+      operationId: Posts_listTimelinePosts
+      summary: List timeline posts
+      description: タイムライン取得
+      parameters:
+        - name: viewerId
+          in: query
+          required: false
+          description: 閲覧者ユーザーID（いいね済み判定に使用）
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.PostListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
+  /api/posts/comments/{commentId}:
+    delete:
+      operationId: Posts_deletePostComment
+      summary: Delete a comment
+      description: コメント削除（要ログイン）
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
+  /api/posts/users/{userId}:
+    get:
+      operationId: Posts_listPostsByUser
+      summary: List posts by a user
+      description: ユーザーの投稿一覧
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: viewerId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.PostListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
+  /api/posts/users/{userId}/likes:
+    get:
+      operationId: Posts_listLikedPostsByUser
+      summary: List posts liked by a user
+      description: ユーザーがいいねした投稿一覧
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.PostListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
+  /api/posts/{postId}:
+    get:
+      operationId: Posts_getPost
+      summary: Get a post
+      description: 投稿取得
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: viewerId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.PostResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
+    delete:
+      operationId: Posts_deletePost
+      summary: Delete a post
+      description: 投稿削除（要ログイン）
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
+  /api/posts/{postId}/comments:
+    get:
+      operationId: Posts_listPostComments
+      summary: List comments on a post
+      description: コメント一覧
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CommentListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
+    post:
+      operationId: Posts_createPostComment
+      summary: Create a comment on a post
+      description: コメント作成（要ログイン）
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CommentResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreateCommentRequest'
+  /api/posts/{postId}/like:
+    post:
+      operationId: Posts_togglePostLike
+      summary: Toggle like on a post
+      description: いいねトグル（要ログイン）
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.LikeToggleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
+  /api/posts/{postId}/repost:
+    post:
+      operationId: Posts_togglePostRepost
+      summary: Toggle repost on a post
+      description: リポストトグル（要ログイン）
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.RepostToggleResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Posts
   /api/scout-settings:
     get:
       operationId: ScoutSettings_getScoutSettings
@@ -1749,6 +2126,55 @@ components:
           format: int32
           description: 順位
       description: RIASEC タイプスコア
+    Models.CommentListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.CommentResponse'
+          description: コメント
+        total:
+          type: integer
+          description: 総件数
+      description: コメント一覧
+    Models.CommentResponse:
+      type: object
+      required:
+        - id
+        - postId
+        - userId
+        - username
+        - name
+        - content
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: コメントID
+        postId:
+          type: string
+          description: 投稿ID
+        userId:
+          type: string
+          description: コメント投稿者ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        content:
+          type: string
+          description: 本文
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: コメント
     Models.CompanyLoginRequest:
       type: object
       required:
@@ -1834,6 +2260,15 @@ components:
         message:
           type: string
       description: Conflict エラー
+    Models.CreateCommentRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: 本文
+      description: コメント作成リクエスト
     Models.CreateEducationRequest:
       type: object
       required:
@@ -1917,6 +2352,18 @@ components:
           maxLength: 5000
           description: 業務内容（自然文、5000文字以内）
       description: 職歴作成リクエスト
+    Models.CreatePostRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: 本文
+        quotePostId:
+          type: string
+          description: 引用元投稿ID
+      description: 投稿作成リクエスト
     Models.CreateScoutTemplateRequest:
       type: object
       required:
@@ -2210,6 +2657,19 @@ components:
           maxLength: 10000
           description: Google ID トークン
       description: Google ログインリクエスト
+    Models.LikeToggleResponse:
+      type: object
+      required:
+        - liked
+        - count
+      properties:
+        liked:
+          type: boolean
+          description: いいね状態
+        count:
+          type: integer
+          description: いいね数
+      description: いいねトグル結果
     Models.NotFoundError:
       type: object
       required:
@@ -2274,6 +2734,123 @@ components:
           format: date-time
           description: 作成日時
       description: 通知
+    Models.PostListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.PostResponse'
+          description: 投稿
+        total:
+          type: integer
+          description: 総件数
+      description: 投稿一覧
+    Models.PostResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - username
+        - name
+        - content
+        - likeCount
+        - commentCount
+        - repostCount
+        - likedByMe
+        - repostedByMe
+        - isRepost
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: 投稿ID
+        userId:
+          type: string
+          description: 投稿者ユーザーID
+        username:
+          type: string
+          description: 投稿者ユーザー名
+        name:
+          type: string
+          description: 投稿者表示名
+        content:
+          type: string
+          description: 本文
+        likeCount:
+          type: integer
+          description: いいね数
+        commentCount:
+          type: integer
+          description: コメント数
+        repostCount:
+          type: integer
+          description: リポスト数
+        likedByMe:
+          type: boolean
+          description: 自分がいいね済みか
+        repostedByMe:
+          type: boolean
+          description: 自分がリポスト済みか
+        isRepost:
+          type: boolean
+          description: リポストか
+        quotedPost:
+          allOf:
+            - $ref: '#/components/schemas/Models.QuotedPostResponse'
+          description: 引用元投稿
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+      description: 投稿
+    Models.QuotedPostResponse:
+      type: object
+      required:
+        - id
+        - content
+        - username
+        - name
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: 投稿ID
+        content:
+          type: string
+          description: 本文
+        username:
+          type: string
+          description: 投稿者ユーザー名
+        name:
+          type: string
+          description: 投稿者表示名
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 引用投稿（要約）
+    Models.RepostToggleResponse:
+      type: object
+      required:
+        - reposted
+        - count
+      properties:
+        reposted:
+          type: boolean
+          description: リポスト状態
+        count:
+          type: integer
+          description: リポスト数
+      description: リポストトグル結果
     Models.ScoutSettingsResponse:
       type: object
       required:
