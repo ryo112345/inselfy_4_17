@@ -28,6 +28,7 @@ tags:
   - name: TalentSearch
   - name: CompanyTeams
   - name: JobPostings
+  - name: Interviews
 paths:
   /api/applications:
     post:
@@ -1030,6 +1031,125 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CompanyRegisterRequest'
+  /api/company/interviews:
+    get:
+      operationId: CompanyInterviews_listCompanyInterviews
+      summary: List interviews for the company in a date range
+      description: 期間内の面接一覧（企業認証）
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: 開始日（YYYY-MM-DD、デフォルト今日）
+          schema:
+            type: string
+          explode: false
+        - name: to
+          in: query
+          required: false
+          description: 終了日（YYYY-MM-DD、デフォルト from+7日）
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyInterviewListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Interviews
+  /api/company/interviews/pending/{applicationId}:
+    get:
+      operationId: CompanyInterviews_getPendingProposal
+      summary: Check for a pending proposal on an application
+      description: 応募に未回答の提案があるか確認（企業認証）
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.PendingProposalCheckResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Interviews
+  /api/company/interviews/propose:
+    post:
+      operationId: CompanyInterviews_proposeInterview
+      summary: Propose interview slots
+      description: 面接日程を提案（企業認証）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ProposeInterviewResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Interviews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.ProposeInterviewRequest'
+  /api/company/interviews/{interviewId}/cancel:
+    post:
+      operationId: CompanyInterviews_cancelCompanyInterview
+      summary: Cancel an interview as the company
+      description: 面接キャンセル（企業認証）
+      parameters:
+        - name: interviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.StatusOkResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Interviews
   /api/company/jobs:
     post:
       operationId: CompanyJobPostings_createJobPosting
@@ -2785,6 +2905,119 @@ paths:
                   - $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - CompanyTeams
+  /api/interviews:
+    get:
+      operationId: CandidateInterviews_listCandidateInterviews
+      summary: List interviews and pending proposals for the candidate
+      description: 面接・未回答提案の一覧（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CandidateInterviewListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Interviews
+  /api/interviews/proposals/{proposalId}/select:
+    post:
+      operationId: CandidateInterviews_selectInterviewSlot
+      summary: Select an interview slot
+      description: 提案スロットを選択して面接確定（要ログイン）
+      parameters:
+        - name: proposalId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SelectSlotResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Interviews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.SelectSlotRequest'
+  /api/interviews/proposals/{proposalId}/slots:
+    get:
+      operationId: CandidateInterviews_getProposalSlots
+      summary: Get slots of a proposal
+      description: 提案のスロット一覧取得（要ログイン）
+      parameters:
+        - name: proposalId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ProposalSlotsResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Interviews
+  /api/interviews/{interviewId}/cancel:
+    post:
+      operationId: CandidateInterviews_cancelCandidateInterview
+      summary: Cancel an interview as the candidate
+      description: 面接キャンセル（要ログイン）
+      parameters:
+        - name: interviewId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.StatusOkResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - Interviews
   /api/jobs:
     get:
       operationId: PublicJobPostings_listPublicJobPostings
@@ -5041,6 +5274,70 @@ components:
           format: int32
           description: 順位
       description: RIASEC タイプスコア
+    Models.CandidateInterviewItem:
+      type: object
+      required:
+        - id
+        - applicationId
+        - startTime
+        - endTime
+        - location
+        - meetingUrl
+        - status
+        - title
+        - companyName
+        - jobTitle
+      properties:
+        id:
+          type: string
+          description: 面接ID
+        applicationId:
+          type: string
+          description: 応募ID
+        startTime:
+          type: string
+          format: date-time
+          description: 開始日時
+        endTime:
+          type: string
+          format: date-time
+          description: 終了日時
+        location:
+          type: string
+          description: 場所
+        meetingUrl:
+          type: string
+          description: ミーティングURL
+        status:
+          type: string
+          description: ステータス（scheduled / completed / cancelled / no_show）
+        title:
+          type: string
+          description: タイトル
+        companyName:
+          type: string
+          description: 企業名
+        jobTitle:
+          type: string
+          description: 求人タイトル
+      description: 面接（候補者向け・企業情報付き）
+    Models.CandidateInterviewListResponse:
+      type: object
+      required:
+        - interviews
+        - pendingProposals
+      properties:
+        interviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.CandidateInterviewItem'
+          description: 確定済み面接
+        pendingProposals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.PendingProposalItem'
+          description: 未回答の日程提案
+      description: 候補者向け面接一覧（未回答の提案付き）
     Models.CandidateScoutReplyRequest:
       type: object
       required:
@@ -5108,6 +5405,68 @@ components:
           format: date-time
           description: 作成日時
       description: コメント
+    Models.CompanyInterviewItem:
+      type: object
+      required:
+        - id
+        - applicationId
+        - startTime
+        - endTime
+        - location
+        - meetingUrl
+        - status
+        - title
+        - candidateName
+        - candidateAvatarUrl
+        - jobTitle
+      properties:
+        id:
+          type: string
+          description: 面接ID
+        applicationId:
+          type: string
+          description: 応募ID
+        startTime:
+          type: string
+          format: date-time
+          description: 開始日時
+        endTime:
+          type: string
+          format: date-time
+          description: 終了日時
+        location:
+          type: string
+          description: 場所
+        meetingUrl:
+          type: string
+          description: ミーティングURL
+        status:
+          type: string
+          description: ステータス（scheduled / completed / cancelled / no_show）
+        title:
+          type: string
+          description: タイトル
+        candidateName:
+          type: string
+          description: 候補者名
+        candidateAvatarUrl:
+          type: string
+          description: 候補者アバターURL
+        jobTitle:
+          type: string
+          description: 求人タイトル
+      description: 面接（企業向け・候補者情報付き）
+    Models.CompanyInterviewListResponse:
+      type: object
+      required:
+        - interviews
+      properties:
+        interviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.CompanyInterviewItem'
+          description: 面接
+      description: 企業向け面接一覧
     Models.CompanyLoginRequest:
       type: object
       required:
@@ -5825,6 +6184,68 @@ components:
           maxLength: 10000
           description: Google ID トークン
       description: Google ログインリクエスト
+    Models.InterviewBase:
+      type: object
+      required:
+        - id
+        - applicationId
+        - startTime
+        - endTime
+        - location
+        - meetingUrl
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          description: 面接ID
+        applicationId:
+          type: string
+          description: 応募ID
+        startTime:
+          type: string
+          format: date-time
+          description: 開始日時
+        endTime:
+          type: string
+          format: date-time
+          description: 終了日時
+        location:
+          type: string
+          description: 場所
+        meetingUrl:
+          type: string
+          description: ミーティングURL
+        status:
+          type: string
+          description: ステータス（scheduled / completed / cancelled / no_show）
+        title:
+          type: string
+          description: タイトル
+      description: 面接（共通フィールド）
+    Models.InterviewSlotResponse:
+      type: object
+      required:
+        - id
+        - startTime
+        - endTime
+        - status
+      properties:
+        id:
+          type: string
+          description: スロットID
+        startTime:
+          type: string
+          format: date-time
+          description: 開始日時
+        endTime:
+          type: string
+          format: date-time
+          description: 終了日時
+        status:
+          type: string
+          description: ステータス（proposed / selected / rejected）
+      description: 面接候補スロット
     Models.JobApplicationListResponse:
       type: object
       required:
@@ -6496,6 +6917,63 @@ components:
           format: date-time
           description: 作成日時
       description: 通知
+    Models.PendingProposalCheckResponse:
+      type: object
+      required:
+        - hasPending
+      properties:
+        hasPending:
+          type: boolean
+          description: 未回答の提案があるか
+        proposalId:
+          type: string
+          description: 提案ID
+        createdAt:
+          type: string
+          format: date-time
+          description: 提案作成日時
+      description: 未回答提案の有無
+    Models.PendingProposalItem:
+      type: object
+      required:
+        - id
+        - companyName
+        - jobTitle
+        - message
+        - durationMinutes
+        - slots
+        - expiresAt
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: 提案ID
+        companyName:
+          type: string
+          description: 企業名
+        jobTitle:
+          type: string
+          description: 求人タイトル
+        message:
+          type: string
+          description: メッセージ
+        durationMinutes:
+          type: integer
+          description: 所要時間（分）
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.InterviewSlotResponse'
+          description: 候補スロット
+        expiresAt:
+          type: string
+          format: date-time
+          description: 有効期限
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 候補者に届いている日程提案
     Models.PostListResponse:
       type: object
       required:
@@ -6574,6 +7052,103 @@ components:
           format: date-time
           description: 更新日時
       description: 投稿
+    Models.ProposalSlotsResponse:
+      type: object
+      required:
+        - proposal
+        - slots
+      properties:
+        proposal:
+          allOf:
+            - $ref: '#/components/schemas/Models.ProposalSummary'
+          description: 提案
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.InterviewSlotResponse'
+          description: 候補スロット
+      description: 提案とスロット一覧
+    Models.ProposalSummary:
+      type: object
+      required:
+        - id
+        - message
+        - status
+        - expiresAt
+      properties:
+        id:
+          type: string
+          description: 提案ID
+        message:
+          type: string
+          description: メッセージ
+        status:
+          type: string
+          description: ステータス（pending / confirmed / expired / cancelled）
+        expiresAt:
+          type: string
+          format: date-time
+          description: 有効期限
+      description: 提案サマリー
+    Models.ProposeInterviewRequest:
+      type: object
+      required:
+        - applicationId
+        - message
+        - location
+        - durationMinutes
+        - slots
+        - expiresInDays
+      properties:
+        applicationId:
+          type: string
+          description: 応募ID
+        message:
+          type: string
+          description: メッセージ
+        location:
+          type: string
+          description: 場所
+        durationMinutes:
+          type: integer
+          description: 所要時間（分）
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.ProposeSlotInput'
+          description: 候補日時（1-10件）
+        expiresInDays:
+          type: integer
+          description: 有効期限（日数）
+      description: 面接日程提案リクエスト
+    Models.ProposeInterviewResponse:
+      type: object
+      required:
+        - proposalId
+        - slots
+      properties:
+        proposalId:
+          type: string
+          description: 提案ID
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.InterviewSlotResponse'
+          description: 登録されたスロット
+      description: 面接日程提案結果
+    Models.ProposeSlotInput:
+      type: object
+      required:
+        - startTime
+        - endTime
+      properties:
+        startTime:
+          type: string
+          description: 開始日時（RFC3339）
+        endTime:
+          type: string
+          description: 終了日時（RFC3339）
+      description: 面接候補日時（提案リクエスト用、RFC3339 文字列）
     Models.PublicCompanyProfileResponse:
       type: object
       required:
@@ -7138,6 +7713,56 @@ components:
           format: date-time
           description: 更新日時
       description: スカウトテンプレート
+    Models.SelectSlotRequest:
+      type: object
+      required:
+        - slotId
+        - startTime
+        - endTime
+      properties:
+        slotId:
+          type: string
+          description: 選択するスロットID
+        startTime:
+          type: string
+          description: 直接指定の開始日時（RFC3339、空文字可）
+        endTime:
+          type: string
+          description: 直接指定の終了日時（RFC3339、空文字可）
+      description: スロット選択リクエスト。slotId 指定か、startTime/endTime の直接指定
+    Models.SelectSlotResponse:
+      type: object
+      required:
+        - interview
+      properties:
+        interview:
+          allOf:
+            - $ref: '#/components/schemas/Models.SelectedInterview'
+          description: 確定した面接
+      description: スロット選択結果
+    Models.SelectedInterview:
+      type: object
+      required:
+        - id
+        - startTime
+        - endTime
+        - status
+      properties:
+        id:
+          type: string
+          description: 面接ID
+        startTime:
+          type: string
+          format: date-time
+          description: 開始日時
+        endTime:
+          type: string
+          format: date-time
+          description: 終了日時
+        status:
+          type: string
+          description: ステータス
+      description: 確定した面接（スロット選択結果）
     Models.SendMessageRequest:
       type: object
       required:

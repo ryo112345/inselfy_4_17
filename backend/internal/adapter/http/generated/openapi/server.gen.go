@@ -350,6 +350,48 @@ type ModelsCITypeScoreResponse struct {
 	TypeId string `json:"type_id"`
 }
 
+// ModelsCandidateInterviewItem 面接（候補者向け・企業情報付き）
+type ModelsCandidateInterviewItem struct {
+	// ApplicationId 応募ID
+	ApplicationId string `json:"applicationId"`
+
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// EndTime 終了日時
+	EndTime time.Time `json:"endTime"`
+
+	// Id 面接ID
+	Id string `json:"id"`
+
+	// JobTitle 求人タイトル
+	JobTitle string `json:"jobTitle"`
+
+	// Location 場所
+	Location string `json:"location"`
+
+	// MeetingUrl ミーティングURL
+	MeetingUrl string `json:"meetingUrl"`
+
+	// StartTime 開始日時
+	StartTime time.Time `json:"startTime"`
+
+	// Status ステータス（scheduled / completed / cancelled / no_show）
+	Status string `json:"status"`
+
+	// Title タイトル
+	Title string `json:"title"`
+}
+
+// ModelsCandidateInterviewListResponse 候補者向け面接一覧（未回答の提案付き）
+type ModelsCandidateInterviewListResponse struct {
+	// Interviews 確定済み面接
+	Interviews []ModelsCandidateInterviewItem `json:"interviews"`
+
+	// PendingProposals 未回答の日程提案
+	PendingProposals []ModelsPendingProposalItem `json:"pendingProposals"`
+}
+
 // ModelsCandidateScoutReplyRequest 候補者からのスカウト返信リクエスト
 type ModelsCandidateScoutReplyRequest struct {
 	// Body 本文
@@ -393,6 +435,48 @@ type ModelsCommentResponse struct {
 
 	// Username ユーザー名
 	Username string `json:"username"`
+}
+
+// ModelsCompanyInterviewItem 面接（企業向け・候補者情報付き）
+type ModelsCompanyInterviewItem struct {
+	// ApplicationId 応募ID
+	ApplicationId string `json:"applicationId"`
+
+	// CandidateAvatarUrl 候補者アバターURL
+	CandidateAvatarUrl string `json:"candidateAvatarUrl"`
+
+	// CandidateName 候補者名
+	CandidateName string `json:"candidateName"`
+
+	// EndTime 終了日時
+	EndTime time.Time `json:"endTime"`
+
+	// Id 面接ID
+	Id string `json:"id"`
+
+	// JobTitle 求人タイトル
+	JobTitle string `json:"jobTitle"`
+
+	// Location 場所
+	Location string `json:"location"`
+
+	// MeetingUrl ミーティングURL
+	MeetingUrl string `json:"meetingUrl"`
+
+	// StartTime 開始日時
+	StartTime time.Time `json:"startTime"`
+
+	// Status ステータス（scheduled / completed / cancelled / no_show）
+	Status string `json:"status"`
+
+	// Title タイトル
+	Title string `json:"title"`
+}
+
+// ModelsCompanyInterviewListResponse 企業向け面接一覧
+type ModelsCompanyInterviewListResponse struct {
+	// Interviews 面接
+	Interviews []ModelsCompanyInterviewItem `json:"interviews"`
 }
 
 // ModelsCompanyLoginRequest 企業ログインリクエスト
@@ -869,6 +953,48 @@ type ModelsGoogleLoginRequest struct {
 	IdToken string `json:"idToken"`
 }
 
+// ModelsInterviewBase 面接（共通フィールド）
+type ModelsInterviewBase struct {
+	// ApplicationId 応募ID
+	ApplicationId string `json:"applicationId"`
+
+	// EndTime 終了日時
+	EndTime time.Time `json:"endTime"`
+
+	// Id 面接ID
+	Id string `json:"id"`
+
+	// Location 場所
+	Location string `json:"location"`
+
+	// MeetingUrl ミーティングURL
+	MeetingUrl string `json:"meetingUrl"`
+
+	// StartTime 開始日時
+	StartTime time.Time `json:"startTime"`
+
+	// Status ステータス（scheduled / completed / cancelled / no_show）
+	Status string `json:"status"`
+
+	// Title タイトル
+	Title string `json:"title"`
+}
+
+// ModelsInterviewSlotResponse 面接候補スロット
+type ModelsInterviewSlotResponse struct {
+	// EndTime 終了日時
+	EndTime time.Time `json:"endTime"`
+
+	// Id スロットID
+	Id string `json:"id"`
+
+	// StartTime 開始日時
+	StartTime time.Time `json:"startTime"`
+
+	// Status ステータス（proposed / selected / rejected）
+	Status string `json:"status"`
+}
+
 // ModelsJobApplicationListResponse 応募一覧
 type ModelsJobApplicationListResponse struct {
 	// Items 応募
@@ -1334,6 +1460,45 @@ type ModelsNotificationResponse struct {
 	Type string `json:"type"`
 }
 
+// ModelsPendingProposalCheckResponse 未回答提案の有無
+type ModelsPendingProposalCheckResponse struct {
+	// CreatedAt 提案作成日時
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// HasPending 未回答の提案があるか
+	HasPending bool `json:"hasPending"`
+
+	// ProposalId 提案ID
+	ProposalId *string `json:"proposalId,omitempty"`
+}
+
+// ModelsPendingProposalItem 候補者に届いている日程提案
+type ModelsPendingProposalItem struct {
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// DurationMinutes 所要時間（分）
+	DurationMinutes int `json:"durationMinutes"`
+
+	// ExpiresAt 有効期限
+	ExpiresAt time.Time `json:"expiresAt"`
+
+	// Id 提案ID
+	Id string `json:"id"`
+
+	// JobTitle 求人タイトル
+	JobTitle string `json:"jobTitle"`
+
+	// Message メッセージ
+	Message string `json:"message"`
+
+	// Slots 候補スロット
+	Slots []ModelsInterviewSlotResponse `json:"slots"`
+}
+
 // ModelsPostListResponse 投稿一覧
 type ModelsPostListResponse struct {
 	// Items 投稿
@@ -1386,6 +1551,69 @@ type ModelsPostResponse struct {
 
 	// Username 投稿者ユーザー名
 	Username string `json:"username"`
+}
+
+// ModelsProposalSlotsResponse 提案とスロット一覧
+type ModelsProposalSlotsResponse struct {
+	// Proposal 提案
+	Proposal ModelsProposalSummary `json:"proposal"`
+
+	// Slots 候補スロット
+	Slots []ModelsInterviewSlotResponse `json:"slots"`
+}
+
+// ModelsProposalSummary 提案サマリー
+type ModelsProposalSummary struct {
+	// ExpiresAt 有効期限
+	ExpiresAt time.Time `json:"expiresAt"`
+
+	// Id 提案ID
+	Id string `json:"id"`
+
+	// Message メッセージ
+	Message string `json:"message"`
+
+	// Status ステータス（pending / confirmed / expired / cancelled）
+	Status string `json:"status"`
+}
+
+// ModelsProposeInterviewRequest 面接日程提案リクエスト
+type ModelsProposeInterviewRequest struct {
+	// ApplicationId 応募ID
+	ApplicationId string `json:"applicationId"`
+
+	// DurationMinutes 所要時間（分）
+	DurationMinutes int `json:"durationMinutes"`
+
+	// ExpiresInDays 有効期限（日数）
+	ExpiresInDays int `json:"expiresInDays"`
+
+	// Location 場所
+	Location string `json:"location"`
+
+	// Message メッセージ
+	Message string `json:"message"`
+
+	// Slots 候補日時（1-10件）
+	Slots []ModelsProposeSlotInput `json:"slots"`
+}
+
+// ModelsProposeInterviewResponse 面接日程提案結果
+type ModelsProposeInterviewResponse struct {
+	// ProposalId 提案ID
+	ProposalId string `json:"proposalId"`
+
+	// Slots 登録されたスロット
+	Slots []ModelsInterviewSlotResponse `json:"slots"`
+}
+
+// ModelsProposeSlotInput 面接候補日時（提案リクエスト用、RFC3339 文字列）
+type ModelsProposeSlotInput struct {
+	// EndTime 終了日時（RFC3339）
+	EndTime string `json:"endTime"`
+
+	// StartTime 開始日時（RFC3339）
+	StartTime string `json:"startTime"`
 }
 
 // ModelsPublicCompanyProfileResponse 企業プロフィール（公開向け）
@@ -1758,6 +1986,39 @@ type ModelsScoutTemplateResponse struct {
 
 	// UpdatedAt 更新日時
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// ModelsSelectSlotRequest スロット選択リクエスト。slotId 指定か、startTime/endTime の直接指定
+type ModelsSelectSlotRequest struct {
+	// EndTime 直接指定の終了日時（RFC3339、空文字可）
+	EndTime string `json:"endTime"`
+
+	// SlotId 選択するスロットID
+	SlotId string `json:"slotId"`
+
+	// StartTime 直接指定の開始日時（RFC3339、空文字可）
+	StartTime string `json:"startTime"`
+}
+
+// ModelsSelectSlotResponse スロット選択結果
+type ModelsSelectSlotResponse struct {
+	// Interview 確定した面接
+	Interview ModelsSelectedInterview `json:"interview"`
+}
+
+// ModelsSelectedInterview 確定した面接（スロット選択結果）
+type ModelsSelectedInterview struct {
+	// EndTime 終了日時
+	EndTime time.Time `json:"endTime"`
+
+	// Id 面接ID
+	Id string `json:"id"`
+
+	// StartTime 開始日時
+	StartTime time.Time `json:"startTime"`
+
+	// Status ステータス
+	Status string `json:"status"`
 }
 
 // ModelsSendMessageRequest メッセージ送信リクエスト
@@ -2494,6 +2755,15 @@ type CompanyApplicationsListCompanyApplicationsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// CompanyInterviewsListCompanyInterviewsParams defines parameters for CompanyInterviewsListCompanyInterviews.
+type CompanyInterviewsListCompanyInterviewsParams struct {
+	// From 開始日（YYYY-MM-DD、デフォルト今日）
+	From *string `form:"from,omitempty" json:"from,omitempty"`
+
+	// To 終了日（YYYY-MM-DD、デフォルト from+7日）
+	To *string `form:"to,omitempty" json:"to,omitempty"`
+}
+
 // CompanyJobPostingsUploadJobCoverImageMultipartBody defines parameters for CompanyJobPostingsUploadJobCoverImage.
 type CompanyJobPostingsUploadJobCoverImageMultipartBody struct {
 	File openapi_types.File `json:"file"`
@@ -2803,6 +3073,9 @@ type CompanyAuthCompanyLoginJSONRequestBody = ModelsCompanyLoginRequest
 // CompanyAuthCompanyRegisterJSONRequestBody defines body for CompanyAuthCompanyRegister for application/json ContentType.
 type CompanyAuthCompanyRegisterJSONRequestBody = ModelsCompanyRegisterRequest
 
+// CompanyInterviewsProposeInterviewJSONRequestBody defines body for CompanyInterviewsProposeInterview for application/json ContentType.
+type CompanyInterviewsProposeInterviewJSONRequestBody = ModelsProposeInterviewRequest
+
 // CompanyJobPostingsCreateJobPostingJSONRequestBody defines body for CompanyJobPostingsCreateJobPosting for application/json ContentType.
 type CompanyJobPostingsCreateJobPostingJSONRequestBody = ModelsJobPostingRequest
 
@@ -2853,6 +3126,9 @@ type CompanyTeamsUpdateTeamJSONRequestBody = ModelsUpdateTeamRequest
 
 // CompanyTeamsAddTeamMemberJSONRequestBody defines body for CompanyTeamsAddTeamMember for application/json ContentType.
 type CompanyTeamsAddTeamMemberJSONRequestBody = ModelsAddTeamMemberRequest
+
+// CandidateInterviewsSelectInterviewSlotJSONRequestBody defines body for CandidateInterviewsSelectInterviewSlot for application/json ContentType.
+type CandidateInterviewsSelectInterviewSlotJSONRequestBody = ModelsSelectSlotRequest
 
 // CandidateMessagingStartCandidateConversationJSONRequestBody defines body for CandidateMessagingStartCandidateConversation for application/json ContentType.
 type CandidateMessagingStartCandidateConversationJSONRequestBody = ModelsStartCandidateConversationRequest
@@ -3018,6 +3294,18 @@ type ServerInterface interface {
 	// Register a company account
 	// (POST /api/company/auth/register)
 	CompanyAuthCompanyRegister(ctx echo.Context) error
+	// List interviews for the company in a date range
+	// (GET /api/company/interviews)
+	CompanyInterviewsListCompanyInterviews(ctx echo.Context, params CompanyInterviewsListCompanyInterviewsParams) error
+	// Check for a pending proposal on an application
+	// (GET /api/company/interviews/pending/{applicationId})
+	CompanyInterviewsGetPendingProposal(ctx echo.Context, applicationId string) error
+	// Propose interview slots
+	// (POST /api/company/interviews/propose)
+	CompanyInterviewsProposeInterview(ctx echo.Context) error
+	// Cancel an interview as the company
+	// (POST /api/company/interviews/{interviewId}/cancel)
+	CompanyInterviewsCancelCompanyInterview(ctx echo.Context, interviewId string) error
 	// List job postings of the company
 	// (GET /api/company/jobs)
 	CompanyJobPostingsListCompanyJobPostings(ctx echo.Context) error
@@ -3183,6 +3471,18 @@ type ServerInterface interface {
 	// Get diagnostic scores of team members
 	// (GET /api/company/teams/{teamId}/scores)
 	CompanyTeamsGetTeamScores(ctx echo.Context, teamId string) error
+	// List interviews and pending proposals for the candidate
+	// (GET /api/interviews)
+	CandidateInterviewsListCandidateInterviews(ctx echo.Context) error
+	// Select an interview slot
+	// (POST /api/interviews/proposals/{proposalId}/select)
+	CandidateInterviewsSelectInterviewSlot(ctx echo.Context, proposalId string) error
+	// Get slots of a proposal
+	// (GET /api/interviews/proposals/{proposalId}/slots)
+	CandidateInterviewsGetProposalSlots(ctx echo.Context, proposalId string) error
+	// Cancel an interview as the candidate
+	// (POST /api/interviews/{interviewId}/cancel)
+	CandidateInterviewsCancelCandidateInterview(ctx echo.Context, interviewId string) error
 	// List public job postings
 	// (GET /api/jobs)
 	PublicJobPostingsListPublicJobPostings(ctx echo.Context, params PublicJobPostingsListPublicJobPostingsParams) error
@@ -3880,6 +4180,72 @@ func (w *ServerInterfaceWrapper) CompanyAuthCompanyRegister(ctx echo.Context) er
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyAuthCompanyRegister(ctx)
+	return err
+}
+
+// CompanyInterviewsListCompanyInterviews converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyInterviewsListCompanyInterviews(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CompanyInterviewsListCompanyInterviewsParams
+	// ------------- Optional query parameter "from" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "from", ctx.QueryParams(), &params.From, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter from: %s", err))
+	}
+
+	// ------------- Optional query parameter "to" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "to", ctx.QueryParams(), &params.To, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter to: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyInterviewsListCompanyInterviews(ctx, params)
+	return err
+}
+
+// CompanyInterviewsGetPendingProposal converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyInterviewsGetPendingProposal(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "applicationId" -------------
+	var applicationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "applicationId", ctx.Param("applicationId"), &applicationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter applicationId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyInterviewsGetPendingProposal(ctx, applicationId)
+	return err
+}
+
+// CompanyInterviewsProposeInterview converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyInterviewsProposeInterview(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyInterviewsProposeInterview(ctx)
+	return err
+}
+
+// CompanyInterviewsCancelCompanyInterview converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyInterviewsCancelCompanyInterview(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "interviewId" -------------
+	var interviewId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "interviewId", ctx.Param("interviewId"), &interviewId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter interviewId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyInterviewsCancelCompanyInterview(ctx, interviewId)
 	return err
 }
 
@@ -4952,6 +5318,63 @@ func (w *ServerInterfaceWrapper) CompanyTeamsGetTeamScores(ctx echo.Context) err
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsGetTeamScores(ctx, teamId)
+	return err
+}
+
+// CandidateInterviewsListCandidateInterviews converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateInterviewsListCandidateInterviews(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateInterviewsListCandidateInterviews(ctx)
+	return err
+}
+
+// CandidateInterviewsSelectInterviewSlot converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateInterviewsSelectInterviewSlot(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "proposalId" -------------
+	var proposalId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "proposalId", ctx.Param("proposalId"), &proposalId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter proposalId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateInterviewsSelectInterviewSlot(ctx, proposalId)
+	return err
+}
+
+// CandidateInterviewsGetProposalSlots converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateInterviewsGetProposalSlots(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "proposalId" -------------
+	var proposalId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "proposalId", ctx.Param("proposalId"), &proposalId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter proposalId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateInterviewsGetProposalSlots(ctx, proposalId)
+	return err
+}
+
+// CandidateInterviewsCancelCandidateInterview converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateInterviewsCancelCandidateInterview(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "interviewId" -------------
+	var interviewId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "interviewId", ctx.Param("interviewId"), &interviewId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter interviewId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateInterviewsCancelCandidateInterview(ctx, interviewId)
 	return err
 }
 
@@ -6131,6 +6554,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/company/auth/me", wrapper.CompanyAuthCompanyGetMe)
 	router.POST(baseURL+"/api/company/auth/refresh", wrapper.CompanyAuthCompanyRefreshToken)
 	router.POST(baseURL+"/api/company/auth/register", wrapper.CompanyAuthCompanyRegister)
+	router.GET(baseURL+"/api/company/interviews", wrapper.CompanyInterviewsListCompanyInterviews)
+	router.GET(baseURL+"/api/company/interviews/pending/:applicationId", wrapper.CompanyInterviewsGetPendingProposal)
+	router.POST(baseURL+"/api/company/interviews/propose", wrapper.CompanyInterviewsProposeInterview)
+	router.POST(baseURL+"/api/company/interviews/:interviewId/cancel", wrapper.CompanyInterviewsCancelCompanyInterview)
 	router.GET(baseURL+"/api/company/jobs", wrapper.CompanyJobPostingsListCompanyJobPostings)
 	router.POST(baseURL+"/api/company/jobs", wrapper.CompanyJobPostingsCreateJobPosting)
 	router.POST(baseURL+"/api/company/jobs/cover-image", wrapper.CompanyJobPostingsUploadJobCoverImage)
@@ -6186,6 +6613,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/company/teams/:teamId/members", wrapper.CompanyTeamsAddTeamMember)
 	router.DELETE(baseURL+"/api/company/teams/:teamId/members/:memberId", wrapper.CompanyTeamsRemoveTeamMember)
 	router.GET(baseURL+"/api/company/teams/:teamId/scores", wrapper.CompanyTeamsGetTeamScores)
+	router.GET(baseURL+"/api/interviews", wrapper.CandidateInterviewsListCandidateInterviews)
+	router.POST(baseURL+"/api/interviews/proposals/:proposalId/select", wrapper.CandidateInterviewsSelectInterviewSlot)
+	router.GET(baseURL+"/api/interviews/proposals/:proposalId/slots", wrapper.CandidateInterviewsGetProposalSlots)
+	router.POST(baseURL+"/api/interviews/:interviewId/cancel", wrapper.CandidateInterviewsCancelCandidateInterview)
 	router.GET(baseURL+"/api/jobs", wrapper.PublicJobPostingsListPublicJobPostings)
 	router.GET(baseURL+"/api/jobs/:jobId", wrapper.PublicJobPostingsGetPublicJobPosting)
 	router.GET(baseURL+"/api/messages/conversations", wrapper.CandidateMessagingListCandidateConversations)

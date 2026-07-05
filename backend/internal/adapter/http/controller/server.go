@@ -33,6 +33,7 @@ type Server struct {
 	talentSearch  *TalentSearchController
 	companyTeam   *CompanyTeamController
 	jobPosting    *JobPostingController
+	interview     *InterviewController
 
 	// Job image uploads are standalone echo.HandlerFuncs built with
 	// HandleImageUpload(storage, subdir); wired here for interface conformance.
@@ -70,6 +71,7 @@ func NewServer(
 	talentSearch *TalentSearchController,
 	companyTeam *CompanyTeamController,
 	jobPosting *JobPostingController,
+	interview *InterviewController,
 	uploadTeamMemberPhoto echo.HandlerFunc,
 	uploadGalleryImage echo.HandlerFunc,
 	uploadJobCoverImage echo.HandlerFunc,
@@ -100,6 +102,7 @@ func NewServer(
 		talentSearch:  talentSearch,
 		companyTeam:   companyTeam,
 		jobPosting:    jobPosting,
+		interview:     interview,
 
 		uploadTeamMemberPhoto: uploadTeamMemberPhoto,
 		uploadGalleryImage:    uploadGalleryImage,
@@ -733,4 +736,38 @@ func (s *Server) PublicJobPostingsListPublicJobPostings(ctx echo.Context, _ open
 
 func (s *Server) PublicJobPostingsGetPublicJobPosting(ctx echo.Context, jobID string) error {
 	return s.jobPosting.GetPublic(ctx, jobID)
+}
+
+// --- Interviews ---
+
+func (s *Server) CompanyInterviewsProposeInterview(ctx echo.Context) error {
+	return s.interview.Propose(ctx)
+}
+
+func (s *Server) CompanyInterviewsGetPendingProposal(ctx echo.Context, _ string) error {
+	return s.interview.GetPendingProposal(ctx)
+}
+
+func (s *Server) CompanyInterviewsListCompanyInterviews(ctx echo.Context, _ openapi.CompanyInterviewsListCompanyInterviewsParams) error {
+	return s.interview.ListByCompany(ctx)
+}
+
+func (s *Server) CompanyInterviewsCancelCompanyInterview(ctx echo.Context, _ string) error {
+	return s.interview.CancelInterview(ctx)
+}
+
+func (s *Server) CandidateInterviewsListCandidateInterviews(ctx echo.Context) error {
+	return s.interview.ListByCandidate(ctx)
+}
+
+func (s *Server) CandidateInterviewsSelectInterviewSlot(ctx echo.Context, _ string) error {
+	return s.interview.SelectSlot(ctx)
+}
+
+func (s *Server) CandidateInterviewsGetProposalSlots(ctx echo.Context, _ string) error {
+	return s.interview.GetProposalSlots(ctx)
+}
+
+func (s *Server) CandidateInterviewsCancelCandidateInterview(ctx echo.Context, _ string) error {
+	return s.interview.CancelInterview(ctx)
 }
