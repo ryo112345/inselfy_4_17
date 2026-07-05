@@ -121,10 +121,14 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		convRepo, msgRepo, participantRepo, tx,
 	))
 
-	interviewCtrl := httpcontroller.NewInterviewController(
-		pool,
-		convRepo, msgRepo, participantRepo, tx,
-	)
+	interviewCtrl := httpcontroller.NewInterviewController(usecase.NewInterviewInteractor(
+		sqlcgw.NewInterviewProposalRepository(pool),
+		sqlcgw.NewInterviewSlotRepository(pool),
+		sqlcgw.NewInterviewRepository(pool),
+		convRepo, msgRepo, participantRepo,
+		sqlcgw.NewInterviewQueryService(pool),
+		tx,
+	))
 
 	companyAuthCtrl := httpcontroller.NewCompanyAuthController(usecase.NewCompanyAuthInteractor(
 		sqlcgw.NewCompanyAccountRepository(pool),

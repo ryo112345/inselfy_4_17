@@ -74,4 +74,32 @@ type SelectSlotInput struct {
 	ProposalID  string
 	SlotID      string
 	CandidateID string
+	// StartTime/EndTime narrow the interview time within the selected slot.
+	// Both must be set to take effect; otherwise the slot's full range is used.
+	StartTime *time.Time
+	EndTime   *time.Time
+}
+
+type ProposeOutput struct {
+	Proposal             *Proposal
+	Slots                []*Slot
+	CancelledProposalIDs []string
+}
+
+// ProposalWithDetails is the read model for a candidate's pending proposal
+// list, enriched with company/job names for display.
+type ProposalWithDetails struct {
+	ID              string
+	CompanyName     string
+	JobTitle        string
+	Message         string
+	DurationMinutes int
+	Slots           []*Slot
+	ExpiresAt       time.Time
+	CreatedAt       time.Time
+}
+
+type PendingProposal struct {
+	ProposalID string
+	CreatedAt  time.Time
 }

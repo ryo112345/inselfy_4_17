@@ -13,6 +13,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
+	"github.com/akiyama/inselfy/backend/internal/domain/interview"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
@@ -25,7 +26,11 @@ import (
 
 func handleError(ctx echo.Context, err error) error {
 	switch {
-	case errors.Is(err, domainerr.ErrNotFound):
+	case errors.Is(err, domainerr.ErrNotFound),
+		errors.Is(err, interview.ErrProposalNotFound),
+		errors.Is(err, interview.ErrSlotNotFound),
+		errors.Is(err, interview.ErrInterviewNotFound),
+		errors.Is(err, interview.ErrApplicationNotFound):
 		return ctx.JSON(http.StatusNotFound, openapi.ModelsNotFoundError{
 			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
 			Message: err.Error(),
@@ -45,7 +50,8 @@ func handleError(ctx echo.Context, err error) error {
 	case errors.Is(err, port.ErrForbidden),
 		errors.Is(err, scout.ErrScoutingDisabled),
 		errors.Is(err, scout.ErrQualityRestricted),
-		errors.Is(err, scout.ErrNotOwner):
+		errors.Is(err, scout.ErrNotOwner),
+		errors.Is(err, interview.ErrNotProposalOwner):
 		return ctx.JSON(http.StatusForbidden, openapi.ModelsForbiddenError{
 			Code:    openapi.ModelsForbiddenErrorCodeFORBIDDEN,
 			Message: err.Error(),
@@ -126,6 +132,12 @@ func isBadRequest(err error) bool {
 		errors.Is(err, messaging.ErrBodyTooLong),
 		errors.Is(err, messaging.ErrSelfConversation),
 		errors.Is(err, messaging.ErrNotParticipant):
+		return true
+	case errors.Is(err, interview.ErrProposalNotPending),
+		errors.Is(err, interview.ErrProposalExpired),
+		errors.Is(err, interview.ErrSlotNotInProposal),
+		errors.Is(err, interview.ErrTimeOutsideSlot),
+		errors.Is(err, interview.ErrInterviewNotScheduled):
 		return true
 	case errors.Is(err, talentsearch.ErrTeamWVUnavailable),
 		errors.Is(err, talentsearch.ErrTeamCIUnavailable),
