@@ -14,6 +14,7 @@ tags:
   - name: Notifications
   - name: Follows
   - name: Auth
+  - name: CompanyAuth
 paths:
   /api/auth/google:
     post:
@@ -99,6 +100,120 @@ paths:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Auth
+  /api/company/auth/login:
+    post:
+      operationId: CompanyAuth_companyLogin
+      summary: Login as a company
+      description: 企業ログイン。成功時は HttpOnly cookie にトークンを設定し、企業情報を返す
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - CompanyAuth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CompanyLoginRequest'
+  /api/company/auth/logout:
+    post:
+      operationId: CompanyAuth_companyLogout
+      summary: Logout the company and clear auth cookies
+      description: ログアウト（認証 cookie を削除）
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+      tags:
+        - CompanyAuth
+  /api/company/auth/me:
+    get:
+      operationId: CompanyAuth_companyGetMe
+      summary: Get the authenticated company
+      description: ログイン中の企業情報取得
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+                  - $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CompanyAuth
+  /api/company/auth/refresh:
+    post:
+      operationId: CompanyAuth_companyRefreshToken
+      summary: Refresh the company access token via cookie
+      description: トークンリフレッシュ（company_refresh_token cookie 使用）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - CompanyAuth
+  /api/company/auth/register:
+    post:
+      operationId: CompanyAuth_companyRegister
+      summary: Register a company account
+      description: 企業アカウント登録
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Models.BadRequestError'
+                  - $ref: '#/components/schemas/Models.ConflictError'
+                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - CompanyAuth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CompanyRegisterRequest'
   /api/company/notifications:
     get:
       operationId: CompanyNotifications_listCompanyNotifications
@@ -1237,6 +1352,78 @@ components:
           type: string
         details: {}
       description: Bad Request エラー
+    Models.CompanyLoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: メールアドレス
+        password:
+          type: string
+          description: パスワード
+      description: 企業ログインリクエスト
+    Models.CompanyRegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - companyName
+        - contactPersonName
+        - phoneNumber
+      properties:
+        email:
+          type: string
+          description: メールアドレス
+        password:
+          type: string
+          description: パスワード
+        companyName:
+          type: string
+          description: 企業名
+        contactPersonName:
+          type: string
+          description: 担当者名
+        phoneNumber:
+          type: string
+          description: 電話番号
+      description: 企業アカウント登録リクエスト
+    Models.CompanyResponse:
+      type: object
+      required:
+        - id
+        - email
+        - companyName
+        - contactPersonName
+        - phoneNumber
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: 企業ID
+        email:
+          type: string
+          description: メールアドレス
+        companyName:
+          type: string
+          description: 企業名
+        contactPersonName:
+          type: string
+          description: 担当者名
+        phoneNumber:
+          type: string
+          description: 電話番号
+        status:
+          type: string
+          description: アカウントステータス
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 企業アカウント情報（トークンは HttpOnly cookie で返る）
     Models.ConflictError:
       type: object
       required:

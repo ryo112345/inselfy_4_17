@@ -8,6 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
@@ -25,13 +26,7 @@ func NewCompanyAuthController(
 }
 
 func (c *CompanyAuthController) Register(ctx echo.Context) error {
-	var body struct {
-		Email             string `json:"email"`
-		Password          string `json:"password"`
-		CompanyName       string `json:"companyName"`
-		ContactPersonName string `json:"contactPersonName"`
-		PhoneNumber       string `json:"phoneNumber"`
-	}
+	var body openapi.ModelsCompanyRegisterRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid request")
 	}
@@ -50,10 +45,7 @@ func (c *CompanyAuthController) Register(ctx echo.Context) error {
 }
 
 func (c *CompanyAuthController) Login(ctx echo.Context) error {
-	var body struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var body openapi.ModelsCompanyLoginRequest
 	if err := ctx.Bind(&body); err != nil || body.Email == "" || body.Password == "" {
 		return badRequest(ctx, "invalid request")
 	}
@@ -128,7 +120,7 @@ func setCompanyAuthCookies(ctx echo.Context, resp *presenter.CompanyAuthTokenRes
 			MaxAge:   604800,
 		})
 	}
-	setCookie("companyId", resp.Company.ID)
+	setCookie("companyId", resp.Company.Id)
 	setCookie("companyName", resp.Company.CompanyName)
 }
 

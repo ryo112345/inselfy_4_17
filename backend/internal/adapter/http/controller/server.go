@@ -19,6 +19,7 @@ type Server struct {
 	notification  *NotificationController
 	follow        *FollowController
 	auth          *AuthController
+	companyAuth   *CompanyAuthController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -36,6 +37,7 @@ func NewServer(
 	notification *NotificationController,
 	follow *FollowController,
 	auth *AuthController,
+	companyAuth *CompanyAuthController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -49,6 +51,7 @@ func NewServer(
 		notification:  notification,
 		follow:        follow,
 		auth:          auth,
+		companyAuth:   companyAuth,
 	}
 }
 
@@ -227,3 +230,25 @@ func (s *Server) AuthRefreshToken(ctx echo.Context) error { return s.auth.Refres
 func (s *Server) AuthLogout(ctx echo.Context) error { return s.auth.Logout(ctx) }
 
 func (s *Server) AuthGetMe(ctx echo.Context) error { return s.auth.GetMe(ctx) }
+
+// --- CompanyAuth ---
+
+func (s *Server) CompanyAuthCompanyRegister(ctx echo.Context) error {
+	return s.companyAuth.Register(ctx)
+}
+
+func (s *Server) CompanyAuthCompanyLogin(ctx echo.Context) error {
+	return s.companyAuth.Login(ctx)
+}
+
+func (s *Server) CompanyAuthCompanyRefreshToken(ctx echo.Context) error {
+	return s.companyAuth.Refresh(ctx)
+}
+
+func (s *Server) CompanyAuthCompanyLogout(ctx echo.Context) error {
+	return s.companyAuth.Logout(ctx)
+}
+
+func (s *Server) CompanyAuthCompanyGetMe(ctx echo.Context) error {
+	return s.companyAuth.GetMe(ctx)
+}

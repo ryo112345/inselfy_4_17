@@ -127,6 +127,57 @@ type ModelsBadRequestError struct {
 // ModelsBadRequestErrorCode defines model for ModelsBadRequestError.Code.
 type ModelsBadRequestErrorCode string
 
+// ModelsCompanyLoginRequest 企業ログインリクエスト
+type ModelsCompanyLoginRequest struct {
+	// Email メールアドレス
+	Email string `json:"email"`
+
+	// Password パスワード
+	Password string `json:"password"`
+}
+
+// ModelsCompanyRegisterRequest 企業アカウント登録リクエスト
+type ModelsCompanyRegisterRequest struct {
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// ContactPersonName 担当者名
+	ContactPersonName string `json:"contactPersonName"`
+
+	// Email メールアドレス
+	Email string `json:"email"`
+
+	// Password パスワード
+	Password string `json:"password"`
+
+	// PhoneNumber 電話番号
+	PhoneNumber string `json:"phoneNumber"`
+}
+
+// ModelsCompanyResponse 企業アカウント情報（トークンは HttpOnly cookie で返る）
+type ModelsCompanyResponse struct {
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// ContactPersonName 担当者名
+	ContactPersonName string `json:"contactPersonName"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Email メールアドレス
+	Email string `json:"email"`
+
+	// Id 企業ID
+	Id string `json:"id"`
+
+	// PhoneNumber 電話番号
+	PhoneNumber string `json:"phoneNumber"`
+
+	// Status アカウントステータス
+	Status string `json:"status"`
+}
+
 // ModelsConflictError Conflict エラー
 type ModelsConflictError struct {
 	Code    ModelsConflictErrorCode `json:"code"`
@@ -730,6 +781,12 @@ type FollowsListFollowingParams struct {
 // AuthGoogleLoginJSONRequestBody defines body for AuthGoogleLogin for application/json ContentType.
 type AuthGoogleLoginJSONRequestBody = ModelsGoogleLoginRequest
 
+// CompanyAuthCompanyLoginJSONRequestBody defines body for CompanyAuthCompanyLogin for application/json ContentType.
+type CompanyAuthCompanyLoginJSONRequestBody = ModelsCompanyLoginRequest
+
+// CompanyAuthCompanyRegisterJSONRequestBody defines body for CompanyAuthCompanyRegister for application/json ContentType.
+type CompanyAuthCompanyRegisterJSONRequestBody = ModelsCompanyRegisterRequest
+
 // ScoutTemplatesCreateScoutTemplateJSONRequestBody defines body for ScoutTemplatesCreateScoutTemplate for application/json ContentType.
 type ScoutTemplatesCreateScoutTemplateJSONRequestBody = ModelsCreateScoutTemplateRequest
 
@@ -777,6 +834,21 @@ type ServerInterface interface {
 	// Refresh the access token via cookie
 	// (POST /api/auth/refresh)
 	AuthRefreshToken(ctx echo.Context) error
+	// Login as a company
+	// (POST /api/company/auth/login)
+	CompanyAuthCompanyLogin(ctx echo.Context) error
+	// Logout the company and clear auth cookies
+	// (POST /api/company/auth/logout)
+	CompanyAuthCompanyLogout(ctx echo.Context) error
+	// Get the authenticated company
+	// (GET /api/company/auth/me)
+	CompanyAuthCompanyGetMe(ctx echo.Context) error
+	// Refresh the company access token via cookie
+	// (POST /api/company/auth/refresh)
+	CompanyAuthCompanyRefreshToken(ctx echo.Context) error
+	// Register a company account
+	// (POST /api/company/auth/register)
+	CompanyAuthCompanyRegister(ctx echo.Context) error
 	// List notifications for the authenticated company
 	// (GET /api/company/notifications)
 	CompanyNotificationsListCompanyNotifications(ctx echo.Context, params CompanyNotificationsListCompanyNotificationsParams) error
@@ -928,6 +1000,51 @@ func (w *ServerInterfaceWrapper) AuthRefreshToken(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AuthRefreshToken(ctx)
+	return err
+}
+
+// CompanyAuthCompanyLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyAuthCompanyLogin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyAuthCompanyLogin(ctx)
+	return err
+}
+
+// CompanyAuthCompanyLogout converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyAuthCompanyLogout(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyAuthCompanyLogout(ctx)
+	return err
+}
+
+// CompanyAuthCompanyGetMe converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyAuthCompanyGetMe(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyAuthCompanyGetMe(ctx)
+	return err
+}
+
+// CompanyAuthCompanyRefreshToken converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyAuthCompanyRefreshToken(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyAuthCompanyRefreshToken(ctx)
+	return err
+}
+
+// CompanyAuthCompanyRegister converts echo context to params.
+func (w *ServerInterfaceWrapper) CompanyAuthCompanyRegister(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CompanyAuthCompanyRegister(ctx)
 	return err
 }
 
@@ -1591,6 +1708,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/auth/logout", wrapper.AuthLogout)
 	router.GET(baseURL+"/api/auth/me", wrapper.AuthGetMe)
 	router.POST(baseURL+"/api/auth/refresh", wrapper.AuthRefreshToken)
+	router.POST(baseURL+"/api/company/auth/login", wrapper.CompanyAuthCompanyLogin)
+	router.POST(baseURL+"/api/company/auth/logout", wrapper.CompanyAuthCompanyLogout)
+	router.GET(baseURL+"/api/company/auth/me", wrapper.CompanyAuthCompanyGetMe)
+	router.POST(baseURL+"/api/company/auth/refresh", wrapper.CompanyAuthCompanyRefreshToken)
+	router.POST(baseURL+"/api/company/auth/register", wrapper.CompanyAuthCompanyRegister)
 	router.GET(baseURL+"/api/company/notifications", wrapper.CompanyNotificationsListCompanyNotifications)
 	router.POST(baseURL+"/api/company/notifications/read-all", wrapper.CompanyNotificationsMarkAllCompanyNotificationsRead)
 	router.GET(baseURL+"/api/company/notifications/unread-count", wrapper.CompanyNotificationsCountCompanyUnreadNotifications)

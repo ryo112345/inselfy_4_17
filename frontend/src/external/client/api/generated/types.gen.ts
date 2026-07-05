@@ -54,6 +54,80 @@ export type ModelsBadRequestError = {
 };
 
 /**
+ * 企業ログインリクエスト
+ */
+export type ModelsCompanyLoginRequest = {
+    /**
+     * メールアドレス
+     */
+    email: string;
+    /**
+     * パスワード
+     */
+    password: string;
+};
+
+/**
+ * 企業アカウント登録リクエスト
+ */
+export type ModelsCompanyRegisterRequest = {
+    /**
+     * メールアドレス
+     */
+    email: string;
+    /**
+     * パスワード
+     */
+    password: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 担当者名
+     */
+    contactPersonName: string;
+    /**
+     * 電話番号
+     */
+    phoneNumber: string;
+};
+
+/**
+ * 企業アカウント情報（トークンは HttpOnly cookie で返る）
+ */
+export type ModelsCompanyResponse = {
+    /**
+     * 企業ID
+     */
+    id: string;
+    /**
+     * メールアドレス
+     */
+    email: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 担当者名
+     */
+    contactPersonName: string;
+    /**
+     * 電話番号
+     */
+    phoneNumber: string;
+    /**
+     * アカウントステータス
+     */
+    status: string;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
  * Conflict エラー
  */
 export type ModelsConflictError = {
@@ -933,6 +1007,122 @@ export type AuthRefreshTokenResponses = {
 };
 
 export type AuthRefreshTokenResponse = AuthRefreshTokenResponses[keyof AuthRefreshTokenResponses];
+
+export type CompanyAuthCompanyLoginData = {
+    body: ModelsCompanyLoginRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/auth/login';
+};
+
+export type CompanyAuthCompanyLoginErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsUnauthorizedError;
+};
+
+export type CompanyAuthCompanyLoginError = CompanyAuthCompanyLoginErrors[keyof CompanyAuthCompanyLoginErrors];
+
+export type CompanyAuthCompanyLoginResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCompanyResponse;
+};
+
+export type CompanyAuthCompanyLoginResponse = CompanyAuthCompanyLoginResponses[keyof CompanyAuthCompanyLoginResponses];
+
+export type CompanyAuthCompanyLogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/auth/logout';
+};
+
+export type CompanyAuthCompanyLogoutResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CompanyAuthCompanyLogoutResponse = CompanyAuthCompanyLogoutResponses[keyof CompanyAuthCompanyLogoutResponses];
+
+export type CompanyAuthCompanyGetMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/auth/me';
+};
+
+export type CompanyAuthCompanyGetMeErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsUnauthorizedError | ModelsNotFoundError;
+};
+
+export type CompanyAuthCompanyGetMeError = CompanyAuthCompanyGetMeErrors[keyof CompanyAuthCompanyGetMeErrors];
+
+export type CompanyAuthCompanyGetMeResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCompanyResponse;
+};
+
+export type CompanyAuthCompanyGetMeResponse = CompanyAuthCompanyGetMeResponses[keyof CompanyAuthCompanyGetMeResponses];
+
+export type CompanyAuthCompanyRefreshTokenData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/company/auth/refresh';
+};
+
+export type CompanyAuthCompanyRefreshTokenErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsUnauthorizedError;
+};
+
+export type CompanyAuthCompanyRefreshTokenError = CompanyAuthCompanyRefreshTokenErrors[keyof CompanyAuthCompanyRefreshTokenErrors];
+
+export type CompanyAuthCompanyRefreshTokenResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsCompanyResponse;
+};
+
+export type CompanyAuthCompanyRefreshTokenResponse = CompanyAuthCompanyRefreshTokenResponses[keyof CompanyAuthCompanyRefreshTokenResponses];
+
+export type CompanyAuthCompanyRegisterData = {
+    body: ModelsCompanyRegisterRequest;
+    path?: never;
+    query?: never;
+    url: '/api/company/auth/register';
+};
+
+export type CompanyAuthCompanyRegisterErrors = {
+    /**
+     * An unexpected error response.
+     */
+    default: ModelsBadRequestError | ModelsConflictError | ModelsUnauthorizedError;
+};
+
+export type CompanyAuthCompanyRegisterError = CompanyAuthCompanyRegisterErrors[keyof CompanyAuthCompanyRegisterErrors];
+
+export type CompanyAuthCompanyRegisterResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsCompanyResponse;
+};
+
+export type CompanyAuthCompanyRegisterResponse = CompanyAuthCompanyRegisterResponses[keyof CompanyAuthCompanyRegisterResponses];
 
 export type CompanyNotificationsListCompanyNotificationsData = {
     body?: never;
