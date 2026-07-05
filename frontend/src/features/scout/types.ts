@@ -74,21 +74,6 @@ export interface ScoutSettings {
   updatedAt: string;
 }
 
-export interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  body: string;
-  referenceId: string | null;
-  isRead: boolean;
-  createdAt: string;
-}
-
-export interface NotificationListResponse {
-  items: Notification[];
-  total: number;
-}
-
 export interface ScoutDashboard {
   credits: {
     balance: number;

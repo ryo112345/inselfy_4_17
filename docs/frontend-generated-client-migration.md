@@ -117,8 +117,8 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 | # | 状態 | 項目（ファイル） | EP数 | 主な注意点 |
 |---|------|------------------|------|-----------|
 | 1 | [x] | similar-users: `app/profile/[username]/SimilarUsersCard.tsx` | 1 | `data.users ?? []` フォールバック維持 |
-| 2 | [ ] | setup: `app/setup/page.tsx` | 1 | users 系 |
-| 3 | [ ] | notifications: `features/notifications/api.ts` | 3 | 204系 |
+| 2 | [x] | setup: `app/setup/page.tsx` | 1 | users 系 |
+| 3 | [x] | notifications: `features/notifications/api.ts` | 3 | 移行ではなく**削除**（importゼロの死にコードだった。孤児化した scout/types.ts の Notification 2型も削除） |
 | 4 | [ ] | messaging: `features/messaging/api.ts`, `unread-context.tsx` | 5 | useWebSocket.ts は触らない |
 | 5 | [ ] | team-diagnose: `app/diagnose/[token]/page.tsx` | 2 | |
 | 6 | [ ] | timeline/posts: `features/timeline/api.ts` | 7 | クエリ文字列組み立てを query オプションへ |
