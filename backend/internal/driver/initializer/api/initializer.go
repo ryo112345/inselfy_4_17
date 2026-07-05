@@ -402,7 +402,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	talentGroup.GET("/search/diagnostic/integrated", talentCtrl.IntegratedDiagnosticSearch)
 
 	// --- Saved Candidates ---
-	savedCandCtrl := httpcontroller.NewSavedCandidateController(pool)
+	savedCandCtrl := httpcontroller.NewSavedCandidateController(
+		usecase.NewSavedCandidateInteractor(sqlcgw.NewSavedCandidateRepository(pool), sqlcgw.NewSavedCandidateQueryService(pool)),
+	)
 	savedCandGroup := e.Group("/api/company/saved-candidates", companyJwtMW)
 	savedCandGroup.GET("", savedCandCtrl.List)
 	savedCandGroup.GET("/count", savedCandCtrl.Count)
