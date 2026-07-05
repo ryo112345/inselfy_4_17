@@ -23,6 +23,7 @@ import "./models/messaging.tsp";
 import "./models/article.tsp";
 import "./models/company-profile.tsp";
 import "./models/talent.tsp";
+import "./models/company-team.tsp";
 import "./routes/users.tsp";
 import "./routes/experiences.tsp";
 import "./routes/educations.tsp";
@@ -46,6 +47,7 @@ import "./routes/articles.tsp";
 import "./routes/company-profile.tsp";
 import "./routes/saved-candidates.tsp";
 import "./routes/talent-search.tsp";
+import "./routes/company-teams.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
