@@ -1,3 +1,26 @@
+import "@/external/client/api/client";
+import {
+  candidateScoutsBulkDeclineScouts,
+  candidateScoutsBulkRespondScouts,
+  candidateScoutsCandidateScoutReply,
+  candidateScoutsGetCandidateScoutDetail,
+  candidateScoutsListCandidateScouts,
+  candidateScoutsRespondToScout,
+  companyScoutsCompanyScoutReply,
+  companyScoutsGetCompanyScoutDetail,
+  companyScoutsGetScoutCredits,
+  companyScoutsGetScoutDashboard,
+  companyScoutsGetScoutQuality,
+  companyScoutsListCompanyScouts,
+  companyScoutsSendScout,
+  scoutSettingsGetScoutSettings,
+  scoutSettingsUpdateScoutSettings,
+  scoutTemplatesCreateScoutTemplate,
+  scoutTemplatesDeleteScoutTemplate,
+  scoutTemplatesGetScoutTemplate,
+  scoutTemplatesListScoutTemplates,
+  scoutTemplatesUpdateScoutTemplate,
+} from "@/external/client/api/generated";
 import type {
   ScoutDashboard,
   ScoutDetail,
@@ -9,11 +32,6 @@ import type {
   ScoutTemplate,
 } from "./types";
 
-const BASE_URL =
-  typeof window === "undefined"
-    ? process.env.INTERNAL_API_URL ?? "http://localhost:8081"
-    : "";
-
 // ---------------------------------------------------------------------------
 // Company-side
 // ---------------------------------------------------------------------------
@@ -24,17 +42,11 @@ export async function sendScout(body: {
   subject: string;
   body: string;
 }): Promise<ScoutMessage> {
-  const res = await fetch(`${BASE_URL}/api/company/scouts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to send scout");
+  const { data, error } = await companyScoutsSendScout({ body });
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to send scout");
   }
-  return res.json();
+  return data as ScoutMessage;
 }
 
 export async function fetchCompanyScouts(params?: {
@@ -42,71 +54,64 @@ export async function fetchCompanyScouts(params?: {
   limit?: number;
   offset?: number;
 }): Promise<ScoutListResponse> {
-  const sp = new URLSearchParams();
-  if (params?.status) sp.set("status", params.status);
-  if (params?.limit != null) sp.set("limit", String(params.limit));
-  if (params?.offset != null) sp.set("offset", String(params.offset));
-  const qs = sp.toString();
-  const res = await fetch(
-    `${BASE_URL}/api/company/scouts${qs ? `?${qs}` : ""}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) throw new Error("Failed to fetch company scouts");
-  return res.json();
+  const { data, error } = await companyScoutsListCompanyScouts({
+    query: {
+      status: params?.status || undefined,
+      limit: params?.limit ?? undefined,
+      offset: params?.offset ?? undefined,
+    },
+    cache: "no-store",
+  });
+  if (error || !data) throw new Error("Failed to fetch company scouts");
+  return data as ScoutListResponse;
 }
 
 export async function fetchScoutDetail(
   scoutId: string,
 ): Promise<ScoutDetail> {
-  const res = await fetch(`${BASE_URL}/api/company/scouts/${scoutId}`, {
+  const { data, error } = await companyScoutsGetCompanyScoutDetail({
+    path: { scoutId },
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to fetch scout detail");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch scout detail");
+  return data as ScoutDetail;
 }
 
 export async function replyToScoutAsCompany(
   scoutId: string,
   body: string,
 ): Promise<void> {
-  const res = await fetch(
-    `${BASE_URL}/api/company/scouts/${scoutId}/reply`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ body }),
-    },
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to reply to scout");
+  const { error } = await companyScoutsCompanyScoutReply({
+    path: { scoutId },
+    body: { body },
+  });
+  if (error) {
+    throw new Error(error.message ?? "Failed to reply to scout");
   }
 }
 
 export async function fetchScoutDashboard(): Promise<ScoutDashboard> {
-  const res = await fetch(`${BASE_URL}/api/company/scouts/dashboard`, {
+  const { data, error } = await companyScoutsGetScoutDashboard({
     cache: "no-store",
-    credentials: "include",
   });
-  if (!res.ok) throw new Error("Failed to fetch scout dashboard");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch scout dashboard");
+  return data;
 }
 
 export async function fetchCredits(): Promise<ScoutCredits> {
-  const res = await fetch(`${BASE_URL}/api/company/scouts/credits`, {
+  const { data, error } = await companyScoutsGetScoutCredits({
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to fetch credits");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch credits");
+  return data;
 }
 
 export async function fetchQualityScore(): Promise<QualityScore> {
-  const res = await fetch(`${BASE_URL}/api/company/scouts/quality`, {
+  const { data, error } = await companyScoutsGetScoutQuality({
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to fetch quality score");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch quality score");
+  return data as QualityScore;
 }
 
 // ---------------------------------------------------------------------------
@@ -117,73 +122,63 @@ export async function fetchReceivedScouts(params?: {
   limit?: number;
   offset?: number;
 }): Promise<ScoutListResponse> {
-  const sp = new URLSearchParams();
-  if (params?.limit != null) sp.set("limit", String(params.limit));
-  if (params?.offset != null) sp.set("offset", String(params.offset));
-  const qs = sp.toString();
-  const res = await fetch(
-    `${BASE_URL}/api/scouts${qs ? `?${qs}` : ""}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) throw new Error("Failed to fetch received scouts");
-  return res.json();
+  const { data, error } = await candidateScoutsListCandidateScouts({
+    query: {
+      limit: params?.limit ?? undefined,
+      offset: params?.offset ?? undefined,
+    },
+    cache: "no-store",
+  });
+  if (error || !data) throw new Error("Failed to fetch received scouts");
+  return data as ScoutListResponse;
 }
 
 export async function fetchReceivedScoutDetail(
   scoutId: string,
 ): Promise<ScoutDetail> {
-  const res = await fetch(`${BASE_URL}/api/scouts/${scoutId}`, {
+  const { data, error } = await candidateScoutsGetCandidateScoutDetail({
+    path: { scoutId },
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to fetch scout detail");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch scout detail");
+  return data as ScoutDetail;
 }
 
 export async function respondToScout(
   scoutId: string,
   response: "interested" | "declined",
 ): Promise<{ conversationId?: string }> {
-  const res = await fetch(`${BASE_URL}/api/scouts/${scoutId}/respond`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ response }),
+  const { data, error } = await candidateScoutsRespondToScout({
+    path: { scoutId },
+    body: { response },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to respond to scout");
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to respond to scout");
   }
-  return res.json();
+  return data;
 }
 
 export async function replyToScout(
   scoutId: string,
   body: string,
 ): Promise<void> {
-  const res = await fetch(`${BASE_URL}/api/scouts/${scoutId}/reply`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ body }),
+  const { error } = await candidateScoutsCandidateScoutReply({
+    path: { scoutId },
+    body: { body },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to reply to scout");
+  if (error) {
+    throw new Error(error.message ?? "Failed to reply to scout");
   }
 }
 
 export async function bulkDeclineScouts(
   scoutIds: string[],
 ): Promise<void> {
-  const res = await fetch(`${BASE_URL}/api/scouts/bulk-decline`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ scoutIds }),
+  const { error } = await candidateScoutsBulkDeclineScouts({
+    body: { scoutIds },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to bulk decline scouts");
+  if (error) {
+    throw new Error(error.message ?? "Failed to bulk decline scouts");
   }
 }
 
@@ -191,15 +186,11 @@ export async function bulkRespondScouts(
   scoutIds: string[],
   response: "interested" | "declined",
 ): Promise<void> {
-  const res = await fetch(`${BASE_URL}/api/scouts/bulk-respond`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ scoutIds, response }),
+  const { error } = await candidateScoutsBulkRespondScouts({
+    body: { scoutIds, response },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to bulk respond to scouts");
+  if (error) {
+    throw new Error(error.message ?? "Failed to bulk respond to scouts");
   }
 }
 
@@ -208,27 +199,23 @@ export async function bulkRespondScouts(
 // ---------------------------------------------------------------------------
 
 export async function fetchScoutSettings(): Promise<ScoutSettings> {
-  const res = await fetch(`${BASE_URL}/api/scout-settings`, {
+  const { data, error } = await scoutSettingsGetScoutSettings({
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to fetch scout settings");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch scout settings");
+  return data;
 }
 
 export async function updateScoutSettings(
   acceptingScouts: boolean,
 ): Promise<ScoutSettings> {
-  const res = await fetch(`${BASE_URL}/api/scout-settings`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ acceptingScouts }),
+  const { data, error } = await scoutSettingsUpdateScoutSettings({
+    body: { acceptingScouts },
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to update scout settings");
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to update scout settings");
   }
-  return res.json();
+  return data;
 }
 
 // ---------------------------------------------------------------------------
@@ -236,11 +223,11 @@ export async function updateScoutSettings(
 // ---------------------------------------------------------------------------
 
 export async function fetchTemplates(): Promise<ScoutTemplate[]> {
-  const res = await fetch(`${BASE_URL}/api/company/scout-templates`, {
+  const { data, error } = await scoutTemplatesListScoutTemplates({
     cache: "no-store",
   });
-  if (!res.ok) throw new Error("Failed to fetch templates");
-  return res.json();
+  if (error || !data) throw new Error("Failed to fetch templates");
+  return data;
 }
 
 export async function createTemplate(body: {
@@ -248,55 +235,39 @@ export async function createTemplate(body: {
   subject: string;
   body: string;
 }): Promise<ScoutTemplate> {
-  const res = await fetch(`${BASE_URL}/api/company/scout-templates`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to create template");
+  const { data, error } = await scoutTemplatesCreateScoutTemplate({ body });
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to create template");
   }
-  return res.json();
+  return data;
 }
 
 export async function fetchTemplate(id: string): Promise<ScoutTemplate> {
-  const res = await fetch(
-    `${BASE_URL}/api/company/scout-templates/${id}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) throw new Error("Failed to fetch template");
-  return res.json();
+  const { data, error } = await scoutTemplatesGetScoutTemplate({
+    path: { templateId: id },
+    cache: "no-store",
+  });
+  if (error || !data) throw new Error("Failed to fetch template");
+  return data;
 }
 
 export async function updateTemplate(
   id: string,
-  body: { name?: string; subject?: string; body?: string },
+  body: { name: string; subject: string; body: string },
 ): Promise<ScoutTemplate> {
-  const res = await fetch(
-    `${BASE_URL}/api/company/scout-templates/${id}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(body),
-    },
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to update template");
+  const { data, error } = await scoutTemplatesUpdateScoutTemplate({
+    path: { templateId: id },
+    body,
+  });
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to update template");
   }
-  return res.json();
+  return data;
 }
 
 export async function deleteTemplate(id: string): Promise<void> {
-  const res = await fetch(
-    `${BASE_URL}/api/company/scout-templates/${id}`,
-    {
-      method: "DELETE",
-      credentials: "include",
-    },
-  );
-  if (!res.ok) throw new Error("Failed to delete template");
+  const { error } = await scoutTemplatesDeleteScoutTemplate({
+    path: { templateId: id },
+  });
+  if (error) throw new Error("Failed to delete template");
 }
