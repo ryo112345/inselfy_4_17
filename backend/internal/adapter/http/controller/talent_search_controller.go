@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -18,29 +19,6 @@ type TalentSearchController struct {
 
 func NewTalentSearchController(input port.TalentSearchInputPort) *TalentSearchController {
 	return &TalentSearchController{input: input}
-}
-
-type talentCard struct {
-	UserID           string      `json:"user_id"`
-	Username         string      `json:"username"`
-	Name             string      `json:"name"`
-	Headline         *string     `json:"headline"`
-	AvatarURL        *string     `json:"avatar_url"`
-	ProfileColor     *string     `json:"profile_color"`
-	JobSeekingStatus *string     `json:"job_seeking_status"`
-	Skills           []string    `json:"skills"`
-	Experiences      []talentExp `json:"experiences"`
-	TopWVLabels      []string    `json:"top_wv_labels"`
-	TopCILabels      []string    `json:"top_ci_labels"`
-	Similarity       *float64    `json:"similarity,omitempty"`
-	WVSimilarity     *float64    `json:"wv_similarity,omitempty"`
-	CISimilarity     *float64    `json:"ci_similarity,omitempty"`
-	IntSimilarity    *float64    `json:"integrated_similarity,omitempty"`
-}
-
-type talentExp struct {
-	CompanyName string `json:"company_name"`
-	Title       string `json:"title"`
 }
 
 func talentSearchPage(ctx echo.Context) (limit, offset int) {
@@ -109,14 +87,7 @@ func parseCustomCIWeights(ctx echo.Context) *[6]float64 {
 }
 
 func talentCardListResponse(ctx echo.Context, cards []talentsearch.Card, total int) error {
-	users := make([]talentCard, len(cards))
-	for i, card := range cards {
-		users[i] = toTalentCardResponse(card)
-	}
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"users": users,
-		"total": total,
-	})
+	return ctx.JSON(http.StatusOK, presenter.TalentListResponse(cards, total))
 }
 
 func diagnosticSearchInput(ctx echo.Context) talentsearch.DiagnosticSearchInput {

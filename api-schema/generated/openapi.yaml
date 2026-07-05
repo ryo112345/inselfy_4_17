@@ -24,6 +24,8 @@ tags:
   - name: Messaging
   - name: Articles
   - name: CompanyProfile
+  - name: SavedCandidates
+  - name: TalentSearch
 paths:
   /api/applications:
     post:
@@ -1434,6 +1436,159 @@ paths:
                 $ref: '#/components/schemas/Models.BadRequestError'
       tags:
         - CompanyProfile
+  /api/company/saved-candidates:
+    get:
+      operationId: SavedCandidates_listSavedCandidates
+      summary: List saved candidates
+      description: 保存済み候補者一覧（企業認証）
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数（1-100、デフォルト20）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TalentListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - SavedCandidates
+  /api/company/saved-candidates/bulk-check:
+    post:
+      operationId: SavedCandidates_bulkCheckSaved
+      summary: Bulk-check whether candidates are saved
+      description: 保存済み一括チェック（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BulkSavedResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - SavedCandidates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.BulkCheckSavedRequest'
+  /api/company/saved-candidates/count:
+    get:
+      operationId: SavedCandidates_countSavedCandidates
+      summary: Count saved candidates
+      description: 保存済み候補者数（企業認証）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SavedCountResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - SavedCandidates
+  /api/company/saved-candidates/{userId}:
+    post:
+      operationId: SavedCandidates_saveCandidate
+      summary: Save a candidate
+      description: 候補者を保存（企業認証）
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - SavedCandidates
+    delete:
+      operationId: SavedCandidates_unsaveCandidate
+      summary: Unsave a candidate
+      description: 候補者の保存を解除（企業認証）
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - SavedCandidates
+    get:
+      operationId: SavedCandidates_isCandidateSaved
+      summary: Check whether a candidate is saved
+      description: 保存済みか確認（企業認証）
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SavedResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - SavedCandidates
   /api/company/scout-templates:
     post:
       operationId: ScoutTemplates_createScoutTemplate
@@ -1761,6 +1916,342 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CompanyScoutReplyRequest'
+  /api/company/talents/search:
+    get:
+      operationId: TalentSearch_searchTalents
+      summary: Search talents by conditions
+      description: 条件検索（企業認証）
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: フリーワード
+          schema:
+            type: string
+          explode: false
+        - name: location
+          in: query
+          required: false
+          description: 居住地
+          schema:
+            type: string
+          explode: false
+        - name: industry
+          in: query
+          required: false
+          description: 業界
+          schema:
+            type: string
+          explode: false
+        - name: job_seeking_status
+          in: query
+          required: false
+          description: 求職ステータス
+          schema:
+            type: string
+          explode: false
+        - name: job_type
+          in: query
+          required: false
+          description: 職種
+          schema:
+            type: string
+          explode: false
+        - name: diagnosed
+          in: query
+          required: false
+          description: 診断済みのみ（"1" で有効）
+          schema:
+            type: string
+          explode: false
+        - name: skills
+          in: query
+          required: false
+          description: スキル（カンマ区切り）
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数（1-200、デフォルト20）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TalentListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - TalentSearch
+  /api/company/talents/search/diagnostic:
+    get:
+      operationId: TalentSearch_diagnosticSearchTalents
+      summary: Search talents by work-values similarity
+      description: Work Values 診断マッチング検索（企業認証）。`wv_<valueId>` カスタム重み対応
+      parameters:
+        - name: team_id
+          in: query
+          required: false
+          description: 比較対象チームID
+          schema:
+            type: string
+          explode: false
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: industry
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: job_seeking_status
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: job_type
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: diagnosed
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: skills
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TalentListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - TalentSearch
+  /api/company/talents/search/diagnostic/ci:
+    get:
+      operationId: TalentSearch_ciDiagnosticSearchTalents
+      summary: Search talents by career-interest similarity
+      description: Career Interest 診断マッチング検索（企業認証）。`ci_<typeId>` カスタム重み対応
+      parameters:
+        - name: team_id
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: industry
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: job_seeking_status
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: job_type
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: diagnosed
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: skills
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TalentListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - TalentSearch
+  /api/company/talents/search/diagnostic/integrated:
+    get:
+      operationId: TalentSearch_integratedDiagnosticSearchTalents
+      summary: Search talents by integrated similarity
+      description: 統合診断マッチング検索（企業認証）。`wv_*` / `ci_*` カスタム重み対応
+      parameters:
+        - name: team_id
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: industry
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: job_seeking_status
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: job_type
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: diagnosed
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: skills
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.TalentListResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+      tags:
+        - TalentSearch
   /api/messages/conversations:
     post:
       operationId: CandidateMessaging_startCandidateConversation
@@ -3676,6 +4167,17 @@ components:
           type: string
         details: {}
       description: Bad Request エラー
+    Models.BulkCheckSavedRequest:
+      type: object
+      required:
+        - user_ids
+      properties:
+        user_ids:
+          type: array
+          items:
+            type: string
+          description: ユーザーID一覧
+      description: 保存済み候補者一括チェックリクエスト
     Models.BulkDeclineRequest:
       type: object
       required:
@@ -3702,6 +4204,17 @@ components:
           type: string
           description: 応答種別（interested / declined）
       description: スカウト一括応答リクエスト
+    Models.BulkSavedResponse:
+      type: object
+      required:
+        - saved
+      properties:
+        saved:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: 判定結果
+      description: 保存済み一括判定（ユーザーID → 保存済みか）
     Models.CIBasicScoreResponse:
       type: object
       required:
@@ -5075,6 +5588,24 @@ components:
           type: integer
           description: リポスト数
       description: リポストトグル結果
+    Models.SavedCountResponse:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          description: 件数
+      description: 保存済み候補者数
+    Models.SavedResponse:
+      type: object
+      required:
+        - saved
+      properties:
+        saved:
+          type: boolean
+          description: 保存済みか
+      description: 保存済み判定
     Models.ScoutCreditsResponse:
       type: object
       required:
@@ -5603,6 +6134,111 @@ components:
           type: string
           description: 処理結果（"ok"）
       description: 汎用 OK レスポンス
+    Models.TalentCard:
+      type: object
+      required:
+        - user_id
+        - username
+        - name
+        - headline
+        - avatar_url
+        - profile_color
+        - job_seeking_status
+        - skills
+        - experiences
+        - top_wv_labels
+        - top_ci_labels
+      properties:
+        user_id:
+          type: string
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        headline:
+          type: string
+          nullable: true
+          description: ヘッドライン
+        avatar_url:
+          type: string
+          nullable: true
+          description: アバター画像URL
+        profile_color:
+          type: string
+          nullable: true
+          description: プロフィールカラー
+        job_seeking_status:
+          type: string
+          nullable: true
+          description: 求職ステータス
+        skills:
+          type: array
+          items:
+            type: string
+          description: スキル
+        experiences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.TalentExperience'
+          description: 職歴
+        top_wv_labels:
+          type: array
+          items:
+            type: string
+          description: Work Values 上位ラベル
+        top_ci_labels:
+          type: array
+          items:
+            type: string
+          description: Career Interest 上位ラベル
+        similarity:
+          type: number
+          format: double
+          description: 類似度
+        wv_similarity:
+          type: number
+          format: double
+          description: Work Values 類似度
+        ci_similarity:
+          type: number
+          format: double
+          description: Career Interest 類似度
+        integrated_similarity:
+          type: number
+          format: double
+          description: 統合類似度
+      description: 人材カード（検索・保存済み候補者で共通）
+    Models.TalentExperience:
+      type: object
+      required:
+        - company_name
+        - title
+      properties:
+        company_name:
+          type: string
+          description: 会社名
+        title:
+          type: string
+          description: 役職
+      description: 人材カードの職歴（要約）
+    Models.TalentListResponse:
+      type: object
+      required:
+        - users
+        - total
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.TalentCard'
+          description: 人材カード
+        total:
+          type: integer
+          description: 総件数
+      description: 人材一覧
     Models.UnauthorizedError:
       type: object
       required:

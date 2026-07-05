@@ -29,6 +29,8 @@ type Server struct {
 	messaging     *MessagingController
 	article       *ArticleController
 	companyProf   *CompanyProfileController
+	savedCand     *SavedCandidateController
+	talentSearch  *TalentSearchController
 }
 
 var _ openapi.ServerInterface = (*Server)(nil)
@@ -56,6 +58,8 @@ func NewServer(
 	messaging *MessagingController,
 	article *ArticleController,
 	companyProf *CompanyProfileController,
+	savedCand *SavedCandidateController,
+	talentSearch *TalentSearchController,
 ) *Server {
 	return &Server{
 		user:          user,
@@ -79,6 +83,8 @@ func NewServer(
 		messaging:     messaging,
 		article:       article,
 		companyProf:   companyProf,
+		savedCand:     savedCand,
+		talentSearch:  talentSearch,
 	}
 }
 
@@ -576,4 +582,48 @@ func (s *Server) CompanyProfilesUploadCompanyProfileImage(ctx echo.Context, _ op
 
 func (s *Server) CompanyProfilesDeleteCompanyProfileImage(ctx echo.Context, _ openapi.CompanyProfilesDeleteCompanyProfileImageParams) error {
 	return s.companyProf.DeleteImage(ctx)
+}
+
+// --- SavedCandidates ---
+
+func (s *Server) SavedCandidatesListSavedCandidates(ctx echo.Context, _ openapi.SavedCandidatesListSavedCandidatesParams) error {
+	return s.savedCand.List(ctx)
+}
+
+func (s *Server) SavedCandidatesCountSavedCandidates(ctx echo.Context) error {
+	return s.savedCand.Count(ctx)
+}
+
+func (s *Server) SavedCandidatesBulkCheckSaved(ctx echo.Context) error {
+	return s.savedCand.BulkCheck(ctx)
+}
+
+func (s *Server) SavedCandidatesSaveCandidate(ctx echo.Context, _ string) error {
+	return s.savedCand.Save(ctx)
+}
+
+func (s *Server) SavedCandidatesUnsaveCandidate(ctx echo.Context, _ string) error {
+	return s.savedCand.Unsave(ctx)
+}
+
+func (s *Server) SavedCandidatesIsCandidateSaved(ctx echo.Context, _ string) error {
+	return s.savedCand.IsSaved(ctx)
+}
+
+// --- TalentSearch ---
+
+func (s *Server) TalentSearchSearchTalents(ctx echo.Context, _ openapi.TalentSearchSearchTalentsParams) error {
+	return s.talentSearch.Search(ctx)
+}
+
+func (s *Server) TalentSearchDiagnosticSearchTalents(ctx echo.Context, _ openapi.TalentSearchDiagnosticSearchTalentsParams) error {
+	return s.talentSearch.DiagnosticSearch(ctx)
+}
+
+func (s *Server) TalentSearchCiDiagnosticSearchTalents(ctx echo.Context, _ openapi.TalentSearchCiDiagnosticSearchTalentsParams) error {
+	return s.talentSearch.CIDiagnosticSearch(ctx)
+}
+
+func (s *Server) TalentSearchIntegratedDiagnosticSearchTalents(ctx echo.Context, _ openapi.TalentSearchIntegratedDiagnosticSearchTalentsParams) error {
+	return s.talentSearch.IntegratedDiagnosticSearch(ctx)
 }
