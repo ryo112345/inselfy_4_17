@@ -33,6 +33,8 @@
 | `src/features/company-auth/company-auth-context.tsx` | 同上 |
 | `src/app/profile/[username]/page.tsx` の `getCurrentUsername`（auth/me + refresh 部分のみ） | 認証プラミング。同上の理由で手書き維持 |
 | `src/features/messaging/useWebSocket.ts` | WebSocket（ws_controller はスペック対象外）。`/api/ws/ticket` もスペック未収載 |
+| `src/features/messaging/unread-context.tsx` | ⚠️ ルートレイアウトに無条件マウントされ、未ログイン訪問者の unread-count 401 が正常系（401インターセプタの罠） |
+| `src/features/scout/unread-context.tsx` | 同上（ルートレイアウトの UnreadScoutProvider が `/api/scouts` を未ログインでも叩く） |
 | `src/external/client/api/client.ts` 内の refresh fetch | インターセプタ自身の実装 |
 
 ## 前提知識
@@ -119,7 +121,7 @@ profile/api.ts の `run()`/`unwrap()` ヘルパーのパターンを踏襲して
 | 1 | [x] | similar-users: `app/profile/[username]/SimilarUsersCard.tsx` | 1 | `data.users ?? []` フォールバック維持 |
 | 2 | [x] | setup: `app/setup/page.tsx` | 1 | users 系 |
 | 3 | [x] | notifications: `features/notifications/api.ts` | 3 | 移行ではなく**削除**（importゼロの死にコードだった。孤児化した scout/types.ts の Notification 2型も削除） |
-| 4 | [ ] | messaging: `features/messaging/api.ts`, `unread-context.tsx` | 5 | useWebSocket.ts は触らない |
+| 4 | [x] | messaging: `features/messaging/api.ts` | 5 | useWebSocket.ts は触らない。`unread-context.tsx` は401正常系のため**スコープ外に変更**（上表参照） |
 | 5 | [ ] | team-diagnose: `app/diagnose/[token]/page.tsx` | 2 | |
 | 6 | [ ] | timeline/posts: `features/timeline/api.ts` | 7 | クエリ文字列組み立てを query オプションへ |
 | 7 | [ ] | articles: `features/articles/api.ts`, `CoverImageUpload.tsx`, `PrevNextNav.tsx`, `RelatedArticles.tsx`, `RichEditor.tsx`, `features/timeline/ArticlePreviewCard.tsx` | 9 | **multipart 2箇所は実アップロード確認** |
