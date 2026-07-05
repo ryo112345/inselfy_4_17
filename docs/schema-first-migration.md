@@ -116,7 +116,7 @@ cd ../backend && make oapi
 | 4 | [x] | scout_template | 5 | **List が bare array** |
 | 5 | [x] | notification | 8 | req body なし、204系 |
 | 6 | [x] | follow | 5 | **bare domain type**（FollowStatus） |
-| 7 | [ ] | auth | 4 | cookie 認証、body はユーザーのみ |
+| 7 | [x] | auth | 4 | cookie 認証、body はユーザーのみ |
 | 8 | [ ] | company_auth | 5 | 同上 |
 | 9 | [ ] | careerinterest | 4 | domain `Response` 埋め込み |
 | 10 | [ ] | workvalues | 4 | 同上 + Mu/SE map |

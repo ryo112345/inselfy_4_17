@@ -1,8 +1,7 @@
 package presenter
 
 import (
-	"time"
-
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
 )
@@ -10,17 +9,7 @@ import (
 type AuthTokenResponse struct {
 	AccessToken  string
 	RefreshToken string
-	User         *AuthUserResponse
-}
-
-type AuthUserResponse struct {
-	ID         string    `json:"id"`
-	Username   string    `json:"username"`
-	Name       string    `json:"name"`
-	AvatarURL  *string   `json:"avatarUrl,omitempty"`
-	Email      *string   `json:"email,omitempty"`
-	NeedsSetup bool      `json:"needsSetup"`
-	CreatedAt  time.Time `json:"createdAt"`
+	User         *openapi.ModelsAuthUserResponse
 }
 
 // AuthTokenPairResponse builds the token-pair API response (with embedded user).
@@ -37,14 +26,14 @@ func AuthMeResponse(u *user.User) any {
 	return toAuthUserResponse(u)
 }
 
-func toAuthUserResponse(u *user.User) *AuthUserResponse {
+func toAuthUserResponse(u *user.User) *openapi.ModelsAuthUserResponse {
 	username := u.Username.String()
 	needsSetup := len(username) == 13 && username[:5] == "user_"
-	return &AuthUserResponse{
-		ID:         u.ID,
+	return &openapi.ModelsAuthUserResponse{
+		Id:         u.ID,
 		Username:   username,
 		Name:       u.Name,
-		AvatarURL:  u.AvatarURL,
+		AvatarUrl:  u.AvatarURL,
 		Email:      u.Email,
 		NeedsSetup: needsSetup,
 		CreatedAt:  u.CreatedAt,

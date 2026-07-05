@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -21,14 +22,12 @@ func NewAuthController(input port.AuthInputPort) *AuthController {
 }
 
 func (c *AuthController) GoogleLogin(ctx echo.Context) error {
-	var body struct {
-		IDToken string `json:"idToken"`
-	}
-	if err := ctx.Bind(&body); err != nil || body.IDToken == "" || len(body.IDToken) > 10000 {
+	var body openapi.ModelsGoogleLoginRequest
+	if err := ctx.Bind(&body); err != nil || body.IdToken == "" || len(body.IdToken) > 10000 {
 		return badRequest(ctx, "invalid request")
 	}
 
-	pair, u, err := c.input.GoogleLogin(ctx.Request().Context(), body.IDToken)
+	pair, u, err := c.input.GoogleLogin(ctx.Request().Context(), body.IdToken)
 	if err != nil {
 		return handleAuthError(ctx, err)
 	}
@@ -91,7 +90,7 @@ func setAuthCookies(ctx echo.Context, resp *presenter.AuthTokenResponse) {
 	setUserInfoCookies(ctx, resp.User, secure)
 }
 
-func setUserInfoCookies(ctx echo.Context, user *presenter.AuthUserResponse, secure bool) {
+func setUserInfoCookies(ctx echo.Context, user *openapi.ModelsAuthUserResponse, secure bool) {
 	maxAge := 604800
 	setCookie := func(name, value string) {
 		ctx.SetCookie(&http.Cookie{
@@ -104,7 +103,7 @@ func setUserInfoCookies(ctx echo.Context, user *presenter.AuthUserResponse, secu
 			MaxAge:   maxAge,
 		})
 	}
-	setCookie("userId", user.ID)
+	setCookie("userId", user.Id)
 	setCookie("username", user.Username)
 	setCookie("displayName", user.Name)
 }

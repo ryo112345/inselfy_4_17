@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -199,13 +200,13 @@ func (c *AdminUserController) BypassLogin(ctx echo.Context, id string) error {
 		return internalError(ctx, "failed to store refresh token")
 	}
 
-	userResp := &presenter.AuthUserResponse{
-		ID:       pgUUIDToString(u.ID),
+	userResp := &openapi.ModelsAuthUserResponse{
+		Id:       pgUUIDToString(u.ID),
 		Username: u.Username,
 		Name:     u.Name,
 	}
 	if u.AvatarUrl.Valid {
-		userResp.AvatarURL = &u.AvatarUrl.String
+		userResp.AvatarUrl = &u.AvatarUrl.String
 	}
 	if u.Email.Valid {
 		userResp.Email = &u.Email.String
