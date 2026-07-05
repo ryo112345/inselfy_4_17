@@ -12,38 +12,19 @@ import (
 
 // SkillController handles skill HTTP endpoints.
 type SkillController struct {
-	inputFactory func(
-		repo port.SkillRepository,
-		userRepo port.UserRepository,
-		tx port.TxManager,
-	) port.SkillInputPort
-	repoFactory     func() port.SkillRepository
-	userRepoFactory func() port.UserRepository
-	tx              port.TxManager
+	input port.SkillInputPort
 }
 
 // NewSkillController creates a SkillController.
 func NewSkillController(
-	inputFactory func(
-		repo port.SkillRepository,
-		userRepo port.UserRepository,
-		tx port.TxManager,
-	) port.SkillInputPort,
-	repoFactory func() port.SkillRepository,
-	userRepoFactory func() port.UserRepository,
-	tx port.TxManager,
+	input port.SkillInputPort,
 ) *SkillController {
-	return &SkillController{
-		inputFactory:    inputFactory,
-		repoFactory:     repoFactory,
-		userRepoFactory: userRepoFactory,
-		tx:              tx,
-	}
+	return &SkillController{input: input}
 }
 
 // List handles GET /api/users/:username/skills.
 func (c *SkillController) List(ctx echo.Context, username string) error {
-	list, err := c.newInput().List(ctx.Request().Context(), username)
+	list, err := c.input.List(ctx.Request().Context(), username)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -56,7 +37,7 @@ func (c *SkillController) Attach(ctx echo.Context, username string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	s, err := c.newInput().Attach(ctx.Request().Context(), username, body.Name)
+	s, err := c.input.Attach(ctx.Request().Context(), username, body.Name)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -65,12 +46,8 @@ func (c *SkillController) Attach(ctx echo.Context, username string) error {
 
 // Detach handles DELETE /api/users/:username/skills/:name.
 func (c *SkillController) Detach(ctx echo.Context, username, name string) error {
-	if err := c.newInput().DetachByName(ctx.Request().Context(), username, name); err != nil {
+	if err := c.input.DetachByName(ctx.Request().Context(), username, name); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func (c *SkillController) newInput() port.SkillInputPort {
-	return c.inputFactory(c.repoFactory(), c.userRepoFactory(), c.tx)
 }

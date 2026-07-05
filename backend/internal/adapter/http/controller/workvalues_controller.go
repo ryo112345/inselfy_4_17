@@ -11,32 +11,13 @@ import (
 )
 
 type WorkValuesController struct {
-	inputFactory func(
-		sessionRepo port.WorkValuesSessionRepository,
-		resultRepo port.WorkValuesResultRepository,
-		scoreRepo port.WorkValuesScoreRepository,
-	) port.WorkValuesInputPort
-	sessionRepoFactory func() port.WorkValuesSessionRepository
-	resultRepoFactory  func() port.WorkValuesResultRepository
-	scoreRepoFactory   func() port.WorkValuesScoreRepository
+	input port.WorkValuesInputPort
 }
 
 func NewWorkValuesController(
-	inputFactory func(
-		sessionRepo port.WorkValuesSessionRepository,
-		resultRepo port.WorkValuesResultRepository,
-		scoreRepo port.WorkValuesScoreRepository,
-	) port.WorkValuesInputPort,
-	sessionRepoFactory func() port.WorkValuesSessionRepository,
-	resultRepoFactory func() port.WorkValuesResultRepository,
-	scoreRepoFactory func() port.WorkValuesScoreRepository,
+	input port.WorkValuesInputPort,
 ) *WorkValuesController {
-	return &WorkValuesController{
-		inputFactory:       inputFactory,
-		sessionRepoFactory: sessionRepoFactory,
-		resultRepoFactory:  resultRepoFactory,
-		scoreRepoFactory:   scoreRepoFactory,
-	}
+	return &WorkValuesController{input: input}
 }
 
 type startSessionRequest struct {
@@ -52,7 +33,7 @@ func (c *WorkValuesController) StartSession(ctx echo.Context) error {
 		return badRequest(ctx, "user_id is required")
 	}
 
-	s, err := c.newInput().StartSession(ctx.Request().Context(), body.UserID)
+	s, err := c.input.StartSession(ctx.Request().Context(), body.UserID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -76,7 +57,7 @@ func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) 
 		Mu:        body.Mu,
 		SE:        body.SE,
 	}
-	r, err := c.newInput().SubmitResult(ctx.Request().Context(), sessionID, input)
+	r, err := c.input.SubmitResult(ctx.Request().Context(), sessionID, input)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -84,7 +65,7 @@ func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) 
 }
 
 func (c *WorkValuesController) GetLatestResult(ctx echo.Context, userID string) error {
-	r, err := c.newInput().GetLatestResult(ctx.Request().Context(), userID)
+	r, err := c.input.GetLatestResult(ctx.Request().Context(), userID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -92,13 +73,9 @@ func (c *WorkValuesController) GetLatestResult(ctx echo.Context, userID string) 
 }
 
 func (c *WorkValuesController) GetResultBySessionID(ctx echo.Context, sessionID string) error {
-	r, err := c.newInput().GetResultBySessionID(ctx.Request().Context(), sessionID)
+	r, err := c.input.GetResultBySessionID(ctx.Request().Context(), sessionID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusOK, presenter.WorkValuesResultResponse(r))
-}
-
-func (c *WorkValuesController) newInput() port.WorkValuesInputPort {
-	return c.inputFactory(c.sessionRepoFactory(), c.resultRepoFactory(), c.scoreRepoFactory())
 }

@@ -14,73 +14,12 @@ import (
 
 // ScoutController handles company-side scout HTTP endpoints.
 type ScoutController struct {
-	inputFactory func(
-		msgRepo port.ScoutMessageRepository,
-		creditRepo port.ScoutCreditRepository,
-		ledgerRepo port.ScoutCreditLedgerRepository,
-		replyRepo port.ScoutReplyRepository,
-		settingsRepo port.UserScoutSettingsRepository,
-		notifRepo port.NotificationRepository,
-		userRepo port.UserRepository,
-		convRepo port.ConversationRepository,
-		convMsgRepo port.MessageRepository,
-		participantRepo port.ConversationParticipantRepository,
-		tx port.TxManager,
-	) port.ScoutInputPort
-	msgRepoFactory         func() port.ScoutMessageRepository
-	creditRepoFactory      func() port.ScoutCreditRepository
-	ledgerRepoFactory      func() port.ScoutCreditLedgerRepository
-	replyRepoFactory       func() port.ScoutReplyRepository
-	settingsRepoFactory    func() port.UserScoutSettingsRepository
-	notifRepoFactory       func() port.NotificationRepository
-	userRepoFactory        func() port.UserRepository
-	convRepoFactory        func() port.ConversationRepository
-	convMsgRepoFactory     func() port.MessageRepository
-	participantRepoFactory func() port.ConversationParticipantRepository
-	tx                     port.TxManager
+	input port.ScoutInputPort
 }
 
 // NewScoutController creates a ScoutController.
-func NewScoutController(
-	inputFactory func(
-		msgRepo port.ScoutMessageRepository,
-		creditRepo port.ScoutCreditRepository,
-		ledgerRepo port.ScoutCreditLedgerRepository,
-		replyRepo port.ScoutReplyRepository,
-		settingsRepo port.UserScoutSettingsRepository,
-		notifRepo port.NotificationRepository,
-		userRepo port.UserRepository,
-		convRepo port.ConversationRepository,
-		convMsgRepo port.MessageRepository,
-		participantRepo port.ConversationParticipantRepository,
-		tx port.TxManager,
-	) port.ScoutInputPort,
-	msgRepoFactory func() port.ScoutMessageRepository,
-	creditRepoFactory func() port.ScoutCreditRepository,
-	ledgerRepoFactory func() port.ScoutCreditLedgerRepository,
-	replyRepoFactory func() port.ScoutReplyRepository,
-	settingsRepoFactory func() port.UserScoutSettingsRepository,
-	notifRepoFactory func() port.NotificationRepository,
-	userRepoFactory func() port.UserRepository,
-	convRepoFactory func() port.ConversationRepository,
-	convMsgRepoFactory func() port.MessageRepository,
-	participantRepoFactory func() port.ConversationParticipantRepository,
-	tx port.TxManager,
-) *ScoutController {
-	return &ScoutController{
-		inputFactory:           inputFactory,
-		msgRepoFactory:         msgRepoFactory,
-		creditRepoFactory:      creditRepoFactory,
-		ledgerRepoFactory:      ledgerRepoFactory,
-		replyRepoFactory:       replyRepoFactory,
-		settingsRepoFactory:    settingsRepoFactory,
-		notifRepoFactory:       notifRepoFactory,
-		userRepoFactory:        userRepoFactory,
-		convRepoFactory:        convRepoFactory,
-		convMsgRepoFactory:     convMsgRepoFactory,
-		participantRepoFactory: participantRepoFactory,
-		tx:                     tx,
-	}
+func NewScoutController(input port.ScoutInputPort) *ScoutController {
+	return &ScoutController{input: input}
 }
 
 type sendScoutRequest struct {
@@ -104,7 +43,7 @@ func (c *ScoutController) Send(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	msg, err := c.newInput().Send(ctx.Request().Context(), scout.SendScoutInput{
+	msg, err := c.input.Send(ctx.Request().Context(), scout.SendScoutInput{
 		CompanyID:    companyID,
 		CandidateID:  body.CandidateID,
 		JobPostingID: body.JobPostingID,
@@ -129,7 +68,7 @@ func (c *ScoutController) List(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	msgs, total, err := c.newInput().ListByCompany(ctx.Request().Context(), companyID, status, limit, offset)
+	msgs, total, err := c.input.ListByCompany(ctx.Request().Context(), companyID, status, limit, offset)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -140,7 +79,7 @@ func (c *ScoutController) List(ctx echo.Context) error {
 func (c *ScoutController) GetDetail(ctx echo.Context, scoutID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	msg, replies, err := c.newInput().GetDetail(ctx.Request().Context(), companyID, scoutID)
+	msg, replies, err := c.input.GetDetail(ctx.Request().Context(), companyID, scoutID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -151,7 +90,7 @@ func (c *ScoutController) GetDetail(ctx echo.Context, scoutID string) error {
 func (c *ScoutController) GetCredits(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	credit, err := c.newInput().GetCredits(ctx.Request().Context(), companyID)
+	credit, err := c.input.GetCredits(ctx.Request().Context(), companyID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -162,7 +101,7 @@ func (c *ScoutController) GetCredits(ctx echo.Context) error {
 func (c *ScoutController) GetQualityScore(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	quality, err := c.newInput().GetQualityScore(ctx.Request().Context(), companyID)
+	quality, err := c.input.GetQualityScore(ctx.Request().Context(), companyID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -173,7 +112,7 @@ func (c *ScoutController) GetQualityScore(ctx echo.Context) error {
 func (c *ScoutController) GetDashboard(ctx echo.Context) error {
 	companyID := authmw.CompanyID(ctx)
 
-	stats, err := c.newInput().GetDashboard(ctx.Request().Context(), companyID)
+	stats, err := c.input.GetDashboard(ctx.Request().Context(), companyID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -189,24 +128,8 @@ func (c *ScoutController) Reply(ctx echo.Context, scoutID string) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	if err := c.newInput().CompanyReply(ctx.Request().Context(), companyID, scoutID, body.Body); err != nil {
+	if err := c.input.CompanyReply(ctx.Request().Context(), companyID, scoutID, body.Body); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusCreated, nil)
-}
-
-func (c *ScoutController) newInput() port.ScoutInputPort {
-	return c.inputFactory(
-		c.msgRepoFactory(),
-		c.creditRepoFactory(),
-		c.ledgerRepoFactory(),
-		c.replyRepoFactory(),
-		c.settingsRepoFactory(),
-		c.notifRepoFactory(),
-		c.userRepoFactory(),
-		c.convRepoFactory(),
-		c.convMsgRepoFactory(),
-		c.participantRepoFactory(),
-		c.tx,
-	)
 }

@@ -14,72 +14,23 @@ import (
 
 // CandidateScoutController handles candidate-side scout HTTP endpoints.
 type CandidateScoutController struct {
-	inputFactory func(
-		msgRepo port.ScoutMessageRepository,
-		creditRepo port.ScoutCreditRepository,
-		ledgerRepo port.ScoutCreditLedgerRepository,
-		replyRepo port.ScoutReplyRepository,
-		settingsRepo port.UserScoutSettingsRepository,
-		notifRepo port.NotificationRepository,
-		userRepo port.UserRepository,
-		convRepo port.ConversationRepository,
-		convMsgRepo port.MessageRepository,
-		participantRepo port.ConversationParticipantRepository,
-		tx port.TxManager,
-	) port.ScoutInputPort
-	msgRepoFactory         func() port.ScoutMessageRepository
-	creditRepoFactory      func() port.ScoutCreditRepository
-	ledgerRepoFactory      func() port.ScoutCreditLedgerRepository
-	replyRepoFactory       func() port.ScoutReplyRepository
-	settingsRepoFactory    func() port.UserScoutSettingsRepository
-	notifRepoFactory       func() port.NotificationRepository
-	userRepoFactory        func() port.UserRepository
-	convRepoFactory        func() port.ConversationRepository
-	convMsgRepoFactory     func() port.MessageRepository
-	participantRepoFactory func() port.ConversationParticipantRepository
-	tx                     port.TxManager
+	input port.ScoutInputPort
+	// msgRepo/convRepo are read directly in Respond to resolve the
+	// conversation created as a side effect of responding to a scout.
+	msgRepo  port.ScoutMessageRepository
+	convRepo port.ConversationRepository
 }
 
 // NewCandidateScoutController creates a CandidateScoutController.
 func NewCandidateScoutController(
-	inputFactory func(
-		msgRepo port.ScoutMessageRepository,
-		creditRepo port.ScoutCreditRepository,
-		ledgerRepo port.ScoutCreditLedgerRepository,
-		replyRepo port.ScoutReplyRepository,
-		settingsRepo port.UserScoutSettingsRepository,
-		notifRepo port.NotificationRepository,
-		userRepo port.UserRepository,
-		convRepo port.ConversationRepository,
-		convMsgRepo port.MessageRepository,
-		participantRepo port.ConversationParticipantRepository,
-		tx port.TxManager,
-	) port.ScoutInputPort,
-	msgRepoFactory func() port.ScoutMessageRepository,
-	creditRepoFactory func() port.ScoutCreditRepository,
-	ledgerRepoFactory func() port.ScoutCreditLedgerRepository,
-	replyRepoFactory func() port.ScoutReplyRepository,
-	settingsRepoFactory func() port.UserScoutSettingsRepository,
-	notifRepoFactory func() port.NotificationRepository,
-	userRepoFactory func() port.UserRepository,
-	convRepoFactory func() port.ConversationRepository,
-	convMsgRepoFactory func() port.MessageRepository,
-	participantRepoFactory func() port.ConversationParticipantRepository,
-	tx port.TxManager,
+	input port.ScoutInputPort,
+	msgRepo port.ScoutMessageRepository,
+	convRepo port.ConversationRepository,
 ) *CandidateScoutController {
 	return &CandidateScoutController{
-		inputFactory:           inputFactory,
-		msgRepoFactory:         msgRepoFactory,
-		creditRepoFactory:      creditRepoFactory,
-		ledgerRepoFactory:      ledgerRepoFactory,
-		replyRepoFactory:       replyRepoFactory,
-		settingsRepoFactory:    settingsRepoFactory,
-		notifRepoFactory:       notifRepoFactory,
-		userRepoFactory:        userRepoFactory,
-		convRepoFactory:        convRepoFactory,
-		convMsgRepoFactory:     convMsgRepoFactory,
-		participantRepoFactory: participantRepoFactory,
-		tx:                     tx,
+		input:    input,
+		msgRepo:  msgRepo,
+		convRepo: convRepo,
 	}
 }
 
@@ -107,7 +58,7 @@ func (c *CandidateScoutController) List(ctx echo.Context) error {
 	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
 	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
 
-	msgs, total, err := c.newInput().ListByCandidate(ctx.Request().Context(), userID, limit, offset)
+	msgs, total, err := c.input.ListByCandidate(ctx.Request().Context(), userID, limit, offset)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -118,7 +69,7 @@ func (c *CandidateScoutController) List(ctx echo.Context) error {
 func (c *CandidateScoutController) GetDetail(ctx echo.Context, scoutID string) error {
 	userID := authmw.UserID(ctx)
 
-	msg, replies, err := c.newInput().GetReceivedDetail(ctx.Request().Context(), userID, scoutID)
+	msg, replies, err := c.input.GetReceivedDetail(ctx.Request().Context(), userID, scoutID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -134,16 +85,14 @@ func (c *CandidateScoutController) Respond(ctx echo.Context, scoutID string) err
 		return badRequest(ctx, "invalid request body")
 	}
 
-	if err := c.newInput().Respond(ctx.Request().Context(), userID, scoutID, scout.CandidateResponse(body.Response)); err != nil {
+	if err := c.input.Respond(ctx.Request().Context(), userID, scoutID, scout.CandidateResponse(body.Response)); err != nil {
 		return handleError(ctx, err)
 	}
 
 	resp := map[string]string{"status": "ok"}
-	msgRepo := c.msgRepoFactory()
-	msg, err := msgRepo.GetByID(ctx.Request().Context(), scoutID)
+	msg, err := c.msgRepo.GetByID(ctx.Request().Context(), scoutID)
 	if err == nil {
-		convRepo := c.convRepoFactory()
-		conv, err := convRepo.GetByCompanyAndCandidate(ctx.Request().Context(), msg.CompanyID, msg.CandidateID)
+		conv, err := c.convRepo.GetByCompanyAndCandidate(ctx.Request().Context(), msg.CompanyID, msg.CandidateID)
 		if err == nil && conv != nil {
 			resp["conversationId"] = conv.ID
 		}
@@ -160,7 +109,7 @@ func (c *CandidateScoutController) Reply(ctx echo.Context, scoutID string) error
 		return badRequest(ctx, "invalid request body")
 	}
 
-	if err := c.newInput().CandidateReply(ctx.Request().Context(), userID, scoutID, body.Body); err != nil {
+	if err := c.input.CandidateReply(ctx.Request().Context(), userID, scoutID, body.Body); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusCreated, nil)
@@ -175,7 +124,7 @@ func (c *CandidateScoutController) BulkDecline(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request body")
 	}
 
-	if err := c.newInput().BulkDecline(ctx.Request().Context(), userID, body.ScoutIDs); err != nil {
+	if err := c.input.BulkDecline(ctx.Request().Context(), userID, body.ScoutIDs); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -195,24 +144,8 @@ func (c *CandidateScoutController) BulkRespond(ctx echo.Context) error {
 		return badRequest(ctx, "invalid response: must be 'interested' or 'declined'")
 	}
 
-	if err := c.newInput().BulkRespond(ctx.Request().Context(), userID, body.ScoutIDs, response); err != nil {
+	if err := c.input.BulkRespond(ctx.Request().Context(), userID, body.ScoutIDs, response); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func (c *CandidateScoutController) newInput() port.ScoutInputPort {
-	return c.inputFactory(
-		c.msgRepoFactory(),
-		c.creditRepoFactory(),
-		c.ledgerRepoFactory(),
-		c.replyRepoFactory(),
-		c.settingsRepoFactory(),
-		c.notifRepoFactory(),
-		c.userRepoFactory(),
-		c.convRepoFactory(),
-		c.convMsgRepoFactory(),
-		c.participantRepoFactory(),
-		c.tx,
-	)
 }

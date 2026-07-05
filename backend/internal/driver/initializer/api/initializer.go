@@ -6,6 +6,8 @@ import (
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
 
+	bcryptgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/bcrypt"
+	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	googlegw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/google"
 	jwtgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/jwt"
 	storagegw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/storage"
@@ -15,9 +17,9 @@ import (
 	ws "github.com/akiyama/inselfy/backend/internal/adapter/ws"
 	"github.com/akiyama/inselfy/backend/internal/driver/config"
 	driverdb "github.com/akiyama/inselfy/backend/internal/driver/db"
-	"github.com/akiyama/inselfy/backend/internal/driver/factory"
 	"github.com/akiyama/inselfy/backend/internal/driver/scheduler"
 	"github.com/akiyama/inselfy/backend/internal/port"
+	"github.com/akiyama/inselfy/backend/internal/usecase"
 )
 
 func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error) {
@@ -36,30 +38,6 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	googleVerifier := googlegw.NewTokenVerifier()
 	jwtService := jwtgw.NewService(cfg.JWTSecret)
 
-	userRepoFactory := factory.NewUserRepoFactory(pool)
-	experienceRepoFactory := factory.NewExperienceRepoFactory(pool)
-	educationRepoFactory := factory.NewEducationRepoFactory(pool)
-	skillRepoFactory := factory.NewSkillRepoFactory(pool)
-	postRepoFactory := factory.NewPostRepoFactory(pool)
-	refreshTokenRepoFactory := factory.NewRefreshTokenRepoFactory(pool)
-	wvSessionRepoFactory := factory.NewWVSessionRepoFactory(pool)
-	wvResultRepoFactory := factory.NewWVResultRepoFactory(pool)
-	wvScoreRepoFactory := factory.NewWVScoreRepoFactory(pool)
-	ciSessionRepoFactory := factory.NewCISessionRepoFactory(pool)
-	ciResultRepoFactory := factory.NewCIResultRepoFactory(pool)
-	ciBasicScoreRepoFactory := factory.NewCIBasicScoreRepoFactory(pool)
-	ciTypeScoreRepoFactory := factory.NewCITypeScoreRepoFactory(pool)
-	companyAccountRepoFactory := factory.NewCompanyAccountRepoFactory(pool)
-	companyRefreshTokenRepoFactory := factory.NewCompanyRefreshTokenRepoFactory(pool)
-
-	userInputFactory := factory.NewUserInputFactory()
-	authInputFactory := factory.NewAuthInputFactory(googleVerifier, jwtService, cfg.GoogleClientID)
-	experienceInputFactory := factory.NewExperienceInputFactory()
-	educationInputFactory := factory.NewEducationInputFactory()
-	skillInputFactory := factory.NewSkillInputFactory()
-	postInputFactory := factory.NewPostInputFactory()
-	wvInputFactory := factory.NewWorkValuesInputFactory()
-	ciInputFactory := factory.NewCareerInterestInputFactory()
 	var fileStorage port.FileStorage
 	if cfg.StorageBackend == "r2" {
 		fileStorage = storagegw.NewR2(cfg.R2AccountID, cfg.R2AccessKeyID, cfg.R2SecretAccessKey, cfg.R2Bucket, cfg.R2PublicURL)
@@ -67,113 +45,93 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		fileStorage = storagegw.NewLocal("./uploads", "/api/uploads")
 	}
 	stripeService := stripegw.NewService(cfg.StripeSecretKey, cfg.AppURL)
-	articleRepoFactory := factory.NewArticleRepoFactory(pool)
-	articlePurchaseRepoFactory := factory.NewArticlePurchaseRepoFactory(pool)
 
-	companyAuthInputFactory := factory.NewCompanyAuthInputFactory(jwtService)
+	// Repositories shared by multiple interactors/controllers.
+	userRepo := sqlcgw.NewUserRepository(pool)
+	notificationRepo := sqlcgw.NewNotificationRepository(pool)
+	jobPostingRepo := sqlcgw.NewJobPostingRepository(pool)
+	scoutMsgRepo := sqlcgw.NewScoutMessageRepository(pool)
+	convRepo := sqlcgw.NewConversationRepository(pool)
+	msgRepo := sqlcgw.NewMessageRepository(pool)
+	participantRepo := sqlcgw.NewConversationParticipantRepository(pool)
 
-	scoutMsgRepoFactory := factory.NewScoutMessageRepoFactory(pool)
-	scoutCreditRepoFactory := factory.NewScoutCreditRepoFactory(pool)
-	scoutCreditLedgerRepoFactory := factory.NewScoutCreditLedgerRepoFactory(pool)
-	scoutReplyRepoFactory := factory.NewScoutReplyRepoFactory(pool)
-	scoutTemplateRepoFactory := factory.NewScoutTemplateRepoFactory(pool)
-	userScoutSettingsRepoFactory := factory.NewUserScoutSettingsRepoFactory(pool)
-	notificationRepoFactory := factory.NewNotificationRepoFactory(pool)
-	jobPostingRepoFactory := factory.NewJobPostingRepoFactory(pool)
+	scoutItr := usecase.NewScoutInteractor(
+		scoutMsgRepo,
+		sqlcgw.NewScoutCreditRepository(pool),
+		sqlcgw.NewScoutCreditLedgerRepository(pool),
+		sqlcgw.NewScoutReplyRepository(pool),
+		sqlcgw.NewUserScoutSettingsRepository(pool),
+		notificationRepo,
+		userRepo,
+		convRepo, msgRepo, participantRepo,
+		tx,
+	)
 
-	scoutInputFactory := factory.NewScoutInputFactory()
-	scoutTemplateInputFactory := factory.NewScoutTemplateInputFactory()
-	notificationInputFactory := factory.NewNotificationInputFactory()
-	jobPostingInputFactory := factory.NewJobPostingInputFactory()
-
-	articleInputFactory := factory.NewArticleInputFactory(stripeService)
-
-	followRepoFactory := factory.NewFollowRepoFactory(pool)
-	followInputFactory := factory.NewFollowInputFactory()
-
-	conversationRepoFactory := factory.NewConversationRepoFactory(pool)
-	messageRepoFactory := factory.NewMessageRepoFactory(pool)
-	participantRepoFactory := factory.NewConversationParticipantRepoFactory(pool)
-	messagingInputFactory := factory.NewMessagingInputFactory()
-
-	jobApplicationRepoFactory := factory.NewJobApplicationRepoFactory(pool)
-	jobApplicationInputFactory := factory.NewJobApplicationInputFactory()
-
-	userCtrl := httpcontroller.NewUserController(userInputFactory, userRepoFactory, fileStorage)
-	authCtrl := httpcontroller.NewAuthController(authInputFactory, userRepoFactory, refreshTokenRepoFactory)
-	experienceCtrl := httpcontroller.NewExperienceController(experienceInputFactory, experienceRepoFactory, userRepoFactory)
-	educationCtrl := httpcontroller.NewEducationController(educationInputFactory, educationRepoFactory, userRepoFactory)
-	skillCtrl := httpcontroller.NewSkillController(skillInputFactory, skillRepoFactory, userRepoFactory, tx)
-	postCtrl := httpcontroller.NewPostController(postInputFactory, postRepoFactory)
-	wvCtrl := httpcontroller.NewWorkValuesController(wvInputFactory, wvSessionRepoFactory, wvResultRepoFactory, wvScoreRepoFactory)
-	ciCtrl := httpcontroller.NewCareerInterestController(ciInputFactory, ciSessionRepoFactory, ciResultRepoFactory, ciBasicScoreRepoFactory, ciTypeScoreRepoFactory)
+	userCtrl := httpcontroller.NewUserController(usecase.NewUserInteractor(userRepo), fileStorage)
+	authCtrl := httpcontroller.NewAuthController(usecase.NewAuthInteractor(
+		userRepo, sqlcgw.NewRefreshTokenRepository(pool), googleVerifier, jwtService, cfg.GoogleClientID,
+	))
+	experienceCtrl := httpcontroller.NewExperienceController(usecase.NewExperienceInteractor(
+		sqlcgw.NewExperienceRepository(pool), userRepo,
+	))
+	educationCtrl := httpcontroller.NewEducationController(usecase.NewEducationInteractor(
+		sqlcgw.NewEducationRepository(pool), userRepo,
+	))
+	skillCtrl := httpcontroller.NewSkillController(usecase.NewSkillInteractor(
+		sqlcgw.NewSkillRepository(pool), userRepo, tx,
+	))
+	postCtrl := httpcontroller.NewPostController(usecase.NewPostInteractor(sqlcgw.NewPostRepository(pool)))
+	wvCtrl := httpcontroller.NewWorkValuesController(usecase.NewWorkValuesInteractor(
+		sqlcgw.NewWorkValuesSessionRepository(pool),
+		sqlcgw.NewWorkValuesResultRepository(pool),
+		sqlcgw.NewWorkValuesScoreRepository(pool),
+	))
+	ciCtrl := httpcontroller.NewCareerInterestController(usecase.NewCareerInterestInteractor(
+		sqlcgw.NewCareerInterestSessionRepository(pool),
+		sqlcgw.NewCareerInterestResultRepository(pool),
+		sqlcgw.NewCareerInterestBasicScoreRepository(pool),
+		sqlcgw.NewCareerInterestTypeScoreRepository(pool),
+	))
 	articleCtrl := httpcontroller.NewArticleController(
-		articleInputFactory,
-		articleRepoFactory,
-		articlePurchaseRepoFactory,
+		usecase.NewArticleInteractor(
+			sqlcgw.NewArticleRepository(pool), sqlcgw.NewArticlePurchaseRepository(pool), stripeService,
+		),
 		fileStorage,
 	)
 
-	scoutCtrl := httpcontroller.NewScoutController(
-		scoutInputFactory,
-		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
-		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
-		userRepoFactory,
-		conversationRepoFactory, messageRepoFactory, participantRepoFactory,
-		tx,
-	)
-	candidateScoutCtrl := httpcontroller.NewCandidateScoutController(
-		scoutInputFactory,
-		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
-		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
-		userRepoFactory,
-		conversationRepoFactory, messageRepoFactory, participantRepoFactory,
-		tx,
-	)
-	scoutSettingsCtrl := httpcontroller.NewScoutSettingsController(
-		scoutInputFactory,
-		scoutMsgRepoFactory, scoutCreditRepoFactory, scoutCreditLedgerRepoFactory,
-		scoutReplyRepoFactory, userScoutSettingsRepoFactory, notificationRepoFactory,
-		userRepoFactory,
-		conversationRepoFactory, messageRepoFactory, participantRepoFactory,
-		tx,
-	)
+	scoutCtrl := httpcontroller.NewScoutController(scoutItr)
+	candidateScoutCtrl := httpcontroller.NewCandidateScoutController(scoutItr, scoutMsgRepo, convRepo)
+	scoutSettingsCtrl := httpcontroller.NewScoutSettingsController(scoutItr)
 	scoutTemplateCtrl := httpcontroller.NewScoutTemplateController(
-		scoutTemplateInputFactory, scoutTemplateRepoFactory,
+		usecase.NewScoutTemplateInteractor(sqlcgw.NewScoutTemplateRepository(pool)),
 	)
-	notifCtrl := httpcontroller.NewNotificationController(
-		notificationInputFactory, notificationRepoFactory,
-	)
-	jobPostingCtrl := httpcontroller.NewJobPostingController(
-		jobPostingInputFactory, jobPostingRepoFactory,
-	)
+	notifCtrl := httpcontroller.NewNotificationController(usecase.NewNotificationInteractor(notificationRepo))
+	jobPostingCtrl := httpcontroller.NewJobPostingController(usecase.NewJobPostingInteractor(jobPostingRepo))
 
-	followCtrl := httpcontroller.NewFollowController(
-		followInputFactory, followRepoFactory, userRepoFactory,
-	)
+	followCtrl := httpcontroller.NewFollowController(usecase.NewFollowInteractor(
+		sqlcgw.NewFollowRepository(pool), userRepo,
+	))
 
 	jobApplicationCtrl := httpcontroller.NewJobApplicationController(
-		jobApplicationInputFactory,
-		jobApplicationRepoFactory, jobPostingRepoFactory, pool,
+		usecase.NewJobApplicationInteractor(sqlcgw.NewJobApplicationRepository(pool), jobPostingRepo),
+		pool,
 	)
 
-	messagingCtrl := httpcontroller.NewMessagingController(
-		messagingInputFactory,
-		conversationRepoFactory, messageRepoFactory, participantRepoFactory, tx,
-	)
+	messagingCtrl := httpcontroller.NewMessagingController(usecase.NewMessagingInteractor(
+		convRepo, msgRepo, participantRepo, tx,
+	))
 
 	interviewCtrl := httpcontroller.NewInterviewController(
 		pool,
-		conversationRepoFactory(), messageRepoFactory(), participantRepoFactory(), tx,
+		convRepo, msgRepo, participantRepo, tx,
 	)
 
-	companyAuthCtrl := httpcontroller.NewCompanyAuthController(
-		func(companyRepo port.CompanyAccountRepository, refreshRepo port.CompanyRefreshTokenRepository) port.CompanyAuthInputPort {
-			return companyAuthInputFactory(companyRepo, refreshRepo)
-		},
-		companyAccountRepoFactory,
-		companyRefreshTokenRepoFactory,
-	)
+	companyAuthCtrl := httpcontroller.NewCompanyAuthController(usecase.NewCompanyAuthInteractor(
+		sqlcgw.NewCompanyAccountRepository(pool),
+		sqlcgw.NewCompanyRefreshTokenRepository(pool),
+		jwtService,
+		bcryptgw.NewService(),
+	))
 
 	e := echo.New()
 	e.Use(echomw.Recover())
@@ -323,7 +281,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	// --- Stripe Webhook ---
 	stripeWebhookCtrl := httpcontroller.NewStripeWebhookController(
-		articlePurchaseRepoFactory(),
+		sqlcgw.NewArticlePurchaseRepository(pool),
 		cfg.StripeWebhookSecret,
 	)
 	e.POST("/api/stripe/webhook", stripeWebhookCtrl.HandleWebhook)
@@ -731,8 +689,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	interviewCtrl.SetWS(wsHub)
 
 	pgBroker := ws.NewPgMessageBroker(pool)
-	participantRepoForRelay := participantRepoFactory()
-	relay := ws.NewRelay(wsHub, pgBroker, participantRepoForRelay)
+	relay := ws.NewRelay(wsHub, pgBroker, participantRepo)
 	go relay.Start(ctx)
 
 	wsTickets := ws.NewTicketStore()
@@ -740,7 +697,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	e.GET("/api/ws/ticket", wsCtrl.IssueTicket)
 	e.GET("/api/ws", wsCtrl.HandleWS)
 
-	sched := scheduler.New(scoutMsgRepoFactory(), scoutCreditRepoFactory())
+	sched := scheduler.New(scoutMsgRepo, sqlcgw.NewScoutCreditRepository(pool))
 	sched.Start(ctx)
 
 	return e, cfg, cleanup, nil

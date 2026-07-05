@@ -13,21 +13,11 @@ import (
 )
 
 type AuthController struct {
-	inputFactory   func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository) port.AuthInputPort
-	repoFactory    func() port.UserRepository
-	refreshFactory func() port.RefreshTokenRepository
+	input port.AuthInputPort
 }
 
-func NewAuthController(
-	inputFactory func(userRepo port.UserRepository, refreshRepo port.RefreshTokenRepository) port.AuthInputPort,
-	repoFactory func() port.UserRepository,
-	refreshFactory func() port.RefreshTokenRepository,
-) *AuthController {
-	return &AuthController{
-		inputFactory:   inputFactory,
-		repoFactory:    repoFactory,
-		refreshFactory: refreshFactory,
-	}
+func NewAuthController(input port.AuthInputPort) *AuthController {
+	return &AuthController{input: input}
 }
 
 func (c *AuthController) GoogleLogin(ctx echo.Context) error {
@@ -38,7 +28,7 @@ func (c *AuthController) GoogleLogin(ctx echo.Context) error {
 		return badRequest(ctx, "invalid request")
 	}
 
-	pair, u, err := c.newInput().GoogleLogin(ctx.Request().Context(), body.IDToken)
+	pair, u, err := c.input.GoogleLogin(ctx.Request().Context(), body.IDToken)
 	if err != nil {
 		return handleAuthError(ctx, err)
 	}
@@ -53,7 +43,7 @@ func (c *AuthController) Refresh(ctx echo.Context) error {
 		return handleAuthError(ctx, nil)
 	}
 
-	pair, u, err := c.newInput().RefreshToken(ctx.Request().Context(), cookie.Value)
+	pair, u, err := c.input.RefreshToken(ctx.Request().Context(), cookie.Value)
 	if err != nil {
 		clearAuthCookies(ctx)
 		return handleAuthError(ctx, err)
@@ -66,7 +56,7 @@ func (c *AuthController) Refresh(ctx echo.Context) error {
 func (c *AuthController) GetMe(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	u, err := c.newInput().GetCurrentUser(ctx.Request().Context(), userID)
+	u, err := c.input.GetCurrentUser(ctx.Request().Context(), userID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -76,10 +66,6 @@ func (c *AuthController) GetMe(ctx echo.Context) error {
 func (c *AuthController) Logout(ctx echo.Context) error {
 	clearAuthCookies(ctx)
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func (c *AuthController) newInput() port.AuthInputPort {
-	return c.inputFactory(c.repoFactory(), c.refreshFactory())
 }
 
 func setAuthCookies(ctx echo.Context, resp *presenter.AuthTokenResponse) {

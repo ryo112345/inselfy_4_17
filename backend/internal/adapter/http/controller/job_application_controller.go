@@ -18,28 +18,15 @@ import (
 )
 
 type JobApplicationController struct {
-	inputFactory   func(repo port.JobApplicationRepository, jobRepo port.JobPostingRepository) port.JobApplicationInputPort
-	repoFactory    func() port.JobApplicationRepository
-	jobRepoFactory func() port.JobPostingRepository
-	pool           *pgxpool.Pool
+	input port.JobApplicationInputPort
+	pool  *pgxpool.Pool
 }
 
 func NewJobApplicationController(
-	inputFactory func(repo port.JobApplicationRepository, jobRepo port.JobPostingRepository) port.JobApplicationInputPort,
-	repoFactory func() port.JobApplicationRepository,
-	jobRepoFactory func() port.JobPostingRepository,
+	input port.JobApplicationInputPort,
 	pool *pgxpool.Pool,
 ) *JobApplicationController {
-	return &JobApplicationController{
-		inputFactory:   inputFactory,
-		repoFactory:    repoFactory,
-		jobRepoFactory: jobRepoFactory,
-		pool:           pool,
-	}
-}
-
-func (c *JobApplicationController) newInput() port.JobApplicationInputPort {
-	return c.inputFactory(c.repoFactory(), c.jobRepoFactory())
+	return &JobApplicationController{input: input, pool: pool}
 }
 
 type applyRequest struct {
@@ -62,7 +49,7 @@ func (c *JobApplicationController) Apply(ctx echo.Context) error {
 		return badRequest(ctx, "jobPostingId is required")
 	}
 
-	a, err := c.newInput().Apply(ctx.Request().Context(), jobapplication.ApplyInput{
+	a, err := c.input.Apply(ctx.Request().Context(), jobapplication.ApplyInput{
 		JobPostingID: body.JobPostingID,
 		CandidateID:  userID,
 		Message:      body.Message,
@@ -99,7 +86,7 @@ func (c *JobApplicationController) ListByCompany(ctx echo.Context) error {
 	filter.Limit, _ = strconv.Atoi(ctx.QueryParam("limit"))
 	filter.Offset, _ = strconv.Atoi(ctx.QueryParam("offset"))
 
-	apps, total, err := c.newInput().ListByCompany(ctx.Request().Context(), companyID, filter)
+	apps, total, err := c.input.ListByCompany(ctx.Request().Context(), companyID, filter)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -111,7 +98,7 @@ func (c *JobApplicationController) ListByCompany(ctx echo.Context) error {
 func (c *JobApplicationController) ListByCandidate(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	apps, total, err := c.newInput().ListByCandidate(ctx.Request().Context(), userID)
+	apps, total, err := c.input.ListByCandidate(ctx.Request().Context(), userID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -121,7 +108,7 @@ func (c *JobApplicationController) ListByCandidate(ctx echo.Context) error {
 func (c *JobApplicationController) GetByID(ctx echo.Context, applicationID string) error {
 	companyID := authmw.CompanyID(ctx)
 
-	a, err := c.newInput().GetByID(ctx.Request().Context(), companyID, applicationID)
+	a, err := c.input.GetByID(ctx.Request().Context(), companyID, applicationID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -136,7 +123,7 @@ func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID 
 		return badRequest(ctx, "invalid request body")
 	}
 
-	if err := c.newInput().UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(body.Status)); err != nil {
+	if err := c.input.UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(body.Status)); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{"status": "ok"})
@@ -145,7 +132,7 @@ func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID 
 func (c *JobApplicationController) Withdraw(ctx echo.Context, applicationID string) error {
 	userID := authmw.UserID(ctx)
 
-	if err := c.newInput().Withdraw(ctx.Request().Context(), userID, applicationID); err != nil {
+	if err := c.input.Withdraw(ctx.Request().Context(), userID, applicationID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusOK, map[string]string{"status": "ok"})
@@ -159,7 +146,7 @@ func (c *JobApplicationController) CheckApplied(ctx echo.Context) error {
 		return badRequest(ctx, "jobPostingId is required")
 	}
 
-	applied, err := c.newInput().CheckApplied(ctx.Request().Context(), userID, jobPostingID)
+	applied, err := c.input.CheckApplied(ctx.Request().Context(), userID, jobPostingID)
 	if err != nil {
 		return handleError(ctx, err)
 	}
