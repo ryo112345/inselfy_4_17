@@ -32,27 +32,18 @@ import {
 } from "@/components/icons/job";
 import { SectionTitle } from "@/components/ui";
 import { ACCENT } from "@/constants/theme";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import {
+  ConditionGroup,
+  cardClass,
+  HighlightCard,
+  StatCell,
+} from "@/features/job-posting/components/view-parts";
 import {
   JOB_PREVIEW_CHANNEL,
   type JobFormPreviewPayload,
   type JobPreviewMessage,
 } from "@/features/job-posting/preview-channel";
-
-const cardClass =
-  "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
-
-type CompanyProfile = {
-  id: string;
-  companyName: string;
-  industry: string;
-  location: string;
-  employeeCount: string;
-  logoUrl: string;
-  benefits: string[];
-  smokingPolicy: string;
-  galleryUrls: string[];
-};
+import { useCompanyProfile } from "@/features/job-posting/useCompanyProfile";
 
 const EMPTY_FORM: JobFormPreviewPayload = {
   title: "",
@@ -97,123 +88,12 @@ const EMPTY_FORM: JobFormPreviewPayload = {
   galleryUrls: [],
 };
 
-function StatCell({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: React.ReactNode;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
-      <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
-        <span className="text-gray-400">{icon}</span>
-        {label}
-      </div>
-      <div className="text-xl font-bold leading-tight text-gray-900 sm:text-2xl">{value}</div>
-    </div>
-  );
-}
-
-function HighlightCard({
-  label,
-  title,
-  body,
-  icon,
-  tone,
-}: {
-  label: string;
-  title: string;
-  body: string;
-  icon: React.ReactNode;
-  tone: { bg: string; ring: string; fg: string };
-}) {
-  return (
-    <div className="flex h-full flex-col gap-3.5 rounded-2xl border border-gray-200/80 bg-white p-6">
-      <div className="flex items-center gap-3">
-        <span
-          className="flex h-11 w-11 items-center justify-center rounded-xl"
-          style={{
-            backgroundColor: tone.bg,
-            color: tone.fg,
-            boxShadow: `inset 0 0 0 1px ${tone.ring}`,
-          }}
-        >
-          {icon}
-        </span>
-        <span className="text-sm font-semibold tracking-wide" style={{ color: tone.fg }}>
-          {label}
-        </span>
-      </div>
-      <h3 className="text-lg font-bold leading-snug text-gray-900">{title}</h3>
-      <p className="text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
-        {body || <span className="italic text-gray-300">未入力</span>}
-      </p>
-    </div>
-  );
-}
-
-function ConditionGroup({
-  title,
-  rows,
-  icon,
-}: {
-  title: string;
-  rows: { label: string; value: string }[];
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col rounded-2xl border border-gray-200/80 bg-white p-6">
-      <div className="mb-4 flex items-center gap-2.5 border-b border-gray-100 pb-3.5">
-        <span
-          className="flex h-8 w-8 items-center justify-center rounded-md"
-          style={{ backgroundColor: `${ACCENT}12`, color: ACCENT }}
-        >
-          {icon}
-        </span>
-        <h3 className="text-base font-bold text-gray-900">{title}</h3>
-      </div>
-      <dl className="flex flex-col gap-3.5">
-        {rows.map((r) => (
-          <div key={r.label} className="flex flex-col gap-1">
-            <dt className="text-xs font-medium tracking-wide text-gray-500">{r.label}</dt>
-            <dd className="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap">
-              {r.value || <span className="italic text-gray-300">未入力</span>}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
+const emptyFallback = <span className="italic text-gray-300">未入力</span>;
 
 export default function CompanyJobPreviewPage() {
-  const { companyFetch } = useCompanyAuth();
   const [form, setForm] = useState<JobFormPreviewPayload>(EMPTY_FORM);
-  const [company, setCompany] = useState<CompanyProfile | null>(null);
+  const company = useCompanyProfile();
   const [hasReceived, setHasReceived] = useState(false);
-
-  useEffect(() => {
-    companyFetch("/api/company/profile").then(async (res) => {
-      if (res.ok) {
-        const data = await res.json();
-        if (!Array.isArray(data.benefits)) data.benefits = [];
-        setCompany({
-          id: data.id,
-          companyName: data.companyName,
-          industry: data.industry,
-          location: data.location,
-          employeeCount: data.employeeCount,
-          logoUrl: data.logoUrl,
-          benefits: data.benefits ?? [],
-          smokingPolicy: data.smokingPolicy ?? "",
-          galleryUrls: data.galleryUrls ?? [],
-        });
-      }
-    });
-  }, [companyFetch]);
 
   useEffect(() => {
     const channel = new BroadcastChannel(JOB_PREVIEW_CHANNEL);
@@ -487,7 +367,7 @@ export default function CompanyJobPreviewPage() {
           <p className="mt-2 text-sm text-gray-500">この仕事を一目で掴むための4つの視点</p>
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {highlightCards.map((c) => (
-              <HighlightCard key={c.label} {...c} />
+              <HighlightCard key={c.label} {...c} fallback={emptyFallback} />
             ))}
           </div>
         </section>
@@ -622,9 +502,24 @@ export default function CompanyJobPreviewPage() {
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<DocumentIcon />}>募集要項</SectionTitle>
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <ConditionGroup title="勤務情報" rows={workConditions} icon={<ClockIcon />} />
-            <ConditionGroup title="給与・報酬" rows={compensationConditions} icon={<YenIcon />} />
-            <ConditionGroup title="契約・その他" rows={contractConditions} icon={<ShieldIcon />} />
+            <ConditionGroup
+              title="勤務情報"
+              rows={workConditions}
+              icon={<ClockIcon />}
+              fallback={emptyFallback}
+            />
+            <ConditionGroup
+              title="給与・報酬"
+              rows={compensationConditions}
+              icon={<YenIcon />}
+              fallback={emptyFallback}
+            />
+            <ConditionGroup
+              title="契約・その他"
+              rows={contractConditions}
+              icon={<ShieldIcon />}
+              fallback={emptyFallback}
+            />
           </div>
         </section>
 
