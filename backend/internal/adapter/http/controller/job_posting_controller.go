@@ -125,7 +125,7 @@ func (c *JobPostingController) ListPublic(ctx echo.Context) error {
 	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobPostingsResponse(js))
+	return ctx.JSON(http.StatusOK, presenter.JobPostingsPaginatedResponse(js, len(js)))
 }
 
 // GetPublic handles GET /api/jobs/:jobId (no auth).

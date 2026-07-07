@@ -12,9 +12,6 @@ var jobPostingConv jobPostingConverter = &jobPostingConverterImpl{}
 // JobPostingResponse converts a single job posting entity to its API response.
 func JobPostingResponse(j *jobposting.JobPosting) any { return jobPostingConv.ToResponse(j) }
 
-// JobPostingsResponse converts a list of job posting entities to API responses.
-func JobPostingsResponse(js []*jobposting.JobPosting) any { return jobPostingConv.ToResponses(js) }
-
 // JobPostingsPaginatedResponse converts a paginated list of job postings to its API response.
 func JobPostingsPaginatedResponse(js []*jobposting.JobPosting, total int) any {
 	items := make([]openapi.ModelsJobPostingResponse, 0, len(js))

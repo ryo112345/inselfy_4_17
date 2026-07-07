@@ -92,9 +92,9 @@ interface CompanyJobPostings {
 @tag("JobPostings")
 interface PublicJobPostings {
   /**
-   * 公開求人一覧。`limit > 0` を指定するとページングラッパー（items/total）で返し、
-   * search / category / employmentType / remotePolicy / sort / valueFilters / filterMode を解釈する。
-   * limit 未指定（0）のときは全件を裸の配列で返す（互換のため）。
+   * 公開求人一覧。常にページングラッパー（items/total）で返す。
+   * `limit > 0` を指定すると search / category / employmentType / remotePolicy /
+   * sort / valueFilters / filterMode を解釈してページングし、limit 未指定（0）のときは全件を返す。
    */
   @get
   @summary("List public job postings")
