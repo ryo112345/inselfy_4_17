@@ -4,3 +4,6 @@
 # Uploaded files (runtime data, not source code)
 backend/uploads/
 !.env.example
+
+# Test coverage profile (make test-cover / CI)
+backend/coverage.out

@@ -1,0 +1,30 @@
+# テストカバレッジ計測（backend CI から octocov-action で実行される）。
+# 方針: 「カバレッジ○%以上」の数値目標ではなく「前回（main の最新レポート）より
+# 下げない」ことをゲートにする。数値目標はテストの質を歪めるため。
+coverage:
+  paths:
+    - backend/coverage.out
+  # 削除リファクタ等（テスト済みコードを消すとカバレッジが下がる）の誤差を
+  # 許容するため -1pt までは通す。初回など prev が無い場合は diff = current で必ず通る。
+  acceptable: diff >= -1%
+codeToTestRatio:
+  code:
+    - "backend/**/*.go"
+    - "!backend/**/*_test.go"
+    # 生成コード（goverter/oapi-codegen/sqlc）は分母から除外
+    - "!backend/**/*.gen.go"
+    - "!backend/internal/adapter/gateway/db/sqlc/generated/**"
+  test:
+    - "backend/**/*_test.go"
+# 前回レポートとの比較元・保存先は GitHub Actions Artifacts（追加インフラ不要）
+diff:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+comment:
+  if: is_pull_request
+summary:
+  if: true
+report:
+  if: is_default_branch
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
