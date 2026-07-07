@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ACCENT } from "@/constants/theme";
@@ -139,11 +140,13 @@ function CardInner({
         {/* Cover image */}
         {job.coverImageUrl && (
           <div className="-mx-4 mt-3 overflow-hidden bg-gray-100">
-            <img
+            <Image
               src={job.coverImageUrl}
               alt=""
+              width={1600}
+              height={900}
+              sizes="(max-width: 1024px) 100vw, 440px"
               className="w-full aspect-[16/9] object-cover"
-              loading="lazy"
             />
           </div>
         )}
@@ -157,7 +160,13 @@ function CardInner({
           )}
           <span className="shrink-0">
             {job.companyLogoUrl ? (
-              <img src={job.companyLogoUrl} alt="" className="h-5 w-5 rounded-sm object-cover" />
+              <Image
+                src={job.companyLogoUrl}
+                alt=""
+                width={20}
+                height={20}
+                className="h-5 w-5 rounded-sm object-cover"
+              />
             ) : (
               <span
                 className="flex h-5 w-5 items-center justify-center rounded-sm text-[9px] font-bold text-white"

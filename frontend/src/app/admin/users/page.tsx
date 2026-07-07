@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch } from "@/features/admin/api";
@@ -183,9 +184,11 @@ export default function AdminUsersPage() {
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           {user.avatar_url ? (
-                            <img
+                            <Image
                               src={user.avatar_url}
                               alt=""
+                              width={36}
+                              height={36}
                               className="w-9 h-9 rounded-full object-cover"
                             />
                           ) : (

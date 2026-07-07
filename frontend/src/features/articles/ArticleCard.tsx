@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatRelativeDate } from "@/lib/date";
@@ -25,10 +26,12 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
         <article className="flex flex-col h-full bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
           <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
             {article.coverImageUrl ? (
-              <img
+              <Image
                 src={article.coverImageUrl}
                 alt=""
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -131,10 +134,12 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
       <article className="flex flex-col h-full bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
         <div className="relative aspect-[16/9] overflow-hidden bg-gray-100">
           {article.coverImageUrl ? (
-            <img
+            <Image
               src={article.coverImageUrl}
               alt=""
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fill
+              sizes="(max-width: 768px) 100vw, 33vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

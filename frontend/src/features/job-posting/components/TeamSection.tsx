@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -188,11 +189,17 @@ export function SimpleTeamSection({
                 return (
                   <label key={i} className="relative cursor-pointer group">
                     <div
-                      className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
+                      className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
                       style={{ backgroundColor: color.bg, color: color.fg }}
                     >
                       {m.photoUrl ? (
-                        <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
+                        <Image
+                          src={m.photoUrl}
+                          alt={m.name}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                        />
                       ) : (
                         <span className={memberNameClass(m.name)}>{m.name.slice(0, 5)}</span>
                       )}
@@ -325,14 +332,16 @@ export function TeamSectionWithSelector({
                     return (
                       <label key={i} className={`relative ${isReal ? "cursor-pointer group" : ""}`}>
                         <div
-                          className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
+                          className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
                           style={{ backgroundColor: color.bg, color: color.fg }}
                         >
                           {m.photoUrl ? (
-                            <img
+                            <Image
                               src={m.photoUrl}
                               alt={m.name}
-                              className="h-full w-full object-cover"
+                              fill
+                              sizes="80px"
+                              className="object-cover"
                             />
                           ) : (
                             <span className={memberNameClass(m.name)}>

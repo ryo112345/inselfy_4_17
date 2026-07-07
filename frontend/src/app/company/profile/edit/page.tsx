@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 
@@ -284,10 +285,12 @@ export default function CompanyProfilePage() {
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className="relative h-44 bg-gradient-to-br from-gray-100 to-gray-50">
           {profile.coverImageUrl ? (
-            <img
+            <Image
               src={profile.coverImageUrl}
               alt="カバー画像"
-              className="h-full w-full object-cover"
+              fill
+              sizes="(max-width: 672px) 100vw, 672px"
+              className="object-cover"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
@@ -331,7 +334,13 @@ export default function CompanyProfilePage() {
           <div className="absolute -bottom-10 left-6">
             <div className="group relative h-20 w-20 overflow-hidden rounded-2xl border-4 border-white bg-white shadow-sm">
               {profile.logoUrl ? (
-                <img src={profile.logoUrl} alt="ロゴ" className="h-full w-full object-cover" />
+                <Image
+                  src={profile.logoUrl}
+                  alt="ロゴ"
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gray-50">
                   <BuildingIcon className="h-7 w-7 text-gray-300" />
@@ -579,7 +588,13 @@ export default function CompanyProfilePage() {
               key={url}
               className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100"
             >
-              <img src={url} alt="" className="h-full w-full object-cover" />
+              <Image
+                src={url}
+                alt=""
+                fill
+                sizes="(max-width: 672px) 33vw, 224px"
+                className="object-cover"
+              />
               <button
                 onClick={() => handleImageDelete("gallery", url)}
                 className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"

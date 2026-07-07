@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { TeamScoresSection } from "@/app/companies/[id]/TeamScoresSection";
 import { ACCENT } from "@/constants/theme";
@@ -115,7 +116,14 @@ export default function CompanyProfilePreviewPage() {
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="relative overflow-hidden">
             {company.coverImageUrl ? (
-              <img src={company.coverImageUrl} alt="" className="w-full" />
+              <Image
+                src={company.coverImageUrl}
+                alt=""
+                width={1600}
+                height={900}
+                sizes="(max-width: 768px) 100vw, 736px"
+                className="h-auto w-full"
+              />
             ) : (
               <div className="h-44 sm:h-56" style={{ background: ACCENT }}>
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
@@ -126,9 +134,9 @@ export default function CompanyProfilePreviewPage() {
 
           <div className="relative px-7 pb-6">
             <div className="absolute -top-10 left-7">
-              <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
+              <div className="relative h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
                 {company.logoUrl ? (
-                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  <Image src={company.logoUrl} alt="" fill sizes="80px" className="object-cover" />
                 ) : (
                   <div
                     className="flex h-full w-full items-center justify-center"
@@ -342,7 +350,13 @@ function Gallery({ urls }: { urls: string[] }) {
   return (
     <div>
       <div className="group relative aspect-video overflow-hidden bg-gray-100">
-        <img src={urls[current]} alt="" className="h-full w-full object-contain" />
+        <Image
+          src={urls[current]}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 736px"
+          className="object-contain"
+        />
         {urls.length > 1 && (
           <>
             <button
@@ -396,7 +410,7 @@ function Gallery({ urls }: { urls: string[] }) {
                 i === current ? { outline: `2px solid ${ACCENT}`, outlineOffset: "1px" } : undefined
               }
             >
-              <img src={url} alt="" className="h-14 w-20 object-cover" />
+              <Image src={url} alt="" width={80} height={56} className="h-14 w-20 object-cover" />
             </button>
           ))}
         </div>

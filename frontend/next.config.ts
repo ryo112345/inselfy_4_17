@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
     position: "bottom-left",
   },
   output: "standalone",
+  images: {
+    // Google OAuth のアバター画像（lh3 等のサブドメイン）。アップロード画像は
+    // 同一オリジンの /api/uploads/** なので設定不要。
+    remotePatterns: [{ protocol: "https", hostname: "*.googleusercontent.com" }],
+  },
 };
 
 export default nextConfig;

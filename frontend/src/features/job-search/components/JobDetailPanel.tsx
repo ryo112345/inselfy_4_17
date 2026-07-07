@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -327,16 +328,23 @@ export function JobDetail({
       {/* Cover image with gradient fade */}
       {job.coverImageUrl && (
         <div className="relative w-full overflow-hidden bg-gray-100">
-          <img src={job.coverImageUrl} alt="" className="w-full aspect-[16/9] object-cover" />
+          <Image
+            src={job.coverImageUrl}
+            alt=""
+            width={1600}
+            height={900}
+            sizes="(max-width: 1024px) 100vw, 60vw"
+            className="w-full aspect-[16/9] object-cover"
+          />
         </div>
       )}
 
       <div className="max-w-4xl mx-auto px-7">
         {/* Company */}
         <div className="flex items-center gap-3 mt-6">
-          <div className="h-12 w-12 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
+          <div className="relative h-12 w-12 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
             {job.companyLogoUrl ? (
-              <img src={job.companyLogoUrl} alt="" className="h-full w-full object-cover" />
+              <Image src={job.companyLogoUrl} alt="" fill sizes="48px" className="object-cover" />
             ) : (
               <span className="text-sm font-bold" style={{ color: ACCENT }}>
                 {job.companyName.charAt(0)}

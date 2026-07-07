@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import {
@@ -19,17 +20,14 @@ import { type ApiError, updateProfile, uploadProfileImage } from "./api";
 import { FollowButton } from "./FollowButton";
 
 // react-easy-crop が重いため、クロップ操作時に初めてロードする
-const ImageCropModal = dynamic(
-  () => import("./ImageCropModal").then((m) => m.ImageCropModal),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-white" />
-      </div>
-    ),
-  },
-);
+const ImageCropModal = dynamic(() => import("./ImageCropModal").then((m) => m.ImageCropModal), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-white" />
+    </div>
+  ),
+});
 
 const PRESET_COLORS = [
   ACCENT,
@@ -164,7 +162,13 @@ export function ProfileHeaderCard({
         style={{ background: user.coverPhotoUrl ? undefined : headerColor }}
       >
         {user.coverPhotoUrl ? (
-          <img src={user.coverPhotoUrl} alt="" className="h-full w-full object-cover" />
+          <Image
+            src={user.coverPhotoUrl}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 672px"
+            className="object-cover"
+          />
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
         )}
@@ -209,9 +213,15 @@ export function ProfileHeaderCard({
         <div className="pointer-events-none h-[120px] md:h-36" />
         <div className="absolute top-14 md:top-20 left-4 md:left-6 z-20">
           <div className="relative">
-            <div className="group flex h-24 w-24 md:h-36 md:w-36 cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
+            <div className="group relative flex h-24 w-24 md:h-36 md:w-36 cursor-pointer items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
               {avatarSrc ? (
-                <img src={avatarSrc} alt={user.name} className="h-full w-full object-cover" />
+                <Image
+                  src={avatarSrc}
+                  alt={user.name}
+                  fill
+                  sizes="(max-width: 768px) 96px, 144px"
+                  className="object-cover"
+                />
               ) : (
                 <FaceIcon className="h-14 w-14 md:h-20 md:w-20" style={{ color: headerColor }} />
               )}

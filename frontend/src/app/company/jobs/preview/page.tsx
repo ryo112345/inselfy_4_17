@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Gallery } from "@/app/companies/[id]/Gallery";
@@ -281,9 +282,15 @@ export default function CompanyJobPreviewPage() {
                 href={`/companies/${company.id}`}
                 className="inline-flex items-center gap-3 group"
               >
-                <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
+                <div className="relative h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
                   {company.logoUrl ? (
-                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                    <Image
+                      src={company.logoUrl}
+                      alt=""
+                      fill
+                      sizes="40px"
+                      className="object-cover"
+                    />
                   ) : (
                     <span className="text-sm font-bold" style={{ color: ACCENT }}>
                       {company.companyName.charAt(0)}
@@ -413,14 +420,16 @@ export default function CompanyJobPreviewPage() {
                         return (
                           <div
                             key={i}
-                            className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
+                            className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
                             style={{ backgroundColor: color.bg, color: color.fg }}
                           >
                             {m.photoUrl ? (
-                              <img
+                              <Image
                                 src={m.photoUrl}
                                 alt={m.name}
-                                className="h-full w-full object-cover"
+                                fill
+                                sizes="80px"
+                                className="object-cover"
                               />
                             ) : (
                               <span
@@ -621,9 +630,15 @@ export default function CompanyJobPreviewPage() {
             <div className="px-6 py-6 sm:px-7">
               <SectionTitle icon={<BuildingIcon />}>企業情報</SectionTitle>
               <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4">
-                <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
+                <div className="relative h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
                   {company.logoUrl ? (
-                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                    <Image
+                      src={company.logoUrl}
+                      alt=""
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                    />
                   ) : (
                     <span className="text-lg font-bold" style={{ color: ACCENT }}>
                       {company.companyName.charAt(0)}

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { ACCENT } from "@/constants/theme";
 
@@ -12,7 +13,13 @@ export function Gallery({ urls }: { urls: string[] }) {
   return (
     <div>
       <div className="group relative aspect-video overflow-hidden bg-gray-100">
-        <img src={urls[current]} alt="" className="h-full w-full object-contain" />
+        <Image
+          src={urls[current]}
+          alt=""
+          fill
+          sizes="(max-width: 896px) 100vw, 896px"
+          className="object-contain"
+        />
 
         {urls.length > 1 && (
           <>
@@ -76,7 +83,7 @@ export function Gallery({ urls }: { urls: string[] }) {
                   : undefined
               }
             >
-              <img src={url} alt="" className="h-14 w-20 object-cover" />
+              <Image src={url} alt="" width={80} height={56} className="h-14 w-20 object-cover" />
             </button>
           ))}
         </div>

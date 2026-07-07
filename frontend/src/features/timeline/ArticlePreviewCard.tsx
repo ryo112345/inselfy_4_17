@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { type ArticleItem, fetchArticle } from "@/features/articles/api";
@@ -63,7 +64,13 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
     >
       {article.coverImageUrl && (
         <div className="relative w-full aspect-[2/1] bg-gray-100">
-          <img src={article.coverImageUrl} alt="" className="w-full h-full object-cover" />
+          <Image
+            src={article.coverImageUrl}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 600px"
+            className="object-cover"
+          />
         </div>
       )}
       <div className="px-3 py-2.5">

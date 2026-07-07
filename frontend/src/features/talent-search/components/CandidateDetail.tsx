@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -95,9 +96,11 @@ export function CandidateDetail({
       {/* ── Header ── */}
       <div className="flex items-start gap-4 pb-6">
         {u.avatarUrl ? (
-          <img
+          <Image
             src={u.avatarUrl}
             alt=""
+            width={56}
+            height={56}
             className="h-14 w-14 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
           />
         ) : (
