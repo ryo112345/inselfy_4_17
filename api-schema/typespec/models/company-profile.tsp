@@ -8,27 +8,36 @@ namespace Inselfy.Models;
 /** 企業プロフィール更新リクエスト */
 model UpdateCompanyProfileRequest {
   /** 企業名 */
+  @minLength(1)
+  @maxLength(200)
   companyName: string;
 
   /** 担当者名 */
+  @maxLength(100)
   contactPersonName: string;
 
   /** 電話番号 */
+  @maxLength(30)
   phoneNumber: string;
 
   /** ヘッドライン */
+  @maxLength(255)
   headline: string;
 
   /** 会社紹介 */
+  @maxLength(10000)
   description: string;
 
   /** 業界 */
+  @maxLength(100)
   industry: string;
 
   /** 所在地 */
+  @maxLength(255)
   location: string;
 
   /** 従業員数 */
+  @maxLength(50)
   employeeCount: string;
 
   /** 設立年 */
@@ -38,30 +47,39 @@ model UpdateCompanyProfileRequest {
   foundedMonth: integer | null;
 
   /** WebサイトURL */
+  @maxLength(500)
   websiteUrl: string;
 
   /** 代表者名 */
+  @maxLength(100)
   representativeName: string;
 
   /** 資本金 */
+  @maxLength(100)
   capital: string;
 
   /** 売上高 */
+  @maxLength(100)
   revenue: string;
 
   /** 福利厚生 */
+  @maxItems(50)
   benefits: string[];
 
   /** 平均年齢 */
+  @maxLength(50)
   averageAge: string;
 
   /** 平均残業時間 */
+  @maxLength(50)
   averageOvertimeHours: string;
 
   /** 有給取得率 */
+  @maxLength(50)
   paidLeaveRate: string;
 
   /** 受動喫煙対策 */
+  @maxLength(255)
   smokingPolicy: string;
 }
 
