@@ -47,14 +47,14 @@ const PERSONA_MAP: Record<string, { name: string; subtitle: string }> = {
   "autonomy_safety":      { name: "建築家",        subtitle: "独立した安全な仕組みを、自ら設計する" },
 };
 
-export function getWVPersona(sortedValues: { value_id: string }[]): {
+export function getWVPersona(sortedValues: { valueId: string }[]): {
   modifier: string;
   name: string;
   subtitle: string;
 } {
-  const first = sortedValues[0].value_id as ValueId;
-  const second = sortedValues[1].value_id as ValueId;
-  const third = sortedValues[2].value_id as ValueId;
+  const first = sortedValues[0].valueId as ValueId;
+  const second = sortedValues[1].valueId as ValueId;
+  const third = sortedValues[2].valueId as ValueId;
 
   const persona = PERSONA_MAP[`${first}_${second}`] ?? { name: "—", subtitle: "" };
   const modifier = WV_MODIFIERS[third] ?? "";

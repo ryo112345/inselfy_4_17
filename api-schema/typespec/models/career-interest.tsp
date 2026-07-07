@@ -8,16 +8,16 @@ namespace Inselfy.Models;
 /** Career Interest セッション開始リクエスト */
 model CIStartSessionRequest {
   /** ユーザーID */
-  user_id: string;
+  userId: string;
 }
 
 /** Career Interest 回答（1問分） */
 model CIResponseItem {
   /** 質問番号 */
-  question_number: int32;
+  questionNumber: int32;
 
   /** 項目コード */
-  item_code: string;
+  itemCode: string;
 
   /** 回答スコア */
   score: int32;
@@ -32,22 +32,22 @@ model CISubmitResultRequest {
 /** Career Interest 設問 */
 model CIItemResponse {
   /** 質問番号 */
-  question_number: int32;
+  questionNumber: int32;
 
   /** 項目コード */
-  item_code: string;
+  itemCode: string;
 
   /** 基本興味領域ID */
-  basic_interest_id: string;
+  basicInterestId: string;
 
   /** スキルレベル */
-  skill_level: string;
+  skillLevel: string;
 
   /** 活動種別 */
-  activity_type: string;
+  activityType: string;
 
   /** 設問文（日本語） */
-  text_ja: string;
+  textJa: string;
 }
 
 /** Career Interest セッション */
@@ -65,7 +65,7 @@ model CISessionResponse {
 /** 基本興味領域スコア */
 model CIBasicScoreResponse {
   /** 基本興味領域ID */
-  basic_interest_id: string;
+  basicInterestId: string;
 
   /** スコア */
   score: float64;
@@ -77,7 +77,7 @@ model CIBasicScoreResponse {
 /** RIASEC タイプスコア */
 model CITypeScoreResponse {
   /** タイプID */
-  type_id: string;
+  typeId: string;
 
   /** スコア */
   score: float64;
@@ -92,17 +92,17 @@ model CIResultResponse {
   id: string;
 
   /** セッションID */
-  session_id: string;
+  sessionId: string;
 
   /** ユーザーID */
-  user_id: string;
+  userId: string;
 
   /** 基本興味領域スコア */
-  basic_scores: CIBasicScoreResponse[];
+  basicScores: CIBasicScoreResponse[];
 
   /** RIASEC タイプスコア */
-  type_scores: CITypeScoreResponse[];
+  typeScores: CITypeScoreResponse[];
 
   /** 作成日時（RFC3339 文字列） */
-  created_at: string;
+  createdAt: string;
 }

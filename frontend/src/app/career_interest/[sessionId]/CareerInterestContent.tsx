@@ -73,12 +73,12 @@ export function CareerInterestResultContent({ sessionId, initialData, isOwner = 
     );
   }
 
-  const basicScoreMap = new Map(result.basic_scores.map((b) => [b.basic_interest_id, b]));
-  const sortedTypes = [...result.type_scores].sort((a, b) => a.rank - b.rank);
+  const basicScoreMap = new Map(result.basicScores.map((b) => [b.basicInterestId, b]));
+  const sortedTypes = [...result.typeScores].sort((a, b) => a.rank - b.rank);
 
   return (
     <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 pt-5 pb-8">
-      <TopRIASECHeroSection types={sortedTypes} badge={badge} createdAt={result.created_at} />
+      <TopRIASECHeroSection types={sortedTypes} badge={badge} createdAt={result.createdAt} />
       <TypesSection types={sortedTypes} colors={colors} badge={badge} />
       <BasicInterestsSection types={sortedTypes} basicScoreMap={basicScoreMap} colors={colors} badge={badge} />
 
@@ -88,7 +88,7 @@ export function CareerInterestResultContent({ sessionId, initialData, isOwner = 
 }
 
 
-function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["type_scores"]; badge: BadgeColors; createdAt: string }) {
+function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["typeScores"]; badge: BadgeColors; createdAt: string }) {
   const top3 = types.slice(0, 3);
   const persona = getCIPersona(types);
 
@@ -207,14 +207,14 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
       <div className="relative hidden md:grid grid-cols-3 items-center -mt-11">
         <div className="flex flex-col items-end gap-1 pr-4 justify-self-center translate-x-2">
           {top3.map((t) => (
-            <span key={t.type_id} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
-              {TYPE_ENGLISH_NAMES[t.type_id as TypeId]}
+            <span key={t.typeId} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+              {TYPE_ENGLISH_NAMES[t.typeId as TypeId]}
             </span>
           ))}
         </div>
         <div className="flex items-end justify-center gap-2.5">
           {top3.map((t, i) => {
-            const tid = t.type_id as TypeId;
+            const tid = t.typeId as TypeId;
             const sizes = [
               { size: "80px", text: "text-3xl", radius: "rounded-2xl" },
               { size: "64px", text: "text-2xl", radius: "rounded-2xl" },
@@ -257,7 +257,7 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
       <div className="relative flex flex-col items-center gap-4 md:hidden">
         <div className="flex items-end justify-center gap-2.5">
           {top3.map((t, i) => {
-            const tid = t.type_id as TypeId;
+            const tid = t.typeId as TypeId;
             const sizes = [
               { size: "72px", text: "text-2xl", radius: "rounded-2xl" },
               { size: "58px", text: "text-xl", radius: "rounded-2xl" },
@@ -294,8 +294,8 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
         </div>
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-0.5">
           {top3.map((t) => (
-            <span key={t.type_id} className="text-[14px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
-              {TYPE_ENGLISH_NAMES[t.type_id as TypeId]}
+            <span key={t.typeId} className="text-[14px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+              {TYPE_ENGLISH_NAMES[t.typeId as TypeId]}
             </span>
           ))}
         </div>
@@ -307,11 +307,11 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
 
 const RADAR_ORDER: TypeId[] = ["R", "I", "A", "S", "E", "C"];
 
-function RIASECRadarChart({ types }: { types: ResultDTO["type_scores"] }) {
+function RIASECRadarChart({ types }: { types: ResultDTO["typeScores"] }) {
   const cx = 95;
   const cy = 95;
   const R = 60;
-  const scoreMap = new Map(types.map((t) => [t.type_id, t]));
+  const scoreMap = new Map(types.map((t) => [t.typeId, t]));
 
   const hexPoint = (i: number, r: number) => {
     const angle = (Math.PI / 2) + (2 * Math.PI * i) / 6;
@@ -375,7 +375,7 @@ function RIASECRadarChart({ types }: { types: ResultDTO["type_scores"] }) {
   );
 }
 
-function TypesSection({ types, colors, badge }: { types: ResultDTO["type_scores"]; colors: ScoreColors; badge: BadgeColors }) {
+function TypesSection({ types, colors, badge }: { types: ResultDTO["typeScores"]; colors: ScoreColors; badge: BadgeColors }) {
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const toggle = (id: string) => setOpenIds((prev) => {
     const next = new Set(prev);
@@ -392,7 +392,7 @@ function TypesSection({ types, colors, badge }: { types: ResultDTO["type_scores"
 
       <div>
         {types.map((t) => {
-          const tid = t.type_id as TypeId;
+          const tid = t.typeId as TypeId;
           const barPct = ((t.score - 1) / 4) * 100;
           const barColor = scoreColor(t.score, colors);
           const isOpen = openIds.has(tid);
@@ -451,7 +451,7 @@ function BasicInterestsSection({
   colors,
   badge,
 }: {
-  types: ResultDTO["type_scores"];
+  types: ResultDTO["typeScores"];
   basicScoreMap: Map<string, BasicScoreDTO>;
   colors: ScoreColors;
   badge: BadgeColors;
@@ -465,7 +465,7 @@ function BasicInterestsSection({
 
       <div className="flex flex-col gap-3">
         {types.map((t) => {
-          const tid = t.type_id as TypeId;
+          const tid = t.typeId as TypeId;
           const bids = TYPE_BASIC_INTERESTS[tid];
           const basicsWithScores = bids
             .map((bid) => ({ bid, score: basicScoreMap.get(bid) }))
@@ -646,8 +646,8 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
         if (cancelled) return;
         if (data?.content) {
           setReportContent(data.content);
-          setFirstView(!!data.first_view);
-          if (!data.first_view) setShowReport(true);
+          setFirstView(!!data.firstView);
+          if (!data.firstView) setShowReport(true);
         }
       })
       .catch(() => {})
@@ -684,7 +684,7 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
         .then((data) => {
           if (data?.content) {
             setReportContent(data.content);
-            setFirstView(!!data.first_view);
+            setFirstView(!!data.firstView);
             setShowReport(true);
           } else {
             setNotFound(true);

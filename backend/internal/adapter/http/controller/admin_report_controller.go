@@ -159,11 +159,11 @@ func (c *AdminReportController) GetReport(ctx echo.Context, sessionID string) er
 	}
 
 	resp := map[string]any{
-		"id":         pgUUIDToString(report.ID),
-		"session_id": pgUUIDToString(report.SessionID),
-		"content":    report.Content,
-		"created_at": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-		"first_view": firstView,
+		"id":        pgUUIDToString(report.ID),
+		"sessionId": pgUUIDToString(report.SessionID),
+		"content":   report.Content,
+		"createdAt": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+		"firstView": firstView,
 	}
 	return ctx.JSON(http.StatusOK, resp)
 }

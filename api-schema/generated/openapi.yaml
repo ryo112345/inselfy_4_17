@@ -5155,25 +5155,25 @@ components:
       type: object
       required:
         - id
-        - session_id
+        - sessionId
         - content
-        - created_at
-        - first_view
+        - createdAt
+        - firstView
       properties:
         id:
           type: string
           description: レポートID
-        session_id:
+        sessionId:
           type: string
           description: セッションID
         content:
           type: string
           description: レポート本文（Markdown）
-        created_at:
+        createdAt:
           type: string
           format: date-time
           description: 作成日時
-        first_view:
+        firstView:
           type: boolean
           description: 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
       description: 診断AIレポート（Work Values / Career Interest 共通）
@@ -5357,9 +5357,9 @@ components:
     Models.BulkCheckSavedRequest:
       type: object
       required:
-        - user_ids
+        - userIds
       properties:
-        user_ids:
+        userIds:
           type: array
           items:
             type: string
@@ -5405,11 +5405,11 @@ components:
     Models.CIBasicScoreResponse:
       type: object
       required:
-        - basic_interest_id
+        - basicInterestId
         - score
         - rank
       properties:
-        basic_interest_id:
+        basicInterestId:
           type: string
           description: 基本興味領域ID
         score:
@@ -5424,45 +5424,45 @@ components:
     Models.CIItemResponse:
       type: object
       required:
-        - question_number
-        - item_code
-        - basic_interest_id
-        - skill_level
-        - activity_type
-        - text_ja
+        - questionNumber
+        - itemCode
+        - basicInterestId
+        - skillLevel
+        - activityType
+        - textJa
       properties:
-        question_number:
+        questionNumber:
           type: integer
           format: int32
           description: 質問番号
-        item_code:
+        itemCode:
           type: string
           description: 項目コード
-        basic_interest_id:
+        basicInterestId:
           type: string
           description: 基本興味領域ID
-        skill_level:
+        skillLevel:
           type: string
           description: スキルレベル
-        activity_type:
+        activityType:
           type: string
           description: 活動種別
-        text_ja:
+        textJa:
           type: string
           description: 設問文（日本語）
       description: Career Interest 設問
     Models.CIResponseItem:
       type: object
       required:
-        - question_number
-        - item_code
+        - questionNumber
+        - itemCode
         - score
       properties:
-        question_number:
+        questionNumber:
           type: integer
           format: int32
           description: 質問番号
-        item_code:
+        itemCode:
           type: string
           description: 項目コード
         score:
@@ -5474,32 +5474,32 @@ components:
       type: object
       required:
         - id
-        - session_id
-        - user_id
-        - basic_scores
-        - type_scores
-        - created_at
+        - sessionId
+        - userId
+        - basicScores
+        - typeScores
+        - createdAt
       properties:
         id:
           type: string
           description: 結果ID
-        session_id:
+        sessionId:
           type: string
           description: セッションID
-        user_id:
+        userId:
           type: string
           description: ユーザーID
-        basic_scores:
+        basicScores:
           type: array
           items:
             $ref: '#/components/schemas/Models.CIBasicScoreResponse'
           description: 基本興味領域スコア
-        type_scores:
+        typeScores:
           type: array
           items:
             $ref: '#/components/schemas/Models.CITypeScoreResponse'
           description: RIASEC タイプスコア
-        created_at:
+        createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）
       description: Career Interest 診断結果
@@ -5525,9 +5525,9 @@ components:
     Models.CIStartSessionRequest:
       type: object
       required:
-        - user_id
+        - userId
       properties:
-        user_id:
+        userId:
           type: string
           description: ユーザーID
       description: Career Interest セッション開始リクエスト
@@ -5545,11 +5545,11 @@ components:
     Models.CITypeScoreResponse:
       type: object
       required:
-        - type_id
+        - typeId
         - score
         - rank
       properties:
-        type_id:
+        typeId:
           type: string
           description: タイプID
         score:
@@ -6159,7 +6159,7 @@ components:
         - topic1
         - topic2
         - topic3
-        - free_text
+        - freeText
       properties:
         topic1:
           type: integer
@@ -6173,7 +6173,7 @@ components:
           type: integer
           format: int16
           description: トピック3（1〜10）
-        free_text:
+        freeText:
           type: string
           description: 自由記述（200文字以内）
       description: 統合レポート生成リクエスト作成リクエスト
@@ -6238,34 +6238,34 @@ components:
     Models.DiagnoseInfoResponse:
       type: object
       required:
-        - member_id
-        - member_name
-        - team_name
-        - company_name
-        - user_id
-        - wv_status
-        - ci_status
+        - memberId
+        - memberName
+        - teamName
+        - companyName
+        - userId
+        - wvStatus
+        - ciStatus
         - email
       properties:
-        member_id:
+        memberId:
           type: string
           description: チームメンバーID
-        member_name:
+        memberName:
           type: string
           description: メンバー名
-        team_name:
+        teamName:
           type: string
           description: チーム名
-        company_name:
+        companyName:
           type: string
           description: 企業名
-        user_id:
+        userId:
           type: string
           description: 紐づくユーザーID（未紐づけは空文字）
-        wv_status:
+        wvStatus:
           type: string
           description: Work Values 診断ステータス
-        ci_status:
+        ciStatus:
           type: string
           description: Career Interest 診断ステータス
         email:
@@ -6498,21 +6498,21 @@ components:
     Models.IntegratedReportLatestRequestResponse:
       type: object
       required:
-        - request_id
-        - user_id
-        - has_report
-        - created_at
+        - requestId
+        - userId
+        - hasReport
+        - createdAt
       properties:
-        request_id:
+        requestId:
           type: string
           description: リクエストID
-        user_id:
+        userId:
           type: string
           description: ユーザーID
-        has_report:
+        hasReport:
           type: boolean
           description: レポートが生成済みかどうか
-        created_at:
+        createdAt:
           type: string
           format: date-time
           description: リクエスト作成日時
@@ -6521,25 +6521,25 @@ components:
       type: object
       required:
         - id
-        - request_id
+        - requestId
         - content
-        - created_at
-        - first_view
+        - createdAt
+        - firstView
       properties:
         id:
           type: string
           description: レポートID
-        request_id:
+        requestId:
           type: string
           description: リクエストID
         content:
           type: string
           description: レポート本文（Markdown）
-        created_at:
+        createdAt:
           type: string
           format: date-time
           description: 作成日時
-        first_view:
+        firstView:
           type: boolean
           description: 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
       description: 自分の最新統合レポート
@@ -6550,8 +6550,8 @@ components:
         - topic1
         - topic2
         - topic3
-        - free_text
-        - created_at
+        - freeText
+        - createdAt
       properties:
         id:
           type: string
@@ -6568,10 +6568,10 @@ components:
           type: integer
           format: int16
           description: トピック3
-        free_text:
+        freeText:
           type: string
           description: 自由記述
-        created_at:
+        createdAt:
           type: string
           format: date-time
           description: 作成日時
@@ -6580,29 +6580,29 @@ components:
       type: object
       required:
         - id
-        - request_id
-        - user_id
+        - requestId
+        - userId
         - content
-        - created_at
-        - first_view
+        - createdAt
+        - firstView
       properties:
         id:
           type: string
           description: レポートID
-        request_id:
+        requestId:
           type: string
           description: リクエストID
-        user_id:
+        userId:
           type: string
           description: ユーザーID
         content:
           type: string
           description: レポート本文（Markdown）
-        created_at:
+        createdAt:
           type: string
           format: date-time
           description: 作成日時
-        first_view:
+        firstView:
           type: boolean
           description: 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
       description: 統合レポート（リクエストID指定）
@@ -6618,7 +6618,7 @@ components:
             - pending
             - ready
           description: 'none: リクエストなし / pending: 生成待ち / ready: レポートあり'
-        request_id:
+        requestId:
           type: string
           description: リクエストID（pending / ready のときのみ）
       description: 統合レポートのリクエスト状況
@@ -7202,37 +7202,37 @@ components:
     Models.MemberScoreResponse:
       type: object
       required:
-        - member_id
-        - member_name
-        - user_id
-        - wv_status
-        - ci_status
-        - is_ace
+        - memberId
+        - memberName
+        - userId
+        - wvStatus
+        - ciStatus
+        - isAce
       properties:
-        member_id:
+        memberId:
           type: string
           description: メンバーID
-        member_name:
+        memberName:
           type: string
           description: メンバー名
-        user_id:
+        userId:
           type: string
           description: 紐づくユーザーID
-        wv_status:
+        wvStatus:
           type: string
           description: Work Values 診断ステータス
-        ci_status:
+        ciStatus:
           type: string
           description: Career Interest 診断ステータス
-        is_ace:
+        isAce:
           type: boolean
           description: エースメンバーか
-        wv_scores:
+        wvScores:
           type: array
           items:
             $ref: '#/components/schemas/Models.TeamScoreEntry'
           description: Work Values スコア
-        ci_scores:
+        ciScores:
           type: array
           items:
             $ref: '#/components/schemas/Models.TeamScoreEntry'
@@ -7699,42 +7699,42 @@ components:
     Models.PublicTeamScoreResponse:
       type: object
       required:
-        - team_id
-        - team_name
-        - wv_scores
-        - wn_scores
-        - ci_scores
-        - member_count
-        - completed_count
+        - teamId
+        - teamName
+        - wvScores
+        - wnScores
+        - ciScores
+        - memberCount
+        - completedCount
       properties:
-        team_id:
+        teamId:
           type: string
           description: チームID
-        team_name:
+        teamName:
           type: string
           description: チーム名
-        wv_scores:
+        wvScores:
           type: array
           items:
             $ref: '#/components/schemas/Models.PublicScoreEntry'
           nullable: true
           description: Work Values 集計（完了者不足時は null）
-        wn_scores:
+        wnScores:
           type: array
           items:
             $ref: '#/components/schemas/Models.PublicScoreEntry'
           nullable: true
           description: Work Needs 集計（完了者不足時は null）
-        ci_scores:
+        ciScores:
           type: array
           items:
             $ref: '#/components/schemas/Models.PublicScoreEntry'
           nullable: true
           description: Career Interest 集計（完了者不足時は null）
-        member_count:
+        memberCount:
           type: integer
           description: メンバー数
-        completed_count:
+        completedCount:
           type: integer
           description: 診断完了者数
       description: チームの公開集計スコア
@@ -8238,34 +8238,34 @@ components:
     Models.SimilarUserExperience:
       type: object
       required:
-        - company_name
+        - companyName
         - title
-        - is_current
+        - isCurrent
       properties:
-        company_name:
+        companyName:
           type: string
           description: 会社名
         title:
           type: string
           description: 役職
-        is_current:
+        isCurrent:
           type: boolean
           description: 現職か
       description: 類似ユーザーの職歴（要約）
     Models.SimilarUserItem:
       type: object
       required:
-        - user_id
+        - userId
         - username
         - name
         - headline
-        - avatar_url
-        - profile_color
+        - avatarUrl
+        - profileColor
         - similarity
-        - top_needs
+        - topNeeds
         - experiences
       properties:
-        user_id:
+        userId:
           type: string
           description: ユーザーID
         username:
@@ -8278,11 +8278,11 @@ components:
           type: string
           nullable: true
           description: ヘッドライン
-        avatar_url:
+        avatarUrl:
           type: string
           nullable: true
           description: アバター画像URL
-        profile_color:
+        profileColor:
           type: string
           nullable: true
           description: プロフィールカラー
@@ -8290,7 +8290,7 @@ components:
           type: number
           format: double
           description: 類似度（0-1）
-        top_needs:
+        topNeeds:
           type: array
           items:
             type: string
@@ -8387,19 +8387,19 @@ components:
     Models.TalentCard:
       type: object
       required:
-        - user_id
+        - userId
         - username
         - name
         - headline
-        - avatar_url
-        - profile_color
-        - job_seeking_status
+        - avatarUrl
+        - profileColor
+        - jobSeekingStatus
         - skills
         - experiences
-        - top_wv_labels
-        - top_ci_labels
+        - topWvLabels
+        - topCiLabels
       properties:
-        user_id:
+        userId:
           type: string
           description: ユーザーID
         username:
@@ -8412,15 +8412,15 @@ components:
           type: string
           nullable: true
           description: ヘッドライン
-        avatar_url:
+        avatarUrl:
           type: string
           nullable: true
           description: アバター画像URL
-        profile_color:
+        profileColor:
           type: string
           nullable: true
           description: プロフィールカラー
-        job_seeking_status:
+        jobSeekingStatus:
           type: string
           nullable: true
           description: 求職ステータス
@@ -8434,12 +8434,12 @@ components:
           items:
             $ref: '#/components/schemas/Models.TalentExperience'
           description: 職歴
-        top_wv_labels:
+        topWvLabels:
           type: array
           items:
             type: string
           description: Work Values 上位ラベル
-        top_ci_labels:
+        topCiLabels:
           type: array
           items:
             type: string
@@ -8448,15 +8448,15 @@ components:
           type: number
           format: double
           description: 類似度
-        wv_similarity:
+        wvSimilarity:
           type: number
           format: double
           description: Work Values 類似度
-        ci_similarity:
+        ciSimilarity:
           type: number
           format: double
           description: Career Interest 類似度
-        integrated_similarity:
+        integratedSimilarity:
           type: number
           format: double
           description: 統合類似度
@@ -8464,10 +8464,10 @@ components:
     Models.TalentExperience:
       type: object
       required:
-        - company_name
+        - companyName
         - title
       properties:
-        company_name:
+        companyName:
           type: string
           description: 会社名
         title:
@@ -8493,17 +8493,17 @@ components:
       type: object
       required:
         - id
-        - company_id
+        - companyId
         - name
         - description
-        - is_public
+        - isPublic
         - members
-        - created_at
+        - createdAt
       properties:
         id:
           type: string
           description: チームID
-        company_id:
+        companyId:
           type: string
           description: 企業ID
         name:
@@ -8513,7 +8513,7 @@ components:
           type: string
           nullable: true
           description: 説明
-        is_public:
+        isPublic:
           type: boolean
           description: 公開フラグ
         members:
@@ -8521,7 +8521,7 @@ components:
           items:
             $ref: '#/components/schemas/Models.TeamMemberResponse'
           description: メンバー一覧
-        created_at:
+        createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）
       description: チーム詳細（メンバー付き）
@@ -8542,11 +8542,11 @@ components:
         - id
         - name
         - email
-        - invite_token
-        - wv_status
-        - ci_status
-        - is_ace
-        - created_at
+        - inviteToken
+        - wvStatus
+        - ciStatus
+        - isAce
+        - createdAt
       properties:
         id:
           type: string
@@ -8558,19 +8558,19 @@ components:
           type: string
           nullable: true
           description: 招待メールアドレス
-        invite_token:
+        inviteToken:
           type: string
           description: 診断招待トークン
-        wv_status:
+        wvStatus:
           type: string
           description: Work Values 診断ステータス
-        ci_status:
+        ciStatus:
           type: string
           description: Career Interest 診断ステータス
-        is_ace:
+        isAce:
           type: boolean
           description: エースメンバーか
-        created_at:
+        createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）
       description: チームメンバー
@@ -8578,19 +8578,19 @@ components:
       type: object
       required:
         - id
-        - company_id
+        - companyId
         - name
         - description
-        - is_public
-        - member_count
-        - wv_completed
-        - ci_completed
-        - created_at
+        - isPublic
+        - memberCount
+        - wvCompleted
+        - ciCompleted
+        - createdAt
       properties:
         id:
           type: string
           description: チームID
-        company_id:
+        companyId:
           type: string
           description: 企業ID
         name:
@@ -8600,19 +8600,19 @@ components:
           type: string
           nullable: true
           description: 説明
-        is_public:
+        isPublic:
           type: boolean
           description: 公開フラグ
-        member_count:
+        memberCount:
           type: integer
           description: メンバー数
-        wv_completed:
+        wvCompleted:
           type: integer
           description: Work Values 完了数
-        ci_completed:
+        ciCompleted:
           type: integer
           description: Career Interest 完了数
-        created_at:
+        createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）
       description: チーム（サマリー）
@@ -8620,13 +8620,13 @@ components:
       type: object
       required:
         - id
-        - display_score
+        - displayScore
         - rank
       properties:
         id:
           type: string
           description: スコアID（need/value/type）
-        display_score:
+        displayScore:
           type: number
           format: double
           description: 表示スコア
@@ -8794,11 +8794,11 @@ components:
     Models.UpdateDiagnoseStatusRequest:
       type: object
       properties:
-        wv_status:
+        wvStatus:
           type: string
           nullable: true
           description: Work Values 診断ステータス
-        ci_status:
+        ciStatus:
           type: string
           nullable: true
           description: Career Interest 診断ステータス
@@ -8924,7 +8924,7 @@ components:
           type: string
           nullable: true
           description: 説明
-        is_public:
+        isPublic:
           type: boolean
           nullable: true
           description: 公開フラグ（未指定なら変更しない）
@@ -9083,7 +9083,7 @@ components:
       required:
         - id
         - label
-        - description_ja
+        - descriptionJa
       properties:
         id:
           type: string
@@ -9091,29 +9091,29 @@ components:
         label:
           type: string
           description: ラベル
-        description_ja:
+        descriptionJa:
           type: string
           description: 説明（日本語）
       description: Work Need 定義
     Models.WVNeedScore:
       type: object
       required:
-        - need_id
+        - needId
         - label
-        - description_ja
-        - display_score
+        - descriptionJa
+        - displayScore
         - rank
       properties:
-        need_id:
+        needId:
           type: string
           description: ニーズID
         label:
           type: string
           description: ラベル
-        description_ja:
+        descriptionJa:
           type: string
           description: 説明（日本語）
-        display_score:
+        displayScore:
           type: number
           format: double
           description: 表示スコア（0-100）
@@ -9125,34 +9125,34 @@ components:
     Models.WVPairResponse:
       type: object
       required:
-        - need_a
-        - need_b
+        - needA
+        - needB
       properties:
-        need_a:
+        needA:
           type: string
           description: ニーズA
-        need_b:
+        needB:
           type: string
           description: ニーズB
       description: 一対比較ペア
     Models.WVResponseItem:
       type: object
       required:
-        - need_a
-        - need_b
+        - needA
+        - needB
         - winner
-        - question_number
+        - questionNumber
       properties:
-        need_a:
+        needA:
           type: string
           description: ニーズA
-        need_b:
+        needB:
           type: string
           description: ニーズB
         winner:
           type: string
-          description: 勝者（need_a か need_b の ID）
-        question_number:
+          description: 勝者（needA か needB の ID）
+        questionNumber:
           type: integer
           format: int32
           description: 質問番号
@@ -9161,19 +9161,19 @@ components:
       type: object
       required:
         - id
-        - session_id
-        - user_id
+        - sessionId
+        - userId
         - needs
         - values
-        - created_at
+        - createdAt
       properties:
         id:
           type: string
           description: 結果ID
-        session_id:
+        sessionId:
           type: string
           description: セッションID
-        user_id:
+        userId:
           type: string
           description: ユーザーID
         needs:
@@ -9186,7 +9186,7 @@ components:
           items:
             $ref: '#/components/schemas/Models.WVValueScoreResponse'
           description: Value スコア
-        created_at:
+        createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）
       description: Work Values 診断結果
@@ -9195,7 +9195,7 @@ components:
       required:
         - id
         - status
-        - initial_pairs
+        - initialPairs
         - needs
       properties:
         id:
@@ -9204,7 +9204,7 @@ components:
         status:
           type: string
           description: ステータス
-        initial_pairs:
+        initialPairs:
           type: array
           items:
             $ref: '#/components/schemas/Models.WVPairResponse'
@@ -9218,9 +9218,9 @@ components:
     Models.WVStartSessionRequest:
       type: object
       required:
-        - user_id
+        - userId
       properties:
-        user_id:
+        userId:
           type: string
           description: ユーザーID
       description: Work Values セッション開始リクエスト
@@ -9252,14 +9252,14 @@ components:
     Models.WVValueScoreResponse:
       type: object
       required:
-        - value_id
-        - display_score
+        - valueId
+        - displayScore
         - rank
       properties:
-        value_id:
+        valueId:
           type: string
           description: Value ID
-        display_score:
+        displayScore:
           type: number
           format: double
           description: 表示スコア（0-100）

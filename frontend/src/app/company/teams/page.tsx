@@ -8,10 +8,10 @@ type Team = {
   id: string;
   name: string;
   description: string | null;
-  member_count: number;
-  wv_completed: number;
-  ci_completed: number;
-  created_at: string;
+  memberCount: number;
+  wvCompleted: number;
+  ciCompleted: number;
+  createdAt: string;
 };
 
 export default function TeamsPage() {
@@ -29,9 +29,9 @@ export default function TeamsPage() {
     return () => { cancelled = true; };
   }, [companyFetch]);
 
-  const totalMembers = teams.reduce((s, t) => s + t.member_count, 0);
-  const totalWv = teams.reduce((s, t) => s + t.wv_completed, 0);
-  const totalCi = teams.reduce((s, t) => s + t.ci_completed, 0);
+  const totalMembers = teams.reduce((s, t) => s + t.memberCount, 0);
+  const totalWv = teams.reduce((s, t) => s + t.wvCompleted, 0);
+  const totalCi = teams.reduce((s, t) => s + t.ciCompleted, 0);
   const totalDiag = totalMembers * 2;
   const completedDiag = totalWv + totalCi;
   const overallPct = totalDiag > 0 ? Math.round((completedDiag / totalDiag) * 100) : 0;
@@ -148,9 +148,9 @@ function SummaryCard({
 }
 
 function TeamCard({ team }: { team: Team }) {
-  const wvPct = team.member_count > 0 ? team.wv_completed / team.member_count : 0;
-  const ciPct = team.member_count > 0 ? team.ci_completed / team.member_count : 0;
-  const allComplete = team.member_count > 0 && wvPct === 1 && ciPct === 1;
+  const wvPct = team.memberCount > 0 ? team.wvCompleted / team.memberCount : 0;
+  const ciPct = team.memberCount > 0 ? team.ciCompleted / team.memberCount : 0;
+  const allComplete = team.memberCount > 0 && wvPct === 1 && ciPct === 1;
 
   return (
     <Link
@@ -184,7 +184,7 @@ function TeamCard({ team }: { team: Team }) {
             </div>
             <div>
               <p className="text-base font-bold text-gray-900">
-                {team.member_count}<span className="ml-0.5 text-sm font-normal text-gray-400">人</span>
+                {team.memberCount}<span className="ml-0.5 text-sm font-normal text-gray-400">人</span>
               </p>
               <p className="text-sm text-gray-400">メンバー</p>
             </div>
@@ -203,7 +203,7 @@ function TeamCard({ team }: { team: Team }) {
             />
             <div>
               <p className="text-base font-bold text-gray-900">
-                {team.wv_completed}/{team.member_count}
+                {team.wvCompleted}/{team.memberCount}
               </p>
               <p className="text-sm text-gray-400">価値観診断</p>
             </div>
@@ -220,7 +220,7 @@ function TeamCard({ team }: { team: Team }) {
             />
             <div>
               <p className="text-base font-bold text-gray-900">
-                {team.ci_completed}/{team.member_count}
+                {team.ciCompleted}/{team.memberCount}
               </p>
               <p className="text-sm text-gray-400">興味診断</p>
             </div>

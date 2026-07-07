@@ -25,7 +25,7 @@ type createIntegratedReportRequestBody struct {
 	Topic1   int16  `json:"topic1"`
 	Topic2   int16  `json:"topic2"`
 	Topic3   int16  `json:"topic3"`
-	FreeText string `json:"free_text"`
+	FreeText string `json:"freeText"`
 }
 
 func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) error {
@@ -43,7 +43,7 @@ func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) err
 		return badRequest(ctx, "topics must be distinct")
 	}
 	if len([]rune(body.FreeText)) > 200 {
-		return badRequest(ctx, "free_text must be 200 characters or less")
+		return badRequest(ctx, "freeText must be 200 characters or less")
 	}
 
 	parsedUserID, err := uuid.Parse(userID)
@@ -64,12 +64,12 @@ func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) err
 	}
 
 	return ctx.JSON(http.StatusCreated, map[string]any{
-		"id":         pgUUIDToString(req.ID),
-		"topic1":     req.Topic1,
-		"topic2":     req.Topic2,
-		"topic3":     req.Topic3,
-		"free_text":  req.FreeText,
-		"created_at": req.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+		"id":        pgUUIDToString(req.ID),
+		"topic1":    req.Topic1,
+		"topic2":    req.Topic2,
+		"topic3":    req.Topic3,
+		"freeText":  req.FreeText,
+		"createdAt": req.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 	})
 }
 
@@ -163,12 +163,12 @@ func (ctrl *AdminIntegratedReportController) GetReport(ctx echo.Context, request
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
-		"id":         pgUUIDToString(report.ID),
-		"request_id": pgUUIDToString(report.RequestID),
-		"user_id":    pgUUIDToString(report.UserID),
-		"content":    report.Content,
-		"created_at": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-		"first_view": firstView,
+		"id":        pgUUIDToString(report.ID),
+		"requestId": pgUUIDToString(report.RequestID),
+		"userId":    pgUUIDToString(report.UserID),
+		"content":   report.Content,
+		"createdAt": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+		"firstView": firstView,
 	})
 }
 
@@ -195,11 +195,11 @@ func (ctrl *AdminIntegratedReportController) GetReportByUser(ctx echo.Context) e
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
-		"id":         pgUUIDToString(report.ID),
-		"request_id": pgUUIDToString(report.RequestID),
-		"content":    report.Content,
-		"created_at": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-		"first_view": firstView,
+		"id":        pgUUIDToString(report.ID),
+		"requestId": pgUUIDToString(report.RequestID),
+		"content":   report.Content,
+		"createdAt": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+		"firstView": firstView,
 	})
 }
 
@@ -224,16 +224,16 @@ func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) 
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return ctx.JSON(http.StatusOK, map[string]any{
-				"status":     "pending",
-				"request_id": pgUUIDToString(req.ID),
+				"status":    "pending",
+				"requestId": pgUUIDToString(req.ID),
 			})
 		}
 		return internalError(ctx, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
-		"status":     "ready",
-		"request_id": pgUUIDToString(report.RequestID),
+		"status":    "ready",
+		"requestId": pgUUIDToString(report.RequestID),
 	})
 }
 
@@ -302,9 +302,9 @@ func (ctrl *AdminIntegratedReportController) GetLatestRequest(ctx echo.Context, 
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]any{
-		"request_id": pgUUIDToString(req.ID),
-		"user_id":    pgUUIDToString(req.UserID),
-		"has_report": hasReport,
-		"created_at": req.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+		"requestId": pgUUIDToString(req.ID),
+		"userId":    pgUUIDToString(req.UserID),
+		"hasReport": hasReport,
+		"createdAt": req.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 	})
 }

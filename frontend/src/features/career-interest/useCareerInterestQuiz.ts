@@ -69,8 +69,8 @@ export function useCareerInterestQuiz(userId: string) {
     if (!currentItem) return;
 
     responsesRef.current.push({
-      question_number: currentIndex + 1,
-      item_code: currentItem.item_code,
+      questionNumber: currentIndex + 1,
+      itemCode: currentItem.itemCode,
       score,
     });
 

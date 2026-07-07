@@ -51,7 +51,7 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
 
         <div className="divide-y divide-gray-100">
           {users.map((u) => (
-            <SimilarUserRow key={u.user_id} user={u} />
+            <SimilarUserRow key={u.userId} user={u} />
           ))}
         </div>
       </div>
@@ -60,9 +60,9 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
 }
 
 function SimilarUserRow({ user }: { user: ModelsSimilarUserItem }) {
-  const color = user.profile_color ?? "#3D8B6E";
+  const color = user.profileColor ?? "#3D8B6E";
   const experiences = user.experiences ?? [];
-  const topNeeds = user.top_needs ?? [];
+  const topNeeds = user.topNeeds ?? [];
   const simColor =
     user.similarity >= 80
       ? "text-emerald-600 bg-emerald-50"
@@ -96,10 +96,10 @@ function SimilarUserRow({ user }: { user: ModelsSimilarUserItem }) {
           <div className="mt-1.5 space-y-1.5">
             {experiences.map((exp, i) => (
               <div key={i} className="flex gap-1.5">
-                <span className={`mt-[5px] inline-block w-1.5 h-1.5 rounded-full shrink-0 ${exp.is_current ? "bg-emerald-400" : "bg-gray-300"}`} />
+                <span className={`mt-[5px] inline-block w-1.5 h-1.5 rounded-full shrink-0 ${exp.isCurrent ? "bg-emerald-400" : "bg-gray-300"}`} />
                 <div className="min-w-0">
                   <p className="text-[13px] font-medium text-gray-700 leading-tight">
-                    {exp.company_name}
+                    {exp.companyName}
                   </p>
                   <p className="text-[12px] text-gray-400 leading-tight">
                     {exp.title}

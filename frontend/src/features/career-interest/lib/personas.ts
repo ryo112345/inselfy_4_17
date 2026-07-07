@@ -47,14 +47,14 @@ const PERSONA_MAP: Record<string, { name: string; subtitle: string }> = {
   "C_E": { name: "立案家",   subtitle: "計画を立て、着実にゴールへ導く" },
 };
 
-export function getCIPersona(sortedTypes: { type_id: string }[]): {
+export function getCIPersona(sortedTypes: { typeId: string }[]): {
   modifier: string;
   name: string;
   subtitle: string;
 } {
-  const first = sortedTypes[0].type_id as TypeId;
-  const second = sortedTypes[1].type_id as TypeId;
-  const third = sortedTypes[2].type_id as TypeId;
+  const first = sortedTypes[0].typeId as TypeId;
+  const second = sortedTypes[1].typeId as TypeId;
+  const third = sortedTypes[2].typeId as TypeId;
 
   const persona = PERSONA_MAP[`${first}_${second}`] ?? { name: "—", subtitle: "" };
   const modifier = CI_MODIFIERS[third] ?? "";

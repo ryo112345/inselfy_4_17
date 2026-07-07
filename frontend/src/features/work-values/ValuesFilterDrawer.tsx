@@ -41,11 +41,11 @@ export function ValuesFilterDrawer({
 
   const valueItems: ScoreItem[] = useMemo(() => {
     return VALUE_IDS.map((id) => {
-      const uv = userValues?.find((v) => v.value_id === id);
+      const uv = userValues?.find((v) => v.valueId === id);
       return {
         id,
         label: VALUE_LABELS[id],
-        userScore: uv ? Math.round(uv.display_score) : 50,
+        userScore: uv ? Math.round(uv.displayScore) : 50,
         threshold: thresholds[id] ?? 0,
       };
     }).sort((a, b) => b.userScore - a.userScore);
@@ -53,11 +53,11 @@ export function ValuesFilterDrawer({
 
   const needItems: ScoreItem[] = useMemo(() => {
     return NEED_IDS.map((id) => {
-      const un = userNeeds?.find((n) => n.need_id === id);
+      const un = userNeeds?.find((n) => n.needId === id);
       return {
         id,
         label: NEED_LABELS[id],
-        userScore: un ? Math.round(un.display_score) : 50,
+        userScore: un ? Math.round(un.displayScore) : 50,
         threshold: thresholds[id] ?? 0,
       };
     }).sort((a, b) => b.userScore - a.userScore);

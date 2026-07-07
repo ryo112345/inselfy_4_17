@@ -174,7 +174,7 @@ function QuizScreen({
         {/* choices */}
         <div className="relative z-10 px-8 pb-8 flex flex-col gap-3">
           <ChoiceButton
-            label={needDefs[pair.needA]?.description_ja ?? pair.needA}
+            label={needDefs[pair.needA]?.descriptionJa ?? pair.needA}
             onClick={() => onAnswer(pair.needA)}
             variant="a"
           />
@@ -184,7 +184,7 @@ function QuizScreen({
             <div className="flex-1 h-px bg-gray-700" />
           </div>
           <ChoiceButton
-            label={needDefs[pair.needB]?.description_ja ?? pair.needB}
+            label={needDefs[pair.needB]?.descriptionJa ?? pair.needB}
             onClick={() => onAnswer(pair.needB)}
             variant="b"
           />

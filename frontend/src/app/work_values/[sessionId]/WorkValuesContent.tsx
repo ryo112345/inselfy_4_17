@@ -90,12 +90,12 @@ export function WorkValuesResultContent({ sessionId, initialData, isOwner = true
     );
   }
 
-  const needScoreMap = new Map(result.needs.map((n) => [n.need_id, n]));
+  const needScoreMap = new Map(result.needs.map((n) => [n.needId, n]));
   const sortedValues = [...result.values].sort((a, b) => a.rank - b.rank);
 
   return (
     <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 pt-5 pb-8">
-      <TopValuesCodeSection values={sortedValues} badge={badge} createdAt={result.created_at} />
+      <TopValuesCodeSection values={sortedValues} badge={badge} createdAt={result.createdAt} />
       <ValuesSection values={sortedValues} colors={colors} badge={badge} />
       <NeedsSection values={sortedValues} needScoreMap={needScoreMap} colors={colors} badge={badge} />
 
@@ -224,14 +224,14 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
       <div className="relative hidden md:grid grid-cols-3 items-center -mt-11">
         <div className="flex flex-col items-end gap-1 pr-4 justify-self-center translate-x-2">
           {top3.map((v) => (
-            <span key={v.value_id} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
-              {VALUE_ENGLISH_NAMES[v.value_id as ValueId]}
+            <span key={v.valueId} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+              {VALUE_ENGLISH_NAMES[v.valueId as ValueId]}
             </span>
           ))}
         </div>
         <div className="flex items-end justify-center gap-2.5">
             {top3.map((v, i) => {
-              const vid = v.value_id as ValueId;
+              const vid = v.valueId as ValueId;
               const sizes = [
                 { size: "80px", text: "text-3xl", radius: "rounded-2xl" },
                 { size: "64px", text: "text-2xl", radius: "rounded-2xl" },
@@ -257,7 +257,7 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
       <div className="relative flex flex-col items-center gap-4 md:hidden">
         <div className="flex items-end justify-center gap-2.5">
           {top3.map((v, i) => {
-            const vid = v.value_id as ValueId;
+            const vid = v.valueId as ValueId;
             const sizes = [
               { size: "72px", text: "text-2xl", radius: "rounded-2xl" },
               { size: "58px", text: "text-xl", radius: "rounded-2xl" },
@@ -277,8 +277,8 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
         </div>
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-0.5">
           {top3.map((v) => (
-            <span key={v.value_id} className="text-[14px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
-              {VALUE_ENGLISH_NAMES[v.value_id as ValueId]}
+            <span key={v.valueId} className="text-[14px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+              {VALUE_ENGLISH_NAMES[v.valueId as ValueId]}
             </span>
           ))}
         </div>
@@ -294,9 +294,9 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
   const cx = 95;
   const cy = 95;
   const R = 60;
-  const scoreMap = new Map(values.map((v) => [v.value_id, v]));
+  const scoreMap = new Map(values.map((v) => [v.valueId, v]));
   const top3Set = new Set(
-    [...values].sort((a, b) => a.rank - b.rank).slice(0, 3).map((v) => v.value_id)
+    [...values].sort((a, b) => a.rank - b.rank).slice(0, 3).map((v) => v.valueId)
   );
 
   const hexPoint = (i: number, r: number) => {
@@ -312,7 +312,7 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
 
   const dataPoints = RADAR_ORDER.map((vid, i) => {
     const v = scoreMap.get(vid);
-    const score = v ? v.display_score / 100 : 0;
+    const score = v ? v.displayScore / 100 : 0;
     return hexPoint(i, R * Math.max(score, 0.05));
   });
   const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
@@ -368,7 +368,7 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
 type ScoreColors = typeof SCORE_COLORS;
 
 function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"]; colors: ScoreColors; badge: BadgeColors }) {
-  const maxScore = Math.max(...values.map((v) => v.display_score));
+  const maxScore = Math.max(...values.map((v) => v.displayScore));
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const toggle = (id: string) => setOpenIds((prev) => {
     const next = new Set(prev);
@@ -385,9 +385,9 @@ function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"];
 
       <div>
         {values.map((v, i) => {
-          const vid = v.value_id as ValueId;
-          const barPct = v.display_score;
-          const barColor = scoreColor(v.display_score, colors);
+          const vid = v.valueId as ValueId;
+          const barPct = v.displayScore;
+          const barColor = scoreColor(v.displayScore, colors);
           const isOpen = openIds.has(vid);
 
           return (
@@ -412,7 +412,7 @@ function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"];
                 </p>
 
                 <span className="pl-2 text-[22px] font-bold tabular-nums ml-1 w-16 text-right shrink-0" style={{ color: barColor }}>
-                  {v.display_score.toFixed(1)}
+                  {v.displayScore.toFixed(1)}
                 </span>
 
                 <button
@@ -464,7 +464,7 @@ function NeedsSection({
 
       <div className="flex flex-col gap-3">
         {values.map((v) => {
-          const vid = v.value_id as ValueId;
+          const vid = v.valueId as ValueId;
           const needIds = VALUE_NEEDS[vid];
           const needsWithScores = needIds
             .map((nid) => ({ nid: nid as NeedId, score: needScoreMap.get(nid) }))
@@ -511,7 +511,7 @@ function NeedRow({ score, colors, badge, showDivider = false }: { score: NeedSco
     : score.rank >= 19
       ? { color: badge.rankBottomColor }
       : { color: badge.rankColor };
-  const barColor = scoreColor(score.display_score, colors);
+  const barColor = scoreColor(score.displayScore, colors);
 
   return (
     <div>
@@ -531,7 +531,7 @@ function NeedRow({ score, colors, badge, showDivider = false }: { score: NeedSco
       </div>
 
       <p className="hidden md:block flex-1 text-[13px] font-medium leading-snug min-w-0" style={{ color: badge.descColor }}>
-        {score.description_ja}
+        {score.descriptionJa}
       </p>
       <div className="flex-1 md:hidden" />
 
@@ -540,14 +540,14 @@ function NeedRow({ score, colors, badge, showDivider = false }: { score: NeedSco
         <div className="h-[5px] rounded-full bg-gray-200 overflow-hidden">
           <div
             className="h-full rounded-full"
-            style={{ width: `${score.display_score}%`, backgroundColor: barColor }}
+            style={{ width: `${score.displayScore}%`, backgroundColor: barColor }}
           />
         </div>
       </div>
 
       {/* score */}
       <span className="text-[14px] font-bold tabular-nums w-10 text-right shrink-0" style={{ color: barColor }}>
-        {score.display_score.toFixed(1)}
+        {score.displayScore.toFixed(1)}
       </span>
 
       {/* chevron */}
@@ -674,8 +674,8 @@ function AiReportSection({ sessionId, badge, isOwner = true }: { sessionId: stri
         if (cancelled) return;
         if (data?.content) {
           setReportContent(data.content);
-          setFirstView(!!data.first_view);
-          if (!data.first_view) setShowReport(true);
+          setFirstView(!!data.firstView);
+          if (!data.firstView) setShowReport(true);
         }
       })
       .catch(() => {})
@@ -712,7 +712,7 @@ function AiReportSection({ sessionId, badge, isOwner = true }: { sessionId: stri
         .then((data) => {
           if (data?.content) {
             setReportContent(data.content);
-            setFirstView(!!data.first_view);
+            setFirstView(!!data.firstView);
             setShowReport(true);
           } else {
             setNotFound(true);

@@ -168,7 +168,7 @@ function QuizScreen({
         {/* question text */}
         <div className="relative z-10 px-8 pb-2">
           <p className="text-gray-800 text-[17px] leading-relaxed text-center">
-            {item.text_ja}
+            {item.textJa}
           </p>
         </div>
 

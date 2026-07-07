@@ -8,25 +8,25 @@ namespace Inselfy.Models;
 /** チーム診断リンク情報 */
 model DiagnoseInfoResponse {
   /** チームメンバーID */
-  member_id: string;
+  memberId: string;
 
   /** メンバー名 */
-  member_name: string;
+  memberName: string;
 
   /** チーム名 */
-  team_name: string;
+  teamName: string;
 
   /** 企業名 */
-  company_name: string;
+  companyName: string;
 
   /** 紐づくユーザーID（未紐づけは空文字） */
-  user_id: string;
+  userId: string;
 
   /** Work Values 診断ステータス */
-  wv_status: string;
+  wvStatus: string;
 
   /** Career Interest 診断ステータス */
-  ci_status: string;
+  ciStatus: string;
 
   /** 招待メールアドレス */
   email: string | null;
@@ -35,8 +35,8 @@ model DiagnoseInfoResponse {
 /** チーム診断ステータス更新リクエスト（指定したキーのみ更新） */
 model UpdateDiagnoseStatusRequest {
   /** Work Values 診断ステータス */
-  wv_status?: string | null;
+  wvStatus?: string | null;
 
   /** Career Interest 診断ステータス */
-  ci_status?: string | null;
+  ciStatus?: string | null;
 }

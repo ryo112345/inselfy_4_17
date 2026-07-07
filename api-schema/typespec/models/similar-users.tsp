@@ -8,19 +8,19 @@ namespace Inselfy.Models;
 /** 類似ユーザーの職歴（要約） */
 model SimilarUserExperience {
   /** 会社名 */
-  company_name: string;
+  companyName: string;
 
   /** 役職 */
   title: string;
 
   /** 現職か */
-  is_current: boolean;
+  isCurrent: boolean;
 }
 
 /** 類似ユーザー */
 model SimilarUserItem {
   /** ユーザーID */
-  user_id: string;
+  userId: string;
 
   /** ユーザー名 */
   username: string;
@@ -32,16 +32,16 @@ model SimilarUserItem {
   headline: string | null;
 
   /** アバター画像URL */
-  avatar_url: string | null;
+  avatarUrl: string | null;
 
   /** プロフィールカラー */
-  profile_color: string | null;
+  profileColor: string | null;
 
   /** 類似度（0-1） */
   similarity: float64;
 
   /** 上位の Work Needs ID */
-  top_needs: string[] | null;
+  topNeeds: string[] | null;
 
   /** 職歴（現職優先の要約） */
   experiences: SimilarUserExperience[] | null;

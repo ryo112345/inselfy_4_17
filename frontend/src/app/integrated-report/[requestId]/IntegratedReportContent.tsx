@@ -90,19 +90,19 @@ type Props = {
 
 export function IntegratedReportContent({ requestId, isOwner = true, wvResult, ciResult }: Props) {
   const wvScores = useMemo(() =>
-    wvResult?.values?.map((v) => ({ id: v.value_id, score: v.display_score })) ?? null,
+    wvResult?.values?.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
     [wvResult],
   );
   const ciScores = useMemo(() =>
-    ciResult?.type_scores?.map((t) => ({ id: t.type_id, score: t.score })) ?? null,
+    ciResult?.typeScores?.map((t) => ({ id: t.typeId, score: t.score })) ?? null,
     [ciResult],
   );
   const wvNeedScores = useMemo(() =>
-    wvResult?.needs?.map((n) => ({ id: n.need_id, score: n.display_score })) ?? null,
+    wvResult?.needs?.map((n) => ({ id: n.needId, score: n.displayScore })) ?? null,
     [wvResult],
   );
   const ciBasicScores = useMemo(() =>
-    ciResult?.basic_scores?.map((b) => ({ id: b.basic_interest_id, score: b.score })) ?? null,
+    ciResult?.basicScores?.map((b) => ({ id: b.basicInterestId, score: b.score })) ?? null,
     [ciResult],
   );
   const hasCharts = !!wvScores || !!ciScores;
@@ -122,8 +122,8 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
         if (cancelled) return;
         if (data?.content) {
           setReportContent(data.content);
-          setFirstView(!!data.first_view);
-          if (!data.first_view) setShowReport(true);
+          setFirstView(!!data.firstView);
+          if (!data.firstView) setShowReport(true);
         }
       })
       .catch(() => {})
