@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/interview"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -53,6 +54,21 @@ func NewInterviewInteractor(
 }
 
 func (i *InterviewInteractor) Propose(ctx context.Context, input interview.ProposeInput) (*interview.ProposeOutput, error) {
+	if len(input.Slots) == 0 {
+		return nil, interview.ErrNoSlots
+	}
+	if len(input.Slots) > 10 {
+		return nil, interview.ErrTooManySlots
+	}
+	for _, s := range input.Slots {
+		if !s.EndTime.After(s.StartTime) {
+			return nil, interview.ErrInvalidTimeRange
+		}
+	}
+	if len([]rune(input.Message)) > 5000 {
+		return nil, domainerr.NewValidation("message は 5000 文字以下にしてください")
+	}
+
 	candidateID, err := i.query.ApplicationCandidateID(ctx, input.ApplicationID, input.CompanyID)
 	if err != nil {
 		return nil, interview.ErrApplicationNotFound

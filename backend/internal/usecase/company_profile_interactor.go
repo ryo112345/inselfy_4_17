@@ -2,10 +2,8 @@ package usecase
 
 import (
 	"context"
-	"strings"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
-	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -30,8 +28,8 @@ func (i *CompanyProfileInteractor) GetPublicProfile(ctx context.Context, company
 }
 
 func (i *CompanyProfileInteractor) UpdateProfile(ctx context.Context, companyID string, input company.UpdateProfileInput) error {
-	if strings.TrimSpace(input.CompanyName) == "" {
-		return domainerr.NewValidation("企業名は必須です")
+	if err := company.ValidateUpdateProfile(input); err != nil {
+		return err
 	}
 	return i.repo.UpdateProfile(ctx, companyID, input)
 }

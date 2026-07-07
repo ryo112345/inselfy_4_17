@@ -27,6 +27,10 @@ var validStatuses = map[Status]bool{
 	StatusWithdrawn: true,
 }
 
+// MaxMessageLength caps the free-text message attached to an application.
+// Keep in sync with api-schema/typespec/models/job-application.tsp.
+const MaxMessageLength = 5000
+
 var (
 	ErrAlreadyApplied = errors.New("already applied to this job")
 	ErrInvalidStatus  = errors.New("invalid application status")
