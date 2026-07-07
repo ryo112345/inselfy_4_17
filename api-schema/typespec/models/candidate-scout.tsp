@@ -14,6 +14,7 @@ model ScoutRespondRequest {
 /** 候補者からのスカウト返信リクエスト */
 model CandidateScoutReplyRequest {
   /** 本文 */
+  @maxLength(5000)
   body: string;
 }
 

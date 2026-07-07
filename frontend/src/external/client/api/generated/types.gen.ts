@@ -947,7 +947,7 @@ export type ModelsCreateArticleRequest = {
      */
     coverImageUrl?: string | null;
     /**
-     * タグ
+     * タグ（各タグは50文字以内）
      */
     tags: Array<string>;
 };
@@ -3521,7 +3521,7 @@ export type ModelsUpdateArticleRequest = {
      */
     coverImageUrl?: string | null;
     /**
-     * タグ
+     * タグ（各タグは50文字以内）
      */
     tags: Array<string>;
 };

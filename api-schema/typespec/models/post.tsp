@@ -8,6 +8,7 @@ namespace Inselfy.Models;
 /** 投稿作成リクエスト */
 model CreatePostRequest {
   /** 本文 */
+  @maxLength(280)
   content: string;
 
   /** 引用元投稿ID */
@@ -17,6 +18,7 @@ model CreatePostRequest {
 /** コメント作成リクエスト */
 model CreateCommentRequest {
   /** 本文 */
+  @maxLength(500)
   content: string;
 }
 

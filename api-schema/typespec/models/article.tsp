@@ -14,21 +14,26 @@ union ArticleStatus {
 /** 記事作成リクエスト */
 model CreateArticleRequest {
   /** タイトル */
+  @maxLength(200)
   title: string;
 
   /** 本文 */
+  @maxLength(100000)
   body: string;
 
   /** 有料記事か */
   isPaid: boolean;
 
   /** 価格（円） */
+  @minValue(0)
+  @maxValue(1000000)
   priceYen: integer;
 
   /** カバー画像URL */
   coverImageUrl?: string | null;
 
-  /** タグ */
+  /** タグ（各タグは50文字以内） */
+  @maxItems(10)
   tags: string[];
 }
 

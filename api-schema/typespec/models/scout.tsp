@@ -36,15 +36,18 @@ model SendScoutRequest {
   templateId?: string | null;
 
   /** 件名 */
+  @maxLength(200)
   subject: string;
 
   /** 本文 */
+  @maxLength(5000)
   body: string;
 }
 
 /** 企業からのスカウト返信リクエスト */
 model CompanyScoutReplyRequest {
   /** 本文 */
+  @maxLength(5000)
   body: string;
 }
 
