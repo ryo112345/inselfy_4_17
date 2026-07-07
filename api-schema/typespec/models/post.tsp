@@ -12,7 +12,7 @@ model CreatePostRequest {
   content: string;
 
   /** 引用元投稿ID */
-  quotePostId?: string;
+  quotePostId?: Uuid;
 }
 
 /** コメント作成リクエスト */
@@ -25,7 +25,7 @@ model CreateCommentRequest {
 /** 引用投稿（要約） */
 model QuotedPostResponse {
   /** 投稿ID */
-  id: string;
+  id: Uuid;
 
   /** 本文 */
   content: string;
@@ -43,10 +43,10 @@ model QuotedPostResponse {
 /** 投稿 */
 model PostResponse {
   /** 投稿ID */
-  id: string;
+  id: Uuid;
 
   /** 投稿者ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** 投稿者ユーザー名 */
   username: string;
@@ -86,13 +86,7 @@ model PostResponse {
 }
 
 /** 投稿一覧 */
-model PostListResponse {
-  /** 投稿 */
-  items: PostResponse[];
-
-  /** 総件数 */
-  total: integer;
-}
+model PostListResponse is ListResponse<PostResponse>;
 
 /** いいねトグル結果 */
 model LikeToggleResponse {
@@ -115,13 +109,13 @@ model RepostToggleResponse {
 /** コメント */
 model CommentResponse {
   /** コメントID */
-  id: string;
+  id: Uuid;
 
   /** 投稿ID */
-  postId: string;
+  postId: Uuid;
 
   /** コメント投稿者ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** ユーザー名 */
   username: string;
@@ -137,10 +131,4 @@ model CommentResponse {
 }
 
 /** コメント一覧 */
-model CommentListResponse {
-  /** コメント */
-  items: CommentResponse[];
-
-  /** 総件数 */
-  total: integer;
-}
+model CommentListResponse is ListResponse<CommentResponse>;

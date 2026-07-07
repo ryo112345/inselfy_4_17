@@ -40,7 +40,7 @@ model ProposeSlotInput {
 /** 面接日程提案リクエスト */
 model ProposeInterviewRequest {
   /** 応募ID */
-  applicationId: string;
+  applicationId: Uuid;
 
   /** メッセージ */
   message: string;
@@ -61,7 +61,7 @@ model ProposeInterviewRequest {
 /** スロット選択リクエスト。slotId 指定か、startTime/endTime の直接指定 */
 model SelectSlotRequest {
   /** 選択するスロットID */
-  slotId: string;
+  slotId: Uuid;
 
   /** 直接指定の開始日時（RFC3339、空文字可） */
   startTime: string;
@@ -73,7 +73,7 @@ model SelectSlotRequest {
 /** 面接候補スロット */
 model InterviewSlotResponse {
   /** スロットID */
-  id: string;
+  id: Uuid;
 
   /** 開始日時 */
   startTime: utcDateTime;
@@ -88,10 +88,10 @@ model InterviewSlotResponse {
 /** 面接（共通フィールド） */
 model InterviewBase {
   /** 面接ID */
-  id: string;
+  id: Uuid;
 
   /** 応募ID */
-  applicationId: string;
+  applicationId: Uuid;
 
   /** 開始日時 */
   startTime: utcDateTime;
@@ -138,15 +138,12 @@ model CandidateInterviewItem {
 }
 
 /** 企業向け面接一覧 */
-model CompanyInterviewListResponse {
-  /** 面接 */
-  items: CompanyInterviewItem[];
-}
+model CompanyInterviewListResponse is ItemsResponse<CompanyInterviewItem>;
 
 /** 候補者に届いている日程提案 */
 model PendingProposalItem {
   /** 提案ID */
-  id: string;
+  id: Uuid;
 
   /** 企業名 */
   companyName: string;
@@ -182,7 +179,7 @@ model CandidateInterviewListResponse {
 /** 面接日程提案結果 */
 model ProposeInterviewResponse {
   /** 提案ID */
-  proposalId: string;
+  proposalId: Uuid;
 
   /** 登録されたスロット */
   slots: InterviewSlotResponse[];
@@ -191,7 +188,7 @@ model ProposeInterviewResponse {
 /** 確定した面接（スロット選択結果） */
 model SelectedInterview {
   /** 面接ID */
-  id: string;
+  id: Uuid;
 
   /** 開始日時 */
   startTime: utcDateTime;
@@ -215,7 +212,7 @@ model PendingProposalCheckResponse {
   hasPending: boolean;
 
   /** 提案ID */
-  proposalId?: string;
+  proposalId?: Uuid;
 
   /** 提案作成日時 */
   createdAt?: utcDateTime;
@@ -224,7 +221,7 @@ model PendingProposalCheckResponse {
 /** 提案サマリー */
 model ProposalSummary {
   /** 提案ID */
-  id: string;
+  id: Uuid;
 
   /** メッセージ */
   message: string;

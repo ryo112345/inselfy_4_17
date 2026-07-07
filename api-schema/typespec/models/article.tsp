@@ -43,7 +43,7 @@ model UpdateArticleRequest is CreateArticleRequest;
 /** 記事 */
 model ArticleResponse {
   /** 記事ID */
-  id: string;
+  id: Uuid;
 
   /** 著者種別（user / company） */
   authorType: string;
@@ -101,13 +101,7 @@ model ArticleResponse {
 }
 
 /** 記事一覧 */
-model ArticleListResponse {
-  /** 記事 */
-  items: ArticleResponse[];
-
-  /** 総件数 */
-  total: integer;
-}
+model ArticleListResponse is ListResponse<ArticleResponse>;
 
 /** Stripe チェックアウトセッション */
 model CheckoutSessionResponse {

@@ -33,10 +33,10 @@ model UpdateEducationRequest is CreateEducationRequest;
 /** 学歴 */
 model EducationResponse {
   /** ID */
-  id: string;
+  id: Uuid;
 
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** 学校名 */
   school: string;
@@ -58,7 +58,4 @@ model EducationResponse {
 }
 
 /** 学歴一覧 */
-model EducationListResponse {
-  /** 学歴 */
-  items: EducationResponse[];
-}
+model EducationListResponse is ItemsResponse<EducationResponse>;

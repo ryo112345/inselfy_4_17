@@ -16,7 +16,7 @@ func PostsListResponse(posts []*post.PostWithUser, total int) any {
 	for i, pw := range posts {
 		items[i] = *postConv.ToPostResponse(pw)
 	}
-	return &openapi.ModelsPostListResponse{Items: items, Total: total}
+	return &openapi.ModelsPostListResponse{Items: items, Total: int32(total)}
 }
 
 // PostLikeToggleResponse builds the like-toggle API response.
@@ -38,5 +38,5 @@ func PostCommentsListResponse(comments []*post.CommentWithUser, total int) any {
 	for i, c := range comments {
 		items[i] = *postConv.ToCommentResponse(c)
 	}
-	return &openapi.ModelsCommentListResponse{Items: items, Total: total}
+	return &openapi.ModelsCommentListResponse{Items: items, Total: int32(total)}
 }

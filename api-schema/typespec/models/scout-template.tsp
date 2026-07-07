@@ -26,10 +26,10 @@ model UpdateScoutTemplateRequest is CreateScoutTemplateRequest;
 /** スカウトテンプレート */
 model ScoutTemplateResponse {
   /** ID */
-  id: string;
+  id: Uuid;
 
   /** 企業ID */
-  companyId: string;
+  companyId: Uuid;
 
   /** テンプレート名 */
   name: string;
@@ -48,7 +48,4 @@ model ScoutTemplateResponse {
 }
 
 /** スカウトテンプレート一覧 */
-model ScoutTemplateListResponse {
-  /** テンプレート */
-  items: ScoutTemplateResponse[];
-}
+model ScoutTemplateListResponse is ItemsResponse<ScoutTemplateResponse>;

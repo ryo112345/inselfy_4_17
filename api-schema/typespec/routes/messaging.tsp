@@ -23,7 +23,7 @@ interface CandidateMessaging {
   ): {
     @statusCode statusCode: 201;
     @body conversation: ConversationResponse;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** 会話一覧（要ログイン） */
   @get
@@ -35,51 +35,51 @@ interface CandidateMessaging {
 
     /** オフセット */
     @query offset?: int32,
-  ): ConversationListResponse | BadRequestError | UnauthorizedError;
+  ): ConversationListResponse | AuthedErrors;
 
   /** 会話取得（要ログイン） */
   @get
   @route("/conversations/{conversationId}")
   @summary("Get a conversation as the candidate")
   getCandidateConversation(
-    @path conversationId: string,
-  ): ConversationResponse | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
+    @path conversationId: Uuid,
+  ): ConversationResponse | AuthedForbiddenErrors;
 
   /** メッセージ一覧（要ログイン） */
   @get
   @route("/conversations/{conversationId}/messages")
   @summary("List messages as the candidate")
   listCandidateMessages(
-    @path conversationId: string,
+    @path conversationId: Uuid,
     @query limit?: int32,
     @query offset?: int32,
-  ): MessageListResponse | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
+  ): MessageListResponse | AuthedForbiddenErrors;
 
   /** メッセージ送信（要ログイン） */
   @post
   @route("/conversations/{conversationId}/messages")
   @summary("Send a message as the candidate")
   sendCandidateMessage(
-    @path conversationId: string,
+    @path conversationId: Uuid,
     @body request: SendMessageRequest,
   ): {
     @statusCode statusCode: 201;
     @body message: MessageResponse;
-  } | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 
   /** 既読化（要ログイン） */
   @post
   @route("/conversations/{conversationId}/read")
   @summary("Mark a conversation as read (candidate)")
   markCandidateConversationRead(
-    @path conversationId: string,
-  ): StatusOkResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path conversationId: Uuid,
+  ): StatusOkResponse | AuthedNotFoundErrors;
 
   /** 未読メッセージ数（要ログイン） */
   @get
   @route("/unread-count")
   @summary("Count unread messages for the candidate")
-  countCandidateUnreadMessages(): UnreadCountResponse | BadRequestError | UnauthorizedError;
+  countCandidateUnreadMessages(): UnreadCountResponse | AuthedErrors;
 }
 
 @route("/api/company/messages")
@@ -95,7 +95,7 @@ interface CompanyMessaging {
   ): {
     @statusCode statusCode: 201;
     @body conversation: ConversationResponse;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** 会話一覧（企業認証） */
   @get
@@ -104,49 +104,49 @@ interface CompanyMessaging {
   listCompanyConversations(
     @query limit?: int32,
     @query offset?: int32,
-  ): ConversationListResponse | BadRequestError | UnauthorizedError;
+  ): ConversationListResponse | AuthedErrors;
 
   /** 会話取得（企業認証） */
   @get
   @route("/conversations/{conversationId}")
   @summary("Get a conversation as the company")
   getCompanyConversation(
-    @path conversationId: string,
-  ): ConversationResponse | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
+    @path conversationId: Uuid,
+  ): ConversationResponse | AuthedForbiddenErrors;
 
   /** メッセージ一覧（企業認証） */
   @get
   @route("/conversations/{conversationId}/messages")
   @summary("List messages as the company")
   listCompanyMessages(
-    @path conversationId: string,
+    @path conversationId: Uuid,
     @query limit?: int32,
     @query offset?: int32,
-  ): MessageListResponse | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
+  ): MessageListResponse | AuthedForbiddenErrors;
 
   /** メッセージ送信（企業認証） */
   @post
   @route("/conversations/{conversationId}/messages")
   @summary("Send a message as the company")
   sendCompanyMessage(
-    @path conversationId: string,
+    @path conversationId: Uuid,
     @body request: SendMessageRequest,
   ): {
     @statusCode statusCode: 201;
     @body message: MessageResponse;
-  } | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 
   /** 既読化（企業認証） */
   @post
   @route("/conversations/{conversationId}/read")
   @summary("Mark a conversation as read (company)")
   markCompanyConversationRead(
-    @path conversationId: string,
-  ): StatusOkResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path conversationId: Uuid,
+  ): StatusOkResponse | AuthedNotFoundErrors;
 
   /** 未読メッセージ数（企業認証） */
   @get
   @route("/unread-count")
   @summary("Count unread messages for the company")
-  countCompanyUnreadMessages(): UnreadCountResponse | BadRequestError | UnauthorizedError;
+  countCompanyUnreadMessages(): UnreadCountResponse | AuthedErrors;
 }

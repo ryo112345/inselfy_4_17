@@ -47,7 +47,7 @@ model CompanyLoginRequest {
 /** 企業アカウント情報（トークンは HttpOnly cookie で返る） */
 model CompanyResponse {
   /** 企業ID */
-  id: string;
+  id: Uuid;
 
   /** メールアドレス */
   email: string;

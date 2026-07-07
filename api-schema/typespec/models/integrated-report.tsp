@@ -23,7 +23,7 @@ model CreateIntegratedReportRequest {
 /** 統合レポート生成リクエスト（作成結果） */
 model IntegratedReportRequestResponse {
   /** リクエストID */
-  id: string;
+  id: Uuid;
 
   /** トピック1 */
   topic1: int16;
@@ -44,13 +44,13 @@ model IntegratedReportRequestResponse {
 /** 統合レポート（リクエストID指定） */
 model IntegratedReportResponse {
   /** レポートID */
-  id: string;
+  id: Uuid;
 
   /** リクエストID */
-  requestId: string;
+  requestId: Uuid;
 
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** レポート本文（Markdown） */
   content: string;
@@ -65,10 +65,10 @@ model IntegratedReportResponse {
 /** 自分の最新統合レポート */
 model IntegratedReportMineResponse {
   /** レポートID */
-  id: string;
+  id: Uuid;
 
   /** リクエストID */
-  requestId: string;
+  requestId: Uuid;
 
   /** レポート本文（Markdown） */
   content: string;
@@ -86,16 +86,16 @@ model IntegratedReportStatusResponse {
   status: "none" | "pending" | "ready";
 
   /** リクエストID（pending / ready のときのみ） */
-  requestId?: string;
+  requestId?: Uuid;
 }
 
 /** ユーザーの最新統合レポートリクエスト */
 model IntegratedReportLatestRequestResponse {
   /** リクエストID */
-  requestId: string;
+  requestId: Uuid;
 
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** レポートが生成済みかどうか */
   hasReport: boolean;

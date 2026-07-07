@@ -16,7 +16,7 @@ model AttachSkillRequest {
 /** スキル */
 model SkillResponse {
   /** スキルID */
-  id: string;
+  id: Uuid;
 
   /** スキル名 */
   name: string;
@@ -26,7 +26,4 @@ model SkillResponse {
 }
 
 /** スキル一覧 */
-model SkillListResponse {
-  /** スキル */
-  items: SkillResponse[];
-}
+model SkillListResponse is ItemsResponse<SkillResponse>;

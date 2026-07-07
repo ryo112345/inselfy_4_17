@@ -22,15 +22,15 @@ interface CompanyInterviews {
   ): {
     @statusCode statusCode: 201;
     @body result: ProposeInterviewResponse;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** 応募に未回答の提案があるか確認（企業認証） */
   @get
   @route("/pending/{applicationId}")
   @summary("Check for a pending proposal on an application")
   getPendingProposal(
-    @path applicationId: string,
-  ): PendingProposalCheckResponse | BadRequestError | UnauthorizedError;
+    @path applicationId: Uuid,
+  ): PendingProposalCheckResponse | AuthedErrors;
 
   /** 期間内の面接一覧（企業認証） */
   @get
@@ -41,15 +41,15 @@ interface CompanyInterviews {
 
     /** 終了日（YYYY-MM-DD、デフォルト from+7日） */
     @query to?: string,
-  ): CompanyInterviewListResponse | BadRequestError | UnauthorizedError;
+  ): CompanyInterviewListResponse | AuthedErrors;
 
   /** 面接キャンセル（企業認証） */
   @post
   @route("/{interviewId}/cancel")
   @summary("Cancel an interview as the company")
   cancelCompanyInterview(
-    @path interviewId: string,
-  ): StatusOkResponse | UnauthorizedError | NotFoundError | BadRequestError;
+    @path interviewId: Uuid,
+  ): StatusOkResponse | AuthedNotFoundErrors;
 }
 
 @route("/api/interviews")
@@ -59,30 +59,30 @@ interface CandidateInterviews {
   /** 面接・未回答提案の一覧（要ログイン） */
   @get
   @summary("List interviews and pending proposals for the candidate")
-  listCandidateInterviews(): CandidateInterviewListResponse | BadRequestError | UnauthorizedError;
+  listCandidateInterviews(): CandidateInterviewListResponse | AuthedErrors;
 
   /** 提案スロットを選択して面接確定（要ログイン） */
   @post
   @route("/proposals/{proposalId}/select")
   @summary("Select an interview slot")
   selectInterviewSlot(
-    @path proposalId: string,
+    @path proposalId: Uuid,
     @body request: SelectSlotRequest,
-  ): SelectSlotResponse | BadRequestError | NotFoundError | ConflictError | UnauthorizedError;
+  ): SelectSlotResponse | AuthedConflictErrors;
 
   /** 提案のスロット一覧取得（要ログイン） */
   @get
   @route("/proposals/{proposalId}/slots")
   @summary("Get slots of a proposal")
   getProposalSlots(
-    @path proposalId: string,
-  ): ProposalSlotsResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path proposalId: Uuid,
+  ): ProposalSlotsResponse | AuthedNotFoundErrors;
 
   /** 面接キャンセル（要ログイン） */
   @post
   @route("/{interviewId}/cancel")
   @summary("Cancel an interview as the candidate")
   cancelCandidateInterview(
-    @path interviewId: string,
-  ): StatusOkResponse | UnauthorizedError | NotFoundError | BadRequestError;
+    @path interviewId: Uuid,
+  ): StatusOkResponse | AuthedNotFoundErrors;
 }

@@ -16,7 +16,7 @@ interface Skills {
   @summary("List skills for a user")
   listSkills(
     @path username: string,
-  ): SkillListResponse | NotFoundError | BadRequestError;
+  ): SkillListResponse | NotFoundErrors;
 
   /** スキル追加（グローバルに無ければ作成） */
   @post
@@ -28,7 +28,7 @@ interface Skills {
   ): {
     @statusCode statusCode: 201;
     @body skill: SkillResponse;
-  } | BadRequestError | NotFoundError | ConflictError | UnauthorizedError;
+  } | AuthedConflictErrors;
 
   /** スキル取り外し（名前で） */
   @delete
@@ -40,5 +40,5 @@ interface Skills {
     @path name: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 }

@@ -8,7 +8,7 @@ namespace Inselfy.Models;
 /** チーム診断リンク情報 */
 model DiagnoseInfoResponse {
   /** チームメンバーID */
-  memberId: string;
+  memberId: Uuid;
 
   /** メンバー名 */
   memberName: string;

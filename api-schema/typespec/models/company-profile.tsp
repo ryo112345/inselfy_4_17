@@ -68,7 +68,7 @@ model UpdateCompanyProfileRequest {
 /** 企業プロフィール（企業本人向け） */
 model CompanyProfileResponse {
   /** 企業ID */
-  id: string;
+  id: Uuid;
 
   /** 企業名 */
   companyName: string;
@@ -143,7 +143,7 @@ model CompanyProfileResponse {
 /** 企業プロフィール（公開向け） */
 model PublicCompanyProfileResponse {
   /** 企業ID */
-  id: string;
+  id: Uuid;
 
   /** 企業名 */
   companyName: string;

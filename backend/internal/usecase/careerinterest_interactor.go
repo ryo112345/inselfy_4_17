@@ -48,10 +48,13 @@ func (i *CareerInterestInteractor) StartSession(ctx context.Context, userID stri
 	return i.sessionRepo.Create(ctx, session)
 }
 
-func (i *CareerInterestInteractor) SubmitResult(ctx context.Context, sessionID string, input careerinterest.SubmitInput) (*careerinterest.Result, error) {
+func (i *CareerInterestInteractor) SubmitResult(ctx context.Context, sessionID, userID string, input careerinterest.SubmitInput) (*careerinterest.Result, error) {
 	session, err := i.sessionRepo.GetByID(ctx, sessionID)
 	if err != nil {
 		return nil, err
+	}
+	if session.UserID != userID {
+		return nil, port.ErrForbidden
 	}
 
 	result, err := careerinterest.ValidateAndCompute(session, input)

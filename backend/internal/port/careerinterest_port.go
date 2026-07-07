@@ -8,7 +8,7 @@ import (
 
 type CareerInterestInputPort interface {
 	StartSession(ctx context.Context, userID string) (*careerinterest.Session, error)
-	SubmitResult(ctx context.Context, sessionID string, input careerinterest.SubmitInput) (*careerinterest.Result, error)
+	SubmitResult(ctx context.Context, sessionID, userID string, input careerinterest.SubmitInput) (*careerinterest.Result, error)
 	GetLatestResult(ctx context.Context, userID string) (*careerinterest.Result, error)
 	GetResultBySessionID(ctx context.Context, sessionID string) (*careerinterest.Result, error)
 }

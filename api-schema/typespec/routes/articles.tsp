@@ -30,7 +30,7 @@ interface Articles {
   listMyArticles(
     @query limit?: int32,
     @query offset?: int32,
-  ): ArticleListResponse | BadRequestError | UnauthorizedError;
+  ): ArticleListResponse | AuthedErrors;
 
   /** 記事画像アップロード（要ログイン） */
   @post
@@ -42,7 +42,7 @@ interface Articles {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UploadUrlResponse | BadRequestError | UnauthorizedError;
+  ): UploadUrlResponse | AuthedErrors;
 
   /** 記事作成（要ログイン） */
   @post
@@ -53,7 +53,7 @@ interface Articles {
   ): {
     @statusCode statusCode: 201;
     @body article: ArticleResponse;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 
   /** 記事取得 */
   @get
@@ -61,8 +61,8 @@ interface Articles {
   @summary("Get an article")
   @useAuth(Models.CandidateAuth | NoAuth)
   getArticle(
-    @path articleId: string,
-  ): ArticleResponse | NotFoundError | BadRequestError;
+    @path articleId: Uuid,
+  ): ArticleResponse | NotFoundErrors;
 
   /** 記事更新（要ログイン・著者のみ） */
   @put
@@ -70,9 +70,9 @@ interface Articles {
   @summary("Update an article as a user")
   @useAuth(Models.CandidateAuth)
   updateArticle(
-    @path articleId: string,
+    @path articleId: Uuid,
     @body request: UpdateArticleRequest,
-  ): ArticleResponse | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+  ): ArticleResponse | AuthedForbiddenErrors;
 
   /** 記事削除（要ログイン・著者のみ） */
   @delete
@@ -80,10 +80,10 @@ interface Articles {
   @summary("Delete an article as a user")
   @useAuth(Models.CandidateAuth)
   deleteArticle(
-    @path articleId: string,
+    @path articleId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 
   /** 記事公開（要ログイン・著者のみ） */
   @post
@@ -91,8 +91,8 @@ interface Articles {
   @summary("Publish an article as a user")
   @useAuth(Models.CandidateAuth)
   publishArticle(
-    @path articleId: string,
-  ): ArticleResponse | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+    @path articleId: Uuid,
+  ): ArticleResponse | AuthedForbiddenErrors;
 
   /** 有料記事のチェックアウト開始（要ログイン） */
   @post
@@ -100,8 +100,8 @@ interface Articles {
   @summary("Create a Stripe checkout session for a paid article")
   @useAuth(Models.CandidateAuth)
   createArticleCheckout(
-    @path articleId: string,
-  ): CheckoutSessionResponse | BadRequestError | NotFoundError | UnauthorizedError;
+    @path articleId: Uuid,
+  ): CheckoutSessionResponse | AuthedNotFoundErrors;
 }
 
 @route("/api/company/articles")
@@ -116,32 +116,32 @@ interface CompanyArticles {
   ): {
     @statusCode statusCode: 201;
     @body article: ArticleResponse;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 
   /** 記事更新（企業認証・著者のみ） */
   @put
   @route("/{articleId}")
   @summary("Update an article as a company")
   updateCompanyArticle(
-    @path articleId: string,
+    @path articleId: Uuid,
     @body request: UpdateArticleRequest,
-  ): ArticleResponse | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+  ): ArticleResponse | AuthedForbiddenErrors;
 
   /** 記事削除（企業認証・著者のみ） */
   @delete
   @route("/{articleId}")
   @summary("Delete an article as a company")
   deleteCompanyArticle(
-    @path articleId: string,
+    @path articleId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 
   /** 記事公開（企業認証・著者のみ） */
   @post
   @route("/{articleId}/publish")
   @summary("Publish an article as a company")
   publishCompanyArticle(
-    @path articleId: string,
-  ): ArticleResponse | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+    @path articleId: Uuid,
+  ): ArticleResponse | AuthedForbiddenErrors;
 }

@@ -20,7 +20,7 @@ interface CompanyScouts {
   ): {
     @statusCode statusCode: 201;
     @body scout: ScoutMessageResponse;
-  } | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 
   /** 送信済みスカウト一覧（企業認証） */
   @get
@@ -34,42 +34,42 @@ interface CompanyScouts {
 
     /** オフセット */
     @query offset?: int32,
-  ): ScoutListResponse | BadRequestError | UnauthorizedError;
+  ): ScoutListResponse | AuthedErrors;
 
   /** スカウトクレジット取得（企業認証） */
   @get
   @route("/credits")
   @summary("Get scout credits")
-  getScoutCredits(): ScoutCreditsResponse | BadRequestError | UnauthorizedError;
+  getScoutCredits(): ScoutCreditsResponse | AuthedErrors;
 
   /** スカウト品質スコア取得（企業認証） */
   @get
   @route("/quality")
   @summary("Get scout quality score")
-  getScoutQuality(): ScoutQualityScoreResponse | BadRequestError | UnauthorizedError;
+  getScoutQuality(): ScoutQualityScoreResponse | AuthedErrors;
 
   /** スカウトダッシュボード取得（企業認証） */
   @get
   @route("/dashboard")
   @summary("Get scout dashboard stats")
-  getScoutDashboard(): ScoutDashboardResponse | BadRequestError | UnauthorizedError;
+  getScoutDashboard(): ScoutDashboardResponse | AuthedErrors;
 
   /** スカウト詳細取得（企業認証） */
   @get
   @route("/{scoutId}")
   @summary("Get scout detail with replies")
   getCompanyScoutDetail(
-    @path scoutId: string,
-  ): ScoutDetailResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path scoutId: Uuid,
+  ): ScoutDetailResponse | AuthedNotFoundErrors;
 
   /** スカウトへ返信（企業認証） */
   @post
   @route("/{scoutId}/reply")
   @summary("Reply to a scout as the company")
   companyScoutReply(
-    @path scoutId: string,
+    @path scoutId: Uuid,
     @body request: CompanyScoutReplyRequest,
   ): {
     @statusCode statusCode: 201;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 }

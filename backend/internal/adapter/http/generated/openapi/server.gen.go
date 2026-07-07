@@ -357,6 +357,42 @@ func (e ModelsJobApplicationStatus) Valid() bool {
 	}
 }
 
+// Defines values for ModelsJobPostingFilterMode.
+const (
+	ModelsJobPostingFilterModeNeeds  ModelsJobPostingFilterMode = "needs"
+	ModelsJobPostingFilterModeValues ModelsJobPostingFilterMode = "values"
+)
+
+// Valid indicates whether the value is a known member of the ModelsJobPostingFilterMode enum.
+func (e ModelsJobPostingFilterMode) Valid() bool {
+	switch e {
+	case ModelsJobPostingFilterModeNeeds:
+		return true
+	case ModelsJobPostingFilterModeValues:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsJobPostingSort.
+const (
+	ModelsJobPostingSortNewest ModelsJobPostingSort = "newest"
+	ModelsJobPostingSortSalary ModelsJobPostingSort = "salary"
+)
+
+// Valid indicates whether the value is a known member of the ModelsJobPostingSort enum.
+func (e ModelsJobPostingSort) Valid() bool {
+	switch e {
+	case ModelsJobPostingSortNewest:
+		return true
+	case ModelsJobPostingSortSalary:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ModelsJobPostingStatus.
 const (
 	ModelsJobPostingStatusDraft ModelsJobPostingStatus = "draft"
@@ -582,10 +618,10 @@ type ModelsAiReportResponse struct {
 	FirstView bool `json:"firstView"`
 
 	// Id レポートID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// SessionId セッションID
-	SessionId string `json:"sessionId"`
+	SessionId ModelsUuid `json:"sessionId"`
 }
 
 // ModelsAppliedResponse 応募済み判定
@@ -597,7 +633,7 @@ type ModelsAppliedResponse struct {
 // ModelsApplyJobRequest 求人応募リクエスト
 type ModelsApplyJobRequest struct {
 	// JobPostingId 求人ID
-	JobPostingId string `json:"jobPostingId"`
+	JobPostingId ModelsUuid `json:"jobPostingId"`
 
 	// Message 応募メッセージ
 	Message string `json:"message"`
@@ -605,11 +641,11 @@ type ModelsApplyJobRequest struct {
 
 // ModelsArticleListResponse 記事一覧
 type ModelsArticleListResponse struct {
-	// Items 記事
+	// Items アイテム一覧
 	Items []ModelsArticleResponse `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsArticleResponse 記事
@@ -639,7 +675,7 @@ type ModelsArticleResponse struct {
 	FreePreview string `json:"freePreview"`
 
 	// Id 記事ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// ImageCount 画像数
 	ImageCount int `json:"imageCount"`
@@ -693,7 +729,7 @@ type ModelsAuthUserResponse struct {
 	Email *string `json:"email,omitempty"`
 
 	// Id ユーザーID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Name 表示名
 	Name string `json:"name"`
@@ -796,22 +832,22 @@ type ModelsCIResultResponse struct {
 	CreatedAt string `json:"createdAt"`
 
 	// Id 結果ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// SessionId セッションID
-	SessionId string `json:"sessionId"`
+	SessionId ModelsUuid `json:"sessionId"`
 
 	// TypeScores RIASEC タイプスコア
 	TypeScores []ModelsCITypeScoreResponse `json:"typeScores"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 }
 
 // ModelsCISessionResponse Career Interest セッション
 type ModelsCISessionResponse struct {
 	// Id セッションID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Items 設問一覧
 	Items []ModelsCIItemResponse `json:"items"`
@@ -822,12 +858,6 @@ type ModelsCISessionResponse struct {
 
 // ModelsCISkillLevel 設問のスキルレベル
 type ModelsCISkillLevel string
-
-// ModelsCIStartSessionRequest Career Interest セッション開始リクエスト
-type ModelsCIStartSessionRequest struct {
-	// UserId ユーザーID
-	UserId string `json:"userId"`
-}
 
 // ModelsCISubmitResultRequest Career Interest 結果送信リクエスト
 type ModelsCISubmitResultRequest struct {
@@ -872,7 +902,7 @@ type ModelsCandidateAuthType string
 // ModelsCandidateInterviewItem 面接（候補者向け・企業情報付き）
 type ModelsCandidateInterviewItem struct {
 	// ApplicationId 応募ID
-	ApplicationId string `json:"applicationId"`
+	ApplicationId ModelsUuid `json:"applicationId"`
 
 	// CompanyName 企業名
 	CompanyName string `json:"companyName"`
@@ -881,7 +911,7 @@ type ModelsCandidateInterviewItem struct {
 	EndTime time.Time `json:"endTime"`
 
 	// Id 面接ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// JobTitle 求人タイトル
 	JobTitle string `json:"jobTitle"`
@@ -925,11 +955,11 @@ type ModelsCheckoutSessionResponse struct {
 
 // ModelsCommentListResponse コメント一覧
 type ModelsCommentListResponse struct {
-	// Items コメント
+	// Items アイテム一覧
 	Items []ModelsCommentResponse `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsCommentResponse コメント
@@ -941,16 +971,16 @@ type ModelsCommentResponse struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id コメントID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Name 表示名
 	Name string `json:"name"`
 
 	// PostId 投稿ID
-	PostId string `json:"postId"`
+	PostId ModelsUuid `json:"postId"`
 
 	// UserId コメント投稿者ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 
 	// Username ユーザー名
 	Username string `json:"username"`
@@ -981,7 +1011,7 @@ type ModelsCompanyAuthType string
 // ModelsCompanyInterviewItem 面接（企業向け・候補者情報付き）
 type ModelsCompanyInterviewItem struct {
 	// ApplicationId 応募ID
-	ApplicationId string `json:"applicationId"`
+	ApplicationId ModelsUuid `json:"applicationId"`
 
 	// CandidateAvatarUrl 候補者アバターURL
 	CandidateAvatarUrl string `json:"candidateAvatarUrl"`
@@ -993,7 +1023,7 @@ type ModelsCompanyInterviewItem struct {
 	EndTime time.Time `json:"endTime"`
 
 	// Id 面接ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// JobTitle 求人タイトル
 	JobTitle string `json:"jobTitle"`
@@ -1016,7 +1046,7 @@ type ModelsCompanyInterviewItem struct {
 
 // ModelsCompanyInterviewListResponse 企業向け面接一覧
 type ModelsCompanyInterviewListResponse struct {
-	// Items 面接
+	// Items アイテム一覧
 	Items []ModelsCompanyInterviewItem `json:"items"`
 }
 
@@ -1074,7 +1104,7 @@ type ModelsCompanyProfileResponse struct {
 	Headline string `json:"headline"`
 
 	// Id 企業ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Industry 業界
 	Industry string `json:"industry"`
@@ -1137,7 +1167,7 @@ type ModelsCompanyResponse struct {
 	Email string `json:"email"`
 
 	// Id 企業ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// PhoneNumber 電話番号
 	PhoneNumber string `json:"phoneNumber"`
@@ -1166,23 +1196,23 @@ type ModelsConflictErrorCode string
 
 // ModelsConversationListResponse 会話一覧
 type ModelsConversationListResponse struct {
-	// Items 会話
+	// Items アイテム一覧
 	Items []ModelsConversationResponse `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsConversationResponse 会話（プレビュー付き）
 type ModelsConversationResponse struct {
 	// CandidateId 候補者ユーザーID
-	CandidateId string `json:"candidateId"`
+	CandidateId ModelsUuid `json:"candidateId"`
 
 	// CandidateName 候補者名
 	CandidateName string `json:"candidateName"`
 
 	// CompanyId 企業ID
-	CompanyId string `json:"companyId"`
+	CompanyId ModelsUuid `json:"companyId"`
 
 	// CompanyName 企業名
 	CompanyName string `json:"companyName"`
@@ -1194,7 +1224,7 @@ type ModelsConversationResponse struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id 会話ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// LastMessageAt 最新メッセージ日時
 	LastMessageAt time.Time `json:"lastMessageAt"`
@@ -1203,13 +1233,13 @@ type ModelsConversationResponse struct {
 	LastMessageBody *string `json:"lastMessageBody"`
 
 	// Participant1Id 参加者1 ID（ユーザー間会話のみ）
-	Participant1Id *string `json:"participant1Id,omitempty"`
+	Participant1Id *ModelsUuid `json:"participant1Id,omitempty"`
 
 	// Participant1Name 参加者1 名（ユーザー間会話のみ）
 	Participant1Name *string `json:"participant1Name,omitempty"`
 
 	// Participant2Id 参加者2 ID（ユーザー間会話のみ）
-	Participant2Id *string `json:"participant2Id,omitempty"`
+	Participant2Id *ModelsUuid `json:"participant2Id,omitempty"`
 
 	// Participant2Name 参加者2 名（ユーザー間会話のみ）
 	Participant2Name *string `json:"participant2Name,omitempty"`
@@ -1308,7 +1338,7 @@ type ModelsCreatePostRequest struct {
 	Content string `json:"content"`
 
 	// QuotePostId 引用元投稿ID
-	QuotePostId *string `json:"quotePostId,omitempty"`
+	QuotePostId *ModelsUuid `json:"quotePostId,omitempty"`
 }
 
 // ModelsCreateScoutTemplateRequest スカウトテンプレート作成リクエスト
@@ -1353,7 +1383,7 @@ type ModelsDiagnoseInfoResponse struct {
 	Email *string `json:"email"`
 
 	// MemberId チームメンバーID
-	MemberId string `json:"memberId"`
+	MemberId ModelsUuid `json:"memberId"`
 
 	// MemberName メンバー名
 	MemberName string `json:"memberName"`
@@ -1373,7 +1403,7 @@ type ModelsDiagnosisSessionStatus string
 
 // ModelsEducationListResponse 学歴一覧
 type ModelsEducationListResponse struct {
-	// Items 学歴
+	// Items アイテム一覧
 	Items []ModelsEducationResponse `json:"items"`
 }
 
@@ -1389,7 +1419,7 @@ type ModelsEducationResponse struct {
 	EndYear *int32 `json:"endYear,omitempty"`
 
 	// Id ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// School 学校名
 	School string `json:"school"`
@@ -1401,7 +1431,7 @@ type ModelsEducationResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 }
 
 // ModelsErrorResponse 共通エラーレスポンス
@@ -1418,7 +1448,7 @@ type ModelsErrorResponse struct {
 
 // ModelsExperienceListResponse 職歴一覧
 type ModelsExperienceListResponse struct {
-	// Items 職歴
+	// Items アイテム一覧
 	Items []ModelsExperienceResponse `json:"items"`
 }
 
@@ -1440,7 +1470,7 @@ type ModelsExperienceResponse struct {
 	EndYear *int32 `json:"endYear,omitempty"`
 
 	// Id ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// IsCurrent 現職フラグ
 	IsCurrent bool `json:"isCurrent"`
@@ -1458,7 +1488,7 @@ type ModelsExperienceResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 }
 
 // ModelsFollowStatusResponse フォロー状態
@@ -1472,7 +1502,7 @@ type ModelsFollowStatusResponse struct {
 
 // ModelsFollowUserListResponse フォロー関係のユーザー一覧
 type ModelsFollowUserListResponse struct {
-	// Items ユーザー
+	// Items アイテム一覧
 	Items []ModelsFollowUserResponse `json:"items"`
 
 	// Total 総件数
@@ -1494,7 +1524,7 @@ type ModelsFollowUserResponse struct {
 	Name string `json:"name"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 
 	// Username ユーザー名
 	Username string `json:"username"`
@@ -1524,10 +1554,10 @@ type ModelsIntegratedReportLatestRequestResponse struct {
 	HasReport bool `json:"hasReport"`
 
 	// RequestId リクエストID
-	RequestId string `json:"requestId"`
+	RequestId ModelsUuid `json:"requestId"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 }
 
 // ModelsIntegratedReportMineResponse 自分の最新統合レポート
@@ -1542,10 +1572,10 @@ type ModelsIntegratedReportMineResponse struct {
 	FirstView bool `json:"firstView"`
 
 	// Id レポートID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// RequestId リクエストID
-	RequestId string `json:"requestId"`
+	RequestId ModelsUuid `json:"requestId"`
 }
 
 // ModelsIntegratedReportRequestResponse 統合レポート生成リクエスト（作成結果）
@@ -1557,7 +1587,7 @@ type ModelsIntegratedReportRequestResponse struct {
 	FreeText string `json:"freeText"`
 
 	// Id リクエストID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Topic1 トピック1
 	Topic1 int16 `json:"topic1"`
@@ -1581,19 +1611,19 @@ type ModelsIntegratedReportResponse struct {
 	FirstView bool `json:"firstView"`
 
 	// Id レポートID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// RequestId リクエストID
-	RequestId string `json:"requestId"`
+	RequestId ModelsUuid `json:"requestId"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 }
 
 // ModelsIntegratedReportStatusResponse 統合レポートのリクエスト状況
 type ModelsIntegratedReportStatusResponse struct {
 	// RequestId リクエストID（pending / ready のときのみ）
-	RequestId *string `json:"requestId,omitempty"`
+	RequestId *ModelsUuid `json:"requestId,omitempty"`
 
 	// Status none: リクエストなし / pending: 生成待ち / ready: レポートあり
 	Status ModelsIntegratedReportStatusResponseStatus `json:"status"`
@@ -1605,13 +1635,13 @@ type ModelsIntegratedReportStatusResponseStatus string
 // ModelsInterviewBase 面接（共通フィールド）
 type ModelsInterviewBase struct {
 	// ApplicationId 応募ID
-	ApplicationId string `json:"applicationId"`
+	ApplicationId ModelsUuid `json:"applicationId"`
 
 	// EndTime 終了日時
 	EndTime time.Time `json:"endTime"`
 
 	// Id 面接ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Location 場所
 	Location string `json:"location"`
@@ -1638,7 +1668,7 @@ type ModelsInterviewSlotResponse struct {
 	EndTime time.Time `json:"endTime"`
 
 	// Id スロットID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// StartTime 開始日時
 	StartTime time.Time `json:"startTime"`
@@ -1655,11 +1685,11 @@ type ModelsInterviewStatus string
 
 // ModelsJobApplicationListResponse 応募一覧
 type ModelsJobApplicationListResponse struct {
-	// Items 応募
+	// Items アイテム一覧
 	Items []ModelsJobApplicationResponse `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsJobApplicationResponse 応募（詳細付き）
@@ -1671,7 +1701,7 @@ type ModelsJobApplicationResponse struct {
 	CandidateHeadline string `json:"candidateHeadline"`
 
 	// CandidateId 候補者ユーザーID
-	CandidateId string `json:"candidateId"`
+	CandidateId ModelsUuid `json:"candidateId"`
 
 	// CandidateName 候補者名
 	CandidateName string `json:"candidateName"`
@@ -1692,7 +1722,7 @@ type ModelsJobApplicationResponse struct {
 	CiSimilarity *float64 `json:"ciSimilarity,omitempty"`
 
 	// CompanyId 企業ID
-	CompanyId string `json:"companyId"`
+	CompanyId ModelsUuid `json:"companyId"`
 
 	// CompanyName 企業名
 	CompanyName string `json:"companyName"`
@@ -1701,13 +1731,13 @@ type ModelsJobApplicationResponse struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id 応募ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// IntegratedSimilarity 統合類似度
 	IntegratedSimilarity *float64 `json:"integratedSimilarity,omitempty"`
 
 	// JobPostingId 求人ID
-	JobPostingId string `json:"jobPostingId"`
+	JobPostingId ModelsUuid `json:"jobPostingId"`
 
 	// JobTitle 求人タイトル
 	JobTitle string `json:"jobTitle"`
@@ -1728,13 +1758,136 @@ type ModelsJobApplicationResponse struct {
 // ModelsJobApplicationStatus 応募ステータス
 type ModelsJobApplicationStatus string
 
+// ModelsJobPostingBase 求人の入力フィールド（リクエスト・レスポンス共通）
+type ModelsJobPostingBase struct {
+	// AppealPoints 訴求ポイント
+	AppealPoints string `json:"appealPoints"`
+
+	// Benefits 福利厚生
+	Benefits string `json:"benefits"`
+
+	// BreakTime 休憩時間
+	BreakTime string `json:"breakTime"`
+
+	// Challenges 課題・チャレンジ
+	Challenges string `json:"challenges"`
+
+	// ContractType 契約種別
+	ContractType string `json:"contractType"`
+
+	// CoverImageUrl カバー画像URL
+	CoverImageUrl string `json:"coverImageUrl"`
+
+	// Description 仕事内容
+	Description string `json:"description"`
+
+	// EmploymentType 雇用形態
+	EmploymentType string `json:"employmentType"`
+
+	// GalleryUrls ギャラリー画像URL
+	GalleryUrls []string `json:"galleryUrls"`
+
+	// HighlightTitleAppeal ハイライトタイトル（訴求）
+	HighlightTitleAppeal string `json:"highlightTitleAppeal"`
+
+	// HighlightTitleChallenge ハイライトタイトル（チャレンジ）
+	HighlightTitleChallenge string `json:"highlightTitleChallenge"`
+
+	// HighlightTitleGrowth ハイライトタイトル（成長）
+	HighlightTitleGrowth string `json:"highlightTitleGrowth"`
+
+	// HighlightTitleRole ハイライトタイトル（役割）
+	HighlightTitleRole string `json:"highlightTitleRole"`
+
+	// HiringCount 採用人数
+	HiringCount string `json:"hiringCount"`
+
+	// Holidays 休日
+	Holidays string `json:"holidays"`
+
+	// Insurance 保険
+	Insurance string `json:"insurance"`
+
+	// JobCategory 職種カテゴリ
+	JobCategory string `json:"jobCategory"`
+
+	// JobDescriptionChangeScope 業務内容の変更の範囲
+	JobDescriptionChangeScope string `json:"jobDescriptionChangeScope"`
+
+	// Location 勤務地（表示用）
+	Location *string `json:"location"`
+
+	// PreferredQualifications 歓迎要件
+	PreferredQualifications string `json:"preferredQualifications"`
+
+	// ProbationPeriod 試用期間
+	ProbationPeriod string `json:"probationPeriod"`
+
+	// RemotePolicy リモートポリシー
+	RemotePolicy string `json:"remotePolicy"`
+
+	// RequiredQualifications 必須要件
+	RequiredQualifications string `json:"requiredQualifications"`
+
+	// SalaryDetail 給与詳細
+	SalaryDetail string `json:"salaryDetail"`
+
+	// SalaryMax 給与上限（万円）
+	SalaryMax *int32 `json:"salaryMax"`
+
+	// SalaryMin 給与下限（万円）
+	SalaryMin *int32 `json:"salaryMin"`
+
+	// SelectionProcess 選考プロセス
+	SelectionProcess string `json:"selectionProcess"`
+
+	// SkillsGained 得られるスキル
+	SkillsGained string `json:"skillsGained"`
+
+	// SmokingPolicy 受動喫煙対策
+	SmokingPolicy string `json:"smokingPolicy"`
+
+	// Status ステータス
+	Status ModelsJobPostingStatus `json:"status"`
+
+	// Tags タグ
+	Tags []string `json:"tags"`
+
+	// TeamDescription チーム紹介
+	TeamDescription string `json:"teamDescription"`
+
+	// TeamId 紐づくチームID
+	TeamId *string `json:"teamId"`
+
+	// TeamLabel チームラベル
+	TeamLabel string `json:"teamLabel"`
+
+	// TeamMembers チームメンバー
+	TeamMembers []ModelsJobPostingTeamMember `json:"teamMembers"`
+
+	// Title 求人タイトル
+	Title string `json:"title"`
+
+	// WorkHours 勤務時間
+	WorkHours string `json:"workHours"`
+
+	// WorkLocation 就業場所
+	WorkLocation string `json:"workLocation"`
+
+	// WorkLocationChangeScope 就業場所の変更の範囲
+	WorkLocationChangeScope string `json:"workLocationChangeScope"`
+}
+
+// ModelsJobPostingFilterMode Work Values フィルタの照合モード
+type ModelsJobPostingFilterMode string
+
 // ModelsJobPostingListResponse 求人一覧（ページング付き）
 type ModelsJobPostingListResponse struct {
-	// Items 求人
+	// Items アイテム一覧
 	Items []ModelsJobPostingResponse `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsJobPostingRequest 求人作成・更新リクエスト
@@ -1835,7 +1988,7 @@ type ModelsJobPostingRequest struct {
 	// TeamDescription チーム紹介
 	TeamDescription string `json:"teamDescription"`
 
-	// TeamId 紐づけるチームID
+	// TeamId 紐づくチームID
 	TeamId *string `json:"teamId"`
 
 	// TeamLabel チームラベル
@@ -1872,7 +2025,7 @@ type ModelsJobPostingResponse struct {
 	Challenges string `json:"challenges"`
 
 	// CompanyId 企業ID
-	CompanyId string `json:"companyId"`
+	CompanyId ModelsUuid `json:"companyId"`
 
 	// CompanyLogoUrl 企業ロゴURL
 	CompanyLogoUrl *string `json:"companyLogoUrl,omitempty"`
@@ -1917,7 +2070,7 @@ type ModelsJobPostingResponse struct {
 	Holidays string `json:"holidays"`
 
 	// Id 求人ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Insurance 保険
 	Insurance string `json:"insurance"`
@@ -1998,6 +2151,9 @@ type ModelsJobPostingResponse struct {
 	WorkLocationChangeScope string `json:"workLocationChangeScope"`
 }
 
+// ModelsJobPostingSort 公開求人一覧のソートキー
+type ModelsJobPostingSort string
+
 // ModelsJobPostingStatus 求人ステータス
 type ModelsJobPostingStatus string
 
@@ -2031,13 +2187,13 @@ type ModelsMemberScoreResponse struct {
 	IsAce bool `json:"isAce"`
 
 	// MemberId メンバーID
-	MemberId string `json:"memberId"`
+	MemberId ModelsUuid `json:"memberId"`
 
 	// MemberName メンバー名
 	MemberName string `json:"memberName"`
 
 	// UserId 紐づくユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 
 	// WvScores Work Values スコア
 	WvScores *[]ModelsTeamScoreEntry `json:"wvScores,omitempty"`
@@ -2048,11 +2204,11 @@ type ModelsMemberScoreResponse struct {
 
 // ModelsMessageListResponse メッセージ一覧
 type ModelsMessageListResponse struct {
-	// Items メッセージ
+	// Items アイテム一覧
 	Items []ModelsMessageResponse `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsMessageResponse メッセージ
@@ -2061,13 +2217,13 @@ type ModelsMessageResponse struct {
 	Body string `json:"body"`
 
 	// ConversationId 会話ID
-	ConversationId string `json:"conversationId"`
+	ConversationId ModelsUuid `json:"conversationId"`
 
 	// CreatedAt 作成日時
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id メッセージID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// MessageType メッセージ種別（text 等）
 	MessageType string `json:"messageType"`
@@ -2076,7 +2232,7 @@ type ModelsMessageResponse struct {
 	Metadata *map[string]interface{} `json:"metadata,omitempty"`
 
 	// SenderId 送信者ID
-	SenderId string `json:"senderId"`
+	SenderId ModelsUuid `json:"senderId"`
 
 	// SenderType 送信者種別（company / candidate）
 	SenderType string `json:"senderType"`
@@ -2093,7 +2249,7 @@ type ModelsNotFoundErrorCode string
 
 // ModelsNotificationListResponse 通知一覧
 type ModelsNotificationListResponse struct {
-	// Items 通知
+	// Items アイテム一覧
 	Items []ModelsNotificationResponse `json:"items"`
 
 	// Total 総件数
@@ -2109,7 +2265,7 @@ type ModelsNotificationResponse struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// IsRead 既読か
 	IsRead bool `json:"isRead"`
@@ -2136,7 +2292,7 @@ type ModelsPendingProposalCheckResponse struct {
 	HasPending bool `json:"hasPending"`
 
 	// ProposalId 提案ID
-	ProposalId *string `json:"proposalId,omitempty"`
+	ProposalId *ModelsUuid `json:"proposalId,omitempty"`
 }
 
 // ModelsPendingProposalItem 候補者に届いている日程提案
@@ -2154,7 +2310,7 @@ type ModelsPendingProposalItem struct {
 	ExpiresAt time.Time `json:"expiresAt"`
 
 	// Id 提案ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// JobTitle 求人タイトル
 	JobTitle string `json:"jobTitle"`
@@ -2168,11 +2324,11 @@ type ModelsPendingProposalItem struct {
 
 // ModelsPostListResponse 投稿一覧
 type ModelsPostListResponse struct {
-	// Items 投稿
+	// Items アイテム一覧
 	Items []ModelsPostResponse `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsPostResponse 投稿
@@ -2187,7 +2343,7 @@ type ModelsPostResponse struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id 投稿ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// IsRepost リポストか
 	IsRepost bool `json:"isRepost"`
@@ -2214,7 +2370,7 @@ type ModelsPostResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 
 	// UserId 投稿者ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 
 	// Username 投稿者ユーザー名
 	Username string `json:"username"`
@@ -2235,7 +2391,7 @@ type ModelsProposalSummary struct {
 	ExpiresAt time.Time `json:"expiresAt"`
 
 	// Id 提案ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Message メッセージ
 	Message string `json:"message"`
@@ -2247,7 +2403,7 @@ type ModelsProposalSummary struct {
 // ModelsProposeInterviewRequest 面接日程提案リクエスト
 type ModelsProposeInterviewRequest struct {
 	// ApplicationId 応募ID
-	ApplicationId string `json:"applicationId"`
+	ApplicationId ModelsUuid `json:"applicationId"`
 
 	// DurationMinutes 所要時間（分）
 	DurationMinutes int `json:"durationMinutes"`
@@ -2268,7 +2424,7 @@ type ModelsProposeInterviewRequest struct {
 // ModelsProposeInterviewResponse 面接日程提案結果
 type ModelsProposeInterviewResponse struct {
 	// ProposalId 提案ID
-	ProposalId string `json:"proposalId"`
+	ProposalId ModelsUuid `json:"proposalId"`
 
 	// Slots 登録されたスロット
 	Slots []ModelsInterviewSlotResponse `json:"slots"`
@@ -2322,7 +2478,7 @@ type ModelsPublicCompanyProfileResponse struct {
 	Headline string `json:"headline"`
 
 	// Id 企業ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Industry 業界
 	Industry string `json:"industry"`
@@ -2370,7 +2526,7 @@ type ModelsPublicTeamScoreResponse struct {
 	MemberCount int `json:"memberCount"`
 
 	// TeamId チームID
-	TeamId string `json:"teamId"`
+	TeamId ModelsUuid `json:"teamId"`
 
 	// TeamName チーム名
 	TeamName string `json:"teamName"`
@@ -2397,7 +2553,7 @@ type ModelsQuotedPostResponse struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id 投稿ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Name 投稿者表示名
 	Name string `json:"name"`
@@ -2507,11 +2663,11 @@ type ModelsScoutDetailResponse struct {
 
 // ModelsScoutListResponse スカウト一覧
 type ModelsScoutListResponse struct {
-	// Items スカウト
+	// Items アイテム一覧
 	Items []ModelsScoutMessageResponse `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsScoutMessageResponse スカウトメッセージ
@@ -2520,13 +2676,13 @@ type ModelsScoutMessageResponse struct {
 	Body string `json:"body"`
 
 	// CandidateId 候補者ユーザーID
-	CandidateId string `json:"candidateId"`
+	CandidateId ModelsUuid `json:"candidateId"`
 
 	// CandidateName 候補者名
 	CandidateName string `json:"candidateName"`
 
 	// CompanyId 企業ID
-	CompanyId string `json:"companyId"`
+	CompanyId ModelsUuid `json:"companyId"`
 
 	// CompanyName 企業名
 	CompanyName string `json:"companyName"`
@@ -2538,7 +2694,7 @@ type ModelsScoutMessageResponse struct {
 	ExpiresAt *time.Time `json:"expiresAt"`
 
 	// Id スカウトID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// JobPostingId 関連求人ID
 	JobPostingId *string `json:"jobPostingId"`
@@ -2601,10 +2757,10 @@ type ModelsScoutReplyResponse struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id 返信ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// SenderId 送信者ID
-	SenderId string `json:"senderId"`
+	SenderId ModelsUuid `json:"senderId"`
 
 	// SenderType 送信者種別（company / candidate）
 	SenderType string `json:"senderType"`
@@ -2619,7 +2775,7 @@ type ModelsScoutRespondRequest struct {
 // ModelsScoutRespondResponse スカウト応答結果
 type ModelsScoutRespondResponse struct {
 	// ConversationId 応答により作成・特定された会話ID
-	ConversationId *string `json:"conversationId,omitempty"`
+	ConversationId *ModelsUuid `json:"conversationId,omitempty"`
 
 	// Status 処理結果（"ok"）
 	Status ModelsScoutRespondResponseStatus `json:"status"`
@@ -2642,7 +2798,7 @@ type ModelsScoutStatus string
 
 // ModelsScoutTemplateListResponse スカウトテンプレート一覧
 type ModelsScoutTemplateListResponse struct {
-	// Items テンプレート
+	// Items アイテム一覧
 	Items []ModelsScoutTemplateResponse `json:"items"`
 }
 
@@ -2652,13 +2808,13 @@ type ModelsScoutTemplateResponse struct {
 	Body string `json:"body"`
 
 	// CompanyId 企業ID
-	CompanyId string `json:"companyId"`
+	CompanyId ModelsUuid `json:"companyId"`
 
 	// CreatedAt 作成日時
 	CreatedAt time.Time `json:"createdAt"`
 
 	// Id ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Name テンプレート名
 	Name string `json:"name"`
@@ -2676,7 +2832,7 @@ type ModelsSelectSlotRequest struct {
 	EndTime string `json:"endTime"`
 
 	// SlotId 選択するスロットID
-	SlotId string `json:"slotId"`
+	SlotId ModelsUuid `json:"slotId"`
 
 	// StartTime 直接指定の開始日時（RFC3339、空文字可）
 	StartTime string `json:"startTime"`
@@ -2694,7 +2850,7 @@ type ModelsSelectedInterview struct {
 	EndTime time.Time `json:"endTime"`
 
 	// Id 面接ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// StartTime 開始日時
 	StartTime time.Time `json:"startTime"`
@@ -2715,7 +2871,7 @@ type ModelsSendScoutRequest struct {
 	Body string `json:"body"`
 
 	// CandidateId 候補者ユーザーID
-	CandidateId string `json:"candidateId"`
+	CandidateId ModelsUuid `json:"candidateId"`
 
 	// JobPostingId 関連求人ID
 	JobPostingId *string `json:"jobPostingId,omitempty"`
@@ -2763,7 +2919,7 @@ type ModelsSimilarUserItem struct {
 	TopNeeds *[]string `json:"topNeeds"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 
 	// Username ユーザー名
 	Username string `json:"username"`
@@ -2780,7 +2936,7 @@ type ModelsSimilarUsersResponse struct {
 
 // ModelsSkillListResponse スキル一覧
 type ModelsSkillListResponse struct {
-	// Items スキル
+	// Items アイテム一覧
 	Items []ModelsSkillResponse `json:"items"`
 }
 
@@ -2790,7 +2946,7 @@ type ModelsSkillResponse struct {
 	AttachedAt time.Time `json:"attachedAt"`
 
 	// Id スキルID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Name スキル名
 	Name string `json:"name"`
@@ -2802,7 +2958,7 @@ type ModelsStartCandidateConversationRequest struct {
 	Body string `json:"body"`
 
 	// RecipientId 相手のID
-	RecipientId string `json:"recipientId"`
+	RecipientId ModelsUuid `json:"recipientId"`
 }
 
 // ModelsStartConversationRequest 会話開始リクエスト（企業→候補者）
@@ -2811,7 +2967,7 @@ type ModelsStartConversationRequest struct {
 	Body string `json:"body"`
 
 	// CandidateId 候補者ユーザーID
-	CandidateId string `json:"candidateId"`
+	CandidateId ModelsUuid `json:"candidateId"`
 }
 
 // ModelsStatusOkResponse 汎用 OK レスポンス
@@ -2862,7 +3018,7 @@ type ModelsTalentCard struct {
 	TopWvLabels []string `json:"topWvLabels"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 
 	// Username ユーザー名
 	Username string `json:"username"`
@@ -2882,17 +3038,17 @@ type ModelsTalentExperience struct {
 
 // ModelsTalentListResponse 人材一覧
 type ModelsTalentListResponse struct {
-	// Items 人材カード
+	// Items アイテム一覧
 	Items []ModelsTalentCard `json:"items"`
 
 	// Total 総件数
-	Total int `json:"total"`
+	Total int32 `json:"total"`
 }
 
 // ModelsTeamDetailResponse チーム詳細（メンバー付き）
 type ModelsTeamDetailResponse struct {
 	// CompanyId 企業ID
-	CompanyId string `json:"companyId"`
+	CompanyId ModelsUuid `json:"companyId"`
 
 	// CreatedAt 作成日時（RFC3339 文字列）
 	CreatedAt string `json:"createdAt"`
@@ -2901,7 +3057,7 @@ type ModelsTeamDetailResponse struct {
 	Description *string `json:"description"`
 
 	// Id チームID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// IsPublic 公開フラグ
 	IsPublic bool `json:"isPublic"`
@@ -2918,7 +3074,7 @@ type ModelsTeamDiagnosisStatus string
 
 // ModelsTeamListResponse チーム一覧
 type ModelsTeamListResponse struct {
-	// Items チーム
+	// Items アイテム一覧
 	Items []ModelsTeamResponse `json:"items"`
 }
 
@@ -2934,7 +3090,7 @@ type ModelsTeamMemberResponse struct {
 	Email *string `json:"email"`
 
 	// Id メンバーID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// InviteToken 診断招待トークン
 	InviteToken string `json:"inviteToken"`
@@ -2955,7 +3111,7 @@ type ModelsTeamResponse struct {
 	CiCompleted int `json:"ciCompleted"`
 
 	// CompanyId 企業ID
-	CompanyId string `json:"companyId"`
+	CompanyId ModelsUuid `json:"companyId"`
 
 	// CreatedAt 作成日時（RFC3339 文字列）
 	CreatedAt string `json:"createdAt"`
@@ -2964,7 +3120,7 @@ type ModelsTeamResponse struct {
 	Description *string `json:"description"`
 
 	// Id チームID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// IsPublic 公開フラグ
 	IsPublic bool `json:"isPublic"`
@@ -3252,7 +3408,7 @@ type ModelsUserResponse struct {
 	Headline *string `json:"headline,omitempty"`
 
 	// Id ユーザーID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Industry 業界
 	Industry *string `json:"industry,omitempty"`
@@ -3281,6 +3437,9 @@ type ModelsUserResponse struct {
 	// Username ユーザー名
 	Username string `json:"username"`
 }
+
+// ModelsUuid UUID 形式の識別子
+type ModelsUuid = string
 
 // ModelsWVNeedDefResponse Work Need 定義
 type ModelsWVNeedDefResponse struct {
@@ -3342,16 +3501,16 @@ type ModelsWVResultResponse struct {
 	CreatedAt string `json:"createdAt"`
 
 	// Id 結果ID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// Needs ニーズスコア（スコア降順）
 	Needs []ModelsWVNeedScore `json:"needs"`
 
 	// SessionId セッションID
-	SessionId string `json:"sessionId"`
+	SessionId ModelsUuid `json:"sessionId"`
 
 	// UserId ユーザーID
-	UserId string `json:"userId"`
+	UserId ModelsUuid `json:"userId"`
 
 	// Values Value スコア
 	Values []ModelsWVValueScoreResponse `json:"values"`
@@ -3360,7 +3519,7 @@ type ModelsWVResultResponse struct {
 // ModelsWVSessionResponse Work Values セッション
 type ModelsWVSessionResponse struct {
 	// Id セッションID
-	Id string `json:"id"`
+	Id ModelsUuid `json:"id"`
 
 	// InitialPairs 初期ペア
 	InitialPairs []ModelsWVPairResponse `json:"initialPairs"`
@@ -3370,12 +3529,6 @@ type ModelsWVSessionResponse struct {
 
 	// Status ステータス
 	Status ModelsDiagnosisSessionStatus `json:"status"`
-}
-
-// ModelsWVStartSessionRequest Work Values セッション開始リクエスト
-type ModelsWVStartSessionRequest struct {
-	// UserId ユーザーID
-	UserId string `json:"userId"`
 }
 
 // ModelsWVSubmitResultRequest Work Values 結果送信リクエスト
@@ -3405,7 +3558,7 @@ type ModelsWVValueScoreResponse struct {
 // CandidateApplicationsCheckAppliedParams defines parameters for CandidateApplicationsCheckApplied.
 type CandidateApplicationsCheckAppliedParams struct {
 	// JobPostingId 求人ID
-	JobPostingId string `form:"jobPostingId" json:"jobPostingId"`
+	JobPostingId ModelsUuid `form:"jobPostingId" json:"jobPostingId"`
 }
 
 // ArticlesListArticlesParams defines parameters for ArticlesListArticles.
@@ -3550,10 +3703,10 @@ type TalentSearchSearchTalentsParams struct {
 	Industry *string `form:"industry,omitempty" json:"industry,omitempty"`
 
 	// JobSeekingStatus 求職ステータス
-	JobSeekingStatus *string `form:"job_seeking_status,omitempty" json:"job_seeking_status,omitempty"`
+	JobSeekingStatus *string `form:"jobSeekingStatus,omitempty" json:"jobSeekingStatus,omitempty"`
 
 	// JobType 職種
-	JobType *string `form:"job_type,omitempty" json:"job_type,omitempty"`
+	JobType *string `form:"jobType,omitempty" json:"jobType,omitempty"`
 
 	// Diagnosed 診断済みのみ（"1" で有効）
 	Diagnosed *string `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
@@ -3571,44 +3724,44 @@ type TalentSearchSearchTalentsParams struct {
 // TalentSearchDiagnosticSearchTalentsParams defines parameters for TalentSearchDiagnosticSearchTalents.
 type TalentSearchDiagnosticSearchTalentsParams struct {
 	// TeamId 比較対象チームID
-	TeamId           *string `form:"team_id,omitempty" json:"team_id,omitempty"`
-	Q                *string `form:"q,omitempty" json:"q,omitempty"`
-	Location         *string `form:"location,omitempty" json:"location,omitempty"`
-	Industry         *string `form:"industry,omitempty" json:"industry,omitempty"`
-	JobSeekingStatus *string `form:"job_seeking_status,omitempty" json:"job_seeking_status,omitempty"`
-	JobType          *string `form:"job_type,omitempty" json:"job_type,omitempty"`
-	Diagnosed        *string `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
-	Skills           *string `form:"skills,omitempty" json:"skills,omitempty"`
-	Limit            *int32  `form:"limit,omitempty" json:"limit,omitempty"`
-	Offset           *int32  `form:"offset,omitempty" json:"offset,omitempty"`
+	TeamId           *ModelsUuid `form:"teamId,omitempty" json:"teamId,omitempty"`
+	Q                *string     `form:"q,omitempty" json:"q,omitempty"`
+	Location         *string     `form:"location,omitempty" json:"location,omitempty"`
+	Industry         *string     `form:"industry,omitempty" json:"industry,omitempty"`
+	JobSeekingStatus *string     `form:"jobSeekingStatus,omitempty" json:"jobSeekingStatus,omitempty"`
+	JobType          *string     `form:"jobType,omitempty" json:"jobType,omitempty"`
+	Diagnosed        *string     `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
+	Skills           *string     `form:"skills,omitempty" json:"skills,omitempty"`
+	Limit            *int32      `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset           *int32      `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
 // TalentSearchCiDiagnosticSearchTalentsParams defines parameters for TalentSearchCiDiagnosticSearchTalents.
 type TalentSearchCiDiagnosticSearchTalentsParams struct {
-	TeamId           *string `form:"team_id,omitempty" json:"team_id,omitempty"`
-	Q                *string `form:"q,omitempty" json:"q,omitempty"`
-	Location         *string `form:"location,omitempty" json:"location,omitempty"`
-	Industry         *string `form:"industry,omitempty" json:"industry,omitempty"`
-	JobSeekingStatus *string `form:"job_seeking_status,omitempty" json:"job_seeking_status,omitempty"`
-	JobType          *string `form:"job_type,omitempty" json:"job_type,omitempty"`
-	Diagnosed        *string `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
-	Skills           *string `form:"skills,omitempty" json:"skills,omitempty"`
-	Limit            *int32  `form:"limit,omitempty" json:"limit,omitempty"`
-	Offset           *int32  `form:"offset,omitempty" json:"offset,omitempty"`
+	TeamId           *ModelsUuid `form:"teamId,omitempty" json:"teamId,omitempty"`
+	Q                *string     `form:"q,omitempty" json:"q,omitempty"`
+	Location         *string     `form:"location,omitempty" json:"location,omitempty"`
+	Industry         *string     `form:"industry,omitempty" json:"industry,omitempty"`
+	JobSeekingStatus *string     `form:"jobSeekingStatus,omitempty" json:"jobSeekingStatus,omitempty"`
+	JobType          *string     `form:"jobType,omitempty" json:"jobType,omitempty"`
+	Diagnosed        *string     `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
+	Skills           *string     `form:"skills,omitempty" json:"skills,omitempty"`
+	Limit            *int32      `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset           *int32      `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
 // TalentSearchIntegratedDiagnosticSearchTalentsParams defines parameters for TalentSearchIntegratedDiagnosticSearchTalents.
 type TalentSearchIntegratedDiagnosticSearchTalentsParams struct {
-	TeamId           *string `form:"team_id,omitempty" json:"team_id,omitempty"`
-	Q                *string `form:"q,omitempty" json:"q,omitempty"`
-	Location         *string `form:"location,omitempty" json:"location,omitempty"`
-	Industry         *string `form:"industry,omitempty" json:"industry,omitempty"`
-	JobSeekingStatus *string `form:"job_seeking_status,omitempty" json:"job_seeking_status,omitempty"`
-	JobType          *string `form:"job_type,omitempty" json:"job_type,omitempty"`
-	Diagnosed        *string `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
-	Skills           *string `form:"skills,omitempty" json:"skills,omitempty"`
-	Limit            *int32  `form:"limit,omitempty" json:"limit,omitempty"`
-	Offset           *int32  `form:"offset,omitempty" json:"offset,omitempty"`
+	TeamId           *ModelsUuid `form:"teamId,omitempty" json:"teamId,omitempty"`
+	Q                *string     `form:"q,omitempty" json:"q,omitempty"`
+	Location         *string     `form:"location,omitempty" json:"location,omitempty"`
+	Industry         *string     `form:"industry,omitempty" json:"industry,omitempty"`
+	JobSeekingStatus *string     `form:"jobSeekingStatus,omitempty" json:"jobSeekingStatus,omitempty"`
+	JobType          *string     `form:"jobType,omitempty" json:"jobType,omitempty"`
+	Diagnosed        *string     `form:"diagnosed,omitempty" json:"diagnosed,omitempty"`
+	Skills           *string     `form:"skills,omitempty" json:"skills,omitempty"`
+	Limit            *int32      `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset           *int32      `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
 // PublicJobPostingsListPublicJobPostingsParams defines parameters for PublicJobPostingsListPublicJobPostings.
@@ -3631,14 +3784,14 @@ type PublicJobPostingsListPublicJobPostingsParams struct {
 	// RemotePolicy リモートポリシー
 	RemotePolicy *string `form:"remotePolicy,omitempty" json:"remotePolicy,omitempty"`
 
-	// Sort ソート（"salary" で給与順）
-	Sort *string `form:"sort,omitempty" json:"sort,omitempty"`
+	// Sort ソートキー
+	Sort *ModelsJobPostingSort `form:"sort,omitempty" json:"sort,omitempty"`
 
 	// ValueFilters Work Values フィルタ（`id:score` のカンマ区切り）
 	ValueFilters *string `form:"valueFilters,omitempty" json:"valueFilters,omitempty"`
 
-	// FilterMode フィルタモード（values / needs）
-	FilterMode *string `form:"filterMode,omitempty" json:"filterMode,omitempty"`
+	// FilterMode フィルタモード（未指定時は values）
+	FilterMode *ModelsJobPostingFilterMode `form:"filterMode,omitempty" json:"filterMode,omitempty"`
 }
 
 // CandidateMessagingListCandidateConversationsParams defines parameters for CandidateMessagingListCandidateConversations.
@@ -3668,7 +3821,7 @@ type UserNotificationsListUserNotificationsParams struct {
 // PostsListTimelinePostsParams defines parameters for PostsListTimelinePosts.
 type PostsListTimelinePostsParams struct {
 	// ViewerId 閲覧者ユーザーID（いいね済み判定に使用）
-	ViewerId *string `form:"viewerId,omitempty" json:"viewerId,omitempty"`
+	ViewerId *ModelsUuid `form:"viewerId,omitempty" json:"viewerId,omitempty"`
 
 	// Limit 取得件数
 	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
@@ -3679,9 +3832,9 @@ type PostsListTimelinePostsParams struct {
 
 // PostsListPostsByUserParams defines parameters for PostsListPostsByUser.
 type PostsListPostsByUserParams struct {
-	ViewerId *string `form:"viewerId,omitempty" json:"viewerId,omitempty"`
-	Limit    *int32  `form:"limit,omitempty" json:"limit,omitempty"`
-	Offset   *int32  `form:"offset,omitempty" json:"offset,omitempty"`
+	ViewerId *ModelsUuid `form:"viewerId,omitempty" json:"viewerId,omitempty"`
+	Limit    *int32      `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset   *int32      `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
 // PostsListLikedPostsByUserParams defines parameters for PostsListLikedPostsByUser.
@@ -3692,7 +3845,7 @@ type PostsListLikedPostsByUserParams struct {
 
 // PostsGetPostParams defines parameters for PostsGetPost.
 type PostsGetPostParams struct {
-	ViewerId *string `form:"viewerId,omitempty" json:"viewerId,omitempty"`
+	ViewerId *ModelsUuid `form:"viewerId,omitempty" json:"viewerId,omitempty"`
 }
 
 // PostsListPostCommentsParams defines parameters for PostsListPostComments.
@@ -3761,9 +3914,6 @@ type ArticlesUpdateArticleJSONRequestBody = ModelsUpdateArticleRequest
 
 // AuthGoogleLoginJSONRequestBody defines body for AuthGoogleLogin for application/json ContentType.
 type AuthGoogleLoginJSONRequestBody = ModelsGoogleLoginRequest
-
-// CareerInterestCiStartSessionJSONRequestBody defines body for CareerInterestCiStartSession for application/json ContentType.
-type CareerInterestCiStartSessionJSONRequestBody = ModelsCIStartSessionRequest
 
 // CareerInterestCiSubmitResultJSONRequestBody defines body for CareerInterestCiSubmitResult for application/json ContentType.
 type CareerInterestCiSubmitResultJSONRequestBody = ModelsCISubmitResultRequest
@@ -3870,8 +4020,14 @@ type CandidateScoutsCandidateScoutReplyJSONRequestBody = ModelsCandidateScoutRep
 // CandidateScoutsRespondToScoutJSONRequestBody defines body for CandidateScoutsRespondToScout for application/json ContentType.
 type CandidateScoutsRespondToScoutJSONRequestBody = ModelsScoutRespondRequest
 
+// TeamDiagnoseSubmitDiagnoseCiResultJSONRequestBody defines body for TeamDiagnoseSubmitDiagnoseCiResult for application/json ContentType.
+type TeamDiagnoseSubmitDiagnoseCiResultJSONRequestBody = ModelsCISubmitResultRequest
+
 // TeamDiagnoseUpdateDiagnoseStatusJSONRequestBody defines body for TeamDiagnoseUpdateDiagnoseStatus for application/json ContentType.
 type TeamDiagnoseUpdateDiagnoseStatusJSONRequestBody = ModelsUpdateDiagnoseStatusRequest
+
+// TeamDiagnoseSubmitDiagnoseWvResultJSONRequestBody defines body for TeamDiagnoseSubmitDiagnoseWvResult for application/json ContentType.
+type TeamDiagnoseSubmitDiagnoseWvResultJSONRequestBody = ModelsWVSubmitResultRequest
 
 // UsersCreateUserJSONRequestBody defines body for UsersCreateUser for application/json ContentType.
 type UsersCreateUserJSONRequestBody = ModelsCreateUserRequest
@@ -3897,9 +4053,6 @@ type SkillsAttachSkillJSONRequestBody = ModelsAttachSkillRequest
 // UsersUploadUserImageMultipartRequestBody defines body for UsersUploadUserImage for multipart/form-data ContentType.
 type UsersUploadUserImageMultipartRequestBody UsersUploadUserImageMultipartBody
 
-// WorkValuesWvStartSessionJSONRequestBody defines body for WorkValuesWvStartSession for application/json ContentType.
-type WorkValuesWvStartSessionJSONRequestBody = ModelsWVStartSessionRequest
-
 // WorkValuesWvSubmitResultJSONRequestBody defines body for WorkValuesWvSubmitResult for application/json ContentType.
 type WorkValuesWvSubmitResultJSONRequestBody = ModelsWVSubmitResultRequest
 
@@ -3916,7 +4069,7 @@ type ServerInterface interface {
 	CandidateApplicationsCheckApplied(ctx echo.Context, params CandidateApplicationsCheckAppliedParams) error
 	// Withdraw an application
 	// (POST /api/applications/{applicationId}/withdraw)
-	CandidateApplicationsWithdrawApplication(ctx echo.Context, applicationId string) error
+	CandidateApplicationsWithdrawApplication(ctx echo.Context, applicationId ModelsUuid) error
 	// List published articles
 	// (GET /api/articles)
 	ArticlesListArticles(ctx echo.Context, params ArticlesListArticlesParams) error
@@ -3931,19 +4084,19 @@ type ServerInterface interface {
 	ArticlesUploadArticleImage(ctx echo.Context) error
 	// Delete an article as a user
 	// (DELETE /api/articles/{articleId})
-	ArticlesDeleteArticle(ctx echo.Context, articleId string) error
+	ArticlesDeleteArticle(ctx echo.Context, articleId ModelsUuid) error
 	// Get an article
 	// (GET /api/articles/{articleId})
-	ArticlesGetArticle(ctx echo.Context, articleId string) error
+	ArticlesGetArticle(ctx echo.Context, articleId ModelsUuid) error
 	// Update an article as a user
 	// (PUT /api/articles/{articleId})
-	ArticlesUpdateArticle(ctx echo.Context, articleId string) error
+	ArticlesUpdateArticle(ctx echo.Context, articleId ModelsUuid) error
 	// Create a Stripe checkout session for a paid article
 	// (POST /api/articles/{articleId}/checkout)
-	ArticlesCreateArticleCheckout(ctx echo.Context, articleId string) error
+	ArticlesCreateArticleCheckout(ctx echo.Context, articleId ModelsUuid) error
 	// Publish an article as a user
 	// (POST /api/articles/{articleId}/publish)
-	ArticlesPublishArticle(ctx echo.Context, articleId string) error
+	ArticlesPublishArticle(ctx echo.Context, articleId ModelsUuid) error
 	// Login with a Google ID token
 	// (POST /api/auth/google)
 	AuthGoogleLogin(ctx echo.Context) error
@@ -3961,43 +4114,43 @@ type ServerInterface interface {
 	CareerInterestCiStartSession(ctx echo.Context) error
 	// Get the AI report for a career interest session
 	// (GET /api/career-interest/sessions/{sessionId}/ai-report)
-	CareerInterestCiGetAiReport(ctx echo.Context, sessionId string) error
+	CareerInterestCiGetAiReport(ctx echo.Context, sessionId ModelsUuid) error
 	// Get the career interest result by session
 	// (GET /api/career-interest/sessions/{sessionId}/results)
-	CareerInterestCiGetResultBySession(ctx echo.Context, sessionId string) error
+	CareerInterestCiGetResultBySession(ctx echo.Context, sessionId ModelsUuid) error
 	// Submit career interest responses
 	// (POST /api/career-interest/sessions/{sessionId}/results)
-	CareerInterestCiSubmitResult(ctx echo.Context, sessionId string) error
+	CareerInterestCiSubmitResult(ctx echo.Context, sessionId ModelsUuid) error
 	// Get the latest career interest result for a user
 	// (GET /api/career-interest/users/{userId}/results/latest)
-	CareerInterestCiGetLatestResult(ctx echo.Context, userId string) error
+	CareerInterestCiGetLatestResult(ctx echo.Context, userId ModelsUuid) error
 	// Get a public company profile
 	// (GET /api/companies/{id})
-	PublicCompanyProfilesGetPublicCompanyProfile(ctx echo.Context, id string) error
+	PublicCompanyProfilesGetPublicCompanyProfile(ctx echo.Context, id ModelsUuid) error
 	// Get public team scores of a company
 	// (GET /api/companies/{id}/teams/scores)
-	PublicTeamScoresGetPublicTeamScores(ctx echo.Context, id string) error
+	PublicTeamScoresGetPublicTeamScores(ctx echo.Context, id ModelsUuid) error
 	// List applications for the company
 	// (GET /api/company/applications)
 	CompanyApplicationsListCompanyApplications(ctx echo.Context, params CompanyApplicationsListCompanyApplicationsParams) error
 	// Get an application
 	// (GET /api/company/applications/{applicationId})
-	CompanyApplicationsGetApplication(ctx echo.Context, applicationId string) error
+	CompanyApplicationsGetApplication(ctx echo.Context, applicationId ModelsUuid) error
 	// Update application status
 	// (PATCH /api/company/applications/{applicationId}/status)
-	CompanyApplicationsUpdateApplicationStatus(ctx echo.Context, applicationId string) error
+	CompanyApplicationsUpdateApplicationStatus(ctx echo.Context, applicationId ModelsUuid) error
 	// Create an article as a company
 	// (POST /api/company/articles)
 	CompanyArticlesCreateCompanyArticle(ctx echo.Context) error
 	// Delete an article as a company
 	// (DELETE /api/company/articles/{articleId})
-	CompanyArticlesDeleteCompanyArticle(ctx echo.Context, articleId string) error
+	CompanyArticlesDeleteCompanyArticle(ctx echo.Context, articleId ModelsUuid) error
 	// Update an article as a company
 	// (PUT /api/company/articles/{articleId})
-	CompanyArticlesUpdateCompanyArticle(ctx echo.Context, articleId string) error
+	CompanyArticlesUpdateCompanyArticle(ctx echo.Context, articleId ModelsUuid) error
 	// Publish an article as a company
 	// (POST /api/company/articles/{articleId}/publish)
-	CompanyArticlesPublishCompanyArticle(ctx echo.Context, articleId string) error
+	CompanyArticlesPublishCompanyArticle(ctx echo.Context, articleId ModelsUuid) error
 	// Login as a company
 	// (POST /api/company/auth/login)
 	CompanyAuthCompanyLogin(ctx echo.Context) error
@@ -4018,13 +4171,13 @@ type ServerInterface interface {
 	CompanyInterviewsListCompanyInterviews(ctx echo.Context, params CompanyInterviewsListCompanyInterviewsParams) error
 	// Check for a pending proposal on an application
 	// (GET /api/company/interviews/pending/{applicationId})
-	CompanyInterviewsGetPendingProposal(ctx echo.Context, applicationId string) error
+	CompanyInterviewsGetPendingProposal(ctx echo.Context, applicationId ModelsUuid) error
 	// Propose interview slots
 	// (POST /api/company/interviews/propose)
 	CompanyInterviewsProposeInterview(ctx echo.Context) error
 	// Cancel an interview as the company
 	// (POST /api/company/interviews/{interviewId}/cancel)
-	CompanyInterviewsCancelCompanyInterview(ctx echo.Context, interviewId string) error
+	CompanyInterviewsCancelCompanyInterview(ctx echo.Context, interviewId ModelsUuid) error
 	// List job postings of the company
 	// (GET /api/company/jobs)
 	CompanyJobPostingsListCompanyJobPostings(ctx echo.Context) error
@@ -4042,13 +4195,13 @@ type ServerInterface interface {
 	CompanyJobPostingsUploadTeamMemberPhoto(ctx echo.Context) error
 	// Delete a job posting
 	// (DELETE /api/company/jobs/{jobId})
-	CompanyJobPostingsDeleteJobPosting(ctx echo.Context, jobId string) error
+	CompanyJobPostingsDeleteJobPosting(ctx echo.Context, jobId ModelsUuid) error
 	// Get a job posting
 	// (GET /api/company/jobs/{jobId})
-	CompanyJobPostingsGetCompanyJobPosting(ctx echo.Context, jobId string) error
+	CompanyJobPostingsGetCompanyJobPosting(ctx echo.Context, jobId ModelsUuid) error
 	// Update a job posting
 	// (PUT /api/company/jobs/{jobId})
-	CompanyJobPostingsUpdateJobPosting(ctx echo.Context, jobId string) error
+	CompanyJobPostingsUpdateJobPosting(ctx echo.Context, jobId ModelsUuid) error
 	// List conversations for the company
 	// (GET /api/company/messages/conversations)
 	CompanyMessagingListCompanyConversations(ctx echo.Context, params CompanyMessagingListCompanyConversationsParams) error
@@ -4057,16 +4210,16 @@ type ServerInterface interface {
 	CompanyMessagingStartCompanyConversation(ctx echo.Context) error
 	// Get a conversation as the company
 	// (GET /api/company/messages/conversations/{conversationId})
-	CompanyMessagingGetCompanyConversation(ctx echo.Context, conversationId string) error
+	CompanyMessagingGetCompanyConversation(ctx echo.Context, conversationId ModelsUuid) error
 	// List messages as the company
 	// (GET /api/company/messages/conversations/{conversationId}/messages)
-	CompanyMessagingListCompanyMessages(ctx echo.Context, conversationId string, params CompanyMessagingListCompanyMessagesParams) error
+	CompanyMessagingListCompanyMessages(ctx echo.Context, conversationId ModelsUuid, params CompanyMessagingListCompanyMessagesParams) error
 	// Send a message as the company
 	// (POST /api/company/messages/conversations/{conversationId}/messages)
-	CompanyMessagingSendCompanyMessage(ctx echo.Context, conversationId string) error
+	CompanyMessagingSendCompanyMessage(ctx echo.Context, conversationId ModelsUuid) error
 	// Mark a conversation as read (company)
 	// (POST /api/company/messages/conversations/{conversationId}/read)
-	CompanyMessagingMarkCompanyConversationRead(ctx echo.Context, conversationId string) error
+	CompanyMessagingMarkCompanyConversationRead(ctx echo.Context, conversationId ModelsUuid) error
 	// Count unread messages for the company
 	// (GET /api/company/messages/unread-count)
 	CompanyMessagingCountCompanyUnreadMessages(ctx echo.Context) error
@@ -4081,7 +4234,7 @@ type ServerInterface interface {
 	CompanyNotificationsCountCompanyUnreadNotifications(ctx echo.Context) error
 	// Mark a company notification as read
 	// (POST /api/company/notifications/{id}/read)
-	CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Context, id string) error
+	CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Context, id ModelsUuid) error
 	// Get the authenticated company's profile
 	// (GET /api/company/profile)
 	CompanyProfilesGetCompanyProfile(ctx echo.Context) error
@@ -4105,13 +4258,13 @@ type ServerInterface interface {
 	SavedCandidatesCountSavedCandidates(ctx echo.Context) error
 	// Unsave a candidate
 	// (DELETE /api/company/saved-candidates/{userId})
-	SavedCandidatesUnsaveCandidate(ctx echo.Context, userId string) error
+	SavedCandidatesUnsaveCandidate(ctx echo.Context, userId ModelsUuid) error
 	// Check whether a candidate is saved
 	// (GET /api/company/saved-candidates/{userId})
-	SavedCandidatesIsCandidateSaved(ctx echo.Context, userId string) error
+	SavedCandidatesIsCandidateSaved(ctx echo.Context, userId ModelsUuid) error
 	// Save a candidate
 	// (POST /api/company/saved-candidates/{userId})
-	SavedCandidatesSaveCandidate(ctx echo.Context, userId string) error
+	SavedCandidatesSaveCandidate(ctx echo.Context, userId ModelsUuid) error
 	// List scout templates
 	// (GET /api/company/scout-templates)
 	ScoutTemplatesListScoutTemplates(ctx echo.Context) error
@@ -4120,13 +4273,13 @@ type ServerInterface interface {
 	ScoutTemplatesCreateScoutTemplate(ctx echo.Context) error
 	// Delete a scout template
 	// (DELETE /api/company/scout-templates/{templateId})
-	ScoutTemplatesDeleteScoutTemplate(ctx echo.Context, templateId string) error
+	ScoutTemplatesDeleteScoutTemplate(ctx echo.Context, templateId ModelsUuid) error
 	// Get a scout template
 	// (GET /api/company/scout-templates/{templateId})
-	ScoutTemplatesGetScoutTemplate(ctx echo.Context, templateId string) error
+	ScoutTemplatesGetScoutTemplate(ctx echo.Context, templateId ModelsUuid) error
 	// Update a scout template
 	// (PUT /api/company/scout-templates/{templateId})
-	ScoutTemplatesUpdateScoutTemplate(ctx echo.Context, templateId string) error
+	ScoutTemplatesUpdateScoutTemplate(ctx echo.Context, templateId ModelsUuid) error
 	// List scouts sent by the company
 	// (GET /api/company/scouts)
 	CompanyScoutsListCompanyScouts(ctx echo.Context, params CompanyScoutsListCompanyScoutsParams) error
@@ -4144,10 +4297,10 @@ type ServerInterface interface {
 	CompanyScoutsGetScoutQuality(ctx echo.Context) error
 	// Get scout detail with replies
 	// (GET /api/company/scouts/{scoutId})
-	CompanyScoutsGetCompanyScoutDetail(ctx echo.Context, scoutId string) error
+	CompanyScoutsGetCompanyScoutDetail(ctx echo.Context, scoutId ModelsUuid) error
 	// Reply to a scout as the company
 	// (POST /api/company/scouts/{scoutId}/reply)
-	CompanyScoutsCompanyScoutReply(ctx echo.Context, scoutId string) error
+	CompanyScoutsCompanyScoutReply(ctx echo.Context, scoutId ModelsUuid) error
 	// Search talents by conditions
 	// (GET /api/company/talents/search)
 	TalentSearchSearchTalents(ctx echo.Context, params TalentSearchSearchTalentsParams) error
@@ -4168,28 +4321,28 @@ type ServerInterface interface {
 	CompanyTeamsCreateTeam(ctx echo.Context) error
 	// Delete a team
 	// (DELETE /api/company/teams/{teamId})
-	CompanyTeamsDeleteTeam(ctx echo.Context, teamId string) error
+	CompanyTeamsDeleteTeam(ctx echo.Context, teamId ModelsUuid) error
 	// Get a team with members
 	// (GET /api/company/teams/{teamId})
-	CompanyTeamsGetTeam(ctx echo.Context, teamId string) error
+	CompanyTeamsGetTeam(ctx echo.Context, teamId ModelsUuid) error
 	// Update a team
 	// (PUT /api/company/teams/{teamId})
-	CompanyTeamsUpdateTeam(ctx echo.Context, teamId string) error
+	CompanyTeamsUpdateTeam(ctx echo.Context, teamId ModelsUuid) error
 	// Unset the ace member of a team
 	// (DELETE /api/company/teams/{teamId}/ace)
-	CompanyTeamsUnsetAceMember(ctx echo.Context, teamId string) error
+	CompanyTeamsUnsetAceMember(ctx echo.Context, teamId ModelsUuid) error
 	// Set the ace member of a team
 	// (PUT /api/company/teams/{teamId}/ace/{memberId})
-	CompanyTeamsSetAceMember(ctx echo.Context, teamId string, memberId string) error
+	CompanyTeamsSetAceMember(ctx echo.Context, teamId ModelsUuid, memberId ModelsUuid) error
 	// Add a team member
 	// (POST /api/company/teams/{teamId}/members)
-	CompanyTeamsAddTeamMember(ctx echo.Context, teamId string) error
+	CompanyTeamsAddTeamMember(ctx echo.Context, teamId ModelsUuid) error
 	// Remove a team member
 	// (DELETE /api/company/teams/{teamId}/members/{memberId})
-	CompanyTeamsRemoveTeamMember(ctx echo.Context, teamId string, memberId string) error
+	CompanyTeamsRemoveTeamMember(ctx echo.Context, teamId ModelsUuid, memberId ModelsUuid) error
 	// Get diagnostic scores of team members
 	// (GET /api/company/teams/{teamId}/scores)
-	CompanyTeamsGetTeamScores(ctx echo.Context, teamId string) error
+	CompanyTeamsGetTeamScores(ctx echo.Context, teamId ModelsUuid) error
 	// Get my latest integrated report
 	// (GET /api/integrated-report/me)
 	IntegratedReportGetMyIntegratedReport(ctx echo.Context) error
@@ -4198,31 +4351,31 @@ type ServerInterface interface {
 	IntegratedReportCreateIntegratedReportRequest(ctx echo.Context) error
 	// Get an integrated report by request ID
 	// (GET /api/integrated-report/requests/{requestId}/report)
-	IntegratedReportGetIntegratedReport(ctx echo.Context, requestId string) error
+	IntegratedReportGetIntegratedReport(ctx echo.Context, requestId ModelsUuid) error
 	// Get my integrated report request status
 	// (GET /api/integrated-report/status)
 	IntegratedReportGetIntegratedReportStatus(ctx echo.Context) error
 	// Get the latest integrated report request for a user
 	// (GET /api/integrated-report/users/{userId}/latest-request)
-	IntegratedReportGetLatestIntegratedRequest(ctx echo.Context, userId string) error
+	IntegratedReportGetLatestIntegratedRequest(ctx echo.Context, userId ModelsUuid) error
 	// List interviews and pending proposals for the candidate
 	// (GET /api/interviews)
 	CandidateInterviewsListCandidateInterviews(ctx echo.Context) error
 	// Select an interview slot
 	// (POST /api/interviews/proposals/{proposalId}/select)
-	CandidateInterviewsSelectInterviewSlot(ctx echo.Context, proposalId string) error
+	CandidateInterviewsSelectInterviewSlot(ctx echo.Context, proposalId ModelsUuid) error
 	// Get slots of a proposal
 	// (GET /api/interviews/proposals/{proposalId}/slots)
-	CandidateInterviewsGetProposalSlots(ctx echo.Context, proposalId string) error
+	CandidateInterviewsGetProposalSlots(ctx echo.Context, proposalId ModelsUuid) error
 	// Cancel an interview as the candidate
 	// (POST /api/interviews/{interviewId}/cancel)
-	CandidateInterviewsCancelCandidateInterview(ctx echo.Context, interviewId string) error
+	CandidateInterviewsCancelCandidateInterview(ctx echo.Context, interviewId ModelsUuid) error
 	// List public job postings
 	// (GET /api/jobs)
 	PublicJobPostingsListPublicJobPostings(ctx echo.Context, params PublicJobPostingsListPublicJobPostingsParams) error
 	// Get a public job posting
 	// (GET /api/jobs/{jobId})
-	PublicJobPostingsGetPublicJobPosting(ctx echo.Context, jobId string) error
+	PublicJobPostingsGetPublicJobPosting(ctx echo.Context, jobId ModelsUuid) error
 	// List conversations for the candidate
 	// (GET /api/messages/conversations)
 	CandidateMessagingListCandidateConversations(ctx echo.Context, params CandidateMessagingListCandidateConversationsParams) error
@@ -4231,16 +4384,16 @@ type ServerInterface interface {
 	CandidateMessagingStartCandidateConversation(ctx echo.Context) error
 	// Get a conversation as the candidate
 	// (GET /api/messages/conversations/{conversationId})
-	CandidateMessagingGetCandidateConversation(ctx echo.Context, conversationId string) error
+	CandidateMessagingGetCandidateConversation(ctx echo.Context, conversationId ModelsUuid) error
 	// List messages as the candidate
 	// (GET /api/messages/conversations/{conversationId}/messages)
-	CandidateMessagingListCandidateMessages(ctx echo.Context, conversationId string, params CandidateMessagingListCandidateMessagesParams) error
+	CandidateMessagingListCandidateMessages(ctx echo.Context, conversationId ModelsUuid, params CandidateMessagingListCandidateMessagesParams) error
 	// Send a message as the candidate
 	// (POST /api/messages/conversations/{conversationId}/messages)
-	CandidateMessagingSendCandidateMessage(ctx echo.Context, conversationId string) error
+	CandidateMessagingSendCandidateMessage(ctx echo.Context, conversationId ModelsUuid) error
 	// Mark a conversation as read (candidate)
 	// (POST /api/messages/conversations/{conversationId}/read)
-	CandidateMessagingMarkCandidateConversationRead(ctx echo.Context, conversationId string) error
+	CandidateMessagingMarkCandidateConversationRead(ctx echo.Context, conversationId ModelsUuid) error
 	// Count unread messages for the candidate
 	// (GET /api/messages/unread-count)
 	CandidateMessagingCountCandidateUnreadMessages(ctx echo.Context) error
@@ -4255,7 +4408,7 @@ type ServerInterface interface {
 	UserNotificationsCountUserUnreadNotifications(ctx echo.Context) error
 	// Mark a notification as read
 	// (POST /api/notifications/{id}/read)
-	UserNotificationsMarkUserNotificationRead(ctx echo.Context, id string) error
+	UserNotificationsMarkUserNotificationRead(ctx echo.Context, id ModelsUuid) error
 	// List timeline posts
 	// (GET /api/posts)
 	PostsListTimelinePosts(ctx echo.Context, params PostsListTimelinePostsParams) error
@@ -4264,31 +4417,31 @@ type ServerInterface interface {
 	PostsCreatePost(ctx echo.Context) error
 	// Delete a comment
 	// (DELETE /api/posts/comments/{commentId})
-	PostsDeletePostComment(ctx echo.Context, commentId string) error
+	PostsDeletePostComment(ctx echo.Context, commentId ModelsUuid) error
 	// List posts by a user
 	// (GET /api/posts/users/{userId})
-	PostsListPostsByUser(ctx echo.Context, userId string, params PostsListPostsByUserParams) error
+	PostsListPostsByUser(ctx echo.Context, userId ModelsUuid, params PostsListPostsByUserParams) error
 	// List posts liked by a user
 	// (GET /api/posts/users/{userId}/likes)
-	PostsListLikedPostsByUser(ctx echo.Context, userId string, params PostsListLikedPostsByUserParams) error
+	PostsListLikedPostsByUser(ctx echo.Context, userId ModelsUuid, params PostsListLikedPostsByUserParams) error
 	// Delete a post
 	// (DELETE /api/posts/{postId})
-	PostsDeletePost(ctx echo.Context, postId string) error
+	PostsDeletePost(ctx echo.Context, postId ModelsUuid) error
 	// Get a post
 	// (GET /api/posts/{postId})
-	PostsGetPost(ctx echo.Context, postId string, params PostsGetPostParams) error
+	PostsGetPost(ctx echo.Context, postId ModelsUuid, params PostsGetPostParams) error
 	// List comments on a post
 	// (GET /api/posts/{postId}/comments)
-	PostsListPostComments(ctx echo.Context, postId string, params PostsListPostCommentsParams) error
+	PostsListPostComments(ctx echo.Context, postId ModelsUuid, params PostsListPostCommentsParams) error
 	// Create a comment on a post
 	// (POST /api/posts/{postId}/comments)
-	PostsCreatePostComment(ctx echo.Context, postId string) error
+	PostsCreatePostComment(ctx echo.Context, postId ModelsUuid) error
 	// Toggle like on a post
 	// (POST /api/posts/{postId}/like)
-	PostsTogglePostLike(ctx echo.Context, postId string) error
+	PostsTogglePostLike(ctx echo.Context, postId ModelsUuid) error
 	// Toggle repost on a post
 	// (POST /api/posts/{postId}/repost)
-	PostsTogglePostRepost(ctx echo.Context, postId string) error
+	PostsTogglePostRepost(ctx echo.Context, postId ModelsUuid) error
 	// Get scout settings for the authenticated user
 	// (GET /api/scout-settings)
 	ScoutSettingsGetScoutSettings(ctx echo.Context) error
@@ -4306,28 +4459,40 @@ type ServerInterface interface {
 	CandidateScoutsBulkRespondScouts(ctx echo.Context) error
 	// Get a received scout with replies
 	// (GET /api/scouts/{scoutId})
-	CandidateScoutsGetCandidateScoutDetail(ctx echo.Context, scoutId string) error
+	CandidateScoutsGetCandidateScoutDetail(ctx echo.Context, scoutId ModelsUuid) error
 	// Reply to a scout as the candidate
 	// (POST /api/scouts/{scoutId}/reply)
-	CandidateScoutsCandidateScoutReply(ctx echo.Context, scoutId string) error
+	CandidateScoutsCandidateScoutReply(ctx echo.Context, scoutId ModelsUuid) error
 	// Respond to a scout
 	// (POST /api/scouts/{scoutId}/respond)
-	CandidateScoutsRespondToScout(ctx echo.Context, scoutId string) error
+	CandidateScoutsRespondToScout(ctx echo.Context, scoutId ModelsUuid) error
 	// Get team-diagnose info by token
 	// (GET /api/team-diagnose/{token})
 	TeamDiagnoseGetDiagnoseByToken(ctx echo.Context, token string) error
+	// Start a career interest session via invite token
+	// (POST /api/team-diagnose/{token}/career-interest/sessions)
+	TeamDiagnoseStartDiagnoseCiSession(ctx echo.Context, token string) error
+	// Submit career interest responses via invite token
+	// (POST /api/team-diagnose/{token}/career-interest/sessions/{sessionId}/results)
+	TeamDiagnoseSubmitDiagnoseCiResult(ctx echo.Context, token string, sessionId ModelsUuid) error
 	// Update diagnose status by token
 	// (PUT /api/team-diagnose/{token}/status)
 	TeamDiagnoseUpdateDiagnoseStatus(ctx echo.Context, token string) error
+	// Start a work values session via invite token
+	// (POST /api/team-diagnose/{token}/work-values/sessions)
+	TeamDiagnoseStartDiagnoseWvSession(ctx echo.Context, token string) error
+	// Submit work values responses via invite token
+	// (POST /api/team-diagnose/{token}/work-values/sessions/{sessionId}/results)
+	TeamDiagnoseSubmitDiagnoseWvResult(ctx echo.Context, token string, sessionId ModelsUuid) error
 	// Create a new user
 	// (POST /api/users)
 	UsersCreateUser(ctx echo.Context) error
 	// Get a user by ID
 	// (GET /api/users/id/{id})
-	UsersGetUserById(ctx echo.Context, id string) error
+	UsersGetUserById(ctx echo.Context, id ModelsUuid) error
 	// Get users with similar work values
 	// (GET /api/users/id/{userId}/similar)
-	SimilarUsersGetSimilarUsers(ctx echo.Context, userId string, params SimilarUsersGetSimilarUsersParams) error
+	SimilarUsersGetSimilarUsers(ctx echo.Context, userId ModelsUuid, params SimilarUsersGetSimilarUsersParams) error
 	// Get a user by username
 	// (GET /api/users/{username})
 	UsersGetUserByUsername(ctx echo.Context, username string) error
@@ -4342,10 +4507,10 @@ type ServerInterface interface {
 	EducationsCreateEducation(ctx echo.Context, username string) error
 	// Delete an education
 	// (DELETE /api/users/{username}/educations/{educationId})
-	EducationsDeleteEducation(ctx echo.Context, username string, educationId string) error
+	EducationsDeleteEducation(ctx echo.Context, username string, educationId ModelsUuid) error
 	// Update an education
 	// (PUT /api/users/{username}/educations/{educationId})
-	EducationsUpdateEducation(ctx echo.Context, username string, educationId string) error
+	EducationsUpdateEducation(ctx echo.Context, username string, educationId ModelsUuid) error
 	// List experiences for a user
 	// (GET /api/users/{username}/experiences)
 	ExperiencesListExperiences(ctx echo.Context, username string) error
@@ -4354,10 +4519,10 @@ type ServerInterface interface {
 	ExperiencesCreateExperience(ctx echo.Context, username string) error
 	// Delete an experience
 	// (DELETE /api/users/{username}/experiences/{experienceId})
-	ExperiencesDeleteExperience(ctx echo.Context, username string, experienceId string) error
+	ExperiencesDeleteExperience(ctx echo.Context, username string, experienceId ModelsUuid) error
 	// Update an experience
 	// (PUT /api/users/{username}/experiences/{experienceId})
-	ExperiencesUpdateExperience(ctx echo.Context, username string, experienceId string) error
+	ExperiencesUpdateExperience(ctx echo.Context, username string, experienceId ModelsUuid) error
 	// Unfollow a user
 	// (DELETE /api/users/{username}/follow)
 	FollowsUnfollowUser(ctx echo.Context, username string) error
@@ -4390,16 +4555,16 @@ type ServerInterface interface {
 	WorkValuesWvStartSession(ctx echo.Context) error
 	// Get the AI report for a work values session
 	// (GET /api/work-values/sessions/{sessionId}/ai-report)
-	WorkValuesWvGetAiReport(ctx echo.Context, sessionId string) error
+	WorkValuesWvGetAiReport(ctx echo.Context, sessionId ModelsUuid) error
 	// Get the work values result by session
 	// (GET /api/work-values/sessions/{sessionId}/results)
-	WorkValuesWvGetResultBySession(ctx echo.Context, sessionId string) error
+	WorkValuesWvGetResultBySession(ctx echo.Context, sessionId ModelsUuid) error
 	// Submit work values responses and estimates
 	// (POST /api/work-values/sessions/{sessionId}/results)
-	WorkValuesWvSubmitResult(ctx echo.Context, sessionId string) error
+	WorkValuesWvSubmitResult(ctx echo.Context, sessionId ModelsUuid) error
 	// Get the latest work values result for a user
 	// (GET /api/work-values/users/{userId}/results/latest)
-	WorkValuesWvGetLatestResult(ctx echo.Context, userId string) error
+	WorkValuesWvGetLatestResult(ctx echo.Context, userId ModelsUuid) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -4453,7 +4618,7 @@ func (w *ServerInterfaceWrapper) CandidateApplicationsCheckApplied(ctx echo.Cont
 func (w *ServerInterfaceWrapper) CandidateApplicationsWithdrawApplication(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "applicationId" -------------
-	var applicationId string
+	var applicationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "applicationId", ctx.Param("applicationId"), &applicationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4545,7 +4710,7 @@ func (w *ServerInterfaceWrapper) ArticlesUploadArticleImage(ctx echo.Context) er
 func (w *ServerInterfaceWrapper) ArticlesDeleteArticle(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "articleId" -------------
-	var articleId string
+	var articleId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4563,7 +4728,7 @@ func (w *ServerInterfaceWrapper) ArticlesDeleteArticle(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) ArticlesGetArticle(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "articleId" -------------
-	var articleId string
+	var articleId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4581,7 +4746,7 @@ func (w *ServerInterfaceWrapper) ArticlesGetArticle(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) ArticlesUpdateArticle(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "articleId" -------------
-	var articleId string
+	var articleId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4599,7 +4764,7 @@ func (w *ServerInterfaceWrapper) ArticlesUpdateArticle(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) ArticlesCreateArticleCheckout(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "articleId" -------------
-	var articleId string
+	var articleId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4617,7 +4782,7 @@ func (w *ServerInterfaceWrapper) ArticlesCreateArticleCheckout(ctx echo.Context)
 func (w *ServerInterfaceWrapper) ArticlesPublishArticle(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "articleId" -------------
-	var articleId string
+	var articleId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4673,6 +4838,8 @@ func (w *ServerInterfaceWrapper) AuthRefreshToken(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) CareerInterestCiStartSession(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CareerInterestCiStartSession(ctx)
 	return err
@@ -4682,12 +4849,16 @@ func (w *ServerInterfaceWrapper) CareerInterestCiStartSession(ctx echo.Context) 
 func (w *ServerInterfaceWrapper) CareerInterestCiGetAiReport(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId string
+	var sessionId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CareerInterestCiGetAiReport(ctx, sessionId)
@@ -4698,12 +4869,16 @@ func (w *ServerInterfaceWrapper) CareerInterestCiGetAiReport(ctx echo.Context) e
 func (w *ServerInterfaceWrapper) CareerInterestCiGetResultBySession(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId string
+	var sessionId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CareerInterestCiGetResultBySession(ctx, sessionId)
@@ -4714,12 +4889,14 @@ func (w *ServerInterfaceWrapper) CareerInterestCiGetResultBySession(ctx echo.Con
 func (w *ServerInterfaceWrapper) CareerInterestCiSubmitResult(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId string
+	var sessionId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CareerInterestCiSubmitResult(ctx, sessionId)
@@ -4730,12 +4907,16 @@ func (w *ServerInterfaceWrapper) CareerInterestCiSubmitResult(ctx echo.Context) 
 func (w *ServerInterfaceWrapper) CareerInterestCiGetLatestResult(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CareerInterestCiGetLatestResult(ctx, userId)
@@ -4746,7 +4927,7 @@ func (w *ServerInterfaceWrapper) CareerInterestCiGetLatestResult(ctx echo.Contex
 func (w *ServerInterfaceWrapper) PublicCompanyProfilesGetPublicCompanyProfile(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4762,7 +4943,7 @@ func (w *ServerInterfaceWrapper) PublicCompanyProfilesGetPublicCompanyProfile(ct
 func (w *ServerInterfaceWrapper) PublicTeamScoresGetPublicTeamScores(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4840,7 +5021,7 @@ func (w *ServerInterfaceWrapper) CompanyApplicationsListCompanyApplications(ctx 
 func (w *ServerInterfaceWrapper) CompanyApplicationsGetApplication(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "applicationId" -------------
-	var applicationId string
+	var applicationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "applicationId", ctx.Param("applicationId"), &applicationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4858,7 +5039,7 @@ func (w *ServerInterfaceWrapper) CompanyApplicationsGetApplication(ctx echo.Cont
 func (w *ServerInterfaceWrapper) CompanyApplicationsUpdateApplicationStatus(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "applicationId" -------------
-	var applicationId string
+	var applicationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "applicationId", ctx.Param("applicationId"), &applicationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4887,7 +5068,7 @@ func (w *ServerInterfaceWrapper) CompanyArticlesCreateCompanyArticle(ctx echo.Co
 func (w *ServerInterfaceWrapper) CompanyArticlesDeleteCompanyArticle(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "articleId" -------------
-	var articleId string
+	var articleId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4905,7 +5086,7 @@ func (w *ServerInterfaceWrapper) CompanyArticlesDeleteCompanyArticle(ctx echo.Co
 func (w *ServerInterfaceWrapper) CompanyArticlesUpdateCompanyArticle(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "articleId" -------------
-	var articleId string
+	var articleId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -4923,7 +5104,7 @@ func (w *ServerInterfaceWrapper) CompanyArticlesUpdateCompanyArticle(ctx echo.Co
 func (w *ServerInterfaceWrapper) CompanyArticlesPublishCompanyArticle(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "articleId" -------------
-	var articleId string
+	var articleId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "articleId", ctx.Param("articleId"), &articleId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5015,7 +5196,7 @@ func (w *ServerInterfaceWrapper) CompanyInterviewsListCompanyInterviews(ctx echo
 func (w *ServerInterfaceWrapper) CompanyInterviewsGetPendingProposal(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "applicationId" -------------
-	var applicationId string
+	var applicationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "applicationId", ctx.Param("applicationId"), &applicationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5044,7 +5225,7 @@ func (w *ServerInterfaceWrapper) CompanyInterviewsProposeInterview(ctx echo.Cont
 func (w *ServerInterfaceWrapper) CompanyInterviewsCancelCompanyInterview(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "interviewId" -------------
-	var interviewId string
+	var interviewId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "interviewId", ctx.Param("interviewId"), &interviewId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5117,7 +5298,7 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadTeamMemberPhoto(ctx ech
 func (w *ServerInterfaceWrapper) CompanyJobPostingsDeleteJobPosting(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "jobId" -------------
-	var jobId string
+	var jobId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "jobId", ctx.Param("jobId"), &jobId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5135,7 +5316,7 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsDeleteJobPosting(ctx echo.Con
 func (w *ServerInterfaceWrapper) CompanyJobPostingsGetCompanyJobPosting(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "jobId" -------------
-	var jobId string
+	var jobId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "jobId", ctx.Param("jobId"), &jobId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5153,7 +5334,7 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsGetCompanyJobPosting(ctx echo
 func (w *ServerInterfaceWrapper) CompanyJobPostingsUpdateJobPosting(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "jobId" -------------
-	var jobId string
+	var jobId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "jobId", ctx.Param("jobId"), &jobId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5209,7 +5390,7 @@ func (w *ServerInterfaceWrapper) CompanyMessagingStartCompanyConversation(ctx ec
 func (w *ServerInterfaceWrapper) CompanyMessagingGetCompanyConversation(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "conversationId" -------------
-	var conversationId string
+	var conversationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5227,7 +5408,7 @@ func (w *ServerInterfaceWrapper) CompanyMessagingGetCompanyConversation(ctx echo
 func (w *ServerInterfaceWrapper) CompanyMessagingListCompanyMessages(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "conversationId" -------------
-	var conversationId string
+	var conversationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5261,7 +5442,7 @@ func (w *ServerInterfaceWrapper) CompanyMessagingListCompanyMessages(ctx echo.Co
 func (w *ServerInterfaceWrapper) CompanyMessagingSendCompanyMessage(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "conversationId" -------------
-	var conversationId string
+	var conversationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5279,7 +5460,7 @@ func (w *ServerInterfaceWrapper) CompanyMessagingSendCompanyMessage(ctx echo.Con
 func (w *ServerInterfaceWrapper) CompanyMessagingMarkCompanyConversationRead(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "conversationId" -------------
-	var conversationId string
+	var conversationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5357,7 +5538,7 @@ func (w *ServerInterfaceWrapper) CompanyNotificationsCountCompanyUnreadNotificat
 func (w *ServerInterfaceWrapper) CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5493,7 +5674,7 @@ func (w *ServerInterfaceWrapper) SavedCandidatesCountSavedCandidates(ctx echo.Co
 func (w *ServerInterfaceWrapper) SavedCandidatesUnsaveCandidate(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5511,7 +5692,7 @@ func (w *ServerInterfaceWrapper) SavedCandidatesUnsaveCandidate(ctx echo.Context
 func (w *ServerInterfaceWrapper) SavedCandidatesIsCandidateSaved(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5529,7 +5710,7 @@ func (w *ServerInterfaceWrapper) SavedCandidatesIsCandidateSaved(ctx echo.Contex
 func (w *ServerInterfaceWrapper) SavedCandidatesSaveCandidate(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5569,7 +5750,7 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesCreateScoutTemplate(ctx echo.Cont
 func (w *ServerInterfaceWrapper) ScoutTemplatesDeleteScoutTemplate(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "templateId" -------------
-	var templateId string
+	var templateId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "templateId", ctx.Param("templateId"), &templateId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5587,7 +5768,7 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesDeleteScoutTemplate(ctx echo.Cont
 func (w *ServerInterfaceWrapper) ScoutTemplatesGetScoutTemplate(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "templateId" -------------
-	var templateId string
+	var templateId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "templateId", ctx.Param("templateId"), &templateId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5605,7 +5786,7 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesGetScoutTemplate(ctx echo.Context
 func (w *ServerInterfaceWrapper) ScoutTemplatesUpdateScoutTemplate(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "templateId" -------------
-	var templateId string
+	var templateId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "templateId", ctx.Param("templateId"), &templateId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5701,7 +5882,7 @@ func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutQuality(ctx echo.Context) 
 func (w *ServerInterfaceWrapper) CompanyScoutsGetCompanyScoutDetail(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "scoutId" -------------
-	var scoutId string
+	var scoutId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5719,7 +5900,7 @@ func (w *ServerInterfaceWrapper) CompanyScoutsGetCompanyScoutDetail(ctx echo.Con
 func (w *ServerInterfaceWrapper) CompanyScoutsCompanyScoutReply(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "scoutId" -------------
-	var scoutId string
+	var scoutId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -5762,18 +5943,18 @@ func (w *ServerInterfaceWrapper) TalentSearchSearchTalents(ctx echo.Context) err
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter industry: %s", err))
 	}
 
-	// ------------- Optional query parameter "job_seeking_status" -------------
+	// ------------- Optional query parameter "jobSeekingStatus" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_seeking_status", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "jobSeekingStatus", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_seeking_status: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobSeekingStatus: %s", err))
 	}
 
-	// ------------- Optional query parameter "job_type" -------------
+	// ------------- Optional query parameter "jobType" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_type", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "jobType", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_type: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobType: %s", err))
 	}
 
 	// ------------- Optional query parameter "diagnosed" -------------
@@ -5817,11 +5998,11 @@ func (w *ServerInterfaceWrapper) TalentSearchDiagnosticSearchTalents(ctx echo.Co
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params TalentSearchDiagnosticSearchTalentsParams
-	// ------------- Optional query parameter "team_id" -------------
+	// ------------- Optional query parameter "teamId" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "team_id", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "teamId", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter team_id: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
 
 	// ------------- Optional query parameter "q" -------------
@@ -5845,18 +6026,18 @@ func (w *ServerInterfaceWrapper) TalentSearchDiagnosticSearchTalents(ctx echo.Co
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter industry: %s", err))
 	}
 
-	// ------------- Optional query parameter "job_seeking_status" -------------
+	// ------------- Optional query parameter "jobSeekingStatus" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_seeking_status", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "jobSeekingStatus", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_seeking_status: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobSeekingStatus: %s", err))
 	}
 
-	// ------------- Optional query parameter "job_type" -------------
+	// ------------- Optional query parameter "jobType" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_type", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "jobType", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_type: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobType: %s", err))
 	}
 
 	// ------------- Optional query parameter "diagnosed" -------------
@@ -5900,11 +6081,11 @@ func (w *ServerInterfaceWrapper) TalentSearchCiDiagnosticSearchTalents(ctx echo.
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params TalentSearchCiDiagnosticSearchTalentsParams
-	// ------------- Optional query parameter "team_id" -------------
+	// ------------- Optional query parameter "teamId" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "team_id", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "teamId", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter team_id: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
 
 	// ------------- Optional query parameter "q" -------------
@@ -5928,18 +6109,18 @@ func (w *ServerInterfaceWrapper) TalentSearchCiDiagnosticSearchTalents(ctx echo.
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter industry: %s", err))
 	}
 
-	// ------------- Optional query parameter "job_seeking_status" -------------
+	// ------------- Optional query parameter "jobSeekingStatus" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_seeking_status", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "jobSeekingStatus", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_seeking_status: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobSeekingStatus: %s", err))
 	}
 
-	// ------------- Optional query parameter "job_type" -------------
+	// ------------- Optional query parameter "jobType" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_type", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "jobType", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_type: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobType: %s", err))
 	}
 
 	// ------------- Optional query parameter "diagnosed" -------------
@@ -5983,11 +6164,11 @@ func (w *ServerInterfaceWrapper) TalentSearchIntegratedDiagnosticSearchTalents(c
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params TalentSearchIntegratedDiagnosticSearchTalentsParams
-	// ------------- Optional query parameter "team_id" -------------
+	// ------------- Optional query parameter "teamId" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "team_id", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "teamId", ctx.QueryParams(), &params.TeamId, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter team_id: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
 
 	// ------------- Optional query parameter "q" -------------
@@ -6011,18 +6192,18 @@ func (w *ServerInterfaceWrapper) TalentSearchIntegratedDiagnosticSearchTalents(c
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter industry: %s", err))
 	}
 
-	// ------------- Optional query parameter "job_seeking_status" -------------
+	// ------------- Optional query parameter "jobSeekingStatus" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_seeking_status", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "jobSeekingStatus", ctx.QueryParams(), &params.JobSeekingStatus, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_seeking_status: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobSeekingStatus: %s", err))
 	}
 
-	// ------------- Optional query parameter "job_type" -------------
+	// ------------- Optional query parameter "jobType" -------------
 
-	err = runtime.BindQueryParameterWithOptions("form", false, false, "job_type", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "jobType", ctx.QueryParams(), &params.JobType, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter job_type: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobType: %s", err))
 	}
 
 	// ------------- Optional query parameter "diagnosed" -------------
@@ -6084,7 +6265,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsCreateTeam(ctx echo.Context) error 
 func (w *ServerInterfaceWrapper) CompanyTeamsDeleteTeam(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "teamId" -------------
-	var teamId string
+	var teamId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6102,7 +6283,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsDeleteTeam(ctx echo.Context) error 
 func (w *ServerInterfaceWrapper) CompanyTeamsGetTeam(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "teamId" -------------
-	var teamId string
+	var teamId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6120,7 +6301,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsGetTeam(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) CompanyTeamsUpdateTeam(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "teamId" -------------
-	var teamId string
+	var teamId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6138,7 +6319,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsUpdateTeam(ctx echo.Context) error 
 func (w *ServerInterfaceWrapper) CompanyTeamsUnsetAceMember(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "teamId" -------------
-	var teamId string
+	var teamId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6156,7 +6337,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsUnsetAceMember(ctx echo.Context) er
 func (w *ServerInterfaceWrapper) CompanyTeamsSetAceMember(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "teamId" -------------
-	var teamId string
+	var teamId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6164,7 +6345,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsSetAceMember(ctx echo.Context) erro
 	}
 
 	// ------------- Path parameter "memberId" -------------
-	var memberId string
+	var memberId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "memberId", ctx.Param("memberId"), &memberId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6182,7 +6363,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsSetAceMember(ctx echo.Context) erro
 func (w *ServerInterfaceWrapper) CompanyTeamsAddTeamMember(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "teamId" -------------
-	var teamId string
+	var teamId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6200,7 +6381,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsAddTeamMember(ctx echo.Context) err
 func (w *ServerInterfaceWrapper) CompanyTeamsRemoveTeamMember(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "teamId" -------------
-	var teamId string
+	var teamId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6208,7 +6389,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsRemoveTeamMember(ctx echo.Context) 
 	}
 
 	// ------------- Path parameter "memberId" -------------
-	var memberId string
+	var memberId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "memberId", ctx.Param("memberId"), &memberId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6226,7 +6407,7 @@ func (w *ServerInterfaceWrapper) CompanyTeamsRemoveTeamMember(ctx echo.Context) 
 func (w *ServerInterfaceWrapper) CompanyTeamsGetTeamScores(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "teamId" -------------
-	var teamId string
+	var teamId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "teamId", ctx.Param("teamId"), &teamId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6266,7 +6447,7 @@ func (w *ServerInterfaceWrapper) IntegratedReportCreateIntegratedReportRequest(c
 func (w *ServerInterfaceWrapper) IntegratedReportGetIntegratedReport(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "requestId" -------------
-	var requestId string
+	var requestId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "requestId", ctx.Param("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6293,7 +6474,7 @@ func (w *ServerInterfaceWrapper) IntegratedReportGetIntegratedReportStatus(ctx e
 func (w *ServerInterfaceWrapper) IntegratedReportGetLatestIntegratedRequest(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6320,7 +6501,7 @@ func (w *ServerInterfaceWrapper) CandidateInterviewsListCandidateInterviews(ctx 
 func (w *ServerInterfaceWrapper) CandidateInterviewsSelectInterviewSlot(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "proposalId" -------------
-	var proposalId string
+	var proposalId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "proposalId", ctx.Param("proposalId"), &proposalId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6338,7 +6519,7 @@ func (w *ServerInterfaceWrapper) CandidateInterviewsSelectInterviewSlot(ctx echo
 func (w *ServerInterfaceWrapper) CandidateInterviewsGetProposalSlots(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "proposalId" -------------
-	var proposalId string
+	var proposalId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "proposalId", ctx.Param("proposalId"), &proposalId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6356,7 +6537,7 @@ func (w *ServerInterfaceWrapper) CandidateInterviewsGetProposalSlots(ctx echo.Co
 func (w *ServerInterfaceWrapper) CandidateInterviewsCancelCandidateInterview(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "interviewId" -------------
-	var interviewId string
+	var interviewId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "interviewId", ctx.Param("interviewId"), &interviewId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6448,7 +6629,7 @@ func (w *ServerInterfaceWrapper) PublicJobPostingsListPublicJobPostings(ctx echo
 func (w *ServerInterfaceWrapper) PublicJobPostingsGetPublicJobPosting(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "jobId" -------------
-	var jobId string
+	var jobId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "jobId", ctx.Param("jobId"), &jobId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6502,7 +6683,7 @@ func (w *ServerInterfaceWrapper) CandidateMessagingStartCandidateConversation(ct
 func (w *ServerInterfaceWrapper) CandidateMessagingGetCandidateConversation(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "conversationId" -------------
-	var conversationId string
+	var conversationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6520,7 +6701,7 @@ func (w *ServerInterfaceWrapper) CandidateMessagingGetCandidateConversation(ctx 
 func (w *ServerInterfaceWrapper) CandidateMessagingListCandidateMessages(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "conversationId" -------------
-	var conversationId string
+	var conversationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6554,7 +6735,7 @@ func (w *ServerInterfaceWrapper) CandidateMessagingListCandidateMessages(ctx ech
 func (w *ServerInterfaceWrapper) CandidateMessagingSendCandidateMessage(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "conversationId" -------------
-	var conversationId string
+	var conversationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6572,7 +6753,7 @@ func (w *ServerInterfaceWrapper) CandidateMessagingSendCandidateMessage(ctx echo
 func (w *ServerInterfaceWrapper) CandidateMessagingMarkCandidateConversationRead(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "conversationId" -------------
-	var conversationId string
+	var conversationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "conversationId", ctx.Param("conversationId"), &conversationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6650,7 +6831,7 @@ func (w *ServerInterfaceWrapper) UserNotificationsCountUserUnreadNotifications(c
 func (w *ServerInterfaceWrapper) UserNotificationsMarkUserNotificationRead(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6711,7 +6892,7 @@ func (w *ServerInterfaceWrapper) PostsCreatePost(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostsDeletePostComment(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "commentId" -------------
-	var commentId string
+	var commentId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "commentId", ctx.Param("commentId"), &commentId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6729,7 +6910,7 @@ func (w *ServerInterfaceWrapper) PostsDeletePostComment(ctx echo.Context) error 
 func (w *ServerInterfaceWrapper) PostsListPostsByUser(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6768,7 +6949,7 @@ func (w *ServerInterfaceWrapper) PostsListPostsByUser(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostsListLikedPostsByUser(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6800,7 +6981,7 @@ func (w *ServerInterfaceWrapper) PostsListLikedPostsByUser(ctx echo.Context) err
 func (w *ServerInterfaceWrapper) PostsDeletePost(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "postId" -------------
-	var postId string
+	var postId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6818,7 +6999,7 @@ func (w *ServerInterfaceWrapper) PostsDeletePost(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostsGetPost(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "postId" -------------
-	var postId string
+	var postId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6843,7 +7024,7 @@ func (w *ServerInterfaceWrapper) PostsGetPost(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostsListPostComments(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "postId" -------------
-	var postId string
+	var postId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6875,7 +7056,7 @@ func (w *ServerInterfaceWrapper) PostsListPostComments(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostsCreatePostComment(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "postId" -------------
-	var postId string
+	var postId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6893,7 +7074,7 @@ func (w *ServerInterfaceWrapper) PostsCreatePostComment(ctx echo.Context) error 
 func (w *ServerInterfaceWrapper) PostsTogglePostLike(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "postId" -------------
-	var postId string
+	var postId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -6911,7 +7092,7 @@ func (w *ServerInterfaceWrapper) PostsTogglePostLike(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PostsTogglePostRepost(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "postId" -------------
-	var postId string
+	var postId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "postId", ctx.Param("postId"), &postId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7000,7 +7181,7 @@ func (w *ServerInterfaceWrapper) CandidateScoutsBulkRespondScouts(ctx echo.Conte
 func (w *ServerInterfaceWrapper) CandidateScoutsGetCandidateScoutDetail(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "scoutId" -------------
-	var scoutId string
+	var scoutId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7018,7 +7199,7 @@ func (w *ServerInterfaceWrapper) CandidateScoutsGetCandidateScoutDetail(ctx echo
 func (w *ServerInterfaceWrapper) CandidateScoutsCandidateScoutReply(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "scoutId" -------------
-	var scoutId string
+	var scoutId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7036,7 +7217,7 @@ func (w *ServerInterfaceWrapper) CandidateScoutsCandidateScoutReply(ctx echo.Con
 func (w *ServerInterfaceWrapper) CandidateScoutsRespondToScout(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "scoutId" -------------
-	var scoutId string
+	var scoutId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "scoutId", ctx.Param("scoutId"), &scoutId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7066,6 +7247,46 @@ func (w *ServerInterfaceWrapper) TeamDiagnoseGetDiagnoseByToken(ctx echo.Context
 	return err
 }
 
+// TeamDiagnoseStartDiagnoseCiSession converts echo context to params.
+func (w *ServerInterfaceWrapper) TeamDiagnoseStartDiagnoseCiSession(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", ctx.Param("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TeamDiagnoseStartDiagnoseCiSession(ctx, token)
+	return err
+}
+
+// TeamDiagnoseSubmitDiagnoseCiResult converts echo context to params.
+func (w *ServerInterfaceWrapper) TeamDiagnoseSubmitDiagnoseCiResult(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", ctx.Param("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token: %s", err))
+	}
+
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TeamDiagnoseSubmitDiagnoseCiResult(ctx, token, sessionId)
+	return err
+}
+
 // TeamDiagnoseUpdateDiagnoseStatus converts echo context to params.
 func (w *ServerInterfaceWrapper) TeamDiagnoseUpdateDiagnoseStatus(ctx echo.Context) error {
 	var err error
@@ -7082,6 +7303,46 @@ func (w *ServerInterfaceWrapper) TeamDiagnoseUpdateDiagnoseStatus(ctx echo.Conte
 	return err
 }
 
+// TeamDiagnoseStartDiagnoseWvSession converts echo context to params.
+func (w *ServerInterfaceWrapper) TeamDiagnoseStartDiagnoseWvSession(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", ctx.Param("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TeamDiagnoseStartDiagnoseWvSession(ctx, token)
+	return err
+}
+
+// TeamDiagnoseSubmitDiagnoseWvResult converts echo context to params.
+func (w *ServerInterfaceWrapper) TeamDiagnoseSubmitDiagnoseWvResult(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", ctx.Param("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token: %s", err))
+	}
+
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.TeamDiagnoseSubmitDiagnoseWvResult(ctx, token, sessionId)
+	return err
+}
+
 // UsersCreateUser converts echo context to params.
 func (w *ServerInterfaceWrapper) UsersCreateUser(ctx echo.Context) error {
 	var err error
@@ -7095,7 +7356,7 @@ func (w *ServerInterfaceWrapper) UsersCreateUser(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) UsersGetUserById(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "id" -------------
-	var id string
+	var id ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7111,7 +7372,7 @@ func (w *ServerInterfaceWrapper) UsersGetUserById(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) SimilarUsersGetSimilarUsers(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7212,7 +7473,7 @@ func (w *ServerInterfaceWrapper) EducationsDeleteEducation(ctx echo.Context) err
 	}
 
 	// ------------- Path parameter "educationId" -------------
-	var educationId string
+	var educationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "educationId", ctx.Param("educationId"), &educationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7238,7 +7499,7 @@ func (w *ServerInterfaceWrapper) EducationsUpdateEducation(ctx echo.Context) err
 	}
 
 	// ------------- Path parameter "educationId" -------------
-	var educationId string
+	var educationId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "educationId", ctx.Param("educationId"), &educationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7298,7 +7559,7 @@ func (w *ServerInterfaceWrapper) ExperiencesDeleteExperience(ctx echo.Context) e
 	}
 
 	// ------------- Path parameter "experienceId" -------------
-	var experienceId string
+	var experienceId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "experienceId", ctx.Param("experienceId"), &experienceId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7324,7 +7585,7 @@ func (w *ServerInterfaceWrapper) ExperiencesUpdateExperience(ctx echo.Context) e
 	}
 
 	// ------------- Path parameter "experienceId" -------------
-	var experienceId string
+	var experienceId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "experienceId", ctx.Param("experienceId"), &experienceId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
@@ -7547,6 +7808,8 @@ func (w *ServerInterfaceWrapper) UsersUploadUserImage(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) WorkValuesWvStartSession(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.WorkValuesWvStartSession(ctx)
 	return err
@@ -7556,12 +7819,16 @@ func (w *ServerInterfaceWrapper) WorkValuesWvStartSession(ctx echo.Context) erro
 func (w *ServerInterfaceWrapper) WorkValuesWvGetAiReport(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId string
+	var sessionId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.WorkValuesWvGetAiReport(ctx, sessionId)
@@ -7572,12 +7839,16 @@ func (w *ServerInterfaceWrapper) WorkValuesWvGetAiReport(ctx echo.Context) error
 func (w *ServerInterfaceWrapper) WorkValuesWvGetResultBySession(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId string
+	var sessionId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.WorkValuesWvGetResultBySession(ctx, sessionId)
@@ -7588,12 +7859,14 @@ func (w *ServerInterfaceWrapper) WorkValuesWvGetResultBySession(ctx echo.Context
 func (w *ServerInterfaceWrapper) WorkValuesWvSubmitResult(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "sessionId" -------------
-	var sessionId string
+	var sessionId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.WorkValuesWvSubmitResult(ctx, sessionId)
@@ -7604,12 +7877,16 @@ func (w *ServerInterfaceWrapper) WorkValuesWvSubmitResult(ctx echo.Context) erro
 func (w *ServerInterfaceWrapper) WorkValuesWvGetLatestResult(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "userId" -------------
-	var userId string
+	var userId ModelsUuid
 
 	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.WorkValuesWvGetLatestResult(ctx, userId)
@@ -7781,7 +8058,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/scouts/:scoutId/reply", wrapper.CandidateScoutsCandidateScoutReply)
 	router.POST(baseURL+"/api/scouts/:scoutId/respond", wrapper.CandidateScoutsRespondToScout)
 	router.GET(baseURL+"/api/team-diagnose/:token", wrapper.TeamDiagnoseGetDiagnoseByToken)
+	router.POST(baseURL+"/api/team-diagnose/:token/career-interest/sessions", wrapper.TeamDiagnoseStartDiagnoseCiSession)
+	router.POST(baseURL+"/api/team-diagnose/:token/career-interest/sessions/:sessionId/results", wrapper.TeamDiagnoseSubmitDiagnoseCiResult)
 	router.PUT(baseURL+"/api/team-diagnose/:token/status", wrapper.TeamDiagnoseUpdateDiagnoseStatus)
+	router.POST(baseURL+"/api/team-diagnose/:token/work-values/sessions", wrapper.TeamDiagnoseStartDiagnoseWvSession)
+	router.POST(baseURL+"/api/team-diagnose/:token/work-values/sessions/:sessionId/results", wrapper.TeamDiagnoseSubmitDiagnoseWvResult)
 	router.POST(baseURL+"/api/users", wrapper.UsersCreateUser)
 	router.GET(baseURL+"/api/users/id/:id", wrapper.UsersGetUserById)
 	router.GET(baseURL+"/api/users/id/:userId/similar", wrapper.SimilarUsersGetSimilarUsers)

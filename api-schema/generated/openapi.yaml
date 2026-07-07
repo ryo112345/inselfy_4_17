@@ -117,7 +117,7 @@ paths:
           required: true
           description: 求人ID
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
           explode: false
       responses:
         '200':
@@ -152,7 +152,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -347,7 +347,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -381,7 +381,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -432,7 +432,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -474,7 +474,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -514,7 +514,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -648,7 +648,7 @@ paths:
     post:
       operationId: CareerInterest_ciStartSession
       summary: Start a career interest session
-      description: 診断セッション開始
+      description: 診断セッション開始（認証ユーザー本人のセッションを作成）
       parameters: []
       responses:
         '201':
@@ -663,6 +663,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
         '404':
           description: Not Found エラー
           content:
@@ -671,12 +677,8 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Models.CIStartSessionRequest'
+      security:
+        - CandidateAuth: []
   /api/career-interest/sessions/{sessionId}/ai-report:
     get:
       operationId: CareerInterest_ciGetAiReport
@@ -687,7 +689,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -701,6 +703,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
         '404':
           description: Not Found エラー
           content:
@@ -709,17 +717,20 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
+      security:
+        - CandidateAuth: []
+        - CompanyAuth: []
   /api/career-interest/sessions/{sessionId}/results:
     post:
       operationId: CareerInterest_ciSubmitResult
       summary: Submit career interest responses
-      description: 診断結果送信
+      description: 診断結果送信（セッション所有者のみ）
       parameters:
         - name: sessionId
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
@@ -733,6 +744,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -747,6 +770,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CISubmitResultRequest'
+      security:
+        - CandidateAuth: []
     get:
       operationId: CareerInterest_ciGetResultBySession
       summary: Get the career interest result by session
@@ -756,7 +781,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -770,6 +795,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
         '404':
           description: Not Found エラー
           content:
@@ -778,6 +809,9 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
+      security:
+        - CandidateAuth: []
+        - CompanyAuth: []
   /api/career-interest/users/{userId}/results/latest:
     get:
       operationId: CareerInterest_ciGetLatestResult
@@ -788,7 +822,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -802,6 +836,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
         '404':
           description: Not Found エラー
           content:
@@ -810,6 +850,9 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
+      security:
+        - CandidateAuth: []
+        - CompanyAuth: []
   /api/companies/{id}:
     get:
       operationId: PublicCompanyProfiles_getPublicCompanyProfile
@@ -820,7 +863,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -852,7 +895,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -964,7 +1007,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1004,7 +1047,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1085,7 +1128,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1136,7 +1179,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -1178,7 +1221,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1327,12 +1370,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
-        '401':
-          description: Unauthorized エラー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Models.UnauthorizedError'
         '409':
           description: Conflict エラー
           content:
@@ -1400,7 +1437,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1475,7 +1512,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1701,7 +1738,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1740,7 +1777,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1785,7 +1822,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -1904,7 +1941,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -1950,7 +1987,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: limit
           in: query
           required: false
@@ -2009,7 +2046,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
@@ -2061,7 +2098,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -2229,7 +2266,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -2529,7 +2566,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -2558,7 +2595,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -2587,7 +2624,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -2684,7 +2721,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -2723,7 +2760,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -2768,7 +2805,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -2989,7 +3026,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -3029,7 +3066,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
@@ -3088,14 +3125,14 @@ paths:
           schema:
             type: string
           explode: false
-        - name: job_seeking_status
+        - name: jobSeekingStatus
           in: query
           required: false
           description: 求職ステータス
           schema:
             type: string
           explode: false
-        - name: job_type
+        - name: jobType
           in: query
           required: false
           description: 職種
@@ -3161,12 +3198,12 @@ paths:
       summary: Search talents by work-values similarity
       description: Work Values 診断マッチング検索（企業認証）。`wv_<valueId>` カスタム重み対応
       parameters:
-        - name: team_id
+        - name: teamId
           in: query
           required: false
           description: 比較対象チームID
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
           explode: false
         - name: q
           in: query
@@ -3186,13 +3223,13 @@ paths:
           schema:
             type: string
           explode: false
-        - name: job_seeking_status
+        - name: jobSeekingStatus
           in: query
           required: false
           schema:
             type: string
           explode: false
-        - name: job_type
+        - name: jobType
           in: query
           required: false
           schema:
@@ -3253,11 +3290,11 @@ paths:
       summary: Search talents by career-interest similarity
       description: Career Interest 診断マッチング検索（企業認証）。`ci_<typeId>` カスタム重み対応
       parameters:
-        - name: team_id
+        - name: teamId
           in: query
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
           explode: false
         - name: q
           in: query
@@ -3277,13 +3314,13 @@ paths:
           schema:
             type: string
           explode: false
-        - name: job_seeking_status
+        - name: jobSeekingStatus
           in: query
           required: false
           schema:
             type: string
           explode: false
-        - name: job_type
+        - name: jobType
           in: query
           required: false
           schema:
@@ -3344,11 +3381,11 @@ paths:
       summary: Search talents by integrated similarity
       description: 統合診断マッチング検索（企業認証）。`wv_*` / `ci_*` カスタム重み対応
       parameters:
-        - name: team_id
+        - name: teamId
           in: query
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
           explode: false
         - name: q
           in: query
@@ -3368,13 +3405,13 @@ paths:
           schema:
             type: string
           explode: false
-        - name: job_seeking_status
+        - name: jobSeekingStatus
           in: query
           required: false
           schema:
             type: string
           explode: false
-        - name: job_type
+        - name: jobType
           in: query
           required: false
           schema:
@@ -3502,7 +3539,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -3541,7 +3578,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -3582,7 +3619,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -3618,7 +3655,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -3654,12 +3691,12 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: memberId
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -3695,7 +3732,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
@@ -3741,12 +3778,12 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: memberId
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -3782,7 +3819,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -3892,7 +3929,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -3953,7 +3990,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -4014,7 +4051,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -4066,7 +4103,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -4106,7 +4143,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -4192,9 +4229,9 @@ paths:
         - name: sort
           in: query
           required: false
-          description: ソート（"salary" で給与順）
+          description: ソートキー
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.JobPostingSort'
           explode: false
         - name: valueFilters
           in: query
@@ -4202,13 +4239,14 @@ paths:
           description: Work Values フィルタ（`id:score` のカンマ区切り）
           schema:
             type: string
+            pattern: ^[A-Za-z0-9_-]+:[0-9]+(\.[0-9]+)?(,[A-Za-z0-9_-]+:[0-9]+(\.[0-9]+)?)*$
           explode: false
         - name: filterMode
           in: query
           required: false
-          description: フィルタモード（values / needs）
+          description: フィルタモード（未指定時は values）
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.JobPostingFilterMode'
           explode: false
       responses:
         '200':
@@ -4216,11 +4254,7 @@ paths:
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.JobPostingListResponse'
-                  - type: array
-                    items:
-                      $ref: '#/components/schemas/Models.JobPostingResponse'
+                $ref: '#/components/schemas/Models.JobPostingListResponse'
         '400':
           description: Bad Request エラー
           content:
@@ -4239,7 +4273,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -4356,7 +4390,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -4402,7 +4436,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: limit
           in: query
           required: false
@@ -4461,7 +4495,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
@@ -4513,7 +4547,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -4681,7 +4715,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -4758,7 +4792,7 @@ paths:
           required: false
           description: 閲覧者ユーザーID（いいね済み判定に使用）
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
           explode: false
         - name: limit
           in: query
@@ -4801,7 +4835,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -4843,12 +4877,12 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: viewerId
           in: query
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
           explode: false
         - name: limit
           in: query
@@ -4895,7 +4929,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: limit
           in: query
           required: false
@@ -4941,12 +4975,12 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: viewerId
           in: query
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
           explode: false
       responses:
         '200':
@@ -4978,7 +5012,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -5020,7 +5054,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: limit
           in: query
           required: false
@@ -5065,7 +5099,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
@@ -5111,7 +5145,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -5151,7 +5185,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -5373,7 +5407,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -5413,7 +5447,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
@@ -5455,7 +5489,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -5517,6 +5551,87 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - TeamDiagnose
+  /api/team-diagnose/{token}/career-interest/sessions:
+    post:
+      operationId: TeamDiagnose_startDiagnoseCiSession
+      summary: Start a career interest session via invite token
+      description: 招待トークン認可で Career Interest セッション開始（未ログインの招待メンバー用）
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CISessionResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - TeamDiagnose
+  /api/team-diagnose/{token}/career-interest/sessions/{sessionId}/results:
+    post:
+      operationId: TeamDiagnose_submitDiagnoseCiResult
+      summary: Submit career interest responses via invite token
+      description: 招待トークン認可で Career Interest 結果送信
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CIResultResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - TeamDiagnose
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CISubmitResultRequest'
   /api/team-diagnose/{token}/status:
     put:
       operationId: TeamDiagnose_updateDiagnoseStatus
@@ -5551,6 +5666,87 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateDiagnoseStatusRequest'
+  /api/team-diagnose/{token}/work-values/sessions:
+    post:
+      operationId: TeamDiagnose_startDiagnoseWvSession
+      summary: Start a work values session via invite token
+      description: 招待トークン認可で Work Values セッション開始（未ログインの招待メンバー用）
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.WVSessionResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - TeamDiagnose
+  /api/team-diagnose/{token}/work-values/sessions/{sessionId}/results:
+    post:
+      operationId: TeamDiagnose_submitDiagnoseWvResult
+      summary: Submit work values responses via invite token
+      description: 招待トークン認可で Work Values 結果送信
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.WVResultResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - TeamDiagnose
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.WVSubmitResultRequest'
   /api/users:
     post:
       operationId: Users_createUser
@@ -5594,7 +5790,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -5626,7 +5822,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
         - name: limit
           in: query
           required: false
@@ -5825,7 +6021,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -5881,7 +6077,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -6011,7 +6207,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -6067,7 +6263,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
@@ -6501,7 +6697,7 @@ paths:
     post:
       operationId: WorkValues_wvStartSession
       summary: Start a work values session
-      description: 診断セッション開始
+      description: 診断セッション開始（認証ユーザー本人のセッションを作成）
       parameters: []
       responses:
         '201':
@@ -6516,6 +6712,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
         '404':
           description: Not Found エラー
           content:
@@ -6524,12 +6726,8 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Models.WVStartSessionRequest'
+      security:
+        - CandidateAuth: []
   /api/work-values/sessions/{sessionId}/ai-report:
     get:
       operationId: WorkValues_wvGetAiReport
@@ -6540,7 +6738,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -6554,6 +6752,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
         '404':
           description: Not Found エラー
           content:
@@ -6562,17 +6766,20 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
+      security:
+        - CandidateAuth: []
+        - CompanyAuth: []
   /api/work-values/sessions/{sessionId}/results:
     post:
       operationId: WorkValues_wvSubmitResult
       summary: Submit work values responses and estimates
-      description: 診断結果送信
+      description: 診断結果送信（セッション所有者のみ）
       parameters:
         - name: sessionId
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
@@ -6586,6 +6793,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6600,6 +6819,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.WVSubmitResultRequest'
+      security:
+        - CandidateAuth: []
     get:
       operationId: WorkValues_wvGetResultBySession
       summary: Get the work values result by session
@@ -6609,7 +6830,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -6623,6 +6844,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
         '404':
           description: Not Found エラー
           content:
@@ -6631,6 +6858,9 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
+      security:
+        - CandidateAuth: []
+        - CompanyAuth: []
   /api/work-values/users/{userId}/results/latest:
     get:
       operationId: WorkValues_wvGetLatestResult
@@ -6641,7 +6871,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: '#/components/schemas/Models.Uuid'
       responses:
         '200':
           description: The request has succeeded.
@@ -6655,6 +6885,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
         '404':
           description: Not Found エラー
           content:
@@ -6663,6 +6899,9 @@ paths:
                 $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
+      security:
+        - CandidateAuth: []
+        - CompanyAuth: []
 components:
   schemas:
     Models.AddTeamMemberRequest:
@@ -6688,10 +6927,12 @@ components:
         - firstView
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: レポートID
         sessionId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: セッションID
         content:
           type: string
@@ -6720,7 +6961,8 @@ components:
         - message
       properties:
         jobPostingId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 求人ID
         message:
           type: string
@@ -6736,9 +6978,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.ArticleResponse'
-          description: 記事
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: 記事一覧
     Models.ArticleResponse:
@@ -6762,7 +7006,8 @@ components:
         - updatedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 記事ID
         authorType:
           type: string
@@ -6852,7 +7097,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         username:
           type: string
@@ -7016,13 +7262,16 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 結果ID
         sessionId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: セッションID
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         basicScores:
           type: array
@@ -7046,7 +7295,8 @@ components:
         - items
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: セッションID
         status:
           allOf:
@@ -7065,15 +7315,6 @@ components:
         - mid
         - advanced
       description: 設問のスキルレベル
-    Models.CIStartSessionRequest:
-      type: object
-      required:
-        - userId
-      properties:
-        userId:
-          type: string
-          description: ユーザーID
-      description: Career Interest セッション開始リクエスト
     Models.CISubmitResultRequest:
       type: object
       required:
@@ -7144,10 +7385,12 @@ components:
         - jobTitle
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 面接ID
         applicationId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 応募ID
         startTime:
           type: string
@@ -7223,9 +7466,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.CommentResponse'
-          description: コメント
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: コメント一覧
     Models.CommentResponse:
@@ -7240,13 +7485,16 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: コメントID
         postId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 投稿ID
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: コメント投稿者ユーザーID
         username:
           type: string
@@ -7303,10 +7551,12 @@ components:
         - jobTitle
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 面接ID
         applicationId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 応募ID
         startTime:
           type: string
@@ -7348,7 +7598,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.CompanyInterviewItem'
-          description: 面接
+          description: アイテム一覧
       description: 企業向け面接一覧
     Models.CompanyLoginRequest:
       type: object
@@ -7392,7 +7642,8 @@ components:
         - galleryUrls
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         companyName:
           type: string
@@ -7512,7 +7763,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         email:
           type: string
@@ -7575,9 +7827,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.ConversationResponse'
-          description: 会話
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: 会話一覧
     Models.ConversationResponse:
@@ -7595,16 +7849,19 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 会話ID
         conversationType:
           type: string
           description: 会話種別
         companyId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         candidateId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 候補者ユーザーID
         companyName:
           type: string
@@ -7613,10 +7870,12 @@ components:
           type: string
           description: 候補者名
         participant1Id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 参加者1 ID（ユーザー間会話のみ）
         participant2Id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 参加者2 ID（ユーザー間会話のみ）
         participant1Name:
           type: string
@@ -7803,7 +8062,8 @@ components:
           maxLength: 280
           description: 本文
         quotePostId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 引用元投稿ID
       description: 投稿作成リクエスト
     Models.CreateScoutTemplateRequest:
@@ -7868,7 +8128,8 @@ components:
         - email
       properties:
         memberId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: チームメンバーID
         memberName:
           type: string
@@ -7911,7 +8172,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.EducationResponse'
-          description: 学歴
+          description: アイテム一覧
       description: 学歴一覧
     Models.EducationResponse:
       type: object
@@ -7923,10 +8184,12 @@ components:
         - updatedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ID
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         school:
           type: string
@@ -7978,7 +8241,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.ExperienceResponse'
-          description: 職歴
+          description: アイテム一覧
       description: 職歴一覧
     Models.ExperienceResponse:
       type: object
@@ -7995,10 +8258,12 @@ components:
         - updatedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ID
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         companyName:
           type: string
@@ -8062,10 +8327,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.FollowUserResponse'
-          description: ユーザー
+          description: アイテム一覧
         total:
           type: integer
           format: int32
+          minimum: 0
           description: 総件数
       description: フォロー関係のユーザー一覧
     Models.FollowUserResponse:
@@ -8079,7 +8345,8 @@ components:
         - createdAt
       properties:
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         username:
           type: string
@@ -8133,10 +8400,12 @@ components:
         - createdAt
       properties:
         requestId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: リクエストID
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         hasReport:
           type: boolean
@@ -8156,10 +8425,12 @@ components:
         - firstView
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: レポートID
         requestId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: リクエストID
         content:
           type: string
@@ -8183,7 +8454,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: リクエストID
         topic1:
           type: integer
@@ -8216,13 +8488,16 @@ components:
         - firstView
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: レポートID
         requestId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: リクエストID
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         content:
           type: string
@@ -8248,7 +8523,8 @@ components:
             - ready
           description: 'none: リクエストなし / pending: 生成待ち / ready: レポートあり'
         requestId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: リクエストID（pending / ready のときのみ）
       description: 統合レポートのリクエスト状況
     Models.InterviewBase:
@@ -8264,10 +8540,12 @@ components:
         - title
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 面接ID
         applicationId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 応募ID
         startTime:
           type: string
@@ -8308,7 +8586,8 @@ components:
         - status
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: スロットID
         startTime:
           type: string
@@ -8348,9 +8627,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.JobApplicationResponse'
-          description: 応募
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: 応募一覧
     Models.JobApplicationResponse:
@@ -8372,16 +8653,20 @@ components:
         - updatedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 応募ID
         jobPostingId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 求人ID
         candidateId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 候補者ユーザーID
         companyId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         status:
           allOf:
@@ -8451,6 +8736,186 @@ components:
         - rejected
         - withdrawn
       description: 応募ステータス
+    Models.JobPostingBase:
+      type: object
+      required:
+        - title
+        - description
+        - employmentType
+        - location
+        - status
+        - jobCategory
+        - hiringCount
+        - appealPoints
+        - challenges
+        - teamDescription
+        - teamMembers
+        - teamLabel
+        - teamId
+        - skillsGained
+        - tags
+        - requiredQualifications
+        - preferredQualifications
+        - workLocation
+        - workLocationChangeScope
+        - jobDescriptionChangeScope
+        - contractType
+        - probationPeriod
+        - workHours
+        - breakTime
+        - holidays
+        - salaryMin
+        - salaryMax
+        - salaryDetail
+        - insurance
+        - remotePolicy
+        - benefits
+        - smokingPolicy
+        - selectionProcess
+        - coverImageUrl
+        - highlightTitleRole
+        - highlightTitleAppeal
+        - highlightTitleChallenge
+        - highlightTitleGrowth
+        - galleryUrls
+      properties:
+        title:
+          type: string
+          description: 求人タイトル
+        description:
+          type: string
+          description: 仕事内容
+        employmentType:
+          type: string
+          description: 雇用形態
+        location:
+          type: string
+          nullable: true
+          description: 勤務地（表示用）
+        status:
+          allOf:
+            - $ref: '#/components/schemas/Models.JobPostingStatus'
+          description: ステータス
+        jobCategory:
+          type: string
+          description: 職種カテゴリ
+        hiringCount:
+          type: string
+          description: 採用人数
+        appealPoints:
+          type: string
+          description: 訴求ポイント
+        challenges:
+          type: string
+          description: 課題・チャレンジ
+        teamDescription:
+          type: string
+          description: チーム紹介
+        teamMembers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.JobPostingTeamMember'
+          description: チームメンバー
+        teamLabel:
+          type: string
+          description: チームラベル
+        teamId:
+          type: string
+          nullable: true
+          description: 紐づくチームID
+        skillsGained:
+          type: string
+          description: 得られるスキル
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグ
+        requiredQualifications:
+          type: string
+          description: 必須要件
+        preferredQualifications:
+          type: string
+          description: 歓迎要件
+        workLocation:
+          type: string
+          description: 就業場所
+        workLocationChangeScope:
+          type: string
+          description: 就業場所の変更の範囲
+        jobDescriptionChangeScope:
+          type: string
+          description: 業務内容の変更の範囲
+        contractType:
+          type: string
+          description: 契約種別
+        probationPeriod:
+          type: string
+          description: 試用期間
+        workHours:
+          type: string
+          description: 勤務時間
+        breakTime:
+          type: string
+          description: 休憩時間
+        holidays:
+          type: string
+          description: 休日
+        salaryMin:
+          type: integer
+          format: int32
+          nullable: true
+          description: 給与下限（万円）
+        salaryMax:
+          type: integer
+          format: int32
+          nullable: true
+          description: 給与上限（万円）
+        salaryDetail:
+          type: string
+          description: 給与詳細
+        insurance:
+          type: string
+          description: 保険
+        remotePolicy:
+          type: string
+          description: リモートポリシー
+        benefits:
+          type: string
+          description: 福利厚生
+        smokingPolicy:
+          type: string
+          description: 受動喫煙対策
+        selectionProcess:
+          type: string
+          description: 選考プロセス
+        coverImageUrl:
+          type: string
+          description: カバー画像URL
+        highlightTitleRole:
+          type: string
+          description: ハイライトタイトル（役割）
+        highlightTitleAppeal:
+          type: string
+          description: ハイライトタイトル（訴求）
+        highlightTitleChallenge:
+          type: string
+          description: ハイライトタイトル（チャレンジ）
+        highlightTitleGrowth:
+          type: string
+          description: ハイライトタイトル（成長）
+        galleryUrls:
+          type: array
+          items:
+            type: string
+          description: ギャラリー画像URL
+      description: 求人の入力フィールド（リクエスト・レスポンス共通）
+    Models.JobPostingFilterMode:
+      type: string
+      enum:
+        - values
+        - needs
+      description: Work Values フィルタの照合モード
     Models.JobPostingListResponse:
       type: object
       required:
@@ -8461,9 +8926,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.JobPostingResponse'
-          description: 求人
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: 求人一覧（ページング付き）
     Models.JobPostingRequest:
@@ -8552,7 +9019,7 @@ components:
         teamId:
           type: string
           nullable: true
-          description: 紐づけるチームID
+          description: 紐づくチームID
         skillsGained:
           type: string
           description: 得られるスキル
@@ -8645,11 +9112,11 @@ components:
       required:
         - id
         - companyId
+        - isActive
         - title
         - description
         - employmentType
         - location
-        - isActive
         - status
         - jobCategory
         - hiringCount
@@ -8689,10 +9156,12 @@ components:
         - updatedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 求人ID
         companyId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         companyName:
           type: string
@@ -8700,6 +9169,9 @@ components:
         companyLogoUrl:
           type: string
           description: 企業ロゴURL
+        isActive:
+          type: boolean
+          description: 公開中か
         title:
           type: string
           description: 求人タイトル
@@ -8713,9 +9185,6 @@ components:
           type: string
           nullable: true
           description: 勤務地（表示用）
-        isActive:
-          type: boolean
-          description: 公開中か
         status:
           allOf:
             - $ref: '#/components/schemas/Models.JobPostingStatus'
@@ -8842,6 +9311,12 @@ components:
           format: date-time
           description: 更新日時
       description: 求人
+    Models.JobPostingSort:
+      type: string
+      enum:
+        - newest
+        - salary
+      description: 公開求人一覧のソートキー
     Models.JobPostingStatus:
       type: string
       enum:
@@ -8884,13 +9359,15 @@ components:
         - isAce
       properties:
         memberId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: メンバーID
         memberName:
           type: string
           description: メンバー名
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 紐づくユーザーID
         wvStatus:
           allOf:
@@ -8924,9 +9401,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.MessageResponse'
-          description: メッセージ
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: メッセージ一覧
     Models.MessageResponse:
@@ -8941,16 +9420,19 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: メッセージID
         conversationId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 会話ID
         senderType:
           type: string
           description: 送信者種別（company / candidate）
         senderId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 送信者ID
         body:
           type: string
@@ -8990,10 +9472,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.NotificationResponse'
-          description: 通知
+          description: アイテム一覧
         total:
           type: integer
           format: int32
+          minimum: 0
           description: 総件数
       description: 通知一覧
     Models.NotificationResponse:
@@ -9008,7 +9491,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ID
         type:
           allOf:
@@ -9052,7 +9536,8 @@ components:
           type: boolean
           description: 未回答の提案があるか
         proposalId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 提案ID
         createdAt:
           type: string
@@ -9072,7 +9557,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 提案ID
         companyName:
           type: string
@@ -9110,9 +9596,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.PostResponse'
-          description: 投稿
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: 投稿一覧
     Models.PostResponse:
@@ -9133,10 +9621,12 @@ components:
         - updatedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 投稿ID
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 投稿者ユーザーID
         username:
           type: string
@@ -9203,7 +9693,8 @@ components:
         - expiresAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 提案ID
         message:
           type: string
@@ -9228,7 +9719,8 @@ components:
         - expiresInDays
       properties:
         applicationId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 応募ID
         message:
           type: string
@@ -9255,7 +9747,8 @@ components:
         - slots
       properties:
         proposalId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 提案ID
         slots:
           type: array
@@ -9302,7 +9795,8 @@ components:
         - galleryUrls
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         companyName:
           type: string
@@ -9397,7 +9891,8 @@ components:
         - completedCount
       properties:
         teamId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: チームID
         teamName:
           type: string
@@ -9448,7 +9943,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 投稿ID
         content:
           type: string
@@ -9626,9 +10122,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.ScoutMessageResponse'
-          description: スカウト
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: スカウト一覧
     Models.ScoutMessageResponse:
@@ -9651,13 +10149,16 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: スカウトID
         companyId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         candidateId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 候補者ユーザーID
         jobPostingId:
           type: string
@@ -9764,13 +10265,15 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 返信ID
         senderType:
           type: string
           description: 送信者種別（company / candidate）
         senderId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 送信者ID
         body:
           type: string
@@ -9800,7 +10303,8 @@ components:
             - ok
           description: 処理結果（"ok"）
         conversationId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 応答により作成・特定された会話ID
       description: スカウト応答結果
     Models.ScoutSettingsResponse:
@@ -9837,7 +10341,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.ScoutTemplateResponse'
-          description: テンプレート
+          description: アイテム一覧
       description: スカウトテンプレート一覧
     Models.ScoutTemplateResponse:
       type: object
@@ -9851,10 +10355,12 @@ components:
         - updatedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ID
         companyId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         name:
           type: string
@@ -9882,7 +10388,8 @@ components:
         - endTime
       properties:
         slotId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 選択するスロットID
         startTime:
           type: string
@@ -9910,7 +10417,8 @@ components:
         - status
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 面接ID
         startTime:
           type: string
@@ -9943,7 +10451,8 @@ components:
         - body
       properties:
         candidateId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 候補者ユーザーID
         jobPostingId:
           type: string
@@ -9993,7 +10502,8 @@ components:
         - experiences
       properties:
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         username:
           type: string
@@ -10056,7 +10566,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.SkillResponse'
-          description: スキル
+          description: アイテム一覧
       description: スキル一覧
     Models.SkillResponse:
       type: object
@@ -10066,7 +10576,8 @@ components:
         - attachedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: スキルID
         name:
           type: string
@@ -10083,7 +10594,8 @@ components:
         - body
       properties:
         recipientId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 相手のID
         body:
           type: string
@@ -10097,7 +10609,8 @@ components:
         - body
       properties:
         candidateId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 候補者ユーザーID
         body:
           type: string
@@ -10131,7 +10644,8 @@ components:
         - topCiLabels
       properties:
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         username:
           type: string
@@ -10215,9 +10729,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.TalentCard'
-          description: 人材カード
+          description: アイテム一覧
         total:
           type: integer
+          format: int32
+          minimum: 0
           description: 総件数
       description: 人材一覧
     Models.TeamDetailResponse:
@@ -10232,10 +10748,12 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: チームID
         companyId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         name:
           type: string
@@ -10271,7 +10789,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Models.TeamResponse'
-          description: チーム
+          description: アイテム一覧
       description: チーム一覧
     Models.TeamMemberResponse:
       type: object
@@ -10286,7 +10804,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: メンバーID
         name:
           type: string
@@ -10327,10 +10846,12 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: チームID
         companyId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 企業ID
         name:
           type: string
@@ -10770,7 +11291,8 @@ components:
         - updatedAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         username:
           type: string
@@ -10826,6 +11348,10 @@ components:
           format: date-time
           description: 更新日時
       description: ユーザー情報
+    Models.Uuid:
+      type: string
+      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+      description: UUID 形式の識別子
     Models.WVNeedDefResponse:
       type: object
       required:
@@ -10916,13 +11442,16 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: 結果ID
         sessionId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: セッションID
         userId:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: ユーザーID
         needs:
           type: array
@@ -10947,7 +11476,8 @@ components:
         - needs
       properties:
         id:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
           description: セッションID
         status:
           allOf:
@@ -10964,15 +11494,6 @@ components:
             $ref: '#/components/schemas/Models.WVNeedDefResponse'
           description: ニーズ定義一覧
       description: Work Values セッション
-    Models.WVStartSessionRequest:
-      type: object
-      required:
-        - userId
-      properties:
-        userId:
-          type: string
-          description: ユーザーID
-      description: Work Values セッション開始リクエスト
     Models.WVSubmitResultRequest:
       type: object
       required:

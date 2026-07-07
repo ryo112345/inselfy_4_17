@@ -38,8 +38,8 @@ func parseConditionFilter(ctx echo.Context) talentsearch.Filter {
 		Keyword:          ctx.QueryParam("q"),
 		Location:         ctx.QueryParam("location"),
 		Industry:         ctx.QueryParam("industry"),
-		JobSeekingStatus: ctx.QueryParam("job_seeking_status"),
-		JobType:          ctx.QueryParam("job_type"),
+		JobSeekingStatus: ctx.QueryParam("jobSeekingStatus"),
+		JobType:          ctx.QueryParam("jobType"),
 		DiagnosedOnly:    ctx.QueryParam("diagnosed") == "1",
 	}
 	if skillsParam := ctx.QueryParam("skills"); skillsParam != "" {
@@ -94,7 +94,7 @@ func diagnosticSearchInput(ctx echo.Context) talentsearch.DiagnosticSearchInput 
 	limit, offset := talentSearchPage(ctx)
 	return talentsearch.DiagnosticSearchInput{
 		CompanyID: authmw.CompanyID(ctx),
-		TeamID:    ctx.QueryParam("team_id"),
+		TeamID:    ctx.QueryParam("teamId"),
 		Filter:    parseConditionFilter(ctx),
 		CustomWV:  parseCustomWVDisplayScores(ctx),
 		CustomCI:  parseCustomCIWeights(ctx),

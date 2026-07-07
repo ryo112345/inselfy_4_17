@@ -21,35 +21,35 @@ interface IntegratedReport {
   ): {
     @statusCode statusCode: 201;
     @body request: IntegratedReportRequestResponse;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 
   /** 自分の最新統合レポート取得（要ログイン） */
   @get
   @route("/me")
   @summary("Get my latest integrated report")
   @useAuth(Models.CandidateAuth)
-  getMyIntegratedReport(): IntegratedReportMineResponse | NotFoundError | BadRequestError | UnauthorizedError;
+  getMyIntegratedReport(): IntegratedReportMineResponse | AuthedNotFoundErrors;
 
   /** 自分の統合レポートリクエスト状況取得（要ログイン） */
   @get
   @route("/status")
   @summary("Get my integrated report request status")
   @useAuth(Models.CandidateAuth)
-  getIntegratedReportStatus(): IntegratedReportStatusResponse | BadRequestError | UnauthorizedError;
+  getIntegratedReportStatus(): IntegratedReportStatusResponse | AuthedErrors;
 
   /** リクエストIDで統合レポート取得（公開） */
   @get
   @route("/requests/{requestId}/report")
   @summary("Get an integrated report by request ID")
   getIntegratedReport(
-    @path requestId: string,
-  ): IntegratedReportResponse | NotFoundError | BadRequestError;
+    @path requestId: Uuid,
+  ): IntegratedReportResponse | NotFoundErrors;
 
   /** ユーザーの最新統合レポートリクエスト取得（公開） */
   @get
   @route("/users/{userId}/latest-request")
   @summary("Get the latest integrated report request for a user")
   getLatestIntegratedRequest(
-    @path userId: string,
-  ): IntegratedReportLatestRequestResponse | NotFoundError | BadRequestError;
+    @path userId: Uuid,
+  ): IntegratedReportLatestRequestResponse | NotFoundErrors;
 }

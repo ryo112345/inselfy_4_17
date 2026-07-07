@@ -16,7 +16,7 @@ model GoogleLoginRequest {
 /** 認証ユーザー情報（トークンは HttpOnly cookie で返る） */
 model AuthUserResponse {
   /** ユーザーID */
-  id: string;
+  id: Uuid;
 
   /** ユーザー名 */
   username: string;

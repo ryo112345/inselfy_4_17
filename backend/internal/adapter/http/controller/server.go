@@ -218,6 +218,22 @@ func (s *Server) TeamDiagnoseUpdateDiagnoseStatus(ctx echo.Context, token string
 	return s.teamDiagnose.UpdateStatus(ctx, token)
 }
 
+func (s *Server) TeamDiagnoseStartDiagnoseWvSession(ctx echo.Context, token string) error {
+	return s.teamDiagnose.StartWVSession(ctx, token)
+}
+
+func (s *Server) TeamDiagnoseSubmitDiagnoseWvResult(ctx echo.Context, token string, sessionID openapi.ModelsUuid) error {
+	return s.teamDiagnose.SubmitWVResult(ctx, token, sessionID)
+}
+
+func (s *Server) TeamDiagnoseStartDiagnoseCiSession(ctx echo.Context, token string) error {
+	return s.teamDiagnose.StartCISession(ctx, token)
+}
+
+func (s *Server) TeamDiagnoseSubmitDiagnoseCiResult(ctx echo.Context, token string, sessionID openapi.ModelsUuid) error {
+	return s.teamDiagnose.SubmitCIResult(ctx, token, sessionID)
+}
+
 // --- ScoutTemplates ---
 
 func (s *Server) ScoutTemplatesCreateScoutTemplate(ctx echo.Context) error {

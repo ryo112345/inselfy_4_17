@@ -8,7 +8,7 @@ namespace Inselfy.Models;
 /** 会話開始リクエスト（企業→候補者） */
 model StartConversationRequest {
   /** 候補者ユーザーID */
-  candidateId: string;
+  candidateId: Uuid;
 
   /** 最初のメッセージ本文 */
   @maxLength(5000)
@@ -18,7 +18,7 @@ model StartConversationRequest {
 /** 会話開始リクエスト（候補者→候補者/企業） */
 model StartCandidateConversationRequest {
   /** 相手のID */
-  recipientId: string;
+  recipientId: Uuid;
 
   /** 最初のメッセージ本文 */
   @maxLength(5000)
@@ -35,16 +35,16 @@ model SendMessageRequest {
 /** 会話（プレビュー付き） */
 model ConversationResponse {
   /** 会話ID */
-  id: string;
+  id: Uuid;
 
   /** 会話種別 */
   conversationType: string;
 
   /** 企業ID */
-  companyId: string;
+  companyId: Uuid;
 
   /** 候補者ユーザーID */
-  candidateId: string;
+  candidateId: Uuid;
 
   /** 企業名 */
   companyName: string;
@@ -53,10 +53,10 @@ model ConversationResponse {
   candidateName: string;
 
   /** 参加者1 ID（ユーザー間会話のみ） */
-  participant1Id?: string;
+  participant1Id?: Uuid;
 
   /** 参加者2 ID（ユーザー間会話のみ） */
-  participant2Id?: string;
+  participant2Id?: Uuid;
 
   /** 参加者1 名（ユーザー間会話のみ） */
   participant1Name?: string;
@@ -78,27 +78,21 @@ model ConversationResponse {
 }
 
 /** 会話一覧 */
-model ConversationListResponse {
-  /** 会話 */
-  items: ConversationResponse[];
-
-  /** 総件数 */
-  total: integer;
-}
+model ConversationListResponse is ListResponse<ConversationResponse>;
 
 /** メッセージ */
 model MessageResponse {
   /** メッセージID */
-  id: string;
+  id: Uuid;
 
   /** 会話ID */
-  conversationId: string;
+  conversationId: Uuid;
 
   /** 送信者種別（company / candidate） */
   senderType: string;
 
   /** 送信者ID */
-  senderId: string;
+  senderId: Uuid;
 
   /** 本文 */
   body: string;
@@ -114,10 +108,4 @@ model MessageResponse {
 }
 
 /** メッセージ一覧 */
-model MessageListResponse {
-  /** メッセージ */
-  items: MessageResponse[];
-
-  /** 総件数 */
-  total: integer;
-}
+model MessageListResponse is ListResponse<MessageResponse>;

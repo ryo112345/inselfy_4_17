@@ -20,7 +20,7 @@ func MessagingConversationsResponse(convs []*messaging.ConversationWithPreview, 
 	for _, c := range messagingConv.ToConversationResponses(convs) {
 		items = append(items, *c)
 	}
-	return &openapi.ModelsConversationListResponse{Items: items, Total: total}
+	return &openapi.ModelsConversationListResponse{Items: items, Total: int32(total)}
 }
 
 // MessagingMessageResponse builds the single-message API response.
@@ -34,7 +34,7 @@ func MessagingMessagesResponse(msgs []*messaging.Message, total int) any {
 	for i, m := range msgs {
 		items[i] = *toMessageResponse(m)
 	}
-	return &openapi.ModelsMessageListResponse{Items: items, Total: total}
+	return &openapi.ModelsMessageListResponse{Items: items, Total: int32(total)}
 }
 
 // MessagingUnreadCountResponse builds the unread-count API response.

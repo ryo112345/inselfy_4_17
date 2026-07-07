@@ -20,7 +20,7 @@ interface Follows {
     @path username: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | ConflictError | UnauthorizedError;
+  } | AuthedConflictErrors;
 
   /** フォロー解除（要ログイン） */
   @delete
@@ -31,7 +31,7 @@ interface Follows {
     @path username: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** フォロワー一覧 */
   @get
@@ -45,7 +45,7 @@ interface Follows {
 
     /** オフセット */
     @query offset?: int32,
-  ): FollowUserListResponse | NotFoundError | BadRequestError;
+  ): FollowUserListResponse | NotFoundErrors;
 
   /** フォロー中一覧 */
   @get
@@ -59,7 +59,7 @@ interface Follows {
 
     /** オフセット */
     @query offset?: int32,
-  ): FollowUserListResponse | NotFoundError | BadRequestError;
+  ): FollowUserListResponse | NotFoundErrors;
 
   /** フォロー状態取得（要ログイン） */
   @get
@@ -68,5 +68,5 @@ interface Follows {
   @useAuth(Models.CandidateAuth)
   getFollowStatus(
     @path username: string,
-  ): FollowStatusResponse | NotFoundError | BadRequestError | UnauthorizedError;
+  ): FollowStatusResponse | AuthedNotFoundErrors;
 }

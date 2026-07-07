@@ -20,12 +20,12 @@ interface CandidateApplications {
   ): {
     @statusCode statusCode: 201;
     @body application: JobApplicationResponse;
-  } | BadRequestError | NotFoundError | ConflictError | UnauthorizedError;
+  } | AuthedConflictErrors;
 
   /** 自分の応募一覧（要ログイン） */
   @get
   @summary("List applications by the candidate")
-  listCandidateApplications(): JobApplicationListResponse | BadRequestError | UnauthorizedError;
+  listCandidateApplications(): JobApplicationListResponse | AuthedErrors;
 
   /** 応募済みチェック（要ログイン） */
   @get
@@ -33,16 +33,16 @@ interface CandidateApplications {
   @summary("Check whether the candidate has applied to a job")
   checkApplied(
     /** 求人ID */
-    @query jobPostingId: string,
-  ): AppliedResponse | BadRequestError | UnauthorizedError;
+    @query jobPostingId: Uuid,
+  ): AppliedResponse | AuthedErrors;
 
   /** 応募取り下げ（要ログイン） */
   @post
   @route("/{applicationId}/withdraw")
   @summary("Withdraw an application")
   withdrawApplication(
-    @path applicationId: string,
-  ): StatusOkResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path applicationId: Uuid,
+  ): StatusOkResponse | AuthedNotFoundErrors;
 }
 
 @route("/api/company/applications")
@@ -73,22 +73,22 @@ interface CompanyApplications {
 
     /** オフセット */
     @query offset?: int32,
-  ): JobApplicationListResponse | BadRequestError | UnauthorizedError;
+  ): JobApplicationListResponse | AuthedErrors;
 
   /** 応募詳細（企業認証） */
   @get
   @route("/{applicationId}")
   @summary("Get an application")
   getApplication(
-    @path applicationId: string,
-  ): JobApplicationResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path applicationId: Uuid,
+  ): JobApplicationResponse | AuthedNotFoundErrors;
 
   /** 応募ステータス更新（企業認証） */
   @patch
   @route("/{applicationId}/status")
   @summary("Update application status")
   updateApplicationStatus(
-    @path applicationId: string,
+    @path applicationId: Uuid,
     @body request: UpdateApplicationStatusRequest,
-  ): StatusOkResponse | BadRequestError | NotFoundError | UnauthorizedError;
+  ): StatusOkResponse | AuthedNotFoundErrors;
 }

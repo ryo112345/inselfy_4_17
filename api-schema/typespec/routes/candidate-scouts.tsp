@@ -22,35 +22,35 @@ interface CandidateScouts {
 
     /** オフセット */
     @query offset?: int32,
-  ): ScoutListResponse | BadRequestError | UnauthorizedError;
+  ): ScoutListResponse | AuthedErrors;
 
   /** 受信スカウト詳細（要ログイン） */
   @get
   @route("/{scoutId}")
   @summary("Get a received scout with replies")
   getCandidateScoutDetail(
-    @path scoutId: string,
-  ): ScoutDetailResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path scoutId: Uuid,
+  ): ScoutDetailResponse | AuthedNotFoundErrors;
 
   /** スカウトへ応答（interested / declined） */
   @post
   @route("/{scoutId}/respond")
   @summary("Respond to a scout")
   respondToScout(
-    @path scoutId: string,
+    @path scoutId: Uuid,
     @body request: ScoutRespondRequest,
-  ): ScoutRespondResponse | BadRequestError | NotFoundError | UnauthorizedError;
+  ): ScoutRespondResponse | AuthedNotFoundErrors;
 
   /** スカウトへ返信（要ログイン） */
   @post
   @route("/{scoutId}/reply")
   @summary("Reply to a scout as the candidate")
   candidateScoutReply(
-    @path scoutId: string,
+    @path scoutId: Uuid,
     @body request: CandidateScoutReplyRequest,
   ): {
     @statusCode statusCode: 201;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** スカウト一括辞退 */
   @post
@@ -60,7 +60,7 @@ interface CandidateScouts {
     @body request: BulkDeclineRequest,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 
   /** スカウト一括応答 */
   @post
@@ -70,5 +70,5 @@ interface CandidateScouts {
     @body request: BulkRespondRequest,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 }

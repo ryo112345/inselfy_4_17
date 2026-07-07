@@ -44,7 +44,7 @@ export default async function ProfilePage({
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
   const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
   const [data, currentUsername] = await Promise.all([
-    fetchPanelDataByUsername(username),
+    fetchPanelDataByUsername(username, cookieHeader),
     getCurrentUsername(cookieHeader),
   ]);
   if (!data) notFound();

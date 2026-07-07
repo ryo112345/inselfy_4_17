@@ -8,7 +8,7 @@ import (
 
 type WorkValuesInputPort interface {
 	StartSession(ctx context.Context, userID string) (*workvalues.Session, error)
-	SubmitResult(ctx context.Context, sessionID string, input workvalues.SubmitInput) (*workvalues.Result, error)
+	SubmitResult(ctx context.Context, sessionID, userID string, input workvalues.SubmitInput) (*workvalues.Result, error)
 	GetLatestResult(ctx context.Context, userID string) (*workvalues.Result, error)
 	GetResultBySessionID(ctx context.Context, sessionID string) (*workvalues.Result, error)
 }

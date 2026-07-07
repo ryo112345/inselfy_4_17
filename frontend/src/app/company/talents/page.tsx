@@ -377,7 +377,7 @@ export default function TalentsPage() {
   const buildDiagnosticParams = useCallback((offset: number, limit?: number) => {
     const params: Record<string, string> = {};
     if (diagnosticMode === "team" && selectedTeamId) {
-      params.team_id = selectedTeamId;
+      params.teamId = selectedTeamId;
     } else if (diagnosticMode === "custom") {
       if (diagnosticType === "wv" || diagnosticType === "integrated") {
         for (const [k, v] of Object.entries(customWeights)) {
@@ -394,8 +394,8 @@ export default function TalentsPage() {
     if (skills.length > 0) params.skills = skills.join(",");
     if (location) params.location = location;
     if (industry) params.industry = industry;
-    if (seekingStatus) params.job_seeking_status = seekingStatus;
-    if (jobType) params.job_type = jobType;
+    if (seekingStatus) params.jobSeekingStatus = seekingStatus;
+    if (jobType) params.jobType = jobType;
     if (diagnosedOnly) params.diagnosed = "1";
     params.limit = String(limit ?? PAGE_SIZE);
     params.offset = String(offset);
@@ -455,8 +455,8 @@ export default function TalentsPage() {
       if (skills.length > 0) params.skills = skills.join(",");
       if (location) params.location = location;
       if (industry) params.industry = industry;
-      if (seekingStatus) params.job_seeking_status = seekingStatus;
-      if (jobType) params.job_type = jobType;
+      if (seekingStatus) params.jobSeekingStatus = seekingStatus;
+      if (jobType) params.jobType = jobType;
       if (diagnosedOnly) params.diagnosed = "1";
       params.limit = String(limit ?? PAGE_SIZE);
       params.offset = String(offset);
