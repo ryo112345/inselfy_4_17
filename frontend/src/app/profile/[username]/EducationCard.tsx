@@ -2,13 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-
+import { Field, PrimaryButton, SecondaryButton } from "@/components/ui";
 import type { ModelsEducationResponse } from "@/external/client/api/generated";
-
 import { type ApiError, createEducation, deleteEducation, updateEducation } from "./api";
 import { DashedButton } from "./DashedButton";
 import { CapIcon, PencilIcon, PlusIcon, TrashIcon } from "./Icons";
-import { Field, PrimaryButton, SecondaryButton } from "./Modal";
 import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {

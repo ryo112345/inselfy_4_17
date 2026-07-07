@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import { MobileFooter } from "@/app/components/MobileFooter";
+import { ConfirmDialogProvider, ToastProvider } from "@/components/ui";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { GoogleProvider } from "@/features/auth/google-provider";
 import { UnreadMessagingProvider } from "@/features/messaging/unread-context";
@@ -33,8 +34,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>
             <UnreadScoutProvider>
               <UnreadMessagingProvider>
-                {children}
-                <MobileFooter />
+                <ToastProvider>
+                  <ConfirmDialogProvider>
+                    {children}
+                    <MobileFooter />
+                  </ConfirmDialogProvider>
+                </ToastProvider>
               </UnreadMessagingProvider>
             </UnreadScoutProvider>
           </AuthProvider>

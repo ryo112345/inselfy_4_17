@@ -1,17 +1,39 @@
 "use client";
 
 import { type ReactNode, useEffect } from "react";
-import { XIcon } from "./Icons";
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
+const SIZE_CLASSES = {
+  md: "max-w-md",
+  xl: "max-w-xl",
+} as const;
 
 type ModalProps = {
   open: boolean;
   onClose: () => void;
-  title: string;
+  /** 省略するとヘッダー（タイトルバー・閉じるボタン）なしで描画する */
+  title?: string;
   children: ReactNode;
   footer?: ReactNode;
+  size?: keyof typeof SIZE_CLASSES;
 };
 
-export function Modal({ open, onClose, title, children, footer }: ModalProps) {
+export function Modal({ open, onClose, title, children, footer, size = "xl" }: ModalProps) {
   // Close on Escape and lock body scroll while the dialog is open.
   useEffect(() => {
     if (!open) return;
@@ -37,20 +59,22 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
       onClick={onClose}
     >
       <div
-        className="relative flex max-h-[calc(100vh-4rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
+        className={`relative flex max-h-[calc(100vh-4rem)] w-full ${SIZE_CLASSES[size]} flex-col overflow-hidden rounded-2xl bg-white shadow-xl`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-          <button
-            type="button"
-            aria-label="閉じる"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100"
-          >
-            <XIcon className="h-5 w-5" />
-          </button>
-        </div>
+        {title !== undefined ? (
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
+            <button
+              type="button"
+              aria-label="閉じる"
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100"
+            >
+              <XIcon className="h-5 w-5" />
+            </button>
+          </div>
+        ) : null}
         <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
         {footer ? (
           <div className="flex items-center justify-end gap-2 border-t border-gray-200 px-6 py-4">

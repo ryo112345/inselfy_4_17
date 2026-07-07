@@ -30,7 +30,7 @@
 
 | # | 状態 | 項目 | 規模 | 種別 |
 |---|------|------|------|------|
-| F5 | [ ] | 共通UI部品の昇格・新設（Modal / Toast / ConfirmDialog） | 中 | 基盤 |
+| F5 | [x] | 共通UI部品の昇格・新設（Modal / Toast / ConfirmDialog） | 中 | 基盤 |
 | F6 | [ ] | `alert()` / `confirm()` 全廃（F5 依存） | 中 | UX |
 | F7 | [ ] | 共有アイコンの集約（`src/components/icons/`） | 中 | 重複排除 |
 | F8 | [ ] | 日付フォーマットの集約（`src/lib/date.ts`） | 小 | 重複排除 |

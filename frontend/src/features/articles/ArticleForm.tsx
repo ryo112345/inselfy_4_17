@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Modal } from "@/components/ui";
 import { type ArticleItem, createArticle, publishArticle, updateArticle } from "./api";
 import { CoverImageUpload } from "./CoverImageUpload";
 import { RichEditor } from "./RichEditor";
@@ -208,69 +209,62 @@ export function ArticleForm({ article }: Props) {
         </div>
       </article>
 
-      {showPublishModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowPublishModal(false);
-          }}
-        >
-          <div className="w-full max-w-md mx-4 bg-white rounded-2xl shadow-xl p-6 space-y-5">
-            <h2 className="text-lg font-bold text-gray-900">公開設定</h2>
+      <Modal open={showPublishModal} onClose={() => setShowPublishModal(false)} size="md">
+        <div className="space-y-5">
+          <h2 className="text-lg font-bold text-gray-900">公開設定</h2>
 
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isPaid}
-                onChange={(e) => {
-                  setIsPaid(e.target.checked);
-                  if (!e.target.checked) setPriceYen(0);
-                }}
-                className="w-4 h-4 rounded border-gray-300 accent-[var(--accent)]"
-              />
-              <span className="text-sm font-medium text-gray-700">有料記事にする</span>
-            </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isPaid}
+              onChange={(e) => {
+                setIsPaid(e.target.checked);
+                if (!e.target.checked) setPriceYen(0);
+              }}
+              className="w-4 h-4 rounded border-gray-300 accent-[var(--accent)]"
+            />
+            <span className="text-sm font-medium text-gray-700">有料記事にする</span>
+          </label>
 
-            {isPaid && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">¥</span>
-                  <input
-                    type="number"
-                    value={priceYen || ""}
-                    onChange={(e) => setPriceYen(Number(e.target.value))}
-                    placeholder="100"
-                    min={1}
-                    max={1000000}
-                    className="w-32 text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-[var(--accent)]"
-                  />
-                </div>
-                <p className="text-xs text-gray-400">
-                  エディタで「有料区切り」を挿入すると、区切り線より上が無料プレビューになります。
-                </p>
+          {isPaid && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">¥</span>
+                <input
+                  type="number"
+                  value={priceYen || ""}
+                  onChange={(e) => setPriceYen(Number(e.target.value))}
+                  placeholder="100"
+                  min={1}
+                  max={1000000}
+                  className="w-32 text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-[var(--accent)]"
+                />
               </div>
-            )}
-
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowPublishModal(false)}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSubmit(true)}
-                disabled={submitting}
-                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[var(--accent)] rounded-xl hover:opacity-90 disabled:opacity-40 transition-colors"
-              >
-                {submitting ? "公開中…" : "公開する"}
-              </button>
+              <p className="text-xs text-gray-400">
+                エディタで「有料区切り」を挿入すると、区切り線より上が無料プレビューになります。
+              </p>
             </div>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowPublishModal(false)}
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+            >
+              キャンセル
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSubmit(true)}
+              disabled={submitting}
+              className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[var(--accent)] rounded-xl hover:opacity-90 disabled:opacity-40 transition-colors"
+            >
+              {submitting ? "公開中…" : "公開する"}
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
     </>
   );
 }
