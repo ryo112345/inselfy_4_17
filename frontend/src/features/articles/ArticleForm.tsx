@@ -1,14 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/ui";
 import { type ArticleItem, createArticle, publishArticle, updateArticle } from "./api";
 import { CoverImageUpload } from "./CoverImageUpload";
-import { RichEditor } from "./RichEditor";
 import { TableOfContents, type TOCItem } from "./TableOfContents";
 import { TagInput } from "./TagInput";
+
+// TipTap 一式が重いため、エディタ本体は遅延ロードする
+const RichEditor = dynamic(() => import("./RichEditor").then((m) => m.RichEditor), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-[300px] animate-pulse rounded-lg bg-gray-50" aria-label="読み込み中" />
+  ),
+});
 
 type Props = {
   article?: ArticleItem;

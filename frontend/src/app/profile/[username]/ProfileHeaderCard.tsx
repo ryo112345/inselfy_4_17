@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import {
@@ -16,7 +17,19 @@ import { ACCENT } from "@/constants/theme";
 import type { ModelsUserResponse } from "@/external/client/api/generated";
 import { type ApiError, updateProfile, uploadProfileImage } from "./api";
 import { FollowButton } from "./FollowButton";
-import { ImageCropModal } from "./ImageCropModal";
+
+// react-easy-crop が重いため、クロップ操作時に初めてロードする
+const ImageCropModal = dynamic(
+  () => import("./ImageCropModal").then((m) => m.ImageCropModal),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-white" />
+      </div>
+    ),
+  },
+);
 
 const PRESET_COLORS = [
   ACCENT,
