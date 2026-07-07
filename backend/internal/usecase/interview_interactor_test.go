@@ -156,9 +156,44 @@ func TestInterviewInteractor_Propose_ApplicationNotFound(t *testing.T) {
 	}
 	it := newInterviewInteractor(&interviewProposalRepoStub{}, &interviewSlotRepoStub{}, &interviewRepoStub{}, &conversationRepoStub{}, &messageRepoStub{}, query)
 
-	_, err := it.Propose(context.Background(), interview.ProposeInput{ApplicationID: "app-x", CompanyID: "co-1"})
+	start := time.Now().Add(24 * time.Hour)
+	_, err := it.Propose(context.Background(), interview.ProposeInput{
+		ApplicationID: "app-x",
+		CompanyID:     "co-1",
+		Slots:         []interview.SlotInput{{StartTime: start, EndTime: start.Add(time.Hour)}},
+	})
 	if !errors.Is(err, interview.ErrApplicationNotFound) {
 		t.Fatalf("expected ErrApplicationNotFound, got %v", err)
+	}
+}
+
+func TestInterviewInteractor_Propose_SlotValidation(t *testing.T) {
+	query := &interviewQueryStub{
+		applicationCandidateIDFn: func(_ context.Context, _, _ string) (string, error) {
+			return "cand-1", nil
+		},
+	}
+	it := newInterviewInteractor(&interviewProposalRepoStub{}, &interviewSlotRepoStub{}, &interviewRepoStub{}, &conversationRepoStub{}, &messageRepoStub{}, query)
+
+	start := time.Now().Add(24 * time.Hour)
+
+	if _, err := it.Propose(context.Background(), interview.ProposeInput{ApplicationID: "app-1", CompanyID: "co-1"}); !errors.Is(err, interview.ErrNoSlots) {
+		t.Fatalf("expected ErrNoSlots, got %v", err)
+	}
+
+	many := make([]interview.SlotInput, 11)
+	for i := range many {
+		many[i] = interview.SlotInput{StartTime: start, EndTime: start.Add(time.Hour)}
+	}
+	if _, err := it.Propose(context.Background(), interview.ProposeInput{ApplicationID: "app-1", CompanyID: "co-1", Slots: many}); !errors.Is(err, interview.ErrTooManySlots) {
+		t.Fatalf("expected ErrTooManySlots, got %v", err)
+	}
+
+	if _, err := it.Propose(context.Background(), interview.ProposeInput{
+		ApplicationID: "app-1", CompanyID: "co-1",
+		Slots: []interview.SlotInput{{StartTime: start, EndTime: start}},
+	}); !errors.Is(err, interview.ErrInvalidTimeRange) {
+		t.Fatalf("expected ErrInvalidTimeRange, got %v", err)
 	}
 }
 

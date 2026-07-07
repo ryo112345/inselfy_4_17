@@ -144,7 +144,10 @@ func isBadRequest(err error) bool {
 		errors.Is(err, interview.ErrProposalExpired),
 		errors.Is(err, interview.ErrSlotNotInProposal),
 		errors.Is(err, interview.ErrTimeOutsideSlot),
-		errors.Is(err, interview.ErrInterviewNotScheduled):
+		errors.Is(err, interview.ErrInterviewNotScheduled),
+		errors.Is(err, interview.ErrNoSlots),
+		errors.Is(err, interview.ErrTooManySlots),
+		errors.Is(err, interview.ErrInvalidTimeRange):
 		return true
 	case errors.Is(err, talentsearch.ErrTeamWVUnavailable),
 		errors.Is(err, talentsearch.ErrTeamCIUnavailable),

@@ -39,6 +39,9 @@ func (i *JobApplicationInteractor) Apply(ctx context.Context, input jobapplicati
 	if jp.Status != "open" {
 		return nil, jobapplication.ErrJobNotOpen
 	}
+	if len([]rune(input.Message)) > jobapplication.MaxMessageLength {
+		return nil, domainerr.NewValidation("message は %d 文字以下にしてください", jobapplication.MaxMessageLength)
+	}
 
 	a := &jobapplication.JobApplication{
 		JobPostingID: input.JobPostingID,

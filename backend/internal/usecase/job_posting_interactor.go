@@ -2,10 +2,8 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
-	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobposting"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -31,13 +29,6 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 	input.Description = strings.TrimSpace(input.Description)
 	input.EmploymentType = strings.TrimSpace(input.EmploymentType)
 
-	if len(input.TeamMembers) > 5 {
-		return nil, fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
-	}
-	if err := validateSalary(input.SalaryMin, input.SalaryMax); err != nil {
-		return nil, err
-	}
-
 	status := input.Status
 	if status == "" {
 		status = "draft"
@@ -46,6 +37,10 @@ func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.Crea
 	entity := jobPostingEntityConv.CreateInputToEntity(input)
 	entity.Status = status
 	entity.IsActive = status == "open"
+
+	if err := jobposting.Validate(entity); err != nil {
+		return nil, err
+	}
 
 	return i.repo.Create(ctx, entity)
 }
@@ -92,13 +87,6 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 		return nil, port.ErrForbidden
 	}
 
-	if len(input.TeamMembers) > 5 {
-		return nil, fmt.Errorf("%w: team members must be 5 or fewer", domainerr.ErrBadRequest)
-	}
-	if err := validateSalary(input.SalaryMin, input.SalaryMax); err != nil {
-		return nil, err
-	}
-
 	existing.Title = strings.TrimSpace(input.Title)
 	existing.Description = strings.TrimSpace(input.Description)
 	existing.EmploymentType = strings.TrimSpace(input.EmploymentType)
@@ -140,6 +128,10 @@ func (i *JobPostingInteractor) Update(ctx context.Context, companyID, jobID stri
 	existing.HighlightTitleGrowth = input.HighlightTitleGrowth
 	existing.GalleryURLs = input.GalleryURLs
 
+	if err := jobposting.Validate(existing); err != nil {
+		return nil, err
+	}
+
 	return i.repo.Update(ctx, existing)
 }
 
@@ -152,15 +144,4 @@ func (i *JobPostingInteractor) Delete(ctx context.Context, companyID, jobID stri
 		return port.ErrForbidden
 	}
 	return i.repo.Delete(ctx, jobID)
-}
-
-func validateSalary(min, max *int32) error {
-	const maxSalary = 9999
-	if min != nil && *min > maxSalary {
-		return fmt.Errorf("%w: salary_min must be 9999 or less (万円)", domainerr.ErrBadRequest)
-	}
-	if max != nil && *max > maxSalary {
-		return fmt.Errorf("%w: salary_max must be 9999 or less (万円)", domainerr.ErrBadRequest)
-	}
-	return nil
 }
