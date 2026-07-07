@@ -301,7 +301,9 @@ export default function JobsPage() {
     const companyIds = [...new Set(jobs.map((j) => j.companyId))];
     Promise.all(companyIds.map((id) => fetchPublicTeamScores(id))).then((results) => {
       const map = new Map<string, TeamScores>();
-      results.flat().forEach((t) => map.set(t.teamId, t));
+      for (const t of results.flat()) {
+        map.set(t.teamId, t);
+      }
       setTeamScoresMap(map);
     });
   }, [hasDiagnosis, jobs]);

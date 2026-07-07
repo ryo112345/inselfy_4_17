@@ -22,7 +22,7 @@ export default async function WorkValuesResultPage({
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
-  let result;
+  let result: Awaited<ReturnType<typeof getResultBySessionId>>;
   try {
     result = await getResultBySessionId(sessionId, cookieHeader);
   } catch {

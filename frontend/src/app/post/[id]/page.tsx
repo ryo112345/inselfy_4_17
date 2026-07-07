@@ -17,8 +17,8 @@ export default async function PostPage({ params }: Props) {
   const displayName = hasToken ? cookieStore.get("displayName")?.value : undefined;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
-  let post;
-  let comments;
+  let post: Awaited<ReturnType<typeof fetchPost>>;
+  let comments: Awaited<ReturnType<typeof fetchComments>>;
   try {
     [post, comments] = await Promise.all([fetchPost(id, userId), fetchComments(id, 50, 0)]);
   } catch {

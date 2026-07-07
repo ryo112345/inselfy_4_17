@@ -276,11 +276,13 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
             ) : showReport && reportContent && firstView ? (
               <div
                 className={reportProseClasses}
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: 自前パイプラインで生成したAIレポートMarkdownのHTML化（ユーザー入力ではない）
                 dangerouslySetInnerHTML={{ __html: markdownToHtml(displayed) }}
               />
             ) : showReport && reportContent ? (
               <div
                 className={reportProseClasses}
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: 自前パイプラインで生成したAIレポートMarkdownのHTML化（ユーザー入力ではない）
                 dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
               />
             ) : reportContent ? (
