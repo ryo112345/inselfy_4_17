@@ -12,10 +12,37 @@
       "!src/external/client/api/generated"
     ]
   },
-  // recommended ルールには既存コードで858件の違反があるため、当面リンターは無効にし、
-  // フォーマットと import 整列だけを CI ゲートにする。ルール有効化は別タスクで段階的に行う。
+  // リンターは recommended を基本とし、既存コードと合わない大量系ルールだけ
+  // 理由付きで調整する（error はゼロ運用。warn は「見える化して個別判断」枠）。
   "linter": {
-    "enabled": false
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        // アクセシビリティ対応（装飾SVGのaria-hidden付与、button type明示など約700件）は
+        // 別タスクでまとめて行う。それまでグループごと無効。
+        "recommended": false
+      },
+      "performance": {
+        // <img> → next/image 移行（56件）は挙動・レイアウト検証込みの別タスク
+        "noImgElement": "off"
+      },
+      "style": {
+        // 非nullアサーション（51件）はTSの実務スタイルとして許容
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        // 並び替えのない静的リストが主体のため index key（79件）は許容。
+        // 動的に並び替わるリストで問題が出たら個別に修正する。
+        "noArrayIndexKey": "off",
+        // any の排除（15件）は型設計を伴うため警告で可視化して段階対応
+        "noExplicitAny": "warn"
+      },
+      "correctness": {
+        // hooks 依存配列（38件）は自動修正が挙動変更になり得るため、警告で可視化して個別判断
+        "useExhaustiveDependencies": "warn"
+      }
+    }
   },
   // 既存コードベースの流儀（2スペース・実質100桁前後）に合わせる
   "formatter": {

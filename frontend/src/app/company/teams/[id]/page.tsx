@@ -964,10 +964,11 @@ function TeamRadarChartSection({
   const wvCompleted = memberScores.filter((m) => m.wvScores && m.wvScores.length > 0);
   const ciCompleted = memberScores.filter((m) => m.ciScores && m.ciScores.length > 0);
 
-  if (wvCompleted.length === 0 && ciCompleted.length === 0) return null;
-
+  // hooks は早期リターンより前に呼ぶ（診断完了者が現れた瞬間に hooks 数が変わりクラッシュする）
   const wvAvg = useMemo(() => computeAvg(memberScores, "wvScores", WV_ORDER), [memberScores]);
   const ciAvg = useMemo(() => computeAvg(memberScores, "ciScores", CI_ORDER), [memberScores]);
+
+  if (wvCompleted.length === 0 && ciCompleted.length === 0) return null;
 
   const isAverage = viewMode === "average";
   const selectedMember = !isAverage

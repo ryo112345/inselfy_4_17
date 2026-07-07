@@ -379,6 +379,7 @@ export function ArticleView({ article, currentUsername }: Props) {
           {showFullBody ? (
             <div
               className="prose prose-gray max-w-none prose-p:text-[18px] prose-li:text-[18px] prose-headings:text-gray-900 prose-headings:scroll-mt-4 prose-p:text-gray-700 prose-p:leading-[1.85] prose-a:text-[var(--accent)] prose-img:rounded-lg prose-li:text-gray-700"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: tiptapで作成された記事本文HTMLの表示（意図的な使用）
               dangerouslySetInnerHTML={{ __html: processedHtml }}
             />
           ) : (
@@ -386,6 +387,7 @@ export function ArticleView({ article, currentUsername }: Props) {
               <div className="relative">
                 <div
                   className="prose prose-gray max-w-none prose-p:text-[18px] prose-li:text-[18px] prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-[1.85] prose-a:text-[var(--accent)] prose-img:rounded-lg prose-li:text-gray-700"
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: tiptapで作成された記事本文HTMLの表示（意図的な使用）
                   dangerouslySetInnerHTML={{ __html: processedHtml }}
                 />
                 <div

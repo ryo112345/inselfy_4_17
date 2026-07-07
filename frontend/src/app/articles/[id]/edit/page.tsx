@@ -20,7 +20,7 @@ export default async function EditArticlePage({ params }: Props) {
     redirect("/login");
   }
 
-  let article;
+  let article: Awaited<ReturnType<typeof fetchArticle>>;
   try {
     article = await fetchArticle(id, { cookie: cookieStore.toString() });
   } catch {

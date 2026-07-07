@@ -18,7 +18,7 @@ export default async function ArticlePage({ params }: Props) {
   const displayName = cookieStore.get("displayName")?.value;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
-  let article;
+  let article: Awaited<ReturnType<typeof fetchArticle>>;
   try {
     article = await fetchArticle(id, { cookie: cookieStore.toString() });
   } catch {
