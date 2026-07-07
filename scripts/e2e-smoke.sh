@@ -52,6 +52,11 @@ check_list_shape() { # 名前 URL — {items: array, total: number} 契約の検
 check_status "API /healthz" "$API/healthz" 200
 check_status "API /readyz " "$API/readyz" 200
 
+# Cloud Run の probe が通る経路（front プロキシ → /api/healthz|readyz）。
+# 本番の startup/liveness probe は port 8080 にしか届かないため、この経路が生命線（C10）
+check_status "front経由 /api/healthz" "$FRONT/api/healthz" 200
+check_status "front経由 /api/readyz " "$FRONT/api/readyz" 200
+
 # front (Next.js) が応答する
 check_status "front /     " "$FRONT/" 200
 

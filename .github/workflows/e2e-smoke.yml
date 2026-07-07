@@ -3,20 +3,11 @@
 # 主要エンドポイントを数本だけ叩く。単体 CI（backend/frontend/migrations）が緑でも
 # 結合で死ぬ系（DI 配線・プロキシ設定・スキーマずれ）を検知するのが目的。
 # E2E は増やすほど flaky になるので意図的に薄く保つ（検証内容は scripts/e2e-smoke.sh）。
+# main への push では deploy.yml が workflow_call でこれを呼ぶ（CD のゲート、C10）。
+# push トリガを持たないのは deploy 経由との二重実行を避けるため。
 name: e2e smoke
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - "Dockerfile"
-      - ".dockerignore"
-      - "docker/**"
-      - "compose.yml"
-      - "scripts/e2e-smoke.sh"
-      - ".github/workflows/e2e-smoke.yml"
   pull_request:
     paths:
       - "backend/**"
@@ -27,12 +18,15 @@ on:
       - "compose.yml"
       - "scripts/e2e-smoke.sh"
       - ".github/workflows/e2e-smoke.yml"
+  workflow_call: {}
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # workflow_call 時の github.workflow は呼び出し元の名前になるため直書き
+  # （詳細は backend-ci.yml の同箇所コメント参照）
+  group: e2e-smoke-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

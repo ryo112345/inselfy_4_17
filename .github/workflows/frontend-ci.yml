@@ -1,23 +1,23 @@
 # フロントエンド CI: biome check → tsc --noEmit → vitest → next build。
 # サードパーティ action はコミット SHA でピン留めする（タグは動かせるため）。
+# main への push では deploy.yml が workflow_call でこれを呼ぶ（CD のゲート、C10）。
+# push トリガを持たないのは deploy 経由との二重実行を避けるため。
 name: frontend CI
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "frontend/**"
-      - ".github/workflows/frontend-ci.yml"
   pull_request:
     paths:
       - "frontend/**"
       - ".github/workflows/frontend-ci.yml"
+  workflow_call: {}
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # workflow_call 時の github.workflow は呼び出し元の名前になるため直書き
+  # （詳細は backend-ci.yml の同箇所コメント参照）
+  group: frontend-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -34,6 +34,14 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+
+      # cross-verify.test.ts（TS/Go の BT 推定の数値一致検証）が backend の
+      # go test を spawn するため Go も必要。無いと toolchain ダウンロードで
+      # execSync がタイムアウトする
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
 
       - name: Install dependencies
         run: npm ci

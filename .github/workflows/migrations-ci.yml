@@ -4,24 +4,25 @@
 #    `down -all 禁止` ルールを機械で担保する）。
 # 2) apply: クリーンな PostgreSQL に全マイグレーションを適用できることを検証。
 #    PR では新規追加分の up → down → up も検証し、down の可逆性を担保する。
+# main への push では deploy.yml が workflow_call でこれを呼ぶ（CD のゲート、C10）。
+# push トリガを持たないのは deploy 経由との二重実行を避けるため。
+# workflow_call（push イベント）時は append-only と up→down→up が自動スキップされ apply のみ走る。
 name: migrations CI
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "backend/migrations/**"
-      - ".github/workflows/migrations-ci.yml"
   pull_request:
     paths:
       - "backend/migrations/**"
       - ".github/workflows/migrations-ci.yml"
+  workflow_call: {}
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # workflow_call 時の github.workflow は呼び出し元の名前になるため直書き
+  # （詳細は backend-ci.yml の同箇所コメント参照）
+  group: migrations-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
