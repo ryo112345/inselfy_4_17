@@ -19,6 +19,12 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /api ./cmd/api
 FROM node:22-alpine
 RUN apk add --no-cache ca-certificates tzdata
 
+# ランタイムで npm/npx/corepack/yarn は使わない（起動は node server.js のみ）。
+# ベースイメージ同梱の npm CLI はその依存（picomatch/sigstore 等）が脆弱性スキャンに
+# 引っかかり続けるため削除する。攻撃面の縮小も兼ねる
+RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
+    /usr/local/bin/corepack /opt/yarn* /usr/local/bin/yarn /usr/local/bin/yarnpkg
+
 WORKDIR /app
 
 # Backend
@@ -30,6 +36,9 @@ COPY --from=frontend-builder /app/frontend/.next/standalone ./frontend
 COPY --from=frontend-builder /app/frontend/.next/static ./frontend/.next/static
 COPY --from=frontend-builder /app/frontend/public ./frontend/public
 
+# 起動スクリプト: API/node のどちらかが死んだらコンテナごと落とす（詳細は docker/start.sh）
+COPY docker/start.sh ./start.sh
+
 EXPOSE 8080
 
-CMD ["sh", "-c", "./api & cd /app/frontend && HOSTNAME=0.0.0.0 PORT=8080 INTERNAL_API_URL=http://127.0.0.1:8081 node server.js"]
+CMD ["sh", "/app/start.sh"]

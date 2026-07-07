@@ -1,0 +1,57 @@
+# コンテナイメージ CI (C6):
+# 本番と同じ Dockerfile でイメージをビルドし、Trivy で OS パッケージ・依存の脆弱性を
+# スキャンする（HIGH 以上で fail）。修正版が出ていない脆弱性はアクションできないので
+# ignore-unfixed で除外し、修正可能なものだけをゲートにする。
+# 週次 schedule も回す（コード変更が無くてもベースイメージに新規開示された脆弱性を拾うため）。
+name: image CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "docker/**"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - "backend/go.mod"
+      - "backend/go.sum"
+      - ".github/workflows/image-ci.yml"
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "docker/**"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - "backend/go.mod"
+      - "backend/go.sum"
+      - ".github/workflows/image-ci.yml"
+  schedule:
+    - cron: "0 21 * * 0" # 毎週月曜 6:00 JST（security.yml と同時刻）
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      # NEXT_PUBLIC_GOOGLE_CLIENT_ID はスキャン用途では実値不要（next build を通すだけ）
+      - name: Build image
+        run: docker build --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=ci-scan-dummy -t inselfy:scan .
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
+        with:
+          scan-type: image
+          image-ref: inselfy:scan
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
