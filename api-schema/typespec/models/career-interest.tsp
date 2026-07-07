@@ -12,12 +12,6 @@ union CISkillLevel {
   "advanced",
 }
 
-/** Career Interest セッション開始リクエスト */
-model CIStartSessionRequest {
-  /** ユーザーID */
-  userId: string;
-}
-
 /** Career Interest 回答（1問分） */
 model CIResponseItem {
   /** 質問番号 */
@@ -60,7 +54,7 @@ model CIItemResponse {
 /** Career Interest セッション */
 model CISessionResponse {
   /** セッションID */
-  id: string;
+  id: Uuid;
 
   /** ステータス */
   status: DiagnosisSessionStatus;
@@ -96,13 +90,13 @@ model CITypeScoreResponse {
 /** Career Interest 診断結果 */
 model CIResultResponse {
   /** 結果ID */
-  id: string;
+  id: Uuid;
 
   /** セッションID */
-  sessionId: string;
+  sessionId: Uuid;
 
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** 基本興味領域スコア */
   basicScores: CIBasicScoreResponse[];

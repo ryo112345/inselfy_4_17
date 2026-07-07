@@ -17,7 +17,7 @@ interface Auth {
   @summary("Login with a Google ID token")
   googleLogin(
     @body request: GoogleLoginRequest,
-  ): AuthUserResponse | BadRequestError | UnauthorizedError;
+  ): AuthUserResponse | AuthedErrors;
 
   /** トークンリフレッシュ（refresh_token cookie 使用）。cookie を更新しユーザー情報を返す */
   @post

@@ -59,7 +59,7 @@ func ArticlesListResponse(articles []*article.ArticleWithAuthor, total int) any 
 			PublishedAt:    a.Article.PublishedAt,
 		}
 	}
-	return &openapi.ModelsArticleListResponse{Items: items, Total: total}
+	return &openapi.ModelsArticleListResponse{Items: items, Total: int32(total)}
 }
 
 // ArticleCheckoutResponse builds the Stripe checkout-session API response.

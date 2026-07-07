@@ -22,8 +22,7 @@ const inter = Inter({
 
 export default function WorkValuesStartPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const userId = user?.id ?? "";
-  const { state, start, answer, submit, sessionId, needDefs } = useWorkValuesQuiz(userId);
+  const { state, start, answer, submit, sessionId, needDefs } = useWorkValuesQuiz();
   const router = useRouter();
 
   useEffect(() => {

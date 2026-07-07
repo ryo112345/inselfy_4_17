@@ -69,7 +69,7 @@ model UpdateUserProfileRequest {
 /** ユーザー情報 */
 model UserResponse {
   /** ユーザーID */
-  id: string;
+  id: Uuid;
 
   /** ユーザー名 */
   username: string;

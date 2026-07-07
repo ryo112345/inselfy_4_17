@@ -51,10 +51,10 @@ model UpdateExperienceRequest is CreateExperienceRequest;
 /** 職歴 */
 model ExperienceResponse {
   /** ID */
-  id: string;
+  id: Uuid;
 
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** 会社名 */
   companyName: string;
@@ -88,7 +88,4 @@ model ExperienceResponse {
 }
 
 /** 職歴一覧 */
-model ExperienceListResponse {
-  /** 職歴 */
-  items: ExperienceResponse[];
-}
+model ExperienceListResponse is ItemsResponse<ExperienceResponse>;

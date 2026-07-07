@@ -43,10 +43,13 @@ func (i *WorkValuesInteractor) StartSession(ctx context.Context, userID string) 
 	return i.sessionRepo.Create(ctx, session)
 }
 
-func (i *WorkValuesInteractor) SubmitResult(ctx context.Context, sessionID string, input workvalues.SubmitInput) (*workvalues.Result, error) {
+func (i *WorkValuesInteractor) SubmitResult(ctx context.Context, sessionID, userID string, input workvalues.SubmitInput) (*workvalues.Result, error) {
 	session, err := i.sessionRepo.GetByID(ctx, sessionID)
 	if err != nil {
 		return nil, err
+	}
+	if session.UserID != userID {
+		return nil, port.ErrForbidden
 	}
 
 	result, err := workvalues.ValidateAndVerify(session, input)

@@ -18,5 +18,5 @@ func JobPostingsPaginatedResponse(js []*jobposting.JobPosting, total int) any {
 	for _, r := range jobPostingConv.ToResponses(js) {
 		items = append(items, *r)
 	}
-	return &openapi.ModelsJobPostingListResponse{Items: items, Total: total}
+	return &openapi.ModelsJobPostingListResponse{Items: items, Total: int32(total)}
 }

@@ -20,37 +20,37 @@ interface ScoutTemplates {
   ): {
     @statusCode statusCode: 201;
     @body template: ScoutTemplateResponse;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 
   /** スカウトテンプレート一覧（企業認証） */
   @get
   @summary("List scout templates")
-  listScoutTemplates(): ScoutTemplateListResponse | BadRequestError | UnauthorizedError;
+  listScoutTemplates(): ScoutTemplateListResponse | AuthedErrors;
 
   /** スカウトテンプレート取得（企業認証） */
   @get
   @route("/{templateId}")
   @summary("Get a scout template")
   getScoutTemplate(
-    @path templateId: string,
-  ): ScoutTemplateResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path templateId: Uuid,
+  ): ScoutTemplateResponse | AuthedNotFoundErrors;
 
   /** スカウトテンプレート更新（企業認証） */
   @put
   @route("/{templateId}")
   @summary("Update a scout template")
   updateScoutTemplate(
-    @path templateId: string,
+    @path templateId: Uuid,
     @body request: UpdateScoutTemplateRequest,
-  ): ScoutTemplateResponse | BadRequestError | NotFoundError | UnauthorizedError;
+  ): ScoutTemplateResponse | AuthedNotFoundErrors;
 
   /** スカウトテンプレート削除（企業認証） */
   @delete
   @route("/{templateId}")
   @summary("Delete a scout template")
   deleteScoutTemplate(
-    @path templateId: string,
+    @path templateId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 }

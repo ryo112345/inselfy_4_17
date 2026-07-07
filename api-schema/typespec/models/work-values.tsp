@@ -5,12 +5,6 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
-/** Work Values セッション開始リクエスト */
-model WVStartSessionRequest {
-  /** ユーザーID */
-  userId: string;
-}
-
 /** Work Values 一対比較の回答（1問分） */
 model WVResponseItem {
   /** ニーズA */
@@ -62,7 +56,7 @@ model WVNeedDefResponse {
 /** Work Values セッション */
 model WVSessionResponse {
   /** セッションID */
-  id: string;
+  id: Uuid;
 
   /** ステータス */
   status: DiagnosisSessionStatus;
@@ -107,13 +101,13 @@ model WVValueScoreResponse {
 /** Work Values 診断結果 */
 model WVResultResponse {
   /** 結果ID */
-  id: string;
+  id: Uuid;
 
   /** セッションID */
-  sessionId: string;
+  sessionId: Uuid;
 
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** ニーズスコア（スコア降順） */
   needs: WVNeedScore[];

@@ -32,10 +32,10 @@ interface TalentSearch {
     @query industry?: string,
 
     /** 求職ステータス */
-    @query job_seeking_status?: string,
+    @query jobSeekingStatus?: string,
 
     /** 職種 */
-    @query job_type?: string,
+    @query jobType?: string,
 
     /** 診断済みのみ（"1" で有効） */
     @query diagnosed?: string,
@@ -48,7 +48,7 @@ interface TalentSearch {
 
     /** オフセット */
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError | UnauthorizedError;
+  ): TalentListResponse | AuthedErrors;
 
   /** Work Values 診断マッチング検索（企業認証）。`wv_<valueId>` カスタム重み対応 */
   @get
@@ -56,50 +56,50 @@ interface TalentSearch {
   @summary("Search talents by work-values similarity")
   diagnosticSearchTalents(
     /** 比較対象チームID */
-    @query team_id?: string,
+    @query teamId?: Uuid,
 
     @query q?: string,
     @query location?: string,
     @query industry?: string,
-    @query job_seeking_status?: string,
-    @query job_type?: string,
+    @query jobSeekingStatus?: string,
+    @query jobType?: string,
     @query diagnosed?: string,
     @query skills?: string,
     @query limit?: int32,
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError | UnauthorizedError;
+  ): TalentListResponse | AuthedErrors;
 
   /** Career Interest 診断マッチング検索（企業認証）。`ci_<typeId>` カスタム重み対応 */
   @get
   @route("/diagnostic/ci")
   @summary("Search talents by career-interest similarity")
   ciDiagnosticSearchTalents(
-    @query team_id?: string,
+    @query teamId?: Uuid,
     @query q?: string,
     @query location?: string,
     @query industry?: string,
-    @query job_seeking_status?: string,
-    @query job_type?: string,
+    @query jobSeekingStatus?: string,
+    @query jobType?: string,
     @query diagnosed?: string,
     @query skills?: string,
     @query limit?: int32,
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError | UnauthorizedError;
+  ): TalentListResponse | AuthedErrors;
 
   /** 統合診断マッチング検索（企業認証）。`wv_*` / `ci_*` カスタム重み対応 */
   @get
   @route("/diagnostic/integrated")
   @summary("Search talents by integrated similarity")
   integratedDiagnosticSearchTalents(
-    @query team_id?: string,
+    @query teamId?: Uuid,
     @query q?: string,
     @query location?: string,
     @query industry?: string,
-    @query job_seeking_status?: string,
-    @query job_type?: string,
+    @query jobSeekingStatus?: string,
+    @query jobType?: string,
     @query diagnosed?: string,
     @query skills?: string,
     @query limit?: int32,
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError | UnauthorizedError;
+  ): TalentListResponse | AuthedErrors;
 }

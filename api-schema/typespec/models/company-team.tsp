@@ -44,10 +44,10 @@ model AddTeamMemberRequest {
 /** チーム（サマリー） */
 model TeamResponse {
   /** チームID */
-  id: string;
+  id: Uuid;
 
   /** 企業ID */
-  companyId: string;
+  companyId: Uuid;
 
   /** チーム名 */
   name: string;
@@ -72,15 +72,12 @@ model TeamResponse {
 }
 
 /** チーム一覧 */
-model TeamListResponse {
-  /** チーム */
-  items: TeamResponse[];
-}
+model TeamListResponse is ItemsResponse<TeamResponse>;
 
 /** チームメンバー */
 model TeamMemberResponse {
   /** メンバーID */
-  id: string;
+  id: Uuid;
 
   /** メンバー名 */
   name: string;
@@ -107,10 +104,10 @@ model TeamMemberResponse {
 /** チーム詳細（メンバー付き） */
 model TeamDetailResponse {
   /** チームID */
-  id: string;
+  id: Uuid;
 
   /** 企業ID */
-  companyId: string;
+  companyId: Uuid;
 
   /** チーム名 */
   name: string;
@@ -143,13 +140,13 @@ model TeamScoreEntry {
 /** メンバーごとの診断スコア */
 model MemberScoreResponse {
   /** メンバーID */
-  memberId: string;
+  memberId: Uuid;
 
   /** メンバー名 */
   memberName: string;
 
   /** 紐づくユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** Work Values 診断ステータス */
   wvStatus: TeamDiagnosisStatus;
@@ -185,7 +182,7 @@ model PublicScoreEntry {
 /** チームの公開集計スコア */
 model PublicTeamScoreResponse {
   /** チームID */
-  teamId: string;
+  teamId: Uuid;
 
   /** チーム名 */
   teamName: string;

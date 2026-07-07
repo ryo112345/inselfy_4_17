@@ -5,7 +5,9 @@ import { AdaptiveSelector, type Pair } from "./lib/adaptive-selector";
 import { NEED_IDS, type NeedId } from "./lib/needs";
 import {
   startSession,
+  startSessionByDiagnoseToken,
   submitResult,
+  submitResultByDiagnoseToken,
   type SessionDTO,
   type NeedDefDTO,
   type ResultDTO,
@@ -40,7 +42,9 @@ export interface QuizState {
   debug: DebugInfo | null;
 }
 
-export function useWorkValuesQuiz(userId: string) {
+// diagnoseToken: チーム診断の招待リンク経由（未ログイン）の場合に渡す。
+// 省略時はログイン中の候補者本人としてセッションを開始する。
+export function useWorkValuesQuiz(diagnoseToken?: string) {
   const [state, setState] = useState<QuizState>({
     phase: "idle",
     currentPair: null,
@@ -58,7 +62,9 @@ export function useWorkValuesQuiz(userId: string) {
   const start = useCallback(async () => {
     setState((s) => ({ ...s, phase: "loading", error: null }));
     try {
-      const session = await startSession(userId);
+      const session = diagnoseToken
+        ? await startSessionByDiagnoseToken(diagnoseToken)
+        : await startSession();
       sessionRef.current = session;
 
       const defs: Record<string, NeedDefDTO> = {};
@@ -94,7 +100,7 @@ export function useWorkValuesQuiz(userId: string) {
         error: e instanceof Error ? e.message : "Unknown error",
       }));
     }
-  }, [userId]);
+  }, [diagnoseToken]);
 
   const answer = useCallback(async (winner: NeedId) => {
     const selector = selectorRef.current;
@@ -145,7 +151,9 @@ export function useWorkValuesQuiz(userId: string) {
         se[NEED_IDS[i]] = bt.se[i];
       }
 
-      const result = await submitResult(sessionRef.current.id, responses, mu, se);
+      const result = diagnoseToken
+        ? await submitResultByDiagnoseToken(diagnoseToken, sessionRef.current.id, responses, mu, se)
+        : await submitResult(sessionRef.current.id, responses, mu, se);
       setState((s) => ({ ...s, phase: "done", result }));
     } catch (e) {
       setState((s) => ({
@@ -154,7 +162,7 @@ export function useWorkValuesQuiz(userId: string) {
         error: e instanceof Error ? e.message : "Submit failed",
       }));
     }
-  }, []);
+  }, [diagnoseToken]);
 
   return { state, start, answer, submit, sessionId: sessionRef.current?.id ?? null, needDefs: needDefsRef.current };
 }

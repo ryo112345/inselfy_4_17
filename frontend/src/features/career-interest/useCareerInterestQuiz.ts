@@ -3,7 +3,9 @@
 import { useState, useCallback, useRef } from "react";
 import {
   startSession,
+  startSessionByDiagnoseToken,
   submitResult,
+  submitResultByDiagnoseToken,
   type SessionDTO,
   type ResultDTO,
   type ItemDTO,
@@ -21,7 +23,9 @@ export interface QuizState {
   error: string | null;
 }
 
-export function useCareerInterestQuiz(userId: string) {
+// diagnoseToken: チーム診断の招待リンク経由（未ログイン）の場合に渡す。
+// 省略時はログイン中の候補者本人としてセッションを開始する。
+export function useCareerInterestQuiz(diagnoseToken?: string) {
   const [state, setState] = useState<QuizState>({
     phase: "idle",
     currentItem: null,
@@ -39,7 +43,9 @@ export function useCareerInterestQuiz(userId: string) {
   const start = useCallback(async () => {
     setState((s) => ({ ...s, phase: "loading", error: null }));
     try {
-      const session = await startSession(userId);
+      const session = diagnoseToken
+        ? await startSessionByDiagnoseToken(diagnoseToken)
+        : await startSession();
       sessionRef.current = session;
       itemsRef.current = session.items;
       responsesRef.current = [];
@@ -60,7 +66,7 @@ export function useCareerInterestQuiz(userId: string) {
         error: e instanceof Error ? e.message : "Unknown error",
       }));
     }
-  }, [userId]);
+  }, [diagnoseToken]);
 
   const answer = useCallback(async (score: number) => {
     const items = itemsRef.current;
@@ -93,10 +99,9 @@ export function useCareerInterestQuiz(userId: string) {
     if (!sessionRef.current) return;
     setState((s) => ({ ...s, phase: "submitting" }));
     try {
-      const result = await submitResult(
-        sessionRef.current.id,
-        responsesRef.current,
-      );
+      const result = diagnoseToken
+        ? await submitResultByDiagnoseToken(diagnoseToken, sessionRef.current.id, responsesRef.current)
+        : await submitResult(sessionRef.current.id, responsesRef.current);
       setState((s) => ({ ...s, phase: "done", result }));
     } catch (e) {
       setState((s) => ({
@@ -105,7 +110,7 @@ export function useCareerInterestQuiz(userId: string) {
         error: e instanceof Error ? e.message : "Submit failed",
       }));
     }
-  }, []);
+  }, [diagnoseToken]);
 
   return { state, start, answer, submit, sessionId: sessionRef.current?.id ?? null };
 }

@@ -17,11 +17,31 @@ model CandidateAuth is ApiKeyAuth<ApiKeyLocation.cookie, "inselfy_token">;
  */
 model CompanyAuth is ApiKeyAuth<ApiKeyLocation.cookie, "company_token">;
 
+/** UUID 形式の識別子 */
+@pattern("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+scalar Uuid extends string;
+
 /** 診断セッションのステータス（Work Values / Career Interest 共通） */
 union DiagnosisSessionStatus {
   "in_progress",
   "completed",
   "expired",
+}
+
+/** ページング付きリストレスポンスの共通形（items + total） */
+model ListResponse<Item> {
+  /** アイテム一覧 */
+  items: Item[];
+
+  /** 総件数 */
+  @minValue(0)
+  total: int32;
+}
+
+/** 総件数を持たない単純リストレスポンス */
+model ItemsResponse<Item> {
+  /** アイテム一覧 */
+  items: Item[];
 }
 
 /** 共通エラーレスポンス */
@@ -78,6 +98,21 @@ model UnauthorizedError {
   message: string;
 }
 
+/** 認証付きエンドポイントの基本エラー（400/401） */
+alias AuthedErrors = BadRequestError | UnauthorizedError;
+
+/** 認証付きリソース参照系のエラー（400/401/404） */
+alias AuthedNotFoundErrors = NotFoundError | AuthedErrors;
+
+/** 認可チェックを伴う操作のエラー（400/401/403/404） */
+alias AuthedForbiddenErrors = ForbiddenError | AuthedNotFoundErrors;
+
+/** 重複・競合が起こりうる操作のエラー（400/401/404/409） */
+alias AuthedConflictErrors = ConflictError | AuthedNotFoundErrors;
+
+/** 認証エラーを含まないリソース参照系のエラー（400/404） */
+alias NotFoundErrors = NotFoundError | BadRequestError;
+
 /** 画像アップロード結果 */
 model UploadUrlResponse {
   /** アップロードされたファイルのURL */
@@ -87,10 +122,10 @@ model UploadUrlResponse {
 /** 診断AIレポート（Work Values / Career Interest 共通） */
 model AiReportResponse {
   /** レポートID */
-  id: string;
+  id: Uuid;
 
   /** セッションID */
-  sessionId: string;
+  sessionId: Uuid;
 
   /** レポート本文（Markdown） */
   content: string;

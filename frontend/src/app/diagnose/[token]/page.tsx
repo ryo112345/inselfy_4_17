@@ -113,7 +113,7 @@ export default function DiagnosePage() {
   if (phase === "wv") {
     return (
       <WVQuizWrapper
-        userId={memberInfo.userId}
+        token={token}
         onComplete={() => {
           updateStatus("wvStatus");
           setPhase("wv_done");
@@ -136,7 +136,7 @@ export default function DiagnosePage() {
   if (phase === "ci") {
     return (
       <CIQuizWrapper
-        userId={memberInfo.userId}
+        token={token}
         onComplete={() => {
           updateStatus("ciStatus");
           setPhase("done");
@@ -242,12 +242,13 @@ function LoadingScreen() {
 
 /* ─────────── WV Quiz Wrapper ─────────── */
 
-function WVQuizWrapper({ userId, onComplete }: { userId: string; onComplete: () => void }) {
-  const { state, start, answer, needDefs } = useWorkValuesQuiz(userId);
+function WVQuizWrapper({ token, onComplete }: { token: string; onComplete: () => void }) {
+  const { state, start, answer, submit, needDefs } = useWorkValuesQuiz(token);
 
   useEffect(() => {
+    if (state.phase === "completed") submit();
     if (state.phase === "done") onComplete();
-  }, [state.phase, onComplete]);
+  }, [state.phase, submit, onComplete]);
 
   if (state.phase === "idle") {
     return (
@@ -369,12 +370,13 @@ function WVQuizWrapper({ userId, onComplete }: { userId: string; onComplete: () 
 
 /* ─────────── CI Quiz Wrapper ─────────── */
 
-function CIQuizWrapper({ userId, onComplete }: { userId: string; onComplete: () => void }) {
-  const { state, start, answer } = useCareerInterestQuiz(userId);
+function CIQuizWrapper({ token, onComplete }: { token: string; onComplete: () => void }) {
+  const { state, start, answer, submit } = useCareerInterestQuiz(token);
 
   useEffect(() => {
+    if (state.phase === "completed") submit();
     if (state.phase === "done") onComplete();
-  }, [state.phase, onComplete]);
+  }, [state.phase, submit, onComplete]);
 
   if (state.phase === "idle") {
     return (

@@ -48,16 +48,18 @@ export type PanelData = {
   followCounts: FollowCounts;
 };
 
-export async function fetchPanelDataByUsername(username: string): Promise<PanelData | null> {
+// cookieHeader: サーバコンポーネントから呼ぶ場合に認証Cookieを転送する。
+// 診断結果系APIは認証必須のため、これがないと未ログイン扱いになり診断パネルが空になる。
+export async function fetchPanelDataByUsername(username: string, cookieHeader?: string): Promise<PanelData | null> {
   const userRes = await usersGetUserByUsername({ path: { username } });
   if (userRes.error || !userRes.data) return null;
-  return fetchRest(userRes.data, username);
+  return fetchRest(userRes.data, username, cookieHeader);
 }
 
-export async function fetchPanelDataByUserId(userId: string): Promise<PanelData | null> {
+export async function fetchPanelDataByUserId(userId: string, cookieHeader?: string): Promise<PanelData | null> {
   const userRes = await usersGetUserById({ path: { id: userId } });
   if (userRes.error || !userRes.data) return null;
-  return fetchRest(userRes.data, userRes.data.username);
+  return fetchRest(userRes.data, userRes.data.username, cookieHeader);
 }
 
 function formatDate(iso: string): string {
@@ -81,9 +83,9 @@ function buildCiKeywords(result: CiResultDTO): string {
     .join("・");
 }
 
-async function checkReportExists(sessionId: string, kind: "work-values" | "career-interest"): Promise<boolean> {
+async function checkReportExists(sessionId: string, kind: "work-values" | "career-interest", cookieHeader?: string): Promise<boolean> {
   try {
-    const report = kind === "work-values" ? await getWvAiReport(sessionId) : await getCiAiReport(sessionId);
+    const report = kind === "work-values" ? await getWvAiReport(sessionId, cookieHeader) : await getCiAiReport(sessionId, cookieHeader);
     return !!report?.content;
   } catch {
     return false;
@@ -115,20 +117,20 @@ async function fetchFollowCounts(username: string): Promise<FollowCounts> {
   }
 }
 
-async function fetchRest(user: ModelsUserResponse, username: string): Promise<PanelData> {
+async function fetchRest(user: ModelsUserResponse, username: string, cookieHeader?: string): Promise<PanelData> {
   const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult, intRequest, followCounts] = await Promise.all([
     experiencesListExperiences({ path: { username } }),
     educationsListEducations({ path: { username } }),
     skillsListSkills({ path: { username } }),
-    getLatestWvResult(user.id).catch(() => null),
-    getLatestCiResult(user.id).catch(() => null),
+    getLatestWvResult(user.id, cookieHeader).catch(() => null),
+    getLatestCiResult(user.id, cookieHeader).catch(() => null),
     fetchLatestIntegratedRequest(user.id),
     fetchFollowCounts(username),
   ]);
 
   const [wvHasReport, ciHasReport] = await Promise.all([
-    wvResult?.sessionId ? checkReportExists(wvResult.sessionId, "work-values") : Promise.resolve(false),
-    ciResult?.sessionId ? checkReportExists(ciResult.sessionId, "career-interest") : Promise.resolve(false),
+    wvResult?.sessionId ? checkReportExists(wvResult.sessionId, "work-values", cookieHeader) : Promise.resolve(false),
+    ciResult?.sessionId ? checkReportExists(ciResult.sessionId, "career-interest", cookieHeader) : Promise.resolve(false),
   ]);
 
   const experiences: ModelsExperienceResponse[] = experiencesRes.data?.items ?? [];

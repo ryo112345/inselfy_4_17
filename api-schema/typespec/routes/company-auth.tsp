@@ -20,7 +20,7 @@ interface CompanyAuth {
   ): {
     @statusCode statusCode: 201;
     @body company: CompanyResponse;
-  } | BadRequestError | ConflictError | UnauthorizedError;
+  } | BadRequestError | ConflictError;
 
   /** 企業ログイン。成功時は HttpOnly cookie にトークンを設定し、企業情報を返す */
   @post
@@ -28,7 +28,7 @@ interface CompanyAuth {
   @summary("Login as a company")
   companyLogin(
     @body request: CompanyLoginRequest,
-  ): CompanyResponse | BadRequestError | UnauthorizedError;
+  ): CompanyResponse | AuthedErrors;
 
   /** トークンリフレッシュ（company_refresh_token cookie 使用） */
   @post

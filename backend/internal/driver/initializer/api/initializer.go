@@ -81,17 +81,19 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		sqlcgw.NewSkillRepository(pool), userRepo, tx,
 	))
 	postCtrl := httpcontroller.NewPostController(usecase.NewPostInteractor(sqlcgw.NewPostRepository(pool)))
-	wvCtrl := httpcontroller.NewWorkValuesController(usecase.NewWorkValuesInteractor(
+	wvInput := usecase.NewWorkValuesInteractor(
 		sqlcgw.NewWorkValuesSessionRepository(pool),
 		sqlcgw.NewWorkValuesResultRepository(pool),
 		sqlcgw.NewWorkValuesScoreRepository(pool),
-	))
-	ciCtrl := httpcontroller.NewCareerInterestController(usecase.NewCareerInterestInteractor(
+	)
+	wvCtrl := httpcontroller.NewWorkValuesController(wvInput)
+	ciInput := usecase.NewCareerInterestInteractor(
 		sqlcgw.NewCareerInterestSessionRepository(pool),
 		sqlcgw.NewCareerInterestResultRepository(pool),
 		sqlcgw.NewCareerInterestBasicScoreRepository(pool),
 		sqlcgw.NewCareerInterestTypeScoreRepository(pool),
-	))
+	)
+	ciCtrl := httpcontroller.NewCareerInterestController(ciInput)
 	articleCtrl := httpcontroller.NewArticleController(
 		usecase.NewArticleInteractor(
 			sqlcgw.NewArticleRepository(pool), sqlcgw.NewArticlePurchaseRepository(pool), stripeService,
@@ -328,30 +330,32 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	}, jwtMW)
 
 	// --- Work Values ---
+	// 書き込みは本人（候補者JWT）のみ、読み取りはログイン済みの候補者/企業どちらでも可
+	anyJwtMW := authmw.AnyJWTAuth(jwtService)
 	wvGroup := e.Group("/api/work-values")
-	wvGroup.POST("/sessions", wvCtrl.StartSession)
+	wvGroup.POST("/sessions", wvCtrl.StartSession, jwtMW)
 	wvGroup.POST("/sessions/:sessionId/results", func(c echo.Context) error {
 		return wvCtrl.SubmitResult(c, c.Param("sessionId"))
-	})
+	}, jwtMW)
 	wvGroup.GET("/users/:userId/results/latest", func(c echo.Context) error {
 		return wvCtrl.GetLatestResult(c, c.Param("userId"))
-	})
+	}, anyJwtMW)
 	wvGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
 		return wvCtrl.GetResultBySessionID(c, c.Param("sessionId"))
-	})
+	}, anyJwtMW)
 
 	// --- Career Interest ---
 	ciGroup := e.Group("/api/career-interest")
-	ciGroup.POST("/sessions", ciCtrl.StartSession)
+	ciGroup.POST("/sessions", ciCtrl.StartSession, jwtMW)
 	ciGroup.POST("/sessions/:sessionId/results", func(c echo.Context) error {
 		return ciCtrl.SubmitResult(c, c.Param("sessionId"))
-	})
+	}, jwtMW)
 	ciGroup.GET("/users/:userId/results/latest", func(c echo.Context) error {
 		return ciCtrl.GetLatestResult(c, c.Param("userId"))
-	})
+	}, anyJwtMW)
 	ciGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
 		return ciCtrl.GetResultBySessionID(c, c.Param("sessionId"))
-	})
+	}, anyJwtMW)
 
 	// --- Company Profile (public) ---
 	companyProfileGw := sqlcgw.NewCompanyProfileGateway(pool)
@@ -439,15 +443,30 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		return savedCandCtrl.IsSaved(c)
 	})
 
-	// --- Team Diagnose (public) ---
+	// --- Team Diagnose (invite-token authorized) ---
 	diagCtrl := httpcontroller.NewTeamDiagnoseController(
 		usecase.NewTeamDiagnoseInteractor(sqlcgw.NewTeamDiagnoseQueryService(pool), sqlcgw.NewTeamMemberRepository(pool)),
+		wvInput,
+		ciInput,
 	)
 	e.GET("/api/team-diagnose/:token", func(c echo.Context) error {
 		return diagCtrl.GetByToken(c, c.Param("token"))
 	})
 	e.PUT("/api/team-diagnose/:token/status", func(c echo.Context) error {
 		return diagCtrl.UpdateStatus(c, c.Param("token"))
+	})
+	// 招待メンバーは未ログインで診断を受けるため、招待トークンを認可として診断セッションを操作する
+	e.POST("/api/team-diagnose/:token/work-values/sessions", func(c echo.Context) error {
+		return diagCtrl.StartWVSession(c, c.Param("token"))
+	})
+	e.POST("/api/team-diagnose/:token/work-values/sessions/:sessionId/results", func(c echo.Context) error {
+		return diagCtrl.SubmitWVResult(c, c.Param("token"), c.Param("sessionId"))
+	})
+	e.POST("/api/team-diagnose/:token/career-interest/sessions", func(c echo.Context) error {
+		return diagCtrl.StartCISession(c, c.Param("token"))
+	})
+	e.POST("/api/team-diagnose/:token/career-interest/sessions/:sessionId/results", func(c echo.Context) error {
+		return diagCtrl.SubmitCIResult(c, c.Param("token"), c.Param("sessionId"))
 	})
 
 	// --- Admin ---
@@ -524,10 +543,10 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// --- AI Report (user-facing) ---
 	wvGroup.GET("/sessions/:sessionId/ai-report", func(c echo.Context) error {
 		return adminReportCtrl.GetReport(c, c.Param("sessionId"))
-	})
+	}, anyJwtMW)
 	ciGroup.GET("/sessions/:sessionId/ai-report", func(c echo.Context) error {
 		return adminCIReportCtrl.GetReport(c, c.Param("sessionId"))
-	})
+	}, anyJwtMW)
 
 	// --- Admin Integrated Reports ---
 	adminIntReportCtrl := httpcontroller.NewAdminIntegratedReportController(pool)

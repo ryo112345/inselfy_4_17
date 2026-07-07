@@ -20,14 +20,14 @@ interface Posts {
   ): {
     @statusCode statusCode: 201;
     @body post: PostResponse;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** タイムライン取得 */
   @get
   @summary("List timeline posts")
   listTimelinePosts(
     /** 閲覧者ユーザーID（いいね済み判定に使用） */
-    @query viewerId?: string,
+    @query viewerId?: Uuid,
 
     /** 取得件数 */
     @query limit?: int32,
@@ -41,30 +41,30 @@ interface Posts {
   @route("/users/{userId}")
   @summary("List posts by a user")
   listPostsByUser(
-    @path userId: string,
-    @query viewerId?: string,
+    @path userId: Uuid,
+    @query viewerId?: Uuid,
     @query limit?: int32,
     @query offset?: int32,
-  ): PostListResponse | NotFoundError | BadRequestError;
+  ): PostListResponse | NotFoundErrors;
 
   /** ユーザーがいいねした投稿一覧 */
   @get
   @route("/users/{userId}/likes")
   @summary("List posts liked by a user")
   listLikedPostsByUser(
-    @path userId: string,
+    @path userId: Uuid,
     @query limit?: int32,
     @query offset?: int32,
-  ): PostListResponse | NotFoundError | BadRequestError;
+  ): PostListResponse | NotFoundErrors;
 
   /** 投稿取得 */
   @get
   @route("/{postId}")
   @summary("Get a post")
   getPost(
-    @path postId: string,
-    @query viewerId?: string,
-  ): PostResponse | NotFoundError | BadRequestError;
+    @path postId: Uuid,
+    @query viewerId?: Uuid,
+  ): PostResponse | NotFoundErrors;
 
   /** 投稿削除（要ログイン） */
   @delete
@@ -72,10 +72,10 @@ interface Posts {
   @summary("Delete a post")
   @useAuth(Models.CandidateAuth)
   deletePost(
-    @path postId: string,
+    @path postId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 
   /** いいねトグル（要ログイン） */
   @post
@@ -83,8 +83,8 @@ interface Posts {
   @summary("Toggle like on a post")
   @useAuth(Models.CandidateAuth)
   togglePostLike(
-    @path postId: string,
-  ): LikeToggleResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path postId: Uuid,
+  ): LikeToggleResponse | AuthedNotFoundErrors;
 
   /** リポストトグル（要ログイン） */
   @post
@@ -92,18 +92,18 @@ interface Posts {
   @summary("Toggle repost on a post")
   @useAuth(Models.CandidateAuth)
   togglePostRepost(
-    @path postId: string,
-  ): RepostToggleResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path postId: Uuid,
+  ): RepostToggleResponse | AuthedNotFoundErrors;
 
   /** コメント一覧 */
   @get
   @route("/{postId}/comments")
   @summary("List comments on a post")
   listPostComments(
-    @path postId: string,
+    @path postId: Uuid,
     @query limit?: int32,
     @query offset?: int32,
-  ): CommentListResponse | NotFoundError | BadRequestError;
+  ): CommentListResponse | NotFoundErrors;
 
   /** コメント作成（要ログイン） */
   @post
@@ -111,12 +111,12 @@ interface Posts {
   @summary("Create a comment on a post")
   @useAuth(Models.CandidateAuth)
   createPostComment(
-    @path postId: string,
+    @path postId: Uuid,
     @body request: CreateCommentRequest,
   ): {
     @statusCode statusCode: 201;
     @body comment: CommentResponse;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** コメント削除（要ログイン） */
   @delete
@@ -124,8 +124,8 @@ interface Posts {
   @summary("Delete a comment")
   @useAuth(Models.CandidateAuth)
   deletePostComment(
-    @path commentId: string,
+    @path commentId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 }

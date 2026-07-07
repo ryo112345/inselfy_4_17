@@ -20,7 +20,7 @@ func JobApplicationsListResponse(apps []*jobapplication.JobApplicationWithDetail
 	for _, r := range jobApplicationConv.ToResponses(apps) {
 		items = append(items, *r)
 	}
-	return &openapi.ModelsJobApplicationListResponse{Items: items, Total: total}
+	return &openapi.ModelsJobApplicationListResponse{Items: items, Total: int32(total)}
 }
 
 // JobApplicationAppliedResponse builds the applied-check API response.

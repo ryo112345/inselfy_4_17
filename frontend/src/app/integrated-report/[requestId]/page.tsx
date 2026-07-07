@@ -29,10 +29,11 @@ export default async function IntegratedReportPage({
   const userId = await getReportUserId(requestId);
   if (!userId) notFound();
 
-  const data = await fetchPanelDataByUserId(userId);
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
+  const data = await fetchPanelDataByUserId(userId, cookieHeader);
   if (!data) notFound();
 
-  const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
   const profileColor = data.user.profileColor ?? "#3D8B6E";
 

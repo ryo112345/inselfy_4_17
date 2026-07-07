@@ -15,8 +15,8 @@ interface PublicTeamScores {
   @get
   @summary("Get public team scores of a company")
   getPublicTeamScores(
-    @path id: string,
-  ): PublicTeamScoresResponse | NotFoundError | BadRequestError;
+    @path id: Uuid,
+  ): PublicTeamScoresResponse | NotFoundErrors;
 }
 
 @route("/api/company/teams")
@@ -26,7 +26,7 @@ interface CompanyTeams {
   /** チーム一覧（企業認証） */
   @get
   @summary("List teams of the authenticated company")
-  listTeams(): TeamListResponse | BadRequestError | UnauthorizedError;
+  listTeams(): TeamListResponse | AuthedErrors;
 
   /** チーム作成（企業認証） */
   @post
@@ -36,86 +36,86 @@ interface CompanyTeams {
   ): {
     @statusCode statusCode: 201;
     @body team: TeamDetailResponse;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 
   /** チーム詳細（企業認証） */
   @get
   @route("/{teamId}")
   @summary("Get a team with members")
   getTeam(
-    @path teamId: string,
-  ): TeamDetailResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path teamId: Uuid,
+  ): TeamDetailResponse | AuthedNotFoundErrors;
 
   /** チーム更新（企業認証） */
   @put
   @route("/{teamId}")
   @summary("Update a team")
   updateTeam(
-    @path teamId: string,
+    @path teamId: Uuid,
     @body request: UpdateTeamRequest,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** チーム削除（企業認証） */
   @delete
   @route("/{teamId}")
   @summary("Delete a team")
   deleteTeam(
-    @path teamId: string,
+    @path teamId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** メンバー追加（企業認証） */
   @post
   @route("/{teamId}/members")
   @summary("Add a team member")
   addTeamMember(
-    @path teamId: string,
+    @path teamId: Uuid,
     @body request: AddTeamMemberRequest,
   ): {
     @statusCode statusCode: 201;
     @body member: TeamMemberResponse;
-  } | BadRequestError | NotFoundError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** メンバー削除（企業認証） */
   @delete
   @route("/{teamId}/members/{memberId}")
   @summary("Remove a team member")
   removeTeamMember(
-    @path teamId: string,
-    @path memberId: string,
+    @path teamId: Uuid,
+    @path memberId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** チームスコア取得（企業認証） */
   @get
   @route("/{teamId}/scores")
   @summary("Get diagnostic scores of team members")
   getTeamScores(
-    @path teamId: string,
-  ): TeamScoresResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path teamId: Uuid,
+  ): TeamScoresResponse | AuthedNotFoundErrors;
 
   /** エースメンバー設定（企業認証） */
   @put
   @route("/{teamId}/ace/{memberId}")
   @summary("Set the ace member of a team")
   setAceMember(
-    @path teamId: string,
-    @path memberId: string,
+    @path teamId: Uuid,
+    @path memberId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** エースメンバー解除（企業認証） */
   @delete
   @route("/{teamId}/ace")
   @summary("Unset the ace member of a team")
   unsetAceMember(
-    @path teamId: string,
+    @path teamId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 }

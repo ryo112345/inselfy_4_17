@@ -37,5 +37,5 @@ func TalentListResponse(cards []talentsearch.Card, total int) *openapi.ModelsTal
 	for i, c := range cards {
 		users[i] = TalentCardResponse(c)
 	}
-	return &openapi.ModelsTalentListResponse{Items: users, Total: total}
+	return &openapi.ModelsTalentListResponse{Items: users, Total: int32(total)}
 }

@@ -21,11 +21,11 @@ export type ModelsAiReportResponse = {
     /**
      * レポートID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * セッションID
      */
-    sessionId: string;
+    sessionId: ModelsUuid;
     /**
      * レポート本文（Markdown）
      */
@@ -57,7 +57,7 @@ export type ModelsApplyJobRequest = {
     /**
      * 求人ID
      */
-    jobPostingId: string;
+    jobPostingId: ModelsUuid;
     /**
      * 応募メッセージ
      */
@@ -69,7 +69,7 @@ export type ModelsApplyJobRequest = {
  */
 export type ModelsArticleListResponse = {
     /**
-     * 記事
+     * アイテム一覧
      */
     items: Array<ModelsArticleResponse>;
     /**
@@ -85,7 +85,7 @@ export type ModelsArticleResponse = {
     /**
      * 記事ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 著者種別（user / company）
      */
@@ -182,7 +182,7 @@ export type ModelsAuthUserResponse = {
     /**
      * ユーザーID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * ユーザー名
      */
@@ -337,15 +337,15 @@ export type ModelsCiResultResponse = {
     /**
      * 結果ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * セッションID
      */
-    sessionId: string;
+    sessionId: ModelsUuid;
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * 基本興味領域スコア
      */
@@ -367,7 +367,7 @@ export type ModelsCiSessionResponse = {
     /**
      * セッションID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * ステータス
      */
@@ -382,16 +382,6 @@ export type ModelsCiSessionResponse = {
  * 設問のスキルレベル
  */
 export type ModelsCiSkillLevel = 'entry' | 'mid' | 'advanced';
-
-/**
- * Career Interest セッション開始リクエスト
- */
-export type ModelsCiStartSessionRequest = {
-    /**
-     * ユーザーID
-     */
-    userId: string;
-};
 
 /**
  * Career Interest 結果送信リクエスト
@@ -447,11 +437,11 @@ export type ModelsCandidateInterviewItem = {
     /**
      * 面接ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 応募ID
      */
-    applicationId: string;
+    applicationId: ModelsUuid;
     /**
      * 開始日時
      */
@@ -525,7 +515,7 @@ export type ModelsCheckoutSessionResponse = {
  */
 export type ModelsCommentListResponse = {
     /**
-     * コメント
+     * アイテム一覧
      */
     items: Array<ModelsCommentResponse>;
     /**
@@ -541,15 +531,15 @@ export type ModelsCommentResponse = {
     /**
      * コメントID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 投稿ID
      */
-    postId: string;
+    postId: ModelsUuid;
     /**
      * コメント投稿者ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * ユーザー名
      */
@@ -594,11 +584,11 @@ export type ModelsCompanyInterviewItem = {
     /**
      * 面接ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 応募ID
      */
-    applicationId: string;
+    applicationId: ModelsUuid;
     /**
      * 開始日時
      */
@@ -642,7 +632,7 @@ export type ModelsCompanyInterviewItem = {
  */
 export type ModelsCompanyInterviewListResponse = {
     /**
-     * 面接
+     * アイテム一覧
      */
     items: Array<ModelsCompanyInterviewItem>;
 };
@@ -668,7 +658,7 @@ export type ModelsCompanyProfileResponse = {
     /**
      * 企業ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 企業名
      */
@@ -796,7 +786,7 @@ export type ModelsCompanyResponse = {
     /**
      * 企業ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * メールアドレス
      */
@@ -851,7 +841,7 @@ export type ModelsConflictError = {
  */
 export type ModelsConversationListResponse = {
     /**
-     * 会話
+     * アイテム一覧
      */
     items: Array<ModelsConversationResponse>;
     /**
@@ -867,7 +857,7 @@ export type ModelsConversationResponse = {
     /**
      * 会話ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 会話種別
      */
@@ -875,11 +865,11 @@ export type ModelsConversationResponse = {
     /**
      * 企業ID
      */
-    companyId: string;
+    companyId: ModelsUuid;
     /**
      * 候補者ユーザーID
      */
-    candidateId: string;
+    candidateId: ModelsUuid;
     /**
      * 企業名
      */
@@ -891,11 +881,11 @@ export type ModelsConversationResponse = {
     /**
      * 参加者1 ID（ユーザー間会話のみ）
      */
-    participant1Id?: string;
+    participant1Id?: ModelsUuid;
     /**
      * 参加者2 ID（ユーザー間会話のみ）
      */
-    participant2Id?: string;
+    participant2Id?: ModelsUuid;
     /**
      * 参加者1 名（ユーザー間会話のみ）
      */
@@ -1055,7 +1045,7 @@ export type ModelsCreatePostRequest = {
     /**
      * 引用元投稿ID
      */
-    quotePostId?: string;
+    quotePostId?: ModelsUuid;
 };
 
 /**
@@ -1111,7 +1101,7 @@ export type ModelsDiagnoseInfoResponse = {
     /**
      * チームメンバーID
      */
-    memberId: string;
+    memberId: ModelsUuid;
     /**
      * メンバー名
      */
@@ -1152,7 +1142,7 @@ export type ModelsDiagnosisSessionStatus = 'in_progress' | 'completed' | 'expire
  */
 export type ModelsEducationListResponse = {
     /**
-     * 学歴
+     * アイテム一覧
      */
     items: Array<ModelsEducationResponse>;
 };
@@ -1164,11 +1154,11 @@ export type ModelsEducationResponse = {
     /**
      * ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * 学校名
      */
@@ -1218,7 +1208,7 @@ export type ModelsErrorResponse = {
  */
 export type ModelsExperienceListResponse = {
     /**
-     * 職歴
+     * アイテム一覧
      */
     items: Array<ModelsExperienceResponse>;
 };
@@ -1230,11 +1220,11 @@ export type ModelsExperienceResponse = {
     /**
      * ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * 会社名
      */
@@ -1296,7 +1286,7 @@ export type ModelsFollowStatusResponse = {
  */
 export type ModelsFollowUserListResponse = {
     /**
-     * ユーザー
+     * アイテム一覧
      */
     items: Array<ModelsFollowUserResponse>;
     /**
@@ -1312,7 +1302,7 @@ export type ModelsFollowUserResponse = {
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * ユーザー名
      */
@@ -1360,11 +1350,11 @@ export type ModelsIntegratedReportLatestRequestResponse = {
     /**
      * リクエストID
      */
-    requestId: string;
+    requestId: ModelsUuid;
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * レポートが生成済みかどうか
      */
@@ -1382,11 +1372,11 @@ export type ModelsIntegratedReportMineResponse = {
     /**
      * レポートID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * リクエストID
      */
-    requestId: string;
+    requestId: ModelsUuid;
     /**
      * レポート本文（Markdown）
      */
@@ -1408,7 +1398,7 @@ export type ModelsIntegratedReportRequestResponse = {
     /**
      * リクエストID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * トピック1
      */
@@ -1438,15 +1428,15 @@ export type ModelsIntegratedReportResponse = {
     /**
      * レポートID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * リクエストID
      */
-    requestId: string;
+    requestId: ModelsUuid;
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * レポート本文（Markdown）
      */
@@ -1472,7 +1462,7 @@ export type ModelsIntegratedReportStatusResponse = {
     /**
      * リクエストID（pending / ready のときのみ）
      */
-    requestId?: string;
+    requestId?: ModelsUuid;
 };
 
 /**
@@ -1482,11 +1472,11 @@ export type ModelsInterviewBase = {
     /**
      * 面接ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 応募ID
      */
-    applicationId: string;
+    applicationId: ModelsUuid;
     /**
      * 開始日時
      */
@@ -1525,7 +1515,7 @@ export type ModelsInterviewSlotResponse = {
     /**
      * スロットID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 開始日時
      */
@@ -1555,7 +1545,7 @@ export type ModelsInterviewStatus = 'scheduled' | 'completed' | 'cancelled' | 'n
  */
 export type ModelsJobApplicationListResponse = {
     /**
-     * 応募
+     * アイテム一覧
      */
     items: Array<ModelsJobApplicationResponse>;
     /**
@@ -1571,19 +1561,19 @@ export type ModelsJobApplicationResponse = {
     /**
      * 応募ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 求人ID
      */
-    jobPostingId: string;
+    jobPostingId: ModelsUuid;
     /**
      * 候補者ユーザーID
      */
-    candidateId: string;
+    candidateId: ModelsUuid;
     /**
      * 企業ID
      */
-    companyId: string;
+    companyId: ModelsUuid;
     /**
      * ステータス
      */
@@ -1656,11 +1646,178 @@ export type ModelsJobApplicationResponse = {
 export type ModelsJobApplicationStatus = 'applied' | 'screening' | 'interview' | 'offer' | 'accepted' | 'rejected' | 'withdrawn';
 
 /**
+ * 求人の入力フィールド（リクエスト・レスポンス共通）
+ */
+export type ModelsJobPostingBase = {
+    /**
+     * 求人タイトル
+     */
+    title: string;
+    /**
+     * 仕事内容
+     */
+    description: string;
+    /**
+     * 雇用形態
+     */
+    employmentType: string;
+    /**
+     * 勤務地（表示用）
+     */
+    location: string | null;
+    /**
+     * ステータス
+     */
+    status: ModelsJobPostingStatus;
+    /**
+     * 職種カテゴリ
+     */
+    jobCategory: string;
+    /**
+     * 採用人数
+     */
+    hiringCount: string;
+    /**
+     * 訴求ポイント
+     */
+    appealPoints: string;
+    /**
+     * 課題・チャレンジ
+     */
+    challenges: string;
+    /**
+     * チーム紹介
+     */
+    teamDescription: string;
+    /**
+     * チームメンバー
+     */
+    teamMembers: Array<ModelsJobPostingTeamMember>;
+    /**
+     * チームラベル
+     */
+    teamLabel: string;
+    /**
+     * 紐づくチームID
+     */
+    teamId: string | null;
+    /**
+     * 得られるスキル
+     */
+    skillsGained: string;
+    /**
+     * タグ
+     */
+    tags: Array<string>;
+    /**
+     * 必須要件
+     */
+    requiredQualifications: string;
+    /**
+     * 歓迎要件
+     */
+    preferredQualifications: string;
+    /**
+     * 就業場所
+     */
+    workLocation: string;
+    /**
+     * 就業場所の変更の範囲
+     */
+    workLocationChangeScope: string;
+    /**
+     * 業務内容の変更の範囲
+     */
+    jobDescriptionChangeScope: string;
+    /**
+     * 契約種別
+     */
+    contractType: string;
+    /**
+     * 試用期間
+     */
+    probationPeriod: string;
+    /**
+     * 勤務時間
+     */
+    workHours: string;
+    /**
+     * 休憩時間
+     */
+    breakTime: string;
+    /**
+     * 休日
+     */
+    holidays: string;
+    /**
+     * 給与下限（万円）
+     */
+    salaryMin: number | null;
+    /**
+     * 給与上限（万円）
+     */
+    salaryMax: number | null;
+    /**
+     * 給与詳細
+     */
+    salaryDetail: string;
+    /**
+     * 保険
+     */
+    insurance: string;
+    /**
+     * リモートポリシー
+     */
+    remotePolicy: string;
+    /**
+     * 福利厚生
+     */
+    benefits: string;
+    /**
+     * 受動喫煙対策
+     */
+    smokingPolicy: string;
+    /**
+     * 選考プロセス
+     */
+    selectionProcess: string;
+    /**
+     * カバー画像URL
+     */
+    coverImageUrl: string;
+    /**
+     * ハイライトタイトル（役割）
+     */
+    highlightTitleRole: string;
+    /**
+     * ハイライトタイトル（訴求）
+     */
+    highlightTitleAppeal: string;
+    /**
+     * ハイライトタイトル（チャレンジ）
+     */
+    highlightTitleChallenge: string;
+    /**
+     * ハイライトタイトル（成長）
+     */
+    highlightTitleGrowth: string;
+    /**
+     * ギャラリー画像URL
+     */
+    galleryUrls: Array<string>;
+};
+
+/**
+ * Work Values フィルタの照合モード
+ */
+export type ModelsJobPostingFilterMode = 'values' | 'needs';
+
+/**
  * 求人一覧（ページング付き）
  */
 export type ModelsJobPostingListResponse = {
     /**
-     * 求人
+     * アイテム一覧
      */
     items: Array<ModelsJobPostingResponse>;
     /**
@@ -1722,7 +1879,7 @@ export type ModelsJobPostingRequest = {
      */
     teamLabel: string;
     /**
-     * 紐づけるチームID
+     * 紐づくチームID
      */
     teamId: string | null;
     /**
@@ -1838,11 +1995,11 @@ export type ModelsJobPostingResponse = {
     /**
      * 求人ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 企業ID
      */
-    companyId: string;
+    companyId: ModelsUuid;
     /**
      * 企業名
      */
@@ -1851,6 +2008,10 @@ export type ModelsJobPostingResponse = {
      * 企業ロゴURL
      */
     companyLogoUrl?: string;
+    /**
+     * 公開中か
+     */
+    isActive: boolean;
     /**
      * 求人タイトル
      */
@@ -1867,10 +2028,6 @@ export type ModelsJobPostingResponse = {
      * 勤務地（表示用）
      */
     location: string | null;
-    /**
-     * 公開中か
-     */
-    isActive: boolean;
     /**
      * ステータス
      */
@@ -2022,6 +2179,11 @@ export type ModelsJobPostingResponse = {
 };
 
 /**
+ * 公開求人一覧のソートキー
+ */
+export type ModelsJobPostingSort = 'newest' | 'salary';
+
+/**
  * 求人ステータス
  */
 export type ModelsJobPostingStatus = 'draft' | 'open';
@@ -2061,7 +2223,7 @@ export type ModelsMemberScoreResponse = {
     /**
      * メンバーID
      */
-    memberId: string;
+    memberId: ModelsUuid;
     /**
      * メンバー名
      */
@@ -2069,7 +2231,7 @@ export type ModelsMemberScoreResponse = {
     /**
      * 紐づくユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * Work Values 診断ステータス
      */
@@ -2097,7 +2259,7 @@ export type ModelsMemberScoreResponse = {
  */
 export type ModelsMessageListResponse = {
     /**
-     * メッセージ
+     * アイテム一覧
      */
     items: Array<ModelsMessageResponse>;
     /**
@@ -2113,11 +2275,11 @@ export type ModelsMessageResponse = {
     /**
      * メッセージID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 会話ID
      */
-    conversationId: string;
+    conversationId: ModelsUuid;
     /**
      * 送信者種別（company / candidate）
      */
@@ -2125,7 +2287,7 @@ export type ModelsMessageResponse = {
     /**
      * 送信者ID
      */
-    senderId: string;
+    senderId: ModelsUuid;
     /**
      * 本文
      */
@@ -2157,7 +2319,7 @@ export type ModelsNotFoundError = {
  */
 export type ModelsNotificationListResponse = {
     /**
-     * 通知
+     * アイテム一覧
      */
     items: Array<ModelsNotificationResponse>;
     /**
@@ -2173,7 +2335,7 @@ export type ModelsNotificationResponse = {
     /**
      * ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 通知種別
      */
@@ -2216,7 +2378,7 @@ export type ModelsPendingProposalCheckResponse = {
     /**
      * 提案ID
      */
-    proposalId?: string;
+    proposalId?: ModelsUuid;
     /**
      * 提案作成日時
      */
@@ -2230,7 +2392,7 @@ export type ModelsPendingProposalItem = {
     /**
      * 提案ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 企業名
      */
@@ -2266,7 +2428,7 @@ export type ModelsPendingProposalItem = {
  */
 export type ModelsPostListResponse = {
     /**
-     * 投稿
+     * アイテム一覧
      */
     items: Array<ModelsPostResponse>;
     /**
@@ -2282,11 +2444,11 @@ export type ModelsPostResponse = {
     /**
      * 投稿ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 投稿者ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * 投稿者ユーザー名
      */
@@ -2358,7 +2520,7 @@ export type ModelsProposalSummary = {
     /**
      * 提案ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * メッセージ
      */
@@ -2380,7 +2542,7 @@ export type ModelsProposeInterviewRequest = {
     /**
      * 応募ID
      */
-    applicationId: string;
+    applicationId: ModelsUuid;
     /**
      * メッセージ
      */
@@ -2410,7 +2572,7 @@ export type ModelsProposeInterviewResponse = {
     /**
      * 提案ID
      */
-    proposalId: string;
+    proposalId: ModelsUuid;
     /**
      * 登録されたスロット
      */
@@ -2438,7 +2600,7 @@ export type ModelsPublicCompanyProfileResponse = {
     /**
      * 企業ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 企業名
      */
@@ -2542,7 +2704,7 @@ export type ModelsPublicTeamScoreResponse = {
     /**
      * チームID
      */
-    teamId: string;
+    teamId: ModelsUuid;
     /**
      * チーム名
      */
@@ -2586,7 +2748,7 @@ export type ModelsQuotedPostResponse = {
     /**
      * 投稿ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 本文
      */
@@ -2760,7 +2922,7 @@ export type ModelsScoutDetailResponse = {
  */
 export type ModelsScoutListResponse = {
     /**
-     * スカウト
+     * アイテム一覧
      */
     items: Array<ModelsScoutMessageResponse>;
     /**
@@ -2776,15 +2938,15 @@ export type ModelsScoutMessageResponse = {
     /**
      * スカウトID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 企業ID
      */
-    companyId: string;
+    companyId: ModelsUuid;
     /**
      * 候補者ユーザーID
      */
-    candidateId: string;
+    candidateId: ModelsUuid;
     /**
      * 関連求人ID
      */
@@ -2885,7 +3047,7 @@ export type ModelsScoutReplyResponse = {
     /**
      * 返信ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 送信者種別（company / candidate）
      */
@@ -2893,7 +3055,7 @@ export type ModelsScoutReplyResponse = {
     /**
      * 送信者ID
      */
-    senderId: string;
+    senderId: ModelsUuid;
     /**
      * 本文
      */
@@ -2925,7 +3087,7 @@ export type ModelsScoutRespondResponse = {
     /**
      * 応答により作成・特定された会話ID
      */
-    conversationId?: string;
+    conversationId?: ModelsUuid;
 };
 
 /**
@@ -2952,7 +3114,7 @@ export type ModelsScoutStatus = 'draft' | 'sent' | 'opened' | 'replied' | 'inter
  */
 export type ModelsScoutTemplateListResponse = {
     /**
-     * テンプレート
+     * アイテム一覧
      */
     items: Array<ModelsScoutTemplateResponse>;
 };
@@ -2964,11 +3126,11 @@ export type ModelsScoutTemplateResponse = {
     /**
      * ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 企業ID
      */
-    companyId: string;
+    companyId: ModelsUuid;
     /**
      * テンプレート名
      */
@@ -2998,7 +3160,7 @@ export type ModelsSelectSlotRequest = {
     /**
      * 選択するスロットID
      */
-    slotId: string;
+    slotId: ModelsUuid;
     /**
      * 直接指定の開始日時（RFC3339、空文字可）
      */
@@ -3026,7 +3188,7 @@ export type ModelsSelectedInterview = {
     /**
      * 面接ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 開始日時
      */
@@ -3058,7 +3220,7 @@ export type ModelsSendScoutRequest = {
     /**
      * 候補者ユーザーID
      */
-    candidateId: string;
+    candidateId: ModelsUuid;
     /**
      * 関連求人ID
      */
@@ -3102,7 +3264,7 @@ export type ModelsSimilarUserItem = {
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * ユーザー名
      */
@@ -3156,7 +3318,7 @@ export type ModelsSimilarUsersResponse = {
  */
 export type ModelsSkillListResponse = {
     /**
-     * スキル
+     * アイテム一覧
      */
     items: Array<ModelsSkillResponse>;
 };
@@ -3168,7 +3330,7 @@ export type ModelsSkillResponse = {
     /**
      * スキルID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * スキル名
      */
@@ -3186,7 +3348,7 @@ export type ModelsStartCandidateConversationRequest = {
     /**
      * 相手のID
      */
-    recipientId: string;
+    recipientId: ModelsUuid;
     /**
      * 最初のメッセージ本文
      */
@@ -3200,7 +3362,7 @@ export type ModelsStartConversationRequest = {
     /**
      * 候補者ユーザーID
      */
-    candidateId: string;
+    candidateId: ModelsUuid;
     /**
      * 最初のメッセージ本文
      */
@@ -3224,7 +3386,7 @@ export type ModelsTalentCard = {
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * ユーザー名
      */
@@ -3302,7 +3464,7 @@ export type ModelsTalentExperience = {
  */
 export type ModelsTalentListResponse = {
     /**
-     * 人材カード
+     * アイテム一覧
      */
     items: Array<ModelsTalentCard>;
     /**
@@ -3318,11 +3480,11 @@ export type ModelsTeamDetailResponse = {
     /**
      * チームID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 企業ID
      */
-    companyId: string;
+    companyId: ModelsUuid;
     /**
      * チーム名
      */
@@ -3355,7 +3517,7 @@ export type ModelsTeamDiagnosisStatus = 'pending' | 'completed';
  */
 export type ModelsTeamListResponse = {
     /**
-     * チーム
+     * アイテム一覧
      */
     items: Array<ModelsTeamResponse>;
 };
@@ -3367,7 +3529,7 @@ export type ModelsTeamMemberResponse = {
     /**
      * メンバーID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * メンバー名
      */
@@ -3405,11 +3567,11 @@ export type ModelsTeamResponse = {
     /**
      * チームID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * 企業ID
      */
-    companyId: string;
+    companyId: ModelsUuid;
     /**
      * チーム名
      */
@@ -3813,7 +3975,7 @@ export type ModelsUserResponse = {
     /**
      * ユーザーID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * ユーザー名
      */
@@ -3871,6 +4033,11 @@ export type ModelsUserResponse = {
      */
     updatedAt: string;
 };
+
+/**
+ * UUID 形式の識別子
+ */
+export type ModelsUuid = string;
 
 /**
  * Work Need 定義
@@ -3959,15 +4126,15 @@ export type ModelsWvResultResponse = {
     /**
      * 結果ID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * セッションID
      */
-    sessionId: string;
+    sessionId: ModelsUuid;
     /**
      * ユーザーID
      */
-    userId: string;
+    userId: ModelsUuid;
     /**
      * ニーズスコア（スコア降順）
      */
@@ -3989,7 +4156,7 @@ export type ModelsWvSessionResponse = {
     /**
      * セッションID
      */
-    id: string;
+    id: ModelsUuid;
     /**
      * ステータス
      */
@@ -4002,16 +4169,6 @@ export type ModelsWvSessionResponse = {
      * ニーズ定義一覧
      */
     needs: Array<ModelsWvNeedDefResponse>;
-};
-
-/**
- * Work Values セッション開始リクエスト
- */
-export type ModelsWvStartSessionRequest = {
-    /**
-     * ユーザーID
-     */
-    userId: string;
 };
 
 /**
@@ -4127,7 +4284,7 @@ export type CandidateApplicationsCheckAppliedData = {
         /**
          * 求人ID
          */
-        jobPostingId: string;
+        jobPostingId: ModelsUuid;
     };
     url: '/api/applications/check';
 };
@@ -4157,7 +4314,7 @@ export type CandidateApplicationsCheckAppliedResponse = CandidateApplicationsChe
 export type CandidateApplicationsWithdrawApplicationData = {
     body?: never;
     path: {
-        applicationId: string;
+        applicationId: ModelsUuid;
     };
     query?: never;
     url: '/api/applications/{applicationId}/withdraw';
@@ -4318,7 +4475,7 @@ export type ArticlesUploadArticleImageResponse = ArticlesUploadArticleImageRespo
 export type ArticlesDeleteArticleData = {
     body?: never;
     path: {
-        articleId: string;
+        articleId: ModelsUuid;
     };
     query?: never;
     url: '/api/articles/{articleId}';
@@ -4357,7 +4514,7 @@ export type ArticlesDeleteArticleResponse = ArticlesDeleteArticleResponses[keyof
 export type ArticlesGetArticleData = {
     body?: never;
     path: {
-        articleId: string;
+        articleId: ModelsUuid;
     };
     query?: never;
     url: '/api/articles/{articleId}';
@@ -4388,7 +4545,7 @@ export type ArticlesGetArticleResponse = ArticlesGetArticleResponses[keyof Artic
 export type ArticlesUpdateArticleData = {
     body: ModelsUpdateArticleRequest;
     path: {
-        articleId: string;
+        articleId: ModelsUuid;
     };
     query?: never;
     url: '/api/articles/{articleId}';
@@ -4427,7 +4584,7 @@ export type ArticlesUpdateArticleResponse = ArticlesUpdateArticleResponses[keyof
 export type ArticlesCreateArticleCheckoutData = {
     body?: never;
     path: {
-        articleId: string;
+        articleId: ModelsUuid;
     };
     query?: never;
     url: '/api/articles/{articleId}/checkout';
@@ -4462,7 +4619,7 @@ export type ArticlesCreateArticleCheckoutResponse = ArticlesCreateArticleCheckou
 export type ArticlesPublishArticleData = {
     body?: never;
     path: {
-        articleId: string;
+        articleId: ModelsUuid;
     };
     query?: never;
     url: '/api/articles/{articleId}/publish';
@@ -4598,7 +4755,7 @@ export type AuthRefreshTokenResponses = {
 export type AuthRefreshTokenResponse = AuthRefreshTokenResponses[keyof AuthRefreshTokenResponses];
 
 export type CareerInterestCiStartSessionData = {
-    body: ModelsCiStartSessionRequest;
+    body?: never;
     path?: never;
     query?: never;
     url: '/api/career-interest/sessions';
@@ -4609,6 +4766,10 @@ export type CareerInterestCiStartSessionErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
     /**
      * Not Found エラー
      */
@@ -4629,7 +4790,7 @@ export type CareerInterestCiStartSessionResponse = CareerInterestCiStartSessionR
 export type CareerInterestCiGetAiReportData = {
     body?: never;
     path: {
-        sessionId: string;
+        sessionId: ModelsUuid;
     };
     query?: never;
     url: '/api/career-interest/sessions/{sessionId}/ai-report';
@@ -4640,6 +4801,10 @@ export type CareerInterestCiGetAiReportErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
     /**
      * Not Found エラー
      */
@@ -4660,7 +4825,7 @@ export type CareerInterestCiGetAiReportResponse = CareerInterestCiGetAiReportRes
 export type CareerInterestCiGetResultBySessionData = {
     body?: never;
     path: {
-        sessionId: string;
+        sessionId: ModelsUuid;
     };
     query?: never;
     url: '/api/career-interest/sessions/{sessionId}/results';
@@ -4671,6 +4836,10 @@ export type CareerInterestCiGetResultBySessionErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
     /**
      * Not Found エラー
      */
@@ -4691,7 +4860,7 @@ export type CareerInterestCiGetResultBySessionResponse = CareerInterestCiGetResu
 export type CareerInterestCiSubmitResultData = {
     body: ModelsCiSubmitResultRequest;
     path: {
-        sessionId: string;
+        sessionId: ModelsUuid;
     };
     query?: never;
     url: '/api/career-interest/sessions/{sessionId}/results';
@@ -4702,6 +4871,14 @@ export type CareerInterestCiSubmitResultErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
@@ -4722,7 +4899,7 @@ export type CareerInterestCiSubmitResultResponse = CareerInterestCiSubmitResultR
 export type CareerInterestCiGetLatestResultData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: never;
     url: '/api/career-interest/users/{userId}/results/latest';
@@ -4733,6 +4910,10 @@ export type CareerInterestCiGetLatestResultErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
     /**
      * Not Found エラー
      */
@@ -4753,7 +4934,7 @@ export type CareerInterestCiGetLatestResultResponse = CareerInterestCiGetLatestR
 export type PublicCompanyProfilesGetPublicCompanyProfileData = {
     body?: never;
     path: {
-        id: string;
+        id: ModelsUuid;
     };
     query?: never;
     url: '/api/companies/{id}';
@@ -4784,7 +4965,7 @@ export type PublicCompanyProfilesGetPublicCompanyProfileResponse = PublicCompany
 export type PublicTeamScoresGetPublicTeamScoresData = {
     body?: never;
     path: {
-        id: string;
+        id: ModelsUuid;
     };
     query?: never;
     url: '/api/companies/{id}/teams/scores';
@@ -4873,7 +5054,7 @@ export type CompanyApplicationsListCompanyApplicationsResponse = CompanyApplicat
 export type CompanyApplicationsGetApplicationData = {
     body?: never;
     path: {
-        applicationId: string;
+        applicationId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/applications/{applicationId}';
@@ -4908,7 +5089,7 @@ export type CompanyApplicationsGetApplicationResponse = CompanyApplicationsGetAp
 export type CompanyApplicationsUpdateApplicationStatusData = {
     body: ModelsUpdateApplicationStatusRequest;
     path: {
-        applicationId: string;
+        applicationId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/applications/{applicationId}/status';
@@ -4972,7 +5153,7 @@ export type CompanyArticlesCreateCompanyArticleResponse = CompanyArticlesCreateC
 export type CompanyArticlesDeleteCompanyArticleData = {
     body?: never;
     path: {
-        articleId: string;
+        articleId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/articles/{articleId}';
@@ -5011,7 +5192,7 @@ export type CompanyArticlesDeleteCompanyArticleResponse = CompanyArticlesDeleteC
 export type CompanyArticlesUpdateCompanyArticleData = {
     body: ModelsUpdateArticleRequest;
     path: {
-        articleId: string;
+        articleId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/articles/{articleId}';
@@ -5050,7 +5231,7 @@ export type CompanyArticlesUpdateCompanyArticleResponse = CompanyArticlesUpdateC
 export type CompanyArticlesPublishCompanyArticleData = {
     body?: never;
     path: {
-        articleId: string;
+        articleId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/articles/{articleId}/publish';
@@ -5198,10 +5379,6 @@ export type CompanyAuthCompanyRegisterErrors = {
      */
     400: ModelsBadRequestError;
     /**
-     * Unauthorized エラー
-     */
-    401: ModelsUnauthorizedError;
-    /**
      * Conflict エラー
      */
     409: ModelsConflictError;
@@ -5259,7 +5436,7 @@ export type CompanyInterviewsListCompanyInterviewsResponse = CompanyInterviewsLi
 export type CompanyInterviewsGetPendingProposalData = {
     body?: never;
     path: {
-        applicationId: string;
+        applicationId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/interviews/pending/{applicationId}';
@@ -5323,7 +5500,7 @@ export type CompanyInterviewsProposeInterviewResponse = CompanyInterviewsPropose
 export type CompanyInterviewsCancelCompanyInterviewData = {
     body?: never;
     path: {
-        interviewId: string;
+        interviewId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/interviews/{interviewId}/cancel';
@@ -5509,7 +5686,7 @@ export type CompanyJobPostingsUploadTeamMemberPhotoResponse = CompanyJobPostings
 export type CompanyJobPostingsDeleteJobPostingData = {
     body?: never;
     path: {
-        jobId: string;
+        jobId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/jobs/{jobId}';
@@ -5544,7 +5721,7 @@ export type CompanyJobPostingsDeleteJobPostingResponse = CompanyJobPostingsDelet
 export type CompanyJobPostingsGetCompanyJobPostingData = {
     body?: never;
     path: {
-        jobId: string;
+        jobId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/jobs/{jobId}';
@@ -5579,7 +5756,7 @@ export type CompanyJobPostingsGetCompanyJobPostingResponse = CompanyJobPostingsG
 export type CompanyJobPostingsUpdateJobPostingData = {
     body: ModelsJobPostingRequest;
     path: {
-        jobId: string;
+        jobId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/jobs/{jobId}';
@@ -5679,7 +5856,7 @@ export type CompanyMessagingStartCompanyConversationResponse = CompanyMessagingS
 export type CompanyMessagingGetCompanyConversationData = {
     body?: never;
     path: {
-        conversationId: string;
+        conversationId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/messages/conversations/{conversationId}';
@@ -5718,7 +5895,7 @@ export type CompanyMessagingGetCompanyConversationResponse = CompanyMessagingGet
 export type CompanyMessagingListCompanyMessagesData = {
     body?: never;
     path: {
-        conversationId: string;
+        conversationId: ModelsUuid;
     };
     query?: {
         limit?: number;
@@ -5760,7 +5937,7 @@ export type CompanyMessagingListCompanyMessagesResponse = CompanyMessagingListCo
 export type CompanyMessagingSendCompanyMessageData = {
     body: ModelsSendMessageRequest;
     path: {
-        conversationId: string;
+        conversationId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/messages/conversations/{conversationId}/messages';
@@ -5799,7 +5976,7 @@ export type CompanyMessagingSendCompanyMessageResponse = CompanyMessagingSendCom
 export type CompanyMessagingMarkCompanyConversationReadData = {
     body?: never;
     path: {
-        conversationId: string;
+        conversationId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/messages/conversations/{conversationId}/read';
@@ -5959,7 +6136,7 @@ export type CompanyNotificationsCountCompanyUnreadNotificationsResponse = Compan
 export type CompanyNotificationsMarkCompanyNotificationReadData = {
     body?: never;
     path: {
-        id: string;
+        id: ModelsUuid;
     };
     query?: never;
     url: '/api/company/notifications/{id}/read';
@@ -6226,7 +6403,7 @@ export type SavedCandidatesCountSavedCandidatesResponse = SavedCandidatesCountSa
 export type SavedCandidatesUnsaveCandidateData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/saved-candidates/{userId}';
@@ -6257,7 +6434,7 @@ export type SavedCandidatesUnsaveCandidateResponse = SavedCandidatesUnsaveCandid
 export type SavedCandidatesIsCandidateSavedData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/saved-candidates/{userId}';
@@ -6288,7 +6465,7 @@ export type SavedCandidatesIsCandidateSavedResponse = SavedCandidatesIsCandidate
 export type SavedCandidatesSaveCandidateData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/saved-candidates/{userId}';
@@ -6377,7 +6554,7 @@ export type ScoutTemplatesCreateScoutTemplateResponse = ScoutTemplatesCreateScou
 export type ScoutTemplatesDeleteScoutTemplateData = {
     body?: never;
     path: {
-        templateId: string;
+        templateId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/scout-templates/{templateId}';
@@ -6412,7 +6589,7 @@ export type ScoutTemplatesDeleteScoutTemplateResponse = ScoutTemplatesDeleteScou
 export type ScoutTemplatesGetScoutTemplateData = {
     body?: never;
     path: {
-        templateId: string;
+        templateId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/scout-templates/{templateId}';
@@ -6447,7 +6624,7 @@ export type ScoutTemplatesGetScoutTemplateResponse = ScoutTemplatesGetScoutTempl
 export type ScoutTemplatesUpdateScoutTemplateData = {
     body: ModelsUpdateScoutTemplateRequest;
     path: {
-        templateId: string;
+        templateId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/scout-templates/{templateId}';
@@ -6648,7 +6825,7 @@ export type CompanyScoutsGetScoutQualityResponse = CompanyScoutsGetScoutQualityR
 export type CompanyScoutsGetCompanyScoutDetailData = {
     body?: never;
     path: {
-        scoutId: string;
+        scoutId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/scouts/{scoutId}';
@@ -6683,7 +6860,7 @@ export type CompanyScoutsGetCompanyScoutDetailResponse = CompanyScoutsGetCompany
 export type CompanyScoutsCompanyScoutReplyData = {
     body: ModelsCompanyScoutReplyRequest;
     path: {
-        scoutId: string;
+        scoutId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/scouts/{scoutId}/reply';
@@ -6732,11 +6909,11 @@ export type TalentSearchSearchTalentsData = {
         /**
          * 求職ステータス
          */
-        job_seeking_status?: string;
+        jobSeekingStatus?: string;
         /**
          * 職種
          */
-        job_type?: string;
+        jobType?: string;
         /**
          * 診断済みのみ（"1" で有効）
          */
@@ -6786,12 +6963,12 @@ export type TalentSearchDiagnosticSearchTalentsData = {
         /**
          * 比較対象チームID
          */
-        team_id?: string;
+        teamId?: ModelsUuid;
         q?: string;
         location?: string;
         industry?: string;
-        job_seeking_status?: string;
-        job_type?: string;
+        jobSeekingStatus?: string;
+        jobType?: string;
         diagnosed?: string;
         skills?: string;
         limit?: number;
@@ -6826,12 +7003,12 @@ export type TalentSearchCiDiagnosticSearchTalentsData = {
     body?: never;
     path?: never;
     query?: {
-        team_id?: string;
+        teamId?: ModelsUuid;
         q?: string;
         location?: string;
         industry?: string;
-        job_seeking_status?: string;
-        job_type?: string;
+        jobSeekingStatus?: string;
+        jobType?: string;
         diagnosed?: string;
         skills?: string;
         limit?: number;
@@ -6866,12 +7043,12 @@ export type TalentSearchIntegratedDiagnosticSearchTalentsData = {
     body?: never;
     path?: never;
     query?: {
-        team_id?: string;
+        teamId?: ModelsUuid;
         q?: string;
         location?: string;
         industry?: string;
-        job_seeking_status?: string;
-        job_type?: string;
+        jobSeekingStatus?: string;
+        jobType?: string;
         diagnosed?: string;
         skills?: string;
         limit?: number;
@@ -6963,7 +7140,7 @@ export type CompanyTeamsCreateTeamResponse = CompanyTeamsCreateTeamResponses[key
 export type CompanyTeamsDeleteTeamData = {
     body?: never;
     path: {
-        teamId: string;
+        teamId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/teams/{teamId}';
@@ -6998,7 +7175,7 @@ export type CompanyTeamsDeleteTeamResponse = CompanyTeamsDeleteTeamResponses[key
 export type CompanyTeamsGetTeamData = {
     body?: never;
     path: {
-        teamId: string;
+        teamId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/teams/{teamId}';
@@ -7033,7 +7210,7 @@ export type CompanyTeamsGetTeamResponse = CompanyTeamsGetTeamResponses[keyof Com
 export type CompanyTeamsUpdateTeamData = {
     body: ModelsUpdateTeamRequest;
     path: {
-        teamId: string;
+        teamId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/teams/{teamId}';
@@ -7068,7 +7245,7 @@ export type CompanyTeamsUpdateTeamResponse = CompanyTeamsUpdateTeamResponses[key
 export type CompanyTeamsUnsetAceMemberData = {
     body?: never;
     path: {
-        teamId: string;
+        teamId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/teams/{teamId}/ace';
@@ -7103,8 +7280,8 @@ export type CompanyTeamsUnsetAceMemberResponse = CompanyTeamsUnsetAceMemberRespo
 export type CompanyTeamsSetAceMemberData = {
     body?: never;
     path: {
-        teamId: string;
-        memberId: string;
+        teamId: ModelsUuid;
+        memberId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/teams/{teamId}/ace/{memberId}';
@@ -7139,7 +7316,7 @@ export type CompanyTeamsSetAceMemberResponse = CompanyTeamsSetAceMemberResponses
 export type CompanyTeamsAddTeamMemberData = {
     body: ModelsAddTeamMemberRequest;
     path: {
-        teamId: string;
+        teamId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/teams/{teamId}/members';
@@ -7174,8 +7351,8 @@ export type CompanyTeamsAddTeamMemberResponse = CompanyTeamsAddTeamMemberRespons
 export type CompanyTeamsRemoveTeamMemberData = {
     body?: never;
     path: {
-        teamId: string;
-        memberId: string;
+        teamId: ModelsUuid;
+        memberId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/teams/{teamId}/members/{memberId}';
@@ -7210,7 +7387,7 @@ export type CompanyTeamsRemoveTeamMemberResponse = CompanyTeamsRemoveTeamMemberR
 export type CompanyTeamsGetTeamScoresData = {
     body?: never;
     path: {
-        teamId: string;
+        teamId: ModelsUuid;
     };
     query?: never;
     url: '/api/company/teams/{teamId}/scores';
@@ -7307,7 +7484,7 @@ export type IntegratedReportCreateIntegratedReportRequestResponse = IntegratedRe
 export type IntegratedReportGetIntegratedReportData = {
     body?: never;
     path: {
-        requestId: string;
+        requestId: ModelsUuid;
     };
     query?: never;
     url: '/api/integrated-report/requests/{requestId}/report';
@@ -7367,7 +7544,7 @@ export type IntegratedReportGetIntegratedReportStatusResponse = IntegratedReport
 export type IntegratedReportGetLatestIntegratedRequestData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: never;
     url: '/api/integrated-report/users/{userId}/latest-request';
@@ -7427,7 +7604,7 @@ export type CandidateInterviewsListCandidateInterviewsResponse = CandidateInterv
 export type CandidateInterviewsSelectInterviewSlotData = {
     body: ModelsSelectSlotRequest;
     path: {
-        proposalId: string;
+        proposalId: ModelsUuid;
     };
     query?: never;
     url: '/api/interviews/proposals/{proposalId}/select';
@@ -7466,7 +7643,7 @@ export type CandidateInterviewsSelectInterviewSlotResponse = CandidateInterviews
 export type CandidateInterviewsGetProposalSlotsData = {
     body?: never;
     path: {
-        proposalId: string;
+        proposalId: ModelsUuid;
     };
     query?: never;
     url: '/api/interviews/proposals/{proposalId}/slots';
@@ -7501,7 +7678,7 @@ export type CandidateInterviewsGetProposalSlotsResponse = CandidateInterviewsGet
 export type CandidateInterviewsCancelCandidateInterviewData = {
     body?: never;
     path: {
-        interviewId: string;
+        interviewId: ModelsUuid;
     };
     query?: never;
     url: '/api/interviews/{interviewId}/cancel';
@@ -7562,17 +7739,17 @@ export type PublicJobPostingsListPublicJobPostingsData = {
          */
         remotePolicy?: string;
         /**
-         * ソート（"salary" で給与順）
+         * ソートキー
          */
-        sort?: string;
+        sort?: ModelsJobPostingSort;
         /**
          * Work Values フィルタ（`id:score` のカンマ区切り）
          */
         valueFilters?: string;
         /**
-         * フィルタモード（values / needs）
+         * フィルタモード（未指定時は values）
          */
-        filterMode?: string;
+        filterMode?: ModelsJobPostingFilterMode;
     };
     url: '/api/jobs';
 };
@@ -7590,7 +7767,7 @@ export type PublicJobPostingsListPublicJobPostingsResponses = {
     /**
      * The request has succeeded.
      */
-    200: ModelsJobPostingListResponse | Array<ModelsJobPostingResponse>;
+    200: ModelsJobPostingListResponse;
 };
 
 export type PublicJobPostingsListPublicJobPostingsResponse = PublicJobPostingsListPublicJobPostingsResponses[keyof PublicJobPostingsListPublicJobPostingsResponses];
@@ -7598,7 +7775,7 @@ export type PublicJobPostingsListPublicJobPostingsResponse = PublicJobPostingsLi
 export type PublicJobPostingsGetPublicJobPostingData = {
     body?: never;
     path: {
-        jobId: string;
+        jobId: ModelsUuid;
     };
     query?: never;
     url: '/api/jobs/{jobId}';
@@ -7700,7 +7877,7 @@ export type CandidateMessagingStartCandidateConversationResponse = CandidateMess
 export type CandidateMessagingGetCandidateConversationData = {
     body?: never;
     path: {
-        conversationId: string;
+        conversationId: ModelsUuid;
     };
     query?: never;
     url: '/api/messages/conversations/{conversationId}';
@@ -7739,7 +7916,7 @@ export type CandidateMessagingGetCandidateConversationResponse = CandidateMessag
 export type CandidateMessagingListCandidateMessagesData = {
     body?: never;
     path: {
-        conversationId: string;
+        conversationId: ModelsUuid;
     };
     query?: {
         limit?: number;
@@ -7781,7 +7958,7 @@ export type CandidateMessagingListCandidateMessagesResponse = CandidateMessaging
 export type CandidateMessagingSendCandidateMessageData = {
     body: ModelsSendMessageRequest;
     path: {
-        conversationId: string;
+        conversationId: ModelsUuid;
     };
     query?: never;
     url: '/api/messages/conversations/{conversationId}/messages';
@@ -7820,7 +7997,7 @@ export type CandidateMessagingSendCandidateMessageResponse = CandidateMessagingS
 export type CandidateMessagingMarkCandidateConversationReadData = {
     body?: never;
     path: {
-        conversationId: string;
+        conversationId: ModelsUuid;
     };
     query?: never;
     url: '/api/messages/conversations/{conversationId}/read';
@@ -7980,7 +8157,7 @@ export type UserNotificationsCountUserUnreadNotificationsResponse = UserNotifica
 export type UserNotificationsMarkUserNotificationReadData = {
     body?: never;
     path: {
-        id: string;
+        id: ModelsUuid;
     };
     query?: never;
     url: '/api/notifications/{id}/read';
@@ -8019,7 +8196,7 @@ export type PostsListTimelinePostsData = {
         /**
          * 閲覧者ユーザーID（いいね済み判定に使用）
          */
-        viewerId?: string;
+        viewerId?: ModelsUuid;
         /**
          * 取得件数
          */
@@ -8086,7 +8263,7 @@ export type PostsCreatePostResponse = PostsCreatePostResponses[keyof PostsCreate
 export type PostsDeletePostCommentData = {
     body?: never;
     path: {
-        commentId: string;
+        commentId: ModelsUuid;
     };
     query?: never;
     url: '/api/posts/comments/{commentId}';
@@ -8125,10 +8302,10 @@ export type PostsDeletePostCommentResponse = PostsDeletePostCommentResponses[key
 export type PostsListPostsByUserData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: {
-        viewerId?: string;
+        viewerId?: ModelsUuid;
         limit?: number;
         offset?: number;
     };
@@ -8160,7 +8337,7 @@ export type PostsListPostsByUserResponse = PostsListPostsByUserResponses[keyof P
 export type PostsListLikedPostsByUserData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: {
         limit?: number;
@@ -8194,7 +8371,7 @@ export type PostsListLikedPostsByUserResponse = PostsListLikedPostsByUserRespons
 export type PostsDeletePostData = {
     body?: never;
     path: {
-        postId: string;
+        postId: ModelsUuid;
     };
     query?: never;
     url: '/api/posts/{postId}';
@@ -8233,10 +8410,10 @@ export type PostsDeletePostResponse = PostsDeletePostResponses[keyof PostsDelete
 export type PostsGetPostData = {
     body?: never;
     path: {
-        postId: string;
+        postId: ModelsUuid;
     };
     query?: {
-        viewerId?: string;
+        viewerId?: ModelsUuid;
     };
     url: '/api/posts/{postId}';
 };
@@ -8266,7 +8443,7 @@ export type PostsGetPostResponse = PostsGetPostResponses[keyof PostsGetPostRespo
 export type PostsListPostCommentsData = {
     body?: never;
     path: {
-        postId: string;
+        postId: ModelsUuid;
     };
     query?: {
         limit?: number;
@@ -8300,7 +8477,7 @@ export type PostsListPostCommentsResponse = PostsListPostCommentsResponses[keyof
 export type PostsCreatePostCommentData = {
     body: ModelsCreateCommentRequest;
     path: {
-        postId: string;
+        postId: ModelsUuid;
     };
     query?: never;
     url: '/api/posts/{postId}/comments';
@@ -8335,7 +8512,7 @@ export type PostsCreatePostCommentResponse = PostsCreatePostCommentResponses[key
 export type PostsTogglePostLikeData = {
     body?: never;
     path: {
-        postId: string;
+        postId: ModelsUuid;
     };
     query?: never;
     url: '/api/posts/{postId}/like';
@@ -8370,7 +8547,7 @@ export type PostsTogglePostLikeResponse = PostsTogglePostLikeResponses[keyof Pos
 export type PostsTogglePostRepostData = {
     body?: never;
     path: {
-        postId: string;
+        postId: ModelsUuid;
     };
     query?: never;
     url: '/api/posts/{postId}/repost';
@@ -8567,7 +8744,7 @@ export type CandidateScoutsBulkRespondScoutsResponse = CandidateScoutsBulkRespon
 export type CandidateScoutsGetCandidateScoutDetailData = {
     body?: never;
     path: {
-        scoutId: string;
+        scoutId: ModelsUuid;
     };
     query?: never;
     url: '/api/scouts/{scoutId}';
@@ -8602,7 +8779,7 @@ export type CandidateScoutsGetCandidateScoutDetailResponse = CandidateScoutsGetC
 export type CandidateScoutsCandidateScoutReplyData = {
     body: ModelsCandidateScoutReplyRequest;
     path: {
-        scoutId: string;
+        scoutId: ModelsUuid;
     };
     query?: never;
     url: '/api/scouts/{scoutId}/reply';
@@ -8635,7 +8812,7 @@ export type CandidateScoutsCandidateScoutReplyResponses = {
 export type CandidateScoutsRespondToScoutData = {
     body: ModelsScoutRespondRequest;
     path: {
-        scoutId: string;
+        scoutId: ModelsUuid;
     };
     query?: never;
     url: '/api/scouts/{scoutId}/respond';
@@ -8694,6 +8871,73 @@ export type TeamDiagnoseGetDiagnoseByTokenResponses = {
 
 export type TeamDiagnoseGetDiagnoseByTokenResponse = TeamDiagnoseGetDiagnoseByTokenResponses[keyof TeamDiagnoseGetDiagnoseByTokenResponses];
 
+export type TeamDiagnoseStartDiagnoseCiSessionData = {
+    body?: never;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/api/team-diagnose/{token}/career-interest/sessions';
+};
+
+export type TeamDiagnoseStartDiagnoseCiSessionErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type TeamDiagnoseStartDiagnoseCiSessionError = TeamDiagnoseStartDiagnoseCiSessionErrors[keyof TeamDiagnoseStartDiagnoseCiSessionErrors];
+
+export type TeamDiagnoseStartDiagnoseCiSessionResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsCiSessionResponse;
+};
+
+export type TeamDiagnoseStartDiagnoseCiSessionResponse = TeamDiagnoseStartDiagnoseCiSessionResponses[keyof TeamDiagnoseStartDiagnoseCiSessionResponses];
+
+export type TeamDiagnoseSubmitDiagnoseCiResultData = {
+    body: ModelsCiSubmitResultRequest;
+    path: {
+        token: string;
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/team-diagnose/{token}/career-interest/sessions/{sessionId}/results';
+};
+
+export type TeamDiagnoseSubmitDiagnoseCiResultErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type TeamDiagnoseSubmitDiagnoseCiResultError = TeamDiagnoseSubmitDiagnoseCiResultErrors[keyof TeamDiagnoseSubmitDiagnoseCiResultErrors];
+
+export type TeamDiagnoseSubmitDiagnoseCiResultResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsCiResultResponse;
+};
+
+export type TeamDiagnoseSubmitDiagnoseCiResultResponse = TeamDiagnoseSubmitDiagnoseCiResultResponses[keyof TeamDiagnoseSubmitDiagnoseCiResultResponses];
+
 export type TeamDiagnoseUpdateDiagnoseStatusData = {
     body: ModelsUpdateDiagnoseStatusRequest;
     path: {
@@ -8724,6 +8968,73 @@ export type TeamDiagnoseUpdateDiagnoseStatusResponses = {
 };
 
 export type TeamDiagnoseUpdateDiagnoseStatusResponse = TeamDiagnoseUpdateDiagnoseStatusResponses[keyof TeamDiagnoseUpdateDiagnoseStatusResponses];
+
+export type TeamDiagnoseStartDiagnoseWvSessionData = {
+    body?: never;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/api/team-diagnose/{token}/work-values/sessions';
+};
+
+export type TeamDiagnoseStartDiagnoseWvSessionErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type TeamDiagnoseStartDiagnoseWvSessionError = TeamDiagnoseStartDiagnoseWvSessionErrors[keyof TeamDiagnoseStartDiagnoseWvSessionErrors];
+
+export type TeamDiagnoseStartDiagnoseWvSessionResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsWvSessionResponse;
+};
+
+export type TeamDiagnoseStartDiagnoseWvSessionResponse = TeamDiagnoseStartDiagnoseWvSessionResponses[keyof TeamDiagnoseStartDiagnoseWvSessionResponses];
+
+export type TeamDiagnoseSubmitDiagnoseWvResultData = {
+    body: ModelsWvSubmitResultRequest;
+    path: {
+        token: string;
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/team-diagnose/{token}/work-values/sessions/{sessionId}/results';
+};
+
+export type TeamDiagnoseSubmitDiagnoseWvResultErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type TeamDiagnoseSubmitDiagnoseWvResultError = TeamDiagnoseSubmitDiagnoseWvResultErrors[keyof TeamDiagnoseSubmitDiagnoseWvResultErrors];
+
+export type TeamDiagnoseSubmitDiagnoseWvResultResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsWvResultResponse;
+};
+
+export type TeamDiagnoseSubmitDiagnoseWvResultResponse = TeamDiagnoseSubmitDiagnoseWvResultResponses[keyof TeamDiagnoseSubmitDiagnoseWvResultResponses];
 
 export type UsersCreateUserData = {
     body: ModelsCreateUserRequest;
@@ -8757,7 +9068,7 @@ export type UsersCreateUserResponse = UsersCreateUserResponses[keyof UsersCreate
 export type UsersGetUserByIdData = {
     body?: never;
     path: {
-        id: string;
+        id: ModelsUuid;
     };
     query?: never;
     url: '/api/users/id/{id}';
@@ -8788,7 +9099,7 @@ export type UsersGetUserByIdResponse = UsersGetUserByIdResponses[keyof UsersGetU
 export type SimilarUsersGetSimilarUsersData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: {
         /**
@@ -8957,7 +9268,7 @@ export type EducationsDeleteEducationData = {
     body?: never;
     path: {
         username: string;
-        educationId: string;
+        educationId: ModelsUuid;
     };
     query?: never;
     url: '/api/users/{username}/educations/{educationId}';
@@ -8997,7 +9308,7 @@ export type EducationsUpdateEducationData = {
     body: ModelsUpdateEducationRequest;
     path: {
         username: string;
-        educationId: string;
+        educationId: ModelsUuid;
     };
     query?: never;
     url: '/api/users/{username}/educations/{educationId}';
@@ -9107,7 +9418,7 @@ export type ExperiencesDeleteExperienceData = {
     body?: never;
     path: {
         username: string;
-        experienceId: string;
+        experienceId: ModelsUuid;
     };
     query?: never;
     url: '/api/users/{username}/experiences/{experienceId}';
@@ -9147,7 +9458,7 @@ export type ExperiencesUpdateExperienceData = {
     body: ModelsUpdateExperienceRequest;
     path: {
         username: string;
-        experienceId: string;
+        experienceId: ModelsUuid;
     };
     query?: never;
     url: '/api/users/{username}/experiences/{experienceId}';
@@ -9518,7 +9829,7 @@ export type UsersUploadUserImageResponses = {
 export type UsersUploadUserImageResponse = UsersUploadUserImageResponses[keyof UsersUploadUserImageResponses];
 
 export type WorkValuesWvStartSessionData = {
-    body: ModelsWvStartSessionRequest;
+    body?: never;
     path?: never;
     query?: never;
     url: '/api/work-values/sessions';
@@ -9529,6 +9840,10 @@ export type WorkValuesWvStartSessionErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
     /**
      * Not Found エラー
      */
@@ -9549,7 +9864,7 @@ export type WorkValuesWvStartSessionResponse = WorkValuesWvStartSessionResponses
 export type WorkValuesWvGetAiReportData = {
     body?: never;
     path: {
-        sessionId: string;
+        sessionId: ModelsUuid;
     };
     query?: never;
     url: '/api/work-values/sessions/{sessionId}/ai-report';
@@ -9560,6 +9875,10 @@ export type WorkValuesWvGetAiReportErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
     /**
      * Not Found エラー
      */
@@ -9580,7 +9899,7 @@ export type WorkValuesWvGetAiReportResponse = WorkValuesWvGetAiReportResponses[k
 export type WorkValuesWvGetResultBySessionData = {
     body?: never;
     path: {
-        sessionId: string;
+        sessionId: ModelsUuid;
     };
     query?: never;
     url: '/api/work-values/sessions/{sessionId}/results';
@@ -9591,6 +9910,10 @@ export type WorkValuesWvGetResultBySessionErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
     /**
      * Not Found エラー
      */
@@ -9611,7 +9934,7 @@ export type WorkValuesWvGetResultBySessionResponse = WorkValuesWvGetResultBySess
 export type WorkValuesWvSubmitResultData = {
     body: ModelsWvSubmitResultRequest;
     path: {
-        sessionId: string;
+        sessionId: ModelsUuid;
     };
     query?: never;
     url: '/api/work-values/sessions/{sessionId}/results';
@@ -9622,6 +9945,14 @@ export type WorkValuesWvSubmitResultErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
@@ -9642,7 +9973,7 @@ export type WorkValuesWvSubmitResultResponse = WorkValuesWvSubmitResultResponses
 export type WorkValuesWvGetLatestResultData = {
     body?: never;
     path: {
-        userId: string;
+        userId: ModelsUuid;
     };
     query?: never;
     url: '/api/work-values/users/{userId}/results/latest';
@@ -9653,6 +9984,10 @@ export type WorkValuesWvGetLatestResultErrors = {
      * Bad Request エラー
      */
     400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
     /**
      * Not Found エラー
      */

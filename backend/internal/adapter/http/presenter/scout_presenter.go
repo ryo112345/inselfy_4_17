@@ -21,7 +21,7 @@ func ScoutMessagesResponse(msgs []*scout.ScoutMessageWithNames, total int) any {
 	for i, m := range msgs {
 		items[i] = *scoutConv.ToScoutMessageResponse(m)
 	}
-	return &openapi.ModelsScoutListResponse{Items: items, Total: total}
+	return &openapi.ModelsScoutListResponse{Items: items, Total: int32(total)}
 }
 
 // ScoutDetailResponse builds the scout-detail API response.

@@ -16,7 +16,7 @@ interface Educations {
   @summary("List educations for a user")
   listEducations(
     @path username: string,
-  ): EducationListResponse | NotFoundError | BadRequestError;
+  ): EducationListResponse | NotFoundErrors;
 
   /** 学歴作成 */
   @post
@@ -28,7 +28,7 @@ interface Educations {
   ): {
     @statusCode statusCode: 201;
     @body education: EducationResponse;
-  } | BadRequestError | NotFoundError | ConflictError | UnauthorizedError;
+  } | AuthedConflictErrors;
 
   /** 学歴更新 */
   @put
@@ -37,9 +37,9 @@ interface Educations {
   @useAuth(Models.CandidateAuth)
   updateEducation(
     @path username: string,
-    @path educationId: string,
+    @path educationId: Uuid,
     @body request: UpdateEducationRequest,
-  ): EducationResponse | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+  ): EducationResponse | AuthedForbiddenErrors;
 
   /** 学歴削除 */
   @delete
@@ -48,8 +48,8 @@ interface Educations {
   @useAuth(Models.CandidateAuth)
   deleteEducation(
     @path username: string,
-    @path educationId: string,
+    @path educationId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | ForbiddenError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 }

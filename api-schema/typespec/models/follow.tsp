@@ -8,7 +8,7 @@ namespace Inselfy.Models;
 /** フォロー関係のユーザー */
 model FollowUserResponse {
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** ユーザー名 */
   username: string;
@@ -27,13 +27,7 @@ model FollowUserResponse {
 }
 
 /** フォロー関係のユーザー一覧 */
-model FollowUserListResponse {
-  /** ユーザー */
-  items: FollowUserResponse[];
-
-  /** 総件数 */
-  total: int32;
-}
+model FollowUserListResponse is ListResponse<FollowUserResponse>;
 
 /** フォロー状態 */
 model FollowStatusResponse {

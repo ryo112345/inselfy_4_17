@@ -21,7 +21,7 @@ interface CompanyJobPostings {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UploadUrlResponse | BadRequestError | UnauthorizedError;
+  ): UploadUrlResponse | AuthedErrors;
 
   /** ギャラリー画像アップロード（企業認証） */
   @post
@@ -32,7 +32,7 @@ interface CompanyJobPostings {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UploadUrlResponse | BadRequestError | UnauthorizedError;
+  ): UploadUrlResponse | AuthedErrors;
 
   /** カバー画像アップロード（企業認証） */
   @post
@@ -43,7 +43,7 @@ interface CompanyJobPostings {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UploadUrlResponse | BadRequestError | UnauthorizedError;
+  ): UploadUrlResponse | AuthedErrors;
 
   /** 求人作成（企業認証） */
   @post
@@ -53,39 +53,39 @@ interface CompanyJobPostings {
   ): {
     @statusCode statusCode: 201;
     @body job: JobPostingResponse;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 
   /** 自社求人一覧（企業認証） */
   @get
   @summary("List job postings of the company")
-  listCompanyJobPostings(): JobPostingListResponse | BadRequestError | UnauthorizedError;
+  listCompanyJobPostings(): JobPostingListResponse | AuthedErrors;
 
   /** 求人取得（企業認証） */
   @get
   @route("/{jobId}")
   @summary("Get a job posting")
   getCompanyJobPosting(
-    @path jobId: string,
-  ): JobPostingResponse | NotFoundError | BadRequestError | UnauthorizedError;
+    @path jobId: Uuid,
+  ): JobPostingResponse | AuthedNotFoundErrors;
 
   /** 求人更新（企業認証） */
   @put
   @route("/{jobId}")
   @summary("Update a job posting")
   updateJobPosting(
-    @path jobId: string,
+    @path jobId: Uuid,
     @body request: JobPostingRequest,
-  ): JobPostingResponse | BadRequestError | NotFoundError | UnauthorizedError;
+  ): JobPostingResponse | AuthedNotFoundErrors;
 
   /** 求人削除（企業認証） */
   @delete
   @route("/{jobId}")
   @summary("Delete a job posting")
   deleteJobPosting(
-    @path jobId: string,
+    @path jobId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 }
 
 @route("/api/jobs")
@@ -117,21 +117,22 @@ interface PublicJobPostings {
     /** リモートポリシー */
     @query remotePolicy?: string,
 
-    /** ソート（"salary" で給与順） */
-    @query sort?: string,
+    /** ソートキー */
+    @query sort?: JobPostingSort,
 
     /** Work Values フィルタ（`id:score` のカンマ区切り） */
+    @pattern("^[A-Za-z0-9_-]+:[0-9]+(\\.[0-9]+)?(,[A-Za-z0-9_-]+:[0-9]+(\\.[0-9]+)?)*$")
     @query valueFilters?: string,
 
-    /** フィルタモード（values / needs） */
-    @query filterMode?: string,
-  ): JobPostingListResponse | JobPostingResponse[] | BadRequestError;
+    /** フィルタモード（未指定時は values） */
+    @query filterMode?: JobPostingFilterMode,
+  ): JobPostingListResponse | BadRequestError;
 
   /** 公開求人取得 */
   @get
   @route("/{jobId}")
   @summary("Get a public job posting")
   getPublicJobPosting(
-    @path jobId: string,
-  ): JobPostingResponse | NotFoundError | BadRequestError;
+    @path jobId: Uuid,
+  ): JobPostingResponse | NotFoundErrors;
 }

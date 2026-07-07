@@ -27,7 +27,7 @@ interface Users {
   @summary("Get a user by username")
   getUserByUsername(
     @path username: string,
-  ): UserResponse | NotFoundError | BadRequestError;
+  ): UserResponse | NotFoundErrors;
 
   /** プロフィール更新（PATCH） */
   @patch
@@ -37,15 +37,15 @@ interface Users {
   updateUserProfile(
     @path username: string,
     @body request: UpdateUserProfileRequest,
-  ): UserResponse | NotFoundError | BadRequestError | UnauthorizedError;
+  ): UserResponse | AuthedNotFoundErrors;
 
   /** ユーザーIDでユーザー取得 */
   @get
   @route("/id/{id}")
   @summary("Get a user by ID")
   getUserById(
-    @path id: string,
-  ): UserResponse | NotFoundError | BadRequestError;
+    @path id: Uuid,
+  ): UserResponse | NotFoundErrors;
 
   /** プロフィール画像アップロード（avatar / cover、要ログイン） */
   @post
@@ -59,5 +59,5 @@ interface Users {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UserImageUploadResponse | BadRequestError | NotFoundError | UnauthorizedError;
+  ): UserImageUploadResponse | AuthedNotFoundErrors;
 }

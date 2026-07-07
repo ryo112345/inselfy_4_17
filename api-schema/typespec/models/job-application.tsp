@@ -19,7 +19,7 @@ union JobApplicationStatus {
 /** 求人応募リクエスト */
 model ApplyJobRequest {
   /** 求人ID */
-  jobPostingId: string;
+  jobPostingId: Uuid;
 
   /** 応募メッセージ */
   message: string;
@@ -34,16 +34,16 @@ model UpdateApplicationStatusRequest {
 /** 応募（詳細付き） */
 model JobApplicationResponse {
   /** 応募ID */
-  id: string;
+  id: Uuid;
 
   /** 求人ID */
-  jobPostingId: string;
+  jobPostingId: Uuid;
 
   /** 候補者ユーザーID */
-  candidateId: string;
+  candidateId: Uuid;
 
   /** 企業ID */
-  companyId: string;
+  companyId: Uuid;
 
   /** ステータス */
   status: JobApplicationStatus;
@@ -95,13 +95,7 @@ model JobApplicationResponse {
 }
 
 /** 応募一覧 */
-model JobApplicationListResponse {
-  /** 応募 */
-  items: JobApplicationResponse[];
-
-  /** 総件数 */
-  total: integer;
-}
+model JobApplicationListResponse is ListResponse<JobApplicationResponse>;
 
 /** 応募済み判定 */
 model AppliedResponse {

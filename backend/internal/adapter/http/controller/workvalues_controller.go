@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -22,15 +23,7 @@ func NewWorkValuesController(
 }
 
 func (c *WorkValuesController) StartSession(ctx echo.Context) error {
-	var body openapi.ModelsWVStartSessionRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	if body.UserId == "" {
-		return badRequest(ctx, "user_id is required")
-	}
-
-	s, err := c.input.StartSession(ctx.Request().Context(), body.UserId)
+	s, err := c.input.StartSession(ctx.Request().Context(), authmw.UserID(ctx))
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -43,6 +36,14 @@ func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) 
 		return badRequest(ctx, "invalid body")
 	}
 
+	r, err := c.input.SubmitResult(ctx.Request().Context(), sessionID, authmw.UserID(ctx), wvSubmitInputFromBody(body))
+	if err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.JSON(http.StatusCreated, presenter.WorkValuesResultResponse(r))
+}
+
+func wvSubmitInputFromBody(body openapi.ModelsWVSubmitResultRequest) workvalues.SubmitInput {
 	responses := make([]workvalues.Response, len(body.Responses))
 	for i, r := range body.Responses {
 		responses[i] = workvalues.Response{
@@ -52,16 +53,11 @@ func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) 
 			QuestionNumber: int(r.QuestionNumber),
 		}
 	}
-	input := workvalues.SubmitInput{
+	return workvalues.SubmitInput{
 		Responses: responses,
 		Mu:        body.Mu,
 		SE:        body.Se,
 	}
-	r, err := c.input.SubmitResult(ctx.Request().Context(), sessionID, input)
-	if err != nil {
-		return handleError(ctx, err)
-	}
-	return ctx.JSON(http.StatusCreated, presenter.WorkValuesResultResponse(r))
 }
 
 func (c *WorkValuesController) GetLatestResult(ctx echo.Context, userID string) error {

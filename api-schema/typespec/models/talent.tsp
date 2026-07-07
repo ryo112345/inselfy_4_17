@@ -17,7 +17,7 @@ model TalentExperience {
 /** 人材カード（検索・保存済み候補者で共通） */
 model TalentCard {
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** ユーザー名 */
   username: string;
@@ -63,13 +63,7 @@ model TalentCard {
 }
 
 /** 人材一覧 */
-model TalentListResponse {
-  /** 人材カード */
-  items: TalentCard[];
-
-  /** 総件数 */
-  total: integer;
-}
+model TalentListResponse is ListResponse<TalentCard>;
 
 /** 保存済み候補者一括チェックリクエスト */
 model BulkCheckSavedRequest {

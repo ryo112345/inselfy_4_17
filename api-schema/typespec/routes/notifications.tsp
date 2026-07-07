@@ -21,23 +21,23 @@ interface UserNotifications {
 
     /** オフセット */
     @query offset?: int32,
-  ): NotificationListResponse | BadRequestError | UnauthorizedError;
+  ): NotificationListResponse | AuthedErrors;
 
   /** 未読件数（要ログイン） */
   @get
   @route("/unread-count")
   @summary("Count unread notifications for the authenticated user")
-  countUserUnreadNotifications(): UnreadCountResponse | BadRequestError | UnauthorizedError;
+  countUserUnreadNotifications(): UnreadCountResponse | AuthedErrors;
 
   /** 既読化 */
   @post
   @route("/{id}/read")
   @summary("Mark a notification as read")
   markUserNotificationRead(
-    @path id: string,
+    @path id: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** 全件既読化（要ログイン） */
   @post
@@ -45,7 +45,7 @@ interface UserNotifications {
   @summary("Mark all notifications as read for the authenticated user")
   markAllUserNotificationsRead(): {
     @statusCode statusCode: 204;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 }
 
 @route("/api/company/notifications")
@@ -61,23 +61,23 @@ interface CompanyNotifications {
 
     /** オフセット */
     @query offset?: int32,
-  ): NotificationListResponse | BadRequestError | UnauthorizedError;
+  ): NotificationListResponse | AuthedErrors;
 
   /** 未読件数（企業認証） */
   @get
   @route("/unread-count")
   @summary("Count unread notifications for the authenticated company")
-  countCompanyUnreadNotifications(): UnreadCountResponse | BadRequestError | UnauthorizedError;
+  countCompanyUnreadNotifications(): UnreadCountResponse | AuthedErrors;
 
   /** 既読化 */
   @post
   @route("/{id}/read")
   @summary("Mark a company notification as read")
   markCompanyNotificationRead(
-    @path id: string,
+    @path id: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | UnauthorizedError;
+  } | AuthedNotFoundErrors;
 
   /** 全件既読化（企業認証） */
   @post
@@ -85,5 +85,5 @@ interface CompanyNotifications {
   @summary("Mark all notifications as read for the authenticated company")
   markAllCompanyNotificationsRead(): {
     @statusCode statusCode: 204;
-  } | BadRequestError | UnauthorizedError;
+  } | AuthedErrors;
 }

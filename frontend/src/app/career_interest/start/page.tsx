@@ -29,8 +29,7 @@ const SCORE_OPTIONS = [
 
 export default function CareerInterestStartPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const userId = user?.id ?? "";
-  const { state, start, answer, submit, sessionId } = useCareerInterestQuiz(userId);
+  const { state, start, answer, submit, sessionId } = useCareerInterestQuiz();
   const router = useRouter();
 
   useEffect(() => {

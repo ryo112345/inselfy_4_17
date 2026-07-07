@@ -15,7 +15,7 @@ interface SimilarUsers {
   @get
   @summary("Get users with similar work values")
   getSimilarUsers(
-    @path userId: string,
+    @path userId: Uuid,
 
     /** 取得件数（1-50、デフォルト10） */
     @query limit?: int32,

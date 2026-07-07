@@ -16,7 +16,7 @@ interface Experiences {
   @summary("List experiences for a user")
   listExperiences(
     @path username: string,
-  ): ExperienceListResponse | NotFoundError | BadRequestError;
+  ): ExperienceListResponse | NotFoundErrors;
 
   /** 職歴作成 */
   @post
@@ -28,7 +28,7 @@ interface Experiences {
   ): {
     @statusCode statusCode: 201;
     @body experience: ExperienceResponse;
-  } | BadRequestError | NotFoundError | ConflictError | UnauthorizedError;
+  } | AuthedConflictErrors;
 
   /** 職歴更新 */
   @put
@@ -37,9 +37,9 @@ interface Experiences {
   @useAuth(Models.CandidateAuth)
   updateExperience(
     @path username: string,
-    @path experienceId: string,
+    @path experienceId: Uuid,
     @body request: UpdateExperienceRequest,
-  ): ExperienceResponse | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
+  ): ExperienceResponse | AuthedForbiddenErrors;
 
   /** 職歴削除 */
   @delete
@@ -48,8 +48,8 @@ interface Experiences {
   @useAuth(Models.CandidateAuth)
   deleteExperience(
     @path username: string,
-    @path experienceId: string,
+    @path experienceId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | ForbiddenError | UnauthorizedError;
+  } | AuthedForbiddenErrors;
 }

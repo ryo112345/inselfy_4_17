@@ -17,16 +17,18 @@ export default async function CareerInterestResultPage({
 }) {
   const { sessionId } = await params;
 
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
+
   let result;
   try {
-    result = await getResultBySessionId(sessionId);
+    result = await getResultBySessionId(sessionId, cookieHeader);
   } catch {
     notFound();
   }
 
-  const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
-  const data = await fetchPanelDataByUserId(result.userId);
+  const data = await fetchPanelDataByUserId(result.userId, cookieHeader);
   if (!data) notFound();
 
   const ciIndex = 3;

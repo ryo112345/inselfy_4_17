@@ -20,7 +20,7 @@ model SimilarUserExperience {
 /** 類似ユーザー */
 model SimilarUserItem {
   /** ユーザーID */
-  userId: string;
+  userId: Uuid;
 
   /** ユーザー名 */
   username: string;

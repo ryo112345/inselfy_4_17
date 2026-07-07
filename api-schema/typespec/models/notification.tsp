@@ -19,7 +19,7 @@ union NotificationType {
 /** 通知 */
 model NotificationResponse {
   /** ID */
-  id: string;
+  id: Uuid;
 
   /** 通知種別 */
   type: NotificationType;
@@ -41,13 +41,7 @@ model NotificationResponse {
 }
 
 /** 通知一覧 */
-model NotificationListResponse {
-  /** 通知 */
-  items: NotificationResponse[];
-
-  /** 総件数 */
-  total: int32;
-}
+model NotificationListResponse is ListResponse<NotificationResponse>;
 
 /** 未読件数 */
 model UnreadCountResponse {

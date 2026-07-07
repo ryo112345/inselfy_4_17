@@ -39,5 +39,5 @@ model ScoutRespondResponse {
   status: "ok";
 
   /** 応答により作成・特定された会話ID */
-  conversationId?: string;
+  conversationId?: Uuid;
 }

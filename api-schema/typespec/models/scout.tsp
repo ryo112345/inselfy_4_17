@@ -27,7 +27,7 @@ union ScoutQualityLevel {
 /** スカウト送信リクエスト */
 model SendScoutRequest {
   /** 候補者ユーザーID */
-  candidateId: string;
+  candidateId: Uuid;
 
   /** 関連求人ID */
   jobPostingId?: string | null;
@@ -54,13 +54,13 @@ model CompanyScoutReplyRequest {
 /** スカウトメッセージ */
 model ScoutMessageResponse {
   /** スカウトID */
-  id: string;
+  id: Uuid;
 
   /** 企業ID */
-  companyId: string;
+  companyId: Uuid;
 
   /** 候補者ユーザーID */
-  candidateId: string;
+  candidateId: Uuid;
 
   /** 関連求人ID */
   jobPostingId: string | null;
@@ -102,13 +102,13 @@ model ScoutMessageResponse {
 /** スカウト返信 */
 model ScoutReplyResponse {
   /** 返信ID */
-  id: string;
+  id: Uuid;
 
   /** 送信者種別（company / candidate） */
   senderType: string;
 
   /** 送信者ID */
-  senderId: string;
+  senderId: Uuid;
 
   /** 本文 */
   body: string;
@@ -127,13 +127,7 @@ model ScoutDetailResponse {
 }
 
 /** スカウト一覧 */
-model ScoutListResponse {
-  /** スカウト */
-  items: ScoutMessageResponse[];
-
-  /** 総件数 */
-  total: integer;
-}
+model ScoutListResponse is ListResponse<ScoutMessageResponse>;
 
 /** スカウトクレジット */
 model ScoutCreditsResponse {
