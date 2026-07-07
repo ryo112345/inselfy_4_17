@@ -88,6 +88,8 @@ export default function TalentsPage() {
   const [detailWv, setDetailWv] = useState<{ id: string; score: number }[] | null>(null);
   const [detailCi, setDetailCi] = useState<{ id: string; score: number }[] | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(false);
+  const [detailReloadKey, setDetailReloadKey] = useState(0);
   const [detailExperiences, setDetailExperiences] = useState<CandidateExperience[]>([]);
   const [detailSkills, setDetailSkills] = useState<string[]>([]);
   const [detailAbout, setDetailAbout] = useState<string | null>(null);
@@ -298,17 +300,28 @@ export default function TalentsPage() {
     }
     const user = users.find((u) => u.userId === selectedUserId);
     if (!user) return;
+    // 候補者の高速切替時に古いレスポンスが新しい選択の詳細を上書きしないよう、
+    // effect の cleanup で進行中のリクエストを中断する
+    const ac = new AbortController();
     setDetailLoading(true);
-    fetchCandidateDetail(user.username, selectedUserId)
+    setDetailError(false);
+    fetchCandidateDetail(user.username, selectedUserId, ac.signal)
       .then((detail) => {
+        if (ac.signal.aborted) return;
         setDetailWv(detail.wvScores);
         setDetailCi(detail.ciScores);
         setDetailExperiences(detail.experiences);
         setDetailSkills(detail.skills);
         setDetailAbout(detail.about);
       })
-      .finally(() => setDetailLoading(false));
-  }, [selectedUserId, users]);
+      .catch(() => {
+        if (!ac.signal.aborted) setDetailError(true);
+      })
+      .finally(() => {
+        if (!ac.signal.aborted) setDetailLoading(false);
+      });
+    return () => ac.abort();
+  }, [selectedUserId, users, detailReloadKey]);
 
   const selectedUser = useMemo(
     () => (selectedUserId ? (users.find((u) => u.userId === selectedUserId) ?? null) : null),
@@ -1090,21 +1103,35 @@ export default function TalentsPage() {
           {/* Right Panel - detail with radar charts */}
           <div className="hidden lg:block flex-1 min-h-0 bg-gray-50/50 overflow-y-auto">
             {selectedUser ? (
-              <CandidateDetail
-                user={selectedUser}
-                wvScores={detailWv}
-                ciScores={detailCi}
-                loading={detailLoading}
-                compareWv={compareWv}
-                compareCi={compareCi}
-                compareLabel={compareDisplayLabel}
-                allExperiences={detailExperiences}
-                allSkills={detailSkills}
-                about={detailAbout}
-                diagnosticType={diagnosticType}
-                isSaved={savedSet.has(selectedUser.userId)}
-                onToggleSave={() => toggleSave(selectedUser.userId)}
-              />
+              <>
+                {detailError && (
+                  <div className="mx-6 mt-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                    <p className="text-sm text-red-700">候補者情報の読み込みに失敗しました</p>
+                    <button
+                      type="button"
+                      onClick={() => setDetailReloadKey((k) => k + 1)}
+                      className="text-sm font-medium text-red-700 underline hover:no-underline cursor-pointer"
+                    >
+                      再読み込み
+                    </button>
+                  </div>
+                )}
+                <CandidateDetail
+                  user={selectedUser}
+                  wvScores={detailWv}
+                  ciScores={detailCi}
+                  loading={detailLoading}
+                  compareWv={compareWv}
+                  compareCi={compareCi}
+                  compareLabel={compareDisplayLabel}
+                  allExperiences={detailExperiences}
+                  allSkills={detailSkills}
+                  about={detailAbout}
+                  diagnosticType={diagnosticType}
+                  isSaved={savedSet.has(selectedUser.userId)}
+                  onToggleSave={() => toggleSave(selectedUser.userId)}
+                />
+              </>
             ) : (
               <div className="flex h-full flex-col items-center justify-center text-center px-6">
                 <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">

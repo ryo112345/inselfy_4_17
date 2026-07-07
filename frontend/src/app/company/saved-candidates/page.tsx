@@ -123,6 +123,13 @@ export default function SavedCandidatesPage() {
         setDetailSkills(detail.skills);
         setDetailAbout(detail.about);
       })
+      .catch(() => {
+        setDetailWv(null);
+        setDetailCi(null);
+        setDetailExperiences([]);
+        setDetailSkills([]);
+        setDetailAbout(null);
+      })
       .finally(() => setDetailLoading(false));
   }, [selectedUserId, candidates]);
 
