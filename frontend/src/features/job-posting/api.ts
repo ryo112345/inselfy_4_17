@@ -69,15 +69,6 @@ export async function deleteJobPosting(id: string): Promise<void> {
   if (error) throw new Error("Failed to delete job posting");
 }
 
-export async function fetchPublicJobPostings(): Promise<JobPostingWithCompany[]> {
-  const { data, error } = await publicJobPostingsListPublicJobPostings({
-    cache: "no-store",
-  });
-  if (error || !data) throw new Error("Failed to fetch public job postings");
-  // クエリなしの GET /api/jobs は裸配列を返す（二形レスポンスの bare 側）
-  return (Array.isArray(data) ? data : data.items) as JobPostingWithCompany[];
-}
-
 export type JobSearchParams = {
   search?: string;
   category?: string;
@@ -113,10 +104,7 @@ export async function searchPublicJobPostings(
     cache: "no-store",
   });
   if (error || !data) throw new Error("Failed to fetch public job postings");
-  // limit>0 なのでページングラッパー側が返る（二形レスポンスの wrapper 側）
-  return (Array.isArray(data)
-    ? { items: data, total: data.length }
-    : data) as PaginatedJobPostingsResponse;
+  return data as PaginatedJobPostingsResponse;
 }
 
 export async function fetchPublicJobPosting(
