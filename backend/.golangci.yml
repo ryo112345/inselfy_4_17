@@ -1,0 +1,21 @@
+# 経路ルール（CLAUDE.md「バックエンドの経路ルール」）の機械的な担保。
+# controller は InputPort 経由必須で、DB 直結（pgx）は admin コントローラのみ許可。
+# 実行: make lint（golangci-lint v2 系。導入方法は Makefile のコメント参照）
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - depguard
+  settings:
+    depguard:
+      rules:
+        controller-no-pgx:
+          # lax: deny に一致しない import はすべて許可（境界チェックだけを行う）
+          list-mode: lax
+          files:
+            - "**/internal/adapter/http/controller/**"
+            - "!**/internal/adapter/http/controller/admin_*.go"
+          deny:
+            - pkg: "github.com/jackc/pgx"
+              desc: "controller は InputPort 経由。pool 直結は admin_*_controller.go のみ許可"
