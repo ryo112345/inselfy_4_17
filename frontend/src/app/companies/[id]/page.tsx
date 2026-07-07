@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { ACCENT } from "@/constants/theme";
 import { fetchPublicCompanyProfile, fetchPublicTeamScores } from "@/features/company-profile/api";
 import { ExpandableText } from "./ExpandableText";
@@ -10,6 +13,29 @@ export const dynamic = "force-dynamic";
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
 
+// generateMetadata とページ本体で同一リクエスト内のフェッチを共有する
+const getCompany = cache((id: string) => fetchPublicCompanyProfile(id, "no-store"));
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const company = await getCompany(id);
+  if (!company) return {};
+  const description = company.headline ?? company.description?.slice(0, 120);
+  return {
+    title: `${company.companyName} | inselfy`,
+    description,
+    openGraph: {
+      title: `${company.companyName} | inselfy`,
+      description,
+      ...(company.coverImageUrl ? { images: [company.coverImageUrl] } : {}),
+    },
+  };
+}
+
 export default async function PublicCompanyProfilePage({
   params,
 }: {
@@ -17,7 +43,7 @@ export default async function PublicCompanyProfilePage({
 }) {
   const { id } = await params;
   const [company, teamScores] = await Promise.all([
-    fetchPublicCompanyProfile(id, "no-store"),
+    getCompany(id),
     fetchPublicTeamScores(id, "no-store"),
   ]);
   if (!company) notFound();
@@ -56,7 +82,14 @@ export default async function PublicCompanyProfilePage({
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="relative overflow-hidden">
             {company.coverImageUrl ? (
-              <img src={company.coverImageUrl} alt="" className="w-full" />
+              <Image
+                src={company.coverImageUrl}
+                alt=""
+                width={1600}
+                height={900}
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="h-auto w-full"
+              />
             ) : (
               <div className="h-44 sm:h-56" style={{ background: ACCENT }}>
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
@@ -67,9 +100,9 @@ export default async function PublicCompanyProfilePage({
 
           <div className="relative px-7 pb-6">
             <div className="absolute -top-10 left-7">
-              <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
+              <div className="relative h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
                 {company.logoUrl ? (
-                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  <Image src={company.logoUrl} alt="" fill sizes="80px" className="object-cover" />
                 ) : (
                   <div
                     className="flex h-full w-full items-center justify-center"
