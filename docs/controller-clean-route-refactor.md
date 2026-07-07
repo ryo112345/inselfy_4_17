@@ -125,6 +125,9 @@ refactor(backend): migrate <feature> controller to clean route
 
 ## 全件完了後の仕上げ（別コミット）
 
+> **→ 未完了分（depguard・CLAUDE.md追記）は他の残リファクタ候補とあわせて
+> `docs/backend-refactor-backlog.md` に引き継いだ。以後はそちらを参照。**
+
 1. **dead code 削除:** ~~`port/scout_port.go` 末尾の `TalentSearchInputPort` は未使用の旧定義。
    新しい talent search port を作る際に削除するか、そこで流用する。~~ → #8 の移行時に削除済み
    （新定義は `port/talent_search_port.go`）。
