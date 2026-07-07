@@ -9,6 +9,7 @@ import {
   type ModelsIntegratedReportResponse,
   type ModelsIntegratedReportStatusResponse,
 } from "@/external/client/api/generated";
+import { run } from "@/lib/api-result";
 
 export type IntegratedReportStatus = ModelsIntegratedReportStatusResponse["status"];
 
@@ -25,8 +26,7 @@ export async function getIntegratedReportStatus(): Promise<ModelsIntegratedRepor
 export async function createIntegratedReportRequest(
   body: ModelsCreateIntegratedReportRequest,
 ): Promise<void> {
-  const { error } = await integratedReportCreateIntegratedReportRequest({ body });
-  if (error) throw new Error(error.message || "リクエストに失敗しました");
+  await run(integratedReportCreateIntegratedReportRequest({ body }), "リクエストに失敗しました");
 }
 
 // リクエストIDでレポート取得（公開）。未生成（404）等のエラーは null を返す。

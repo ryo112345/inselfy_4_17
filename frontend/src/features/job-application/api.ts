@@ -10,19 +10,19 @@ import {
   type ModelsJobApplicationResponse,
   type ModelsJobApplicationStatus,
 } from "@/external/client/api/generated";
+import { run } from "@/lib/api-result";
 
 export type JobApplication = ModelsJobApplicationResponse;
 export type JobApplicationListResponse = ModelsJobApplicationListResponse;
 export type JobApplicationStatus = ModelsJobApplicationStatus;
 
 export async function applyToJob(jobPostingId: string, message?: string): Promise<JobApplication> {
-  const { data, error } = await candidateApplicationsApplyToJob({
-    body: { jobPostingId, message: message ?? "" },
-  });
-  if (error || !data) {
-    throw new Error(error?.message ?? "応募に失敗しました");
-  }
-  return data;
+  return run(
+    candidateApplicationsApplyToJob({
+      body: { jobPostingId, message: message ?? "" },
+    }),
+    "応募に失敗しました",
+  );
 }
 
 export async function checkApplied(jobPostingId: string): Promise<boolean> {
@@ -34,16 +34,16 @@ export async function checkApplied(jobPostingId: string): Promise<boolean> {
 }
 
 export async function fetchCandidateApplications(): Promise<JobApplicationListResponse> {
-  const { data, error } = await candidateApplicationsListCandidateApplications();
-  if (error || !data) throw new Error("Failed to fetch applications");
-  return data;
+  return run(candidateApplicationsListCandidateApplications(), "Failed to fetch applications");
 }
 
 export async function withdrawApplication(applicationId: string): Promise<void> {
-  const { error } = await candidateApplicationsWithdrawApplication({
-    path: { applicationId },
-  });
-  if (error) throw new Error("Failed to withdraw application");
+  await run(
+    candidateApplicationsWithdrawApplication({
+      path: { applicationId },
+    }),
+    "Failed to withdraw application",
+  );
 }
 
 export async function fetchCompanyApplications(params?: {
@@ -55,28 +55,31 @@ export async function fetchCompanyApplications(params?: {
   limit?: number;
   offset?: number;
 }): Promise<JobApplicationListResponse> {
-  const { data, error } = await companyApplicationsListCompanyApplications({
-    query: {
-      status: params?.status || undefined,
-      job_posting_id: params?.jobPostingId || undefined,
-      keyword: params?.keyword || undefined,
-      date_from: params?.dateFrom || undefined,
-      date_to: params?.dateTo || undefined,
-      limit: params?.limit ?? 50,
-      offset: params?.offset ?? 0,
-    },
-  });
-  if (error || !data) throw new Error("Failed to fetch applications");
-  return data;
+  return run(
+    companyApplicationsListCompanyApplications({
+      query: {
+        status: params?.status || undefined,
+        job_posting_id: params?.jobPostingId || undefined,
+        keyword: params?.keyword || undefined,
+        date_from: params?.dateFrom || undefined,
+        date_to: params?.dateTo || undefined,
+        limit: params?.limit ?? 50,
+        offset: params?.offset ?? 0,
+      },
+    }),
+    "Failed to fetch applications",
+  );
 }
 
 export async function updateApplicationStatus(
   applicationId: string,
   status: ModelsJobApplicationStatus,
 ): Promise<void> {
-  const { error } = await companyApplicationsUpdateApplicationStatus({
-    path: { applicationId },
-    body: { status },
-  });
-  if (error) throw new Error("Failed to update status");
+  await run(
+    companyApplicationsUpdateApplicationStatus({
+      path: { applicationId },
+      body: { status },
+    }),
+    "Failed to update status",
+  );
 }

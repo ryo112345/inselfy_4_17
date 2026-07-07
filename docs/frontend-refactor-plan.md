@@ -34,7 +34,7 @@
 | F6 | [ ] | `alert()` / `confirm()` 全廃（F5 依存） | 中 | UX |
 | F7 | [x] | 共有アイコンの集約（`src/components/icons/`） | 中 | 重複排除 |
 | F8 | [ ] | 日付フォーマットの集約（`src/lib/date.ts`） | 小 | 重複排除 |
-| F9 | [ ] | API ボイラープレートの共通化（`run` / `unwrap`） | 中 | 重複排除 |
+| F9 | [x] | API ボイラープレートの共通化（`run` / `unwrap`） | 中 | 重複排除 |
 | F10 | [ ] | テーマカラー・選択肢マスタ・ステータスマップの定数化 | 中 | 重複排除 |
 
 ### Phase C: 大型リファクタ
@@ -244,6 +244,11 @@ articles 6、interview 6、job-application 4、integrated-report 3）。
 2. 全 feature の api.ts を `return run(sdkCall(...))` 形式に機械的に書き換え。
    挙動（throw する条件・メッセージ）は変えない。
 3. profile 側は新パスから import。
+
+**実施メモ（2026-07-07）:** `src/lib/api-result.ts` に `ApiError extends Error` + `run(call, fallbackMessage)` を実装。
+work-values / career-interest の api.ts は `response.status` を使った動的エラーメッセージ・404→null 分岐のため
+機械的置換の対象外として残した（挙動を変えないため）。messaging の unread-count 系 2 関数（エラー時 `{count:0}`）は
+F16 で対応。エラーは Error インスタンス（ApiError）になり、サーバメッセージがあれば固定文言より優先される。
 
 **コミット:** `refactor(frontend): share run/unwrap API helpers across features`
 
