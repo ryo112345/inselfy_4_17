@@ -25,9 +25,7 @@ func NewJobPostingInteractor(
 }
 
 func (i *JobPostingInteractor) Create(ctx context.Context, input jobposting.CreateJobPostingInput) (*jobposting.JobPosting, error) {
-	input.Title = strings.TrimSpace(input.Title)
-	input.Description = strings.TrimSpace(input.Description)
-	input.EmploymentType = strings.TrimSpace(input.EmploymentType)
+	normalizeStrings(&input.Title, &input.Description, &input.EmploymentType)
 
 	status := input.Status
 	if status == "" {

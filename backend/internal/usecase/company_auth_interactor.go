@@ -36,10 +36,7 @@ func NewCompanyAuthInteractor(
 }
 
 func (i *CompanyAuthInteractor) Register(ctx context.Context, input company.RegisterInput) (*company.CompanyAccount, error) {
-	input.Email = strings.TrimSpace(input.Email)
-	input.CompanyName = strings.TrimSpace(input.CompanyName)
-	input.ContactPersonName = strings.TrimSpace(input.ContactPersonName)
-	input.PhoneNumber = strings.TrimSpace(input.PhoneNumber)
+	normalizeStrings(&input.Email, &input.CompanyName, &input.ContactPersonName, &input.PhoneNumber)
 
 	if err := company.ValidateRegistration(input); err != nil {
 		return nil, err

@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"strings"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
@@ -32,8 +31,7 @@ func (i *ExperienceInteractor) Create(ctx context.Context, rawUsername string, i
 		return nil, err
 	}
 	input.UserID = u.ID
-	input.CompanyName = strings.TrimSpace(input.CompanyName)
-	input.Title = strings.TrimSpace(input.Title)
+	normalizeStrings(&input.CompanyName, &input.Title)
 	if err := experience.ValidateCreate(input); err != nil {
 		return nil, err
 	}
@@ -72,8 +70,7 @@ func (i *ExperienceInteractor) Update(ctx context.Context, rawUsername, experien
 		return nil, port.ErrForbidden
 	}
 	input.ID = existing.ID
-	input.CompanyName = strings.TrimSpace(input.CompanyName)
-	input.Title = strings.TrimSpace(input.Title)
+	normalizeStrings(&input.CompanyName, &input.Title)
 	if err := experience.ValidateUpdate(input); err != nil {
 		return nil, err
 	}

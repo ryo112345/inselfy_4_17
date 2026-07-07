@@ -61,8 +61,7 @@ func NewScoutInteractor(
 }
 
 func (i *ScoutInteractor) Send(ctx context.Context, input scout.SendScoutInput) (*scout.ScoutMessageWithNames, error) {
-	input.Subject = strings.TrimSpace(input.Subject)
-	input.Body = strings.TrimSpace(input.Body)
+	normalizeStrings(&input.Subject, &input.Body)
 	if err := scout.ValidateSend(input); err != nil {
 		return nil, err
 	}
