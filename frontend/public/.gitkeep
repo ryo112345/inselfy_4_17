@@ -1,0 +1,3 @@
+# frontend/public は Next.js の必須ディレクトリ（Dockerfile が COPY する）だが
+# 中身が無いと git がディレクトリを追跡せず、クローン直後の docker build が
+# "/app/frontend/public": not found で落ちる。このファイルでディレクトリを保持する。
