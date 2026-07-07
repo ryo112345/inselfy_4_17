@@ -20,6 +20,7 @@ import {
   TYPE_PERSONALITIES,
   type TypeId,
 } from "@/features/career-interest/lib/types";
+import { markdownToHtml } from "@/lib/markdown";
 
 const SCORE_COLORS = {
   tier1: "#149470",
@@ -880,13 +881,13 @@ function CIAiReportSection({
         ) : showReport && reportContent && firstView ? (
           <div
             className={reportProseClasses}
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: 自前パイプラインで生成したAIレポートMarkdownのHTML化（ユーザー入力ではない）
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: markdownToHtml が DOMPurify でサニタイズ済み
             dangerouslySetInnerHTML={{ __html: markdownToHtml(displayed) }}
           />
         ) : showReport && reportContent ? (
           <div
             className={reportProseClasses}
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: 自前パイプラインで生成したAIレポートMarkdownのHTML化（ユーザー入力ではない）
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: markdownToHtml が DOMPurify でサニタイズ済み
             dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
           />
         ) : isOwner ? (
@@ -916,29 +917,6 @@ function CIAiReportSection({
       {scrollSpacer && !done && <div className="h-screen" />}
     </div>
   );
-}
-
-function markdownToHtml(md: string): string {
-  let html = md
-    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
-    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/^> (.+)$/gm, "<blockquote><p>$1</p></blockquote>")
-    .replace(/^[・-] (.+)$/gm, "<li>$1</li>")
-    .replace(/((?:<li>.*<\/li>\n?)+)/g, "<ul>$1</ul>")
-    .replace(/\n\n/g, "</p><p>")
-    .replace(/^/, "<p>")
-    .replace(/$/, "</p>")
-    .replace(/<p>(<h[23]>)/g, "$1")
-    .replace(/(<\/h[23]>)<\/p>/g, "$1")
-    .replace(/<p>(<ul>)/g, "$1")
-    .replace(/(<\/ul>)<\/p>/g, "$1")
-    .replace(/<p>(<blockquote>)/g, "$1")
-    .replace(/(<\/blockquote>)<\/p>/g, "$1");
-
-  html = html.replace(/^<p>/, '<p class="catchphrase">');
-
-  return html;
 }
 
 function ChevronIcon({ size = 18 }: { size?: number }) {
