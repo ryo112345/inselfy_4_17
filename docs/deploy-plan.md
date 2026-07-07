@@ -161,11 +161,18 @@ cd backend && make migrate-up
 
 ## Phase 4: デプロイ実行
 
-### 4-1. 初回デプロイ
+### 4-1. デプロイ
 
 ```bash
-gcloud builds submit --config=cloudbuild.yaml
+# クリーンな作業ツリー（git status が clean）で実行すること。
+# イメージタグ = git SHA なので、未コミット変更が混ざるとタグと中身がズレる。
+gcloud builds submit --config=cloudbuild.yaml \
+  --substitutions=_GIT_SHA=$(git rev-parse --short=12 HEAD)
 ```
+
+イメージタグは git SHA に統一している（`latest` は使わない）。Cloud Run のリビジョン →
+イメージタグ → コミットが一意に辿れる。コミット起点の自動デプロイ化は C10 で行う
+（`docs/backend-refactor-backlog.md` 参照）。
 
 ### 4-2. 動作確認
 
