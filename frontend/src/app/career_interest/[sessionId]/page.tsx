@@ -4,6 +4,7 @@ import { Sidebar } from "@/app/components/Sidebar";
 import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
+import { ACCENT } from "@/constants/theme";
 import { getResultBySessionId } from "@/features/career-interest/api";
 import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 
@@ -34,7 +35,7 @@ export default async function CareerInterestResultPage({
   if (!data) notFound();
 
   const ciIndex = 3;
-  const profileColor = data.user.profileColor ?? "#3D8B6E";
+  const profileColor = data.user.profileColor ?? ACCENT;
 
   return (
     <ProfileColorContext value={profileColor}>

@@ -11,14 +11,15 @@ import {
   PlusIcon,
   XIcon,
 } from "@/components/icons";
-import { Field, PrimaryButton, SecondaryButton } from "@/components/ui";
+import { Field, JobSeekingBadge, PrimaryButton, SecondaryButton } from "@/components/ui";
+import { ACCENT } from "@/constants/theme";
 import type { ModelsUserResponse } from "@/external/client/api/generated";
 import { type ApiError, updateProfile, uploadProfileImage } from "./api";
 import { FollowButton } from "./FollowButton";
 import { ImageCropModal } from "./ImageCropModal";
 
 const PRESET_COLORS = [
-  "#3D8B6E",
+  ACCENT,
   "#059669",
   "#0D9488",
   "#0891B2",
@@ -34,12 +35,6 @@ const PRESET_COLORS = [
   "#64748B",
   "#1E293B",
 ];
-
-const JOB_SEEKING_LABELS: Record<string, { label: string; color: string }> = {
-  active: { label: "スカウト歓迎", color: "bg-emerald-100 text-emerald-800" },
-  open: { label: "いい話があれば", color: "bg-amber-100 text-amber-800" },
-  not_seeking: { label: "スカウト不要", color: "bg-gray-100 text-gray-600" },
-};
 
 type Props = {
   user: ModelsUserResponse;
@@ -64,7 +59,7 @@ export function ProfileHeaderCard({
   const [industry, setIndustry] = useState(user.industry ?? "");
   const [jobType, setJobType] = useState(user.jobType ?? "");
   const [jobSeekingStatus, setJobSeekingStatus] = useState(user.jobSeekingStatus ?? "");
-  const [profileColor, setProfileColor] = useState(user.profileColor ?? "#3D8B6E");
+  const [profileColor, setProfileColor] = useState(user.profileColor ?? ACCENT);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
@@ -141,13 +136,12 @@ export function ProfileHeaderCard({
     setIndustry(user.industry ?? "");
     setJobType(user.jobType ?? "");
     setJobSeekingStatus(user.jobSeekingStatus ?? "");
-    setProfileColor(user.profileColor ?? "#3D8B6E");
+    setProfileColor(user.profileColor ?? ACCENT);
     setError(null);
     setIsEditing(false);
   };
 
-  const headerColor = isEditing ? profileColor : (user.profileColor ?? "#3D8B6E");
-  const jobStatus = user.jobSeekingStatus ? JOB_SEEKING_LABELS[user.jobSeekingStatus] : null;
+  const headerColor = isEditing ? profileColor : (user.profileColor ?? ACCENT);
   const avatarSrc = user.avatarUrl?.replace("=s96-c", "=s400-c") ?? null;
 
   return (
@@ -561,13 +555,7 @@ export function ProfileHeaderCard({
                 <h1 className="text-xl md:text-2xl font-bold tracking-tight text-gray-900">
                   {user.name}
                 </h1>
-                {jobStatus ? (
-                  <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${jobStatus.color}`}
-                  >
-                    {jobStatus.label}
-                  </span>
-                ) : null}
+                <JobSeekingBadge status={user.jobSeekingStatus} size="sm" dot={false} />
               </div>
               {user.headline ? (
                 <p className="mt-2 text-lg text-gray-700">{user.headline}</p>

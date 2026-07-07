@@ -100,7 +100,7 @@ export default function InterviewsPage() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-brand" />
       </div>
     );
   }
@@ -133,7 +133,7 @@ export default function InterviewsPage() {
             {counts[t.key] > 0 && (
               <span
                 className={`ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold ${
-                  tab === t.key ? "bg-[#3D8B6E] text-white" : "bg-gray-200 text-gray-600"
+                  tab === t.key ? "bg-brand text-white" : "bg-gray-200 text-gray-600"
                 }`}
               >
                 {counts[t.key]}
@@ -145,7 +145,7 @@ export default function InterviewsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+          <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-brand" />
         </div>
       ) : (
         <>
@@ -277,7 +277,7 @@ function InterviewCard({
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E]/10 text-[#3D8B6E] text-sm font-semibold">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand text-sm font-semibold">
             {interview.companyName?.charAt(0) ?? "?"}
           </div>
           <div>

@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ACCENT } from "@/constants/theme";
 import type { NeedScoreDTO, ValueScoreDTO } from "./api";
 import type { NeedId, ValueId } from "./lib/needs";
 import { NEED_IDS, NEED_LABELS, VALUE_IDS, VALUE_LABELS } from "./lib/needs";
-
-const ACCENT = "#3D8B6E";
 
 export type FilterMode = "values" | "needs";
 

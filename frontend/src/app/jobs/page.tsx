@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  SEARCH_EMPLOYMENT_TYPES,
+  SEARCH_JOB_CATEGORIES,
+  SEARCH_REMOTE_POLICIES,
+} from "@/constants/job-options";
+import { ACCENT } from "@/constants/theme";
 import { useAuth } from "@/features/auth/auth-context";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
@@ -21,8 +27,6 @@ import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
 import { ValuesFilterDrawer } from "@/features/work-values/ValuesFilterDrawer";
 import { formatRelativeDate } from "@/lib/date";
 import { Gallery } from "../companies/[id]/Gallery";
-
-const ACCENT = "#3D8B6E";
 
 const WV_ORDER = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"];
 const CI_ORDER = ["R", "I", "A", "S", "E", "C"];
@@ -108,18 +112,6 @@ function formatSalary(min: number | null, max: number | null): string | null {
   if (min != null) return `${min}万円〜`;
   return `〜${max}万円`;
 }
-
-const JOB_CATEGORIES = [
-  "すべて",
-  "エンジニア",
-  "デザイナー",
-  "PM",
-  "マーケティング",
-  "営業",
-  "その他",
-];
-const EMPLOYMENT_TYPES = ["すべて", "正社員", "契約社員", "業務委託", "インターン", "アルバイト"];
-const REMOTE_OPTIONS = ["すべて", "フルリモート", "一部リモート", "出社"];
 
 type SortKey = "newest" | "salary";
 
@@ -392,19 +384,19 @@ export default function JobsPage() {
             label="職種"
             value={category}
             onChange={setCategory}
-            options={JOB_CATEGORIES}
+            options={SEARCH_JOB_CATEGORIES}
           />
           <FilterSelect
             label="雇用形態"
             value={employment}
             onChange={setEmployment}
-            options={EMPLOYMENT_TYPES}
+            options={SEARCH_EMPLOYMENT_TYPES}
           />
           <FilterSelect
             label="リモート"
             value={remote}
             onChange={setRemote}
-            options={REMOTE_OPTIONS}
+            options={SEARCH_REMOTE_POLICIES}
           />
 
           {/* Values Filter Button */}

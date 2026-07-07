@@ -31,6 +31,13 @@ import {
   YenIcon,
 } from "@/components/icons/job";
 import { SectionTitle, useConfirm, useToast } from "@/components/ui";
+import {
+  EMPLOYMENT_TYPES,
+  JOB_CATEGORIES,
+  REMOTE_POLICIES,
+  SMOKING_POLICIES,
+} from "@/constants/job-options";
+import { ACCENT } from "@/constants/theme";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import {
   type JobPostingBody,
@@ -57,44 +64,8 @@ type TeamScores = {
   ciScores: { id: string; score: number }[] | null;
 };
 
-const ACCENT = "#3D8B6E";
-
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
-
-const JOB_CATEGORIES = [
-  "エンジニア",
-  "デザイナー",
-  "プロダクトマネージャー",
-  "マーケティング",
-  "セールス",
-  "カスタマーサクセス",
-  "人事・採用",
-  "経営企画",
-  "その他",
-];
-
-const EMPLOYMENT_TYPES = [
-  { value: "正社員", label: "正社員" },
-  { value: "契約社員", label: "契約社員" },
-  { value: "業務委託", label: "業務委託" },
-  { value: "パートタイム", label: "パートタイム" },
-  { value: "インターン", label: "インターン" },
-];
-
-const REMOTE_POLICIES = [
-  { value: "フルリモート", label: "フルリモート" },
-  { value: "リモート可（週数回出社）", label: "リモート可（週数回出社）" },
-  { value: "原則出社", label: "原則出社" },
-  { value: "フル出社", label: "フル出社" },
-];
-
-const SMOKING_POLICIES = [
-  { value: "屋内原則禁煙（喫煙専用室あり）", label: "屋内原則禁煙（喫煙専用室あり）" },
-  { value: "屋内全面禁煙", label: "屋内全面禁煙" },
-  { value: "屋内禁煙（屋外に喫煙場所あり）", label: "屋内禁煙（屋外に喫煙場所あり）" },
-  { value: "敷地内全面禁煙", label: "敷地内全面禁煙" },
-];
 
 const DEFAULTS = {
   title: "",
@@ -204,7 +175,7 @@ function InlineSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full max-w-full truncate bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors cursor-pointer text-inherit font-inherit"
+      className="w-full max-w-full truncate bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors cursor-pointer text-inherit font-inherit"
     >
       {placeholder && (
         <option value="" disabled>
@@ -389,7 +360,7 @@ function EditableHighlightCard({
         value={title}
         onChange={(e) => onTitleChange(e.target.value)}
         placeholder={titlePlaceholder}
-        className="text-lg font-bold leading-snug text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+        className="text-lg font-bold leading-snug text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
       />
       <InlineTextarea
         value={value}
@@ -1223,7 +1194,7 @@ export default function JobEditPage() {
               }}
               rows={1}
               placeholder="求人タイトルを入力..."
-              className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-[#3D8B6E] transition-colors pb-1 resize-none overflow-hidden"
+              className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-brand transition-colors pb-1 resize-none overflow-hidden"
             />
 
             {/* Meta badges — editable selects */}
@@ -1302,7 +1273,7 @@ export default function JobEditPage() {
                     }
                     max={9999}
                     placeholder="下限"
-                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
                   />
                   <span className="text-base font-medium text-gray-500">〜</span>
                   <input
@@ -1313,7 +1284,7 @@ export default function JobEditPage() {
                     }
                     max={9999}
                     placeholder="上限"
-                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
                   />
                   <span className="ml-0.5 text-sm font-medium text-gray-500">万円</span>
                 </div>
@@ -1391,7 +1362,7 @@ export default function JobEditPage() {
               value={description}
               onChange={setDescription}
               icon={<SparkIcon />}
-              tone={{ bg: "#EAF4F0", ring: "#3D8B6E33", fg: "#3D8B6E" }}
+              tone={{ bg: "#EAF4F0", ring: `${ACCENT}33`, fg: ACCENT }}
               placeholder="この求人の仕事内容を記入..."
             />
             <EditableHighlightCard
@@ -1500,7 +1471,7 @@ export default function JobEditPage() {
                 <select
                   value={teamId ?? ""}
                   onChange={(e) => setTeamId(e.target.value || null)}
-                  className="w-56 truncate rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-[#3D8B6E] focus:ring-1 focus:ring-[#3D8B6E] transition-colors cursor-pointer"
+                  className="w-56 truncate rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-colors cursor-pointer"
                 >
                   <option value="">選択してください</option>
                   {teamsList.map((t) => (
@@ -1558,7 +1529,7 @@ export default function JobEditPage() {
             {teamsList.length === 0 && (
               <p className="mt-2 text-xs text-gray-400">
                 チームが未作成です。
-                <Link href="/company/teams" className="text-[#3D8B6E] hover:underline ml-1">
+                <Link href="/company/teams" className="text-brand hover:underline ml-1">
                   チーム管理
                 </Link>
                 で作成してください。
@@ -1588,7 +1559,7 @@ export default function JobEditPage() {
                       {row.map((m, colIdx) => {
                         const i = rowIdx * 5 + colIdx;
                         const colors = [
-                          { bg: "#EAF4F0", fg: "#3D8B6E" },
+                          { bg: "#EAF4F0", fg: ACCENT },
                           { bg: "#EEF2FB", fg: "#3B6FCC" },
                           { bg: "#FEF7E6", fg: "#B07914" },
                           { bg: "#F3EEFB", fg: "#7647C5" },
@@ -1691,7 +1662,7 @@ export default function JobEditPage() {
                 value={teamLabel}
                 onChange={(e) => setTeamLabel(e.target.value)}
                 placeholder="例: 少数精鋭の営業チーム"
-                className="w-52 text-center text-base font-semibold bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors placeholder:text-gray-300"
+                className="w-52 text-center text-base font-semibold bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors placeholder:text-gray-300"
                 style={{ color: ACCENT }}
               />
             </div>

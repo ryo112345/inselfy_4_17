@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ブランドカラー: bg-brand / text-brand / border-brand 等で使用（F10） */
+@theme {
+  --color-brand: #3d8b6e;
+}
+
 :root {
   --background: #f6f7f5;
   --foreground: #111111;

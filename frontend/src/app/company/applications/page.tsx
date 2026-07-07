@@ -10,6 +10,7 @@ import {
   WV_FULL_LABELS,
   WV_ORDER,
 } from "@/app/components/SingleRadarChart";
+import { SEEKING_STATUS_MAP } from "@/constants/seeking-status";
 import { checkPendingProposal } from "@/features/interview/api";
 import type { JobApplication, JobApplicationStatus } from "@/features/job-application/api";
 import { fetchCompanyApplications, updateApplicationStatus } from "@/features/job-application/api";
@@ -59,28 +60,6 @@ const FILTER_TABS = [
   { value: "rejected", label: "不合格" },
   { value: "withdrawn", label: "辞退" },
 ];
-
-const SEEKING_STATUS_MAP: Record<string, { label: string; bg: string; text: string; dot: string }> =
-  {
-    active: {
-      label: "スカウト歓迎",
-      bg: "bg-emerald-50",
-      text: "text-emerald-700",
-      dot: "bg-emerald-400",
-    },
-    open: {
-      label: "いい話があれば",
-      bg: "bg-amber-50",
-      text: "text-amber-700",
-      dot: "bg-amber-400",
-    },
-    not_seeking: {
-      label: "スカウト不要",
-      bg: "bg-gray-100",
-      text: "text-gray-500",
-      dot: "bg-gray-300",
-    },
-  };
 
 function matchScoreColor(score: number): string {
   if (score >= 80) return "#149470";

@@ -225,7 +225,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-brand" />
       </div>
     );
   }
@@ -277,21 +277,21 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
                   onClick={() => handleTabChange(tab.key)}
                   className={`relative flex-1 py-3 text-sm font-medium transition-colors text-center ${
                     isActive
-                      ? "text-[#3D8B6E] border-b-2 border-[#3D8B6E]"
+                      ? "text-brand border-b-2 border-brand"
                       : "text-gray-500 hover:text-gray-700 border-b-2 border-transparent"
                   }`}
                 >
                   <span className="relative">
                     {tab.label}
                     {badgeNum > 0 && (
-                      <span className="absolute -right-6 top-1/2 -translate-y-[44%] inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-[#3D8B6E] px-1 text-[10px] font-bold text-white">
+                      <span className="absolute -right-6 top-1/2 -translate-y-[44%] inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
                         {badgeNum > 99 ? "99+" : badgeNum}
                       </span>
                     )}
                     {hasDot && (
                       <span className="absolute -right-3 -top-0.5 flex h-2 w-2">
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-[#3D8B6E] opacity-60 animate-[ping_2.5s_ease-in-out_infinite]" />
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#3D8B6E]" />
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-brand opacity-60 animate-[ping_2.5s_ease-in-out_infinite]" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
                       </span>
                     )}
                   </span>
@@ -315,7 +315,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
                 <div className="flex-1 overflow-y-auto scrollbar-hide">
                   {loadingConvs ? (
                     <div className="flex items-center justify-center py-12">
-                      <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+                      <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-brand" />
                     </div>
                   ) : (
                     <ConversationList

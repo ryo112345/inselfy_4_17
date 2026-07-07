@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
-
-// TODO(F10): ACCENT はテーマカラー定数化の際に var(--color-brand) へ置き換える
-const ACCENT = "#3D8B6E";
+import { ACCENT } from "@/constants/theme";
 
 export function SectionTitle({ children, icon }: { children: ReactNode; icon?: ReactNode }) {
   return (

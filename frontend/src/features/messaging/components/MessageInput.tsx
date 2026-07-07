@@ -54,13 +54,13 @@ export function MessageInput({ onSend, disabled }: Props) {
           placeholder="メッセージを入力..."
           disabled={disabled || sending}
           rows={1}
-          className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#3D8B6E] focus:ring-1 focus:ring-[#3D8B6E]/20 disabled:opacity-50"
+          className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-brand focus:ring-1 focus:ring-brand/20 disabled:opacity-50"
           style={{ minHeight: 40, maxHeight: 120 }}
         />
         <button
           onClick={handleSend}
           disabled={!body.trim() || sending || disabled}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E] text-white transition hover:bg-[#347a5f] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-white transition hover:bg-[#347a5f] disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {sending ? (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />

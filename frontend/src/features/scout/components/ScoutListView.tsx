@@ -343,7 +343,7 @@ export function ScoutListView() {
             type="button"
             onClick={handleBulkInterested}
             disabled={responding}
-            className="flex items-center gap-1.5 min-h-[44px] text-sm font-medium text-[#3D8B6E] hover:bg-[#3D8B6E]/8 rounded-lg px-3 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
+            className="flex items-center gap-1.5 min-h-[44px] text-sm font-medium text-brand hover:bg-brand/8 rounded-lg px-3 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
           >
             <svg
               width={15}
@@ -417,11 +417,7 @@ export function ScoutListView() {
                 />
               </svg>
             ) : (
-              <svg
-                className="h-5 w-5 shrink-0 text-[#3D8B6E]"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
+              <svg className="h-5 w-5 shrink-0 text-brand" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"

@@ -23,45 +23,16 @@ import {
   YenIcon,
 } from "@/components/icons/job";
 import { SectionTitle } from "@/components/ui";
-
-const ACCENT = "#3D8B6E";
+import {
+  EMPLOYMENT_TYPES,
+  JOB_CATEGORIES,
+  REMOTE_POLICIES,
+  SMOKING_POLICIES,
+} from "@/constants/job-options";
+import { ACCENT } from "@/constants/theme";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
-
-const JOB_CATEGORIES = [
-  "エンジニア",
-  "デザイナー",
-  "プロダクトマネージャー",
-  "マーケティング",
-  "セールス",
-  "カスタマーサクセス",
-  "人事・採用",
-  "経営企画",
-  "その他",
-];
-
-const EMPLOYMENT_TYPES = [
-  { value: "正社員", label: "正社員" },
-  { value: "契約社員", label: "契約社員" },
-  { value: "業務委託", label: "業務委託" },
-  { value: "パートタイム", label: "パートタイム" },
-  { value: "インターン", label: "インターン" },
-];
-
-const REMOTE_POLICIES = [
-  { value: "フルリモート", label: "フルリモート" },
-  { value: "リモート可（週数回出社）", label: "リモート可（週数回出社）" },
-  { value: "原則出社", label: "原則出社" },
-  { value: "フル出社", label: "フル出社" },
-];
-
-const SMOKING_POLICIES = [
-  { value: "屋内原則禁煙（喫煙専用室あり）", label: "屋内原則禁煙（喫煙専用室あり）" },
-  { value: "屋内全面禁煙", label: "屋内全面禁煙" },
-  { value: "屋内禁煙（屋外に喫煙場所あり）", label: "屋内禁煙（屋外に喫煙場所あり）" },
-  { value: "敷地内全面禁煙", label: "敷地内全面禁煙" },
-];
 
 const MOCK_DATA = {
   title: "バックエンドエンジニア｜Go / PostgreSQL / AWS でプロダクト基盤を設計",
@@ -179,7 +150,7 @@ function InlineSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors cursor-pointer text-inherit font-inherit"
+      className="bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors cursor-pointer text-inherit font-inherit"
     >
       {placeholder && (
         <option value="" disabled>
@@ -364,7 +335,7 @@ function EditableHighlightCard({
         value={title}
         onChange={(e) => onTitleChange(e.target.value)}
         placeholder={titlePlaceholder}
-        className="text-lg font-bold leading-snug text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+        className="text-lg font-bold leading-snug text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
       />
       <InlineTextarea
         value={value}
@@ -618,7 +589,7 @@ export default function TestJobEditPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="求人タイトルを入力..."
-              className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-[#3D8B6E] transition-colors pb-1"
+              className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-brand transition-colors pb-1"
             />
 
             {/* Meta badges — editable selects */}
@@ -694,7 +665,7 @@ export default function TestJobEditPage() {
                     value={salaryMin ?? ""}
                     onChange={(e) => setSalaryMin(e.target.value ? Number(e.target.value) : null)}
                     placeholder="下限"
-                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
                   />
                   <span className="text-base font-medium text-gray-500">〜</span>
                   <input
@@ -702,7 +673,7 @@ export default function TestJobEditPage() {
                     value={salaryMax ?? ""}
                     onChange={(e) => setSalaryMax(e.target.value ? Number(e.target.value) : null)}
                     placeholder="上限"
-                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[#3D8B6E] transition-colors"
+                    className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
                   />
                   <span className="ml-0.5 text-sm font-medium text-gray-500">万円</span>
                 </div>
@@ -780,7 +751,7 @@ export default function TestJobEditPage() {
               value={description}
               onChange={setDescription}
               icon={<SparkIcon />}
-              tone={{ bg: "#EAF4F0", ring: "#3D8B6E33", fg: "#3D8B6E" }}
+              tone={{ bg: "#EAF4F0", ring: `${ACCENT}33`, fg: ACCENT }}
               placeholder="この求人の仕事内容を記入..."
             />
             <EditableHighlightCard

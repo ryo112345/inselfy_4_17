@@ -31,6 +31,7 @@ import {
   YenIcon,
 } from "@/components/icons/job";
 import { SectionTitle } from "@/components/ui";
+import { ACCENT } from "@/constants/theme";
 import { useAuth } from "@/features/auth/auth-context";
 import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 import {
@@ -46,8 +47,6 @@ import { Gallery } from "../../companies/[id]/Gallery";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
-
-const ACCENT = "#3D8B6E";
 
 const MOCK = {
   company: {
@@ -128,7 +127,7 @@ const MOCK = {
 };
 
 const AVATAR_TONES = [
-  { bg: "#EAF4F0", fg: "#3D8B6E" },
+  { bg: "#EAF4F0", fg: ACCENT },
   { bg: "#FEF7E6", fg: "#B07914" },
   { bg: "#EEF2FB", fg: "#3B6FCC" },
   { bg: "#F3EEFB", fg: "#7647C5" },
@@ -337,7 +336,7 @@ export default function JobDetailPage() {
       title: "仕事内容",
       body: job.description,
       icon: <SparkIcon />,
-      tone: { bg: "#EAF4F0", ring: "#3D8B6E33", fg: "#3D8B6E" },
+      tone: { bg: "#EAF4F0", ring: `${ACCENT}33`, fg: ACCENT },
     },
     {
       label: "APPEAL",
@@ -516,7 +515,7 @@ export default function JobDetailPage() {
                     <div className="flex items-center -space-x-[18px]">
                       {job.teamMembers.map((m: { name: string; photoUrl?: string }, i: number) => {
                         const colors = [
-                          { bg: "#EAF4F0", fg: "#3D8B6E" },
+                          { bg: "#EAF4F0", fg: ACCENT },
                           { bg: "#EEF2FB", fg: "#3B6FCC" },
                           { bg: "#FEF7E6", fg: "#B07914" },
                           { bg: "#F3EEFB", fg: "#7647C5" },

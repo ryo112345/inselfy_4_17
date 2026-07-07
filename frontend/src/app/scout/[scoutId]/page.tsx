@@ -129,15 +129,15 @@ export default function ScoutDetailPage() {
           <div className="px-4 py-3.5 md:px-6 md:py-4 border-b border-gray-100">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
-                <div className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-[#3D8B6E]/8 flex items-center justify-center shrink-0">
-                  <span className="text-xs md:text-sm font-bold text-[#3D8B6E]">
+                <div className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-brand/8 flex items-center justify-center shrink-0">
+                  <span className="text-xs md:text-sm font-bold text-brand">
                     {message.companyName.charAt(0)}
                   </span>
                 </div>
                 <div className="min-w-0">
                   <Link
                     href={`/companies/${message.companyId}`}
-                    className="text-sm font-semibold text-gray-900 hover:text-[#3D8B6E] truncate block transition-colors"
+                    className="text-sm font-semibold text-gray-900 hover:text-brand truncate block transition-colors"
                   >
                     {message.companyName}
                   </Link>
@@ -177,7 +177,7 @@ export default function ScoutDetailPage() {
                 {message.jobPostingId ? (
                   <Link
                     href={`/jobs/${message.jobPostingId}`}
-                    className="hover:text-[#3D8B6E] transition-colors"
+                    className="hover:text-brand transition-colors"
                   >
                     {message.jobTitle}
                   </Link>
@@ -233,7 +233,7 @@ export default function ScoutDetailPage() {
                     type="button"
                     onClick={() => handleRespond("interested")}
                     disabled={responding}
-                    className="bg-[#3D8B6E] text-white px-5 py-2 rounded-lg hover:bg-[#347a5f] disabled:opacity-50 font-medium text-sm transition-colors"
+                    className="bg-brand text-white px-5 py-2 rounded-lg hover:bg-[#347a5f] disabled:opacity-50 font-medium text-sm transition-colors"
                   >
                     {responding ? "処理中..." : "興味あり"}
                   </button>
@@ -257,7 +257,7 @@ export default function ScoutDetailPage() {
                     type="button"
                     onClick={() => handleRespond("interested")}
                     disabled={responding}
-                    className="flex-1 bg-[#3D8B6E] text-white py-2.5 rounded-lg hover:bg-[#347a5f] disabled:opacity-50 font-medium text-sm transition-colors"
+                    className="flex-1 bg-brand text-white py-2.5 rounded-lg hover:bg-[#347a5f] disabled:opacity-50 font-medium text-sm transition-colors"
                   >
                     {responding ? "処理中..." : "興味あり"}
                   </button>
@@ -341,11 +341,7 @@ export default function ScoutDetailPage() {
                 />
               </svg>
             ) : (
-              <svg
-                className="h-5 w-5 shrink-0 text-[#3D8B6E]"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
+              <svg className="h-5 w-5 shrink-0 text-brand" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"

@@ -311,7 +311,7 @@ export function CalendarSlotSelector({
       {/* Header */}
       <div className="px-5 py-3 border-b border-gray-100">
         <div className="flex items-center gap-3 mb-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E]/10 text-[#3D8B6E] text-sm font-semibold">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand text-sm font-semibold">
             {companyName.charAt(0)}
           </div>
           <div>
@@ -458,7 +458,7 @@ export function CalendarSlotSelector({
                     selection.dayIndex === dayIdx &&
                     toDateStr(weekDays[dayIdx]) === toDateStr(new Date(selection.startIso)) && (
                       <div
-                        className="absolute left-1 right-1 rounded-md bg-[#3D8B6E] text-white px-1.5 py-0.5 z-10 shadow-md ring-2 ring-[#3D8B6E] ring-offset-1"
+                        className="absolute left-1 right-1 rounded-md bg-brand text-white px-1.5 py-0.5 z-10 shadow-md ring-2 ring-brand ring-offset-1"
                         style={{
                           top: `${offsetY(selection.startMinutes)}px`,
                           height: `${offsetY(selection.endMinutes) - offsetY(selection.startMinutes)}px`,
@@ -486,7 +486,7 @@ export function CalendarSlotSelector({
           <button
             onClick={handleConfirm}
             disabled={!selection || confirming}
-            className="ml-auto rounded-lg bg-[#3D8B6E] px-5 py-2 text-sm font-medium text-white hover:bg-[#357a60] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="ml-auto rounded-lg bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-[#357a60] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {confirming ? "確定中..." : "この日程で確定する"}
           </button>
