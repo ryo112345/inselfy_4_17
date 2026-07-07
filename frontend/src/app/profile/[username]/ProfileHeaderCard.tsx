@@ -2,13 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-
+import { Field, PrimaryButton, SecondaryButton } from "@/components/ui";
 import type { ModelsUserResponse } from "@/external/client/api/generated";
 import { type ApiError, updateProfile, uploadProfileImage } from "./api";
 import { FollowButton } from "./FollowButton";
 import { CameraIcon, FaceIcon, MailIcon, MapPinIcon, PencilIcon, PlusIcon, XIcon } from "./Icons";
 import { ImageCropModal } from "./ImageCropModal";
-import { Field, PrimaryButton, SecondaryButton } from "./Modal";
 
 const PRESET_COLORS = [
   "#3D8B6E",

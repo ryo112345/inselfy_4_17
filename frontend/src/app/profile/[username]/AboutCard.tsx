@@ -2,12 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-
+import { Field, PrimaryButton, SecondaryButton } from "@/components/ui";
 import type { ModelsUserResponse } from "@/external/client/api/generated";
-
 import { type ApiError, updateProfile } from "./api";
 import { PencilIcon } from "./Icons";
-import { Field, PrimaryButton, SecondaryButton } from "./Modal";
 import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {

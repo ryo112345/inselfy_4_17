@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Field, Modal, PrimaryButton, SecondaryButton } from "@/components/ui";
 import { createIntegratedReportRequest } from "@/features/integrated-report/api";
-import { Field, Modal, PrimaryButton, SecondaryButton } from "./Modal";
 
 const TOPICS = [
   {
