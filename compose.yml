@@ -15,5 +15,56 @@ services:
       timeout: 5s
       retries: 5
 
+  # --- E2E スモークテスト用（profile: e2e）---
+  # 普段の `docker compose up` では起動しない。CI とローカル検証で
+  # `docker compose --profile e2e up -d --build` として使う（scripts/e2e-smoke.sh 参照）。
+
+  # マイグレーションを全件適用してから app を起動する
+  migrate:
+    image: migrate/migrate:v4.19.1
+    profiles: ["e2e"]
+    volumes:
+      - ./backend/migrations:/migrations:ro
+    command:
+      [
+        "-path", "/migrations",
+        "-database", "postgres://${DB_USER:-user}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-inselfy}?sslmode=disable",
+        "up",
+      ]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 本番と同じ Dockerfile（front + API 同居の1イメージ）を結合状態で起動する
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: e2e-dummy
+    profiles: ["e2e"]
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:-user}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_NAME: ${DB_NAME:-inselfy}
+      API_PORT: "8081"
+      JWT_SECRET: e2e-dummy-secret
+    ports:
+      # ローカルの開発プロセス（API 8081 / front 3000）と衝突しないよう 18xxx に逃がす
+      - "18080:8080" # front (Next.js)
+      - "18081:8081" # API 直叩き用
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8081/readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
 volumes:
   db_data:
