@@ -13,14 +13,14 @@ func CareerInterestSessionResponse(s *careerinterest.Session) any {
 			QuestionNumber:  int32(item.QuestionNumber),
 			ItemCode:        item.ItemCode,
 			BasicInterestId: item.BasicInterestID,
-			SkillLevel:      item.SkillLevel,
+			SkillLevel:      openapi.ModelsCISkillLevel(item.SkillLevel),
 			ActivityType:    item.ActivityType,
 			TextJa:          item.TextJa,
 		}
 	}
 	return &openapi.ModelsCISessionResponse{
 		Id:     s.ID,
-		Status: s.Status,
+		Status: openapi.ModelsDiagnosisSessionStatus(s.Status),
 		Items:  items,
 	}
 }

@@ -34,8 +34,8 @@ model BulkRespondRequest {
 
 /** スカウト応答結果 */
 model ScoutRespondResponse {
-  /** 処理結果 */
-  status: string;
+  /** 処理結果（"ok"） */
+  status: "ok";
 
   /** 応答により作成・特定された会話ID */
   conversationId?: string;

@@ -38,7 +38,7 @@ func toCompanyResponse(c *company.CompanyAccount) *openapi.ModelsCompanyResponse
 		CompanyName:       c.CompanyName,
 		ContactPersonName: c.ContactPersonName,
 		PhoneNumber:       c.PhoneNumber,
-		Status:            string(c.Status),
+		Status:            openapi.ModelsCompanyStatus(c.Status),
 		CreatedAt:         c.CreatedAt,
 	}
 }

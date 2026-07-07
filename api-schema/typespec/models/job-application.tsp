@@ -5,6 +5,17 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** 応募ステータス */
+union JobApplicationStatus {
+  "applied",
+  "screening",
+  "interview",
+  "offer",
+  "accepted",
+  "rejected",
+  "withdrawn",
+}
+
 /** 求人応募リクエスト */
 model ApplyJobRequest {
   /** 求人ID */
@@ -17,7 +28,7 @@ model ApplyJobRequest {
 /** 応募ステータス更新リクエスト */
 model UpdateApplicationStatusRequest {
   /** 新しいステータス */
-  status: string;
+  status: JobApplicationStatus;
 }
 
 /** 応募（詳細付き） */
@@ -35,7 +46,7 @@ model JobApplicationResponse {
   companyId: string;
 
   /** ステータス */
-  status: string;
+  status: JobApplicationStatus;
 
   /** 応募メッセージ */
   message: string;
@@ -101,5 +112,5 @@ model AppliedResponse {
 /** 汎用 OK レスポンス */
 model StatusOkResponse {
   /** 処理結果（"ok"） */
-  status: string;
+  status: "ok";
 }

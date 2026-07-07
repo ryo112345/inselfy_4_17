@@ -1,8 +1,13 @@
+import type {
+  ModelsInterviewSlotStatus,
+  ModelsInterviewStatus,
+} from "@/external/client/api/generated";
+
 export interface InterviewSlot {
   id: string;
   startTime: string;
   endTime: string;
-  status: "proposed" | "selected" | "rejected";
+  status: ModelsInterviewSlotStatus;
 }
 
 export interface InterviewProposal {
@@ -23,7 +28,7 @@ export interface Interview {
   endTime: string;
   location: string;
   meetingUrl: string;
-  status: "scheduled" | "completed" | "cancelled" | "no_show";
+  status: ModelsInterviewStatus;
   title: string;
   candidateName?: string;
   candidateAvatarUrl?: string;

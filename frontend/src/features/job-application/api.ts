@@ -8,10 +8,12 @@ import {
   companyApplicationsUpdateApplicationStatus,
   type ModelsJobApplicationListResponse,
   type ModelsJobApplicationResponse,
+  type ModelsJobApplicationStatus,
 } from "@/external/client/api/generated";
 
 export type JobApplication = ModelsJobApplicationResponse;
 export type JobApplicationListResponse = ModelsJobApplicationListResponse;
+export type JobApplicationStatus = ModelsJobApplicationStatus;
 
 export async function applyToJob(
   jobPostingId: string,
@@ -75,7 +77,7 @@ export async function fetchCompanyApplications(params?: {
 
 export async function updateApplicationStatus(
   applicationId: string,
-  status: string,
+  status: ModelsJobApplicationStatus,
 ): Promise<void> {
   const { error } = await companyApplicationsUpdateApplicationStatus({
     path: { applicationId },

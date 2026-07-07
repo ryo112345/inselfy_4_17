@@ -13,7 +13,7 @@ func InterviewSlotsResponse(slots []*interview.Slot) []openapi.ModelsInterviewSl
 			Id:        s.ID,
 			StartTime: s.StartTime,
 			EndTime:   s.EndTime,
-			Status:    s.Status,
+			Status:    openapi.ModelsInterviewSlotStatus(s.Status),
 		}
 	}
 	return result
@@ -34,7 +34,7 @@ func SelectSlotResponse(iv *interview.Interview) *openapi.ModelsSelectSlotRespon
 			Id:        iv.ID,
 			StartTime: iv.StartTime,
 			EndTime:   iv.EndTime,
-			Status:    iv.Status,
+			Status:    openapi.ModelsInterviewStatus(iv.Status),
 		},
 	}
 }
@@ -50,7 +50,7 @@ func CompanyInterviewsResponse(interviews []*interview.InterviewWithNames) *open
 			EndTime:            iv.EndTime,
 			Location:           iv.Location,
 			MeetingUrl:         iv.MeetingURL,
-			Status:             iv.Status,
+			Status:             openapi.ModelsInterviewStatus(iv.Status),
 			Title:              iv.Title,
 			CandidateName:      iv.CandidateName,
 			CandidateAvatarUrl: iv.CandidateAvatar,
@@ -71,7 +71,7 @@ func CandidateInterviewsResponse(interviews []*interview.InterviewWithNames, pro
 			EndTime:       iv.EndTime,
 			Location:      iv.Location,
 			MeetingUrl:    iv.MeetingURL,
-			Status:        iv.Status,
+			Status:        openapi.ModelsInterviewStatus(iv.Status),
 			Title:         iv.Title,
 			CompanyName:   iv.CompanyName,
 			JobTitle:      iv.JobTitle,
@@ -104,7 +104,7 @@ func ProposalSlotsResponse(proposal *interview.Proposal, slots []*interview.Slot
 		Proposal: openapi.ModelsProposalSummary{
 			Id:        proposal.ID,
 			Message:   proposal.Message,
-			Status:    proposal.Status,
+			Status:    openapi.ModelsInterviewProposalStatus(proposal.Status),
 			ExpiresAt: proposal.ExpiresAt,
 		},
 		Slots: InterviewSlotsResponse(slots),

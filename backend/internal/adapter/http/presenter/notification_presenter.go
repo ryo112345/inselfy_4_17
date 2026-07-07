@@ -11,7 +11,7 @@ func NotificationsResponse(ns []*notification.Notification, total int) any {
 	for i, n := range ns {
 		items[i] = openapi.ModelsNotificationResponse{
 			Id:          n.ID,
-			Type:        string(n.Type),
+			Type:        openapi.ModelsNotificationType(n.Type),
 			Title:       n.Title,
 			Body:        n.Body,
 			ReferenceId: n.ReferenceID,

@@ -5,6 +5,12 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** 記事ステータス */
+union ArticleStatus {
+  "draft",
+  "published",
+}
+
 /** 記事作成リクエスト */
 model CreateArticleRequest {
   /** タイトル */
@@ -71,7 +77,7 @@ model ArticleResponse {
   imageCount: integer;
 
   /** ステータス */
-  status: string;
+  status: ArticleStatus;
 
   /** カバー画像URL */
   coverImageUrl?: string;

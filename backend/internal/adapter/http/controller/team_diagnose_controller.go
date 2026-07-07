@@ -38,7 +38,7 @@ func (c *TeamDiagnoseController) UpdateStatus(ctx echo.Context, token string) er
 		return badRequest(ctx, "invalid request")
 	}
 
-	if err := c.input.UpdateStatus(ctx.Request().Context(), token, body.WvStatus, body.CiStatus); err != nil {
+	if err := c.input.UpdateStatus(ctx.Request().Context(), token, (*string)(body.WvStatus), (*string)(body.CiStatus)); err != nil {
 		switch {
 		case errors.Is(err, domainerr.ErrBadRequest):
 			return badRequest(ctx, err.Error())

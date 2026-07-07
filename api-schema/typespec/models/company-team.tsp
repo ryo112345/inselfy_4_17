@@ -5,6 +5,12 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** チームメンバーの診断ステータス */
+union TeamDiagnosisStatus {
+  "pending",
+  "completed",
+}
+
 /** チーム作成リクエスト */
 model CreateTeamRequest {
   /** チーム名 */
@@ -86,10 +92,10 @@ model TeamMemberResponse {
   inviteToken: string;
 
   /** Work Values 診断ステータス */
-  wvStatus: string;
+  wvStatus: TeamDiagnosisStatus;
 
   /** Career Interest 診断ステータス */
-  ciStatus: string;
+  ciStatus: TeamDiagnosisStatus;
 
   /** エースメンバーか */
   isAce: boolean;
@@ -146,10 +152,10 @@ model MemberScoreResponse {
   userId: string;
 
   /** Work Values 診断ステータス */
-  wvStatus: string;
+  wvStatus: TeamDiagnosisStatus;
 
   /** Career Interest 診断ステータス */
-  ciStatus: string;
+  ciStatus: TeamDiagnosisStatus;
 
   /** エースメンバーか */
   isAce: boolean;

@@ -5,6 +5,13 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** 設問のスキルレベル */
+union CISkillLevel {
+  "entry",
+  "mid",
+  "advanced",
+}
+
 /** Career Interest セッション開始リクエスト */
 model CIStartSessionRequest {
   /** ユーザーID */
@@ -41,7 +48,7 @@ model CIItemResponse {
   basicInterestId: string;
 
   /** スキルレベル */
-  skillLevel: string;
+  skillLevel: CISkillLevel;
 
   /** 活動種別 */
   activityType: string;
@@ -56,7 +63,7 @@ model CISessionResponse {
   id: string;
 
   /** ステータス */
-  status: string;
+  status: DiagnosisSessionStatus;
 
   /** 設問一覧 */
   items: CIItemResponse[];

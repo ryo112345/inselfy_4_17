@@ -13,8 +13,8 @@ func DiagnoseInfoResponse(info *company.TeamDiagnoseInfo) *openapi.ModelsDiagnos
 		TeamName:    info.TeamName,
 		CompanyName: info.CompanyName,
 		UserId:      info.UserID,
-		WvStatus:    info.WVStatus,
-		CiStatus:    info.CIStatus,
+		WvStatus:    openapi.ModelsTeamDiagnosisStatus(info.WVStatus),
+		CiStatus:    openapi.ModelsTeamDiagnosisStatus(info.CIStatus),
 		Email:       info.Email,
 	}
 }

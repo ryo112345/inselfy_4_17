@@ -19,7 +19,7 @@ func (c *jobPostingRequestConverterImpl) ToCreateInput(source openapi.ModelsJobP
 		xstring := *source.Location
 		jobpostingCreateJobPostingInput.Location = &xstring
 	}
-	jobpostingCreateJobPostingInput.Status = source.Status
+	jobpostingCreateJobPostingInput.Status = jobPostingStatusToString(source.Status)
 	jobpostingCreateJobPostingInput.JobCategory = source.JobCategory
 	jobpostingCreateJobPostingInput.HiringCount = source.HiringCount
 	jobpostingCreateJobPostingInput.AppealPoints = source.AppealPoints
@@ -89,7 +89,7 @@ func (c *jobPostingRequestConverterImpl) ToUpdateInput(source openapi.ModelsJobP
 		xstring := *source.Location
 		jobpostingUpdateJobPostingInput.Location = &xstring
 	}
-	jobpostingUpdateJobPostingInput.Status = source.Status
+	jobpostingUpdateJobPostingInput.Status = jobPostingStatusToString(source.Status)
 	jobpostingUpdateJobPostingInput.JobCategory = source.JobCategory
 	jobpostingUpdateJobPostingInput.HiringCount = source.HiringCount
 	jobpostingUpdateJobPostingInput.AppealPoints = source.AppealPoints

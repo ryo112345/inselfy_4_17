@@ -34,7 +34,7 @@ func (c *scoutConverterImpl) ToScoutMessageResponse(source *scout.ScoutMessageWi
 		openapiModelsScoutMessageResponse.OpenedAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.OpenedAt)
 		openapiModelsScoutMessageResponse.RepliedAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.RepliedAt)
 		openapiModelsScoutMessageResponse.SentAt = c.pTimeTimeToPTimeTime((*source).ScoutMessage.SentAt)
-		openapiModelsScoutMessageResponse.Status = scoutStatusToString((*source).ScoutMessage.Status)
+		openapiModelsScoutMessageResponse.Status = scoutStatusToModel((*source).ScoutMessage.Status)
 		openapiModelsScoutMessageResponse.Subject = (*source).ScoutMessage.Subject
 		pOpenapiModelsScoutMessageResponse = &openapiModelsScoutMessageResponse
 	}

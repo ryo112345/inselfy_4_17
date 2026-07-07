@@ -8,7 +8,7 @@ import {
   updateApplicationStatus,
 } from "@/features/job-application/api";
 import { checkPendingProposal } from "@/features/interview/api";
-import type { JobApplication } from "@/features/job-application/api";
+import type { JobApplication, JobApplicationStatus } from "@/features/job-application/api";
 import { fetchJobPosting, fetchJobPostings } from "@/features/job-posting/api";
 import {
   fetchCandidateDetail,
@@ -43,7 +43,7 @@ const STATUS_COLORS: Record<string, string> = {
   withdrawn: "bg-gray-100 text-gray-500",
 };
 
-const STATUS_OPTIONS = [
+const STATUS_OPTIONS: { value: JobApplicationStatus; label: string }[] = [
   { value: "applied", label: "応募受付" },
   { value: "screening", label: "書類選考" },
   { value: "interview", label: "面接" },
@@ -393,7 +393,7 @@ export default function CompanyApplicationsPage() {
 
   const handleStatusChange = async (
     applicationId: string,
-    newStatus: string,
+    newStatus: JobApplicationStatus,
   ) => {
     try {
       await updateApplicationStatus(applicationId, newStatus);

@@ -11,7 +11,7 @@ import (
 // goverter:converter
 // goverter:output:file ./scout_converter.gen.go
 // goverter:output:package github.com/akiyama/inselfy/backend/internal/adapter/http/presenter
-// goverter:extend copyTime scoutStatusToString
+// goverter:extend copyTime scoutStatusToModel
 // goverter:matchIgnoreCase
 // goverter:useZeroValueOnPointerInconsistency
 type scoutConverter interface {
@@ -20,4 +20,6 @@ type scoutConverter interface {
 	ToScoutReplyResponses(rs []*scout.ScoutReply) []openapi.ModelsScoutReplyResponse
 }
 
-func scoutStatusToString(s scout.Status) string { return string(s) }
+func scoutStatusToModel(s scout.Status) openapi.ModelsScoutStatus {
+	return openapi.ModelsScoutStatus(s)
+}

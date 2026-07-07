@@ -89,20 +89,36 @@ Go 側は生成フィールド名が概ね同一（`session_id` → `SessionId` 
 
 | # | 状態 | フィールド | 値集合 | 根拠 |
 |---|------|-----------|--------|------|
-| E1 | [ ] | job-application `status`（response + update request） | `applied` `screening` `interview` `offer` `accepted` `rejected` `withdrawn` | domain/jobapplication/entity.go + DB CHECK |
-| E2 | [ ] | scout / candidate-scout `status` | `draft` `sent` `opened` `replied` `interested` `declined` `expired` | domain/scout/entity.go + DB ENUM。FE 手書き union（scout/types.ts）と一致 → 生成型に置換 |
-| E3 | [ ] | scout quality `level` | `good` `warning` `temporarily_restricted` `restricted` | domain/scout/entity.go QualityLevel |
-| E4 | [ ] | work-values / career-interest セッション `status` | `in_progress` `completed` `expired` | 両 domain 定数 + DB CHECK |
-| E5 | [ ] | article `status` | `draft` `published` | domain/article/entity.go + DB ENUM |
-| E6 | [ ] | notification `type` | `scout_received` `scout_replied` `scout_interested` `scout_declined` `scout_expired` `credit_replenished` `quality_warning` | domain/notification/entity.go + DB ENUM |
-| E7 | [ ] | company-auth `status` | `pending` `approved` `rejected` | domain/company/entity.go + DB ENUM |
-| E8 | [ ] | interview: proposal `status` / slot `status` / interview `status` | proposal: `pending` `confirmed` `expired` `cancelled` ／ slot: `proposed` `selected` `rejected` ／ interview: `scheduled` `completed` `cancelled` `no_show` | domain コメント準拠（`expired`/`completed`/`no_show` は現状未出力だが文書化された将来値として含める）。FE 手書き union（interview/types.ts）と一致 → 生成型に置換 |
-| E9 | [ ] | job-posting `status` | `draft` `open` | interactor が認識する2値のみ（DB は TEXT・未検証のパススルー） |
-| E10 | [ ] | team member / team-diagnose `wv_status` `ci_status` | `pending` `completed` | コード上この2値のみ（update は `completed` のみ受理） |
-| E11 | [ ] | career-interest 設問 `skill_level` | `entry` `mid` `advanced` | domain/careerinterest/items.go（コンパイル時定数） |
+| E1 | [x] | job-application `status`（response + update request） | `applied` `screening` `interview` `offer` `accepted` `rejected` `withdrawn` | domain/jobapplication/entity.go + DB CHECK |
+| E2 | [x] | scout / candidate-scout `status` | `draft` `sent` `opened` `replied` `interested` `declined` `expired` | domain/scout/entity.go + DB ENUM。FE 手書き union（scout/types.ts）と一致 → 生成型に置換 |
+| E3 | [x] | scout quality `level` | `good` `warning` `temporarily_restricted` `restricted` | domain/scout/entity.go QualityLevel |
+| E4 | [x] | work-values / career-interest セッション `status` | `in_progress` `completed` `expired` | 両 domain 定数 + DB CHECK |
+| E5 | [x] | article `status` | `draft` `published` | domain/article/entity.go + DB ENUM |
+| E6 | [x] | notification `type` | `scout_received` `scout_replied` `scout_interested` `scout_declined` `scout_expired` `credit_replenished` `quality_warning` | domain/notification/entity.go + DB ENUM |
+| E7 | [x] | company-auth `status` | `pending` `approved` `rejected` | domain/company/entity.go + DB ENUM |
+| E8 | [x] | interview: proposal `status` / slot `status` / interview `status` | proposal: `pending` `confirmed` `expired` `cancelled` ／ slot: `proposed` `selected` `rejected` ／ interview: `scheduled` `completed` `cancelled` `no_show` | domain コメント準拠（`expired`/`completed`/`no_show` は現状未出力だが文書化された将来値として含める）。FE 手書き union（interview/types.ts）と一致 → 生成型に置換 |
+| E9 | [x] | job-posting `status` | `draft` `open` | interactor が認識する2値のみ（DB は TEXT・未検証のパススルー） |
+| E10 | [x] | team member / team-diagnose `wv_status` `ci_status` | `pending` `completed` | コード上この2値のみ（update は `completed` のみ受理） |
+| E11 | [x] | career-interest 設問 `skill_level` | `entry` `mid` `advanced` | domain/careerinterest/items.go（コンパイル時定数） |
 
 **enum 化しない（自由記述）:** `jobSeekingStatus` / `job_seeking_status` / `candidateSeekingStatus`
 （長さ50制限のみの自由テキスト）、career-interest の `activity_type`（日本語カテゴリラベル）。
+
+### enum 化の実装メモ（2026-07-07 完了）
+
+- named union は各 models/*.tsp の先頭に定義（WV/CI 共通の `DiagnosisSessionStatus` のみ common.tsp）。
+- `{"status":"ok"}` 系（job-application `StatusOkResponse`、candidate-scout `ScoutRespondResponse`）は
+  リテラル `"ok"` にした。
+- team-diagnose の update リクエストは `TeamDiagnosisStatus | null` にすると oapi-codegen が
+  union ラッパー struct を生成して扱いづらいため、`?`（省略可）のみに変更した。
+  FE は元々キー省略で送っており、明示 null を送る呼び出し元は存在しない（挙動不変）。
+- Go 側は domain string → 生成 enum 型のキャストを presenter で明示。goverter converter は
+  extend 関数（`scoutStatusToModel` / `jobApplicationStatusToModel` / `jobPostingStatusToModel` /
+  `jobPostingStatusToString`）を追加して `make goverter` で再生成。
+- FE の手書きリテラル union（scout/types.ts の `ScoutStatus`・`QualityScore.level`、
+  interview/types.ts の slot/interview status）は生成型のエイリアスに置換。
+- enum はドキュメント・型レベルの契約であり、Go 生成サーバはランタイム検証をしない
+  （job-posting の update は従来どおり任意文字列を受けても 200 になる。挙動不変）。
 
 ## 進め方
 

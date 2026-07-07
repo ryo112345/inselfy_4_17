@@ -5,6 +5,13 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** 企業アカウントのステータス */
+union CompanyStatus {
+  "pending",
+  "approved",
+  "rejected",
+}
+
 /** 企業アカウント登録リクエスト */
 model CompanyRegisterRequest {
   /** メールアドレス */
@@ -50,7 +57,7 @@ model CompanyResponse {
   phoneNumber: string;
 
   /** アカウントステータス */
-  status: string;
+  status: CompanyStatus;
 
   /** 作成日時 */
   createdAt: utcDateTime;

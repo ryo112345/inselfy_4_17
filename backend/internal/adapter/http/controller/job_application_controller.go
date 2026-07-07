@@ -107,7 +107,7 @@ func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID 
 
 	status := ""
 	if body.Status != nil {
-		status = *body.Status
+		status = string(*body.Status)
 	}
 	if err := c.input.UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(status)); err != nil {
 		return handleError(ctx, err)

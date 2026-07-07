@@ -50,7 +50,7 @@ func ScoutCreditsResponse(c *scout.ScoutCredit) any {
 func ScoutQualityResponse(q *scout.QualityScore) any {
 	return &openapi.ModelsScoutQualityScoreResponse{
 		ReplyRate14d:      q.ReplyRate14d,
-		Level:             string(q.Level),
+		Level:             openapi.ModelsScoutQualityLevel(q.Level),
 		SentLast14d:       q.SentLast14d,
 		RepliedLast14d:    q.RepliedLast14d,
 		WarningStartedAt:  q.WarningStartedAt,

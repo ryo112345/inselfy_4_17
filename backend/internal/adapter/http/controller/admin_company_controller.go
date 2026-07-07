@@ -199,7 +199,7 @@ func (c *AdminCompanyController) BypassLogin(ctx echo.Context, id string) error 
 			CompanyName:       ca.CompanyName,
 			ContactPersonName: ca.ContactPersonName,
 			PhoneNumber:       ca.PhoneNumber,
-			Status:            string(ca.Status),
+			Status:            openapi.ModelsCompanyStatus(ca.Status),
 			CreatedAt:         ca.CreatedAt.Time,
 		},
 	})
