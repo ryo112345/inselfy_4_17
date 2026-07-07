@@ -1232,7 +1232,7 @@ type ModelsCreateArticleRequest struct {
 	// PriceYen 価格（円）
 	PriceYen int `json:"priceYen"`
 
-	// Tags タグ
+	// Tags タグ（各タグは50文字以内）
 	Tags []string `json:"tags"`
 
 	// Title タイトル
@@ -3032,7 +3032,7 @@ type ModelsUpdateArticleRequest struct {
 	// PriceYen 価格（円）
 	PriceYen int `json:"priceYen"`
 
-	// Tags タグ
+	// Tags タグ（各タグは50文字以内）
 	Tags []string `json:"tags"`
 
 	// Title タイトル

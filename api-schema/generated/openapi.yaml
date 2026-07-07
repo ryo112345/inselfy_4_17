@@ -7201,6 +7201,7 @@ components:
       properties:
         body:
           type: string
+          maxLength: 5000
           description: 本文
       description: 候補者からのスカウト返信リクエスト
     Models.CheckoutSessionResponse:
@@ -7480,18 +7481,23 @@ components:
       properties:
         email:
           type: string
+          maxLength: 255
           description: メールアドレス
         password:
           type: string
+          minLength: 8
           description: パスワード
         companyName:
           type: string
+          maxLength: 200
           description: 企業名
         contactPersonName:
           type: string
+          maxLength: 100
           description: 担当者名
         phoneNumber:
           type: string
+          maxLength: 30
           description: 電話番号
       description: 企業アカウント登録リクエスト
     Models.CompanyResponse:
@@ -7536,6 +7542,7 @@ components:
       properties:
         body:
           type: string
+          maxLength: 5000
           description: 本文
       description: 企業からのスカウト返信リクエスト
     Models.CompanyStatus:
@@ -7644,15 +7651,19 @@ components:
       properties:
         title:
           type: string
+          maxLength: 200
           description: タイトル
         body:
           type: string
+          maxLength: 100000
           description: 本文
         isPaid:
           type: boolean
           description: 有料記事か
         priceYen:
           type: integer
+          minimum: 0
+          maximum: 1000000
           description: 価格（円）
         coverImageUrl:
           type: string
@@ -7662,7 +7673,8 @@ components:
           type: array
           items:
             type: string
-          description: タグ
+          maxItems: 10
+          description: タグ（各タグは50文字以内）
       description: 記事作成リクエスト
     Models.CreateCommentRequest:
       type: object
@@ -7671,6 +7683,7 @@ components:
       properties:
         content:
           type: string
+          maxLength: 500
           description: 本文
       description: コメント作成リクエスト
     Models.CreateEducationRequest:
@@ -7787,6 +7800,7 @@ components:
       properties:
         content:
           type: string
+          maxLength: 280
           description: 本文
         quotePostId:
           type: string
@@ -7801,12 +7815,15 @@ components:
       properties:
         name:
           type: string
+          maxLength: 100
           description: テンプレート名
         subject:
           type: string
+          maxLength: 200
           description: 件名
         body:
           type: string
+          maxLength: 5000
           description: 本文
       description: スカウトテンプレート作成リクエスト
     Models.CreateTeamRequest:
@@ -9915,6 +9932,7 @@ components:
       properties:
         body:
           type: string
+          maxLength: 5000
           description: 本文
       description: メッセージ送信リクエスト
     Models.SendScoutRequest:
@@ -9937,9 +9955,11 @@ components:
           description: 使用テンプレートID
         subject:
           type: string
+          maxLength: 200
           description: 件名
         body:
           type: string
+          maxLength: 5000
           description: 本文
       description: スカウト送信リクエスト
     Models.SimilarUserExperience:
@@ -10067,6 +10087,7 @@ components:
           description: 相手のID
         body:
           type: string
+          maxLength: 5000
           description: 最初のメッセージ本文
       description: 会話開始リクエスト（候補者→候補者/企業）
     Models.StartConversationRequest:
@@ -10080,6 +10101,7 @@ components:
           description: 候補者ユーザーID
         body:
           type: string
+          maxLength: 5000
           description: 最初のメッセージ本文
       description: 会話開始リクエスト（企業→候補者）
     Models.StatusOkResponse:
@@ -10404,15 +10426,19 @@ components:
       properties:
         title:
           type: string
+          maxLength: 200
           description: タイトル
         body:
           type: string
+          maxLength: 100000
           description: 本文
         isPaid:
           type: boolean
           description: 有料記事か
         priceYen:
           type: integer
+          minimum: 0
+          maximum: 1000000
           description: 価格（円）
         coverImageUrl:
           type: string
@@ -10422,7 +10448,8 @@ components:
           type: array
           items:
             type: string
-          description: タグ
+          maxItems: 10
+          description: タグ（各タグは50文字以内）
       description: 記事更新リクエスト
     Models.UpdateCompanyProfileRequest:
       type: object
@@ -10622,12 +10649,15 @@ components:
       properties:
         name:
           type: string
+          maxLength: 100
           description: テンプレート名
         subject:
           type: string
+          maxLength: 200
           description: 件名
         body:
           type: string
+          maxLength: 5000
           description: 本文
       description: スカウトテンプレート更新リクエスト
     Models.UpdateTeamRequest:

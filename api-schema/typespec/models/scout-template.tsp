@@ -8,12 +8,15 @@ namespace Inselfy.Models;
 /** スカウトテンプレート作成リクエスト */
 model CreateScoutTemplateRequest {
   /** テンプレート名 */
+  @maxLength(100)
   name: string;
 
   /** 件名 */
+  @maxLength(200)
   subject: string;
 
   /** 本文 */
+  @maxLength(5000)
   body: string;
 }
 

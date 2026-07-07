@@ -15,18 +15,23 @@ union CompanyStatus {
 /** 企業アカウント登録リクエスト */
 model CompanyRegisterRequest {
   /** メールアドレス */
+  @maxLength(255)
   email: string;
 
   /** パスワード */
+  @minLength(8)
   password: string;
 
   /** 企業名 */
+  @maxLength(200)
   companyName: string;
 
   /** 担当者名 */
+  @maxLength(100)
   contactPersonName: string;
 
   /** 電話番号 */
+  @maxLength(30)
   phoneNumber: string;
 }
 

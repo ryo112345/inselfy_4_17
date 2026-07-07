@@ -11,6 +11,7 @@ model StartConversationRequest {
   candidateId: string;
 
   /** 最初のメッセージ本文 */
+  @maxLength(5000)
   body: string;
 }
 
@@ -20,12 +21,14 @@ model StartCandidateConversationRequest {
   recipientId: string;
 
   /** 最初のメッセージ本文 */
+  @maxLength(5000)
   body: string;
 }
 
 /** メッセージ送信リクエスト */
 model SendMessageRequest {
   /** 本文 */
+  @maxLength(5000)
   body: string;
 }
 
