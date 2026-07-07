@@ -11,6 +11,7 @@ namespace Inselfy.Routes;
 
 @route("/api/scouts")
 @tag("CandidateScouts")
+@useAuth(Models.CandidateAuth)
 interface CandidateScouts {
   /** 受信スカウト一覧（要ログイン） */
   @get
@@ -21,7 +22,7 @@ interface CandidateScouts {
 
     /** オフセット */
     @query offset?: int32,
-  ): ScoutListResponse | BadRequestError;
+  ): ScoutListResponse | BadRequestError | UnauthorizedError;
 
   /** 受信スカウト詳細（要ログイン） */
   @get
@@ -29,7 +30,7 @@ interface CandidateScouts {
   @summary("Get a received scout with replies")
   getCandidateScoutDetail(
     @path scoutId: string,
-  ): ScoutDetailResponse | NotFoundError | BadRequestError;
+  ): ScoutDetailResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** スカウトへ応答（interested / declined） */
   @post
@@ -38,7 +39,7 @@ interface CandidateScouts {
   respondToScout(
     @path scoutId: string,
     @body request: ScoutRespondRequest,
-  ): ScoutRespondResponse | BadRequestError | NotFoundError;
+  ): ScoutRespondResponse | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** スカウトへ返信（要ログイン） */
   @post
@@ -49,7 +50,7 @@ interface CandidateScouts {
     @body request: CandidateScoutReplyRequest,
   ): {
     @statusCode statusCode: 201;
-  } | BadRequestError | NotFoundError;
+  } | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** スカウト一括辞退 */
   @post
@@ -59,7 +60,7 @@ interface CandidateScouts {
     @body request: BulkDeclineRequest,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 
   /** スカウト一括応答 */
   @post
@@ -69,5 +70,5 @@ interface CandidateScouts {
     @body request: BulkRespondRequest,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 }

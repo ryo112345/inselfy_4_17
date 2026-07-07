@@ -14,12 +14,13 @@ interface Posts {
   /** 投稿作成（要ログイン） */
   @post
   @summary("Create a post")
+  @useAuth(Models.CandidateAuth)
   createPost(
     @body request: CreatePostRequest,
   ): {
     @statusCode statusCode: 201;
     @body post: PostResponse;
-  } | BadRequestError | NotFoundError;
+  } | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** タイムライン取得 */
   @get
@@ -69,27 +70,30 @@ interface Posts {
   @delete
   @route("/{postId}")
   @summary("Delete a post")
+  @useAuth(Models.CandidateAuth)
   deletePost(
     @path postId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | ForbiddenError | BadRequestError;
+  } | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
 
   /** いいねトグル（要ログイン） */
   @post
   @route("/{postId}/like")
   @summary("Toggle like on a post")
+  @useAuth(Models.CandidateAuth)
   togglePostLike(
     @path postId: string,
-  ): LikeToggleResponse | NotFoundError | BadRequestError;
+  ): LikeToggleResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** リポストトグル（要ログイン） */
   @post
   @route("/{postId}/repost")
   @summary("Toggle repost on a post")
+  @useAuth(Models.CandidateAuth)
   togglePostRepost(
     @path postId: string,
-  ): RepostToggleResponse | NotFoundError | BadRequestError;
+  ): RepostToggleResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** コメント一覧 */
   @get
@@ -105,21 +109,23 @@ interface Posts {
   @post
   @route("/{postId}/comments")
   @summary("Create a comment on a post")
+  @useAuth(Models.CandidateAuth)
   createPostComment(
     @path postId: string,
     @body request: CreateCommentRequest,
   ): {
     @statusCode statusCode: 201;
     @body comment: CommentResponse;
-  } | BadRequestError | NotFoundError;
+  } | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** コメント削除（要ログイン） */
   @delete
   @route("/comments/{commentId}")
   @summary("Delete a comment")
+  @useAuth(Models.CandidateAuth)
   deletePostComment(
     @path commentId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | ForbiddenError | BadRequestError;
+  } | NotFoundError | ForbiddenError | BadRequestError | UnauthorizedError;
 }

@@ -10,6 +10,7 @@ namespace Inselfy.Routes;
 
 @route("/api/company/scout-templates")
 @tag("ScoutTemplates")
+@useAuth(Models.CompanyAuth)
 interface ScoutTemplates {
   /** スカウトテンプレート作成（企業認証） */
   @post
@@ -19,12 +20,12 @@ interface ScoutTemplates {
   ): {
     @statusCode statusCode: 201;
     @body template: ScoutTemplateResponse;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 
   /** スカウトテンプレート一覧（企業認証） */
   @get
   @summary("List scout templates")
-  listScoutTemplates(): ScoutTemplateListResponse | BadRequestError;
+  listScoutTemplates(): ScoutTemplateListResponse | BadRequestError | UnauthorizedError;
 
   /** スカウトテンプレート取得（企業認証） */
   @get
@@ -32,7 +33,7 @@ interface ScoutTemplates {
   @summary("Get a scout template")
   getScoutTemplate(
     @path templateId: string,
-  ): ScoutTemplateResponse | NotFoundError | BadRequestError;
+  ): ScoutTemplateResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** スカウトテンプレート更新（企業認証） */
   @put
@@ -41,7 +42,7 @@ interface ScoutTemplates {
   updateScoutTemplate(
     @path templateId: string,
     @body request: UpdateScoutTemplateRequest,
-  ): ScoutTemplateResponse | BadRequestError | NotFoundError;
+  ): ScoutTemplateResponse | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** スカウトテンプレート削除（企業認証） */
   @delete
@@ -51,5 +52,5 @@ interface ScoutTemplates {
     @path templateId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 }

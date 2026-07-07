@@ -10,6 +10,7 @@ namespace Inselfy.Routes;
 
 @route("/api/company/scouts")
 @tag("CompanyScouts")
+@useAuth(Models.CompanyAuth)
 interface CompanyScouts {
   /** スカウト送信（企業認証） */
   @post
@@ -19,7 +20,7 @@ interface CompanyScouts {
   ): {
     @statusCode statusCode: 201;
     @body scout: ScoutMessageResponse;
-  } | BadRequestError | NotFoundError | ForbiddenError;
+  } | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
 
   /** 送信済みスカウト一覧（企業認証） */
   @get
@@ -33,25 +34,25 @@ interface CompanyScouts {
 
     /** オフセット */
     @query offset?: int32,
-  ): ScoutListResponse | BadRequestError;
+  ): ScoutListResponse | BadRequestError | UnauthorizedError;
 
   /** スカウトクレジット取得（企業認証） */
   @get
   @route("/credits")
   @summary("Get scout credits")
-  getScoutCredits(): ScoutCreditsResponse | BadRequestError;
+  getScoutCredits(): ScoutCreditsResponse | BadRequestError | UnauthorizedError;
 
   /** スカウト品質スコア取得（企業認証） */
   @get
   @route("/quality")
   @summary("Get scout quality score")
-  getScoutQuality(): ScoutQualityScoreResponse | BadRequestError;
+  getScoutQuality(): ScoutQualityScoreResponse | BadRequestError | UnauthorizedError;
 
   /** スカウトダッシュボード取得（企業認証） */
   @get
   @route("/dashboard")
   @summary("Get scout dashboard stats")
-  getScoutDashboard(): ScoutDashboardResponse | BadRequestError;
+  getScoutDashboard(): ScoutDashboardResponse | BadRequestError | UnauthorizedError;
 
   /** スカウト詳細取得（企業認証） */
   @get
@@ -59,7 +60,7 @@ interface CompanyScouts {
   @summary("Get scout detail with replies")
   getCompanyScoutDetail(
     @path scoutId: string,
-  ): ScoutDetailResponse | NotFoundError | BadRequestError;
+  ): ScoutDetailResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** スカウトへ返信（企業認証） */
   @post
@@ -70,5 +71,5 @@ interface CompanyScouts {
     @body request: CompanyScoutReplyRequest,
   ): {
     @statusCode statusCode: 201;
-  } | BadRequestError | NotFoundError;
+  } | BadRequestError | NotFoundError | UnauthorizedError;
 }

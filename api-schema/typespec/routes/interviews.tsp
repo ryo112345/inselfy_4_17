@@ -11,6 +11,7 @@ namespace Inselfy.Routes;
 
 @route("/api/company/interviews")
 @tag("Interviews")
+@useAuth(Models.CompanyAuth)
 interface CompanyInterviews {
   /** 面接日程を提案（企業認証） */
   @post
@@ -21,7 +22,7 @@ interface CompanyInterviews {
   ): {
     @statusCode statusCode: 201;
     @body result: ProposeInterviewResponse;
-  } | BadRequestError | NotFoundError;
+  } | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** 応募に未回答の提案があるか確認（企業認証） */
   @get
@@ -29,7 +30,7 @@ interface CompanyInterviews {
   @summary("Check for a pending proposal on an application")
   getPendingProposal(
     @path applicationId: string,
-  ): PendingProposalCheckResponse | BadRequestError;
+  ): PendingProposalCheckResponse | BadRequestError | UnauthorizedError;
 
   /** 期間内の面接一覧（企業認証） */
   @get
@@ -40,7 +41,7 @@ interface CompanyInterviews {
 
     /** 終了日（YYYY-MM-DD、デフォルト from+7日） */
     @query to?: string,
-  ): CompanyInterviewListResponse | BadRequestError;
+  ): CompanyInterviewListResponse | BadRequestError | UnauthorizedError;
 
   /** 面接キャンセル（企業認証） */
   @post
@@ -53,11 +54,12 @@ interface CompanyInterviews {
 
 @route("/api/interviews")
 @tag("Interviews")
+@useAuth(Models.CandidateAuth)
 interface CandidateInterviews {
   /** 面接・未回答提案の一覧（要ログイン） */
   @get
   @summary("List interviews and pending proposals for the candidate")
-  listCandidateInterviews(): CandidateInterviewListResponse | BadRequestError;
+  listCandidateInterviews(): CandidateInterviewListResponse | BadRequestError | UnauthorizedError;
 
   /** 提案スロットを選択して面接確定（要ログイン） */
   @post
@@ -66,7 +68,7 @@ interface CandidateInterviews {
   selectInterviewSlot(
     @path proposalId: string,
     @body request: SelectSlotRequest,
-  ): SelectSlotResponse | BadRequestError | NotFoundError | ConflictError;
+  ): SelectSlotResponse | BadRequestError | NotFoundError | ConflictError | UnauthorizedError;
 
   /** 提案のスロット一覧取得（要ログイン） */
   @get
@@ -74,7 +76,7 @@ interface CandidateInterviews {
   @summary("Get slots of a proposal")
   getProposalSlots(
     @path proposalId: string,
-  ): ProposalSlotsResponse | NotFoundError | BadRequestError;
+  ): ProposalSlotsResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** 面接キャンセル（要ログイン） */
   @post

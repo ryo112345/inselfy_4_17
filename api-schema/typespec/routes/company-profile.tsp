@@ -21,18 +21,19 @@ interface PublicCompanyProfiles {
 
 @route("/api/company/profile")
 @tag("CompanyProfile")
+@useAuth(Models.CompanyAuth)
 interface CompanyProfiles {
   /** 自社プロフィール取得（企業認証） */
   @get
   @summary("Get the authenticated company's profile")
-  getCompanyProfile(): CompanyProfileResponse | NotFoundError | BadRequestError;
+  getCompanyProfile(): CompanyProfileResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** 自社プロフィール更新（企業認証）。更新後の全プロフィールを返す */
   @put
   @summary("Update the authenticated company's profile")
   updateCompanyProfile(
     @body request: UpdateCompanyProfileRequest,
-  ): CompanyProfileResponse | BadRequestError;
+  ): CompanyProfileResponse | BadRequestError | UnauthorizedError;
 
   /** 画像アップロード（企業認証）。type=logo|cover|gallery */
   @post
@@ -47,7 +48,7 @@ interface CompanyProfiles {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UploadUrlResponse | BadRequestError;
+  ): UploadUrlResponse | BadRequestError | UnauthorizedError;
 
   /** 画像削除（企業認証）。type=logo|cover|gallery、gallery は url 指定 */
   @delete
@@ -61,5 +62,5 @@ interface CompanyProfiles {
     @query url?: string,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 }

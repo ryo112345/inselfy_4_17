@@ -10,16 +10,17 @@ namespace Inselfy.Routes;
 
 @route("/api/scout-settings")
 @tag("ScoutSettings")
+@useAuth(Models.CandidateAuth)
 interface ScoutSettings {
   /** スカウト受け入れ設定取得（要ログイン） */
   @get
   @summary("Get scout settings for the authenticated user")
-  getScoutSettings(): ScoutSettingsResponse | NotFoundError | BadRequestError;
+  getScoutSettings(): ScoutSettingsResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** スカウト受け入れ設定更新（要ログイン） */
   @put
   @summary("Update scout settings for the authenticated user")
   updateScoutSettings(
     @body request: UpdateScoutSettingsRequest,
-  ): ScoutSettingsResponse | BadRequestError | NotFoundError;
+  ): ScoutSettingsResponse | BadRequestError | NotFoundError | UnauthorizedError;
 }

@@ -5,6 +5,18 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/**
+ * 候補者認証。`inselfy_token` cookie の JWT を検証する
+ * （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
+ */
+model CandidateAuth is ApiKeyAuth<ApiKeyLocation.cookie, "inselfy_token">;
+
+/**
+ * 企業認証。`company_token` cookie の JWT を検証する
+ * （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
+ */
+model CompanyAuth is ApiKeyAuth<ApiKeyLocation.cookie, "company_token">;
+
 /** 診断セッションのステータス（Work Values / Career Interest 共通） */
 union DiagnosisSessionStatus {
   "in_progress",
@@ -28,6 +40,7 @@ model ErrorResponse {
 /** Not Found エラー */
 @error
 model NotFoundError {
+  @statusCode statusCode: 404;
   code: "NOT_FOUND";
   message: string;
 }
@@ -35,6 +48,7 @@ model NotFoundError {
 /** Bad Request エラー */
 @error
 model BadRequestError {
+  @statusCode statusCode: 400;
   code: "BAD_REQUEST";
   message: string;
   details?: unknown;
@@ -43,6 +57,7 @@ model BadRequestError {
 /** Conflict エラー */
 @error
 model ConflictError {
+  @statusCode statusCode: 409;
   code: "CONFLICT";
   message: string;
 }
@@ -50,6 +65,7 @@ model ConflictError {
 /** Forbidden エラー */
 @error
 model ForbiddenError {
+  @statusCode statusCode: 403;
   code: "FORBIDDEN";
   message: string;
 }
@@ -57,6 +73,7 @@ model ForbiddenError {
 /** Unauthorized エラー */
 @error
 model UnauthorizedError {
+  @statusCode statusCode: 401;
   code: "UNAUTHORIZED";
   message: string;
 }

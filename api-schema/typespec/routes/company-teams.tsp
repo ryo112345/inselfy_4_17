@@ -21,11 +21,12 @@ interface PublicTeamScores {
 
 @route("/api/company/teams")
 @tag("CompanyTeams")
+@useAuth(Models.CompanyAuth)
 interface CompanyTeams {
   /** チーム一覧（企業認証） */
   @get
   @summary("List teams of the authenticated company")
-  listTeams(): TeamListResponse | BadRequestError;
+  listTeams(): TeamListResponse | BadRequestError | UnauthorizedError;
 
   /** チーム作成（企業認証） */
   @post
@@ -35,7 +36,7 @@ interface CompanyTeams {
   ): {
     @statusCode statusCode: 201;
     @body team: TeamDetailResponse;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 
   /** チーム詳細（企業認証） */
   @get
@@ -43,7 +44,7 @@ interface CompanyTeams {
   @summary("Get a team with members")
   getTeam(
     @path teamId: string,
-  ): TeamDetailResponse | NotFoundError | BadRequestError;
+  ): TeamDetailResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** チーム更新（企業認証） */
   @put
@@ -54,7 +55,7 @@ interface CompanyTeams {
     @body request: UpdateTeamRequest,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError | NotFoundError;
+  } | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** チーム削除（企業認証） */
   @delete
@@ -64,7 +65,7 @@ interface CompanyTeams {
     @path teamId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** メンバー追加（企業認証） */
   @post
@@ -76,7 +77,7 @@ interface CompanyTeams {
   ): {
     @statusCode statusCode: 201;
     @body member: TeamMemberResponse;
-  } | BadRequestError | NotFoundError;
+  } | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** メンバー削除（企業認証） */
   @delete
@@ -87,7 +88,7 @@ interface CompanyTeams {
     @path memberId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** チームスコア取得（企業認証） */
   @get
@@ -95,7 +96,7 @@ interface CompanyTeams {
   @summary("Get diagnostic scores of team members")
   getTeamScores(
     @path teamId: string,
-  ): TeamScoresResponse | NotFoundError | BadRequestError;
+  ): TeamScoresResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** エースメンバー設定（企業認証） */
   @put
@@ -106,7 +107,7 @@ interface CompanyTeams {
     @path memberId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** エースメンバー解除（企業認証） */
   @delete
@@ -116,5 +117,5 @@ interface CompanyTeams {
     @path teamId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 }
