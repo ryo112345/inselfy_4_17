@@ -48,10 +48,10 @@
 
 | # | 状態 | 項目 | 規模 | 種別 |
 |---|------|------|------|------|
-| F12 | [ ] | `loading.tsx` / `error.tsx` / `not-found.tsx` の追加 | 小 | UX |
-| F13 | [ ] | `next/image` への移行（全17ファイル） | 中 | パフォーマンス |
-| F14 | [ ] | 公開ページの SSR 化＋`generateMetadata` | 大 | SEO・パフォーマンス |
-| F15 | [ ] | 重量ライブラリの dynamic import（TipTap / react-easy-crop） | 小 | パフォーマンス |
+| F12 | [x] | `loading.tsx` / `error.tsx` / `not-found.tsx` の追加 | 小 | UX |
+| F13 | [x] | `next/image` への移行（全17ファイル） | 中 | パフォーマンス |
+| F14 | [x] | 公開ページの SSR 化＋`generateMetadata` | 大 | SEO・パフォーマンス |
+| F15 | [x] | 重量ライブラリの dynamic import（TipTap / react-easy-crop） | 小 | パフォーマンス |
 
 ### Phase E: データ層・型のクリーンアップ
 
