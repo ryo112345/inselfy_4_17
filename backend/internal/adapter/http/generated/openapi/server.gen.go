@@ -13,6 +13,11 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+const (
+	CandidateAuthScopes = "CandidateAuth.Scopes"
+	CompanyAuthScopes   = "CompanyAuth.Scopes"
+)
+
 // Defines values for ModelsArticleStatus.
 const (
 	ModelsArticleStatusDraft     ModelsArticleStatus = "draft"
@@ -61,6 +66,96 @@ func (e ModelsCISkillLevel) Valid() bool {
 	case ModelsCISkillLevelEntry:
 		return true
 	case ModelsCISkillLevelMid:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsCandidateAuthIn.
+const (
+	ModelsCandidateAuthInCookie ModelsCandidateAuthIn = "cookie"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCandidateAuthIn enum.
+func (e ModelsCandidateAuthIn) Valid() bool {
+	switch e {
+	case ModelsCandidateAuthInCookie:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsCandidateAuthName.
+const (
+	ModelsCandidateAuthNameInselfyToken ModelsCandidateAuthName = "inselfy_token"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCandidateAuthName enum.
+func (e ModelsCandidateAuthName) Valid() bool {
+	switch e {
+	case ModelsCandidateAuthNameInselfyToken:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsCandidateAuthType.
+const (
+	ModelsCandidateAuthTypeApiKey ModelsCandidateAuthType = "apiKey"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCandidateAuthType enum.
+func (e ModelsCandidateAuthType) Valid() bool {
+	switch e {
+	case ModelsCandidateAuthTypeApiKey:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsCompanyAuthIn.
+const (
+	ModelsCompanyAuthInCookie ModelsCompanyAuthIn = "cookie"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCompanyAuthIn enum.
+func (e ModelsCompanyAuthIn) Valid() bool {
+	switch e {
+	case ModelsCompanyAuthInCookie:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsCompanyAuthName.
+const (
+	ModelsCompanyAuthNameCompanyToken ModelsCompanyAuthName = "company_token"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCompanyAuthName enum.
+func (e ModelsCompanyAuthName) Valid() bool {
+	switch e {
+	case ModelsCompanyAuthNameCompanyToken:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsCompanyAuthType.
+const (
+	ModelsCompanyAuthTypeApiKey ModelsCompanyAuthType = "apiKey"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCompanyAuthType enum.
+func (e ModelsCompanyAuthType) Valid() bool {
+	switch e {
+	case ModelsCompanyAuthTypeApiKey:
 		return true
 	default:
 		return false
@@ -752,6 +847,28 @@ type ModelsCITypeScoreResponse struct {
 	TypeId string `json:"typeId"`
 }
 
+// ModelsCandidateAuth 候補者認証。`inselfy_token` cookie の JWT を検証する
+// （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
+type ModelsCandidateAuth struct {
+	// In location of the API key
+	In ModelsCandidateAuthIn `json:"in"`
+
+	// Name name of the API key
+	Name ModelsCandidateAuthName `json:"name"`
+
+	// Type API key authentication
+	Type ModelsCandidateAuthType `json:"type"`
+}
+
+// ModelsCandidateAuthIn location of the API key
+type ModelsCandidateAuthIn string
+
+// ModelsCandidateAuthName name of the API key
+type ModelsCandidateAuthName string
+
+// ModelsCandidateAuthType API key authentication
+type ModelsCandidateAuthType string
+
 // ModelsCandidateInterviewItem 面接（候補者向け・企業情報付き）
 type ModelsCandidateInterviewItem struct {
 	// ApplicationId 応募ID
@@ -838,6 +955,28 @@ type ModelsCommentResponse struct {
 	// Username ユーザー名
 	Username string `json:"username"`
 }
+
+// ModelsCompanyAuth 企業認証。`company_token` cookie の JWT を検証する
+// （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
+type ModelsCompanyAuth struct {
+	// In location of the API key
+	In ModelsCompanyAuthIn `json:"in"`
+
+	// Name name of the API key
+	Name ModelsCompanyAuthName `json:"name"`
+
+	// Type API key authentication
+	Type ModelsCompanyAuthType `json:"type"`
+}
+
+// ModelsCompanyAuthIn location of the API key
+type ModelsCompanyAuthIn string
+
+// ModelsCompanyAuthName name of the API key
+type ModelsCompanyAuthName string
+
+// ModelsCompanyAuthType API key authentication
+type ModelsCompanyAuthType string
 
 // ModelsCompanyInterviewItem 面接（企業向け・候補者情報付き）
 type ModelsCompanyInterviewItem struct {
@@ -4272,6 +4411,8 @@ type ServerInterfaceWrapper struct {
 func (w *ServerInterfaceWrapper) CandidateApplicationsListCandidateApplications(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateApplicationsListCandidateApplications(ctx)
 	return err
@@ -4281,6 +4422,8 @@ func (w *ServerInterfaceWrapper) CandidateApplicationsListCandidateApplications(
 func (w *ServerInterfaceWrapper) CandidateApplicationsApplyToJob(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateApplicationsApplyToJob(ctx)
 	return err
@@ -4289,6 +4432,8 @@ func (w *ServerInterfaceWrapper) CandidateApplicationsApplyToJob(ctx echo.Contex
 // CandidateApplicationsCheckApplied converts echo context to params.
 func (w *ServerInterfaceWrapper) CandidateApplicationsCheckApplied(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CandidateApplicationsCheckAppliedParams
@@ -4314,6 +4459,8 @@ func (w *ServerInterfaceWrapper) CandidateApplicationsWithdrawApplication(ctx ec
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter applicationId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateApplicationsWithdrawApplication(ctx, applicationId)
@@ -4349,6 +4496,8 @@ func (w *ServerInterfaceWrapper) ArticlesListArticles(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) ArticlesCreateArticle(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ArticlesCreateArticle(ctx)
 	return err
@@ -4357,6 +4506,8 @@ func (w *ServerInterfaceWrapper) ArticlesCreateArticle(ctx echo.Context) error {
 // ArticlesListMyArticles converts echo context to params.
 func (w *ServerInterfaceWrapper) ArticlesListMyArticles(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params ArticlesListMyArticlesParams
@@ -4383,6 +4534,8 @@ func (w *ServerInterfaceWrapper) ArticlesListMyArticles(ctx echo.Context) error 
 func (w *ServerInterfaceWrapper) ArticlesUploadArticleImage(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ArticlesUploadArticleImage(ctx)
 	return err
@@ -4398,6 +4551,8 @@ func (w *ServerInterfaceWrapper) ArticlesDeleteArticle(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ArticlesDeleteArticle(ctx, articleId)
@@ -4415,6 +4570,8 @@ func (w *ServerInterfaceWrapper) ArticlesGetArticle(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ArticlesGetArticle(ctx, articleId)
 	return err
@@ -4430,6 +4587,8 @@ func (w *ServerInterfaceWrapper) ArticlesUpdateArticle(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ArticlesUpdateArticle(ctx, articleId)
@@ -4447,6 +4606,8 @@ func (w *ServerInterfaceWrapper) ArticlesCreateArticleCheckout(ctx echo.Context)
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ArticlesCreateArticleCheckout(ctx, articleId)
 	return err
@@ -4462,6 +4623,8 @@ func (w *ServerInterfaceWrapper) ArticlesPublishArticle(ctx echo.Context) error 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ArticlesPublishArticle(ctx, articleId)
@@ -4489,6 +4652,8 @@ func (w *ServerInterfaceWrapper) AuthLogout(ctx echo.Context) error {
 // AuthGetMe converts echo context to params.
 func (w *ServerInterfaceWrapper) AuthGetMe(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AuthGetMe(ctx)
@@ -4613,6 +4778,8 @@ func (w *ServerInterfaceWrapper) PublicTeamScoresGetPublicTeamScores(ctx echo.Co
 func (w *ServerInterfaceWrapper) CompanyApplicationsListCompanyApplications(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CompanyApplicationsListCompanyApplicationsParams
 	// ------------- Optional query parameter "status" -------------
@@ -4680,6 +4847,8 @@ func (w *ServerInterfaceWrapper) CompanyApplicationsGetApplication(ctx echo.Cont
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter applicationId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyApplicationsGetApplication(ctx, applicationId)
 	return err
@@ -4696,6 +4865,8 @@ func (w *ServerInterfaceWrapper) CompanyApplicationsUpdateApplicationStatus(ctx 
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter applicationId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyApplicationsUpdateApplicationStatus(ctx, applicationId)
 	return err
@@ -4704,6 +4875,8 @@ func (w *ServerInterfaceWrapper) CompanyApplicationsUpdateApplicationStatus(ctx 
 // CompanyArticlesCreateCompanyArticle converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyArticlesCreateCompanyArticle(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyArticlesCreateCompanyArticle(ctx)
@@ -4721,6 +4894,8 @@ func (w *ServerInterfaceWrapper) CompanyArticlesDeleteCompanyArticle(ctx echo.Co
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyArticlesDeleteCompanyArticle(ctx, articleId)
 	return err
@@ -4737,6 +4912,8 @@ func (w *ServerInterfaceWrapper) CompanyArticlesUpdateCompanyArticle(ctx echo.Co
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyArticlesUpdateCompanyArticle(ctx, articleId)
 	return err
@@ -4752,6 +4929,8 @@ func (w *ServerInterfaceWrapper) CompanyArticlesPublishCompanyArticle(ctx echo.C
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter articleId: %s", err))
 	}
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyArticlesPublishCompanyArticle(ctx, articleId)
@@ -4780,6 +4959,8 @@ func (w *ServerInterfaceWrapper) CompanyAuthCompanyLogout(ctx echo.Context) erro
 func (w *ServerInterfaceWrapper) CompanyAuthCompanyGetMe(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyAuthCompanyGetMe(ctx)
 	return err
@@ -4806,6 +4987,8 @@ func (w *ServerInterfaceWrapper) CompanyAuthCompanyRegister(ctx echo.Context) er
 // CompanyInterviewsListCompanyInterviews converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyInterviewsListCompanyInterviews(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CompanyInterviewsListCompanyInterviewsParams
@@ -4839,6 +5022,8 @@ func (w *ServerInterfaceWrapper) CompanyInterviewsGetPendingProposal(ctx echo.Co
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter applicationId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyInterviewsGetPendingProposal(ctx, applicationId)
 	return err
@@ -4847,6 +5032,8 @@ func (w *ServerInterfaceWrapper) CompanyInterviewsGetPendingProposal(ctx echo.Co
 // CompanyInterviewsProposeInterview converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyInterviewsProposeInterview(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyInterviewsProposeInterview(ctx)
@@ -4864,6 +5051,8 @@ func (w *ServerInterfaceWrapper) CompanyInterviewsCancelCompanyInterview(ctx ech
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter interviewId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyInterviewsCancelCompanyInterview(ctx, interviewId)
 	return err
@@ -4872,6 +5061,8 @@ func (w *ServerInterfaceWrapper) CompanyInterviewsCancelCompanyInterview(ctx ech
 // CompanyJobPostingsListCompanyJobPostings converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyJobPostingsListCompanyJobPostings(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyJobPostingsListCompanyJobPostings(ctx)
@@ -4882,6 +5073,8 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsListCompanyJobPostings(ctx ec
 func (w *ServerInterfaceWrapper) CompanyJobPostingsCreateJobPosting(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyJobPostingsCreateJobPosting(ctx)
 	return err
@@ -4890,6 +5083,8 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsCreateJobPosting(ctx echo.Con
 // CompanyJobPostingsUploadJobCoverImage converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadJobCoverImage(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyJobPostingsUploadJobCoverImage(ctx)
@@ -4900,6 +5095,8 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadJobCoverImage(ctx echo.
 func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadGalleryImage(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyJobPostingsUploadGalleryImage(ctx)
 	return err
@@ -4908,6 +5105,8 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadGalleryImage(ctx echo.C
 // CompanyJobPostingsUploadTeamMemberPhoto converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyJobPostingsUploadTeamMemberPhoto(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyJobPostingsUploadTeamMemberPhoto(ctx)
@@ -4925,6 +5124,8 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsDeleteJobPosting(ctx echo.Con
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyJobPostingsDeleteJobPosting(ctx, jobId)
 	return err
@@ -4940,6 +5141,8 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsGetCompanyJobPosting(ctx echo
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobId: %s", err))
 	}
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyJobPostingsGetCompanyJobPosting(ctx, jobId)
@@ -4957,6 +5160,8 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsUpdateJobPosting(ctx echo.Con
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter jobId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyJobPostingsUpdateJobPosting(ctx, jobId)
 	return err
@@ -4965,6 +5170,8 @@ func (w *ServerInterfaceWrapper) CompanyJobPostingsUpdateJobPosting(ctx echo.Con
 // CompanyMessagingListCompanyConversations converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyMessagingListCompanyConversations(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CompanyMessagingListCompanyConversationsParams
@@ -4991,6 +5198,8 @@ func (w *ServerInterfaceWrapper) CompanyMessagingListCompanyConversations(ctx ec
 func (w *ServerInterfaceWrapper) CompanyMessagingStartCompanyConversation(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyMessagingStartCompanyConversation(ctx)
 	return err
@@ -5007,6 +5216,8 @@ func (w *ServerInterfaceWrapper) CompanyMessagingGetCompanyConversation(ctx echo
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyMessagingGetCompanyConversation(ctx, conversationId)
 	return err
@@ -5022,6 +5233,8 @@ func (w *ServerInterfaceWrapper) CompanyMessagingListCompanyMessages(ctx echo.Co
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
 	}
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CompanyMessagingListCompanyMessagesParams
@@ -5055,6 +5268,8 @@ func (w *ServerInterfaceWrapper) CompanyMessagingSendCompanyMessage(ctx echo.Con
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyMessagingSendCompanyMessage(ctx, conversationId)
 	return err
@@ -5071,6 +5286,8 @@ func (w *ServerInterfaceWrapper) CompanyMessagingMarkCompanyConversationRead(ctx
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyMessagingMarkCompanyConversationRead(ctx, conversationId)
 	return err
@@ -5080,6 +5297,8 @@ func (w *ServerInterfaceWrapper) CompanyMessagingMarkCompanyConversationRead(ctx
 func (w *ServerInterfaceWrapper) CompanyMessagingCountCompanyUnreadMessages(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyMessagingCountCompanyUnreadMessages(ctx)
 	return err
@@ -5088,6 +5307,8 @@ func (w *ServerInterfaceWrapper) CompanyMessagingCountCompanyUnreadMessages(ctx 
 // CompanyNotificationsListCompanyNotifications converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyNotificationsListCompanyNotifications(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CompanyNotificationsListCompanyNotificationsParams
@@ -5114,6 +5335,8 @@ func (w *ServerInterfaceWrapper) CompanyNotificationsListCompanyNotifications(ct
 func (w *ServerInterfaceWrapper) CompanyNotificationsMarkAllCompanyNotificationsRead(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyNotificationsMarkAllCompanyNotificationsRead(ctx)
 	return err
@@ -5122,6 +5345,8 @@ func (w *ServerInterfaceWrapper) CompanyNotificationsMarkAllCompanyNotifications
 // CompanyNotificationsCountCompanyUnreadNotifications converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyNotificationsCountCompanyUnreadNotifications(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyNotificationsCountCompanyUnreadNotifications(ctx)
@@ -5139,6 +5364,8 @@ func (w *ServerInterfaceWrapper) CompanyNotificationsMarkCompanyNotificationRead
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyNotificationsMarkCompanyNotificationRead(ctx, id)
 	return err
@@ -5147,6 +5374,8 @@ func (w *ServerInterfaceWrapper) CompanyNotificationsMarkCompanyNotificationRead
 // CompanyProfilesGetCompanyProfile converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyProfilesGetCompanyProfile(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyProfilesGetCompanyProfile(ctx)
@@ -5157,6 +5386,8 @@ func (w *ServerInterfaceWrapper) CompanyProfilesGetCompanyProfile(ctx echo.Conte
 func (w *ServerInterfaceWrapper) CompanyProfilesUpdateCompanyProfile(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyProfilesUpdateCompanyProfile(ctx)
 	return err
@@ -5165,6 +5396,8 @@ func (w *ServerInterfaceWrapper) CompanyProfilesUpdateCompanyProfile(ctx echo.Co
 // CompanyProfilesDeleteCompanyProfileImage converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyProfilesDeleteCompanyProfileImage(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CompanyProfilesDeleteCompanyProfileImageParams
@@ -5191,6 +5424,8 @@ func (w *ServerInterfaceWrapper) CompanyProfilesDeleteCompanyProfileImage(ctx ec
 func (w *ServerInterfaceWrapper) CompanyProfilesUploadCompanyProfileImage(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CompanyProfilesUploadCompanyProfileImageParams
 	// ------------- Required query parameter "type" -------------
@@ -5208,6 +5443,8 @@ func (w *ServerInterfaceWrapper) CompanyProfilesUploadCompanyProfileImage(ctx ec
 // SavedCandidatesListSavedCandidates converts echo context to params.
 func (w *ServerInterfaceWrapper) SavedCandidatesListSavedCandidates(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params SavedCandidatesListSavedCandidatesParams
@@ -5234,6 +5471,8 @@ func (w *ServerInterfaceWrapper) SavedCandidatesListSavedCandidates(ctx echo.Con
 func (w *ServerInterfaceWrapper) SavedCandidatesBulkCheckSaved(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SavedCandidatesBulkCheckSaved(ctx)
 	return err
@@ -5242,6 +5481,8 @@ func (w *ServerInterfaceWrapper) SavedCandidatesBulkCheckSaved(ctx echo.Context)
 // SavedCandidatesCountSavedCandidates converts echo context to params.
 func (w *ServerInterfaceWrapper) SavedCandidatesCountSavedCandidates(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SavedCandidatesCountSavedCandidates(ctx)
@@ -5259,6 +5500,8 @@ func (w *ServerInterfaceWrapper) SavedCandidatesUnsaveCandidate(ctx echo.Context
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SavedCandidatesUnsaveCandidate(ctx, userId)
 	return err
@@ -5274,6 +5517,8 @@ func (w *ServerInterfaceWrapper) SavedCandidatesIsCandidateSaved(ctx echo.Contex
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
 	}
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SavedCandidatesIsCandidateSaved(ctx, userId)
@@ -5291,6 +5536,8 @@ func (w *ServerInterfaceWrapper) SavedCandidatesSaveCandidate(ctx echo.Context) 
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SavedCandidatesSaveCandidate(ctx, userId)
 	return err
@@ -5300,6 +5547,8 @@ func (w *ServerInterfaceWrapper) SavedCandidatesSaveCandidate(ctx echo.Context) 
 func (w *ServerInterfaceWrapper) ScoutTemplatesListScoutTemplates(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutTemplatesListScoutTemplates(ctx)
 	return err
@@ -5308,6 +5557,8 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesListScoutTemplates(ctx echo.Conte
 // ScoutTemplatesCreateScoutTemplate converts echo context to params.
 func (w *ServerInterfaceWrapper) ScoutTemplatesCreateScoutTemplate(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutTemplatesCreateScoutTemplate(ctx)
@@ -5325,6 +5576,8 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesDeleteScoutTemplate(ctx echo.Cont
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter templateId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutTemplatesDeleteScoutTemplate(ctx, templateId)
 	return err
@@ -5340,6 +5593,8 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesGetScoutTemplate(ctx echo.Context
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter templateId: %s", err))
 	}
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutTemplatesGetScoutTemplate(ctx, templateId)
@@ -5357,6 +5612,8 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesUpdateScoutTemplate(ctx echo.Cont
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter templateId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutTemplatesUpdateScoutTemplate(ctx, templateId)
 	return err
@@ -5365,6 +5622,8 @@ func (w *ServerInterfaceWrapper) ScoutTemplatesUpdateScoutTemplate(ctx echo.Cont
 // CompanyScoutsListCompanyScouts converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyScoutsListCompanyScouts(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CompanyScoutsListCompanyScoutsParams
@@ -5398,6 +5657,8 @@ func (w *ServerInterfaceWrapper) CompanyScoutsListCompanyScouts(ctx echo.Context
 func (w *ServerInterfaceWrapper) CompanyScoutsSendScout(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyScoutsSendScout(ctx)
 	return err
@@ -5406,6 +5667,8 @@ func (w *ServerInterfaceWrapper) CompanyScoutsSendScout(ctx echo.Context) error 
 // CompanyScoutsGetScoutCredits converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutCredits(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyScoutsGetScoutCredits(ctx)
@@ -5416,6 +5679,8 @@ func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutCredits(ctx echo.Context) 
 func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutDashboard(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyScoutsGetScoutDashboard(ctx)
 	return err
@@ -5424,6 +5689,8 @@ func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutDashboard(ctx echo.Context
 // CompanyScoutsGetScoutQuality converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyScoutsGetScoutQuality(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyScoutsGetScoutQuality(ctx)
@@ -5441,6 +5708,8 @@ func (w *ServerInterfaceWrapper) CompanyScoutsGetCompanyScoutDetail(ctx echo.Con
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyScoutsGetCompanyScoutDetail(ctx, scoutId)
 	return err
@@ -5457,6 +5726,8 @@ func (w *ServerInterfaceWrapper) CompanyScoutsCompanyScoutReply(ctx echo.Context
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyScoutsCompanyScoutReply(ctx, scoutId)
 	return err
@@ -5465,6 +5736,8 @@ func (w *ServerInterfaceWrapper) CompanyScoutsCompanyScoutReply(ctx echo.Context
 // TalentSearchSearchTalents converts echo context to params.
 func (w *ServerInterfaceWrapper) TalentSearchSearchTalents(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params TalentSearchSearchTalentsParams
@@ -5539,6 +5812,8 @@ func (w *ServerInterfaceWrapper) TalentSearchSearchTalents(ctx echo.Context) err
 // TalentSearchDiagnosticSearchTalents converts echo context to params.
 func (w *ServerInterfaceWrapper) TalentSearchDiagnosticSearchTalents(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params TalentSearchDiagnosticSearchTalentsParams
@@ -5621,6 +5896,8 @@ func (w *ServerInterfaceWrapper) TalentSearchDiagnosticSearchTalents(ctx echo.Co
 func (w *ServerInterfaceWrapper) TalentSearchCiDiagnosticSearchTalents(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params TalentSearchCiDiagnosticSearchTalentsParams
 	// ------------- Optional query parameter "team_id" -------------
@@ -5701,6 +5978,8 @@ func (w *ServerInterfaceWrapper) TalentSearchCiDiagnosticSearchTalents(ctx echo.
 // TalentSearchIntegratedDiagnosticSearchTalents converts echo context to params.
 func (w *ServerInterfaceWrapper) TalentSearchIntegratedDiagnosticSearchTalents(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params TalentSearchIntegratedDiagnosticSearchTalentsParams
@@ -5783,6 +6062,8 @@ func (w *ServerInterfaceWrapper) TalentSearchIntegratedDiagnosticSearchTalents(c
 func (w *ServerInterfaceWrapper) CompanyTeamsListTeams(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsListTeams(ctx)
 	return err
@@ -5791,6 +6072,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsListTeams(ctx echo.Context) error {
 // CompanyTeamsCreateTeam converts echo context to params.
 func (w *ServerInterfaceWrapper) CompanyTeamsCreateTeam(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsCreateTeam(ctx)
@@ -5808,6 +6091,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsDeleteTeam(ctx echo.Context) error 
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsDeleteTeam(ctx, teamId)
 	return err
@@ -5823,6 +6108,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsGetTeam(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsGetTeam(ctx, teamId)
@@ -5840,6 +6127,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsUpdateTeam(ctx echo.Context) error 
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsUpdateTeam(ctx, teamId)
 	return err
@@ -5855,6 +6144,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsUnsetAceMember(ctx echo.Context) er
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsUnsetAceMember(ctx, teamId)
@@ -5880,6 +6171,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsSetAceMember(ctx echo.Context) erro
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter memberId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsSetAceMember(ctx, teamId, memberId)
 	return err
@@ -5895,6 +6188,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsAddTeamMember(ctx echo.Context) err
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
+
+	ctx.Set(CompanyAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsAddTeamMember(ctx, teamId)
@@ -5920,6 +6215,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsRemoveTeamMember(ctx echo.Context) 
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter memberId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsRemoveTeamMember(ctx, teamId, memberId)
 	return err
@@ -5936,6 +6233,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsGetTeamScores(ctx echo.Context) err
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter teamId: %s", err))
 	}
 
+	ctx.Set(CompanyAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CompanyTeamsGetTeamScores(ctx, teamId)
 	return err
@@ -5945,6 +6244,8 @@ func (w *ServerInterfaceWrapper) CompanyTeamsGetTeamScores(ctx echo.Context) err
 func (w *ServerInterfaceWrapper) IntegratedReportGetMyIntegratedReport(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.IntegratedReportGetMyIntegratedReport(ctx)
 	return err
@@ -5953,6 +6254,8 @@ func (w *ServerInterfaceWrapper) IntegratedReportGetMyIntegratedReport(ctx echo.
 // IntegratedReportCreateIntegratedReportRequest converts echo context to params.
 func (w *ServerInterfaceWrapper) IntegratedReportCreateIntegratedReportRequest(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.IntegratedReportCreateIntegratedReportRequest(ctx)
@@ -5979,6 +6282,8 @@ func (w *ServerInterfaceWrapper) IntegratedReportGetIntegratedReport(ctx echo.Co
 func (w *ServerInterfaceWrapper) IntegratedReportGetIntegratedReportStatus(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.IntegratedReportGetIntegratedReportStatus(ctx)
 	return err
@@ -6004,6 +6309,8 @@ func (w *ServerInterfaceWrapper) IntegratedReportGetLatestIntegratedRequest(ctx 
 func (w *ServerInterfaceWrapper) CandidateInterviewsListCandidateInterviews(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateInterviewsListCandidateInterviews(ctx)
 	return err
@@ -6019,6 +6326,8 @@ func (w *ServerInterfaceWrapper) CandidateInterviewsSelectInterviewSlot(ctx echo
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter proposalId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateInterviewsSelectInterviewSlot(ctx, proposalId)
@@ -6036,6 +6345,8 @@ func (w *ServerInterfaceWrapper) CandidateInterviewsGetProposalSlots(ctx echo.Co
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter proposalId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateInterviewsGetProposalSlots(ctx, proposalId)
 	return err
@@ -6051,6 +6362,8 @@ func (w *ServerInterfaceWrapper) CandidateInterviewsCancelCandidateInterview(ctx
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter interviewId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateInterviewsCancelCandidateInterview(ctx, interviewId)
@@ -6151,6 +6464,8 @@ func (w *ServerInterfaceWrapper) PublicJobPostingsGetPublicJobPosting(ctx echo.C
 func (w *ServerInterfaceWrapper) CandidateMessagingListCandidateConversations(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CandidateMessagingListCandidateConversationsParams
 	// ------------- Optional query parameter "limit" -------------
@@ -6176,6 +6491,8 @@ func (w *ServerInterfaceWrapper) CandidateMessagingListCandidateConversations(ct
 func (w *ServerInterfaceWrapper) CandidateMessagingStartCandidateConversation(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateMessagingStartCandidateConversation(ctx)
 	return err
@@ -6192,6 +6509,8 @@ func (w *ServerInterfaceWrapper) CandidateMessagingGetCandidateConversation(ctx 
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateMessagingGetCandidateConversation(ctx, conversationId)
 	return err
@@ -6207,6 +6526,8 @@ func (w *ServerInterfaceWrapper) CandidateMessagingListCandidateMessages(ctx ech
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CandidateMessagingListCandidateMessagesParams
@@ -6240,6 +6561,8 @@ func (w *ServerInterfaceWrapper) CandidateMessagingSendCandidateMessage(ctx echo
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateMessagingSendCandidateMessage(ctx, conversationId)
 	return err
@@ -6256,6 +6579,8 @@ func (w *ServerInterfaceWrapper) CandidateMessagingMarkCandidateConversationRead
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter conversationId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateMessagingMarkCandidateConversationRead(ctx, conversationId)
 	return err
@@ -6265,6 +6590,8 @@ func (w *ServerInterfaceWrapper) CandidateMessagingMarkCandidateConversationRead
 func (w *ServerInterfaceWrapper) CandidateMessagingCountCandidateUnreadMessages(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateMessagingCountCandidateUnreadMessages(ctx)
 	return err
@@ -6273,6 +6600,8 @@ func (w *ServerInterfaceWrapper) CandidateMessagingCountCandidateUnreadMessages(
 // UserNotificationsListUserNotifications converts echo context to params.
 func (w *ServerInterfaceWrapper) UserNotificationsListUserNotifications(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params UserNotificationsListUserNotificationsParams
@@ -6299,6 +6628,8 @@ func (w *ServerInterfaceWrapper) UserNotificationsListUserNotifications(ctx echo
 func (w *ServerInterfaceWrapper) UserNotificationsMarkAllUserNotificationsRead(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UserNotificationsMarkAllUserNotificationsRead(ctx)
 	return err
@@ -6307,6 +6638,8 @@ func (w *ServerInterfaceWrapper) UserNotificationsMarkAllUserNotificationsRead(c
 // UserNotificationsCountUserUnreadNotifications converts echo context to params.
 func (w *ServerInterfaceWrapper) UserNotificationsCountUserUnreadNotifications(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UserNotificationsCountUserUnreadNotifications(ctx)
@@ -6323,6 +6656,8 @@ func (w *ServerInterfaceWrapper) UserNotificationsMarkUserNotificationRead(ctx e
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UserNotificationsMarkUserNotificationRead(ctx, id)
@@ -6365,6 +6700,8 @@ func (w *ServerInterfaceWrapper) PostsListTimelinePosts(ctx echo.Context) error 
 func (w *ServerInterfaceWrapper) PostsCreatePost(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostsCreatePost(ctx)
 	return err
@@ -6380,6 +6717,8 @@ func (w *ServerInterfaceWrapper) PostsDeletePostComment(ctx echo.Context) error 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter commentId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostsDeletePostComment(ctx, commentId)
@@ -6468,6 +6807,8 @@ func (w *ServerInterfaceWrapper) PostsDeletePost(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostsDeletePost(ctx, postId)
 	return err
@@ -6541,6 +6882,8 @@ func (w *ServerInterfaceWrapper) PostsCreatePostComment(ctx echo.Context) error 
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostsCreatePostComment(ctx, postId)
 	return err
@@ -6556,6 +6899,8 @@ func (w *ServerInterfaceWrapper) PostsTogglePostLike(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostsTogglePostLike(ctx, postId)
@@ -6573,6 +6918,8 @@ func (w *ServerInterfaceWrapper) PostsTogglePostRepost(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter postId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PostsTogglePostRepost(ctx, postId)
 	return err
@@ -6581,6 +6928,8 @@ func (w *ServerInterfaceWrapper) PostsTogglePostRepost(ctx echo.Context) error {
 // ScoutSettingsGetScoutSettings converts echo context to params.
 func (w *ServerInterfaceWrapper) ScoutSettingsGetScoutSettings(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutSettingsGetScoutSettings(ctx)
@@ -6591,6 +6940,8 @@ func (w *ServerInterfaceWrapper) ScoutSettingsGetScoutSettings(ctx echo.Context)
 func (w *ServerInterfaceWrapper) ScoutSettingsUpdateScoutSettings(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ScoutSettingsUpdateScoutSettings(ctx)
 	return err
@@ -6599,6 +6950,8 @@ func (w *ServerInterfaceWrapper) ScoutSettingsUpdateScoutSettings(ctx echo.Conte
 // CandidateScoutsListCandidateScouts converts echo context to params.
 func (w *ServerInterfaceWrapper) CandidateScoutsListCandidateScouts(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params CandidateScoutsListCandidateScoutsParams
@@ -6625,6 +6978,8 @@ func (w *ServerInterfaceWrapper) CandidateScoutsListCandidateScouts(ctx echo.Con
 func (w *ServerInterfaceWrapper) CandidateScoutsBulkDeclineScouts(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateScoutsBulkDeclineScouts(ctx)
 	return err
@@ -6633,6 +6988,8 @@ func (w *ServerInterfaceWrapper) CandidateScoutsBulkDeclineScouts(ctx echo.Conte
 // CandidateScoutsBulkRespondScouts converts echo context to params.
 func (w *ServerInterfaceWrapper) CandidateScoutsBulkRespondScouts(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateScoutsBulkRespondScouts(ctx)
@@ -6650,6 +7007,8 @@ func (w *ServerInterfaceWrapper) CandidateScoutsGetCandidateScoutDetail(ctx echo
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateScoutsGetCandidateScoutDetail(ctx, scoutId)
 	return err
@@ -6666,6 +7025,8 @@ func (w *ServerInterfaceWrapper) CandidateScoutsCandidateScoutReply(ctx echo.Con
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateScoutsCandidateScoutReply(ctx, scoutId)
 	return err
@@ -6681,6 +7042,8 @@ func (w *ServerInterfaceWrapper) CandidateScoutsRespondToScout(ctx echo.Context)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter scoutId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CandidateScoutsRespondToScout(ctx, scoutId)
@@ -6796,6 +7159,8 @@ func (w *ServerInterfaceWrapper) UsersUpdateUserProfile(ctx echo.Context) error 
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UsersUpdateUserProfile(ctx, username)
 	return err
@@ -6828,6 +7193,8 @@ func (w *ServerInterfaceWrapper) EducationsCreateEducation(ctx echo.Context) err
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.EducationsCreateEducation(ctx, username)
 	return err
@@ -6852,6 +7219,8 @@ func (w *ServerInterfaceWrapper) EducationsDeleteEducation(ctx echo.Context) err
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter educationId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.EducationsDeleteEducation(ctx, username, educationId)
 	return err
@@ -6875,6 +7244,8 @@ func (w *ServerInterfaceWrapper) EducationsUpdateEducation(ctx echo.Context) err
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter educationId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.EducationsUpdateEducation(ctx, username, educationId)
@@ -6908,6 +7279,8 @@ func (w *ServerInterfaceWrapper) ExperiencesCreateExperience(ctx echo.Context) e
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ExperiencesCreateExperience(ctx, username)
 	return err
@@ -6931,6 +7304,8 @@ func (w *ServerInterfaceWrapper) ExperiencesDeleteExperience(ctx echo.Context) e
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter experienceId: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ExperiencesDeleteExperience(ctx, username, experienceId)
@@ -6956,6 +7331,8 @@ func (w *ServerInterfaceWrapper) ExperiencesUpdateExperience(ctx echo.Context) e
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter experienceId: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.ExperiencesUpdateExperience(ctx, username, experienceId)
 	return err
@@ -6971,6 +7348,8 @@ func (w *ServerInterfaceWrapper) FollowsUnfollowUser(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.FollowsUnfollowUser(ctx, username)
@@ -6988,6 +7367,8 @@ func (w *ServerInterfaceWrapper) FollowsFollowUser(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.FollowsFollowUser(ctx, username)
 	return err
@@ -7003,6 +7384,8 @@ func (w *ServerInterfaceWrapper) FollowsGetFollowStatus(ctx echo.Context) error 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.FollowsGetFollowStatus(ctx, username)
@@ -7100,6 +7483,8 @@ func (w *ServerInterfaceWrapper) SkillsAttachSkill(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SkillsAttachSkill(ctx, username)
 	return err
@@ -7124,6 +7509,8 @@ func (w *ServerInterfaceWrapper) SkillsDetachSkill(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter name: %s", err))
 	}
 
+	ctx.Set(CandidateAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.SkillsDetachSkill(ctx, username, name)
 	return err
@@ -7139,6 +7526,8 @@ func (w *ServerInterfaceWrapper) UsersUploadUserImage(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter username: %s", err))
 	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params UsersUploadUserImageParams

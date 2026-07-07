@@ -33,10 +33,11 @@ interface Users {
   @patch
   @route("/{username}")
   @summary("Update a user profile")
+  @useAuth(Models.CandidateAuth)
   updateUserProfile(
     @path username: string,
     @body request: UpdateUserProfileRequest,
-  ): UserResponse | NotFoundError | BadRequestError;
+  ): UserResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** ユーザーIDでユーザー取得 */
   @get
@@ -50,6 +51,7 @@ interface Users {
   @post
   @route("/{username}/upload-image")
   @summary("Upload a user profile image")
+  @useAuth(Models.CandidateAuth)
   uploadUserImage(
     @path username: string,
     @query type: "avatar" | "cover",
@@ -57,5 +59,5 @@ interface Users {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UserImageUploadResponse | BadRequestError | NotFoundError;
+  ): UserImageUploadResponse | BadRequestError | NotFoundError | UnauthorizedError;
 }

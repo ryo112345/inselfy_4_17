@@ -16,6 +16,7 @@ namespace Inselfy.Routes;
  */
 @route("/api/company/talents/search")
 @tag("TalentSearch")
+@useAuth(Models.CompanyAuth)
 interface TalentSearch {
   /** 条件検索（企業認証） */
   @get
@@ -47,7 +48,7 @@ interface TalentSearch {
 
     /** オフセット */
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError;
+  ): TalentListResponse | BadRequestError | UnauthorizedError;
 
   /** Work Values 診断マッチング検索（企業認証）。`wv_<valueId>` カスタム重み対応 */
   @get
@@ -66,7 +67,7 @@ interface TalentSearch {
     @query skills?: string,
     @query limit?: int32,
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError;
+  ): TalentListResponse | BadRequestError | UnauthorizedError;
 
   /** Career Interest 診断マッチング検索（企業認証）。`ci_<typeId>` カスタム重み対応 */
   @get
@@ -83,7 +84,7 @@ interface TalentSearch {
     @query skills?: string,
     @query limit?: int32,
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError;
+  ): TalentListResponse | BadRequestError | UnauthorizedError;
 
   /** 統合診断マッチング検索（企業認証）。`wv_*` / `ci_*` カスタム重み対応 */
   @get
@@ -100,5 +101,5 @@ interface TalentSearch {
     @query skills?: string,
     @query limit?: int32,
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError;
+  ): TalentListResponse | BadRequestError | UnauthorizedError;
 }

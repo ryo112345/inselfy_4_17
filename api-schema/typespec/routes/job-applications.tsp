@@ -10,6 +10,7 @@ namespace Inselfy.Routes;
 
 @route("/api/applications")
 @tag("JobApplications")
+@useAuth(Models.CandidateAuth)
 interface CandidateApplications {
   /** 求人へ応募（要ログイン） */
   @post
@@ -19,12 +20,12 @@ interface CandidateApplications {
   ): {
     @statusCode statusCode: 201;
     @body application: JobApplicationResponse;
-  } | BadRequestError | NotFoundError | ConflictError;
+  } | BadRequestError | NotFoundError | ConflictError | UnauthorizedError;
 
   /** 自分の応募一覧（要ログイン） */
   @get
   @summary("List applications by the candidate")
-  listCandidateApplications(): JobApplicationListResponse | BadRequestError;
+  listCandidateApplications(): JobApplicationListResponse | BadRequestError | UnauthorizedError;
 
   /** 応募済みチェック（要ログイン） */
   @get
@@ -33,7 +34,7 @@ interface CandidateApplications {
   checkApplied(
     /** 求人ID */
     @query jobPostingId: string,
-  ): AppliedResponse | BadRequestError;
+  ): AppliedResponse | BadRequestError | UnauthorizedError;
 
   /** 応募取り下げ（要ログイン） */
   @post
@@ -41,11 +42,12 @@ interface CandidateApplications {
   @summary("Withdraw an application")
   withdrawApplication(
     @path applicationId: string,
-  ): StatusOkResponse | NotFoundError | BadRequestError;
+  ): StatusOkResponse | NotFoundError | BadRequestError | UnauthorizedError;
 }
 
 @route("/api/company/applications")
 @tag("JobApplications")
+@useAuth(Models.CompanyAuth)
 interface CompanyApplications {
   /** 企業への応募一覧（企業認証） */
   @get
@@ -71,7 +73,7 @@ interface CompanyApplications {
 
     /** オフセット */
     @query offset?: int32,
-  ): JobApplicationListResponse | BadRequestError;
+  ): JobApplicationListResponse | BadRequestError | UnauthorizedError;
 
   /** 応募詳細（企業認証） */
   @get
@@ -79,7 +81,7 @@ interface CompanyApplications {
   @summary("Get an application")
   getApplication(
     @path applicationId: string,
-  ): JobApplicationResponse | NotFoundError | BadRequestError;
+  ): JobApplicationResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** 応募ステータス更新（企業認証） */
   @patch
@@ -88,5 +90,5 @@ interface CompanyApplications {
   updateApplicationStatus(
     @path applicationId: string,
     @body request: UpdateApplicationStatusRequest,
-  ): StatusOkResponse | BadRequestError | NotFoundError;
+  ): StatusOkResponse | BadRequestError | NotFoundError | UnauthorizedError;
 }

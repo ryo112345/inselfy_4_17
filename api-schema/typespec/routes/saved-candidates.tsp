@@ -10,6 +10,7 @@ namespace Inselfy.Routes;
 
 @route("/api/company/saved-candidates")
 @tag("SavedCandidates")
+@useAuth(Models.CompanyAuth)
 interface SavedCandidates {
   /** 保存済み候補者一覧（企業認証） */
   @get
@@ -20,13 +21,13 @@ interface SavedCandidates {
 
     /** オフセット */
     @query offset?: int32,
-  ): TalentListResponse | BadRequestError;
+  ): TalentListResponse | BadRequestError | UnauthorizedError;
 
   /** 保存済み候補者数（企業認証） */
   @get
   @route("/count")
   @summary("Count saved candidates")
-  countSavedCandidates(): SavedCountResponse | BadRequestError;
+  countSavedCandidates(): SavedCountResponse | BadRequestError | UnauthorizedError;
 
   /** 保存済み一括チェック（企業認証） */
   @post
@@ -34,7 +35,7 @@ interface SavedCandidates {
   @summary("Bulk-check whether candidates are saved")
   bulkCheckSaved(
     @body request: BulkCheckSavedRequest,
-  ): BulkSavedResponse | BadRequestError;
+  ): BulkSavedResponse | BadRequestError | UnauthorizedError;
 
   /** 候補者を保存（企業認証） */
   @post
@@ -44,7 +45,7 @@ interface SavedCandidates {
     @path userId: string,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 
   /** 候補者の保存を解除（企業認証） */
   @delete
@@ -54,7 +55,7 @@ interface SavedCandidates {
     @path userId: string,
   ): {
     @statusCode statusCode: 204;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 
   /** 保存済みか確認（企業認証） */
   @get
@@ -62,5 +63,5 @@ interface SavedCandidates {
   @summary("Check whether a candidate is saved")
   isCandidateSaved(
     @path userId: string,
-  ): SavedResponse | BadRequestError;
+  ): SavedResponse | BadRequestError | UnauthorizedError;
 }

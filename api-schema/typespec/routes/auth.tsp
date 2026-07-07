@@ -37,5 +37,6 @@ interface Auth {
   @get
   @route("/me")
   @summary("Get the authenticated user")
+  @useAuth(Models.CandidateAuth)
   getMe(): AuthUserResponse | UnauthorizedError | NotFoundError;
 }

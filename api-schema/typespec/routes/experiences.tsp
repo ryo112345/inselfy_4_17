@@ -21,32 +21,35 @@ interface Experiences {
   /** 職歴作成 */
   @post
   @summary("Create a new experience")
+  @useAuth(Models.CandidateAuth)
   createExperience(
     @path username: string,
     @body request: CreateExperienceRequest,
   ): {
     @statusCode statusCode: 201;
     @body experience: ExperienceResponse;
-  } | BadRequestError | NotFoundError | ConflictError;
+  } | BadRequestError | NotFoundError | ConflictError | UnauthorizedError;
 
   /** 職歴更新 */
   @put
   @route("/{experienceId}")
   @summary("Update an experience")
+  @useAuth(Models.CandidateAuth)
   updateExperience(
     @path username: string,
     @path experienceId: string,
     @body request: UpdateExperienceRequest,
-  ): ExperienceResponse | BadRequestError | NotFoundError | ForbiddenError;
+  ): ExperienceResponse | BadRequestError | NotFoundError | ForbiddenError | UnauthorizedError;
 
   /** 職歴削除 */
   @delete
   @route("/{experienceId}")
   @summary("Delete an experience")
+  @useAuth(Models.CandidateAuth)
   deleteExperience(
     @path username: string,
     @path experienceId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | ForbiddenError;
+  } | NotFoundError | BadRequestError | ForbiddenError | UnauthorizedError;
 }

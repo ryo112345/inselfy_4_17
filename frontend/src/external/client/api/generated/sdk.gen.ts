@@ -24,6 +24,13 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  */
 export const candidateApplicationsListCandidateApplications = <ThrowOnError extends boolean = false>(options?: Options<CandidateApplicationsListCandidateApplicationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CandidateApplicationsListCandidateApplicationsResponse, CandidateApplicationsListCandidateApplicationsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/applications',
         ...options
     });
@@ -35,6 +42,13 @@ export const candidateApplicationsListCandidateApplications = <ThrowOnError exte
  */
 export const candidateApplicationsApplyToJob = <ThrowOnError extends boolean = false>(options: Options<CandidateApplicationsApplyToJobData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateApplicationsApplyToJobResponse, CandidateApplicationsApplyToJobError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/applications',
         ...options,
         headers: {
@@ -50,6 +64,13 @@ export const candidateApplicationsApplyToJob = <ThrowOnError extends boolean = f
  */
 export const candidateApplicationsCheckApplied = <ThrowOnError extends boolean = false>(options: Options<CandidateApplicationsCheckAppliedData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CandidateApplicationsCheckAppliedResponse, CandidateApplicationsCheckAppliedError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/applications/check',
         ...options
     });
@@ -61,6 +82,13 @@ export const candidateApplicationsCheckApplied = <ThrowOnError extends boolean =
  */
 export const candidateApplicationsWithdrawApplication = <ThrowOnError extends boolean = false>(options: Options<CandidateApplicationsWithdrawApplicationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateApplicationsWithdrawApplicationResponse, CandidateApplicationsWithdrawApplicationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/applications/{applicationId}/withdraw',
         ...options
     });
@@ -83,6 +111,13 @@ export const articlesListArticles = <ThrowOnError extends boolean = false>(optio
  */
 export const articlesCreateArticle = <ThrowOnError extends boolean = false>(options: Options<ArticlesCreateArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<ArticlesCreateArticleResponse, ArticlesCreateArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/articles',
         ...options,
         headers: {
@@ -98,6 +133,13 @@ export const articlesCreateArticle = <ThrowOnError extends boolean = false>(opti
  */
 export const articlesListMyArticles = <ThrowOnError extends boolean = false>(options?: Options<ArticlesListMyArticlesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<ArticlesListMyArticlesResponse, ArticlesListMyArticlesError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/articles/mine',
         ...options
     });
@@ -110,6 +152,13 @@ export const articlesListMyArticles = <ThrowOnError extends boolean = false>(opt
 export const articlesUploadArticleImage = <ThrowOnError extends boolean = false>(options: Options<ArticlesUploadArticleImageData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<ArticlesUploadArticleImageResponse, ArticlesUploadArticleImageError, ThrowOnError>({
         ...formDataBodySerializer,
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/articles/upload-image',
         ...options,
         headers: {
@@ -125,6 +174,13 @@ export const articlesUploadArticleImage = <ThrowOnError extends boolean = false>
  */
 export const articlesDeleteArticle = <ThrowOnError extends boolean = false>(options: Options<ArticlesDeleteArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<ArticlesDeleteArticleResponse, ArticlesDeleteArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/articles/{articleId}',
         ...options
     });
@@ -136,6 +192,13 @@ export const articlesDeleteArticle = <ThrowOnError extends boolean = false>(opti
  */
 export const articlesGetArticle = <ThrowOnError extends boolean = false>(options: Options<ArticlesGetArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<ArticlesGetArticleResponse, ArticlesGetArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/articles/{articleId}',
         ...options
     });
@@ -147,6 +210,13 @@ export const articlesGetArticle = <ThrowOnError extends boolean = false>(options
  */
 export const articlesUpdateArticle = <ThrowOnError extends boolean = false>(options: Options<ArticlesUpdateArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<ArticlesUpdateArticleResponse, ArticlesUpdateArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/articles/{articleId}',
         ...options,
         headers: {
@@ -162,6 +232,13 @@ export const articlesUpdateArticle = <ThrowOnError extends boolean = false>(opti
  */
 export const articlesCreateArticleCheckout = <ThrowOnError extends boolean = false>(options: Options<ArticlesCreateArticleCheckoutData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<ArticlesCreateArticleCheckoutResponse, ArticlesCreateArticleCheckoutError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/articles/{articleId}/checkout',
         ...options
     });
@@ -173,6 +250,13 @@ export const articlesCreateArticleCheckout = <ThrowOnError extends boolean = fal
  */
 export const articlesPublishArticle = <ThrowOnError extends boolean = false>(options: Options<ArticlesPublishArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<ArticlesPublishArticleResponse, ArticlesPublishArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/articles/{articleId}/publish',
         ...options
     });
@@ -210,6 +294,13 @@ export const authLogout = <ThrowOnError extends boolean = false>(options?: Optio
  */
 export const authGetMe = <ThrowOnError extends boolean = false>(options?: Options<AuthGetMeData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<AuthGetMeResponse, AuthGetMeError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/auth/me',
         ...options
     });
@@ -317,6 +408,13 @@ export const publicTeamScoresGetPublicTeamScores = <ThrowOnError extends boolean
  */
 export const companyApplicationsListCompanyApplications = <ThrowOnError extends boolean = false>(options?: Options<CompanyApplicationsListCompanyApplicationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyApplicationsListCompanyApplicationsResponse, CompanyApplicationsListCompanyApplicationsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/applications',
         ...options
     });
@@ -328,6 +426,13 @@ export const companyApplicationsListCompanyApplications = <ThrowOnError extends 
  */
 export const companyApplicationsGetApplication = <ThrowOnError extends boolean = false>(options: Options<CompanyApplicationsGetApplicationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CompanyApplicationsGetApplicationResponse, CompanyApplicationsGetApplicationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/applications/{applicationId}',
         ...options
     });
@@ -339,6 +444,13 @@ export const companyApplicationsGetApplication = <ThrowOnError extends boolean =
  */
 export const companyApplicationsUpdateApplicationStatus = <ThrowOnError extends boolean = false>(options: Options<CompanyApplicationsUpdateApplicationStatusData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).patch<CompanyApplicationsUpdateApplicationStatusResponse, CompanyApplicationsUpdateApplicationStatusError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/applications/{applicationId}/status',
         ...options,
         headers: {
@@ -354,6 +466,13 @@ export const companyApplicationsUpdateApplicationStatus = <ThrowOnError extends 
  */
 export const companyArticlesCreateCompanyArticle = <ThrowOnError extends boolean = false>(options: Options<CompanyArticlesCreateCompanyArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyArticlesCreateCompanyArticleResponse, CompanyArticlesCreateCompanyArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/articles',
         ...options,
         headers: {
@@ -369,6 +488,13 @@ export const companyArticlesCreateCompanyArticle = <ThrowOnError extends boolean
  */
 export const companyArticlesDeleteCompanyArticle = <ThrowOnError extends boolean = false>(options: Options<CompanyArticlesDeleteCompanyArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<CompanyArticlesDeleteCompanyArticleResponse, CompanyArticlesDeleteCompanyArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/articles/{articleId}',
         ...options
     });
@@ -380,6 +506,13 @@ export const companyArticlesDeleteCompanyArticle = <ThrowOnError extends boolean
  */
 export const companyArticlesUpdateCompanyArticle = <ThrowOnError extends boolean = false>(options: Options<CompanyArticlesUpdateCompanyArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<CompanyArticlesUpdateCompanyArticleResponse, CompanyArticlesUpdateCompanyArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/articles/{articleId}',
         ...options,
         headers: {
@@ -395,6 +528,13 @@ export const companyArticlesUpdateCompanyArticle = <ThrowOnError extends boolean
  */
 export const companyArticlesPublishCompanyArticle = <ThrowOnError extends boolean = false>(options: Options<CompanyArticlesPublishCompanyArticleData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyArticlesPublishCompanyArticleResponse, CompanyArticlesPublishCompanyArticleError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/articles/{articleId}/publish',
         ...options
     });
@@ -432,6 +572,13 @@ export const companyAuthCompanyLogout = <ThrowOnError extends boolean = false>(o
  */
 export const companyAuthCompanyGetMe = <ThrowOnError extends boolean = false>(options?: Options<CompanyAuthCompanyGetMeData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyAuthCompanyGetMeResponse, CompanyAuthCompanyGetMeError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/auth/me',
         ...options
     });
@@ -469,6 +616,13 @@ export const companyAuthCompanyRegister = <ThrowOnError extends boolean = false>
  */
 export const companyInterviewsListCompanyInterviews = <ThrowOnError extends boolean = false>(options?: Options<CompanyInterviewsListCompanyInterviewsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyInterviewsListCompanyInterviewsResponse, CompanyInterviewsListCompanyInterviewsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/interviews',
         ...options
     });
@@ -480,6 +634,13 @@ export const companyInterviewsListCompanyInterviews = <ThrowOnError extends bool
  */
 export const companyInterviewsGetPendingProposal = <ThrowOnError extends boolean = false>(options: Options<CompanyInterviewsGetPendingProposalData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CompanyInterviewsGetPendingProposalResponse, CompanyInterviewsGetPendingProposalError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/interviews/pending/{applicationId}',
         ...options
     });
@@ -491,6 +652,13 @@ export const companyInterviewsGetPendingProposal = <ThrowOnError extends boolean
  */
 export const companyInterviewsProposeInterview = <ThrowOnError extends boolean = false>(options: Options<CompanyInterviewsProposeInterviewData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyInterviewsProposeInterviewResponse, CompanyInterviewsProposeInterviewError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/interviews/propose',
         ...options,
         headers: {
@@ -506,6 +674,13 @@ export const companyInterviewsProposeInterview = <ThrowOnError extends boolean =
  */
 export const companyInterviewsCancelCompanyInterview = <ThrowOnError extends boolean = false>(options: Options<CompanyInterviewsCancelCompanyInterviewData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyInterviewsCancelCompanyInterviewResponse, CompanyInterviewsCancelCompanyInterviewError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/interviews/{interviewId}/cancel',
         ...options
     });
@@ -517,6 +692,13 @@ export const companyInterviewsCancelCompanyInterview = <ThrowOnError extends boo
  */
 export const companyJobPostingsListCompanyJobPostings = <ThrowOnError extends boolean = false>(options?: Options<CompanyJobPostingsListCompanyJobPostingsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyJobPostingsListCompanyJobPostingsResponse, CompanyJobPostingsListCompanyJobPostingsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/jobs',
         ...options
     });
@@ -528,6 +710,13 @@ export const companyJobPostingsListCompanyJobPostings = <ThrowOnError extends bo
  */
 export const companyJobPostingsCreateJobPosting = <ThrowOnError extends boolean = false>(options: Options<CompanyJobPostingsCreateJobPostingData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyJobPostingsCreateJobPostingResponse, CompanyJobPostingsCreateJobPostingError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/jobs',
         ...options,
         headers: {
@@ -544,6 +733,13 @@ export const companyJobPostingsCreateJobPosting = <ThrowOnError extends boolean 
 export const companyJobPostingsUploadJobCoverImage = <ThrowOnError extends boolean = false>(options: Options<CompanyJobPostingsUploadJobCoverImageData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyJobPostingsUploadJobCoverImageResponse, CompanyJobPostingsUploadJobCoverImageError, ThrowOnError>({
         ...formDataBodySerializer,
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/jobs/cover-image',
         ...options,
         headers: {
@@ -560,6 +756,13 @@ export const companyJobPostingsUploadJobCoverImage = <ThrowOnError extends boole
 export const companyJobPostingsUploadGalleryImage = <ThrowOnError extends boolean = false>(options: Options<CompanyJobPostingsUploadGalleryImageData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyJobPostingsUploadGalleryImageResponse, CompanyJobPostingsUploadGalleryImageError, ThrowOnError>({
         ...formDataBodySerializer,
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/jobs/gallery-image',
         ...options,
         headers: {
@@ -576,6 +779,13 @@ export const companyJobPostingsUploadGalleryImage = <ThrowOnError extends boolea
 export const companyJobPostingsUploadTeamMemberPhoto = <ThrowOnError extends boolean = false>(options: Options<CompanyJobPostingsUploadTeamMemberPhotoData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyJobPostingsUploadTeamMemberPhotoResponse, CompanyJobPostingsUploadTeamMemberPhotoError, ThrowOnError>({
         ...formDataBodySerializer,
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/jobs/team-member-photo',
         ...options,
         headers: {
@@ -591,6 +801,13 @@ export const companyJobPostingsUploadTeamMemberPhoto = <ThrowOnError extends boo
  */
 export const companyJobPostingsDeleteJobPosting = <ThrowOnError extends boolean = false>(options: Options<CompanyJobPostingsDeleteJobPostingData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<CompanyJobPostingsDeleteJobPostingResponse, CompanyJobPostingsDeleteJobPostingError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/jobs/{jobId}',
         ...options
     });
@@ -602,6 +819,13 @@ export const companyJobPostingsDeleteJobPosting = <ThrowOnError extends boolean 
  */
 export const companyJobPostingsGetCompanyJobPosting = <ThrowOnError extends boolean = false>(options: Options<CompanyJobPostingsGetCompanyJobPostingData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CompanyJobPostingsGetCompanyJobPostingResponse, CompanyJobPostingsGetCompanyJobPostingError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/jobs/{jobId}',
         ...options
     });
@@ -613,6 +837,13 @@ export const companyJobPostingsGetCompanyJobPosting = <ThrowOnError extends bool
  */
 export const companyJobPostingsUpdateJobPosting = <ThrowOnError extends boolean = false>(options: Options<CompanyJobPostingsUpdateJobPostingData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<CompanyJobPostingsUpdateJobPostingResponse, CompanyJobPostingsUpdateJobPostingError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/jobs/{jobId}',
         ...options,
         headers: {
@@ -628,6 +859,13 @@ export const companyJobPostingsUpdateJobPosting = <ThrowOnError extends boolean 
  */
 export const companyMessagingListCompanyConversations = <ThrowOnError extends boolean = false>(options?: Options<CompanyMessagingListCompanyConversationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyMessagingListCompanyConversationsResponse, CompanyMessagingListCompanyConversationsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/messages/conversations',
         ...options
     });
@@ -639,6 +877,13 @@ export const companyMessagingListCompanyConversations = <ThrowOnError extends bo
  */
 export const companyMessagingStartCompanyConversation = <ThrowOnError extends boolean = false>(options: Options<CompanyMessagingStartCompanyConversationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyMessagingStartCompanyConversationResponse, CompanyMessagingStartCompanyConversationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/messages/conversations',
         ...options,
         headers: {
@@ -654,6 +899,13 @@ export const companyMessagingStartCompanyConversation = <ThrowOnError extends bo
  */
 export const companyMessagingGetCompanyConversation = <ThrowOnError extends boolean = false>(options: Options<CompanyMessagingGetCompanyConversationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CompanyMessagingGetCompanyConversationResponse, CompanyMessagingGetCompanyConversationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/messages/conversations/{conversationId}',
         ...options
     });
@@ -665,6 +917,13 @@ export const companyMessagingGetCompanyConversation = <ThrowOnError extends bool
  */
 export const companyMessagingListCompanyMessages = <ThrowOnError extends boolean = false>(options: Options<CompanyMessagingListCompanyMessagesData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CompanyMessagingListCompanyMessagesResponse, CompanyMessagingListCompanyMessagesError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/messages/conversations/{conversationId}/messages',
         ...options
     });
@@ -676,6 +935,13 @@ export const companyMessagingListCompanyMessages = <ThrowOnError extends boolean
  */
 export const companyMessagingSendCompanyMessage = <ThrowOnError extends boolean = false>(options: Options<CompanyMessagingSendCompanyMessageData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyMessagingSendCompanyMessageResponse, CompanyMessagingSendCompanyMessageError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/messages/conversations/{conversationId}/messages',
         ...options,
         headers: {
@@ -691,6 +957,13 @@ export const companyMessagingSendCompanyMessage = <ThrowOnError extends boolean 
  */
 export const companyMessagingMarkCompanyConversationRead = <ThrowOnError extends boolean = false>(options: Options<CompanyMessagingMarkCompanyConversationReadData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyMessagingMarkCompanyConversationReadResponse, CompanyMessagingMarkCompanyConversationReadError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/messages/conversations/{conversationId}/read',
         ...options
     });
@@ -702,6 +975,13 @@ export const companyMessagingMarkCompanyConversationRead = <ThrowOnError extends
  */
 export const companyMessagingCountCompanyUnreadMessages = <ThrowOnError extends boolean = false>(options?: Options<CompanyMessagingCountCompanyUnreadMessagesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyMessagingCountCompanyUnreadMessagesResponse, CompanyMessagingCountCompanyUnreadMessagesError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/messages/unread-count',
         ...options
     });
@@ -713,6 +993,13 @@ export const companyMessagingCountCompanyUnreadMessages = <ThrowOnError extends 
  */
 export const companyNotificationsListCompanyNotifications = <ThrowOnError extends boolean = false>(options?: Options<CompanyNotificationsListCompanyNotificationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyNotificationsListCompanyNotificationsResponse, CompanyNotificationsListCompanyNotificationsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/notifications',
         ...options
     });
@@ -724,6 +1011,13 @@ export const companyNotificationsListCompanyNotifications = <ThrowOnError extend
  */
 export const companyNotificationsMarkAllCompanyNotificationsRead = <ThrowOnError extends boolean = false>(options?: Options<CompanyNotificationsMarkAllCompanyNotificationsReadData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<CompanyNotificationsMarkAllCompanyNotificationsReadResponse, CompanyNotificationsMarkAllCompanyNotificationsReadError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/notifications/read-all',
         ...options
     });
@@ -735,6 +1029,13 @@ export const companyNotificationsMarkAllCompanyNotificationsRead = <ThrowOnError
  */
 export const companyNotificationsCountCompanyUnreadNotifications = <ThrowOnError extends boolean = false>(options?: Options<CompanyNotificationsCountCompanyUnreadNotificationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyNotificationsCountCompanyUnreadNotificationsResponse, CompanyNotificationsCountCompanyUnreadNotificationsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/notifications/unread-count',
         ...options
     });
@@ -746,6 +1047,13 @@ export const companyNotificationsCountCompanyUnreadNotifications = <ThrowOnError
  */
 export const companyNotificationsMarkCompanyNotificationRead = <ThrowOnError extends boolean = false>(options: Options<CompanyNotificationsMarkCompanyNotificationReadData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyNotificationsMarkCompanyNotificationReadResponse, CompanyNotificationsMarkCompanyNotificationReadError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/notifications/{id}/read',
         ...options
     });
@@ -757,6 +1065,13 @@ export const companyNotificationsMarkCompanyNotificationRead = <ThrowOnError ext
  */
 export const companyProfilesGetCompanyProfile = <ThrowOnError extends boolean = false>(options?: Options<CompanyProfilesGetCompanyProfileData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyProfilesGetCompanyProfileResponse, CompanyProfilesGetCompanyProfileError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/profile',
         ...options
     });
@@ -768,6 +1083,13 @@ export const companyProfilesGetCompanyProfile = <ThrowOnError extends boolean = 
  */
 export const companyProfilesUpdateCompanyProfile = <ThrowOnError extends boolean = false>(options: Options<CompanyProfilesUpdateCompanyProfileData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<CompanyProfilesUpdateCompanyProfileResponse, CompanyProfilesUpdateCompanyProfileError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/profile',
         ...options,
         headers: {
@@ -783,6 +1105,13 @@ export const companyProfilesUpdateCompanyProfile = <ThrowOnError extends boolean
  */
 export const companyProfilesDeleteCompanyProfileImage = <ThrowOnError extends boolean = false>(options: Options<CompanyProfilesDeleteCompanyProfileImageData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<CompanyProfilesDeleteCompanyProfileImageResponse, CompanyProfilesDeleteCompanyProfileImageError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/profile/image',
         ...options
     });
@@ -795,6 +1124,13 @@ export const companyProfilesDeleteCompanyProfileImage = <ThrowOnError extends bo
 export const companyProfilesUploadCompanyProfileImage = <ThrowOnError extends boolean = false>(options: Options<CompanyProfilesUploadCompanyProfileImageData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyProfilesUploadCompanyProfileImageResponse, CompanyProfilesUploadCompanyProfileImageError, ThrowOnError>({
         ...formDataBodySerializer,
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/profile/image',
         ...options,
         headers: {
@@ -810,6 +1146,13 @@ export const companyProfilesUploadCompanyProfileImage = <ThrowOnError extends bo
  */
 export const savedCandidatesListSavedCandidates = <ThrowOnError extends boolean = false>(options?: Options<SavedCandidatesListSavedCandidatesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<SavedCandidatesListSavedCandidatesResponse, SavedCandidatesListSavedCandidatesError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/saved-candidates',
         ...options
     });
@@ -821,6 +1164,13 @@ export const savedCandidatesListSavedCandidates = <ThrowOnError extends boolean 
  */
 export const savedCandidatesBulkCheckSaved = <ThrowOnError extends boolean = false>(options: Options<SavedCandidatesBulkCheckSavedData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<SavedCandidatesBulkCheckSavedResponse, SavedCandidatesBulkCheckSavedError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/saved-candidates/bulk-check',
         ...options,
         headers: {
@@ -836,6 +1186,13 @@ export const savedCandidatesBulkCheckSaved = <ThrowOnError extends boolean = fal
  */
 export const savedCandidatesCountSavedCandidates = <ThrowOnError extends boolean = false>(options?: Options<SavedCandidatesCountSavedCandidatesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<SavedCandidatesCountSavedCandidatesResponse, SavedCandidatesCountSavedCandidatesError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/saved-candidates/count',
         ...options
     });
@@ -847,6 +1204,13 @@ export const savedCandidatesCountSavedCandidates = <ThrowOnError extends boolean
  */
 export const savedCandidatesUnsaveCandidate = <ThrowOnError extends boolean = false>(options: Options<SavedCandidatesUnsaveCandidateData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<SavedCandidatesUnsaveCandidateResponse, SavedCandidatesUnsaveCandidateError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/saved-candidates/{userId}',
         ...options
     });
@@ -858,6 +1222,13 @@ export const savedCandidatesUnsaveCandidate = <ThrowOnError extends boolean = fa
  */
 export const savedCandidatesIsCandidateSaved = <ThrowOnError extends boolean = false>(options: Options<SavedCandidatesIsCandidateSavedData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<SavedCandidatesIsCandidateSavedResponse, SavedCandidatesIsCandidateSavedError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/saved-candidates/{userId}',
         ...options
     });
@@ -869,6 +1240,13 @@ export const savedCandidatesIsCandidateSaved = <ThrowOnError extends boolean = f
  */
 export const savedCandidatesSaveCandidate = <ThrowOnError extends boolean = false>(options: Options<SavedCandidatesSaveCandidateData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<SavedCandidatesSaveCandidateResponse, SavedCandidatesSaveCandidateError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/saved-candidates/{userId}',
         ...options
     });
@@ -880,6 +1258,13 @@ export const savedCandidatesSaveCandidate = <ThrowOnError extends boolean = fals
  */
 export const scoutTemplatesListScoutTemplates = <ThrowOnError extends boolean = false>(options?: Options<ScoutTemplatesListScoutTemplatesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<ScoutTemplatesListScoutTemplatesResponse, ScoutTemplatesListScoutTemplatesError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scout-templates',
         ...options
     });
@@ -891,6 +1276,13 @@ export const scoutTemplatesListScoutTemplates = <ThrowOnError extends boolean = 
  */
 export const scoutTemplatesCreateScoutTemplate = <ThrowOnError extends boolean = false>(options: Options<ScoutTemplatesCreateScoutTemplateData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<ScoutTemplatesCreateScoutTemplateResponse, ScoutTemplatesCreateScoutTemplateError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scout-templates',
         ...options,
         headers: {
@@ -906,6 +1298,13 @@ export const scoutTemplatesCreateScoutTemplate = <ThrowOnError extends boolean =
  */
 export const scoutTemplatesDeleteScoutTemplate = <ThrowOnError extends boolean = false>(options: Options<ScoutTemplatesDeleteScoutTemplateData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<ScoutTemplatesDeleteScoutTemplateResponse, ScoutTemplatesDeleteScoutTemplateError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scout-templates/{templateId}',
         ...options
     });
@@ -917,6 +1316,13 @@ export const scoutTemplatesDeleteScoutTemplate = <ThrowOnError extends boolean =
  */
 export const scoutTemplatesGetScoutTemplate = <ThrowOnError extends boolean = false>(options: Options<ScoutTemplatesGetScoutTemplateData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<ScoutTemplatesGetScoutTemplateResponse, ScoutTemplatesGetScoutTemplateError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scout-templates/{templateId}',
         ...options
     });
@@ -928,6 +1334,13 @@ export const scoutTemplatesGetScoutTemplate = <ThrowOnError extends boolean = fa
  */
 export const scoutTemplatesUpdateScoutTemplate = <ThrowOnError extends boolean = false>(options: Options<ScoutTemplatesUpdateScoutTemplateData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<ScoutTemplatesUpdateScoutTemplateResponse, ScoutTemplatesUpdateScoutTemplateError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scout-templates/{templateId}',
         ...options,
         headers: {
@@ -943,6 +1356,13 @@ export const scoutTemplatesUpdateScoutTemplate = <ThrowOnError extends boolean =
  */
 export const companyScoutsListCompanyScouts = <ThrowOnError extends boolean = false>(options?: Options<CompanyScoutsListCompanyScoutsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyScoutsListCompanyScoutsResponse, CompanyScoutsListCompanyScoutsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scouts',
         ...options
     });
@@ -954,6 +1374,13 @@ export const companyScoutsListCompanyScouts = <ThrowOnError extends boolean = fa
  */
 export const companyScoutsSendScout = <ThrowOnError extends boolean = false>(options: Options<CompanyScoutsSendScoutData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyScoutsSendScoutResponse, CompanyScoutsSendScoutError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scouts',
         ...options,
         headers: {
@@ -969,6 +1396,13 @@ export const companyScoutsSendScout = <ThrowOnError extends boolean = false>(opt
  */
 export const companyScoutsGetScoutCredits = <ThrowOnError extends boolean = false>(options?: Options<CompanyScoutsGetScoutCreditsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyScoutsGetScoutCreditsResponse, CompanyScoutsGetScoutCreditsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scouts/credits',
         ...options
     });
@@ -980,6 +1414,13 @@ export const companyScoutsGetScoutCredits = <ThrowOnError extends boolean = fals
  */
 export const companyScoutsGetScoutDashboard = <ThrowOnError extends boolean = false>(options?: Options<CompanyScoutsGetScoutDashboardData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyScoutsGetScoutDashboardResponse, CompanyScoutsGetScoutDashboardError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scouts/dashboard',
         ...options
     });
@@ -991,6 +1432,13 @@ export const companyScoutsGetScoutDashboard = <ThrowOnError extends boolean = fa
  */
 export const companyScoutsGetScoutQuality = <ThrowOnError extends boolean = false>(options?: Options<CompanyScoutsGetScoutQualityData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyScoutsGetScoutQualityResponse, CompanyScoutsGetScoutQualityError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scouts/quality',
         ...options
     });
@@ -1002,6 +1450,13 @@ export const companyScoutsGetScoutQuality = <ThrowOnError extends boolean = fals
  */
 export const companyScoutsGetCompanyScoutDetail = <ThrowOnError extends boolean = false>(options: Options<CompanyScoutsGetCompanyScoutDetailData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CompanyScoutsGetCompanyScoutDetailResponse, CompanyScoutsGetCompanyScoutDetailError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scouts/{scoutId}',
         ...options
     });
@@ -1013,6 +1468,13 @@ export const companyScoutsGetCompanyScoutDetail = <ThrowOnError extends boolean 
  */
 export const companyScoutsCompanyScoutReply = <ThrowOnError extends boolean = false>(options: Options<CompanyScoutsCompanyScoutReplyData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<unknown, CompanyScoutsCompanyScoutReplyError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/scouts/{scoutId}/reply',
         ...options,
         headers: {
@@ -1028,6 +1490,13 @@ export const companyScoutsCompanyScoutReply = <ThrowOnError extends boolean = fa
  */
 export const talentSearchSearchTalents = <ThrowOnError extends boolean = false>(options?: Options<TalentSearchSearchTalentsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<TalentSearchSearchTalentsResponse, TalentSearchSearchTalentsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/talents/search',
         ...options
     });
@@ -1039,6 +1508,13 @@ export const talentSearchSearchTalents = <ThrowOnError extends boolean = false>(
  */
 export const talentSearchDiagnosticSearchTalents = <ThrowOnError extends boolean = false>(options?: Options<TalentSearchDiagnosticSearchTalentsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<TalentSearchDiagnosticSearchTalentsResponse, TalentSearchDiagnosticSearchTalentsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/talents/search/diagnostic',
         ...options
     });
@@ -1050,6 +1526,13 @@ export const talentSearchDiagnosticSearchTalents = <ThrowOnError extends boolean
  */
 export const talentSearchCiDiagnosticSearchTalents = <ThrowOnError extends boolean = false>(options?: Options<TalentSearchCiDiagnosticSearchTalentsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<TalentSearchCiDiagnosticSearchTalentsResponse, TalentSearchCiDiagnosticSearchTalentsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/talents/search/diagnostic/ci',
         ...options
     });
@@ -1061,6 +1544,13 @@ export const talentSearchCiDiagnosticSearchTalents = <ThrowOnError extends boole
  */
 export const talentSearchIntegratedDiagnosticSearchTalents = <ThrowOnError extends boolean = false>(options?: Options<TalentSearchIntegratedDiagnosticSearchTalentsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<TalentSearchIntegratedDiagnosticSearchTalentsResponse, TalentSearchIntegratedDiagnosticSearchTalentsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/talents/search/diagnostic/integrated',
         ...options
     });
@@ -1072,6 +1562,13 @@ export const talentSearchIntegratedDiagnosticSearchTalents = <ThrowOnError exten
  */
 export const companyTeamsListTeams = <ThrowOnError extends boolean = false>(options?: Options<CompanyTeamsListTeamsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyTeamsListTeamsResponse, CompanyTeamsListTeamsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams',
         ...options
     });
@@ -1083,6 +1580,13 @@ export const companyTeamsListTeams = <ThrowOnError extends boolean = false>(opti
  */
 export const companyTeamsCreateTeam = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsCreateTeamData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyTeamsCreateTeamResponse, CompanyTeamsCreateTeamError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams',
         ...options,
         headers: {
@@ -1098,6 +1602,13 @@ export const companyTeamsCreateTeam = <ThrowOnError extends boolean = false>(opt
  */
 export const companyTeamsDeleteTeam = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsDeleteTeamData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<CompanyTeamsDeleteTeamResponse, CompanyTeamsDeleteTeamError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams/{teamId}',
         ...options
     });
@@ -1109,6 +1620,13 @@ export const companyTeamsDeleteTeam = <ThrowOnError extends boolean = false>(opt
  */
 export const companyTeamsGetTeam = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsGetTeamData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CompanyTeamsGetTeamResponse, CompanyTeamsGetTeamError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams/{teamId}',
         ...options
     });
@@ -1120,6 +1638,13 @@ export const companyTeamsGetTeam = <ThrowOnError extends boolean = false>(option
  */
 export const companyTeamsUpdateTeam = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsUpdateTeamData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<CompanyTeamsUpdateTeamResponse, CompanyTeamsUpdateTeamError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams/{teamId}',
         ...options,
         headers: {
@@ -1135,6 +1660,13 @@ export const companyTeamsUpdateTeam = <ThrowOnError extends boolean = false>(opt
  */
 export const companyTeamsUnsetAceMember = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsUnsetAceMemberData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<CompanyTeamsUnsetAceMemberResponse, CompanyTeamsUnsetAceMemberError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams/{teamId}/ace',
         ...options
     });
@@ -1146,6 +1678,13 @@ export const companyTeamsUnsetAceMember = <ThrowOnError extends boolean = false>
  */
 export const companyTeamsSetAceMember = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsSetAceMemberData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<CompanyTeamsSetAceMemberResponse, CompanyTeamsSetAceMemberError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams/{teamId}/ace/{memberId}',
         ...options
     });
@@ -1157,6 +1696,13 @@ export const companyTeamsSetAceMember = <ThrowOnError extends boolean = false>(o
  */
 export const companyTeamsAddTeamMember = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsAddTeamMemberData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CompanyTeamsAddTeamMemberResponse, CompanyTeamsAddTeamMemberError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams/{teamId}/members',
         ...options,
         headers: {
@@ -1172,6 +1718,13 @@ export const companyTeamsAddTeamMember = <ThrowOnError extends boolean = false>(
  */
 export const companyTeamsRemoveTeamMember = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsRemoveTeamMemberData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<CompanyTeamsRemoveTeamMemberResponse, CompanyTeamsRemoveTeamMemberError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams/{teamId}/members/{memberId}',
         ...options
     });
@@ -1183,6 +1736,13 @@ export const companyTeamsRemoveTeamMember = <ThrowOnError extends boolean = fals
  */
 export const companyTeamsGetTeamScores = <ThrowOnError extends boolean = false>(options: Options<CompanyTeamsGetTeamScoresData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CompanyTeamsGetTeamScoresResponse, CompanyTeamsGetTeamScoresError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'company_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/company/teams/{teamId}/scores',
         ...options
     });
@@ -1194,6 +1754,13 @@ export const companyTeamsGetTeamScores = <ThrowOnError extends boolean = false>(
  */
 export const integratedReportGetMyIntegratedReport = <ThrowOnError extends boolean = false>(options?: Options<IntegratedReportGetMyIntegratedReportData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<IntegratedReportGetMyIntegratedReportResponse, IntegratedReportGetMyIntegratedReportError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/integrated-report/me',
         ...options
     });
@@ -1205,6 +1772,13 @@ export const integratedReportGetMyIntegratedReport = <ThrowOnError extends boole
  */
 export const integratedReportCreateIntegratedReportRequest = <ThrowOnError extends boolean = false>(options: Options<IntegratedReportCreateIntegratedReportRequestData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<IntegratedReportCreateIntegratedReportRequestResponse, IntegratedReportCreateIntegratedReportRequestError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/integrated-report/requests',
         ...options,
         headers: {
@@ -1231,6 +1805,13 @@ export const integratedReportGetIntegratedReport = <ThrowOnError extends boolean
  */
 export const integratedReportGetIntegratedReportStatus = <ThrowOnError extends boolean = false>(options?: Options<IntegratedReportGetIntegratedReportStatusData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<IntegratedReportGetIntegratedReportStatusResponse, IntegratedReportGetIntegratedReportStatusError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/integrated-report/status',
         ...options
     });
@@ -1253,6 +1834,13 @@ export const integratedReportGetLatestIntegratedRequest = <ThrowOnError extends 
  */
 export const candidateInterviewsListCandidateInterviews = <ThrowOnError extends boolean = false>(options?: Options<CandidateInterviewsListCandidateInterviewsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CandidateInterviewsListCandidateInterviewsResponse, CandidateInterviewsListCandidateInterviewsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/interviews',
         ...options
     });
@@ -1264,6 +1852,13 @@ export const candidateInterviewsListCandidateInterviews = <ThrowOnError extends 
  */
 export const candidateInterviewsSelectInterviewSlot = <ThrowOnError extends boolean = false>(options: Options<CandidateInterviewsSelectInterviewSlotData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateInterviewsSelectInterviewSlotResponse, CandidateInterviewsSelectInterviewSlotError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/interviews/proposals/{proposalId}/select',
         ...options,
         headers: {
@@ -1279,6 +1874,13 @@ export const candidateInterviewsSelectInterviewSlot = <ThrowOnError extends bool
  */
 export const candidateInterviewsGetProposalSlots = <ThrowOnError extends boolean = false>(options: Options<CandidateInterviewsGetProposalSlotsData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CandidateInterviewsGetProposalSlotsResponse, CandidateInterviewsGetProposalSlotsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/interviews/proposals/{proposalId}/slots',
         ...options
     });
@@ -1290,6 +1892,13 @@ export const candidateInterviewsGetProposalSlots = <ThrowOnError extends boolean
  */
 export const candidateInterviewsCancelCandidateInterview = <ThrowOnError extends boolean = false>(options: Options<CandidateInterviewsCancelCandidateInterviewData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateInterviewsCancelCandidateInterviewResponse, CandidateInterviewsCancelCandidateInterviewError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/interviews/{interviewId}/cancel',
         ...options
     });
@@ -1325,6 +1934,13 @@ export const publicJobPostingsGetPublicJobPosting = <ThrowOnError extends boolea
  */
 export const candidateMessagingListCandidateConversations = <ThrowOnError extends boolean = false>(options?: Options<CandidateMessagingListCandidateConversationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CandidateMessagingListCandidateConversationsResponse, CandidateMessagingListCandidateConversationsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/messages/conversations',
         ...options
     });
@@ -1336,6 +1952,13 @@ export const candidateMessagingListCandidateConversations = <ThrowOnError extend
  */
 export const candidateMessagingStartCandidateConversation = <ThrowOnError extends boolean = false>(options: Options<CandidateMessagingStartCandidateConversationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateMessagingStartCandidateConversationResponse, CandidateMessagingStartCandidateConversationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/messages/conversations',
         ...options,
         headers: {
@@ -1351,6 +1974,13 @@ export const candidateMessagingStartCandidateConversation = <ThrowOnError extend
  */
 export const candidateMessagingGetCandidateConversation = <ThrowOnError extends boolean = false>(options: Options<CandidateMessagingGetCandidateConversationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CandidateMessagingGetCandidateConversationResponse, CandidateMessagingGetCandidateConversationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/messages/conversations/{conversationId}',
         ...options
     });
@@ -1362,6 +1992,13 @@ export const candidateMessagingGetCandidateConversation = <ThrowOnError extends 
  */
 export const candidateMessagingListCandidateMessages = <ThrowOnError extends boolean = false>(options: Options<CandidateMessagingListCandidateMessagesData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CandidateMessagingListCandidateMessagesResponse, CandidateMessagingListCandidateMessagesError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/messages/conversations/{conversationId}/messages',
         ...options
     });
@@ -1373,6 +2010,13 @@ export const candidateMessagingListCandidateMessages = <ThrowOnError extends boo
  */
 export const candidateMessagingSendCandidateMessage = <ThrowOnError extends boolean = false>(options: Options<CandidateMessagingSendCandidateMessageData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateMessagingSendCandidateMessageResponse, CandidateMessagingSendCandidateMessageError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/messages/conversations/{conversationId}/messages',
         ...options,
         headers: {
@@ -1388,6 +2032,13 @@ export const candidateMessagingSendCandidateMessage = <ThrowOnError extends bool
  */
 export const candidateMessagingMarkCandidateConversationRead = <ThrowOnError extends boolean = false>(options: Options<CandidateMessagingMarkCandidateConversationReadData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateMessagingMarkCandidateConversationReadResponse, CandidateMessagingMarkCandidateConversationReadError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/messages/conversations/{conversationId}/read',
         ...options
     });
@@ -1399,6 +2050,13 @@ export const candidateMessagingMarkCandidateConversationRead = <ThrowOnError ext
  */
 export const candidateMessagingCountCandidateUnreadMessages = <ThrowOnError extends boolean = false>(options?: Options<CandidateMessagingCountCandidateUnreadMessagesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CandidateMessagingCountCandidateUnreadMessagesResponse, CandidateMessagingCountCandidateUnreadMessagesError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/messages/unread-count',
         ...options
     });
@@ -1410,6 +2068,13 @@ export const candidateMessagingCountCandidateUnreadMessages = <ThrowOnError exte
  */
 export const userNotificationsListUserNotifications = <ThrowOnError extends boolean = false>(options?: Options<UserNotificationsListUserNotificationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<UserNotificationsListUserNotificationsResponse, UserNotificationsListUserNotificationsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/notifications',
         ...options
     });
@@ -1421,6 +2086,13 @@ export const userNotificationsListUserNotifications = <ThrowOnError extends bool
  */
 export const userNotificationsMarkAllUserNotificationsRead = <ThrowOnError extends boolean = false>(options?: Options<UserNotificationsMarkAllUserNotificationsReadData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).post<UserNotificationsMarkAllUserNotificationsReadResponse, UserNotificationsMarkAllUserNotificationsReadError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/notifications/read-all',
         ...options
     });
@@ -1432,6 +2104,13 @@ export const userNotificationsMarkAllUserNotificationsRead = <ThrowOnError exten
  */
 export const userNotificationsCountUserUnreadNotifications = <ThrowOnError extends boolean = false>(options?: Options<UserNotificationsCountUserUnreadNotificationsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<UserNotificationsCountUserUnreadNotificationsResponse, UserNotificationsCountUserUnreadNotificationsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/notifications/unread-count',
         ...options
     });
@@ -1443,6 +2122,13 @@ export const userNotificationsCountUserUnreadNotifications = <ThrowOnError exten
  */
 export const userNotificationsMarkUserNotificationRead = <ThrowOnError extends boolean = false>(options: Options<UserNotificationsMarkUserNotificationReadData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<UserNotificationsMarkUserNotificationReadResponse, UserNotificationsMarkUserNotificationReadError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/notifications/{id}/read',
         ...options
     });
@@ -1465,6 +2151,13 @@ export const postsListTimelinePosts = <ThrowOnError extends boolean = false>(opt
  */
 export const postsCreatePost = <ThrowOnError extends boolean = false>(options: Options<PostsCreatePostData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<PostsCreatePostResponse, PostsCreatePostError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/posts',
         ...options,
         headers: {
@@ -1480,6 +2173,13 @@ export const postsCreatePost = <ThrowOnError extends boolean = false>(options: O
  */
 export const postsDeletePostComment = <ThrowOnError extends boolean = false>(options: Options<PostsDeletePostCommentData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<PostsDeletePostCommentResponse, PostsDeletePostCommentError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/posts/comments/{commentId}',
         ...options
     });
@@ -1513,6 +2213,13 @@ export const postsListLikedPostsByUser = <ThrowOnError extends boolean = false>(
  */
 export const postsDeletePost = <ThrowOnError extends boolean = false>(options: Options<PostsDeletePostData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<PostsDeletePostResponse, PostsDeletePostError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/posts/{postId}',
         ...options
     });
@@ -1546,6 +2253,13 @@ export const postsListPostComments = <ThrowOnError extends boolean = false>(opti
  */
 export const postsCreatePostComment = <ThrowOnError extends boolean = false>(options: Options<PostsCreatePostCommentData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<PostsCreatePostCommentResponse, PostsCreatePostCommentError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/posts/{postId}/comments',
         ...options,
         headers: {
@@ -1561,6 +2275,13 @@ export const postsCreatePostComment = <ThrowOnError extends boolean = false>(opt
  */
 export const postsTogglePostLike = <ThrowOnError extends boolean = false>(options: Options<PostsTogglePostLikeData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<PostsTogglePostLikeResponse, PostsTogglePostLikeError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/posts/{postId}/like',
         ...options
     });
@@ -1572,6 +2293,13 @@ export const postsTogglePostLike = <ThrowOnError extends boolean = false>(option
  */
 export const postsTogglePostRepost = <ThrowOnError extends boolean = false>(options: Options<PostsTogglePostRepostData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<PostsTogglePostRepostResponse, PostsTogglePostRepostError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/posts/{postId}/repost',
         ...options
     });
@@ -1583,6 +2311,13 @@ export const postsTogglePostRepost = <ThrowOnError extends boolean = false>(opti
  */
 export const scoutSettingsGetScoutSettings = <ThrowOnError extends boolean = false>(options?: Options<ScoutSettingsGetScoutSettingsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<ScoutSettingsGetScoutSettingsResponse, ScoutSettingsGetScoutSettingsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/scout-settings',
         ...options
     });
@@ -1594,6 +2329,13 @@ export const scoutSettingsGetScoutSettings = <ThrowOnError extends boolean = fal
  */
 export const scoutSettingsUpdateScoutSettings = <ThrowOnError extends boolean = false>(options: Options<ScoutSettingsUpdateScoutSettingsData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<ScoutSettingsUpdateScoutSettingsResponse, ScoutSettingsUpdateScoutSettingsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/scout-settings',
         ...options,
         headers: {
@@ -1609,6 +2351,13 @@ export const scoutSettingsUpdateScoutSettings = <ThrowOnError extends boolean = 
  */
 export const candidateScoutsListCandidateScouts = <ThrowOnError extends boolean = false>(options?: Options<CandidateScoutsListCandidateScoutsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CandidateScoutsListCandidateScoutsResponse, CandidateScoutsListCandidateScoutsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/scouts',
         ...options
     });
@@ -1620,6 +2369,13 @@ export const candidateScoutsListCandidateScouts = <ThrowOnError extends boolean 
  */
 export const candidateScoutsBulkDeclineScouts = <ThrowOnError extends boolean = false>(options: Options<CandidateScoutsBulkDeclineScoutsData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateScoutsBulkDeclineScoutsResponse, CandidateScoutsBulkDeclineScoutsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/scouts/bulk-decline',
         ...options,
         headers: {
@@ -1635,6 +2391,13 @@ export const candidateScoutsBulkDeclineScouts = <ThrowOnError extends boolean = 
  */
 export const candidateScoutsBulkRespondScouts = <ThrowOnError extends boolean = false>(options: Options<CandidateScoutsBulkRespondScoutsData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateScoutsBulkRespondScoutsResponse, CandidateScoutsBulkRespondScoutsError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/scouts/bulk-respond',
         ...options,
         headers: {
@@ -1650,6 +2413,13 @@ export const candidateScoutsBulkRespondScouts = <ThrowOnError extends boolean = 
  */
 export const candidateScoutsGetCandidateScoutDetail = <ThrowOnError extends boolean = false>(options: Options<CandidateScoutsGetCandidateScoutDetailData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<CandidateScoutsGetCandidateScoutDetailResponse, CandidateScoutsGetCandidateScoutDetailError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/scouts/{scoutId}',
         ...options
     });
@@ -1661,6 +2431,13 @@ export const candidateScoutsGetCandidateScoutDetail = <ThrowOnError extends bool
  */
 export const candidateScoutsCandidateScoutReply = <ThrowOnError extends boolean = false>(options: Options<CandidateScoutsCandidateScoutReplyData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<unknown, CandidateScoutsCandidateScoutReplyError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/scouts/{scoutId}/reply',
         ...options,
         headers: {
@@ -1676,6 +2453,13 @@ export const candidateScoutsCandidateScoutReply = <ThrowOnError extends boolean 
  */
 export const candidateScoutsRespondToScout = <ThrowOnError extends boolean = false>(options: Options<CandidateScoutsRespondToScoutData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<CandidateScoutsRespondToScoutResponse, CandidateScoutsRespondToScoutError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/scouts/{scoutId}/respond',
         ...options,
         headers: {
@@ -1765,6 +2549,13 @@ export const usersGetUserByUsername = <ThrowOnError extends boolean = false>(opt
  */
 export const usersUpdateUserProfile = <ThrowOnError extends boolean = false>(options: Options<UsersUpdateUserProfileData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).patch<UsersUpdateUserProfileResponse, UsersUpdateUserProfileError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}',
         ...options,
         headers: {
@@ -1791,6 +2582,13 @@ export const educationsListEducations = <ThrowOnError extends boolean = false>(o
  */
 export const educationsCreateEducation = <ThrowOnError extends boolean = false>(options: Options<EducationsCreateEducationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<EducationsCreateEducationResponse, EducationsCreateEducationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/educations',
         ...options,
         headers: {
@@ -1806,6 +2604,13 @@ export const educationsCreateEducation = <ThrowOnError extends boolean = false>(
  */
 export const educationsDeleteEducation = <ThrowOnError extends boolean = false>(options: Options<EducationsDeleteEducationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<EducationsDeleteEducationResponse, EducationsDeleteEducationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/educations/{educationId}',
         ...options
     });
@@ -1817,6 +2622,13 @@ export const educationsDeleteEducation = <ThrowOnError extends boolean = false>(
  */
 export const educationsUpdateEducation = <ThrowOnError extends boolean = false>(options: Options<EducationsUpdateEducationData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<EducationsUpdateEducationResponse, EducationsUpdateEducationError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/educations/{educationId}',
         ...options,
         headers: {
@@ -1843,6 +2655,13 @@ export const experiencesListExperiences = <ThrowOnError extends boolean = false>
  */
 export const experiencesCreateExperience = <ThrowOnError extends boolean = false>(options: Options<ExperiencesCreateExperienceData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<ExperiencesCreateExperienceResponse, ExperiencesCreateExperienceError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/experiences',
         ...options,
         headers: {
@@ -1858,6 +2677,13 @@ export const experiencesCreateExperience = <ThrowOnError extends boolean = false
  */
 export const experiencesDeleteExperience = <ThrowOnError extends boolean = false>(options: Options<ExperiencesDeleteExperienceData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<ExperiencesDeleteExperienceResponse, ExperiencesDeleteExperienceError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/experiences/{experienceId}',
         ...options
     });
@@ -1869,6 +2695,13 @@ export const experiencesDeleteExperience = <ThrowOnError extends boolean = false
  */
 export const experiencesUpdateExperience = <ThrowOnError extends boolean = false>(options: Options<ExperiencesUpdateExperienceData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<ExperiencesUpdateExperienceResponse, ExperiencesUpdateExperienceError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/experiences/{experienceId}',
         ...options,
         headers: {
@@ -1884,6 +2717,13 @@ export const experiencesUpdateExperience = <ThrowOnError extends boolean = false
  */
 export const followsUnfollowUser = <ThrowOnError extends boolean = false>(options: Options<FollowsUnfollowUserData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<FollowsUnfollowUserResponse, FollowsUnfollowUserError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/follow',
         ...options
     });
@@ -1895,6 +2735,13 @@ export const followsUnfollowUser = <ThrowOnError extends boolean = false>(option
  */
 export const followsFollowUser = <ThrowOnError extends boolean = false>(options: Options<FollowsFollowUserData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<FollowsFollowUserResponse, FollowsFollowUserError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/follow',
         ...options
     });
@@ -1906,6 +2753,13 @@ export const followsFollowUser = <ThrowOnError extends boolean = false>(options:
  */
 export const followsGetFollowStatus = <ThrowOnError extends boolean = false>(options: Options<FollowsGetFollowStatusData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<FollowsGetFollowStatusResponse, FollowsGetFollowStatusError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/follow-status',
         ...options
     });
@@ -1950,6 +2804,13 @@ export const skillsListSkills = <ThrowOnError extends boolean = false>(options: 
  */
 export const skillsAttachSkill = <ThrowOnError extends boolean = false>(options: Options<SkillsAttachSkillData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<SkillsAttachSkillResponse, SkillsAttachSkillError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/skills',
         ...options,
         headers: {
@@ -1965,6 +2826,13 @@ export const skillsAttachSkill = <ThrowOnError extends boolean = false>(options:
  */
 export const skillsDetachSkill = <ThrowOnError extends boolean = false>(options: Options<SkillsDetachSkillData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).delete<SkillsDetachSkillResponse, SkillsDetachSkillError, ThrowOnError>({
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/skills/{name}',
         ...options
     });
@@ -1977,6 +2845,13 @@ export const skillsDetachSkill = <ThrowOnError extends boolean = false>(options:
 export const usersUploadUserImage = <ThrowOnError extends boolean = false>(options: Options<UsersUploadUserImageData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<UsersUploadUserImageResponse, UsersUploadUserImageError, ThrowOnError>({
         ...formDataBodySerializer,
+        security: [
+            {
+                in: 'cookie',
+                name: 'inselfy_token',
+                type: 'apiKey'
+            }
+        ],
         url: '/api/users/{username}/upload-image',
         ...options,
         headers: {

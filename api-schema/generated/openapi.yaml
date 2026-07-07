@@ -44,15 +44,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobApplicationResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ConflictError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - JobApplications
       requestBody:
@@ -61,6 +76,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.ApplyJobRequest'
+      security:
+        - CandidateAuth: []
     get:
       operationId: CandidateApplications_listCandidateApplications
       summary: List applications by the candidate
@@ -73,14 +90,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobApplicationListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - JobApplications
+      security:
+        - CandidateAuth: []
   /api/applications/check:
     get:
       operationId: CandidateApplications_checkApplied
@@ -101,14 +126,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.AppliedResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - JobApplications
+      security:
+        - CandidateAuth: []
   /api/applications/{applicationId}/withdraw:
     post:
       operationId: CandidateApplications_withdrawApplication
@@ -127,16 +160,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.StatusOkResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - JobApplications
+      security:
+        - CandidateAuth: []
   /api/articles:
     get:
       operationId: Articles_listArticles
@@ -166,8 +211,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
@@ -186,12 +231,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Articles
       requestBody:
@@ -200,6 +251,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateArticleRequest'
+      security:
+        - CandidateAuth: []
   /api/articles/mine:
     get:
       operationId: Articles_listMyArticles
@@ -227,14 +280,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Articles
+      security:
+        - CandidateAuth: []
   /api/articles/upload-image:
     post:
       operationId: Articles_uploadArticleImage
@@ -248,12 +309,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UploadUrlResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Articles
       requestBody:
@@ -268,6 +335,8 @@ paths:
                   format: binary
               required:
                 - file
+      security:
+        - CandidateAuth: []
   /api/articles/{articleId}:
     get:
       operationId: Articles_getArticle
@@ -286,16 +355,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Articles
+      security:
+        - CandidateAuth: []
+        - {}
     put:
       operationId: Articles_updateArticle
       summary: Update an article as a user
@@ -313,15 +389,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Articles
       requestBody:
@@ -330,6 +421,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateArticleRequest'
+      security:
+        - CandidateAuth: []
     delete:
       operationId: Articles_deleteArticle
       summary: Delete an article as a user
@@ -343,17 +436,34 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Articles
+      security:
+        - CandidateAuth: []
   /api/articles/{articleId}/checkout:
     post:
       operationId: Articles_createArticleCheckout
@@ -372,16 +482,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CheckoutSessionResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Articles
+      security:
+        - CandidateAuth: []
   /api/articles/{articleId}/publish:
     post:
       operationId: Articles_publishArticle
@@ -400,17 +522,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Articles
+      security:
+        - CandidateAuth: []
   /api/auth/google:
     post:
       operationId: Auth_googleLogin
@@ -424,14 +563,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.AuthUserResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Auth
       requestBody:
@@ -464,16 +607,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.AuthUserResponse'
-        default:
-          description: An unexpected error response.
+        '401':
+          description: Unauthorized エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.UnauthorizedError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Auth
+      security:
+        - CandidateAuth: []
   /api/auth/refresh:
     post:
       operationId: Auth_refreshToken
@@ -487,8 +636,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.AuthUserResponse'
-        default:
-          description: An unexpected error response.
+        '401':
+          description: Unauthorized エラー
           content:
             application/json:
               schema:
@@ -508,14 +657,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CISessionResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
       requestBody:
@@ -542,14 +695,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.AiReportResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
   /api/career-interest/sessions/{sessionId}/results:
@@ -570,14 +727,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CIResultResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
       requestBody:
@@ -603,14 +764,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CIResultResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
   /api/career-interest/users/{userId}/results/latest:
@@ -631,14 +796,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CIResultResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CareerInterest
   /api/companies/{id}:
@@ -659,14 +828,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.PublicCompanyProfileResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyProfile
   /api/companies/{id}/teams/scores:
@@ -687,14 +860,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.PublicTeamScoresResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
   /api/company/applications:
@@ -761,14 +938,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobApplicationListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - JobApplications
+      security:
+        - CompanyAuth: []
   /api/company/applications/{applicationId}:
     get:
       operationId: CompanyApplications_getApplication
@@ -787,16 +972,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobApplicationResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - JobApplications
+      security:
+        - CompanyAuth: []
   /api/company/applications/{applicationId}/status:
     patch:
       operationId: CompanyApplications_updateApplicationStatus
@@ -815,14 +1012,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.StatusOkResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - JobApplications
       requestBody:
@@ -831,6 +1038,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateApplicationStatusRequest'
+      security:
+        - CompanyAuth: []
   /api/company/articles:
     post:
       operationId: CompanyArticles_createCompanyArticle
@@ -844,12 +1053,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Articles
       requestBody:
@@ -858,6 +1073,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateArticleRequest'
+      security:
+        - CompanyAuth: []
   /api/company/articles/{articleId}:
     put:
       operationId: CompanyArticles_updateCompanyArticle
@@ -876,15 +1093,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Articles
       requestBody:
@@ -893,6 +1125,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateArticleRequest'
+      security:
+        - CompanyAuth: []
     delete:
       operationId: CompanyArticles_deleteCompanyArticle
       summary: Delete an article as a company
@@ -906,17 +1140,34 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Articles
+      security:
+        - CompanyAuth: []
   /api/company/articles/{articleId}/publish:
     post:
       operationId: CompanyArticles_publishCompanyArticle
@@ -935,17 +1186,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ArticleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Articles
+      security:
+        - CompanyAuth: []
   /api/company/auth/login:
     post:
       operationId: CompanyAuth_companyLogin
@@ -959,14 +1227,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CompanyResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyAuth
       requestBody:
@@ -999,16 +1271,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CompanyResponse'
-        default:
-          description: An unexpected error response.
+        '401':
+          description: Unauthorized エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.UnauthorizedError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyAuth
+      security:
+        - CompanyAuth: []
   /api/company/auth/refresh:
     post:
       operationId: CompanyAuth_companyRefreshToken
@@ -1022,8 +1300,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CompanyResponse'
-        default:
-          description: An unexpected error response.
+        '401':
+          description: Unauthorized エラー
           content:
             application/json:
               schema:
@@ -1043,15 +1321,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CompanyResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.ConflictError'
-                  - $ref: '#/components/schemas/Models.UnauthorizedError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - CompanyAuth
       requestBody:
@@ -1087,14 +1374,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CompanyInterviewListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Interviews
+      security:
+        - CompanyAuth: []
   /api/company/interviews/pending/{applicationId}:
     get:
       operationId: CompanyInterviews_getPendingProposal
@@ -1113,14 +1408,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.PendingProposalCheckResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Interviews
+      security:
+        - CompanyAuth: []
   /api/company/interviews/propose:
     post:
       operationId: CompanyInterviews_proposeInterview
@@ -1134,14 +1437,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ProposeInterviewResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Interviews
       requestBody:
@@ -1150,6 +1463,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.ProposeInterviewRequest'
+      security:
+        - CompanyAuth: []
   /api/company/interviews/{interviewId}/cancel:
     post:
       operationId: CompanyInterviews_cancelCompanyInterview
@@ -1168,17 +1483,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.StatusOkResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.UnauthorizedError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Interviews
+      security:
+        - CompanyAuth: []
   /api/company/jobs:
     post:
       operationId: CompanyJobPostings_createJobPosting
@@ -1192,12 +1518,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobPostingResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - JobPostings
       requestBody:
@@ -1206,6 +1538,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.JobPostingRequest'
+      security:
+        - CompanyAuth: []
     get:
       operationId: CompanyJobPostings_listCompanyJobPostings
       summary: List job postings of the company
@@ -1218,14 +1552,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobPostingListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - JobPostings
+      security:
+        - CompanyAuth: []
   /api/company/jobs/cover-image:
     post:
       operationId: CompanyJobPostings_uploadJobCoverImage
@@ -1239,12 +1581,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UploadUrlResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - JobPostings
       requestBody:
@@ -1259,6 +1607,8 @@ paths:
                   format: binary
               required:
                 - file
+      security:
+        - CompanyAuth: []
   /api/company/jobs/gallery-image:
     post:
       operationId: CompanyJobPostings_uploadGalleryImage
@@ -1272,12 +1622,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UploadUrlResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - JobPostings
       requestBody:
@@ -1292,6 +1648,8 @@ paths:
                   format: binary
               required:
                 - file
+      security:
+        - CompanyAuth: []
   /api/company/jobs/team-member-photo:
     post:
       operationId: CompanyJobPostings_uploadTeamMemberPhoto
@@ -1305,12 +1663,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UploadUrlResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - JobPostings
       requestBody:
@@ -1325,6 +1689,8 @@ paths:
                   format: binary
               required:
                 - file
+      security:
+        - CompanyAuth: []
   /api/company/jobs/{jobId}:
     get:
       operationId: CompanyJobPostings_getCompanyJobPosting
@@ -1343,16 +1709,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobPostingResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - JobPostings
+      security:
+        - CompanyAuth: []
     put:
       operationId: CompanyJobPostings_updateJobPosting
       summary: Update a job posting
@@ -1370,14 +1748,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobPostingResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - JobPostings
       requestBody:
@@ -1386,6 +1774,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.JobPostingRequest'
+      security:
+        - CompanyAuth: []
     delete:
       operationId: CompanyJobPostings_deleteJobPosting
       summary: Delete a job posting
@@ -1399,16 +1789,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - JobPostings
+      security:
+        - CompanyAuth: []
   /api/company/messages/conversations:
     post:
       operationId: CompanyMessaging_startCompanyConversation
@@ -1422,14 +1824,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ConversationResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
       requestBody:
@@ -1438,6 +1850,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.StartConversationRequest'
+      security:
+        - CompanyAuth: []
     get:
       operationId: CompanyMessaging_listCompanyConversations
       summary: List conversations for the company
@@ -1464,14 +1878,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ConversationListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Messaging
+      security:
+        - CompanyAuth: []
   /api/company/messages/conversations/{conversationId}:
     get:
       operationId: CompanyMessaging_getCompanyConversation
@@ -1490,17 +1912,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ConversationResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
+      security:
+        - CompanyAuth: []
   /api/company/messages/conversations/{conversationId}/messages:
     get:
       operationId: CompanyMessaging_listCompanyMessages
@@ -1533,17 +1972,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.MessageListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
+      security:
+        - CompanyAuth: []
     post:
       operationId: CompanyMessaging_sendCompanyMessage
       summary: Send a message as the company
@@ -1561,15 +2017,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.MessageResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
       requestBody:
@@ -1578,6 +2049,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.SendMessageRequest'
+      security:
+        - CompanyAuth: []
   /api/company/messages/conversations/{conversationId}/read:
     post:
       operationId: CompanyMessaging_markCompanyConversationRead
@@ -1596,16 +2069,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.StatusOkResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
+      security:
+        - CompanyAuth: []
   /api/company/messages/unread-count:
     get:
       operationId: CompanyMessaging_countCompanyUnreadMessages
@@ -1619,14 +2104,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnreadCountResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Messaging
+      security:
+        - CompanyAuth: []
   /api/company/notifications:
     get:
       operationId: CompanyNotifications_listCompanyNotifications
@@ -1656,14 +2149,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.NotificationListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Notifications
+      security:
+        - CompanyAuth: []
   /api/company/notifications/read-all:
     post:
       operationId: CompanyNotifications_markAllCompanyNotificationsRead
@@ -1673,14 +2174,22 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Notifications
+      security:
+        - CompanyAuth: []
   /api/company/notifications/unread-count:
     get:
       operationId: CompanyNotifications_countCompanyUnreadNotifications
@@ -1694,14 +2203,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnreadCountResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Notifications
+      security:
+        - CompanyAuth: []
   /api/company/notifications/{id}/read:
     post:
       operationId: CompanyNotifications_markCompanyNotificationRead
@@ -1716,16 +2233,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Notifications
+      security:
+        - CompanyAuth: []
   /api/company/profile:
     get:
       operationId: CompanyProfiles_getCompanyProfile
@@ -1739,16 +2268,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CompanyProfileResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyProfile
+      security:
+        - CompanyAuth: []
     put:
       operationId: CompanyProfiles_updateCompanyProfile
       summary: Update the authenticated company's profile
@@ -1761,12 +2302,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CompanyProfileResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyProfile
       requestBody:
@@ -1775,6 +2322,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateCompanyProfileRequest'
+      security:
+        - CompanyAuth: []
   /api/company/profile/image:
     post:
       operationId: CompanyProfiles_uploadCompanyProfileImage
@@ -1795,12 +2344,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UploadUrlResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyProfile
       requestBody:
@@ -1815,6 +2370,8 @@ paths:
                   format: binary
               required:
                 - file
+      security:
+        - CompanyAuth: []
     delete:
       operationId: CompanyProfiles_deleteCompanyProfileImage
       summary: Delete a company profile image
@@ -1837,14 +2394,22 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyProfile
+      security:
+        - CompanyAuth: []
   /api/company/saved-candidates:
     get:
       operationId: SavedCandidates_listSavedCandidates
@@ -1874,14 +2439,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TalentListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - SavedCandidates
+      security:
+        - CompanyAuth: []
   /api/company/saved-candidates/bulk-check:
     post:
       operationId: SavedCandidates_bulkCheckSaved
@@ -1895,12 +2468,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BulkSavedResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - SavedCandidates
       requestBody:
@@ -1909,6 +2488,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.BulkCheckSavedRequest'
+      security:
+        - CompanyAuth: []
   /api/company/saved-candidates/count:
     get:
       operationId: SavedCandidates_countSavedCandidates
@@ -1922,14 +2503,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.SavedCountResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - SavedCandidates
+      security:
+        - CompanyAuth: []
   /api/company/saved-candidates/{userId}:
     post:
       operationId: SavedCandidates_saveCandidate
@@ -1944,14 +2533,22 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - SavedCandidates
+      security:
+        - CompanyAuth: []
     delete:
       operationId: SavedCandidates_unsaveCandidate
       summary: Unsave a candidate
@@ -1965,14 +2562,22 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - SavedCandidates
+      security:
+        - CompanyAuth: []
     get:
       operationId: SavedCandidates_isCandidateSaved
       summary: Check whether a candidate is saved
@@ -1990,14 +2595,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.SavedResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - SavedCandidates
+      security:
+        - CompanyAuth: []
   /api/company/scout-templates:
     post:
       operationId: ScoutTemplates_createScoutTemplate
@@ -2011,12 +2624,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutTemplateResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - ScoutTemplates
       requestBody:
@@ -2025,6 +2644,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateScoutTemplateRequest'
+      security:
+        - CompanyAuth: []
     get:
       operationId: ScoutTemplates_listScoutTemplates
       summary: List scout templates
@@ -2037,14 +2658,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutTemplateListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - ScoutTemplates
+      security:
+        - CompanyAuth: []
   /api/company/scout-templates/{templateId}:
     get:
       operationId: ScoutTemplates_getScoutTemplate
@@ -2063,16 +2692,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutTemplateResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - ScoutTemplates
+      security:
+        - CompanyAuth: []
     put:
       operationId: ScoutTemplates_updateScoutTemplate
       summary: Update a scout template
@@ -2090,14 +2731,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutTemplateResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - ScoutTemplates
       requestBody:
@@ -2106,6 +2757,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateScoutTemplateRequest'
+      security:
+        - CompanyAuth: []
     delete:
       operationId: ScoutTemplates_deleteScoutTemplate
       summary: Delete a scout template
@@ -2119,16 +2772,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - ScoutTemplates
+      security:
+        - CompanyAuth: []
   /api/company/scouts:
     post:
       operationId: CompanyScouts_sendScout
@@ -2142,15 +2807,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutMessageResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyScouts
       requestBody:
@@ -2159,6 +2839,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.SendScoutRequest'
+      security:
+        - CompanyAuth: []
     get:
       operationId: CompanyScouts_listCompanyScouts
       summary: List scouts sent by the company
@@ -2194,14 +2876,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyScouts
+      security:
+        - CompanyAuth: []
   /api/company/scouts/credits:
     get:
       operationId: CompanyScouts_getScoutCredits
@@ -2215,14 +2905,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutCreditsResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyScouts
+      security:
+        - CompanyAuth: []
   /api/company/scouts/dashboard:
     get:
       operationId: CompanyScouts_getScoutDashboard
@@ -2236,14 +2934,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutDashboardResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyScouts
+      security:
+        - CompanyAuth: []
   /api/company/scouts/quality:
     get:
       operationId: CompanyScouts_getScoutQuality
@@ -2257,14 +2963,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutQualityScoreResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyScouts
+      security:
+        - CompanyAuth: []
   /api/company/scouts/{scoutId}:
     get:
       operationId: CompanyScouts_getCompanyScoutDetail
@@ -2283,16 +2997,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutDetailResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyScouts
+      security:
+        - CompanyAuth: []
   /api/company/scouts/{scoutId}/reply:
     post:
       operationId: CompanyScouts_companyScoutReply
@@ -2307,14 +3033,24 @@ paths:
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyScouts
       requestBody:
@@ -2323,6 +3059,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CompanyScoutReplyRequest'
+      security:
+        - CompanyAuth: []
   /api/company/talents/search:
     get:
       operationId: TalentSearch_searchTalents
@@ -2401,14 +3139,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TalentListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - TalentSearch
+      security:
+        - CompanyAuth: []
   /api/company/talents/search/diagnostic:
     get:
       operationId: TalentSearch_diagnosticSearchTalents
@@ -2485,14 +3231,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TalentListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - TalentSearch
+      security:
+        - CompanyAuth: []
   /api/company/talents/search/diagnostic/ci:
     get:
       operationId: TalentSearch_ciDiagnosticSearchTalents
@@ -2568,14 +3322,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TalentListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - TalentSearch
+      security:
+        - CompanyAuth: []
   /api/company/talents/search/diagnostic/integrated:
     get:
       operationId: TalentSearch_integratedDiagnosticSearchTalents
@@ -2651,14 +3413,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TalentListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - TalentSearch
+      security:
+        - CompanyAuth: []
   /api/company/teams:
     get:
       operationId: CompanyTeams_listTeams
@@ -2672,14 +3442,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TeamListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyTeams
+      security:
+        - CompanyAuth: []
     post:
       operationId: CompanyTeams_createTeam
       summary: Create a team
@@ -2692,12 +3470,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TeamDetailResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CompanyTeams
       requestBody:
@@ -2706,6 +3490,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateTeamRequest'
+      security:
+        - CompanyAuth: []
   /api/company/teams/{teamId}:
     get:
       operationId: CompanyTeams_getTeam
@@ -2724,16 +3510,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TeamDetailResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
+      security:
+        - CompanyAuth: []
     put:
       operationId: CompanyTeams_updateTeam
       summary: Update a team
@@ -2747,14 +3545,24 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
       requestBody:
@@ -2763,6 +3571,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateTeamRequest'
+      security:
+        - CompanyAuth: []
     delete:
       operationId: CompanyTeams_deleteTeam
       summary: Delete a team
@@ -2776,16 +3586,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
+      security:
+        - CompanyAuth: []
   /api/company/teams/{teamId}/ace:
     delete:
       operationId: CompanyTeams_unsetAceMember
@@ -2800,16 +3622,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
+      security:
+        - CompanyAuth: []
   /api/company/teams/{teamId}/ace/{memberId}:
     put:
       operationId: CompanyTeams_setAceMember
@@ -2829,16 +3663,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
+      security:
+        - CompanyAuth: []
   /api/company/teams/{teamId}/members:
     post:
       operationId: CompanyTeams_addTeamMember
@@ -2857,14 +3703,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TeamMemberResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
       requestBody:
@@ -2873,6 +3729,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.AddTeamMemberRequest'
+      security:
+        - CompanyAuth: []
   /api/company/teams/{teamId}/members/{memberId}:
     delete:
       operationId: CompanyTeams_removeTeamMember
@@ -2892,16 +3750,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
+      security:
+        - CompanyAuth: []
   /api/company/teams/{teamId}/scores:
     get:
       operationId: CompanyTeams_getTeamScores
@@ -2920,16 +3790,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.TeamScoresResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CompanyTeams
+      security:
+        - CompanyAuth: []
   /api/integrated-report/me:
     get:
       operationId: IntegratedReport_getMyIntegratedReport
@@ -2943,16 +3825,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.IntegratedReportMineResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - IntegratedReport
+      security:
+        - CandidateAuth: []
   /api/integrated-report/requests:
     post:
       operationId: IntegratedReport_createIntegratedReportRequest
@@ -2966,12 +3860,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.IntegratedReportRequestResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - IntegratedReport
       requestBody:
@@ -2980,6 +3880,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateIntegratedReportRequest'
+      security:
+        - CandidateAuth: []
   /api/integrated-report/requests/{requestId}/report:
     get:
       operationId: IntegratedReport_getIntegratedReport
@@ -2998,14 +3900,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.IntegratedReportResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - IntegratedReport
   /api/integrated-report/status:
@@ -3021,14 +3927,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.IntegratedReportStatusResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - IntegratedReport
+      security:
+        - CandidateAuth: []
   /api/integrated-report/users/{userId}/latest-request:
     get:
       operationId: IntegratedReport_getLatestIntegratedRequest
@@ -3047,14 +3961,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.IntegratedReportLatestRequestResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - IntegratedReport
   /api/interviews:
@@ -3070,14 +3988,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CandidateInterviewListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Interviews
+      security:
+        - CandidateAuth: []
   /api/interviews/proposals/{proposalId}/select:
     post:
       operationId: CandidateInterviews_selectInterviewSlot
@@ -3096,15 +4022,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.SelectSlotResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ConflictError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Interviews
       requestBody:
@@ -3113,6 +4054,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.SelectSlotRequest'
+      security:
+        - CandidateAuth: []
   /api/interviews/proposals/{proposalId}/slots:
     get:
       operationId: CandidateInterviews_getProposalSlots
@@ -3131,16 +4074,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ProposalSlotsResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Interviews
+      security:
+        - CandidateAuth: []
   /api/interviews/{interviewId}/cancel:
     post:
       operationId: CandidateInterviews_cancelCandidateInterview
@@ -3159,17 +4114,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.StatusOkResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.UnauthorizedError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Interviews
+      security:
+        - CandidateAuth: []
   /api/jobs:
     get:
       operationId: PublicJobPostings_listPublicJobPostings
@@ -3255,8 +4221,8 @@ paths:
                   - type: array
                     items:
                       $ref: '#/components/schemas/Models.JobPostingResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
@@ -3281,14 +4247,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.JobPostingResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - JobPostings
   /api/messages/conversations:
@@ -3304,14 +4274,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ConversationResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
       requestBody:
@@ -3320,6 +4300,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.StartCandidateConversationRequest'
+      security:
+        - CandidateAuth: []
     get:
       operationId: CandidateMessaging_listCandidateConversations
       summary: List conversations for the candidate
@@ -3348,14 +4330,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ConversationListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Messaging
+      security:
+        - CandidateAuth: []
   /api/messages/conversations/{conversationId}:
     get:
       operationId: CandidateMessaging_getCandidateConversation
@@ -3374,17 +4364,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ConversationResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
+      security:
+        - CandidateAuth: []
   /api/messages/conversations/{conversationId}/messages:
     get:
       operationId: CandidateMessaging_listCandidateMessages
@@ -3417,17 +4424,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.MessageListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
+      security:
+        - CandidateAuth: []
     post:
       operationId: CandidateMessaging_sendCandidateMessage
       summary: Send a message as the candidate
@@ -3445,15 +4469,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.MessageResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
       requestBody:
@@ -3462,6 +4501,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.SendMessageRequest'
+      security:
+        - CandidateAuth: []
   /api/messages/conversations/{conversationId}/read:
     post:
       operationId: CandidateMessaging_markCandidateConversationRead
@@ -3480,16 +4521,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.StatusOkResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Messaging
+      security:
+        - CandidateAuth: []
   /api/messages/unread-count:
     get:
       operationId: CandidateMessaging_countCandidateUnreadMessages
@@ -3503,14 +4556,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnreadCountResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Messaging
+      security:
+        - CandidateAuth: []
   /api/notifications:
     get:
       operationId: UserNotifications_listUserNotifications
@@ -3540,14 +4601,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.NotificationListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Notifications
+      security:
+        - CandidateAuth: []
   /api/notifications/read-all:
     post:
       operationId: UserNotifications_markAllUserNotificationsRead
@@ -3557,14 +4626,22 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Notifications
+      security:
+        - CandidateAuth: []
   /api/notifications/unread-count:
     get:
       operationId: UserNotifications_countUserUnreadNotifications
@@ -3578,14 +4655,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnreadCountResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - Notifications
+      security:
+        - CandidateAuth: []
   /api/notifications/{id}/read:
     post:
       operationId: UserNotifications_markUserNotificationRead
@@ -3600,16 +4685,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Notifications
+      security:
+        - CandidateAuth: []
   /api/posts:
     post:
       operationId: Posts_createPost
@@ -3623,14 +4720,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.PostResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
       requestBody:
@@ -3639,6 +4746,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreatePostRequest'
+      security:
+        - CandidateAuth: []
     get:
       operationId: Posts_listTimelinePosts
       summary: List timeline posts
@@ -3674,8 +4783,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.PostListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
@@ -3696,17 +4805,34 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
+      security:
+        - CandidateAuth: []
   /api/posts/users/{userId}:
     get:
       operationId: Posts_listPostsByUser
@@ -3745,14 +4871,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.PostListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
   /api/posts/users/{userId}/likes:
@@ -3787,14 +4917,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.PostListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
   /api/posts/{postId}:
@@ -3821,14 +4955,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.PostResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
     delete:
@@ -3844,17 +4982,34 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
+      security:
+        - CandidateAuth: []
   /api/posts/{postId}/comments:
     get:
       operationId: Posts_listPostComments
@@ -3887,14 +5042,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CommentListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
     post:
@@ -3914,14 +5073,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.CommentResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
       requestBody:
@@ -3930,6 +5099,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateCommentRequest'
+      security:
+        - CandidateAuth: []
   /api/posts/{postId}/like:
     post:
       operationId: Posts_togglePostLike
@@ -3948,16 +5119,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.LikeToggleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
+      security:
+        - CandidateAuth: []
   /api/posts/{postId}/repost:
     post:
       operationId: Posts_togglePostRepost
@@ -3976,16 +5159,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.RepostToggleResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Posts
+      security:
+        - CandidateAuth: []
   /api/scout-settings:
     get:
       operationId: ScoutSettings_getScoutSettings
@@ -3999,16 +5194,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutSettingsResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - ScoutSettings
+      security:
+        - CandidateAuth: []
     put:
       operationId: ScoutSettings_updateScoutSettings
       summary: Update scout settings for the authenticated user
@@ -4021,14 +5228,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutSettingsResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - ScoutSettings
       requestBody:
@@ -4037,6 +5254,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateScoutSettingsRequest'
+      security:
+        - CandidateAuth: []
   /api/scouts:
     get:
       operationId: CandidateScouts_listCandidateScouts
@@ -4066,14 +5285,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CandidateScouts
+      security:
+        - CandidateAuth: []
   /api/scouts/bulk-decline:
     post:
       operationId: CandidateScouts_bulkDeclineScouts
@@ -4083,12 +5310,18 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CandidateScouts
       requestBody:
@@ -4097,6 +5330,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.BulkDeclineRequest'
+      security:
+        - CandidateAuth: []
   /api/scouts/bulk-respond:
     post:
       operationId: CandidateScouts_bulkRespondScouts
@@ -4106,12 +5341,18 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
       tags:
         - CandidateScouts
       requestBody:
@@ -4120,6 +5361,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.BulkRespondRequest'
+      security:
+        - CandidateAuth: []
   /api/scouts/{scoutId}:
     get:
       operationId: CandidateScouts_getCandidateScoutDetail
@@ -4138,16 +5381,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutDetailResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CandidateScouts
+      security:
+        - CandidateAuth: []
   /api/scouts/{scoutId}/reply:
     post:
       operationId: CandidateScouts_candidateScoutReply
@@ -4162,14 +5417,24 @@ paths:
       responses:
         '201':
           description: The request has succeeded and a new resource has been created as a result.
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CandidateScouts
       requestBody:
@@ -4178,6 +5443,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CandidateScoutReplyRequest'
+      security:
+        - CandidateAuth: []
   /api/scouts/{scoutId}/respond:
     post:
       operationId: CandidateScouts_respondToScout
@@ -4196,14 +5463,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ScoutRespondResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CandidateScouts
       requestBody:
@@ -4212,6 +5489,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.ScoutRespondRequest'
+      security:
+        - CandidateAuth: []
   /api/team-diagnose/{token}:
     get:
       operationId: TeamDiagnose_getDiagnoseByToken
@@ -4230,8 +5509,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.DiagnoseInfoResponse'
-        default:
-          description: An unexpected error response.
+        '404':
+          description: Not Found エラー
           content:
             application/json:
               schema:
@@ -4252,14 +5531,18 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - TeamDiagnose
       requestBody:
@@ -4281,14 +5564,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UserResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.ConflictError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Users
       requestBody:
@@ -4315,14 +5602,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UserResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Users
   /api/users/id/{userId}/similar:
@@ -4351,8 +5642,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.SimilarUsersResponse'
-        default:
-          description: An unexpected error response.
+        '404':
+          description: Not Found エラー
           content:
             application/json:
               schema:
@@ -4377,14 +5668,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UserResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Users
     patch:
@@ -4404,14 +5699,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UserResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Users
       requestBody:
@@ -4420,6 +5725,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateUserProfileRequest'
+      security:
+        - CandidateAuth: []
   /api/users/{username}/educations:
     get:
       operationId: Educations_listEducations
@@ -4438,14 +5745,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.EducationListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Educations
     post:
@@ -4465,15 +5776,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.EducationResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ConflictError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Educations
       requestBody:
@@ -4482,6 +5808,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateEducationRequest'
+      security:
+        - CandidateAuth: []
   /api/users/{username}/educations/{educationId}:
     put:
       operationId: Educations_updateEducation
@@ -4505,15 +5833,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.EducationResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Educations
       requestBody:
@@ -4522,6 +5865,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateEducationRequest'
+      security:
+        - CandidateAuth: []
     delete:
       operationId: Educations_deleteEducation
       summary: Delete an education
@@ -4540,17 +5885,34 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Educations
+      security:
+        - CandidateAuth: []
   /api/users/{username}/experiences:
     get:
       operationId: Experiences_listExperiences
@@ -4569,14 +5931,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ExperienceListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Experiences
     post:
@@ -4596,15 +5962,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ExperienceResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ConflictError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Experiences
       requestBody:
@@ -4613,6 +5994,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.CreateExperienceRequest'
+      security:
+        - CandidateAuth: []
   /api/users/{username}/experiences/{experienceId}:
     put:
       operationId: Experiences_updateExperience
@@ -4636,15 +6019,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.ExperienceResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Experiences
       requestBody:
@@ -4653,6 +6051,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.UpdateExperienceRequest'
+      security:
+        - CandidateAuth: []
     delete:
       operationId: Experiences_deleteExperience
       summary: Delete an experience
@@ -4671,17 +6071,34 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.ForbiddenError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Experiences
+      security:
+        - CandidateAuth: []
   /api/users/{username}/follow:
     post:
       operationId: Follows_followUser
@@ -4696,17 +6113,34 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.ConflictError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Follows
+      security:
+        - CandidateAuth: []
     delete:
       operationId: Follows_unfollowUser
       summary: Unfollow a user
@@ -4720,16 +6154,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Follows
+      security:
+        - CandidateAuth: []
   /api/users/{username}/follow-status:
     get:
       operationId: Follows_getFollowStatus
@@ -4748,16 +6194,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.FollowStatusResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Follows
+      security:
+        - CandidateAuth: []
   /api/users/{username}/followers:
     get:
       operationId: Follows_listFollowers
@@ -4792,14 +6250,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.FollowUserListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Follows
   /api/users/{username}/following:
@@ -4836,14 +6298,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.FollowUserListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Follows
   /api/users/{username}/skills:
@@ -4864,14 +6330,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.SkillListResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Skills
     post:
@@ -4891,15 +6361,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.SkillResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.ConflictError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Skills
       requestBody:
@@ -4908,6 +6393,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Models.AttachSkillRequest'
+      security:
+        - CandidateAuth: []
   /api/users/{username}/skills/{name}:
     delete:
       operationId: Skills_detachSkill
@@ -4927,16 +6414,28 @@ paths:
       responses:
         '204':
           description: 'There is no content to send for this request, but the headers may be useful. '
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Skills
+      security:
+        - CandidateAuth: []
   /api/users/{username}/upload-image:
     post:
       operationId: Users_uploadUserImage
@@ -4964,14 +6463,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UserImageUploadResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Users
       requestBody:
@@ -4986,6 +6495,8 @@ paths:
                   format: binary
               required:
                 - file
+      security:
+        - CandidateAuth: []
   /api/work-values/sessions:
     post:
       operationId: WorkValues_wvStartSession
@@ -4999,14 +6510,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.WVSessionResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
       requestBody:
@@ -5033,14 +6548,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.AiReportResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
   /api/work-values/sessions/{sessionId}/results:
@@ -5061,14 +6580,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.WVResultResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.BadRequestError'
-                  - $ref: '#/components/schemas/Models.NotFoundError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
       requestBody:
@@ -5094,14 +6617,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.WVResultResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
   /api/work-values/users/{userId}/results/latest:
@@ -5122,14 +6649,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.WVResultResponse'
-        default:
-          description: An unexpected error response.
+        '400':
+          description: Bad Request エラー
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Models.NotFoundError'
-                  - $ref: '#/components/schemas/Models.BadRequestError'
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - WorkValues
 components:
@@ -5573,6 +7104,31 @@ components:
           format: int32
           description: 順位
       description: RIASEC タイプスコア
+    Models.CandidateAuth:
+      type: object
+      required:
+        - type
+        - in
+        - name
+      properties:
+        type:
+          type: string
+          enum:
+            - apiKey
+          description: API key authentication
+        in:
+          type: string
+          enum:
+            - cookie
+          description: location of the API key
+        name:
+          type: string
+          enum:
+            - inselfy_token
+          description: name of the API key
+      description: |-
+        候補者認証。`inselfy_token` cookie の JWT を検証する
+        （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
     Models.CandidateInterviewItem:
       type: object
       required:
@@ -5705,6 +7261,31 @@ components:
           format: date-time
           description: 作成日時
       description: コメント
+    Models.CompanyAuth:
+      type: object
+      required:
+        - type
+        - in
+        - name
+      properties:
+        type:
+          type: string
+          enum:
+            - apiKey
+          description: API key authentication
+        in:
+          type: string
+          enum:
+            - cookie
+          description: location of the API key
+        name:
+          type: string
+          enum:
+            - company_token
+          description: name of the API key
+      description: |-
+        企業認証。`company_token` cookie の JWT を検証する
+        （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
     Models.CompanyInterviewItem:
       type: object
       required:
@@ -9406,6 +10987,21 @@ components:
           format: int32
           description: 順位
       description: Work Value スコア
+  securitySchemes:
+    CandidateAuth:
+      type: apiKey
+      in: cookie
+      name: inselfy_token
+      description: |-
+        候補者認証。`inselfy_token` cookie の JWT を検証する
+        （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
+    CompanyAuth:
+      type: apiKey
+      in: cookie
+      name: company_token
+      description: |-
+        企業認証。`company_token` cookie の JWT を検証する
+        （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
 servers:
   - url: http://localhost:8081
     description: Development server

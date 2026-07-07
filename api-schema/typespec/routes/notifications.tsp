@@ -10,6 +10,7 @@ namespace Inselfy.Routes;
 
 @route("/api/notifications")
 @tag("Notifications")
+@useAuth(Models.CandidateAuth)
 interface UserNotifications {
   /** 通知一覧（要ログイン） */
   @get
@@ -20,13 +21,13 @@ interface UserNotifications {
 
     /** オフセット */
     @query offset?: int32,
-  ): NotificationListResponse | BadRequestError;
+  ): NotificationListResponse | BadRequestError | UnauthorizedError;
 
   /** 未読件数（要ログイン） */
   @get
   @route("/unread-count")
   @summary("Count unread notifications for the authenticated user")
-  countUserUnreadNotifications(): UnreadCountResponse | BadRequestError;
+  countUserUnreadNotifications(): UnreadCountResponse | BadRequestError | UnauthorizedError;
 
   /** 既読化 */
   @post
@@ -36,7 +37,7 @@ interface UserNotifications {
     @path id: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** 全件既読化（要ログイン） */
   @post
@@ -44,11 +45,12 @@ interface UserNotifications {
   @summary("Mark all notifications as read for the authenticated user")
   markAllUserNotificationsRead(): {
     @statusCode statusCode: 204;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 }
 
 @route("/api/company/notifications")
 @tag("Notifications")
+@useAuth(Models.CompanyAuth)
 interface CompanyNotifications {
   /** 通知一覧（企業認証） */
   @get
@@ -59,13 +61,13 @@ interface CompanyNotifications {
 
     /** オフセット */
     @query offset?: int32,
-  ): NotificationListResponse | BadRequestError;
+  ): NotificationListResponse | BadRequestError | UnauthorizedError;
 
   /** 未読件数（企業認証） */
   @get
   @route("/unread-count")
   @summary("Count unread notifications for the authenticated company")
-  countCompanyUnreadNotifications(): UnreadCountResponse | BadRequestError;
+  countCompanyUnreadNotifications(): UnreadCountResponse | BadRequestError | UnauthorizedError;
 
   /** 既読化 */
   @post
@@ -75,7 +77,7 @@ interface CompanyNotifications {
     @path id: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** 全件既読化（企業認証） */
   @post
@@ -83,5 +85,5 @@ interface CompanyNotifications {
   @summary("Mark all notifications as read for the authenticated company")
   markAllCompanyNotificationsRead(): {
     @statusCode statusCode: 204;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 }

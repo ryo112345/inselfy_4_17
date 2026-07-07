@@ -15,21 +15,23 @@ interface Follows {
   @post
   @route("/follow")
   @summary("Follow a user")
+  @useAuth(Models.CandidateAuth)
   followUser(
     @path username: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError | ConflictError;
+  } | NotFoundError | BadRequestError | ConflictError | UnauthorizedError;
 
   /** フォロー解除（要ログイン） */
   @delete
   @route("/follow")
   @summary("Unfollow a user")
+  @useAuth(Models.CandidateAuth)
   unfollowUser(
     @path username: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** フォロワー一覧 */
   @get
@@ -63,7 +65,8 @@ interface Follows {
   @get
   @route("/follow-status")
   @summary("Get follow status between the authenticated user and a user")
+  @useAuth(Models.CandidateAuth)
   getFollowStatus(
     @path username: string,
-  ): FollowStatusResponse | NotFoundError | BadRequestError;
+  ): FollowStatusResponse | NotFoundError | BadRequestError | UnauthorizedError;
 }

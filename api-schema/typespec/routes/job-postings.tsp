@@ -10,6 +10,7 @@ namespace Inselfy.Routes;
 
 @route("/api/company/jobs")
 @tag("JobPostings")
+@useAuth(Models.CompanyAuth)
 interface CompanyJobPostings {
   /** チームメンバー写真アップロード（企業認証） */
   @post
@@ -20,7 +21,7 @@ interface CompanyJobPostings {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UploadUrlResponse | BadRequestError;
+  ): UploadUrlResponse | BadRequestError | UnauthorizedError;
 
   /** ギャラリー画像アップロード（企業認証） */
   @post
@@ -31,7 +32,7 @@ interface CompanyJobPostings {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UploadUrlResponse | BadRequestError;
+  ): UploadUrlResponse | BadRequestError | UnauthorizedError;
 
   /** カバー画像アップロード（企業認証） */
   @post
@@ -42,7 +43,7 @@ interface CompanyJobPostings {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UploadUrlResponse | BadRequestError;
+  ): UploadUrlResponse | BadRequestError | UnauthorizedError;
 
   /** 求人作成（企業認証） */
   @post
@@ -52,12 +53,12 @@ interface CompanyJobPostings {
   ): {
     @statusCode statusCode: 201;
     @body job: JobPostingResponse;
-  } | BadRequestError;
+  } | BadRequestError | UnauthorizedError;
 
   /** 自社求人一覧（企業認証） */
   @get
   @summary("List job postings of the company")
-  listCompanyJobPostings(): JobPostingListResponse | BadRequestError;
+  listCompanyJobPostings(): JobPostingListResponse | BadRequestError | UnauthorizedError;
 
   /** 求人取得（企業認証） */
   @get
@@ -65,7 +66,7 @@ interface CompanyJobPostings {
   @summary("Get a job posting")
   getCompanyJobPosting(
     @path jobId: string,
-  ): JobPostingResponse | NotFoundError | BadRequestError;
+  ): JobPostingResponse | NotFoundError | BadRequestError | UnauthorizedError;
 
   /** 求人更新（企業認証） */
   @put
@@ -74,7 +75,7 @@ interface CompanyJobPostings {
   updateJobPosting(
     @path jobId: string,
     @body request: JobPostingRequest,
-  ): JobPostingResponse | BadRequestError | NotFoundError;
+  ): JobPostingResponse | BadRequestError | NotFoundError | UnauthorizedError;
 
   /** 求人削除（企業認証） */
   @delete
@@ -84,7 +85,7 @@ interface CompanyJobPostings {
     @path jobId: string,
   ): {
     @statusCode statusCode: 204;
-  } | NotFoundError | BadRequestError;
+  } | NotFoundError | BadRequestError | UnauthorizedError;
 }
 
 @route("/api/jobs")

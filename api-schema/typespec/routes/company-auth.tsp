@@ -48,5 +48,6 @@ interface CompanyAuth {
   @get
   @route("/me")
   @summary("Get the authenticated company")
+  @useAuth(Models.CompanyAuth)
   companyGetMe(): CompanyResponse | UnauthorizedError | NotFoundError;
 }

@@ -422,6 +422,25 @@ export type ModelsCiTypeScoreResponse = {
 };
 
 /**
+ * 候補者認証。`inselfy_token` cookie の JWT を検証する
+ * （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
+ */
+export type ModelsCandidateAuth = {
+    /**
+     * API key authentication
+     */
+    type: 'apiKey';
+    /**
+     * location of the API key
+     */
+    in: 'cookie';
+    /**
+     * name of the API key
+     */
+    name: 'inselfy_token';
+};
+
+/**
  * 面接（候補者向け・企業情報付き）
  */
 export type ModelsCandidateInterviewItem = {
@@ -547,6 +566,25 @@ export type ModelsCommentResponse = {
      * 作成日時
      */
     createdAt: string;
+};
+
+/**
+ * 企業認証。`company_token` cookie の JWT を検証する
+ * （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
+ */
+export type ModelsCompanyAuth = {
+    /**
+     * API key authentication
+     */
+    type: 'apiKey';
+    /**
+     * location of the API key
+     */
+    in: 'cookie';
+    /**
+     * name of the API key
+     */
+    name: 'company_token';
 };
 
 /**
@@ -4025,9 +4063,13 @@ export type CandidateApplicationsListCandidateApplicationsData = {
 
 export type CandidateApplicationsListCandidateApplicationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CandidateApplicationsListCandidateApplicationsError = CandidateApplicationsListCandidateApplicationsErrors[keyof CandidateApplicationsListCandidateApplicationsErrors];
@@ -4050,9 +4092,21 @@ export type CandidateApplicationsApplyToJobData = {
 
 export type CandidateApplicationsApplyToJobErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsConflictError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type CandidateApplicationsApplyToJobError = CandidateApplicationsApplyToJobErrors[keyof CandidateApplicationsApplyToJobErrors];
@@ -4080,9 +4134,13 @@ export type CandidateApplicationsCheckAppliedData = {
 
 export type CandidateApplicationsCheckAppliedErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CandidateApplicationsCheckAppliedError = CandidateApplicationsCheckAppliedErrors[keyof CandidateApplicationsCheckAppliedErrors];
@@ -4107,9 +4165,17 @@ export type CandidateApplicationsWithdrawApplicationData = {
 
 export type CandidateApplicationsWithdrawApplicationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateApplicationsWithdrawApplicationError = CandidateApplicationsWithdrawApplicationErrors[keyof CandidateApplicationsWithdrawApplicationErrors];
@@ -4141,9 +4207,9 @@ export type ArticlesListArticlesData = {
 
 export type ArticlesListArticlesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
 };
 
 export type ArticlesListArticlesError = ArticlesListArticlesErrors[keyof ArticlesListArticlesErrors];
@@ -4166,9 +4232,13 @@ export type ArticlesCreateArticleData = {
 
 export type ArticlesCreateArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type ArticlesCreateArticleError = ArticlesCreateArticleErrors[keyof ArticlesCreateArticleErrors];
@@ -4194,9 +4264,13 @@ export type ArticlesListMyArticlesData = {
 
 export type ArticlesListMyArticlesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type ArticlesListMyArticlesError = ArticlesListMyArticlesErrors[keyof ArticlesListMyArticlesErrors];
@@ -4221,9 +4295,13 @@ export type ArticlesUploadArticleImageData = {
 
 export type ArticlesUploadArticleImageErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type ArticlesUploadArticleImageError = ArticlesUploadArticleImageErrors[keyof ArticlesUploadArticleImageErrors];
@@ -4248,9 +4326,21 @@ export type ArticlesDeleteArticleData = {
 
 export type ArticlesDeleteArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ArticlesDeleteArticleError = ArticlesDeleteArticleErrors[keyof ArticlesDeleteArticleErrors];
@@ -4275,9 +4365,13 @@ export type ArticlesGetArticleData = {
 
 export type ArticlesGetArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ArticlesGetArticleError = ArticlesGetArticleErrors[keyof ArticlesGetArticleErrors];
@@ -4302,9 +4396,21 @@ export type ArticlesUpdateArticleData = {
 
 export type ArticlesUpdateArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ArticlesUpdateArticleError = ArticlesUpdateArticleErrors[keyof ArticlesUpdateArticleErrors];
@@ -4329,9 +4435,17 @@ export type ArticlesCreateArticleCheckoutData = {
 
 export type ArticlesCreateArticleCheckoutErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ArticlesCreateArticleCheckoutError = ArticlesCreateArticleCheckoutErrors[keyof ArticlesCreateArticleCheckoutErrors];
@@ -4356,9 +4470,21 @@ export type ArticlesPublishArticleData = {
 
 export type ArticlesPublishArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ArticlesPublishArticleError = ArticlesPublishArticleErrors[keyof ArticlesPublishArticleErrors];
@@ -4381,9 +4507,13 @@ export type AuthGoogleLoginData = {
 
 export type AuthGoogleLoginErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsUnauthorizedError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type AuthGoogleLoginError = AuthGoogleLoginErrors[keyof AuthGoogleLoginErrors];
@@ -4422,9 +4552,13 @@ export type AuthGetMeData = {
 
 export type AuthGetMeErrors = {
     /**
-     * An unexpected error response.
+     * Unauthorized エラー
      */
-    default: ModelsUnauthorizedError | ModelsNotFoundError;
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type AuthGetMeError = AuthGetMeErrors[keyof AuthGetMeErrors];
@@ -4447,9 +4581,9 @@ export type AuthRefreshTokenData = {
 
 export type AuthRefreshTokenErrors = {
     /**
-     * An unexpected error response.
+     * Unauthorized エラー
      */
-    default: ModelsUnauthorizedError;
+    401: ModelsUnauthorizedError;
 };
 
 export type AuthRefreshTokenError = AuthRefreshTokenErrors[keyof AuthRefreshTokenErrors];
@@ -4472,9 +4606,13 @@ export type CareerInterestCiStartSessionData = {
 
 export type CareerInterestCiStartSessionErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CareerInterestCiStartSessionError = CareerInterestCiStartSessionErrors[keyof CareerInterestCiStartSessionErrors];
@@ -4499,9 +4637,13 @@ export type CareerInterestCiGetAiReportData = {
 
 export type CareerInterestCiGetAiReportErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CareerInterestCiGetAiReportError = CareerInterestCiGetAiReportErrors[keyof CareerInterestCiGetAiReportErrors];
@@ -4526,9 +4668,13 @@ export type CareerInterestCiGetResultBySessionData = {
 
 export type CareerInterestCiGetResultBySessionErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CareerInterestCiGetResultBySessionError = CareerInterestCiGetResultBySessionErrors[keyof CareerInterestCiGetResultBySessionErrors];
@@ -4553,9 +4699,13 @@ export type CareerInterestCiSubmitResultData = {
 
 export type CareerInterestCiSubmitResultErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CareerInterestCiSubmitResultError = CareerInterestCiSubmitResultErrors[keyof CareerInterestCiSubmitResultErrors];
@@ -4580,9 +4730,13 @@ export type CareerInterestCiGetLatestResultData = {
 
 export type CareerInterestCiGetLatestResultErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CareerInterestCiGetLatestResultError = CareerInterestCiGetLatestResultErrors[keyof CareerInterestCiGetLatestResultErrors];
@@ -4607,9 +4761,13 @@ export type PublicCompanyProfilesGetPublicCompanyProfileData = {
 
 export type PublicCompanyProfilesGetPublicCompanyProfileErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PublicCompanyProfilesGetPublicCompanyProfileError = PublicCompanyProfilesGetPublicCompanyProfileErrors[keyof PublicCompanyProfilesGetPublicCompanyProfileErrors];
@@ -4634,9 +4792,13 @@ export type PublicTeamScoresGetPublicTeamScoresData = {
 
 export type PublicTeamScoresGetPublicTeamScoresErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PublicTeamScoresGetPublicTeamScoresError = PublicTeamScoresGetPublicTeamScoresErrors[keyof PublicTeamScoresGetPublicTeamScoresErrors];
@@ -4688,9 +4850,13 @@ export type CompanyApplicationsListCompanyApplicationsData = {
 
 export type CompanyApplicationsListCompanyApplicationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyApplicationsListCompanyApplicationsError = CompanyApplicationsListCompanyApplicationsErrors[keyof CompanyApplicationsListCompanyApplicationsErrors];
@@ -4715,9 +4881,17 @@ export type CompanyApplicationsGetApplicationData = {
 
 export type CompanyApplicationsGetApplicationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyApplicationsGetApplicationError = CompanyApplicationsGetApplicationErrors[keyof CompanyApplicationsGetApplicationErrors];
@@ -4742,9 +4916,17 @@ export type CompanyApplicationsUpdateApplicationStatusData = {
 
 export type CompanyApplicationsUpdateApplicationStatusErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyApplicationsUpdateApplicationStatusError = CompanyApplicationsUpdateApplicationStatusErrors[keyof CompanyApplicationsUpdateApplicationStatusErrors];
@@ -4767,9 +4949,13 @@ export type CompanyArticlesCreateCompanyArticleData = {
 
 export type CompanyArticlesCreateCompanyArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyArticlesCreateCompanyArticleError = CompanyArticlesCreateCompanyArticleErrors[keyof CompanyArticlesCreateCompanyArticleErrors];
@@ -4794,9 +4980,21 @@ export type CompanyArticlesDeleteCompanyArticleData = {
 
 export type CompanyArticlesDeleteCompanyArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyArticlesDeleteCompanyArticleError = CompanyArticlesDeleteCompanyArticleErrors[keyof CompanyArticlesDeleteCompanyArticleErrors];
@@ -4821,9 +5019,21 @@ export type CompanyArticlesUpdateCompanyArticleData = {
 
 export type CompanyArticlesUpdateCompanyArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyArticlesUpdateCompanyArticleError = CompanyArticlesUpdateCompanyArticleErrors[keyof CompanyArticlesUpdateCompanyArticleErrors];
@@ -4848,9 +5058,21 @@ export type CompanyArticlesPublishCompanyArticleData = {
 
 export type CompanyArticlesPublishCompanyArticleErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyArticlesPublishCompanyArticleError = CompanyArticlesPublishCompanyArticleErrors[keyof CompanyArticlesPublishCompanyArticleErrors];
@@ -4873,9 +5095,13 @@ export type CompanyAuthCompanyLoginData = {
 
 export type CompanyAuthCompanyLoginErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsUnauthorizedError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyAuthCompanyLoginError = CompanyAuthCompanyLoginErrors[keyof CompanyAuthCompanyLoginErrors];
@@ -4914,9 +5140,13 @@ export type CompanyAuthCompanyGetMeData = {
 
 export type CompanyAuthCompanyGetMeErrors = {
     /**
-     * An unexpected error response.
+     * Unauthorized エラー
      */
-    default: ModelsUnauthorizedError | ModelsNotFoundError;
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyAuthCompanyGetMeError = CompanyAuthCompanyGetMeErrors[keyof CompanyAuthCompanyGetMeErrors];
@@ -4939,9 +5169,9 @@ export type CompanyAuthCompanyRefreshTokenData = {
 
 export type CompanyAuthCompanyRefreshTokenErrors = {
     /**
-     * An unexpected error response.
+     * Unauthorized エラー
      */
-    default: ModelsUnauthorizedError;
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyAuthCompanyRefreshTokenError = CompanyAuthCompanyRefreshTokenErrors[keyof CompanyAuthCompanyRefreshTokenErrors];
@@ -4964,9 +5194,17 @@ export type CompanyAuthCompanyRegisterData = {
 
 export type CompanyAuthCompanyRegisterErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsConflictError | ModelsUnauthorizedError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type CompanyAuthCompanyRegisterError = CompanyAuthCompanyRegisterErrors[keyof CompanyAuthCompanyRegisterErrors];
@@ -4998,9 +5236,13 @@ export type CompanyInterviewsListCompanyInterviewsData = {
 
 export type CompanyInterviewsListCompanyInterviewsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyInterviewsListCompanyInterviewsError = CompanyInterviewsListCompanyInterviewsErrors[keyof CompanyInterviewsListCompanyInterviewsErrors];
@@ -5025,9 +5267,13 @@ export type CompanyInterviewsGetPendingProposalData = {
 
 export type CompanyInterviewsGetPendingProposalErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyInterviewsGetPendingProposalError = CompanyInterviewsGetPendingProposalErrors[keyof CompanyInterviewsGetPendingProposalErrors];
@@ -5050,9 +5296,17 @@ export type CompanyInterviewsProposeInterviewData = {
 
 export type CompanyInterviewsProposeInterviewErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyInterviewsProposeInterviewError = CompanyInterviewsProposeInterviewErrors[keyof CompanyInterviewsProposeInterviewErrors];
@@ -5077,9 +5331,17 @@ export type CompanyInterviewsCancelCompanyInterviewData = {
 
 export type CompanyInterviewsCancelCompanyInterviewErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsUnauthorizedError | ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyInterviewsCancelCompanyInterviewError = CompanyInterviewsCancelCompanyInterviewErrors[keyof CompanyInterviewsCancelCompanyInterviewErrors];
@@ -5102,9 +5364,13 @@ export type CompanyJobPostingsListCompanyJobPostingsData = {
 
 export type CompanyJobPostingsListCompanyJobPostingsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyJobPostingsListCompanyJobPostingsError = CompanyJobPostingsListCompanyJobPostingsErrors[keyof CompanyJobPostingsListCompanyJobPostingsErrors];
@@ -5127,9 +5393,13 @@ export type CompanyJobPostingsCreateJobPostingData = {
 
 export type CompanyJobPostingsCreateJobPostingErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyJobPostingsCreateJobPostingError = CompanyJobPostingsCreateJobPostingErrors[keyof CompanyJobPostingsCreateJobPostingErrors];
@@ -5154,9 +5424,13 @@ export type CompanyJobPostingsUploadJobCoverImageData = {
 
 export type CompanyJobPostingsUploadJobCoverImageErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyJobPostingsUploadJobCoverImageError = CompanyJobPostingsUploadJobCoverImageErrors[keyof CompanyJobPostingsUploadJobCoverImageErrors];
@@ -5181,9 +5455,13 @@ export type CompanyJobPostingsUploadGalleryImageData = {
 
 export type CompanyJobPostingsUploadGalleryImageErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyJobPostingsUploadGalleryImageError = CompanyJobPostingsUploadGalleryImageErrors[keyof CompanyJobPostingsUploadGalleryImageErrors];
@@ -5208,9 +5486,13 @@ export type CompanyJobPostingsUploadTeamMemberPhotoData = {
 
 export type CompanyJobPostingsUploadTeamMemberPhotoErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyJobPostingsUploadTeamMemberPhotoError = CompanyJobPostingsUploadTeamMemberPhotoErrors[keyof CompanyJobPostingsUploadTeamMemberPhotoErrors];
@@ -5235,9 +5517,17 @@ export type CompanyJobPostingsDeleteJobPostingData = {
 
 export type CompanyJobPostingsDeleteJobPostingErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyJobPostingsDeleteJobPostingError = CompanyJobPostingsDeleteJobPostingErrors[keyof CompanyJobPostingsDeleteJobPostingErrors];
@@ -5262,9 +5552,17 @@ export type CompanyJobPostingsGetCompanyJobPostingData = {
 
 export type CompanyJobPostingsGetCompanyJobPostingErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyJobPostingsGetCompanyJobPostingError = CompanyJobPostingsGetCompanyJobPostingErrors[keyof CompanyJobPostingsGetCompanyJobPostingErrors];
@@ -5289,9 +5587,17 @@ export type CompanyJobPostingsUpdateJobPostingData = {
 
 export type CompanyJobPostingsUpdateJobPostingErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyJobPostingsUpdateJobPostingError = CompanyJobPostingsUpdateJobPostingErrors[keyof CompanyJobPostingsUpdateJobPostingErrors];
@@ -5317,9 +5623,13 @@ export type CompanyMessagingListCompanyConversationsData = {
 
 export type CompanyMessagingListCompanyConversationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyMessagingListCompanyConversationsError = CompanyMessagingListCompanyConversationsErrors[keyof CompanyMessagingListCompanyConversationsErrors];
@@ -5342,9 +5652,17 @@ export type CompanyMessagingStartCompanyConversationData = {
 
 export type CompanyMessagingStartCompanyConversationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyMessagingStartCompanyConversationError = CompanyMessagingStartCompanyConversationErrors[keyof CompanyMessagingStartCompanyConversationErrors];
@@ -5369,9 +5687,21 @@ export type CompanyMessagingGetCompanyConversationData = {
 
 export type CompanyMessagingGetCompanyConversationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyMessagingGetCompanyConversationError = CompanyMessagingGetCompanyConversationErrors[keyof CompanyMessagingGetCompanyConversationErrors];
@@ -5399,9 +5729,21 @@ export type CompanyMessagingListCompanyMessagesData = {
 
 export type CompanyMessagingListCompanyMessagesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyMessagingListCompanyMessagesError = CompanyMessagingListCompanyMessagesErrors[keyof CompanyMessagingListCompanyMessagesErrors];
@@ -5426,9 +5768,21 @@ export type CompanyMessagingSendCompanyMessageData = {
 
 export type CompanyMessagingSendCompanyMessageErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyMessagingSendCompanyMessageError = CompanyMessagingSendCompanyMessageErrors[keyof CompanyMessagingSendCompanyMessageErrors];
@@ -5453,9 +5807,17 @@ export type CompanyMessagingMarkCompanyConversationReadData = {
 
 export type CompanyMessagingMarkCompanyConversationReadErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyMessagingMarkCompanyConversationReadError = CompanyMessagingMarkCompanyConversationReadErrors[keyof CompanyMessagingMarkCompanyConversationReadErrors];
@@ -5478,9 +5840,13 @@ export type CompanyMessagingCountCompanyUnreadMessagesData = {
 
 export type CompanyMessagingCountCompanyUnreadMessagesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyMessagingCountCompanyUnreadMessagesError = CompanyMessagingCountCompanyUnreadMessagesErrors[keyof CompanyMessagingCountCompanyUnreadMessagesErrors];
@@ -5512,9 +5878,13 @@ export type CompanyNotificationsListCompanyNotificationsData = {
 
 export type CompanyNotificationsListCompanyNotificationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyNotificationsListCompanyNotificationsError = CompanyNotificationsListCompanyNotificationsErrors[keyof CompanyNotificationsListCompanyNotificationsErrors];
@@ -5537,9 +5907,13 @@ export type CompanyNotificationsMarkAllCompanyNotificationsReadData = {
 
 export type CompanyNotificationsMarkAllCompanyNotificationsReadErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyNotificationsMarkAllCompanyNotificationsReadError = CompanyNotificationsMarkAllCompanyNotificationsReadErrors[keyof CompanyNotificationsMarkAllCompanyNotificationsReadErrors];
@@ -5562,9 +5936,13 @@ export type CompanyNotificationsCountCompanyUnreadNotificationsData = {
 
 export type CompanyNotificationsCountCompanyUnreadNotificationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyNotificationsCountCompanyUnreadNotificationsError = CompanyNotificationsCountCompanyUnreadNotificationsErrors[keyof CompanyNotificationsCountCompanyUnreadNotificationsErrors];
@@ -5589,9 +5967,17 @@ export type CompanyNotificationsMarkCompanyNotificationReadData = {
 
 export type CompanyNotificationsMarkCompanyNotificationReadErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyNotificationsMarkCompanyNotificationReadError = CompanyNotificationsMarkCompanyNotificationReadErrors[keyof CompanyNotificationsMarkCompanyNotificationReadErrors];
@@ -5614,9 +6000,17 @@ export type CompanyProfilesGetCompanyProfileData = {
 
 export type CompanyProfilesGetCompanyProfileErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyProfilesGetCompanyProfileError = CompanyProfilesGetCompanyProfileErrors[keyof CompanyProfilesGetCompanyProfileErrors];
@@ -5639,9 +6033,13 @@ export type CompanyProfilesUpdateCompanyProfileData = {
 
 export type CompanyProfilesUpdateCompanyProfileErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyProfilesUpdateCompanyProfileError = CompanyProfilesUpdateCompanyProfileErrors[keyof CompanyProfilesUpdateCompanyProfileErrors];
@@ -5673,9 +6071,13 @@ export type CompanyProfilesDeleteCompanyProfileImageData = {
 
 export type CompanyProfilesDeleteCompanyProfileImageErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyProfilesDeleteCompanyProfileImageError = CompanyProfilesDeleteCompanyProfileImageErrors[keyof CompanyProfilesDeleteCompanyProfileImageErrors];
@@ -5705,9 +6107,13 @@ export type CompanyProfilesUploadCompanyProfileImageData = {
 
 export type CompanyProfilesUploadCompanyProfileImageErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyProfilesUploadCompanyProfileImageError = CompanyProfilesUploadCompanyProfileImageErrors[keyof CompanyProfilesUploadCompanyProfileImageErrors];
@@ -5739,9 +6145,13 @@ export type SavedCandidatesListSavedCandidatesData = {
 
 export type SavedCandidatesListSavedCandidatesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type SavedCandidatesListSavedCandidatesError = SavedCandidatesListSavedCandidatesErrors[keyof SavedCandidatesListSavedCandidatesErrors];
@@ -5764,9 +6174,13 @@ export type SavedCandidatesBulkCheckSavedData = {
 
 export type SavedCandidatesBulkCheckSavedErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type SavedCandidatesBulkCheckSavedError = SavedCandidatesBulkCheckSavedErrors[keyof SavedCandidatesBulkCheckSavedErrors];
@@ -5789,9 +6203,13 @@ export type SavedCandidatesCountSavedCandidatesData = {
 
 export type SavedCandidatesCountSavedCandidatesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type SavedCandidatesCountSavedCandidatesError = SavedCandidatesCountSavedCandidatesErrors[keyof SavedCandidatesCountSavedCandidatesErrors];
@@ -5816,9 +6234,13 @@ export type SavedCandidatesUnsaveCandidateData = {
 
 export type SavedCandidatesUnsaveCandidateErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type SavedCandidatesUnsaveCandidateError = SavedCandidatesUnsaveCandidateErrors[keyof SavedCandidatesUnsaveCandidateErrors];
@@ -5843,9 +6265,13 @@ export type SavedCandidatesIsCandidateSavedData = {
 
 export type SavedCandidatesIsCandidateSavedErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type SavedCandidatesIsCandidateSavedError = SavedCandidatesIsCandidateSavedErrors[keyof SavedCandidatesIsCandidateSavedErrors];
@@ -5870,9 +6296,13 @@ export type SavedCandidatesSaveCandidateData = {
 
 export type SavedCandidatesSaveCandidateErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type SavedCandidatesSaveCandidateError = SavedCandidatesSaveCandidateErrors[keyof SavedCandidatesSaveCandidateErrors];
@@ -5895,9 +6325,13 @@ export type ScoutTemplatesListScoutTemplatesData = {
 
 export type ScoutTemplatesListScoutTemplatesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type ScoutTemplatesListScoutTemplatesError = ScoutTemplatesListScoutTemplatesErrors[keyof ScoutTemplatesListScoutTemplatesErrors];
@@ -5920,9 +6354,13 @@ export type ScoutTemplatesCreateScoutTemplateData = {
 
 export type ScoutTemplatesCreateScoutTemplateErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type ScoutTemplatesCreateScoutTemplateError = ScoutTemplatesCreateScoutTemplateErrors[keyof ScoutTemplatesCreateScoutTemplateErrors];
@@ -5947,9 +6385,17 @@ export type ScoutTemplatesDeleteScoutTemplateData = {
 
 export type ScoutTemplatesDeleteScoutTemplateErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ScoutTemplatesDeleteScoutTemplateError = ScoutTemplatesDeleteScoutTemplateErrors[keyof ScoutTemplatesDeleteScoutTemplateErrors];
@@ -5974,9 +6420,17 @@ export type ScoutTemplatesGetScoutTemplateData = {
 
 export type ScoutTemplatesGetScoutTemplateErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ScoutTemplatesGetScoutTemplateError = ScoutTemplatesGetScoutTemplateErrors[keyof ScoutTemplatesGetScoutTemplateErrors];
@@ -6001,9 +6455,17 @@ export type ScoutTemplatesUpdateScoutTemplateData = {
 
 export type ScoutTemplatesUpdateScoutTemplateErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ScoutTemplatesUpdateScoutTemplateError = ScoutTemplatesUpdateScoutTemplateErrors[keyof ScoutTemplatesUpdateScoutTemplateErrors];
@@ -6039,9 +6501,13 @@ export type CompanyScoutsListCompanyScoutsData = {
 
 export type CompanyScoutsListCompanyScoutsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyScoutsListCompanyScoutsError = CompanyScoutsListCompanyScoutsErrors[keyof CompanyScoutsListCompanyScoutsErrors];
@@ -6064,9 +6530,21 @@ export type CompanyScoutsSendScoutData = {
 
 export type CompanyScoutsSendScoutErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyScoutsSendScoutError = CompanyScoutsSendScoutErrors[keyof CompanyScoutsSendScoutErrors];
@@ -6089,9 +6567,13 @@ export type CompanyScoutsGetScoutCreditsData = {
 
 export type CompanyScoutsGetScoutCreditsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyScoutsGetScoutCreditsError = CompanyScoutsGetScoutCreditsErrors[keyof CompanyScoutsGetScoutCreditsErrors];
@@ -6114,9 +6596,13 @@ export type CompanyScoutsGetScoutDashboardData = {
 
 export type CompanyScoutsGetScoutDashboardErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyScoutsGetScoutDashboardError = CompanyScoutsGetScoutDashboardErrors[keyof CompanyScoutsGetScoutDashboardErrors];
@@ -6139,9 +6625,13 @@ export type CompanyScoutsGetScoutQualityData = {
 
 export type CompanyScoutsGetScoutQualityErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyScoutsGetScoutQualityError = CompanyScoutsGetScoutQualityErrors[keyof CompanyScoutsGetScoutQualityErrors];
@@ -6166,9 +6656,17 @@ export type CompanyScoutsGetCompanyScoutDetailData = {
 
 export type CompanyScoutsGetCompanyScoutDetailErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyScoutsGetCompanyScoutDetailError = CompanyScoutsGetCompanyScoutDetailErrors[keyof CompanyScoutsGetCompanyScoutDetailErrors];
@@ -6193,9 +6691,17 @@ export type CompanyScoutsCompanyScoutReplyData = {
 
 export type CompanyScoutsCompanyScoutReplyErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyScoutsCompanyScoutReplyError = CompanyScoutsCompanyScoutReplyErrors[keyof CompanyScoutsCompanyScoutReplyErrors];
@@ -6253,9 +6759,13 @@ export type TalentSearchSearchTalentsData = {
 
 export type TalentSearchSearchTalentsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type TalentSearchSearchTalentsError = TalentSearchSearchTalentsErrors[keyof TalentSearchSearchTalentsErrors];
@@ -6292,9 +6802,13 @@ export type TalentSearchDiagnosticSearchTalentsData = {
 
 export type TalentSearchDiagnosticSearchTalentsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type TalentSearchDiagnosticSearchTalentsError = TalentSearchDiagnosticSearchTalentsErrors[keyof TalentSearchDiagnosticSearchTalentsErrors];
@@ -6328,9 +6842,13 @@ export type TalentSearchCiDiagnosticSearchTalentsData = {
 
 export type TalentSearchCiDiagnosticSearchTalentsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type TalentSearchCiDiagnosticSearchTalentsError = TalentSearchCiDiagnosticSearchTalentsErrors[keyof TalentSearchCiDiagnosticSearchTalentsErrors];
@@ -6364,9 +6882,13 @@ export type TalentSearchIntegratedDiagnosticSearchTalentsData = {
 
 export type TalentSearchIntegratedDiagnosticSearchTalentsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type TalentSearchIntegratedDiagnosticSearchTalentsError = TalentSearchIntegratedDiagnosticSearchTalentsErrors[keyof TalentSearchIntegratedDiagnosticSearchTalentsErrors];
@@ -6389,9 +6911,13 @@ export type CompanyTeamsListTeamsData = {
 
 export type CompanyTeamsListTeamsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyTeamsListTeamsError = CompanyTeamsListTeamsErrors[keyof CompanyTeamsListTeamsErrors];
@@ -6414,9 +6940,13 @@ export type CompanyTeamsCreateTeamData = {
 
 export type CompanyTeamsCreateTeamErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CompanyTeamsCreateTeamError = CompanyTeamsCreateTeamErrors[keyof CompanyTeamsCreateTeamErrors];
@@ -6441,9 +6971,17 @@ export type CompanyTeamsDeleteTeamData = {
 
 export type CompanyTeamsDeleteTeamErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyTeamsDeleteTeamError = CompanyTeamsDeleteTeamErrors[keyof CompanyTeamsDeleteTeamErrors];
@@ -6468,9 +7006,17 @@ export type CompanyTeamsGetTeamData = {
 
 export type CompanyTeamsGetTeamErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyTeamsGetTeamError = CompanyTeamsGetTeamErrors[keyof CompanyTeamsGetTeamErrors];
@@ -6495,9 +7041,17 @@ export type CompanyTeamsUpdateTeamData = {
 
 export type CompanyTeamsUpdateTeamErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyTeamsUpdateTeamError = CompanyTeamsUpdateTeamErrors[keyof CompanyTeamsUpdateTeamErrors];
@@ -6522,9 +7076,17 @@ export type CompanyTeamsUnsetAceMemberData = {
 
 export type CompanyTeamsUnsetAceMemberErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyTeamsUnsetAceMemberError = CompanyTeamsUnsetAceMemberErrors[keyof CompanyTeamsUnsetAceMemberErrors];
@@ -6550,9 +7112,17 @@ export type CompanyTeamsSetAceMemberData = {
 
 export type CompanyTeamsSetAceMemberErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyTeamsSetAceMemberError = CompanyTeamsSetAceMemberErrors[keyof CompanyTeamsSetAceMemberErrors];
@@ -6577,9 +7147,17 @@ export type CompanyTeamsAddTeamMemberData = {
 
 export type CompanyTeamsAddTeamMemberErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyTeamsAddTeamMemberError = CompanyTeamsAddTeamMemberErrors[keyof CompanyTeamsAddTeamMemberErrors];
@@ -6605,9 +7183,17 @@ export type CompanyTeamsRemoveTeamMemberData = {
 
 export type CompanyTeamsRemoveTeamMemberErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyTeamsRemoveTeamMemberError = CompanyTeamsRemoveTeamMemberErrors[keyof CompanyTeamsRemoveTeamMemberErrors];
@@ -6632,9 +7218,17 @@ export type CompanyTeamsGetTeamScoresData = {
 
 export type CompanyTeamsGetTeamScoresErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CompanyTeamsGetTeamScoresError = CompanyTeamsGetTeamScoresErrors[keyof CompanyTeamsGetTeamScoresErrors];
@@ -6657,9 +7251,17 @@ export type IntegratedReportGetMyIntegratedReportData = {
 
 export type IntegratedReportGetMyIntegratedReportErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type IntegratedReportGetMyIntegratedReportError = IntegratedReportGetMyIntegratedReportErrors[keyof IntegratedReportGetMyIntegratedReportErrors];
@@ -6682,9 +7284,13 @@ export type IntegratedReportCreateIntegratedReportRequestData = {
 
 export type IntegratedReportCreateIntegratedReportRequestErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type IntegratedReportCreateIntegratedReportRequestError = IntegratedReportCreateIntegratedReportRequestErrors[keyof IntegratedReportCreateIntegratedReportRequestErrors];
@@ -6709,9 +7315,13 @@ export type IntegratedReportGetIntegratedReportData = {
 
 export type IntegratedReportGetIntegratedReportErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type IntegratedReportGetIntegratedReportError = IntegratedReportGetIntegratedReportErrors[keyof IntegratedReportGetIntegratedReportErrors];
@@ -6734,9 +7344,13 @@ export type IntegratedReportGetIntegratedReportStatusData = {
 
 export type IntegratedReportGetIntegratedReportStatusErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type IntegratedReportGetIntegratedReportStatusError = IntegratedReportGetIntegratedReportStatusErrors[keyof IntegratedReportGetIntegratedReportStatusErrors];
@@ -6761,9 +7375,13 @@ export type IntegratedReportGetLatestIntegratedRequestData = {
 
 export type IntegratedReportGetLatestIntegratedRequestErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type IntegratedReportGetLatestIntegratedRequestError = IntegratedReportGetLatestIntegratedRequestErrors[keyof IntegratedReportGetLatestIntegratedRequestErrors];
@@ -6786,9 +7404,13 @@ export type CandidateInterviewsListCandidateInterviewsData = {
 
 export type CandidateInterviewsListCandidateInterviewsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CandidateInterviewsListCandidateInterviewsError = CandidateInterviewsListCandidateInterviewsErrors[keyof CandidateInterviewsListCandidateInterviewsErrors];
@@ -6813,9 +7435,21 @@ export type CandidateInterviewsSelectInterviewSlotData = {
 
 export type CandidateInterviewsSelectInterviewSlotErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsConflictError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type CandidateInterviewsSelectInterviewSlotError = CandidateInterviewsSelectInterviewSlotErrors[keyof CandidateInterviewsSelectInterviewSlotErrors];
@@ -6840,9 +7474,17 @@ export type CandidateInterviewsGetProposalSlotsData = {
 
 export type CandidateInterviewsGetProposalSlotsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateInterviewsGetProposalSlotsError = CandidateInterviewsGetProposalSlotsErrors[keyof CandidateInterviewsGetProposalSlotsErrors];
@@ -6867,9 +7509,17 @@ export type CandidateInterviewsCancelCandidateInterviewData = {
 
 export type CandidateInterviewsCancelCandidateInterviewErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsUnauthorizedError | ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateInterviewsCancelCandidateInterviewError = CandidateInterviewsCancelCandidateInterviewErrors[keyof CandidateInterviewsCancelCandidateInterviewErrors];
@@ -6929,9 +7579,9 @@ export type PublicJobPostingsListPublicJobPostingsData = {
 
 export type PublicJobPostingsListPublicJobPostingsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
 };
 
 export type PublicJobPostingsListPublicJobPostingsError = PublicJobPostingsListPublicJobPostingsErrors[keyof PublicJobPostingsListPublicJobPostingsErrors];
@@ -6956,9 +7606,13 @@ export type PublicJobPostingsGetPublicJobPostingData = {
 
 export type PublicJobPostingsGetPublicJobPostingErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PublicJobPostingsGetPublicJobPostingError = PublicJobPostingsGetPublicJobPostingErrors[keyof PublicJobPostingsGetPublicJobPostingErrors];
@@ -6990,9 +7644,13 @@ export type CandidateMessagingListCandidateConversationsData = {
 
 export type CandidateMessagingListCandidateConversationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CandidateMessagingListCandidateConversationsError = CandidateMessagingListCandidateConversationsErrors[keyof CandidateMessagingListCandidateConversationsErrors];
@@ -7015,9 +7673,17 @@ export type CandidateMessagingStartCandidateConversationData = {
 
 export type CandidateMessagingStartCandidateConversationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateMessagingStartCandidateConversationError = CandidateMessagingStartCandidateConversationErrors[keyof CandidateMessagingStartCandidateConversationErrors];
@@ -7042,9 +7708,21 @@ export type CandidateMessagingGetCandidateConversationData = {
 
 export type CandidateMessagingGetCandidateConversationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateMessagingGetCandidateConversationError = CandidateMessagingGetCandidateConversationErrors[keyof CandidateMessagingGetCandidateConversationErrors];
@@ -7072,9 +7750,21 @@ export type CandidateMessagingListCandidateMessagesData = {
 
 export type CandidateMessagingListCandidateMessagesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateMessagingListCandidateMessagesError = CandidateMessagingListCandidateMessagesErrors[keyof CandidateMessagingListCandidateMessagesErrors];
@@ -7099,9 +7789,21 @@ export type CandidateMessagingSendCandidateMessageData = {
 
 export type CandidateMessagingSendCandidateMessageErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateMessagingSendCandidateMessageError = CandidateMessagingSendCandidateMessageErrors[keyof CandidateMessagingSendCandidateMessageErrors];
@@ -7126,9 +7828,17 @@ export type CandidateMessagingMarkCandidateConversationReadData = {
 
 export type CandidateMessagingMarkCandidateConversationReadErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateMessagingMarkCandidateConversationReadError = CandidateMessagingMarkCandidateConversationReadErrors[keyof CandidateMessagingMarkCandidateConversationReadErrors];
@@ -7151,9 +7861,13 @@ export type CandidateMessagingCountCandidateUnreadMessagesData = {
 
 export type CandidateMessagingCountCandidateUnreadMessagesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CandidateMessagingCountCandidateUnreadMessagesError = CandidateMessagingCountCandidateUnreadMessagesErrors[keyof CandidateMessagingCountCandidateUnreadMessagesErrors];
@@ -7185,9 +7899,13 @@ export type UserNotificationsListUserNotificationsData = {
 
 export type UserNotificationsListUserNotificationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type UserNotificationsListUserNotificationsError = UserNotificationsListUserNotificationsErrors[keyof UserNotificationsListUserNotificationsErrors];
@@ -7210,9 +7928,13 @@ export type UserNotificationsMarkAllUserNotificationsReadData = {
 
 export type UserNotificationsMarkAllUserNotificationsReadErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type UserNotificationsMarkAllUserNotificationsReadError = UserNotificationsMarkAllUserNotificationsReadErrors[keyof UserNotificationsMarkAllUserNotificationsReadErrors];
@@ -7235,9 +7957,13 @@ export type UserNotificationsCountUserUnreadNotificationsData = {
 
 export type UserNotificationsCountUserUnreadNotificationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type UserNotificationsCountUserUnreadNotificationsError = UserNotificationsCountUserUnreadNotificationsErrors[keyof UserNotificationsCountUserUnreadNotificationsErrors];
@@ -7262,9 +7988,17 @@ export type UserNotificationsMarkUserNotificationReadData = {
 
 export type UserNotificationsMarkUserNotificationReadErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type UserNotificationsMarkUserNotificationReadError = UserNotificationsMarkUserNotificationReadErrors[keyof UserNotificationsMarkUserNotificationReadErrors];
@@ -7300,9 +8034,9 @@ export type PostsListTimelinePostsData = {
 
 export type PostsListTimelinePostsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
 };
 
 export type PostsListTimelinePostsError = PostsListTimelinePostsErrors[keyof PostsListTimelinePostsErrors];
@@ -7325,9 +8059,17 @@ export type PostsCreatePostData = {
 
 export type PostsCreatePostErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsCreatePostError = PostsCreatePostErrors[keyof PostsCreatePostErrors];
@@ -7352,9 +8094,21 @@ export type PostsDeletePostCommentData = {
 
 export type PostsDeletePostCommentErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsDeletePostCommentError = PostsDeletePostCommentErrors[keyof PostsDeletePostCommentErrors];
@@ -7383,9 +8137,13 @@ export type PostsListPostsByUserData = {
 
 export type PostsListPostsByUserErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsListPostsByUserError = PostsListPostsByUserErrors[keyof PostsListPostsByUserErrors];
@@ -7413,9 +8171,13 @@ export type PostsListLikedPostsByUserData = {
 
 export type PostsListLikedPostsByUserErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsListLikedPostsByUserError = PostsListLikedPostsByUserErrors[keyof PostsListLikedPostsByUserErrors];
@@ -7440,9 +8202,21 @@ export type PostsDeletePostData = {
 
 export type PostsDeletePostErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsForbiddenError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsDeletePostError = PostsDeletePostErrors[keyof PostsDeletePostErrors];
@@ -7469,9 +8243,13 @@ export type PostsGetPostData = {
 
 export type PostsGetPostErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsGetPostError = PostsGetPostErrors[keyof PostsGetPostErrors];
@@ -7499,9 +8277,13 @@ export type PostsListPostCommentsData = {
 
 export type PostsListPostCommentsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsListPostCommentsError = PostsListPostCommentsErrors[keyof PostsListPostCommentsErrors];
@@ -7526,9 +8308,17 @@ export type PostsCreatePostCommentData = {
 
 export type PostsCreatePostCommentErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsCreatePostCommentError = PostsCreatePostCommentErrors[keyof PostsCreatePostCommentErrors];
@@ -7553,9 +8343,17 @@ export type PostsTogglePostLikeData = {
 
 export type PostsTogglePostLikeErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsTogglePostLikeError = PostsTogglePostLikeErrors[keyof PostsTogglePostLikeErrors];
@@ -7580,9 +8378,17 @@ export type PostsTogglePostRepostData = {
 
 export type PostsTogglePostRepostErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type PostsTogglePostRepostError = PostsTogglePostRepostErrors[keyof PostsTogglePostRepostErrors];
@@ -7605,9 +8411,17 @@ export type ScoutSettingsGetScoutSettingsData = {
 
 export type ScoutSettingsGetScoutSettingsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ScoutSettingsGetScoutSettingsError = ScoutSettingsGetScoutSettingsErrors[keyof ScoutSettingsGetScoutSettingsErrors];
@@ -7630,9 +8444,17 @@ export type ScoutSettingsUpdateScoutSettingsData = {
 
 export type ScoutSettingsUpdateScoutSettingsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ScoutSettingsUpdateScoutSettingsError = ScoutSettingsUpdateScoutSettingsErrors[keyof ScoutSettingsUpdateScoutSettingsErrors];
@@ -7664,9 +8486,13 @@ export type CandidateScoutsListCandidateScoutsData = {
 
 export type CandidateScoutsListCandidateScoutsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CandidateScoutsListCandidateScoutsError = CandidateScoutsListCandidateScoutsErrors[keyof CandidateScoutsListCandidateScoutsErrors];
@@ -7689,9 +8515,13 @@ export type CandidateScoutsBulkDeclineScoutsData = {
 
 export type CandidateScoutsBulkDeclineScoutsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CandidateScoutsBulkDeclineScoutsError = CandidateScoutsBulkDeclineScoutsErrors[keyof CandidateScoutsBulkDeclineScoutsErrors];
@@ -7714,9 +8544,13 @@ export type CandidateScoutsBulkRespondScoutsData = {
 
 export type CandidateScoutsBulkRespondScoutsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
 };
 
 export type CandidateScoutsBulkRespondScoutsError = CandidateScoutsBulkRespondScoutsErrors[keyof CandidateScoutsBulkRespondScoutsErrors];
@@ -7741,9 +8575,17 @@ export type CandidateScoutsGetCandidateScoutDetailData = {
 
 export type CandidateScoutsGetCandidateScoutDetailErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateScoutsGetCandidateScoutDetailError = CandidateScoutsGetCandidateScoutDetailErrors[keyof CandidateScoutsGetCandidateScoutDetailErrors];
@@ -7768,9 +8610,17 @@ export type CandidateScoutsCandidateScoutReplyData = {
 
 export type CandidateScoutsCandidateScoutReplyErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateScoutsCandidateScoutReplyError = CandidateScoutsCandidateScoutReplyErrors[keyof CandidateScoutsCandidateScoutReplyErrors];
@@ -7793,9 +8643,17 @@ export type CandidateScoutsRespondToScoutData = {
 
 export type CandidateScoutsRespondToScoutErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateScoutsRespondToScoutError = CandidateScoutsRespondToScoutErrors[keyof CandidateScoutsRespondToScoutErrors];
@@ -7820,9 +8678,9 @@ export type TeamDiagnoseGetDiagnoseByTokenData = {
 
 export type TeamDiagnoseGetDiagnoseByTokenErrors = {
     /**
-     * An unexpected error response.
+     * Not Found エラー
      */
-    default: ModelsNotFoundError;
+    404: ModelsNotFoundError;
 };
 
 export type TeamDiagnoseGetDiagnoseByTokenError = TeamDiagnoseGetDiagnoseByTokenErrors[keyof TeamDiagnoseGetDiagnoseByTokenErrors];
@@ -7847,9 +8705,13 @@ export type TeamDiagnoseUpdateDiagnoseStatusData = {
 
 export type TeamDiagnoseUpdateDiagnoseStatusErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type TeamDiagnoseUpdateDiagnoseStatusError = TeamDiagnoseUpdateDiagnoseStatusErrors[keyof TeamDiagnoseUpdateDiagnoseStatusErrors];
@@ -7872,9 +8734,13 @@ export type UsersCreateUserData = {
 
 export type UsersCreateUserErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsConflictError;
+    400: ModelsBadRequestError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type UsersCreateUserError = UsersCreateUserErrors[keyof UsersCreateUserErrors];
@@ -7899,9 +8765,13 @@ export type UsersGetUserByIdData = {
 
 export type UsersGetUserByIdErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type UsersGetUserByIdError = UsersGetUserByIdErrors[keyof UsersGetUserByIdErrors];
@@ -7931,9 +8801,9 @@ export type SimilarUsersGetSimilarUsersData = {
 
 export type SimilarUsersGetSimilarUsersErrors = {
     /**
-     * An unexpected error response.
+     * Not Found エラー
      */
-    default: ModelsNotFoundError;
+    404: ModelsNotFoundError;
 };
 
 export type SimilarUsersGetSimilarUsersError = SimilarUsersGetSimilarUsersErrors[keyof SimilarUsersGetSimilarUsersErrors];
@@ -7958,9 +8828,13 @@ export type UsersGetUserByUsernameData = {
 
 export type UsersGetUserByUsernameErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type UsersGetUserByUsernameError = UsersGetUserByUsernameErrors[keyof UsersGetUserByUsernameErrors];
@@ -7985,9 +8859,17 @@ export type UsersUpdateUserProfileData = {
 
 export type UsersUpdateUserProfileErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type UsersUpdateUserProfileError = UsersUpdateUserProfileErrors[keyof UsersUpdateUserProfileErrors];
@@ -8012,9 +8894,13 @@ export type EducationsListEducationsData = {
 
 export type EducationsListEducationsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type EducationsListEducationsError = EducationsListEducationsErrors[keyof EducationsListEducationsErrors];
@@ -8039,9 +8925,21 @@ export type EducationsCreateEducationData = {
 
 export type EducationsCreateEducationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsConflictError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type EducationsCreateEducationError = EducationsCreateEducationErrors[keyof EducationsCreateEducationErrors];
@@ -8067,9 +8965,21 @@ export type EducationsDeleteEducationData = {
 
 export type EducationsDeleteEducationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type EducationsDeleteEducationError = EducationsDeleteEducationErrors[keyof EducationsDeleteEducationErrors];
@@ -8095,9 +9005,21 @@ export type EducationsUpdateEducationData = {
 
 export type EducationsUpdateEducationErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type EducationsUpdateEducationError = EducationsUpdateEducationErrors[keyof EducationsUpdateEducationErrors];
@@ -8122,9 +9044,13 @@ export type ExperiencesListExperiencesData = {
 
 export type ExperiencesListExperiencesErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ExperiencesListExperiencesError = ExperiencesListExperiencesErrors[keyof ExperiencesListExperiencesErrors];
@@ -8149,9 +9075,21 @@ export type ExperiencesCreateExperienceData = {
 
 export type ExperiencesCreateExperienceErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsConflictError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type ExperiencesCreateExperienceError = ExperiencesCreateExperienceErrors[keyof ExperiencesCreateExperienceErrors];
@@ -8177,9 +9115,21 @@ export type ExperiencesDeleteExperienceData = {
 
 export type ExperiencesDeleteExperienceErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ExperiencesDeleteExperienceError = ExperiencesDeleteExperienceErrors[keyof ExperiencesDeleteExperienceErrors];
@@ -8205,9 +9155,21 @@ export type ExperiencesUpdateExperienceData = {
 
 export type ExperiencesUpdateExperienceErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsForbiddenError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type ExperiencesUpdateExperienceError = ExperiencesUpdateExperienceErrors[keyof ExperiencesUpdateExperienceErrors];
@@ -8232,9 +9194,17 @@ export type FollowsUnfollowUserData = {
 
 export type FollowsUnfollowUserErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type FollowsUnfollowUserError = FollowsUnfollowUserErrors[keyof FollowsUnfollowUserErrors];
@@ -8259,9 +9229,21 @@ export type FollowsFollowUserData = {
 
 export type FollowsFollowUserErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError | ModelsConflictError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type FollowsFollowUserError = FollowsFollowUserErrors[keyof FollowsFollowUserErrors];
@@ -8286,9 +9268,17 @@ export type FollowsGetFollowStatusData = {
 
 export type FollowsGetFollowStatusErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type FollowsGetFollowStatusError = FollowsGetFollowStatusErrors[keyof FollowsGetFollowStatusErrors];
@@ -8322,9 +9312,13 @@ export type FollowsListFollowersData = {
 
 export type FollowsListFollowersErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type FollowsListFollowersError = FollowsListFollowersErrors[keyof FollowsListFollowersErrors];
@@ -8358,9 +9352,13 @@ export type FollowsListFollowingData = {
 
 export type FollowsListFollowingErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type FollowsListFollowingError = FollowsListFollowingErrors[keyof FollowsListFollowingErrors];
@@ -8385,9 +9383,13 @@ export type SkillsListSkillsData = {
 
 export type SkillsListSkillsErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type SkillsListSkillsError = SkillsListSkillsErrors[keyof SkillsListSkillsErrors];
@@ -8412,9 +9414,21 @@ export type SkillsAttachSkillData = {
 
 export type SkillsAttachSkillErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError | ModelsConflictError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type SkillsAttachSkillError = SkillsAttachSkillErrors[keyof SkillsAttachSkillErrors];
@@ -8440,9 +9454,17 @@ export type SkillsDetachSkillData = {
 
 export type SkillsDetachSkillErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type SkillsDetachSkillError = SkillsDetachSkillErrors[keyof SkillsDetachSkillErrors];
@@ -8471,9 +9493,17 @@ export type UsersUploadUserImageData = {
 
 export type UsersUploadUserImageErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type UsersUploadUserImageError = UsersUploadUserImageErrors[keyof UsersUploadUserImageErrors];
@@ -8496,9 +9526,13 @@ export type WorkValuesWvStartSessionData = {
 
 export type WorkValuesWvStartSessionErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type WorkValuesWvStartSessionError = WorkValuesWvStartSessionErrors[keyof WorkValuesWvStartSessionErrors];
@@ -8523,9 +9557,13 @@ export type WorkValuesWvGetAiReportData = {
 
 export type WorkValuesWvGetAiReportErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type WorkValuesWvGetAiReportError = WorkValuesWvGetAiReportErrors[keyof WorkValuesWvGetAiReportErrors];
@@ -8550,9 +9588,13 @@ export type WorkValuesWvGetResultBySessionData = {
 
 export type WorkValuesWvGetResultBySessionErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type WorkValuesWvGetResultBySessionError = WorkValuesWvGetResultBySessionErrors[keyof WorkValuesWvGetResultBySessionErrors];
@@ -8577,9 +9619,13 @@ export type WorkValuesWvSubmitResultData = {
 
 export type WorkValuesWvSubmitResultErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsBadRequestError | ModelsNotFoundError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type WorkValuesWvSubmitResultError = WorkValuesWvSubmitResultErrors[keyof WorkValuesWvSubmitResultErrors];
@@ -8604,9 +9650,13 @@ export type WorkValuesWvGetLatestResultData = {
 
 export type WorkValuesWvGetLatestResultErrors = {
     /**
-     * An unexpected error response.
+     * Bad Request エラー
      */
-    default: ModelsNotFoundError | ModelsBadRequestError;
+    400: ModelsBadRequestError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type WorkValuesWvGetLatestResultError = WorkValuesWvGetLatestResultErrors[keyof WorkValuesWvGetLatestResultErrors];
