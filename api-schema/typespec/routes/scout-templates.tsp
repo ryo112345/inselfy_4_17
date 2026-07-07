@@ -21,10 +21,10 @@ interface ScoutTemplates {
     @body template: ScoutTemplateResponse;
   } | BadRequestError;
 
-  /** スカウトテンプレート一覧（企業認証）。裸の配列を返す（互換のため） */
+  /** スカウトテンプレート一覧（企業認証） */
   @get
   @summary("List scout templates")
-  listScoutTemplates(): ScoutTemplateResponse[] | BadRequestError;
+  listScoutTemplates(): ScoutTemplateListResponse | BadRequestError;
 
   /** スカウトテンプレート取得（企業認証） */
   @get

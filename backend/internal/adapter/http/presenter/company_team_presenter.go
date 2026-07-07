@@ -23,7 +23,7 @@ func CompanyTeamsResponse(summaries []company.TeamSummary) *openapi.ModelsTeamLi
 			CreatedAt:   s.CreatedAt.Format(time.RFC3339),
 		})
 	}
-	return &openapi.ModelsTeamListResponse{Teams: teams}
+	return &openapi.ModelsTeamListResponse{Items: teams}
 }
 
 // TeamMemberResponse converts a team member to its API response.
@@ -85,7 +85,7 @@ func TeamScoresResponse(memberScores []company.TeamMemberScores) *openapi.Models
 			CiScores:   teamScoreEntries(m.CIScores),
 		})
 	}
-	return &openapi.ModelsTeamScoresResponse{Members: result}
+	return &openapi.ModelsTeamScoresResponse{Items: result}
 }
 
 // publicScoreEntries keeps nil as nil: the public response renders missing
@@ -115,5 +115,5 @@ func PublicTeamScoresResponse(teams []company.TeamPublicScores) *openapi.ModelsP
 			CompletedCount: t.CompletedCount,
 		})
 	}
-	return &openapi.ModelsPublicTeamScoresResponse{Teams: result}
+	return &openapi.ModelsPublicTeamScoresResponse{Items: result}
 }

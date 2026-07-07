@@ -94,7 +94,7 @@ export function WeekCalendar() {
       const end = new Date(start);
       end.setDate(end.getDate() + 7);
       const res = await fetchCompanyInterviews(toDateStr(start), toDateStr(end));
-      setInterviews(res.interviews ?? []);
+      setInterviews(res.items ?? []);
     } catch {
       setInterviews([]);
     } finally {

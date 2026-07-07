@@ -65,7 +65,7 @@ model TalentCard {
 /** 人材一覧 */
 model TalentListResponse {
   /** 人材カード */
-  users: TalentCard[];
+  items: TalentCard[];
 
   /** 総件数 */
   total: integer;

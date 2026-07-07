@@ -596,7 +596,7 @@ export type ModelsCompanyInterviewListResponse = {
     /**
      * 面接
      */
-    interviews: Array<ModelsCompanyInterviewItem>;
+    items: Array<ModelsCompanyInterviewItem>;
 };
 
 /**
@@ -2488,7 +2488,7 @@ export type ModelsPublicTeamScoresResponse = {
     /**
      * チーム
      */
-    teams: Array<ModelsPublicTeamScoreResponse>;
+    items: Array<ModelsPublicTeamScoreResponse>;
 };
 
 /**
@@ -2850,6 +2850,16 @@ export type ModelsScoutSettingsResponse = {
 };
 
 /**
+ * スカウトテンプレート一覧
+ */
+export type ModelsScoutTemplateListResponse = {
+    /**
+     * テンプレート
+     */
+    items: Array<ModelsScoutTemplateResponse>;
+};
+
+/**
  * スカウトテンプレート
  */
 export type ModelsScoutTemplateResponse = {
@@ -3036,7 +3046,7 @@ export type ModelsSimilarUsersResponse = {
     /**
      * 類似ユーザー（0件時は null）
      */
-    users: Array<ModelsSimilarUserItem> | null;
+    items: Array<ModelsSimilarUserItem> | null;
     /**
      * 件数
      */
@@ -3196,7 +3206,7 @@ export type ModelsTalentListResponse = {
     /**
      * 人材カード
      */
-    users: Array<ModelsTalentCard>;
+    items: Array<ModelsTalentCard>;
     /**
      * 総件数
      */
@@ -3244,7 +3254,7 @@ export type ModelsTeamListResponse = {
     /**
      * チーム
      */
-    teams: Array<ModelsTeamResponse>;
+    items: Array<ModelsTeamResponse>;
 };
 
 /**
@@ -3352,7 +3362,7 @@ export type ModelsTeamScoresResponse = {
     /**
      * メンバーごとのスコア
      */
-    members: Array<ModelsMemberScoreResponse>;
+    items: Array<ModelsMemberScoreResponse>;
 };
 
 /**
@@ -5038,7 +5048,7 @@ export type CompanyJobPostingsListCompanyJobPostingsResponses = {
     /**
      * The request has succeeded.
      */
-    200: Array<ModelsJobPostingResponse>;
+    200: ModelsJobPostingListResponse;
 };
 
 export type CompanyJobPostingsListCompanyJobPostingsResponse = CompanyJobPostingsListCompanyJobPostingsResponses[keyof CompanyJobPostingsListCompanyJobPostingsResponses];
@@ -5831,7 +5841,7 @@ export type ScoutTemplatesListScoutTemplatesResponses = {
     /**
      * The request has succeeded.
      */
-    200: Array<ModelsScoutTemplateResponse>;
+    200: ModelsScoutTemplateListResponse;
 };
 
 export type ScoutTemplatesListScoutTemplatesResponse = ScoutTemplatesListScoutTemplatesResponses[keyof ScoutTemplatesListScoutTemplatesResponses];

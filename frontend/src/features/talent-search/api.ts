@@ -83,7 +83,7 @@ export async function fetchTeamScoreAverages(
   const { data } = await companyTeamsGetTeamScores({ path: { teamId } });
   const wvAccum: Record<string, { sum: number; count: number }> = {};
   const ciAccum: Record<string, { sum: number; count: number }> = {};
-  for (const m of data?.members ?? []) {
+  for (const m of data?.items ?? []) {
     for (const s of m.wvScores ?? []) {
       if (!wvAccum[s.id]) wvAccum[s.id] = { sum: 0, count: 0 };
       wvAccum[s.id].sum += s.displayScore;
@@ -105,7 +105,7 @@ export async function fetchTeamScoreAverages(
 
 export async function fetchCompanyTeams(): Promise<ModelsTeamResponse[]> {
   const { data } = await companyTeamsListTeams();
-  return data?.teams ?? [];
+  return data?.items ?? [];
 }
 
 export type TalentSearchKind = "plain" | "wv" | "ci" | "integrated";
@@ -125,7 +125,7 @@ export async function searchTalents(
         : kind === "integrated"
           ? await talentSearchIntegratedDiagnosticSearchTalents({ query })
           : await talentSearchDiagnosticSearchTalents({ query });
-  return { users: data?.users ?? [], total: data?.total ?? 0 };
+  return { users: data?.items ?? [], total: data?.total ?? 0 };
 }
 
 export async function fetchSavedCandidates(
@@ -133,7 +133,7 @@ export async function fetchSavedCandidates(
   offset: number,
 ): Promise<{ users: TalentCard[]; total: number }> {
   const { data } = await savedCandidatesListSavedCandidates({ query: { limit, offset } });
-  return { users: data?.users ?? [], total: data?.total ?? 0 };
+  return { users: data?.items ?? [], total: data?.total ?? 0 };
 }
 
 // 非2xxは旧実装（res.json() を黙殺）に合わせて無視し、ネットワークエラーのみ throw する

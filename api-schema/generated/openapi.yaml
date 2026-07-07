@@ -1209,7 +1209,7 @@ paths:
     get:
       operationId: CompanyJobPostings_listCompanyJobPostings
       summary: List job postings of the company
-      description: 自社求人一覧（企業認証）。裸の配列を返す（互換のため）
+      description: 自社求人一覧（企業認証）
       parameters: []
       responses:
         '200':
@@ -1217,9 +1217,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Models.JobPostingResponse'
+                $ref: '#/components/schemas/Models.JobPostingListResponse'
         default:
           description: An unexpected error response.
           content:
@@ -2030,7 +2028,7 @@ paths:
     get:
       operationId: ScoutTemplates_listScoutTemplates
       summary: List scout templates
-      description: スカウトテンプレート一覧（企業認証）。裸の配列を返す（互換のため）
+      description: スカウトテンプレート一覧（企業認証）
       parameters: []
       responses:
         '200':
@@ -2038,9 +2036,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Models.ScoutTemplateResponse'
+                $ref: '#/components/schemas/Models.ScoutTemplateListResponse'
         default:
           description: An unexpected error response.
           content:
@@ -5746,9 +5742,9 @@ components:
     Models.CompanyInterviewListResponse:
       type: object
       required:
-        - interviews
+        - items
       properties:
-        interviews:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/Models.CompanyInterviewItem'
@@ -7741,9 +7737,9 @@ components:
     Models.PublicTeamScoresResponse:
       type: object
       required:
-        - teams
+        - items
       properties:
-        teams:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/Models.PublicTeamScoreResponse'
@@ -8116,6 +8112,17 @@ components:
           format: date-time
           description: 更新日時
       description: スカウト受け入れ設定
+    Models.ScoutTemplateListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.ScoutTemplateResponse'
+          description: テンプレート
+      description: スカウトテンプレート一覧
     Models.ScoutTemplateResponse:
       type: object
       required:
@@ -8306,10 +8313,10 @@ components:
     Models.SimilarUsersResponse:
       type: object
       required:
-        - users
+        - items
         - total
       properties:
-        users:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/Models.SimilarUserItem'
@@ -8477,10 +8484,10 @@ components:
     Models.TalentListResponse:
       type: object
       required:
-        - users
+        - items
         - total
       properties:
-        users:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/Models.TalentCard'
@@ -8528,9 +8535,9 @@ components:
     Models.TeamListResponse:
       type: object
       required:
-        - teams
+        - items
       properties:
-        teams:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/Models.TeamResponse'
@@ -8637,9 +8644,9 @@ components:
     Models.TeamScoresResponse:
       type: object
       required:
-        - members
+        - items
       properties:
-        members:
+        items:
           type: array
           items:
             $ref: '#/components/schemas/Models.MemberScoreResponse'

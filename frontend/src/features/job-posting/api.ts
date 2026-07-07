@@ -36,7 +36,7 @@ export async function fetchJobPostings(): Promise<JobPosting[]> {
     cache: "no-store",
   });
   if (error || !data) throw new Error("Failed to fetch job postings");
-  return data;
+  return data.items;
 }
 
 export async function fetchJobPosting(id: string): Promise<JobPosting> {

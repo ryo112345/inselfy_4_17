@@ -23,7 +23,7 @@ export default function TeamsPage() {
     let cancelled = false;
     companyFetch("/api/company/teams")
       .then((r) => r.json())
-      .then((data) => { if (!cancelled) setTeams(data.teams ?? []); })
+      .then((data) => { if (!cancelled) setTeams(data.items ?? []); })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };

@@ -33,7 +33,7 @@ export async function fetchPublicTeamScores(
       path: { id },
       cache,
     });
-    return data?.teams ?? [];
+    return data?.items ?? [];
   } catch {
     return [];
   }

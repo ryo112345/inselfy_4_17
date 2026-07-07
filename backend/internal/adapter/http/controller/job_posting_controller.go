@@ -56,7 +56,7 @@ func (c *JobPostingController) List(ctx echo.Context) error {
 	if err != nil {
 		return handleError(ctx, err)
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobPostingsResponse(js))
+	return ctx.JSON(http.StatusOK, presenter.JobPostingsPaginatedResponse(js, len(js)))
 }
 
 // Get handles GET /api/company/jobs/:jobId.
