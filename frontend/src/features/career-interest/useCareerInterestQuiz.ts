@@ -1,18 +1,25 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
+  type ItemDTO,
+  type ResponseDTO,
+  type ResultDTO,
+  type SessionDTO,
   startSession,
   startSessionByDiagnoseToken,
   submitResult,
   submitResultByDiagnoseToken,
-  type SessionDTO,
-  type ResultDTO,
-  type ItemDTO,
-  type ResponseDTO,
 } from "./api";
 
-export type QuizPhase = "idle" | "loading" | "active" | "completed" | "submitting" | "done" | "error";
+export type QuizPhase =
+  | "idle"
+  | "loading"
+  | "active"
+  | "completed"
+  | "submitting"
+  | "done"
+  | "error";
 
 export interface QuizState {
   phase: QuizPhase;
@@ -100,7 +107,11 @@ export function useCareerInterestQuiz(diagnoseToken?: string) {
     setState((s) => ({ ...s, phase: "submitting" }));
     try {
       const result = diagnoseToken
-        ? await submitResultByDiagnoseToken(diagnoseToken, sessionRef.current.id, responsesRef.current)
+        ? await submitResultByDiagnoseToken(
+            diagnoseToken,
+            sessionRef.current.id,
+            responsesRef.current,
+          )
         : await submitResult(sessionRef.current.id, responsesRef.current);
       setState((s) => ({ ...s, phase: "done", result }));
     } catch (e) {

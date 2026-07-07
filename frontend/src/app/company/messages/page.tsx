@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import {
-  startConversation,
-  fetchCompanyConversations,
   fetchCompanyConversationMessages,
-  sendMessageAsCompany,
+  fetchCompanyConversations,
   markReadAsCompany,
+  sendMessageAsCompany,
+  startConversation,
 } from "@/features/messaging/api";
 import { useCompanyUnreadMessaging } from "@/features/messaging/company-unread-context";
-import type { Conversation, Message } from "@/features/messaging/types";
 import { ConversationList } from "@/features/messaging/components/ConversationList";
 import { MessageThread } from "@/features/messaging/components/MessageThread";
+import type { Conversation, Message } from "@/features/messaging/types";
 import { useMessagingWebSocket } from "@/features/messaging/useWebSocket";
 
 export default function CompanyMessagesPage() {
@@ -71,11 +71,7 @@ export default function CompanyMessagesPage() {
       setMessages(data.items ?? []);
       await markReadAsCompany(convId);
       refreshUnread();
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === convId ? { ...c, unreadCount: 0 } : c,
-        ),
-      );
+      setConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0 } : c)));
     } catch {
       // ignore
     } finally {
@@ -176,9 +172,7 @@ export default function CompanyMessagesPage() {
           }`}
         >
           <div className="shrink-0 border-b border-gray-200 px-4 py-3">
-            <h1 className="text-base font-semibold text-gray-900">
-              メッセージ
-            </h1>
+            <h1 className="text-base font-semibold text-gray-900">メッセージ</h1>
           </div>
           <div className="flex-1 overflow-y-auto scrollbar-hide">
             {loadingConvs ? (
@@ -238,9 +232,7 @@ export default function CompanyMessagesPage() {
                   d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
                 />
               </svg>
-              <p className="text-sm font-medium text-gray-500">
-                会話を選択してください
-              </p>
+              <p className="text-sm font-medium text-gray-500">会話を選択してください</p>
             </div>
           )}
         </div>

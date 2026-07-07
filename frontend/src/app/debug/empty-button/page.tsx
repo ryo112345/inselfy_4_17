@@ -118,9 +118,7 @@ export default function DebugEmptyButtonPage() {
     <main className="min-h-screen bg-[#f6f7f5] px-4 py-8">
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900">
-            空状態ボタンのバリエーション
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">空状態ボタンのバリエーション</h1>
           <p className="mt-2 text-sm text-gray-500">
             ホバーして見た目を比較してください。気に入った組み合わせを指定すれば本体に反映します。
           </p>
@@ -132,12 +130,8 @@ export default function DebugEmptyButtonPage() {
             className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]"
           >
             <div className="mb-3 flex items-start justify-between gap-4">
-              <span className="text-sm font-semibold text-gray-700">
-                #{i + 1}
-              </span>
-              <code className="flex-1 text-right text-xs text-gray-500">
-                {v.label}
-              </code>
+              <span className="text-sm font-semibold text-gray-700">#{i + 1}</span>
+              <code className="flex-1 text-right text-xs text-gray-500">{v.label}</code>
             </div>
             <button
               type="button"

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { NEED_LABELS, type NeedId } from "@/features/work-values/lib/needs";
 import "@/external/client/api/client";
 import {
-  similarUsersGetSimilarUsers,
   type ModelsSimilarUserItem,
+  similarUsersGetSimilarUsers,
 } from "@/external/client/api/generated";
 
 type Props = {
@@ -31,7 +31,9 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
       .catch(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
   if (!visible || (loading && users.length === 0)) return null;
@@ -41,12 +43,8 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
     <div className={className ?? "w-full max-w-[320px] ml-auto"}>
       <div className="rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)] overflow-hidden">
         <div className="px-5 pt-5 pb-3">
-          <h3 className="text-[15px] font-bold text-gray-900">
-            価値観が近い人
-          </h3>
-          <p className="text-[12px] text-gray-400 mt-0.5">
-            Work Values の結果から
-          </p>
+          <h3 className="text-[15px] font-bold text-gray-900">価値観が近い人</h3>
+          <p className="text-[12px] text-gray-400 mt-0.5">Work Values の結果から</p>
         </div>
 
         <div className="divide-y divide-gray-100">
@@ -96,14 +94,14 @@ function SimilarUserRow({ user }: { user: ModelsSimilarUserItem }) {
           <div className="mt-1.5 space-y-1.5">
             {experiences.map((exp, i) => (
               <div key={i} className="flex gap-1.5">
-                <span className={`mt-[5px] inline-block w-1.5 h-1.5 rounded-full shrink-0 ${exp.isCurrent ? "bg-emerald-400" : "bg-gray-300"}`} />
+                <span
+                  className={`mt-[5px] inline-block w-1.5 h-1.5 rounded-full shrink-0 ${exp.isCurrent ? "bg-emerald-400" : "bg-gray-300"}`}
+                />
                 <div className="min-w-0">
                   <p className="text-[13px] font-medium text-gray-700 leading-tight">
                     {exp.companyName}
                   </p>
-                  <p className="text-[12px] text-gray-400 leading-tight">
-                    {exp.title}
-                  </p>
+                  <p className="text-[12px] text-gray-400 leading-tight">{exp.title}</p>
                 </div>
               </div>
             ))}
@@ -129,12 +127,7 @@ function SimilarUserRow({ user }: { user: ModelsSimilarUserItem }) {
 
 function SmallFaceIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg
-      className={className}
-      style={style}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-    >
+    <svg className={className} style={style} viewBox="0 0 24 24" fill="currentColor">
       <circle cx="12" cy="12" r="10" opacity={0.15} />
       <circle cx="9" cy="10" r="1.5" />
       <circle cx="15" cy="10" r="1.5" />

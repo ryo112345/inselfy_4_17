@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useAuth } from "@/features/auth/auth-context";
-import { createPost } from "./api";
 import { ArticlePreviewCard, extractArticleId } from "./ArticlePreviewCard";
+import { createPost } from "./api";
 
 export function PostForm() {
   const { user, isLoading } = useAuth();
@@ -47,7 +47,10 @@ export function PostForm() {
   return (
     <form onSubmit={handleSubmit} className="px-4 pt-3 pb-2 border-b border-gray-200/80">
       <div className="flex gap-3">
-        <span className="flex shrink-0 w-10 h-10 items-center justify-center rounded-full text-sm font-bold text-white mt-1" style={{ backgroundColor: "var(--accent)" }}>
+        <span
+          className="flex shrink-0 w-10 h-10 items-center justify-center rounded-full text-sm font-bold text-white mt-1"
+          style={{ backgroundColor: "var(--accent)" }}
+        >
           {initial}
         </span>
         <div className="flex-1 min-w-0">
@@ -61,23 +64,35 @@ export function PostForm() {
             style={{ minHeight: 48 }}
           />
 
-          {detectedArticleId && (
-            <ArticlePreviewCard articleId={detectedArticleId} />
-          )}
+          {detectedArticleId && <ArticlePreviewCard articleId={detectedArticleId} />}
 
           <div className="flex items-center justify-between pt-2 border-t border-gray-100">
             <div className="flex items-center gap-0.5 -ml-2">
-              <ActionIcon><ImageIcon /></ActionIcon>
-              <ActionIcon><GifIcon /></ActionIcon>
-              <ActionIcon><PollIcon /></ActionIcon>
-              <ActionIcon><EmojiIcon /></ActionIcon>
-              <ActionIcon><ScheduleIcon /></ActionIcon>
-              <ActionIcon><LocationIcon /></ActionIcon>
+              <ActionIcon>
+                <ImageIcon />
+              </ActionIcon>
+              <ActionIcon>
+                <GifIcon />
+              </ActionIcon>
+              <ActionIcon>
+                <PollIcon />
+              </ActionIcon>
+              <ActionIcon>
+                <EmojiIcon />
+              </ActionIcon>
+              <ActionIcon>
+                <ScheduleIcon />
+              </ActionIcon>
+              <ActionIcon>
+                <LocationIcon />
+              </ActionIcon>
             </div>
 
             <div className="flex items-center gap-3">
               {content.length > 0 && (
-                <span className={`text-xs ${content.length > maxLength - 20 ? "text-rose-500" : "text-gray-400"}`}>
+                <span
+                  className={`text-xs ${content.length > maxLength - 20 ? "text-rose-500" : "text-gray-400"}`}
+                >
                   {maxLength - content.length}
                 </span>
               )}

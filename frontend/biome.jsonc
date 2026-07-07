@@ -1,0 +1,38 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      // ビルド生成物・アーカイブ・コード生成物は検査しない
+      "!.next",
+      "!.archive",
+      "!test-results",
+      "!playwright-report",
+      "!next-env.d.ts",
+      "!src/external/client/api/generated"
+    ]
+  },
+  // recommended ルールには既存コードで858件の違反があるため、当面リンターは無効にし、
+  // フォーマットと import 整列だけを CI ゲートにする。ルール有効化は別タスクで段階的に行う。
+  "linter": {
+    "enabled": false
+  },
+  // 既存コードベースの流儀（2スペース・実質100桁前後）に合わせる
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2
+    }
+  },
+  "css": {
+    "parser": {
+      // Tailwind 4 の @plugin / @theme 構文を許可する
+      "tailwindDirectives": true
+    }
+  }
+}

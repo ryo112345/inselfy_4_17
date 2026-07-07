@@ -1,9 +1,9 @@
-import { test, expect, Page } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 
 async function loginAsCompany(page: Page) {
   await page.goto("/company/login");
-  await page.fill('#email', "admin@inselfy.example.com");
-  await page.fill('#password', "test1234");
+  await page.fill("#email", "admin@inselfy.example.com");
+  await page.fill("#password", "test1234");
   await page.click('button[type="submit"]');
   await page.waitForURL(/\/company(?!\/login)/);
   await page.waitForLoadState("networkidle");
@@ -82,9 +82,7 @@ test.describe("Talents page scroll behavior", () => {
     expect(scrollAfter).toBeGreaterThan(scrollBefore);
   });
 
-  test("diagnostic tab: seamless scroll from page to right panel", async ({
-    page,
-  }) => {
+  test("diagnostic tab: seamless scroll from page to right panel", async ({ page }) => {
     await searchDiagnosticTab(page);
 
     // Select a candidate to show detail in right panel

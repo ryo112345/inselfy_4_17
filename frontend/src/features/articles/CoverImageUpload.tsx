@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { uploadArticleImage } from "./api";
 
 type Props = {
@@ -30,11 +30,7 @@ export function CoverImageUpload({ value, onChange }: Props) {
   if (value) {
     return (
       <div className="relative group">
-        <img
-          src={value}
-          alt="カバー画像"
-          className="w-full"
-        />
+        <img src={value} alt="カバー画像" className="w-full" />
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
           <button
             type="button"
@@ -87,13 +83,7 @@ export function CoverImageUpload({ value, onChange }: Props) {
           {uploading ? "アップロード中…" : "カバー画像を追加"}
         </span>
       </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFile}
-        className="hidden"
-      />
+      <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
     </div>
   );
 }

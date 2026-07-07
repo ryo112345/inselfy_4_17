@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchArticles, type ArticleItem } from "./api";
+import { useEffect, useState } from "react";
+import { type ArticleItem, fetchArticles } from "./api";
 
 type Props = {
   currentArticle: ArticleItem;

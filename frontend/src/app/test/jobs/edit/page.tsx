@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 
 const ACCENT = "#3D8B6E";
 
@@ -74,14 +74,17 @@ const MOCK_DATA = {
     "完全週休2日制（土日祝）、年末年始休暇、有給休暇（入社半年後10日付与）、慶弔休暇、産前産後休暇、育児休暇",
   salaryMin: 600,
   salaryMax: 1000,
-  salaryDetail:
-    "月給50万円〜83万円（固定残業代45時間分を含む）。経験・能力を考慮の上決定。",
+  salaryDetail: "月給50万円〜83万円（固定残業代45時間分を含む）。経験・能力を考慮の上決定。",
   insurance: "健康保険、厚生年金、雇用保険、労災保険",
   smokingPolicy: "屋内原則禁煙（喫煙専用室あり）",
-  benefits: ["リモートワーク手当月3万円", "書籍購入費全額補助", "カンファレンス参加費補助", "副業OK"],
+  benefits: [
+    "リモートワーク手当月3万円",
+    "書籍購入費全額補助",
+    "カンファレンス参加費補助",
+    "副業OK",
+  ],
   remotePolicy: "フルリモート",
-  selectionProcess:
-    "書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定",
+  selectionProcess: "書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定",
 };
 
 const MOCK_COMPANY = {
@@ -206,7 +209,13 @@ function InlineTagInput({
             onClick={() => onRemove(i)}
             className="hover:text-red-500 cursor-pointer ml-0.5"
           >
-            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              className="h-3 w-3"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -264,7 +273,13 @@ function BenefitTagInput({
             onClick={() => onRemove(i)}
             className="hover:opacity-60 cursor-pointer ml-0.5"
           >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              className="h-3.5 w-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -319,10 +334,7 @@ function EditableHighlightCard({
         >
           {icon}
         </span>
-        <span
-          className="text-sm font-semibold tracking-wide"
-          style={{ color: tone.fg }}
-        >
+        <span className="text-sm font-semibold tracking-wide" style={{ color: tone.fg }}>
           {label}
         </span>
       </div>
@@ -350,7 +362,14 @@ function EditableConditionGroup({
   icon,
 }: {
   title: string;
-  rows: { label: string; value: string; onChange: (v: string) => void; placeholder: string; type?: "text" | "textarea" | "select"; options?: { value: string; label: string }[] }[];
+  rows: {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    placeholder: string;
+    type?: "text" | "textarea" | "select";
+    options?: { value: string; label: string }[];
+  }[];
   icon: React.ReactNode;
 }) {
   return (
@@ -367,9 +386,7 @@ function EditableConditionGroup({
       <dl className="flex flex-col gap-3.5">
         {rows.map((r) => (
           <div key={r.label} className="flex flex-col gap-1">
-            <dt className="text-xs font-medium tracking-wide text-gray-500">
-              {r.label}
-            </dt>
+            <dt className="text-xs font-medium tracking-wide text-gray-500">{r.label}</dt>
             <dd>
               {r.type === "select" && r.options ? (
                 <InlineSelect
@@ -418,11 +435,19 @@ export default function TestJobEditPage() {
   const [teamDescription, setTeamDescription] = useState(MOCK_DATA.teamDescription);
   const [skillsGained, setSkillsGained] = useState(MOCK_DATA.skillsGained);
   const [tags, setTags] = useState(MOCK_DATA.tags);
-  const [requiredQualifications, setRequiredQualifications] = useState(MOCK_DATA.requiredQualifications);
-  const [preferredQualifications, setPreferredQualifications] = useState(MOCK_DATA.preferredQualifications);
+  const [requiredQualifications, setRequiredQualifications] = useState(
+    MOCK_DATA.requiredQualifications,
+  );
+  const [preferredQualifications, setPreferredQualifications] = useState(
+    MOCK_DATA.preferredQualifications,
+  );
   const [workLocation, setWorkLocation] = useState(MOCK_DATA.workLocation);
-  const [workLocationChangeScope, setWorkLocationChangeScope] = useState(MOCK_DATA.workLocationChangeScope);
-  const [jobDescriptionChangeScope, setJobDescriptionChangeScope] = useState(MOCK_DATA.jobDescriptionChangeScope);
+  const [workLocationChangeScope, setWorkLocationChangeScope] = useState(
+    MOCK_DATA.workLocationChangeScope,
+  );
+  const [jobDescriptionChangeScope, setJobDescriptionChangeScope] = useState(
+    MOCK_DATA.jobDescriptionChangeScope,
+  );
   const [contractType, setContractType] = useState(MOCK_DATA.contractType);
   const [probationPeriod, setProbationPeriod] = useState(MOCK_DATA.probationPeriod);
   const [workHours, setWorkHours] = useState(MOCK_DATA.workHours);
@@ -444,7 +469,10 @@ export default function TestJobEditPage() {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
 
   const selectionSteps = selectionProcess
-    ? selectionProcess.split("→").map((s) => s.trim()).filter(Boolean)
+    ? selectionProcess
+        .split("→")
+        .map((s) => s.trim())
+        .filter(Boolean)
     : [];
 
   const statusLabel = status === "open" ? "公開中" : "下書き";
@@ -463,7 +491,14 @@ export default function TestJobEditPage() {
               href="/test/jobs"
               className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
             >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
                 <path d="M15 18l-6-6 6-6" />
               </svg>
               求人一覧
@@ -478,7 +513,9 @@ export default function TestJobEditPage() {
               onClick={() => setStatus(status === "open" ? "draft" : "open")}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer transition-colors ${statusColor}`}
             >
-              <span className={`h-2 w-2 rounded-full ${status === "open" ? "bg-emerald-500" : "bg-amber-500"}`} />
+              <span
+                className={`h-2 w-2 rounded-full ${status === "open" ? "bg-emerald-500" : "bg-amber-500"}`}
+              />
               {statusLabel}
             </button>
             <button className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors cursor-pointer">
@@ -500,13 +537,31 @@ export default function TestJobEditPage() {
                 onClick={() => setCoverImage(null)}
                 className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
               </button>
             </div>
           ) : (
             <label className="flex flex-col items-center justify-center py-10 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors">
-              <svg className="h-8 w-8 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+              <svg
+                className="h-8 w-8 text-gray-300"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <path d="M21 15l-5-5L5 21" />
               </svg>
               <span className="mt-2 text-sm text-gray-400">カバー写真を追加</span>
               <input
@@ -549,7 +604,11 @@ export default function TestJobEditPage() {
             <div className="mt-5 flex flex-wrap gap-2 items-center">
               <span
                 className="inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium"
-                style={{ borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}12`, color: ACCENT }}
+                style={{
+                  borderColor: `${ACCENT}40`,
+                  backgroundColor: `${ACCENT}12`,
+                  color: ACCENT,
+                }}
               >
                 <InlineSelect
                   value={employmentType}
@@ -560,7 +619,11 @@ export default function TestJobEditPage() {
               </span>
               <span
                 className="inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium"
-                style={{ borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}12`, color: ACCENT }}
+                style={{
+                  borderColor: `${ACCENT}40`,
+                  backgroundColor: `${ACCENT}12`,
+                  color: ACCENT,
+                }}
               >
                 <InlineSelect
                   value={jobCategory}
@@ -571,7 +634,11 @@ export default function TestJobEditPage() {
               </span>
               <span
                 className="inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium"
-                style={{ borderColor: `${ACCENT}40`, backgroundColor: `${ACCENT}12`, color: ACCENT }}
+                style={{
+                  borderColor: `${ACCENT}40`,
+                  backgroundColor: `${ACCENT}12`,
+                  color: ACCENT,
+                }}
               >
                 <InlineSelect
                   value={remotePolicy}
@@ -595,7 +662,9 @@ export default function TestJobEditPage() {
             <div className="mt-6 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-gray-50/40 sm:grid-cols-4 sm:divide-y-0">
               <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
                 <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
-                  <span className="text-gray-400"><YenIcon /></span>
+                  <span className="text-gray-400">
+                    <YenIcon />
+                  </span>
                   想定年収
                 </div>
                 <div className="flex items-center gap-1">
@@ -619,16 +688,22 @@ export default function TestJobEditPage() {
               </div>
               <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
                 <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
-                  <span className="text-gray-400"><BriefcaseIcon /></span>
+                  <span className="text-gray-400">
+                    <BriefcaseIcon />
+                  </span>
                   雇用形態
                 </div>
                 <div className="text-xl font-bold leading-tight text-gray-900">
-                  {employmentType || <span className="text-sm font-normal italic text-gray-300">未選択</span>}
+                  {employmentType || (
+                    <span className="text-sm font-normal italic text-gray-300">未選択</span>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
                 <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
-                  <span className="text-gray-400"><UsersIcon /></span>
+                  <span className="text-gray-400">
+                    <UsersIcon />
+                  </span>
                   採用人数
                 </div>
                 <InlineInput
@@ -640,11 +715,15 @@ export default function TestJobEditPage() {
               </div>
               <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
                 <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
-                  <span className="text-gray-400"><HomeIcon /></span>
+                  <span className="text-gray-400">
+                    <HomeIcon />
+                  </span>
                   勤務形態
                 </div>
                 <div className="text-xl font-bold leading-tight text-gray-900">
-                  {remotePolicy || <span className="text-sm font-normal italic text-gray-300">未選択</span>}
+                  {remotePolicy || (
+                    <span className="text-sm font-normal italic text-gray-300">未選択</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -670,9 +749,7 @@ export default function TestJobEditPage() {
         {/* Highlights */}
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<LayersIcon />}>ハイライト</SectionTitle>
-          <p className="mt-2 text-sm text-gray-500">
-            この仕事を一目で掴むための4つの視点
-          </p>
+          <p className="mt-2 text-sm text-gray-500">この仕事を一目で掴むための4つの視点</p>
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <EditableHighlightCard
               label="ROLE"
@@ -734,14 +811,30 @@ export default function TestJobEditPage() {
                     onClick={() => setGalleryImages(galleryImages.filter((_, idx) => idx !== i))}
                     className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   >
-                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                    <svg
+                      className="h-3 w-3"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
               ))}
             </div>
           )}
           <label className="mt-3 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-6 cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-colors">
-            <svg className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>
+            <svg
+              className="h-5 w-5 text-gray-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
             <span className="text-sm text-gray-400">写真を追加</span>
             <input
               type="file"
@@ -781,10 +874,31 @@ export default function TestJobEditPage() {
               title="勤務情報"
               icon={<ClockIcon />}
               rows={[
-                { label: "勤務地", value: workLocation, onChange: setWorkLocation, placeholder: "例: 東京都渋谷区" },
-                { label: "勤務時間", value: workHours, onChange: setWorkHours, placeholder: "例: フレックスタイム制" },
-                { label: "休憩時間", value: breakTime, onChange: setBreakTime, placeholder: "例: 60分" },
-                { label: "休日・休暇", value: holidays, onChange: setHolidays, placeholder: "休日・休暇を入力...", type: "textarea" },
+                {
+                  label: "勤務地",
+                  value: workLocation,
+                  onChange: setWorkLocation,
+                  placeholder: "例: 東京都渋谷区",
+                },
+                {
+                  label: "勤務時間",
+                  value: workHours,
+                  onChange: setWorkHours,
+                  placeholder: "例: フレックスタイム制",
+                },
+                {
+                  label: "休憩時間",
+                  value: breakTime,
+                  onChange: setBreakTime,
+                  placeholder: "例: 60分",
+                },
+                {
+                  label: "休日・休暇",
+                  value: holidays,
+                  onChange: setHolidays,
+                  placeholder: "休日・休暇を入力...",
+                  type: "textarea",
+                },
               ]}
             />
             <EditableConditionGroup
@@ -793,24 +907,56 @@ export default function TestJobEditPage() {
               rows={[
                 {
                   label: "年収レンジ",
-                  value: salaryMin != null || salaryMax != null
-                    ? `${salaryMin ?? "?"}万円 〜 ${salaryMax ?? "?"}万円`
-                    : "",
+                  value:
+                    salaryMin != null || salaryMax != null
+                      ? `${salaryMin ?? "?"}万円 〜 ${salaryMax ?? "?"}万円`
+                      : "",
                   onChange: () => {},
                   placeholder: "ヒーロー欄で入力済み",
                 },
-                { label: "給与詳細", value: salaryDetail, onChange: setSalaryDetail, placeholder: "給与の詳細を入力...", type: "textarea" },
-                { label: "社会保険", value: insurance, onChange: setInsurance, placeholder: "例: 健康保険、厚生年金..." },
+                {
+                  label: "給与詳細",
+                  value: salaryDetail,
+                  onChange: setSalaryDetail,
+                  placeholder: "給与の詳細を入力...",
+                  type: "textarea",
+                },
+                {
+                  label: "社会保険",
+                  value: insurance,
+                  onChange: setInsurance,
+                  placeholder: "例: 健康保険、厚生年金...",
+                },
               ]}
             />
             <EditableConditionGroup
               title="契約・その他"
               icon={<ShieldIcon />}
               rows={[
-                { label: "契約期間", value: contractType, onChange: setContractType, placeholder: "例: 無期" },
-                { label: "試用期間", value: probationPeriod, onChange: setProbationPeriod, placeholder: "例: 入社後3ヶ月" },
-                { label: "就業場所の変更範囲", value: workLocationChangeScope, onChange: setWorkLocationChangeScope, placeholder: "例: 当面なし" },
-                { label: "業務内容の変更範囲", value: jobDescriptionChangeScope, onChange: setJobDescriptionChangeScope, placeholder: "例: 当面なし" },
+                {
+                  label: "契約期間",
+                  value: contractType,
+                  onChange: setContractType,
+                  placeholder: "例: 無期",
+                },
+                {
+                  label: "試用期間",
+                  value: probationPeriod,
+                  onChange: setProbationPeriod,
+                  placeholder: "例: 入社後3ヶ月",
+                },
+                {
+                  label: "就業場所の変更範囲",
+                  value: workLocationChangeScope,
+                  onChange: setWorkLocationChangeScope,
+                  placeholder: "例: 当面なし",
+                },
+                {
+                  label: "業務内容の変更範囲",
+                  value: jobDescriptionChangeScope,
+                  onChange: setJobDescriptionChangeScope,
+                  placeholder: "例: 当面なし",
+                },
                 {
                   label: "受動喫煙対策",
                   value: smokingPolicy,
@@ -899,7 +1045,14 @@ export default function TestJobEditPage() {
                     </span>
                   </div>
                   {i < arr.length - 1 && (
-                    <svg className="h-5 w-5 shrink-0 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <svg
+                      className="h-5 w-5 shrink-0 text-gray-300"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    >
                       <path d="M9 18l6-6-6-6" />
                     </svg>
                   )}
@@ -935,13 +1088,7 @@ export default function TestJobEditPage() {
 
 /* ── Shared section title ── */
 
-function SectionTitle({
-  children,
-  icon,
-}: {
-  children: React.ReactNode;
-  icon?: React.ReactNode;
-}) {
+function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       {icon && (
@@ -952,9 +1099,7 @@ function SectionTitle({
           {icon}
         </span>
       )}
-      <h2 className="text-xl font-bold tracking-tight text-gray-900">
-        {children}
-      </h2>
+      <h2 className="text-xl font-bold tracking-tight text-gray-900">{children}</h2>
     </div>
   );
 }
@@ -963,50 +1108,124 @@ function SectionTitle({
 
 function BookmarkIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
 function YenIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 4l7 9 7-9" /><path d="M7 13h10" /><path d="M7 17h10" /><path d="M12 13v7" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 4l7 9 7-9" />
+      <path d="M7 13h10" />
+      <path d="M7 17h10" />
+      <path d="M12 13v7" />
     </svg>
   );
 }
 function BriefcaseIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" /><path d="M3 13h18" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M3 13h18" />
     </svg>
   );
 }
 function UsersIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
 }
 function HomeIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 11l9-8 9 8" />
+      <path d="M5 10v10h14V10" />
     </svg>
   );
 }
 function LayersIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2 2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2 2 7l10 5 10-5-10-5z" />
+      <path d="M2 17l10 5 10-5" />
+      <path d="M2 12l10 5 10-5" />
     </svg>
   );
 }
 function SparkIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3v4" /><path d="M12 17v4" /><path d="M3 12h4" /><path d="M17 12h4" /><path d="M5.6 5.6l2.8 2.8" /><path d="M15.6 15.6l2.8 2.8" /><path d="M5.6 18.4l2.8-2.8" /><path d="M15.6 8.4l2.8-2.8" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3v4" />
+      <path d="M12 17v4" />
+      <path d="M3 12h4" />
+      <path d="M17 12h4" />
+      <path d="M5.6 5.6l2.8 2.8" />
+      <path d="M15.6 15.6l2.8 2.8" />
+      <path d="M5.6 18.4l2.8-2.8" />
+      <path d="M15.6 8.4l2.8-2.8" />
     </svg>
   );
 }
@@ -1019,8 +1238,17 @@ function StarIcon() {
 }
 function FlagIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 22V4" /><path d="M4 4h13l-2 4 2 4H4" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 22V4" />
+      <path d="M4 4h13l-2 4 2 4H4" />
     </svg>
   );
 }
@@ -1033,57 +1261,139 @@ function BoltIcon() {
 }
 function CheckSquareIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 11l3 3 8-8" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 11l3 3 8-8" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
     </svg>
   );
 }
 function GiftIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13" /><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" /><path d="M8 8a2.5 2.5 0 0 1 0-5C10 3 12 5 12 8" /><path d="M16 8a2.5 2.5 0 0 0 0-5C14 3 12 5 12 8" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="8" width="18" height="4" rx="1" />
+      <path d="M12 8v13" />
+      <path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
+      <path d="M8 8a2.5 2.5 0 0 1 0-5C10 3 12 5 12 8" />
+      <path d="M16 8a2.5 2.5 0 0 0 0-5C14 3 12 5 12 8" />
     </svg>
   );
 }
 function CameraIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><circle cx="12" cy="13" r="4" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <circle cx="12" cy="13" r="4" />
     </svg>
   );
 }
 function DocumentIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="M8 13h8" />
+      <path d="M8 17h6" />
     </svg>
   );
 }
 function ClockIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
     </svg>
   );
 }
 function ShieldIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z" />
     </svg>
   );
 }
 function RouteIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="6" cy="19" r="3" /><circle cx="18" cy="5" r="3" /><path d="M6 16V8a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="6" cy="19" r="3" />
+      <circle cx="18" cy="5" r="3" />
+      <path d="M6 16V8a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4" />
     </svg>
   );
 }
 function BuildingIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="3" width="16" height="18" rx="1" /><path d="M9 8h.01" /><path d="M14 8h.01" /><path d="M9 12h.01" /><path d="M14 12h.01" /><path d="M9 16h.01" /><path d="M14 16h.01" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="3" width="16" height="18" rx="1" />
+      <path d="M9 8h.01" />
+      <path d="M14 8h.01" />
+      <path d="M9 12h.01" />
+      <path d="M14 12h.01" />
+      <path d="M9 16h.01" />
+      <path d="M14 16h.01" />
     </svg>
   );
 }

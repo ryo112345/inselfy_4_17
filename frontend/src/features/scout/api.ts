@@ -22,11 +22,11 @@ import {
   scoutTemplatesUpdateScoutTemplate,
 } from "@/external/client/api/generated";
 import type {
+  QualityScore,
+  ScoutCredits,
   ScoutDashboard,
   ScoutDetail,
   ScoutListResponse,
-  ScoutCredits,
-  QualityScore,
   ScoutMessage,
   ScoutSettings,
   ScoutTemplate,
@@ -66,9 +66,7 @@ export async function fetchCompanyScouts(params?: {
   return data as ScoutListResponse;
 }
 
-export async function fetchScoutDetail(
-  scoutId: string,
-): Promise<ScoutDetail> {
+export async function fetchScoutDetail(scoutId: string): Promise<ScoutDetail> {
   const { data, error } = await companyScoutsGetCompanyScoutDetail({
     path: { scoutId },
     cache: "no-store",
@@ -77,10 +75,7 @@ export async function fetchScoutDetail(
   return data as ScoutDetail;
 }
 
-export async function replyToScoutAsCompany(
-  scoutId: string,
-  body: string,
-): Promise<void> {
+export async function replyToScoutAsCompany(scoutId: string, body: string): Promise<void> {
   const { error } = await companyScoutsCompanyScoutReply({
     path: { scoutId },
     body: { body },
@@ -133,9 +128,7 @@ export async function fetchReceivedScouts(params?: {
   return data as ScoutListResponse;
 }
 
-export async function fetchReceivedScoutDetail(
-  scoutId: string,
-): Promise<ScoutDetail> {
+export async function fetchReceivedScoutDetail(scoutId: string): Promise<ScoutDetail> {
   const { data, error } = await candidateScoutsGetCandidateScoutDetail({
     path: { scoutId },
     cache: "no-store",
@@ -158,10 +151,7 @@ export async function respondToScout(
   return data;
 }
 
-export async function replyToScout(
-  scoutId: string,
-  body: string,
-): Promise<void> {
+export async function replyToScout(scoutId: string, body: string): Promise<void> {
   const { error } = await candidateScoutsCandidateScoutReply({
     path: { scoutId },
     body: { body },
@@ -171,9 +161,7 @@ export async function replyToScout(
   }
 }
 
-export async function bulkDeclineScouts(
-  scoutIds: string[],
-): Promise<void> {
+export async function bulkDeclineScouts(scoutIds: string[]): Promise<void> {
   const { error } = await candidateScoutsBulkDeclineScouts({
     body: { scoutIds },
   });
@@ -206,9 +194,7 @@ export async function fetchScoutSettings(): Promise<ScoutSettings> {
   return data;
 }
 
-export async function updateScoutSettings(
-  acceptingScouts: boolean,
-): Promise<ScoutSettings> {
+export async function updateScoutSettings(acceptingScouts: boolean): Promise<ScoutSettings> {
   const { data, error } = await scoutSettingsUpdateScoutSettings({
     body: { acceptingScouts },
   });

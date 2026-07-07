@@ -1,7 +1,4 @@
-import type {
-  ModelsScoutQualityLevel,
-  ModelsScoutStatus,
-} from "@/external/client/api/generated";
+import type { ModelsScoutQualityLevel, ModelsScoutStatus } from "@/external/client/api/generated";
 
 export type ScoutStatus = ModelsScoutStatus;
 

@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 
 import type { ModelsUserResponse } from "@/external/client/api/generated";
 
-import { updateProfile, type ApiError } from "./api";
+import { type ApiError, updateProfile } from "./api";
 import { PencilIcon } from "./Icons";
 import { Field, PrimaryButton, SecondaryButton } from "./Modal";
 import { useProfileColor } from "./ProfileColorContext";

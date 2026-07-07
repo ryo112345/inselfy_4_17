@@ -47,12 +47,26 @@ export const TYPE_ABBREVIATIONS: Record<TypeId, string> = {
 };
 
 export const BASIC_INTEREST_IDS = [
-  "A1", "A2", "A3",
-  "C1", "C2", "C3",
-  "E1", "E2", "E3",
-  "I1", "I2", "I3", "I4",
-  "R1", "R2", "R3",
-  "S1", "S2", "S3", "S4",
+  "A1",
+  "A2",
+  "A3",
+  "C1",
+  "C2",
+  "C3",
+  "E1",
+  "E2",
+  "E3",
+  "I1",
+  "I2",
+  "I3",
+  "I4",
+  "R1",
+  "R2",
+  "R3",
+  "S1",
+  "S2",
+  "S3",
+  "S4",
 ] as const;
 
 export type BasicInterestId = (typeof BASIC_INTEREST_IDS)[number];

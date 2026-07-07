@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchMyArticles, type ArticleItem } from "@/features/articles/api";
+import { useEffect, useState } from "react";
+import { type ArticleItem, fetchMyArticles } from "@/features/articles/api";
 
 type Tab = "draft" | "published";
 
@@ -12,8 +12,7 @@ function stripHtml(html: string): string {
 
 function MyArticleCard({ article }: { article: ArticleItem }) {
   const plainText = stripHtml(article.body);
-  const excerpt =
-    plainText.length > 100 ? plainText.slice(0, 100) + "…" : plainText;
+  const excerpt = plainText.length > 100 ? plainText.slice(0, 100) + "…" : plainText;
 
   const date = article.publishedAt
     ? new Date(article.publishedAt).toLocaleDateString("ja-JP")
@@ -37,9 +36,7 @@ function MyArticleCard({ article }: { article: ArticleItem }) {
           {article.title || "無題"}
         </h3>
 
-        {excerpt && (
-          <p className="mt-1 text-sm text-gray-500 line-clamp-2">{excerpt}</p>
-        )}
+        {excerpt && <p className="mt-1 text-sm text-gray-500 line-clamp-2">{excerpt}</p>}
 
         <div className="flex items-center gap-2 mt-2">
           {article.isPaid && (
@@ -91,11 +88,7 @@ export function MyArticles() {
       </div>
 
       <div className="flex border-b border-gray-200/80">
-        <TabButton
-          active={tab === "draft"}
-          onClick={() => setTab("draft")}
-          count={drafts.length}
-        >
+        <TabButton active={tab === "draft"} onClick={() => setTab("draft")} count={drafts.length}>
           下書き
         </TabButton>
         <TabButton
@@ -114,15 +107,10 @@ export function MyArticles() {
       ) : current.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-2">
           <p className="text-sm">
-            {tab === "draft"
-              ? "下書きはありません"
-              : "公開済みの記事はありません"}
+            {tab === "draft" ? "下書きはありません" : "公開済みの記事はありません"}
           </p>
           {tab === "draft" && (
-            <Link
-              href="/articles/new"
-              className="text-sm text-[var(--accent)] hover:underline"
-            >
+            <Link href="/articles/new" className="text-sm text-[var(--accent)] hover:underline">
               記事を書く
             </Link>
           )}
@@ -154,15 +142,11 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={`flex-1 px-4 py-3 text-sm font-medium text-center transition-colors relative ${
-        active
-          ? "text-gray-900"
-          : "text-gray-400 hover:text-gray-600"
+        active ? "text-gray-900" : "text-gray-400 hover:text-gray-600"
       }`}
     >
       {children}
-      {count > 0 && (
-        <span className="ml-1.5 text-xs text-gray-400">{count}</span>
-      )}
+      {count > 0 && <span className="ml-1.5 text-xs text-gray-400">{count}</span>}
       {active && (
         <span className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-gray-900 rounded-full" />
       )}

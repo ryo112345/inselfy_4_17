@@ -1,4 +1,4 @@
-import { Node, mergeAttributes } from "@tiptap/react";
+import { mergeAttributes, Node } from "@tiptap/react";
 
 export const PaidSeparator = Node.create({
   name: "paidSeparator",
@@ -11,10 +11,7 @@ export const PaidSeparator = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return [
-      "div",
-      mergeAttributes(HTMLAttributes, { "data-paid-separator": "true" }),
-    ];
+    return ["div", mergeAttributes(HTMLAttributes, { "data-paid-separator": "true" })];
   },
 
   addNodeView() {

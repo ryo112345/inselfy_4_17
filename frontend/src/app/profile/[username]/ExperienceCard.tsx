@@ -5,15 +5,10 @@ import { useMemo, useState, useTransition } from "react";
 
 import type { ModelsExperienceResponse } from "@/external/client/api/generated";
 
-import {
-  createExperience,
-  deleteExperience,
-  updateExperience,
-  type ApiError,
-} from "./api";
+import { type ApiError, createExperience, deleteExperience, updateExperience } from "./api";
+import { DashedButton } from "./DashedButton";
 import { BriefcaseIcon, PencilIcon, PlusIcon, TrashIcon } from "./Icons";
 import { Field, PrimaryButton, SecondaryButton } from "./Modal";
-import { DashedButton } from "./DashedButton";
 import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
@@ -25,9 +20,7 @@ type Props = {
 export function ExperienceCard({ username, experiences, isOwner = true }: Props) {
   const pc = useProfileColor();
   const [formState, setFormState] = useState<
-    | { mode: "closed" }
-    | { mode: "create" }
-    | { mode: "edit"; experience: ModelsExperienceResponse }
+    { mode: "closed" } | { mode: "create" } | { mode: "edit"; experience: ModelsExperienceResponse }
   >({ mode: "closed" });
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -106,10 +99,7 @@ export function ExperienceCard({ username, experiences, isOwner = true }: Props)
             const editingId = formState.mode === "edit" ? formState.experience.id : null;
             const isEditing = group.items.some((it) => it.id === editingId);
             return (
-              <li
-                key={group.items[0].id}
-                className="relative pt-4 pb-3"
-              >
+              <li key={group.items[0].id} className="relative pt-4 pb-3">
                 {!isEditing && <TimelineRail isLast={isLast} />}
                 {group.items.length === 1 ? (
                   editingId === group.items[0].id ? (
@@ -124,9 +114,7 @@ export function ExperienceCard({ username, experiences, isOwner = true }: Props)
                       experience={group.items[0]}
                       pending={pending && deletingId === group.items[0].id}
                       showActions={isOwner && formState.mode === "closed"}
-                      onEdit={() =>
-                        setFormState({ mode: "edit", experience: group.items[0] })
-                      }
+                      onEdit={() => setFormState({ mode: "edit", experience: group.items[0] })}
                       onDelete={() => handleDelete(group.items[0].id)}
                     />
                   )
@@ -137,9 +125,7 @@ export function ExperienceCard({ username, experiences, isOwner = true }: Props)
                     deletingId={deletingId}
                     pending={pending}
                     showActions={isOwner && formState.mode === "closed"}
-                    onEdit={(e) =>
-                      setFormState({ mode: "edit", experience: e })
-                    }
+                    onEdit={(e) => setFormState({ mode: "edit", experience: e })}
                     onDelete={handleDelete}
                     username={username}
                     onCloseEdit={() => setFormState({ mode: "closed" })}
@@ -181,11 +167,7 @@ function TimelineRail({ isLast = false }: { isLast?: boolean }) {
       className="pointer-events-none absolute left-[24px] top-[64px] w-[2px] -translate-x-1/2"
       style={{ bottom: isLast ? "0px" : "-28px" }}
     >
-      <svg
-        preserveAspectRatio="none"
-        viewBox="0 0 2 100"
-        className="block h-full w-full"
-      >
+      <svg preserveAspectRatio="none" viewBox="0 0 2 100" className="block h-full w-full">
         <line
           x1="1"
           y1="0"
@@ -209,11 +191,7 @@ function RoleRail({ isLast = false }: { isLast?: boolean }) {
       className="pointer-events-none absolute left-[5px] top-[17px] w-[2px] -translate-x-1/2"
       style={{ bottom: isLast ? "0px" : "-20px" }}
     >
-      <svg
-        preserveAspectRatio="none"
-        viewBox="0 0 2 100"
-        className="block h-full w-full"
-      >
+      <svg preserveAspectRatio="none" viewBox="0 0 2 100" className="block h-full w-full">
         <line
           x1="1"
           y1="0"
@@ -343,9 +321,7 @@ function SingleExperience({
           <h3 className="min-w-0 text-lg font-bold tracking-tight text-gray-900">
             {e.companyName}
           </h3>
-          {showActions && (
-            <RowActions onEdit={onEdit} onDelete={onDelete} disabled={pending} />
-          )}
+          {showActions && <RowActions onEdit={onEdit} onDelete={onDelete} disabled={pending} />}
         </div>
         <div className="relative mt-1">
           <RoleRail isLast />
@@ -353,7 +329,11 @@ function SingleExperience({
             <RoleDot />
             <span>{e.title}</span>
           </p>
-          {e.isCurrent ? <div className="pl-5 mt-0.5"><CurrentBadge /></div> : null}
+          {e.isCurrent ? (
+            <div className="pl-5 mt-0.5">
+              <CurrentBadge />
+            </div>
+          ) : null}
           <PeriodLine experience={e} />
           {e.description ? (
             <p className="mt-2.5 whitespace-pre-wrap pl-5 text-base leading-relaxed text-gray-800">
@@ -411,19 +391,11 @@ function GroupedExperience({
     <div className="flex items-start gap-3">
       <CompanyBadge name={group.companyName} />
       <div className="min-w-0 flex-1">
-        <h3 className="text-lg font-bold tracking-tight text-gray-900">
-          {group.companyName}
-        </h3>
+        <h3 className="text-lg font-bold tracking-tight text-gray-900">{group.companyName}</h3>
         <p className="mt-1 text-sm text-gray-500">
           {formatPeriod(earliest.y, earliest.m, latestEnd.y, latestEnd.m, hasCurrent)}
           {(() => {
-            const d = formatDuration(
-              earliest.y,
-              earliest.m,
-              latestEnd.y,
-              latestEnd.m,
-              hasCurrent,
-            );
+            const d = formatDuration(earliest.y, earliest.m, latestEnd.y, latestEnd.m, hasCurrent);
             return d ? ` · ${d}` : "";
           })()}
         </p>
@@ -458,7 +430,11 @@ function GroupedExperience({
                     />
                   )}
                 </div>
-                {e.isCurrent ? <div className="pl-5 mt-0.5"><CurrentBadge /></div> : null}
+                {e.isCurrent ? (
+                  <div className="pl-5 mt-0.5">
+                    <CurrentBadge />
+                  </div>
+                ) : null}
                 <PeriodLine experience={e} />
                 {e.description ? (
                   <p className="mt-2 whitespace-pre-wrap pl-5 text-base leading-relaxed text-gray-800">
@@ -511,7 +487,9 @@ function YearMonthSelect({
       >
         <option value="">年</option>
         {YEARS.map((y) => (
-          <option key={y} value={y}>{y}年</option>
+          <option key={y} value={y}>
+            {y}年
+          </option>
         ))}
       </select>
       <select
@@ -522,7 +500,9 @@ function YearMonthSelect({
       >
         <option value="">月</option>
         {MONTHS.map((m) => (
-          <option key={m} value={m}>{m}月</option>
+          <option key={m} value={m}>
+            {m}月
+          </option>
         ))}
       </select>
     </div>
@@ -636,10 +616,7 @@ function ExperienceForm({ username, mode, experience, onClose }: FormProps) {
         />
         現職として登録する
       </label>
-      <Field
-        label="業務内容"
-        hint={`${description.length} / 5000`}
-      >
+      <Field label="業務内容" hint={`${description.length} / 5000`}>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -694,4 +671,3 @@ function formatDuration(
   const rem = months % 12;
   return rem > 0 ? `${years}年${rem}ヶ月` : `${years}年`;
 }
-

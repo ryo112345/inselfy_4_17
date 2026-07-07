@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { selectSlot } from "../api";
 
 type Slot = {
@@ -95,7 +95,17 @@ type Selection = {
   endIso: string;
 };
 
-export function CalendarSlotSelector({ proposalId, slots, message, location, expiresAt, durationMinutes, companyName, jobTitle, onConfirmed }: Props) {
+export function CalendarSlotSelector({
+  proposalId,
+  slots,
+  message,
+  location,
+  expiresAt,
+  durationMinutes,
+  companyName,
+  jobTitle,
+  onConfirmed,
+}: Props) {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -121,16 +131,17 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
   const initialWeekStart = useMemo(() => {
     if (slots.length === 0) return getMonday(new Date());
     const earliest = slots.reduce((min, s) =>
-      new Date(s.startTime) < new Date(min.startTime) ? s : min
+      new Date(s.startTime) < new Date(min.startTime) ? s : min,
     );
     return getMonday(new Date(earliest.startTime));
   }, [slots]);
 
   const [weekStart, setWeekStart] = useState(initialWeekStart);
 
-  const weekDays = useMemo(() =>
-    Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
-  [weekStart]);
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart],
+  );
 
   const allWeeks = useMemo(() => {
     const weeks = new Set<string>();
@@ -148,19 +159,21 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
   const hasNext = currentWeekIdx < allWeeks.length - 1;
 
   const windows: AvailableWindow[] = useMemo(() => {
-    return slots.map((slot) => {
-      const start = new Date(slot.startTime);
-      const end = new Date(slot.endTime);
-      const dayStr = toDateStr(start);
-      const dayIndex = weekDays.findIndex((d) => toDateStr(d) === dayStr);
-      return {
-        slotId: slot.id,
-        dayIndex,
-        startMinutes: start.getHours() * 60 + start.getMinutes(),
-        endMinutes: end.getHours() * 60 + end.getMinutes(),
-        baseDate: start,
-      };
-    }).filter((w) => w.dayIndex >= 0);
+    return slots
+      .map((slot) => {
+        const start = new Date(slot.startTime);
+        const end = new Date(slot.endTime);
+        const dayStr = toDateStr(start);
+        const dayIndex = weekDays.findIndex((d) => toDateStr(d) === dayStr);
+        return {
+          slotId: slot.id,
+          dayIndex,
+          startMinutes: start.getHours() * 60 + start.getMinutes(),
+          endMinutes: end.getHours() * 60 + end.getMinutes(),
+          baseDate: start,
+        };
+      })
+      .filter((w) => w.dayIndex >= 0);
   }, [slots, weekDays]);
 
   const { minHour, maxHour } = useMemo(() => {
@@ -177,33 +190,36 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
   const hours = maxHour - minHour;
   const offsetY = (minutes: number) => ((minutes - minHour * 60) / 60) * HOUR_HEIGHT;
 
-  const handleClick = useCallback((dayIdx: number, e: React.MouseEvent<HTMLDivElement>) => {
-    if (isExpired) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const rawMinutes = (y / HOUR_HEIGHT) * 60 + minHour * 60;
-    const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES;
-    const endMin = snapped + duration;
+  const handleClick = useCallback(
+    (dayIdx: number, e: React.MouseEvent<HTMLDivElement>) => {
+      if (isExpired) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const rawMinutes = (y / HOUR_HEIGHT) * 60 + minHour * 60;
+      const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES;
+      const endMin = snapped + duration;
 
-    const window = windows.find(
-      (w) => w.dayIndex === dayIdx && snapped >= w.startMinutes && endMin <= w.endMinutes,
-    );
-    if (!window) return;
+      const window = windows.find(
+        (w) => w.dayIndex === dayIdx && snapped >= w.startMinutes && endMin <= w.endMinutes,
+      );
+      if (!window) return;
 
-    const startDate = new Date(window.baseDate);
-    startDate.setHours(Math.floor(snapped / 60), snapped % 60, 0, 0);
-    const endDate = new Date(window.baseDate);
-    endDate.setHours(Math.floor(endMin / 60), endMin % 60, 0, 0);
+      const startDate = new Date(window.baseDate);
+      startDate.setHours(Math.floor(snapped / 60), snapped % 60, 0, 0);
+      const endDate = new Date(window.baseDate);
+      endDate.setHours(Math.floor(endMin / 60), endMin % 60, 0, 0);
 
-    setSelection({
-      slotId: window.slotId,
-      dayIndex: dayIdx,
-      startMinutes: snapped,
-      endMinutes: endMin,
-      startIso: startDate.toISOString(),
-      endIso: endDate.toISOString(),
-    });
-  }, [duration, minHour, windows, isExpired]);
+      setSelection({
+        slotId: window.slotId,
+        dayIndex: dayIdx,
+        startMinutes: snapped,
+        endMinutes: endMin,
+        startIso: startDate.toISOString(),
+        endIso: endDate.toISOString(),
+      });
+    },
+    [duration, minHour, windows, isExpired],
+  );
 
   const handleConfirm = async () => {
     if (!selection) return;
@@ -224,15 +240,31 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
     return (
       <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
         <div className="flex items-center gap-2 mb-2">
-          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          <svg
+            width={18}
+            height={18}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#16a34a"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
           </svg>
           <span className="text-sm font-semibold text-green-800">面接日程が確定しました</span>
         </div>
         {selection && (
           <p className="text-sm text-green-700">
-            {new Date(selection.startIso).toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "short" })}
-            {" "}{formatTimeFromDate(new Date(selection.startIso))} – {formatTimeFromDate(new Date(selection.endIso))}
+            {new Date(selection.startIso).toLocaleDateString("ja-JP", {
+              month: "long",
+              day: "numeric",
+              weekday: "short",
+            })}{" "}
+            {formatTimeFromDate(new Date(selection.startIso))} –{" "}
+            {formatTimeFromDate(new Date(selection.endIso))}
           </p>
         )}
       </div>
@@ -243,12 +275,25 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
     return (
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
         <div className="flex items-center gap-2">
-          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          <svg
+            width={18}
+            height={18}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#d97706"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
+            />
           </svg>
           <span className="text-sm font-semibold text-amber-800">この提案は取り消されました</span>
         </div>
-        <p className="text-xs text-amber-600 mt-1">企業から新しい日程が提案される可能性があります</p>
+        <p className="text-xs text-amber-600 mt-1">
+          企業から新しい日程が提案される可能性があります
+        </p>
       </div>
     );
   }
@@ -284,7 +329,8 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
             const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
             return (
               <p key={i} className="text-sm font-medium text-gray-900">
-                {s.getMonth() + 1}/{s.getDate()}({weekdays[s.getDay()]}) {formatTimeFromDate(s)} – {formatTimeFromDate(e)}
+                {s.getMonth() + 1}/{s.getDate()}({weekdays[s.getDay()]}) {formatTimeFromDate(s)} –{" "}
+                {formatTimeFromDate(e)}
               </p>
             );
           })}
@@ -301,7 +347,16 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
               disabled={!hasPrev}
               className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default"
             >
-              <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+              <svg
+                width={12}
+                height={12}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
           )}
           <span className="text-xs font-medium text-gray-500">{formatWeekRange(weekStart)}</span>
@@ -311,7 +366,16 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
               disabled={!hasNext}
               className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default"
             >
-              <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+              <svg
+                width={12}
+                height={12}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           )}
         </div>
@@ -325,7 +389,9 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
             return (
               <div key={i} className={`py-1 text-center ${today ? "bg-blue-50 rounded-t" : ""}`}>
                 <p className="text-[10px] text-gray-500">{DAY_LABELS[d.getDay()]}</p>
-                <p className={`text-sm font-semibold ${hasWindow ? "text-blue-600" : today ? "text-blue-500" : "text-gray-400"}`}>
+                <p
+                  className={`text-sm font-semibold ${hasWindow ? "text-blue-600" : today ? "text-blue-500" : "text-gray-400"}`}
+                >
                   {d.getDate()}
                 </p>
               </div>
@@ -334,12 +400,22 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
         </div>
 
         {/* Time Grid */}
-        <div className="overflow-y-auto" style={{ maxHeight: `${Math.min(hours, 8) * HOUR_HEIGHT + 8}px` }}>
-          <div className="grid grid-cols-[40px_repeat(7,1fr)]" style={{ height: `${hours * HOUR_HEIGHT}px` }}>
+        <div
+          className="overflow-y-auto"
+          style={{ maxHeight: `${Math.min(hours, 8) * HOUR_HEIGHT + 8}px` }}
+        >
+          <div
+            className="grid grid-cols-[40px_repeat(7,1fr)]"
+            style={{ height: `${hours * HOUR_HEIGHT}px` }}
+          >
             {/* Hour labels */}
             <div className="relative">
               {Array.from({ length: hours }, (_, i) => (
-                <div key={i} className="absolute right-1" style={{ top: `${i * HOUR_HEIGHT - 6}px` }}>
+                <div
+                  key={i}
+                  className="absolute right-1"
+                  style={{ top: `${i * HOUR_HEIGHT - 6}px` }}
+                >
                   <span className="text-[10px] text-gray-400">
                     {formatTime((minHour + i) * 60)}
                   </span>
@@ -378,19 +454,21 @@ export function CalendarSlotSelector({ proposalId, slots, message, location, exp
                   ))}
 
                   {/* Selection */}
-                  {selection && selection.dayIndex === dayIdx && toDateStr(weekDays[dayIdx]) === toDateStr(new Date(selection.startIso)) && (
-                    <div
-                      className="absolute left-1 right-1 rounded-md bg-[#3D8B6E] text-white px-1.5 py-0.5 z-10 shadow-md ring-2 ring-[#3D8B6E] ring-offset-1"
-                      style={{
-                        top: `${offsetY(selection.startMinutes)}px`,
-                        height: `${offsetY(selection.endMinutes) - offsetY(selection.startMinutes)}px`,
-                      }}
-                    >
-                      <p className="text-[11px] font-medium leading-tight">
-                        {formatTime(selection.startMinutes)} – {formatTime(selection.endMinutes)}
-                      </p>
-                    </div>
-                  )}
+                  {selection &&
+                    selection.dayIndex === dayIdx &&
+                    toDateStr(weekDays[dayIdx]) === toDateStr(new Date(selection.startIso)) && (
+                      <div
+                        className="absolute left-1 right-1 rounded-md bg-[#3D8B6E] text-white px-1.5 py-0.5 z-10 shadow-md ring-2 ring-[#3D8B6E] ring-offset-1"
+                        style={{
+                          top: `${offsetY(selection.startMinutes)}px`,
+                          height: `${offsetY(selection.endMinutes) - offsetY(selection.startMinutes)}px`,
+                        }}
+                      >
+                        <p className="text-[11px] font-medium leading-tight">
+                          {formatTime(selection.startMinutes)} – {formatTime(selection.endMinutes)}
+                        </p>
+                      </div>
+                    )}
                 </div>
               );
             })}

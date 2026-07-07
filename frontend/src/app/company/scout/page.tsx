@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  fetchCompanyScouts,
-  fetchScoutDashboard,
-  fetchQualityScore,
-} from "@/features/scout/api";
+import { useEffect, useState } from "react";
+import { fetchCompanyScouts, fetchQualityScore, fetchScoutDashboard } from "@/features/scout/api";
 import type {
-  ScoutMessage,
-  ScoutDashboard,
   QualityScore,
+  ScoutDashboard,
+  ScoutMessage,
   ScoutStatus,
 } from "@/features/scout/types";
 
@@ -74,8 +70,12 @@ export default function ScoutListPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchScoutDashboard().then(setDashboard).catch(() => {});
-    fetchQualityScore().then(setQuality).catch(() => {});
+    fetchScoutDashboard()
+      .then(setDashboard)
+      .catch(() => {});
+    fetchQualityScore()
+      .then(setQuality)
+      .catch(() => {});
   }, []);
 
   // Fetch scouts when tab or page changes
@@ -97,8 +97,11 @@ export default function ScoutListPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const totalCredits = dashboard ? dashboard.credits.balance + dashboard.pending.total : 0;
-  const creditPct = totalCredits > 0 ? Math.round((dashboard!.credits.balance / totalCredits) * 100) : 0;
-  const creditLow = dashboard ? dashboard.credits.balance / dashboard.credits.maxStock < 0.2 : false;
+  const creditPct =
+    totalCredits > 0 ? Math.round((dashboard!.credits.balance / totalCredits) * 100) : 0;
+  const creditLow = dashboard
+    ? dashboard.credits.balance / dashboard.credits.maxStock < 0.2
+    : false;
 
   return (
     <div className="space-y-6">
@@ -128,10 +131,15 @@ export default function ScoutListPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <p className="text-base font-semibold text-gray-700">送信可能</p>
             <div className="mt-1.5 flex items-baseline gap-2">
-              <span className="text-3xl font-bold" style={{ color: creditLow ? "#ef4444" : accent, ...num }}>
+              <span
+                className="text-3xl font-bold"
+                style={{ color: creditLow ? "#ef4444" : accent, ...num }}
+              >
                 {dashboard.credits.balance}
               </span>
-              <span className="text-sm font-normal text-gray-400">/ <span style={num}>{totalCredits}</span> 通</span>
+              <span className="text-sm font-normal text-gray-400">
+                / <span style={num}>{totalCredits}</span> 通
+              </span>
             </div>
             <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-gray-100">
               <div
@@ -140,23 +148,45 @@ export default function ScoutListPage() {
               />
             </div>
             <p className="mt-2 text-sm text-gray-400">
-              補充: {formatReplenishDate(dashboard.credits.nextReplenishDate)}（+{Math.min(dashboard.credits.monthlyAllowance, dashboard.credits.maxStock - dashboard.credits.balance)}通 / 上限{dashboard.credits.maxStock}通）
+              補充: {formatReplenishDate(dashboard.credits.nextReplenishDate)}（+
+              {Math.min(
+                dashboard.credits.monthlyAllowance,
+                dashboard.credits.maxStock - dashboard.credits.balance,
+              )}
+              通 / 上限{dashboard.credits.maxStock}通）
             </p>
 
             <div className="mt-4 border-t border-gray-100 pt-4">
-              <p className="mb-2.5 text-base font-semibold text-gray-700">スカウト成果（直近90日）</p>
+              <p className="mb-2.5 text-base font-semibold text-gray-700">
+                スカウト成果（直近90日）
+              </p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">スカウト経由応募</span>
-                  <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={num}>—</span> 件</span>
+                  <span className="font-medium text-gray-700">
+                    <span className="text-lg font-bold" style={num}>
+                      —
+                    </span>{" "}
+                    件
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">応募あたり送信数</span>
-                  <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={num}>—</span> 通/件</span>
+                  <span className="font-medium text-gray-700">
+                    <span className="text-lg font-bold" style={num}>
+                      —
+                    </span>{" "}
+                    通/件
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">返信率</span>
-                  <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={num}>{dashboard.replyRate}</span> %</span>
+                  <span className="font-medium text-gray-700">
+                    <span className="text-lg font-bold" style={num}>
+                      {dashboard.replyRate}
+                    </span>{" "}
+                    %
+                  </span>
                 </div>
               </div>
             </div>
@@ -169,7 +199,9 @@ export default function ScoutListPage() {
               <div className="flex-1">
                 <p className="text-base font-semibold text-gray-700">返信待ち</p>
                 <div className="mt-1.5 flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gray-900" style={num}>{dashboard.pending.total}</span>
+                  <span className="text-3xl font-bold text-gray-900" style={num}>
+                    {dashboard.pending.total}
+                  </span>
                   <span className="text-sm font-normal text-gray-400">通</span>
                 </div>
               </div>
@@ -185,7 +217,9 @@ export default function ScoutListPage() {
                       {(() => {
                         const badge = QUALITY_BADGE[quality.level];
                         return badge ? (
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}
+                          >
                             {badge.label}
                           </span>
                         ) : null;
@@ -195,11 +229,16 @@ export default function ScoutListPage() {
                       送信: {quality.sentLast14d}件 / 返信: {quality.repliedLast14d}件
                     </p>
                     {quality.level === "warning" && quality.daysRemaining != null && (
-                      <p className="text-xs text-yellow-600 mt-0.5">改善期限まで残り{quality.daysRemaining}日</p>
+                      <p className="text-xs text-yellow-600 mt-0.5">
+                        改善期限まで残り{quality.daysRemaining}日
+                      </p>
                     )}
-                    {quality.level === "temporarily_restricted" && quality.daysRemaining != null && (
-                      <p className="text-xs text-orange-600 mt-0.5">制限解除まで残り{quality.daysRemaining}日</p>
-                    )}
+                    {quality.level === "temporarily_restricted" &&
+                      quality.daysRemaining != null && (
+                        <p className="text-xs text-orange-600 mt-0.5">
+                          制限解除まで残り{quality.daysRemaining}日
+                        </p>
+                      )}
                   </>
                 ) : (
                   <span className="text-sm text-gray-400">-</span>
@@ -211,11 +250,24 @@ export default function ScoutListPage() {
                 <div key={m.month} className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">{formatMonth(m.month)}送信分</span>
                   <span className="flex items-baseline">
-                    <span className="inline-flex items-baseline justify-end font-medium text-gray-700" style={{ width: "3.5rem" }}>
-                      <span className="text-lg font-bold" style={num}>{m.count}</span><span className="ml-1">通</span>
+                    <span
+                      className="inline-flex items-baseline justify-end font-medium text-gray-700"
+                      style={{ width: "3.5rem" }}
+                    >
+                      <span className="text-lg font-bold" style={num}>
+                        {m.count}
+                      </span>
+                      <span className="ml-1">通</span>
                     </span>
-                    <span className={`inline-flex items-baseline justify-end ${m.daysLeft <= 14 ? "font-semibold text-red-500" : "text-gray-400"}`} style={{ width: "4.5rem" }}>
-                      残<span className="ml-1.5 text-lg font-bold" style={num}>{m.daysLeft}</span> 日
+                    <span
+                      className={`inline-flex items-baseline justify-end ${m.daysLeft <= 14 ? "font-semibold text-red-500" : "text-gray-400"}`}
+                      style={{ width: "4.5rem" }}
+                    >
+                      残
+                      <span className="ml-1.5 text-lg font-bold" style={num}>
+                        {m.daysLeft}
+                      </span>{" "}
+                      日
                     </span>
                   </span>
                 </div>
@@ -223,7 +275,12 @@ export default function ScoutListPage() {
             </div>
             <div className="mt-2 flex items-center justify-between text-sm">
               <span className="text-gray-500">平均返信日数</span>
-              <span className="font-medium text-gray-700"><span className="text-lg font-bold" style={num}>{dashboard.avgReplyDays}</span> 日</span>
+              <span className="font-medium text-gray-700">
+                <span className="text-lg font-bold" style={num}>
+                  {dashboard.avgReplyDays}
+                </span>{" "}
+                日
+              </span>
             </div>
           </div>
         </div>
@@ -302,11 +359,11 @@ export default function ScoutListPage() {
                     <td className="px-2 py-3.5 text-gray-700 max-w-[200px] truncate">
                       {scout.subject}
                     </td>
-                    <td className="px-2 py-3.5 text-gray-500 text-xs">
-                      {scout.jobTitle ?? "-"}
-                    </td>
+                    <td className="px-2 py-3.5 text-gray-500 text-xs">{scout.jobTitle ?? "-"}</td>
                     <td className="px-2 py-3.5">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}
+                      >
                         {badge.label}
                       </span>
                     </td>

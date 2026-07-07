@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function ScrollProgress() {
   const barRef = useRef<HTMLDivElement>(null);
@@ -8,8 +8,7 @@ export function ScrollProgress() {
   useEffect(() => {
     let raf: number;
     function update() {
-      const { scrollTop, scrollHeight, clientHeight } =
-        document.documentElement;
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
       const total = scrollHeight - clientHeight;
       const pct = total > 0 ? (scrollTop / total) * 100 : 0;
       if (barRef.current) {

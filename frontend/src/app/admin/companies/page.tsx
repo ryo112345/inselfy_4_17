@@ -115,21 +115,36 @@ export default function AdminCompaniesPage() {
             href="/admin"
             className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </Link>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--foreground)]">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-[var(--foreground)]"
+          >
             <rect x="4" y="2" width="16" height="20" rx="2" />
             <path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2" />
             <path d="M10 22v-4h4v4" />
           </svg>
           <h1 className="text-2xl font-bold">企業管理</h1>
-          {data && (
-            <span className="text-sm text-[var(--muted)] ml-2">
-              {data.total}件
-            </span>
-          )}
+          {data && <span className="text-sm text-[var(--muted)] ml-2">{data.total}件</span>}
         </div>
 
         <div className="flex gap-1 mb-6">
@@ -156,27 +171,42 @@ export default function AdminCompaniesPage() {
             <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
           </div>
         ) : !data || data.companies.length === 0 ? (
-          <div className="text-center py-16 text-[var(--muted)]">
-            該当する企業がありません
-          </div>
+          <div className="text-center py-16 text-[var(--muted)]">該当する企業がありません</div>
         ) : (
           <>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100">
-                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">企業名</th>
-                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">担当者</th>
-                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">メール</th>
-                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">電話番号</th>
-                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">ステータス</th>
-                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">登録日</th>
-                    <th className="text-right text-xs font-medium text-[var(--muted)] px-5 py-3">操作</th>
+                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                      企業名
+                    </th>
+                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                      担当者
+                    </th>
+                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                      メール
+                    </th>
+                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                      電話番号
+                    </th>
+                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                      ステータス
+                    </th>
+                    <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                      登録日
+                    </th>
+                    <th className="text-right text-xs font-medium text-[var(--muted)] px-5 py-3">
+                      操作
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.companies.map((c) => (
-                    <tr key={c.id} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors">
+                    <tr
+                      key={c.id}
+                      className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors"
+                    >
                       <td className="px-5 py-4">
                         <span className="text-sm font-medium">{c.companyName}</span>
                       </td>
@@ -191,7 +221,9 @@ export default function AdminCompaniesPage() {
                       </td>
                       <td className="px-5 py-4">{statusBadge(c.status)}</td>
                       <td className="px-5 py-4">
-                        <span className="text-sm text-[var(--muted)]">{formatDate(c.createdAt)}</span>
+                        <span className="text-sm text-[var(--muted)]">
+                          {formatDate(c.createdAt)}
+                        </span>
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1.5">

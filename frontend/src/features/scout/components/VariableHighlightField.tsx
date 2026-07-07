@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 
 const VARIABLE_SPLIT = /(\{\{[^}]+\}\})/g;
 const VARIABLE_TEST = /^\{\{[^}]+\}\}$/;

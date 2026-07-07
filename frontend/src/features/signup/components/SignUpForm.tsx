@@ -3,10 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import "@/external/client/api/client";
-import {
-  usersCreateUser,
-  type ModelsUserResponse,
-} from "@/external/client/api/generated";
+import { type ModelsUserResponse, usersCreateUser } from "@/external/client/api/generated";
 
 type ApiError = { code: string; message: string };
 

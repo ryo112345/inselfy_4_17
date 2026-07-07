@@ -28,7 +28,11 @@ export interface ConversationListResponse {
   total: number;
 }
 
-export type MessageType = "text" | "interview_proposal" | "interview_confirmed" | "interview_cancelled";
+export type MessageType =
+  | "text"
+  | "interview_proposal"
+  | "interview_confirmed"
+  | "interview_cancelled";
 
 export interface Message {
   id: string;

@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Sidebar } from "@/app/components/Sidebar";
 import { useAuth } from "@/features/auth/auth-context";
-import { useUnreadMessaging } from "@/features/messaging/unread-context";
-import { useUnreadScout } from "@/features/scout/unread-context";
 import {
-  fetchCandidateConversations,
   fetchCandidateConversationMessages,
-  sendMessageAsCandidate,
+  fetchCandidateConversations,
   markReadAsCandidate,
+  sendMessageAsCandidate,
   startCandidateConversation,
 } from "@/features/messaging/api";
-import type { Conversation, Message } from "@/features/messaging/types";
-import { getCounterpartName } from "@/features/messaging/types";
 import { ConversationList } from "@/features/messaging/components/ConversationList";
 import { MessageThread } from "@/features/messaging/components/MessageThread";
+import type { Conversation, Message } from "@/features/messaging/types";
+import { getCounterpartName } from "@/features/messaging/types";
+import { useUnreadMessaging } from "@/features/messaging/unread-context";
 import { useMessagingWebSocket } from "@/features/messaging/useWebSocket";
-import { Sidebar } from "@/app/components/Sidebar";
 import { ScoutListView } from "@/features/scout/components/ScoutListView";
+import { useUnreadScout } from "@/features/scout/unread-context";
 
 type ActiveTab = "company" | "personal" | "scout";
 
@@ -68,9 +68,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
         await markReadAsCandidate(convId);
         refreshUnread();
         setConversations((prev) =>
-          prev.map((c) =>
-            c.id === convId ? { ...c, unreadCount: 0 } : c,
-          ),
+          prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0 } : c)),
         );
       } catch {
         // ignore
@@ -97,8 +95,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
         const existing = items.find(
           (c) =>
             c.conversationType === "candidate_candidate" &&
-            (c.participant1Id === recipientId ||
-              c.participant2Id === recipientId),
+            (c.participant1Id === recipientId || c.participant2Id === recipientId),
         );
         if (existing) {
           setSelectedConv(existing);
@@ -149,15 +146,17 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
       });
       setNewConvRecipient(null);
       setSelectedConv(conv);
-      setMessages([{
-        id: conv.id + "-first",
-        conversationId: conv.id,
-        senderType: "candidate",
-        senderId: user!.id,
-        body,
-        messageType: "text",
-        createdAt: conv.createdAt,
-      }]);
+      setMessages([
+        {
+          id: conv.id + "-first",
+          conversationId: conv.id,
+          senderType: "candidate",
+          senderId: user!.id,
+          body,
+          messageType: "text",
+          createdAt: conv.createdAt,
+        },
+      ]);
       await loadConversations();
       refreshUnread();
       loadMessages(conv.id);
@@ -212,13 +211,16 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
     ),
   });
 
-  const handleTabChange = useCallback((key: ActiveTab) => {
-    setActiveTab(key);
-    setSelectedConv(null);
-    setNewConvRecipient(null);
-    setMessages([]);
-    router.replace(key === "scout" ? "/scout" : "/messages");
-  }, [router]);
+  const handleTabChange = useCallback(
+    (key: ActiveTab) => {
+      setActiveTab(key);
+      setSelectedConv(null);
+      setNewConvRecipient(null);
+      setMessages([]);
+      router.replace(key === "scout" ? "/scout" : "/messages");
+    },
+    [router],
+  );
 
   if (authLoading) {
     return (
@@ -237,9 +239,10 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
   }
 
   const showThread = selectedConv || newConvRecipient;
-  const threadCounterpartName = selectedConv && user
-    ? getCounterpartName(selectedConv, user.id)
-    : newConvRecipient?.name ?? "";
+  const threadCounterpartName =
+    selectedConv && user
+      ? getCounterpartName(selectedConv, user.id)
+      : (newConvRecipient?.name ?? "");
 
   const companyUnread = conversations
     .filter((c) => c.conversationType === "company_candidate")
@@ -319,11 +322,13 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
                       conversations={conversations.filter((c) =>
                         activeTab === "company"
                           ? c.conversationType === "company_candidate"
-                          : c.conversationType === "candidate_candidate"
+                          : c.conversationType === "candidate_candidate",
                       )}
                       selectedId={selectedConv?.id ?? null}
                       onSelect={handleSelectConv}
-                      getDisplayName={(c) => user ? getCounterpartName(c, user.id) : c.companyName}
+                      getDisplayName={(c) =>
+                        user ? getCounterpartName(c, user.id) : c.companyName
+                      }
                     />
                   )}
                 </div>
@@ -361,9 +366,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
                         d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
                       />
                     </svg>
-                    <p className="text-sm font-medium text-gray-500">
-                      会話を選択してください
-                    </p>
+                    <p className="text-sm font-medium text-gray-500">会話を選択してください</p>
                   </div>
                 )}
               </div>

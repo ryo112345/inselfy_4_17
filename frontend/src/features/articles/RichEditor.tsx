@@ -1,21 +1,15 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
-import type { Editor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
+import type { Editor } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  useRef,
-  useCallback,
-  useState,
-  useEffect,
-  type ReactNode,
-} from "react";
-import { PaidSeparator } from "./PaidSeparatorExtension";
 import { uploadArticleImage as uploadImage } from "./api";
+import { PaidSeparator } from "./PaidSeparatorExtension";
 
 type Props = {
   content: string;
@@ -91,17 +85,13 @@ function BubbleToolbar({ editor }: { editor: Editor }) {
       <span className="w-px h-4 bg-gray-200" />
       <InlineBtn
         active={editor.isActive("heading", { level: 2 })}
-        onClick={() =>
-          editor.chain().focus().toggleHeading({ level: 2 }).run()
-        }
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
       >
         H2
       </InlineBtn>
       <InlineBtn
         active={editor.isActive("heading", { level: 3 })}
-        onClick={() =>
-          editor.chain().focus().toggleHeading({ level: 3 }).run()
-        }
+        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
       >
         H3
       </InlineBtn>
@@ -260,11 +250,7 @@ function PlusMenu({
           {isPaid && (
             <BlockBtn
               onClick={() => {
-                editor
-                  .chain()
-                  .focus()
-                  .insertContent({ type: "paidSeparator" })
-                  .run();
+                editor.chain().focus().insertContent({ type: "paidSeparator" }).run();
                 setExpanded(false);
               }}
               title="有料区切り"
@@ -415,11 +401,7 @@ export function RichEditor({ content, onChange, isPaid }: Props) {
       {editor && (
         <>
           <BubbleToolbar editor={editor} />
-          <PlusMenu
-            editor={editor}
-            isPaid={isPaid}
-            fileInputRef={fileInputRef}
-          />
+          <PlusMenu editor={editor} isPaid={isPaid} fileInputRef={fileInputRef} />
         </>
       )}
       <EditorContent editor={editor} />

@@ -4,6 +4,8 @@ import {
   companyTeamsGetTeamScores,
   companyTeamsListTeams,
   experiencesListExperiences,
+  type ModelsTalentCard,
+  type ModelsTeamResponse,
   savedCandidatesBulkCheckSaved,
   savedCandidatesListSavedCandidates,
   savedCandidatesSaveCandidate,
@@ -15,8 +17,6 @@ import {
   talentSearchSearchTalents,
   usersGetUserByUsername,
   workValuesWvGetLatestResult,
-  type ModelsTalentCard,
-  type ModelsTeamResponse,
 } from "@/external/client/api/generated";
 
 export type TalentCard = ModelsTalentCard;
@@ -70,10 +70,8 @@ export async function fetchCandidateDetail(
     about: profile?.data?.about ?? null,
     jobSeekingStatus: profile?.data?.jobSeekingStatus ?? null,
     profileColor: profile?.data?.profileColor ?? null,
-    wvScores:
-      wv?.data?.values.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
-    ciScores:
-      ci?.data?.typeScores.map((s) => ({ id: s.typeId, score: s.score })) ?? null,
+    wvScores: wv?.data?.values.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
+    ciScores: ci?.data?.typeScores.map((s) => ({ id: s.typeId, score: s.score })) ?? null,
   };
 }
 

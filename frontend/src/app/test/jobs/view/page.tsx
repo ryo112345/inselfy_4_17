@@ -36,8 +36,7 @@ const MOCK = {
     ],
   },
   job: {
-    title:
-      "バックエンドエンジニア｜Go / PostgreSQL / AWS でプロダクト基盤を設計",
+    title: "バックエンドエンジニア｜Go / PostgreSQL / AWS でプロダクト基盤を設計",
     jobCategory: "エンジニア",
     employmentType: "正社員",
     hiringCount: "1〜2名",
@@ -51,14 +50,7 @@ const MOCK = {
       "現在エンジニア5名のチームで、全員がフルスタック志向を持ちながらもバックエンドに強みを持つメンバーが揃っています。コードレビューを重視し、技術的な議論を日常的に行うカルチャーです。",
     skillsGained:
       "Go言語での大規模API設計スキル、統計モデルの実装経験、ベクトルデータベースの運用知識、AWSインフラの設計・構築スキルが身につきます。",
-    tags: [
-      "Go",
-      "PostgreSQL",
-      "AWS",
-      "pgvector",
-      "API設計",
-      "マッチングアルゴリズム",
-    ],
+    tags: ["Go", "PostgreSQL", "AWS", "pgvector", "API設計", "マッチングアルゴリズム"],
     requiredQualifications:
       "Go言語でのWebアプリケーション開発経験3年以上。RDBMSを用いたバックエンド開発の実務経験。",
     preferredQualifications:
@@ -68,19 +60,16 @@ const MOCK = {
     jobDescriptionChangeScope: "当面なし",
     contractType: "無期",
     probationPeriod: "入社後3ヶ月（条件変更なし）",
-    workHours:
-      "フレックスタイム制（コアタイムなし）標準労働時間8時間",
+    workHours: "フレックスタイム制（コアタイムなし）標準労働時間8時間",
     breakTime: "60分",
     holidays:
       "完全週休2日制（土日祝）、年末年始休暇、有給休暇（入社半年後10日付与）、慶弔休暇、産前産後休暇、育児休暇",
     salaryMin: 600,
     salaryMax: 1000,
-    salaryDetail:
-      "月給50万円〜83万円（固定残業代45時間分を含む）。経験・能力を考慮の上決定。",
+    salaryDetail: "月給50万円〜83万円（固定残業代45時間分を含む）。経験・能力を考慮の上決定。",
     insurance: "健康保険、厚生年金、雇用保険、労災保険",
     remotePolicy: "フルリモート",
-    selectionProcess:
-      "書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定",
+    selectionProcess: "書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定",
     publishedAt: "2026-04-15",
   },
   team: {
@@ -103,13 +92,7 @@ const AVATAR_TONES = [
   { bg: "#EEF3F4", fg: "#5A6B7B" },
 ];
 
-function SectionTitle({
-  children,
-  icon,
-}: {
-  children: React.ReactNode;
-  icon?: React.ReactNode;
-}) {
+function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       {icon && (
@@ -120,9 +103,7 @@ function SectionTitle({
           {icon}
         </span>
       )}
-      <h2 className="text-xl font-bold tracking-tight text-gray-900">
-        {children}
-      </h2>
+      <h2 className="text-xl font-bold tracking-tight text-gray-900">{children}</h2>
     </div>
   );
 }
@@ -142,9 +123,7 @@ function StatCell({
         <span className="text-gray-400">{icon}</span>
         {label}
       </div>
-      <div className="text-xl font-bold leading-tight text-gray-900 sm:text-2xl">
-        {value}
-      </div>
+      <div className="text-xl font-bold leading-tight text-gray-900 sm:text-2xl">{value}</div>
     </div>
   );
 }
@@ -167,23 +146,20 @@ function HighlightCard({
       <div className="flex items-center gap-3">
         <span
           className="flex h-11 w-11 items-center justify-center rounded-xl"
-          style={{ backgroundColor: tone.bg, color: tone.fg, boxShadow: `inset 0 0 0 1px ${tone.ring}` }}
+          style={{
+            backgroundColor: tone.bg,
+            color: tone.fg,
+            boxShadow: `inset 0 0 0 1px ${tone.ring}`,
+          }}
         >
           {icon}
         </span>
-        <span
-          className="text-sm font-semibold tracking-wide"
-          style={{ color: tone.fg }}
-        >
+        <span className="text-sm font-semibold tracking-wide" style={{ color: tone.fg }}>
           {label}
         </span>
       </div>
-      <h3 className="text-lg font-bold leading-snug text-gray-900">
-        {title}
-      </h3>
-      <p className="text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
-        {body}
-      </p>
+      <h3 className="text-lg font-bold leading-snug text-gray-900">{title}</h3>
+      <p className="text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">{body}</p>
     </div>
   );
 }
@@ -211,9 +187,7 @@ function ConditionGroup({
       <dl className="flex flex-col gap-3.5">
         {rows.map((r) => (
           <div key={r.label} className="flex flex-col gap-1">
-            <dt className="text-xs font-medium tracking-wide text-gray-500">
-              {r.label}
-            </dt>
+            <dt className="text-xs font-medium tracking-wide text-gray-500">{r.label}</dt>
             <dd className="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap">
               {r.value}
             </dd>
@@ -241,9 +215,7 @@ export default function TestJobViewPage() {
           {job.salaryMin}
           <span className="text-base font-medium text-gray-500">〜</span>
           {job.salaryMax}
-          <span className="ml-0.5 text-sm font-medium text-gray-500">
-            万円
-          </span>
+          <span className="ml-0.5 text-sm font-medium text-gray-500">万円</span>
         </span>
       ),
       icon: <YenIcon />,
@@ -316,11 +288,7 @@ export default function TestJobViewPage() {
         {/* ─── Hero ─── */}
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="relative w-full overflow-hidden bg-gray-100 aspect-[16/9]">
-            <img
-              src="/job-cover.png"
-              alt=""
-              className="h-full w-full object-contain"
-            />
+            <img src="/job-cover.png" alt="" className="h-full w-full object-contain" />
           </div>
 
           <div className="px-6 pb-6 pt-6 sm:px-8">
@@ -330,16 +298,9 @@ export default function TestJobViewPage() {
             >
               <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
                 {company.logoUrl ? (
-                  <img
-                    src={company.logoUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <span
-                    className="text-sm font-bold"
-                    style={{ color: ACCENT }}
-                  >
+                  <span className="text-sm font-bold" style={{ color: ACCENT }}>
                     {company.name.charAt(0)}
                   </span>
                 )}
@@ -388,12 +349,7 @@ export default function TestJobViewPage() {
             {/* Quick Facts strip */}
             <div className="mt-6 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-gray-50/40 sm:grid-cols-4 sm:divide-y-0">
               {quickFacts.map((f) => (
-                <StatCell
-                  key={f.label}
-                  label={f.label}
-                  value={f.value}
-                  icon={f.icon}
-                />
+                <StatCell key={f.label} label={f.label} value={f.value} icon={f.icon} />
               ))}
             </div>
 
@@ -414,9 +370,7 @@ export default function TestJobViewPage() {
         {/* ─── Highlights (4 cards in 2x2 grid) ─── */}
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<LayersIcon />}>ハイライト</SectionTitle>
-          <p className="mt-2 text-sm text-gray-500">
-            この仕事を一目で掴むための4つの視点
-          </p>
+          <p className="mt-2 text-sm text-gray-500">この仕事を一目で掴むための4つの視点</p>
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {highlightCards.map((c) => (
               <HighlightCard key={c.label} {...c} />
@@ -470,24 +424,16 @@ export default function TestJobViewPage() {
                 })}
               </div>
               <div className="flex items-baseline gap-1">
-                <span
-                  className="text-3xl font-bold leading-none"
-                  style={{ color: ACCENT }}
-                >
+                <span className="text-3xl font-bold leading-none" style={{ color: ACCENT }}>
                   {team.size}
                 </span>
-                <span
-                  className="text-base font-semibold"
-                  style={{ color: ACCENT }}
-                >
+                <span className="text-base font-semibold" style={{ color: ACCENT }}>
                   名のチーム
                 </span>
               </div>
             </div>
             <div className="px-6 py-6 sm:px-7 sm:py-7">
-              <h2 className="text-lg font-bold text-gray-900">
-                チーム紹介
-              </h2>
+              <h2 className="text-lg font-bold text-gray-900">チーム紹介</h2>
               <p className="mt-3 text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
                 {job.teamDescription}
               </p>
@@ -499,21 +445,9 @@ export default function TestJobViewPage() {
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<DocumentIcon />}>募集要項</SectionTitle>
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <ConditionGroup
-              title="勤務情報"
-              rows={workConditions}
-              icon={<ClockIcon />}
-            />
-            <ConditionGroup
-              title="給与・報酬"
-              rows={compensationConditions}
-              icon={<YenIcon />}
-            />
-            <ConditionGroup
-              title="契約・その他"
-              rows={contractConditions}
-              icon={<ShieldIcon />}
-            />
+            <ConditionGroup title="勤務情報" rows={workConditions} icon={<ClockIcon />} />
+            <ConditionGroup title="給与・報酬" rows={compensationConditions} icon={<YenIcon />} />
+            <ConditionGroup title="契約・その他" rows={contractConditions} icon={<ShieldIcon />} />
           </div>
         </section>
 
@@ -553,22 +487,21 @@ export default function TestJobViewPage() {
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<GiftIcon />}>福利厚生・待遇</SectionTitle>
           <ul className="mt-5 flex flex-wrap gap-2">
-            {[
-              ...company.benefits,
-              ...(company.smokingPolicy ? [company.smokingPolicy] : []),
-            ].map((b) => (
-              <li
-                key={b}
-                className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-medium"
-                style={{
-                  borderColor: `${ACCENT}40`,
-                  backgroundColor: `${ACCENT}12`,
-                  color: ACCENT,
-                }}
-              >
-                {b}
-              </li>
-            ))}
+            {[...company.benefits, ...(company.smokingPolicy ? [company.smokingPolicy] : [])].map(
+              (b) => (
+                <li
+                  key={b}
+                  className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-medium"
+                  style={{
+                    borderColor: `${ACCENT}40`,
+                    backgroundColor: `${ACCENT}12`,
+                    color: ACCENT,
+                  }}
+                >
+                  {b}
+                </li>
+              ),
+            )}
           </ul>
         </section>
 
@@ -616,16 +549,9 @@ export default function TestJobViewPage() {
             >
               <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
                 {company.logoUrl ? (
-                  <img
-                    src={company.logoUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <span
-                    className="text-lg font-bold"
-                    style={{ color: ACCENT }}
-                  >
+                  <span className="text-lg font-bold" style={{ color: ACCENT }}>
                     {company.name.charAt(0)}
                   </span>
                 )}
@@ -667,9 +593,7 @@ export default function TestJobViewPage() {
           </div>
         </div>
 
-        <p className="text-center text-sm text-gray-400 mt-2">
-          {job.publishedAt} 掲載
-        </p>
+        <p className="text-center text-sm text-gray-400 mt-2">{job.publishedAt} 掲載</p>
       </div>
     </div>
   );
@@ -809,11 +733,7 @@ function SparkIcon() {
 
 function StarIcon() {
   return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-    >
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2l2.9 6.9L22 10l-5.5 4.7L18 22l-6-3.6L6 22l1.5-7.3L2 10l7.1-1.1z" />
     </svg>
   );
@@ -838,11 +758,7 @@ function FlagIcon() {
 
 function BoltIcon() {
   return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-    >
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
       <path d="M13 2L3 14h7l-1 8 11-13h-7z" />
     </svg>
   );

@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  fetchScoutDetail,
-  replyToScoutAsCompany,
-} from "@/features/scout/api";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { fetchScoutDetail, replyToScoutAsCompany } from "@/features/scout/api";
 import type { ScoutDetail, ScoutStatus } from "@/features/scout/types";
 
 const STATUS_BADGE: Record<ScoutStatus, { bg: string; text: string; label: string }> = {
@@ -72,7 +69,10 @@ export default function ScoutDetailPage() {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
         <p className="text-red-500 text-sm">{error ?? "スカウトが見つかりません"}</p>
-        <Link href="/company/scout" className="text-sm text-[#2979ff] hover:underline mt-4 inline-block">
+        <Link
+          href="/company/scout"
+          className="text-sm text-[#2979ff] hover:underline mt-4 inline-block"
+        >
           一覧に戻る
         </Link>
       </div>
@@ -85,8 +85,18 @@ export default function ScoutDetailPage() {
   return (
     <div className="space-y-6">
       {/* Back link */}
-      <Link href="/company/scout" className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1">
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <Link
+        href="/company/scout"
+        className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
           <path d="M15 18l-6-6 6-6" />
         </svg>
         スカウト一覧
@@ -98,13 +108,19 @@ export default function ScoutDetailPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{message.subject}</h1>
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-              <span>候補者: <span className="font-medium text-gray-700">{message.candidateName}</span></span>
+              <span>
+                候補者: <span className="font-medium text-gray-700">{message.candidateName}</span>
+              </span>
               {message.jobTitle && (
-                <span>求人: <span className="font-medium text-gray-700">{message.jobTitle}</span></span>
+                <span>
+                  求人: <span className="font-medium text-gray-700">{message.jobTitle}</span>
+                </span>
               )}
             </div>
           </div>
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}
+          >
             {badge.label}
           </span>
         </div>
@@ -119,7 +135,9 @@ export default function ScoutDetailPage() {
 
         {/* Body */}
         <div className="bg-gray-50 rounded-lg p-4">
-          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{message.body}</p>
+          <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+            {message.body}
+          </p>
         </div>
       </div>
 
@@ -139,12 +157,16 @@ export default function ScoutDetailPage() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`text-xs font-medium ${isCompany ? "text-blue-600" : "text-gray-600"}`}>
+                  <span
+                    className={`text-xs font-medium ${isCompany ? "text-blue-600" : "text-gray-600"}`}
+                  >
                     {isCompany ? "自社" : "候補者"}
                   </span>
                   <span className="text-xs text-gray-400">{formatDateTime(reply.createdAt)}</span>
                 </div>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{reply.body}</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {reply.body}
+                </p>
               </div>
             );
           })}

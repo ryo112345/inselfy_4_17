@@ -28,10 +28,27 @@ type Props = {
   followingCount?: number;
 };
 
-export function ProfileContent({ user, username, experiences, educations, skills, posts, isOwner = true, intReportRequestId, followersCount = 0, followingCount = 0 }: Props) {
+export function ProfileContent({
+  user,
+  username,
+  experiences,
+  educations,
+  skills,
+  posts,
+  isOwner = true,
+  intReportRequestId,
+  followersCount = 0,
+  followingCount = 0,
+}: Props) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 md:px-0">
-      <ProfileHeaderCard user={user} experienceCount={experiences.length} followersCount={followersCount} followingCount={followingCount} isOwner={isOwner} />
+      <ProfileHeaderCard
+        user={user}
+        experienceCount={experiences.length}
+        followersCount={followersCount}
+        followingCount={followingCount}
+        isOwner={isOwner}
+      />
       {isOwner && (
         <AiReportCard
           hasExperience={experiences.length > 0}
@@ -50,9 +67,7 @@ export function ProfileContent({ user, username, experiences, educations, skills
       {(isOwner || educations.length > 0) && (
         <EducationCard username={username} educations={educations} isOwner={isOwner} />
       )}
-      {(isOwner || user.about) && (
-        <AboutCard user={user} isOwner={isOwner} />
-      )}
+      {(isOwner || user.about) && <AboutCard user={user} isOwner={isOwner} />}
       <PostsTabs posts={posts} userId={user.id} />
     </div>
   );

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import type { CommentItem } from "./api";
-import { fetchComments, createComment } from "./api";
+import { createComment, fetchComments } from "./api";
 
 type Props = {
   postId: string;
@@ -31,15 +31,19 @@ export function CommentSection({ postId, currentUserId, onCommentCountChange }: 
 
   useEffect(() => {
     let cancelled = false;
-    fetchComments(postId, 50).then((res) => {
-      if (!cancelled) {
-        setComments(res.items ?? []);
-        setLoading(false);
-      }
-    }).catch(() => {
-      if (!cancelled) setLoading(false);
-    });
-    return () => { cancelled = true; };
+    fetchComments(postId, 50)
+      .then((res) => {
+        if (!cancelled) {
+          setComments(res.items ?? []);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [postId]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -105,13 +109,19 @@ function CommentCard({ comment }: { comment: CommentItem }) {
   return (
     <div className="flex gap-2">
       <Link href={`/profile/${comment.username}`} className="shrink-0">
-        <span className="flex w-7 h-7 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: "var(--accent)" }}>
+        <span
+          className="flex w-7 h-7 items-center justify-center rounded-full text-xs font-bold text-white"
+          style={{ backgroundColor: "var(--accent)" }}
+        >
           {initial}
         </span>
       </Link>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1">
-          <Link href={`/profile/${comment.username}`} className="font-semibold text-[13px] text-gray-900 hover:underline">
+          <Link
+            href={`/profile/${comment.username}`}
+            className="font-semibold text-[13px] text-gray-900 hover:underline"
+          >
             {comment.name || comment.username}
           </Link>
           <span className="text-[13px] text-gray-400">@{comment.username}</span>

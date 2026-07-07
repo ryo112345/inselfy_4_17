@@ -1,23 +1,20 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 import {
+  bulkDeclineScouts,
+  bulkRespondScouts,
   fetchReceivedScouts,
   fetchScoutSettings,
   updateScoutSettings,
-  bulkDeclineScouts,
-  bulkRespondScouts,
 } from "@/features/scout/api";
 import type { ScoutMessage, ScoutSettings, ScoutStatus } from "@/features/scout/types";
 
 const PAGE_SIZE = 20;
 
-const STATUS_BADGE: Record<
-  ScoutStatus,
-  { label: string; className: string }
-> = {
+const STATUS_BADGE: Record<ScoutStatus, { label: string; className: string }> = {
   draft: { label: "下書き", className: "bg-gray-100 text-gray-600" },
   sent: { label: "未読", className: "bg-blue-100 text-blue-800" },
   opened: { label: "既読", className: "bg-yellow-100 text-yellow-800" },
@@ -34,9 +31,7 @@ function formatDate(dateStr: string | null): string {
 
 function daysRemaining(expiresAt: string | null): string | null {
   if (!expiresAt) return null;
-  const diff = Math.ceil(
-    (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-  );
+  const diff = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   if (diff < 0) return "期限切れ";
   if (diff === 0) return "今日まで";
   return `残り${diff}日`;
@@ -62,25 +57,22 @@ export function ScoutListView() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const loadScouts = useCallback(
-    async (offset: number) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetchReceivedScouts({
-          limit: PAGE_SIZE,
-          offset,
-        });
-        setScouts(res.items);
-        setTotal(res.total);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "読み込みに失敗しました");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
+  const loadScouts = useCallback(async (offset: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchReceivedScouts({
+        limit: PAGE_SIZE,
+        offset,
+      });
+      setScouts(res.items);
+      setTotal(res.total);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "読み込みに失敗しました");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -209,9 +201,7 @@ export function ScoutListView() {
                 }`}
               />
             </button>
-            <span className="text-xs text-gray-400">
-              {settings.acceptingScouts ? "ON" : "OFF"}
-            </span>
+            <span className="text-xs text-gray-400">{settings.acceptingScouts ? "ON" : "OFF"}</span>
           </div>
         )}
       </div>
@@ -272,14 +262,10 @@ export function ScoutListView() {
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-800 font-medium truncate mb-1">
-                    {scout.subject}
-                  </p>
+                  <p className="text-sm text-gray-800 font-medium truncate mb-1">{scout.subject}</p>
 
                   {scout.jobTitle && (
-                    <p className="text-xs text-gray-500 truncate mb-1">
-                      {scout.jobTitle}
-                    </p>
+                    <p className="text-xs text-gray-500 truncate mb-1">{scout.jobTitle}</p>
                   )}
 
                   {scout.body && (
@@ -371,7 +357,16 @@ export function ScoutListView() {
             disabled={responding}
             className="flex items-center gap-1.5 min-h-[44px] text-sm font-medium text-[#3D8B6E] hover:bg-[#3D8B6E]/8 rounded-lg px-3 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
           >
-            <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width={15}
+              height={15}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M20 6L9 17l-5-5" />
             </svg>
             {responding ? "処理中..." : "興味あり"}
@@ -385,7 +380,16 @@ export function ScoutListView() {
             disabled={declining}
             className="flex items-center gap-1.5 min-h-[44px] text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg px-3 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
           >
-            <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width={15}
+              height={15}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
             {declining ? "処理中..." : "辞退する"}
@@ -413,17 +417,37 @@ export function ScoutListView() {
             }`}
           >
             {toast.type === "error" ? (
-              <svg className="h-5 w-5 shrink-0 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 shrink-0 text-red-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                  clipRule="evenodd"
+                />
               </svg>
             ) : (
-              <svg className="h-5 w-5 shrink-0 text-[#3D8B6E]" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 shrink-0 text-[#3D8B6E]"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                  clipRule="evenodd"
+                />
               </svg>
             )}
-            <span className={`text-sm font-medium ${
-              toast.type === "error" ? "text-red-800" : "text-emerald-800"
-            }`}>{toast.message}</span>
+            <span
+              className={`text-sm font-medium ${
+                toast.type === "error" ? "text-red-800" : "text-emerald-800"
+              }`}
+            >
+              {toast.message}
+            </span>
           </div>
         </div>
       )}

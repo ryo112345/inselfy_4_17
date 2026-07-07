@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Inter, Playfair_Display } from "next/font/google";
 import { useParams } from "next/navigation";
-import { Playfair_Display, Inter } from "next/font/google";
-import { useWorkValuesQuiz } from "@/features/work-values/useWorkValuesQuiz";
+import { useCallback, useEffect, useState } from "react";
+import type { ItemDTO } from "@/features/career-interest/api";
 import { useCareerInterestQuiz } from "@/features/career-interest/useCareerInterestQuiz";
 import type { NeedId } from "@/features/work-values/lib/needs";
-import type { ItemDTO } from "@/features/career-interest/api";
+import { useWorkValuesQuiz } from "@/features/work-values/useWorkValuesQuiz";
 import "@/external/client/api/client";
 import {
+  type ModelsDiagnoseInfoResponse,
   teamDiagnoseGetDiagnoseByToken,
   teamDiagnoseUpdateDiagnoseStatus,
-  type ModelsDiagnoseInfoResponse,
 } from "@/external/client/api/generated";
 
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"], display: "swap" });
@@ -69,7 +69,14 @@ export default function DiagnosePage() {
       <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4">
         <div className="w-full max-w-md text-center rounded-3xl bg-white border border-gray-200 p-12 shadow-sm">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
-            <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth={2}>
+            <svg
+              width={28}
+              height={28}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth={2}
+            >
               <circle cx={12} cy={12} r={10} />
               <path d="M15 9l-6 6M9 9l6 6" />
             </svg>
@@ -86,7 +93,14 @@ export default function DiagnosePage() {
       <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4">
         <div className="w-full max-w-md text-center rounded-3xl bg-white border border-gray-200 p-12 shadow-sm">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
-            <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={2.5}>
+            <svg
+              width={28}
+              height={28}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth={2.5}
+            >
               <path d="M20 6L9 17l-5-5" />
             </svg>
           </div>
@@ -102,12 +116,7 @@ export default function DiagnosePage() {
   if (!memberInfo) return null;
 
   if (phase === "welcome") {
-    return (
-      <WelcomeScreen
-        memberInfo={memberInfo}
-        onStart={() => setPhase("wv")}
-      />
-    );
+    return <WelcomeScreen memberInfo={memberInfo} onStart={() => setPhase("wv")} />;
   }
 
   if (phase === "wv") {
@@ -157,11 +166,10 @@ function WelcomeScreen({ memberInfo, onStart }: { memberInfo: MemberInfo; onStar
           <p className="text-sm text-gray-600 font-medium">{memberInfo.teamName}</p>
         </div>
 
-        <p className="text-xl font-bold text-gray-900 mb-2">
-          {memberInfo.memberName}さん
-        </p>
+        <p className="text-xl font-bold text-gray-900 mb-2">{memberInfo.memberName}さん</p>
         <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-          チームの傾向を分析するため、2つの診断を受けていただきます。<br />
+          チームの傾向を分析するため、2つの診断を受けていただきます。
+          <br />
           所要時間は合計で約20分です。
         </p>
 
@@ -191,8 +199,16 @@ function WelcomeScreen({ memberInfo, onStart }: { memberInfo: MemberInfo; onStar
   );
 }
 
-function DiagnosticItem({ number, label, description, time }: {
-  number: number; label: string; description: string; time: string;
+function DiagnosticItem({
+  number,
+  label,
+  description,
+  time,
+}: {
+  number: number;
+  label: string;
+  description: string;
+  time: string;
 }) {
   return (
     <div className="flex items-start gap-3 rounded-xl bg-gray-50 border border-gray-100 p-4 text-left">
@@ -208,14 +224,29 @@ function DiagnosticItem({ number, label, description, time }: {
   );
 }
 
-function TransitionScreen({ title, subtitle, buttonLabel, onNext }: {
-  title: string; subtitle: string; buttonLabel: string; onNext: () => void;
+function TransitionScreen({
+  title,
+  subtitle,
+  buttonLabel,
+  onNext,
+}: {
+  title: string;
+  subtitle: string;
+  buttonLabel: string;
+  onNext: () => void;
 }) {
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4">
       <div className="w-full max-w-md text-center rounded-3xl bg-white border border-gray-200 p-12 shadow-sm">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
-          <svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={2.5}>
+          <svg
+            width={28}
+            height={28}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#10b981"
+            strokeWidth={2.5}
+          >
             <path d="M20 6L9 17l-5-5" />
           </svg>
         </div>
@@ -259,7 +290,8 @@ function WVQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
               Work Values
             </p>
             <p className="text-gray-400 text-sm leading-relaxed">
-              2つの選択肢から、自分にとってより大切な方を選んでください。<br />
+              2つの選択肢から、自分にとってより大切な方を選んでください。
+              <br />
               直感で答えて大丈夫です。
             </p>
           </div>
@@ -300,7 +332,9 @@ function WVQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
                 </span>
                 <span className="text-sm text-gray-500">/ {state.maxQuestions}</span>
               </div>
-              <span className={`${inter.className} text-sm font-medium text-emerald-400 tabular-nums`}>
+              <span
+                className={`${inter.className} text-sm font-medium text-emerald-400 tabular-nums`}
+              >
                 {Math.round(progress)}%
               </span>
             </div>
@@ -313,7 +347,9 @@ function WVQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
           </div>
 
           <div className="px-8 pb-3">
-            <p className="text-gray-500 text-[13px] text-center">どちらがあなたにとって大切ですか？</p>
+            <p className="text-gray-500 text-[13px] text-center">
+              どちらがあなたにとって大切ですか？
+            </p>
           </div>
 
           <div className="px-8 pb-8 flex flex-col gap-3">
@@ -357,7 +393,10 @@ function WVQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
       <main className="min-h-screen flex items-center justify-center bg-[#0a1628] px-4">
         <div className="w-full max-w-md text-center">
           <p className="text-red-400 mb-4">{state.error ?? "エラーが発生しました"}</p>
-          <button onClick={start} className="text-gray-400 hover:text-white underline cursor-pointer">
+          <button
+            onClick={start}
+            className="text-gray-400 hover:text-white underline cursor-pointer"
+          >
             もう一度試す
           </button>
         </div>
@@ -387,7 +426,8 @@ function CIQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
               Career Interest
             </p>
             <p className="text-gray-500 text-sm leading-relaxed">
-              各活動への興味度を5段階で評価してください。<br />
+              各活動への興味度を5段階で評価してください。
+              <br />
               直感で答えて大丈夫です。
             </p>
           </div>
@@ -414,7 +454,14 @@ function CIQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
   }
 
   if (state.phase === "active" && state.currentItem) {
-    return <CIQuizScreen item={state.currentItem} questionNumber={state.questionNumber} maxQuestions={state.maxQuestions} onAnswer={answer} />;
+    return (
+      <CIQuizScreen
+        item={state.currentItem}
+        questionNumber={state.questionNumber}
+        maxQuestions={state.maxQuestions}
+        onAnswer={answer}
+      />
+    );
   }
 
   if (state.phase === "submitting") {
@@ -433,7 +480,10 @@ function CIQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
       <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4">
         <div className="w-full max-w-md text-center">
           <p className="text-red-500 mb-4">{state.error ?? "エラーが発生しました"}</p>
-          <button onClick={start} className="text-gray-500 hover:text-gray-800 underline cursor-pointer">
+          <button
+            onClick={start}
+            className="text-gray-500 hover:text-gray-800 underline cursor-pointer"
+          >
             もう一度試す
           </button>
         </div>
@@ -444,8 +494,16 @@ function CIQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
   return null;
 }
 
-function CIQuizScreen({ item, questionNumber, maxQuestions, onAnswer }: {
-  item: ItemDTO; questionNumber: number; maxQuestions: number; onAnswer: (score: number) => void;
+function CIQuizScreen({
+  item,
+  questionNumber,
+  maxQuestions,
+  onAnswer,
+}: {
+  item: ItemDTO;
+  questionNumber: number;
+  maxQuestions: number;
+  onAnswer: (score: number) => void;
 }) {
   const progress = (questionNumber / maxQuestions) * 100;
 
@@ -476,7 +534,9 @@ function CIQuizScreen({ item, questionNumber, maxQuestions, onAnswer }: {
           <p className="text-gray-800 text-[17px] leading-relaxed text-center">{item.textJa}</p>
         </div>
         <div className="px-8 pb-3">
-          <p className="text-gray-400 text-[13px] text-center">この活動にどの程度興味がありますか？</p>
+          <p className="text-gray-400 text-[13px] text-center">
+            この活動にどの程度興味がありますか？
+          </p>
         </div>
 
         <div className="px-8 pb-8 flex flex-col gap-2">

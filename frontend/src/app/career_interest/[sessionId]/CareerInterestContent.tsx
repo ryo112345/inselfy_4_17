@@ -2,24 +2,24 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  type BasicScoreDTO,
   getAiReport,
   getResultBySessionId,
   type ResultDTO,
-  type BasicScoreDTO,
 } from "@/features/career-interest/api";
+import { getCIPersona } from "@/features/career-interest/lib/personas";
 import {
-  TYPE_LABELS,
-  TYPE_DESCRIPTIONS,
-  TYPE_PERSONALITIES,
-  TYPE_ENGLISH_NAMES,
+  BASIC_INTEREST_LABELS,
+  type BasicInterestId,
   TYPE_ABBREVIATIONS,
   TYPE_BASIC_INTERESTS,
-  BASIC_INTEREST_LABELS,
+  TYPE_DESCRIPTIONS,
+  TYPE_ENGLISH_NAMES,
   TYPE_IDS,
+  TYPE_LABELS,
+  TYPE_PERSONALITIES,
   type TypeId,
-  type BasicInterestId,
 } from "@/features/career-interest/lib/types";
-import { getCIPersona } from "@/features/career-interest/lib/personas";
 
 const SCORE_COLORS = {
   tier1: "#149470",
@@ -44,7 +44,15 @@ const DEFAULT_BADGE = {
 type BadgeColors = typeof DEFAULT_BADGE;
 type ScoreColors = typeof SCORE_COLORS;
 
-export function CareerInterestResultContent({ sessionId, initialData, isOwner = true }: { sessionId: string; initialData?: ResultDTO | null; isOwner?: boolean }) {
+export function CareerInterestResultContent({
+  sessionId,
+  initialData,
+  isOwner = true,
+}: {
+  sessionId: string;
+  initialData?: ResultDTO | null;
+  isOwner?: boolean;
+}) {
   const [result, setResult] = useState<ResultDTO | null>(initialData ?? null);
   const [error, setError] = useState<string | null>(null);
   const colors = SCORE_COLORS;
@@ -80,15 +88,27 @@ export function CareerInterestResultContent({ sessionId, initialData, isOwner = 
     <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 pt-5 pb-8">
       <TopRIASECHeroSection types={sortedTypes} badge={badge} createdAt={result.createdAt} />
       <TypesSection types={sortedTypes} colors={colors} badge={badge} />
-      <BasicInterestsSection types={sortedTypes} basicScoreMap={basicScoreMap} colors={colors} badge={badge} />
+      <BasicInterestsSection
+        types={sortedTypes}
+        basicScoreMap={basicScoreMap}
+        colors={colors}
+        badge={badge}
+      />
 
       <CIAiReportSection sessionId={sessionId} badge={badge} isOwner={isOwner} />
     </div>
   );
 }
 
-
-function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["typeScores"]; badge: BadgeColors; createdAt: string }) {
+function TopRIASECHeroSection({
+  types,
+  badge,
+  createdAt,
+}: {
+  types: ResultDTO["typeScores"];
+  badge: BadgeColors;
+  createdAt: string;
+}) {
   const top3 = types.slice(0, 3);
   const persona = getCIPersona(types);
 
@@ -157,19 +177,49 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
           pointer-events: none;
         }
       `}</style>
-      <div className="ci-ripple-tr" style={{ animation: "ci-ripple-pulse 8s ease-in-out infinite" }} />
-      <div className="ci-ripple-bl" style={{ animation: "ci-ripple-pulse 8s ease-in-out infinite" }} />
+      <div
+        className="ci-ripple-tr"
+        style={{ animation: "ci-ripple-pulse 8s ease-in-out infinite" }}
+      />
+      <div
+        className="ci-ripple-bl"
+        style={{ animation: "ci-ripple-pulse 8s ease-in-out infinite" }}
+      />
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-        <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-purple-50 transition-colors" style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}>
-          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-purple-50 transition-colors"
+          style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}
+        >
+          <svg
+            width={13}
+            height={13}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
             <polyline points="16 6 12 2 8 6" />
             <line x1={12} y1={2} x2={12} y2={15} />
           </svg>
           Share Link
         </button>
-        <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-purple-50 transition-colors" style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}>
-          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-purple-50 transition-colors"
+          style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}
+        >
+          <svg
+            width={13}
+            height={13}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <rect x={2} y={2} width={20} height={20} rx={5} />
             <circle cx={12} cy={12} r={4} />
             <circle cx={18} cy={6} r={1.5} fill="currentColor" stroke="none" />
@@ -178,8 +228,20 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
         </button>
       </div>
       <div className="absolute top-4 left-4 z-10">
-        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border" style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}>
-          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border"
+          style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}
+        >
+          <svg
+            width={13}
+            height={13}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <circle cx={12} cy={12} r={10} />
             <polyline points="12 6 12 12 16 14" />
           </svg>
@@ -189,7 +251,10 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
           })()}
         </span>
       </div>
-      <h2 className="relative text-[12px] font-bold tracking-[0.2em] mb-2 uppercase" style={{ color: "#9a8aaa" }}>
+      <h2
+        className="relative text-[12px] font-bold tracking-[0.2em] mb-2 uppercase"
+        style={{ color: "#9a8aaa" }}
+      >
         Your RIASEC Type
       </h2>
       <p
@@ -198,7 +263,8 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
           backgroundImage: "linear-gradient(to right, #6B3FA0, #8B5CC8, #A87DE0, #C49CF0)",
         }}
       >
-        {persona.modifier}{persona.name}
+        {persona.modifier}
+        {persona.name}
       </p>
       <p className="relative text-[14px] mb-5 tracking-wide" style={{ color: "#9a8aaa" }}>
         {persona.subtitle}
@@ -207,7 +273,11 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
       <div className="relative hidden md:grid grid-cols-3 items-center -mt-11">
         <div className="flex flex-col items-end gap-1 pr-4 justify-self-center translate-x-2">
           {top3.map((t) => (
-            <span key={t.typeId} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+            <span
+              key={t.typeId}
+              className="text-[16px] font-semibold leading-snug tracking-wide"
+              style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}
+            >
               {TYPE_ENGLISH_NAMES[t.typeId as TypeId]}
             </span>
           ))}
@@ -223,18 +293,24 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
             const s = sizes[i];
             const badgeStyles = [
               {
-                background: "linear-gradient(170deg, #C49CF0 0%, #A87DE0 30%, #8B5CC8 60%, #7B4BAF 100%)",
-                boxShadow: "0 6px 14px rgba(120,70,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                background:
+                  "linear-gradient(170deg, #C49CF0 0%, #A87DE0 30%, #8B5CC8 60%, #7B4BAF 100%)",
+                boxShadow:
+                  "0 6px 14px rgba(120,70,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
                 border: "1px solid rgba(255,255,255,0.25)",
               },
               {
-                background: "linear-gradient(170deg, #B890E8 0%, #9C70DC 30%, #8858C8 60%, #7A50B8 100%)",
-                boxShadow: "0 6px 14px rgba(110,70,190,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                background:
+                  "linear-gradient(170deg, #B890E8 0%, #9C70DC 30%, #8858C8 60%, #7A50B8 100%)",
+                boxShadow:
+                  "0 6px 14px rgba(110,70,190,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
                 border: "1px solid rgba(255,255,255,0.25)",
               },
               {
-                background: "linear-gradient(170deg, #B088DC 0%, #9668C8 30%, #8058B8 60%, #7450A8 100%)",
-                boxShadow: "0 6px 14px rgba(100,70,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                background:
+                  "linear-gradient(170deg, #B088DC 0%, #9668C8 30%, #8058B8 60%, #7450A8 100%)",
+                boxShadow:
+                  "0 6px 14px rgba(100,70,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
                 border: "1px solid rgba(255,255,255,0.25)",
               },
             ];
@@ -266,18 +342,24 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
             const s = sizes[i];
             const badgeStyles = [
               {
-                background: "linear-gradient(170deg, #C49CF0 0%, #A87DE0 30%, #8B5CC8 60%, #7B4BAF 100%)",
-                boxShadow: "0 6px 14px rgba(120,70,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                background:
+                  "linear-gradient(170deg, #C49CF0 0%, #A87DE0 30%, #8B5CC8 60%, #7B4BAF 100%)",
+                boxShadow:
+                  "0 6px 14px rgba(120,70,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
                 border: "1px solid rgba(255,255,255,0.25)",
               },
               {
-                background: "linear-gradient(170deg, #B890E8 0%, #9C70DC 30%, #8858C8 60%, #7A50B8 100%)",
-                boxShadow: "0 6px 14px rgba(110,70,190,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                background:
+                  "linear-gradient(170deg, #B890E8 0%, #9C70DC 30%, #8858C8 60%, #7A50B8 100%)",
+                boxShadow:
+                  "0 6px 14px rgba(110,70,190,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
                 border: "1px solid rgba(255,255,255,0.25)",
               },
               {
-                background: "linear-gradient(170deg, #B088DC 0%, #9668C8 30%, #8058B8 60%, #7450A8 100%)",
-                boxShadow: "0 6px 14px rgba(100,70,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+                background:
+                  "linear-gradient(170deg, #B088DC 0%, #9668C8 30%, #8058B8 60%, #7450A8 100%)",
+                boxShadow:
+                  "0 6px 14px rgba(100,70,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
                 border: "1px solid rgba(255,255,255,0.25)",
               },
             ];
@@ -294,7 +376,11 @@ function TopRIASECHeroSection({ types, badge, createdAt }: { types: ResultDTO["t
         </div>
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-0.5">
           {top3.map((t) => (
-            <span key={t.typeId} className="text-[14px] font-semibold leading-snug tracking-wide" style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+            <span
+              key={t.typeId}
+              className="text-[14px] font-semibold leading-snug tracking-wide"
+              style={{ color: "#5A2D82", fontFamily: "system-ui, -apple-system, sans-serif" }}
+            >
               {TYPE_ENGLISH_NAMES[t.typeId as TypeId]}
             </span>
           ))}
@@ -314,7 +400,7 @@ function RIASECRadarChart({ types }: { types: ResultDTO["typeScores"] }) {
   const scoreMap = new Map(types.map((t) => [t.typeId, t]));
 
   const hexPoint = (i: number, r: number) => {
-    const angle = (Math.PI / 2) + (2 * Math.PI * i) / 6;
+    const angle = Math.PI / 2 + (2 * Math.PI * i) / 6;
     return { x: cx - Math.cos(angle) * r, y: cy - Math.sin(angle) * r };
   };
 
@@ -349,14 +435,7 @@ function RIASECRadarChart({ types }: { types: ResultDTO["typeScores"] }) {
         const pt = hexPoint(i, R + 20);
         return (
           <g key={tid}>
-            <circle
-              cx={pt.x}
-              cy={pt.y}
-              r={14}
-              fill="#f0e8fa"
-              stroke="#A87DE0"
-              strokeWidth={1}
-            />
+            <circle cx={pt.x} cy={pt.y} r={14} fill="#f0e8fa" stroke="#A87DE0" strokeWidth={1} />
             <text
               x={pt.x}
               y={pt.y}
@@ -375,17 +454,29 @@ function RIASECRadarChart({ types }: { types: ResultDTO["typeScores"] }) {
   );
 }
 
-function TypesSection({ types, colors, badge }: { types: ResultDTO["typeScores"]; colors: ScoreColors; badge: BadgeColors }) {
+function TypesSection({
+  types,
+  colors,
+  badge,
+}: {
+  types: ResultDTO["typeScores"];
+  colors: ScoreColors;
+  badge: BadgeColors;
+}) {
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
-  const toggle = (id: string) => setOpenIds((prev) => {
-    const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
-    return next;
-  });
+  const toggle = (id: string) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
 
   return (
     <section className="mb-6">
-      <h2 className="text-[13px] font-bold tracking-widest mb-1.5" style={{ color: badge.headingColor }}>
+      <h2
+        className="text-[13px] font-bold tracking-widest mb-1.5"
+        style={{ color: badge.headingColor }}
+      >
         RIASEC タイプスコア
       </h2>
       <div className="border-t border-gray-200 mb-2" />
@@ -413,11 +504,17 @@ function TypesSection({ types, colors, badge }: { types: ResultDTO["typeScores"]
                   </div>
                 </div>
 
-                <p className="hidden md:block text-[14px] font-medium leading-relaxed max-w-[280px] text-left" style={{ color: badge.descColor }}>
+                <p
+                  className="hidden md:block text-[14px] font-medium leading-relaxed max-w-[280px] text-left"
+                  style={{ color: badge.descColor }}
+                >
                   {TYPE_PERSONALITIES[tid]}
                 </p>
 
-                <span className="text-[22px] font-bold tabular-nums ml-1 w-16 text-right shrink-0" style={{ color: barColor }}>
+                <span
+                  className="text-[22px] font-bold tabular-nums ml-1 w-16 text-right shrink-0"
+                  style={{ color: barColor }}
+                >
                   {t.score.toFixed(1)}
                 </span>
 
@@ -425,7 +522,10 @@ function TypesSection({ types, colors, badge }: { types: ResultDTO["typeScores"]
                   onClick={() => toggle(tid)}
                   className="text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
                 >
-                  <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                  <span
+                    className="transition-transform duration-200"
+                    style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                  >
                     <ChevronIcon size={14} />
                   </span>
                 </button>
@@ -458,7 +558,10 @@ function BasicInterestsSection({
 }) {
   return (
     <section>
-      <h2 className="text-[13px] font-bold tracking-widest mb-1.5" style={{ color: badge.headingColor }}>
+      <h2
+        className="text-[13px] font-bold tracking-widest mb-1.5"
+        style={{ color: badge.headingColor }}
+      >
         基本興味領域スコア
       </h2>
       <div className="border-t border-gray-200 mb-2" />
@@ -483,7 +586,14 @@ function BasicInterestsSection({
 
               <div className="flex flex-col">
                 {basicsWithScores.map(({ bid, score }, i) => (
-                  <BasicInterestRow key={bid} bid={bid} score={score} colors={colors} badge={badge} showDivider={i > 0} />
+                  <BasicInterestRow
+                    key={bid}
+                    bid={bid}
+                    score={score}
+                    colors={colors}
+                    badge={badge}
+                    showDivider={i > 0}
+                  />
                 ))}
               </div>
             </div>
@@ -496,7 +606,19 @@ function BasicInterestsSection({
 
 const MEDAL = ["🥇", "🥈", "🥉"] as const;
 
-function BasicInterestRow({ bid, score, colors, badge, showDivider = false }: { bid: BasicInterestId; score: BasicScoreDTO; colors: ScoreColors; badge: BadgeColors; showDivider?: boolean }) {
+function BasicInterestRow({
+  bid,
+  score,
+  colors,
+  badge,
+  showDivider = false,
+}: {
+  bid: BasicInterestId;
+  score: BasicScoreDTO;
+  colors: ScoreColors;
+  badge: BadgeColors;
+  showDivider?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const medal = score.rank <= 3 ? MEDAL[score.rank - 1] : null;
   const isTop = score.rank <= 3;
@@ -513,12 +635,18 @@ function BasicInterestRow({ bid, score, colors, badge, showDivider = false }: { 
     <div>
       {showDivider && <div className="border-t border-gray-200 ml-3 mt-1" />}
       <div className="flex items-center gap-2 py-1 overflow-hidden">
-        <span className="text-[13px] font-semibold w-10 text-right tabular-nums shrink-0 whitespace-nowrap" style={rankStyle}>
+        <span
+          className="text-[13px] font-semibold w-10 text-right tabular-nums shrink-0 whitespace-nowrap"
+          style={rankStyle}
+        >
           {score.rank}位
         </span>
 
         <div className="flex items-center gap-0.5 min-w-0">
-          <span className="text-[14px] truncate" style={{ color: badge.needLabelColor, fontWeight: badge.needLabelWeight }}>
+          <span
+            className="text-[14px] truncate"
+            style={{ color: badge.needLabelColor, fontWeight: badge.needLabelWeight }}
+          >
             {BASIC_INTEREST_LABELS[bid]}
           </span>
           {medal && <span className="text-[13px] shrink-0">{medal}</span>}
@@ -535,7 +663,10 @@ function BasicInterestRow({ bid, score, colors, badge, showDivider = false }: { 
           </div>
         </div>
 
-        <span className="text-[14px] font-bold tabular-nums w-10 text-right shrink-0" style={{ color: barColor }}>
+        <span
+          className="text-[14px] font-bold tabular-nums w-10 text-right shrink-0"
+          style={{ color: barColor }}
+        >
           {score.score.toFixed(1)}
         </span>
 
@@ -543,7 +674,10 @@ function BasicInterestRow({ bid, score, colors, badge, showDivider = false }: { 
           onClick={() => setIsOpen(!isOpen)}
           className="text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
         >
-          <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+          <span
+            className="transition-transform duration-200"
+            style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+          >
             <ChevronIcon size={14} />
           </span>
         </button>
@@ -569,7 +703,11 @@ function TypeBadge({
     return (
       <span
         className={`${dim} rounded-full font-semibold flex items-center justify-center shrink-0`}
-        style={{ border: `1px solid ${badge.border}`, color: badge.text, backgroundColor: badge.bg }}
+        style={{
+          border: `1px solid ${badge.border}`,
+          color: badge.text,
+          backgroundColor: badge.bg,
+        }}
       >
         {TYPE_ABBREVIATIONS[typeId]}
       </span>
@@ -623,12 +761,25 @@ function useTypewriter(fullText: string | null, charsPerTick = 2, intervalMs = 3
     setDone(true);
   }, [fullText]);
 
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    },
+    [],
+  );
 
   return { displayed, done, start, skip };
 }
 
-function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: string; badge: BadgeColors; isOwner?: boolean }) {
+function CIAiReportSection({
+  sessionId,
+  badge,
+  isOwner = true,
+}: {
+  sessionId: string;
+  badge: BadgeColors;
+  isOwner?: boolean;
+}) {
   const [reportContent, setReportContent] = useState<string | null>(null);
   const [firstView, setFirstView] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -651,8 +802,12 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
         }
       })
       .catch(() => {})
-      .finally(() => { if (!cancelled) setInitialLoading(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        if (!cancelled) setInitialLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [sessionId]);
 
   const handleClick = () => {
@@ -694,7 +849,8 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
     }
   };
 
-  const reportProseClasses = "prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-purple-800 [&_h2]:border-l-3 [&_h2]:border-purple-500 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-purple-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-purple-400 [&_.catchphrase]:bg-purple-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-purple-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4";
+  const reportProseClasses =
+    "prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-purple-800 [&_h2]:border-l-3 [&_h2]:border-purple-500 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-purple-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-purple-400 [&_.catchphrase]:bg-purple-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-purple-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4";
 
   return (
     <div ref={sectionRef} className="relative mt-10 scroll-mt-4">
@@ -703,14 +859,17 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
           className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
           style={{
             background: "linear-gradient(180deg, #9B6BC8 0%, #7B4BAF 50%, #6B3FA0 100%)",
-            boxShadow: "0 4px 10px rgba(107,63,160,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
+            boxShadow:
+              "0 4px 10px rgba(107,63,160,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
           }}
         >
           inselfy.ai
         </span>
       </div>
       <div className="rounded-md border border-gray-200 bg-[#fdfbff] px-8 pt-8 pb-7">
-        <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>AI キャリアレポート</h3>
+        <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>
+          AI キャリアレポート
+        </h3>
         <div className="border-t border-gray-200 mb-3" />
 
         {initialLoading ? (
@@ -728,30 +887,28 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
             className={reportProseClasses}
             dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
           />
-        ) : (
-          isOwner ? (
-            <>
-              <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
-                AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
-              </p>
-              <button
-                onClick={handleClick}
-                disabled={loading}
-                className="bg-purple-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(107,63,160,0.45)] hover:bg-purple-800 hover:shadow-[0_6px_16px_-4px_rgba(107,63,160,0.55)] transition cursor-pointer disabled:opacity-50"
-              >
-                レポートを作成する
-              </button>
-              {notFound && (
-                <p className="text-[13px] text-amber-600 mt-4">
-                  レポートはまだ作成中です。しばらくお待ちください。
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-[16px] text-gray-500 leading-relaxed">
-              レポートはまだ作成されていません。
+        ) : isOwner ? (
+          <>
+            <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
+              AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
             </p>
-          )
+            <button
+              onClick={handleClick}
+              disabled={loading}
+              className="bg-purple-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(107,63,160,0.45)] hover:bg-purple-800 hover:shadow-[0_6px_16px_-4px_rgba(107,63,160,0.55)] transition cursor-pointer disabled:opacity-50"
+            >
+              レポートを作成する
+            </button>
+            {notFound && (
+              <p className="text-[13px] text-amber-600 mt-4">
+                レポートはまだ作成中です。しばらくお待ちください。
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="text-[16px] text-gray-500 leading-relaxed">
+            レポートはまだ作成されていません。
+          </p>
         )}
       </div>
       {scrollSpacer && !done && <div className="h-screen" />}
@@ -761,21 +918,21 @@ function CIAiReportSection({ sessionId, badge, isOwner = true }: { sessionId: st
 
 function markdownToHtml(md: string): string {
   let html = md
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^> (.+)$/gm, '<blockquote><p>$1</p></blockquote>')
-    .replace(/^[・-] (.+)$/gm, '<li>$1</li>')
-    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^/, '<p>')
-    .replace(/$/, '</p>')
-    .replace(/<p>(<h[23]>)/g, '$1')
-    .replace(/(<\/h[23]>)<\/p>/g, '$1')
-    .replace(/<p>(<ul>)/g, '$1')
-    .replace(/(<\/ul>)<\/p>/g, '$1')
-    .replace(/<p>(<blockquote>)/g, '$1')
-    .replace(/(<\/blockquote>)<\/p>/g, '$1');
+    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^> (.+)$/gm, "<blockquote><p>$1</p></blockquote>")
+    .replace(/^[・-] (.+)$/gm, "<li>$1</li>")
+    .replace(/((?:<li>.*<\/li>\n?)+)/g, "<ul>$1</ul>")
+    .replace(/\n\n/g, "</p><p>")
+    .replace(/^/, "<p>")
+    .replace(/$/, "</p>")
+    .replace(/<p>(<h[23]>)/g, "$1")
+    .replace(/(<\/h[23]>)<\/p>/g, "$1")
+    .replace(/<p>(<ul>)/g, "$1")
+    .replace(/(<\/ul>)<\/p>/g, "$1")
+    .replace(/<p>(<blockquote>)/g, "$1")
+    .replace(/(<\/blockquote>)<\/p>/g, "$1");
 
   html = html.replace(/^<p>/, '<p class="catchphrase">');
 
@@ -784,7 +941,16 @@ function markdownToHtml(md: string): string {
 
 function ChevronIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="m6 9 6 6 6-6" />
     </svg>
   );

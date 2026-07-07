@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  createArticle,
-  updateArticle,
-  publishArticle,
-  type ArticleItem,
-} from "./api";
-import { RichEditor } from "./RichEditor";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ArticleItem, createArticle, publishArticle, updateArticle } from "./api";
 import { CoverImageUpload } from "./CoverImageUpload";
-import { TagInput } from "./TagInput";
+import { RichEditor } from "./RichEditor";
 import { TableOfContents, type TOCItem } from "./TableOfContents";
+import { TagInput } from "./TagInput";
 
 type Props = {
   article?: ArticleItem;
@@ -25,9 +20,7 @@ export function ArticleForm({ article }: Props) {
   const [body, setBody] = useState(article?.body ?? "");
   const [isPaid, setIsPaid] = useState(article?.isPaid ?? false);
   const [priceYen, setPriceYen] = useState(article?.priceYen ?? 0);
-  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(
-    article?.coverImageUrl ?? null,
-  );
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(article?.coverImageUrl ?? null);
   const [tags, setTags] = useState<string[]>(article?.tags ?? []);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -132,7 +125,16 @@ export function ArticleForm({ article }: Props) {
           <div className="flex items-center gap-2">
             {saved && (
               <span className="flex items-center gap-1 text-sm text-[var(--accent)]">
-                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width={14}
+                  height={14}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 保存しました
@@ -185,9 +187,7 @@ export function ArticleForm({ article }: Props) {
               }}
               onPaste={(e) => {
                 e.preventDefault();
-                const text = e.clipboardData
-                  .getData("text/plain")
-                  .replace(/\n/g, " ");
+                const text = e.clipboardData.getData("text/plain").replace(/\n/g, " ");
                 document.execCommand("insertText", false, text);
               }}
               className="relative text-[28px] sm:text-3xl font-bold text-gray-900 leading-[1.35] focus:outline-none"
@@ -228,9 +228,7 @@ export function ArticleForm({ article }: Props) {
                 }}
                 className="w-4 h-4 rounded border-gray-300 accent-[var(--accent)]"
               />
-              <span className="text-sm font-medium text-gray-700">
-                有料記事にする
-              </span>
+              <span className="text-sm font-medium text-gray-700">有料記事にする</span>
             </label>
 
             {isPaid && (

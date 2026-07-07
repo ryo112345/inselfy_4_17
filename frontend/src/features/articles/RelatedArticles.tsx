@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchArticles, type ArticleItem } from "./api";
 import { ArticleCard } from "./ArticleCard";
+import { type ArticleItem, fetchArticles } from "./api";
 
 type Props = {
   currentArticle: ArticleItem;

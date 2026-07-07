@@ -13,7 +13,12 @@ type Props = {
   intReportRequestId?: string | null;
 };
 
-export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReportRequestId }: Props) {
+export function AiReportCard({
+  hasExperience,
+  hasSkills,
+  hasEducation,
+  intReportRequestId,
+}: Props) {
   const { isAuthenticated } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [requestStatus, setRequestStatus] = useState<"none" | "pending" | "ready">(
@@ -30,7 +35,9 @@ export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReport
         if (!cancelled && data?.status) setRequestStatus(data.status);
       })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated]);
 
   const steps = [
@@ -49,9 +56,7 @@ export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReport
   }
 
   const buttonLabel =
-    requestStatus === "pending"
-      ? "リクエスト済み（生成中）"
-      : "レポートを生成する";
+    requestStatus === "pending" ? "リクエスト済み（生成中）" : "レポートを生成する";
 
   return (
     <>
@@ -68,7 +73,9 @@ export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReport
 
         <div className="relative mx-auto max-w-md text-center">
           <h2 className="text-xl font-bold leading-snug tracking-tight text-gray-900">
-            自分の強みと価値観を、<wbr />プロの視点で整理します
+            自分の強みと価値観を、
+            <wbr />
+            プロの視点で整理します
           </h2>
           <p className="mx-auto mt-3 max-w-sm text-base leading-relaxed text-gray-800">
             診断結果と経歴をAIが分析し、あなた自身も気づいていない特性を言語化します。
@@ -94,7 +101,9 @@ export function AiReportCard({ hasExperience, hasSkills, hasEducation, intReport
           <button
             type="button"
             disabled={!allDone || requestStatus === "pending"}
-            onClick={() => { if (allDone) setModalOpen(true); }}
+            onClick={() => {
+              if (allDone) setModalOpen(true);
+            }}
             className={`mt-5 inline-flex w-full max-w-[260px] items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition ${
               allDone && requestStatus !== "pending"
                 ? "bg-gradient-to-r from-amber-700 via-amber-600 to-amber-500 text-white shadow-[0_4px_14px_-4px_rgba(180,120,40,0.55)] hover:shadow-[0_6px_18px_-4px_rgba(180,120,40,0.65)]"

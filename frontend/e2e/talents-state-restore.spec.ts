@@ -1,9 +1,9 @@
-import { test, expect, Page } from "@playwright/test";
+import { expect, Page, test } from "@playwright/test";
 
 async function loginAsCompany(page: Page) {
   await page.goto("/company/login");
-  await page.fill('#email', "admin@inselfy.example.com");
-  await page.fill('#password', "test1234");
+  await page.fill("#email", "admin@inselfy.example.com");
+  await page.fill("#password", "test1234");
   await page.click('button[type="submit"]');
   await page.waitForURL(/\/company(?!\/login)/);
   await page.waitForLoadState("networkidle");
@@ -100,9 +100,7 @@ test.describe("Talents page state preservation on browser back", () => {
     expect(scrollY).toBeGreaterThan(100);
   });
 
-  test("diagnostic tab: selected user + scroll are restored after back", async ({
-    page,
-  }) => {
+  test("diagnostic tab: selected user + scroll are restored after back", async ({ page }) => {
     await page.goto("/company/talents?tab=diagnostic");
     await page.waitForLoadState("networkidle");
 
@@ -113,9 +111,7 @@ test.describe("Talents page state preservation on browser back", () => {
     await page.waitForLoadState("networkidle");
 
     // Wait for candidate list to appear
-    const candidateButtons = page.locator(
-      ".lg\\:block.w-full.text-left.cursor-pointer"
-    );
+    const candidateButtons = page.locator(".lg\\:block.w-full.text-left.cursor-pointer");
     await expect(candidateButtons.first()).toBeVisible({ timeout: 10000 });
     const count = await candidateButtons.count();
     if (count < 2) {

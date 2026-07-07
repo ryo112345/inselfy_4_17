@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { NeedScoreDTO, ValueScoreDTO } from "./api";
-import { VALUE_LABELS, NEED_LABELS, VALUE_IDS, NEED_IDS } from "./lib/needs";
-import type { ValueId, NeedId } from "./lib/needs";
+import type { NeedId, ValueId } from "./lib/needs";
+import { NEED_IDS, NEED_LABELS, VALUE_IDS, VALUE_LABELS } from "./lib/needs";
 
 const ACCENT = "#3D8B6E";
 
@@ -156,11 +156,7 @@ export function ValuesFilterDrawer({
         {/* Scrollable list */}
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-2">
           {items.map((item) => (
-            <SliderRow
-              key={item.id}
-              item={item}
-              onChange={handleThresholdChange}
-            />
+            <SliderRow key={item.id} item={item} onChange={handleThresholdChange} />
           ))}
         </div>
 
@@ -210,9 +206,7 @@ function SliderRow({
 
   return (
     <div className="flex items-center gap-3 py-2">
-      <span className="w-28 shrink-0 truncate text-sm font-medium text-gray-700">
-        {item.label}
-      </span>
+      <span className="w-28 shrink-0 truncate text-sm font-medium text-gray-700">{item.label}</span>
       <span className="w-7 shrink-0 text-right text-sm tabular-nums text-gray-500">
         {item.userScore}
       </span>
@@ -275,9 +269,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={`flex-1 pb-2.5 text-sm font-medium transition-colors cursor-pointer ${
-        active
-          ? "border-b-2 text-gray-900"
-          : "text-gray-400 hover:text-gray-600"
+        active ? "border-b-2 text-gray-900" : "text-gray-400 hover:text-gray-600"
       }`}
       style={active ? { borderColor: ACCENT } : undefined}
     >
@@ -288,11 +280,24 @@ function TabButton({
 
 function FilterIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
-      <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
-      <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
-      <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" />
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="4" y1="21" x2="4" y2="14" />
+      <line x1="4" y1="10" x2="4" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12" y2="3" />
+      <line x1="20" y1="21" x2="20" y2="16" />
+      <line x1="20" y1="12" x2="20" y2="3" />
+      <line x1="1" y1="14" x2="7" y2="14" />
+      <line x1="9" y1="8" x2="15" y2="8" />
       <line x1="17" y1="16" x2="23" y2="16" />
     </svg>
   );
@@ -300,8 +305,18 @@ function FilterIcon() {
 
 function CloseIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   );
 }

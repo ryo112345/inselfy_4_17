@@ -1,9 +1,9 @@
 import "@/external/client/api/client";
 import {
-  publicCompanyProfilesGetPublicCompanyProfile,
-  publicTeamScoresGetPublicTeamScores,
   type ModelsPublicCompanyProfileResponse,
   type ModelsPublicTeamScoreResponse,
+  publicCompanyProfilesGetPublicCompanyProfile,
+  publicTeamScoresGetPublicTeamScores,
 } from "@/external/client/api/generated";
 
 export type PublicCompanyProfile = ModelsPublicCompanyProfileResponse;

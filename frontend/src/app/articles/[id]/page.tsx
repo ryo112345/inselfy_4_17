@@ -1,11 +1,11 @@
-import { fetchArticle } from "@/features/articles/api";
-import { ArticleView } from "@/features/articles/ArticleView";
-import { RelatedArticles } from "@/features/articles/RelatedArticles";
-import { PrevNextNav } from "@/features/articles/PrevNextNav";
-import { ScrollProgress } from "@/features/articles/ScrollProgress";
-import { Sidebar } from "@/app/components/Sidebar";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { Sidebar } from "@/app/components/Sidebar";
+import { ArticleView } from "@/features/articles/ArticleView";
+import { fetchArticle } from "@/features/articles/api";
+import { PrevNextNav } from "@/features/articles/PrevNextNav";
+import { RelatedArticles } from "@/features/articles/RelatedArticles";
+import { ScrollProgress } from "@/features/articles/ScrollProgress";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -28,11 +28,7 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <>
       <ScrollProgress />
-      <Sidebar
-        username={username}
-        displayName={displayName}
-        defaultOpen={sidebarOpen}
-      />
+      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
       <div className="flex justify-center min-h-screen md:pl-[50px]">
         <main className="w-full max-w-2xl bg-white border-x border-gray-200/80">
           <ArticleView article={article} currentUsername={username} />

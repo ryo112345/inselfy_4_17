@@ -99,7 +99,14 @@ export const NEED_LABELS: Record<NeedId, string> = {
 
 export const VALUE_NEEDS: Record<ValueId, NeedId[]> = {
   achievement: ["ability_utilization", "achievement"],
-  comfort: ["activity", "independence", "variety", "compensation", "security", "working_conditions"],
+  comfort: [
+    "activity",
+    "independence",
+    "variety",
+    "compensation",
+    "security",
+    "working_conditions",
+  ],
   status: ["advancement", "authority", "recognition", "social_status"],
   altruism: ["co_workers", "moral_values", "social_service"],
   safety: ["company_policies", "supervision_hr", "supervision_technical"],

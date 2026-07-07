@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 
 type Team = {
@@ -23,10 +23,16 @@ export default function TeamsPage() {
     let cancelled = false;
     companyFetch("/api/company/teams")
       .then((r) => r.json())
-      .then((data) => { if (!cancelled) setTeams(data.items ?? []); })
+      .then((data) => {
+        if (!cancelled) setTeams(data.items ?? []);
+      })
       .catch(() => {})
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [companyFetch]);
 
   const totalMembers = teams.reduce((s, t) => s + t.memberCount, 0);
@@ -45,7 +51,14 @@ export default function TeamsPage() {
           className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90"
           style={{ backgroundColor: "#2979ff" }}
         >
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path d="M12 5v14M5 12h14" />
           </svg>
           チームを作成
@@ -64,7 +77,16 @@ export default function TeamsPage() {
           <div className="grid grid-cols-3 gap-4 mb-6">
             <SummaryCard
               icon={
-                <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2979ff"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M23 21v-2a4 4 0 00-3-3.87" />
@@ -77,7 +99,16 @@ export default function TeamsPage() {
             />
             <SummaryCard
               icon={
-                <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2979ff"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
@@ -88,7 +119,16 @@ export default function TeamsPage() {
             />
             <SummaryCard
               icon={
-                <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={overallPct === 100 ? "#10b981" : "#2979ff"} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={overallPct === 100 ? "#10b981" : "#2979ff"}
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
                   <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
@@ -166,7 +206,14 @@ function TeamCard({ team }: { team: Team }) {
             </h2>
           </div>
           <div className="shrink-0 ml-3 text-gray-300 group-hover:text-[#2979ff] transition-colors">
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path d="M9 18l6-6-6-6" />
             </svg>
           </div>
@@ -177,14 +224,24 @@ function TeamCard({ team }: { team: Team }) {
           {/* Member Count */}
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50">
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#2979ff"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </div>
             <div>
               <p className="text-base font-bold text-gray-900">
-                {team.memberCount}<span className="ml-0.5 text-sm font-normal text-gray-400">人</span>
+                {team.memberCount}
+                <span className="ml-0.5 text-sm font-normal text-gray-400">人</span>
               </p>
               <p className="text-sm text-gray-400">メンバー</p>
             </div>
@@ -295,9 +352,21 @@ function EmptyState() {
         <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-50">
           <svg width={48} height={48} viewBox="0 0 48 48" fill="none">
             <circle cx="16" cy="16" r="6" stroke="#2979ff" strokeWidth={1.5} fill="none" />
-            <path d="M8 34v-2a8 8 0 0116 0v2" stroke="#2979ff" strokeWidth={1.5} fill="none" strokeLinecap="round" />
+            <path
+              d="M8 34v-2a8 8 0 0116 0v2"
+              stroke="#2979ff"
+              strokeWidth={1.5}
+              fill="none"
+              strokeLinecap="round"
+            />
             <circle cx="32" cy="16" r="6" stroke="#93bbff" strokeWidth={1.5} fill="none" />
-            <path d="M24 34v-2a8 8 0 0116 0v2" stroke="#93bbff" strokeWidth={1.5} fill="none" strokeLinecap="round" />
+            <path
+              d="M24 34v-2a8 8 0 0116 0v2"
+              stroke="#93bbff"
+              strokeWidth={1.5}
+              fill="none"
+              strokeLinecap="round"
+            />
             <path d="M34 10v8M30 14h8" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" />
           </svg>
         </div>
@@ -309,22 +378,57 @@ function EmptyState() {
         </p>
         <div className="flex items-center justify-center gap-4 text-sm text-gray-400 mb-8">
           <span className="flex items-center gap-1">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">1</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">
+              1
+            </span>
             チーム作成
           </span>
-          <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 18l6-6-6-6" /></svg>
+          <svg
+            width={12}
+            height={12}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
           <span className="flex items-center gap-1">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">2</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">
+              2
+            </span>
             メンバー追加
           </span>
-          <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 18l6-6-6-6" /></svg>
+          <svg
+            width={12}
+            height={12}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
           <span className="flex items-center gap-1">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">3</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">
+              3
+            </span>
             診断実施
           </span>
-          <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 18l6-6-6-6" /></svg>
+          <svg
+            width={12}
+            height={12}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
           <span className="flex items-center gap-1">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">4</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-50 text-[10px] font-bold text-[#2979ff]">
+              4
+            </span>
             結果分析
           </span>
         </div>
@@ -334,7 +438,14 @@ function EmptyState() {
           className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-medium text-white transition-colors hover:opacity-90"
           style={{ backgroundColor: "#2979ff" }}
         >
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path d="M12 5v14M5 12h14" />
           </svg>
           最初のチームを作成

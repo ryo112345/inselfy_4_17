@@ -47,7 +47,13 @@ export function CompanyAuthGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <CompanyUnreadMessagingProvider>
-      <div className={isFullBleed ? "flex h-screen flex-col overflow-hidden bg-gray-50" : "min-h-screen bg-gray-50"}>
+      <div
+        className={
+          isFullBleed
+            ? "flex h-screen flex-col overflow-hidden bg-gray-50"
+            : "min-h-screen bg-gray-50"
+        }
+      >
         <CompanyHeader>{children}</CompanyHeader>
       </div>
     </CompanyUnreadMessagingProvider>

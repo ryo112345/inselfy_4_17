@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { PostItem } from "@/features/timeline/api";
 import { fetchLikedPosts } from "@/features/timeline/api";
 import { PostCard } from "@/features/timeline/PostCard";
@@ -96,9 +96,7 @@ export function PostsTabs({ posts = [], userId, currentUserId }: Props) {
       </div>
 
       {content ?? (
-        <div className="py-14 text-center text-base text-gray-500">
-          {activeTab.empty}
-        </div>
+        <div className="py-14 text-center text-base text-gray-500">{activeTab.empty}</div>
       )}
     </section>
   );

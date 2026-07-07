@@ -4,19 +4,27 @@ import {
   experiencesListExperiences,
   followsListFollowers,
   followsListFollowing,
-  skillsListSkills,
-  usersGetUserById,
-  usersGetUserByUsername,
   type ModelsEducationResponse,
   type ModelsExperienceResponse,
   type ModelsSkillResponse,
   type ModelsUserResponse,
+  skillsListSkills,
+  usersGetUserById,
+  usersGetUserByUsername,
 } from "@/external/client/api/generated";
-import { getAiReport as getWvAiReport, getLatestResult as getLatestWvResult, type ResultDTO as WvResultDTO } from "@/features/work-values/api";
-import { getAiReport as getCiAiReport, getLatestResult as getLatestCiResult, type ResultDTO as CiResultDTO } from "@/features/career-interest/api";
-import { getLatestIntegratedRequest } from "@/features/integrated-report/api";
-import { VALUE_LABELS, type ValueId } from "@/features/work-values/lib/needs";
+import {
+  type ResultDTO as CiResultDTO,
+  getAiReport as getCiAiReport,
+  getLatestResult as getLatestCiResult,
+} from "@/features/career-interest/api";
 import { TYPE_LABELS, type TypeId } from "@/features/career-interest/lib/types";
+import { getLatestIntegratedRequest } from "@/features/integrated-report/api";
+import {
+  getLatestResult as getLatestWvResult,
+  getAiReport as getWvAiReport,
+  type ResultDTO as WvResultDTO,
+} from "@/features/work-values/api";
+import { VALUE_LABELS, type ValueId } from "@/features/work-values/lib/needs";
 
 export type DiagnosticSummary = {
   label: string;
@@ -50,13 +58,19 @@ export type PanelData = {
 
 // cookieHeader: サーバコンポーネントから呼ぶ場合に認証Cookieを転送する。
 // 診断結果系APIは認証必須のため、これがないと未ログイン扱いになり診断パネルが空になる。
-export async function fetchPanelDataByUsername(username: string, cookieHeader?: string): Promise<PanelData | null> {
+export async function fetchPanelDataByUsername(
+  username: string,
+  cookieHeader?: string,
+): Promise<PanelData | null> {
   const userRes = await usersGetUserByUsername({ path: { username } });
   if (userRes.error || !userRes.data) return null;
   return fetchRest(userRes.data, username, cookieHeader);
 }
 
-export async function fetchPanelDataByUserId(userId: string, cookieHeader?: string): Promise<PanelData | null> {
+export async function fetchPanelDataByUserId(
+  userId: string,
+  cookieHeader?: string,
+): Promise<PanelData | null> {
   const userRes = await usersGetUserById({ path: { id: userId } });
   if (userRes.error || !userRes.data) return null;
   return fetchRest(userRes.data, userRes.data.username, cookieHeader);
@@ -83,16 +97,25 @@ function buildCiKeywords(result: CiResultDTO): string {
     .join("・");
 }
 
-async function checkReportExists(sessionId: string, kind: "work-values" | "career-interest", cookieHeader?: string): Promise<boolean> {
+async function checkReportExists(
+  sessionId: string,
+  kind: "work-values" | "career-interest",
+  cookieHeader?: string,
+): Promise<boolean> {
   try {
-    const report = kind === "work-values" ? await getWvAiReport(sessionId, cookieHeader) : await getCiAiReport(sessionId, cookieHeader);
+    const report =
+      kind === "work-values"
+        ? await getWvAiReport(sessionId, cookieHeader)
+        : await getCiAiReport(sessionId, cookieHeader);
     return !!report?.content;
   } catch {
     return false;
   }
 }
 
-async function fetchLatestIntegratedRequest(userId: string): Promise<{ requestId: string; hasReport: boolean } | null> {
+async function fetchLatestIntegratedRequest(
+  userId: string,
+): Promise<{ requestId: string; hasReport: boolean } | null> {
   try {
     const data = await getLatestIntegratedRequest(userId);
     if (!data) return null;
@@ -117,20 +140,29 @@ async function fetchFollowCounts(username: string): Promise<FollowCounts> {
   }
 }
 
-async function fetchRest(user: ModelsUserResponse, username: string, cookieHeader?: string): Promise<PanelData> {
-  const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult, intRequest, followCounts] = await Promise.all([
-    experiencesListExperiences({ path: { username } }),
-    educationsListEducations({ path: { username } }),
-    skillsListSkills({ path: { username } }),
-    getLatestWvResult(user.id, cookieHeader).catch(() => null),
-    getLatestCiResult(user.id, cookieHeader).catch(() => null),
-    fetchLatestIntegratedRequest(user.id),
-    fetchFollowCounts(username),
-  ]);
+async function fetchRest(
+  user: ModelsUserResponse,
+  username: string,
+  cookieHeader?: string,
+): Promise<PanelData> {
+  const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult, intRequest, followCounts] =
+    await Promise.all([
+      experiencesListExperiences({ path: { username } }),
+      educationsListEducations({ path: { username } }),
+      skillsListSkills({ path: { username } }),
+      getLatestWvResult(user.id, cookieHeader).catch(() => null),
+      getLatestCiResult(user.id, cookieHeader).catch(() => null),
+      fetchLatestIntegratedRequest(user.id),
+      fetchFollowCounts(username),
+    ]);
 
   const [wvHasReport, ciHasReport] = await Promise.all([
-    wvResult?.sessionId ? checkReportExists(wvResult.sessionId, "work-values", cookieHeader) : Promise.resolve(false),
-    ciResult?.sessionId ? checkReportExists(ciResult.sessionId, "career-interest", cookieHeader) : Promise.resolve(false),
+    wvResult?.sessionId
+      ? checkReportExists(wvResult.sessionId, "work-values", cookieHeader)
+      : Promise.resolve(false),
+    ciResult?.sessionId
+      ? checkReportExists(ciResult.sessionId, "career-interest", cookieHeader)
+      : Promise.resolve(false),
   ]);
 
   const experiences: ModelsExperienceResponse[] = experiencesRes.data?.items ?? [];

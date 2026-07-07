@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
-import { fetchCandidateInterviews, cancelInterviewAsCandidate } from "@/features/interview/api";
-import type { Interview, InterviewProposal } from "@/features/interview/types";
+import { cancelInterviewAsCandidate, fetchCandidateInterviews } from "@/features/interview/api";
 import { CalendarSlotSelector } from "@/features/interview/components/CalendarSlotSelector";
+import type { Interview, InterviewProposal } from "@/features/interview/types";
 import { useMessagingWebSocket } from "@/features/messaging/useWebSocket";
 
 type Tab = "pending" | "scheduled" | "past";
@@ -17,11 +17,15 @@ const TABS: { key: Tab; label: string }[] = [
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString("ja-JP", {
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-  }) + " " + d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  return (
+    d.toLocaleDateString("ja-JP", {
+      month: "long",
+      day: "numeric",
+      weekday: "short",
+    }) +
+    " " +
+    d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })
+  );
 }
 
 function formatTimeOnly(iso: string): string {
@@ -84,9 +88,7 @@ export default function InterviewsPage() {
   const scheduled = interviews.filter(
     (iv) => iv.status === "scheduled" && new Date(iv.startTime) >= now,
   );
-  const past = interviews.filter(
-    (iv) => iv.status !== "scheduled" || new Date(iv.startTime) < now,
-  );
+  const past = interviews.filter((iv) => iv.status !== "scheduled" || new Date(iv.startTime) < now);
 
   const counts: Record<Tab, number> = {
     pending: proposals.length,
@@ -128,9 +130,11 @@ export default function InterviewsPage() {
           >
             {t.label}
             {counts[t.key] > 0 && (
-              <span className={`ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold ${
-                tab === t.key ? "bg-[#3D8B6E] text-white" : "bg-gray-200 text-gray-600"
-              }`}>
+              <span
+                className={`ml-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold ${
+                  tab === t.key ? "bg-[#3D8B6E] text-white" : "bg-gray-200 text-gray-600"
+                }`}
+              >
                 {counts[t.key]}
               </span>
             )}
@@ -179,9 +183,7 @@ export default function InterviewsPage() {
               ) : (
                 scheduled
                   .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-                  .map((iv) => (
-                    <InterviewCard key={iv.id} interview={iv} onCancelled={load} />
-                  ))
+                  .map((iv) => <InterviewCard key={iv.id} interview={iv} onCancelled={load} />)
               )}
             </div>
           )}
@@ -194,9 +196,7 @@ export default function InterviewsPage() {
               ) : (
                 past
                   .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
-                  .map((iv) => (
-                    <InterviewCard key={iv.id} interview={iv} isPast />
-                  ))
+                  .map((iv) => <InterviewCard key={iv.id} interview={iv} isPast />)
               )}
             </div>
           )}
@@ -209,7 +209,15 @@ export default function InterviewsPage() {
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 py-16">
-      <svg className="mb-3 text-gray-300" width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+      <svg
+        className="mb-3 text-gray-300"
+        width={40}
+        height={40}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+      >
         <rect x={3} y={4} width={18} height={18} rx={2} />
         <path d="M16 2v4M8 2v4M3 10h18" />
       </svg>
@@ -252,7 +260,9 @@ function InterviewCard({
   };
 
   return (
-    <div className={`rounded-2xl border bg-white p-5 ${isPast ? "border-gray-100 opacity-75" : "border-gray-200"}`}>
+    <div
+      className={`rounded-2xl border bg-white p-5 ${isPast ? "border-gray-100 opacity-75" : "border-gray-200"}`}
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E]/10 text-[#3D8B6E] text-sm font-semibold">
@@ -260,9 +270,7 @@ function InterviewCard({
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-900">{interview.companyName}</p>
-            {interview.jobTitle && (
-              <p className="text-xs text-gray-500">{interview.jobTitle}</p>
-            )}
+            {interview.jobTitle && <p className="text-xs text-gray-500">{interview.jobTitle}</p>}
           </div>
         </div>
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${status.color}`}>
@@ -272,7 +280,15 @@ function InterviewCard({
 
       <div className="space-y-2 mb-3">
         <div className="flex items-center gap-2.5">
-          <svg className="shrink-0 text-gray-400" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="shrink-0 text-gray-400"
+            width={16}
+            height={16}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <rect x={3} y={4} width={18} height={18} rx={2} />
             <path d="M16 2v4M8 2v4M3 10h18" />
           </svg>
@@ -288,7 +304,15 @@ function InterviewCard({
 
         {interview.location && (
           <div className="flex items-center gap-2.5">
-            <svg className="shrink-0 text-gray-400" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="shrink-0 text-gray-400"
+              width={16}
+              height={16}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" />
               <circle cx={12} cy={10} r={3} />
             </svg>
@@ -298,7 +322,15 @@ function InterviewCard({
 
         {interview.meetingUrl && (
           <div className="flex items-center gap-2.5">
-            <svg className="shrink-0 text-gray-400" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="shrink-0 text-gray-400"
+              width={16}
+              height={16}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
             </svg>

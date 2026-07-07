@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { Interview } from "../types";
 import { cancelInterviewAsCompany } from "../api";
+import type { Interview } from "../types";
 
 type Props = {
   interview: Interview;
@@ -12,12 +12,16 @@ type Props = {
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-  }) + " " + d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  return (
+    d.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "short",
+    }) +
+    " " +
+    d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })
+  );
 }
 
 function formatTimeOnly(iso: string): string {
@@ -49,7 +53,10 @@ export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props)
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+    >
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4"
         onClick={(e) => e.stopPropagation()}
@@ -60,7 +67,14 @@ export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props)
             onClick={onClose}
             className="h-8 w-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100"
           >
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
           </button>
@@ -73,30 +87,48 @@ export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props)
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-900">{interview.candidateName}</p>
-              {interview.jobTitle && (
-                <p className="text-xs text-gray-500">{interview.jobTitle}</p>
-              )}
+              {interview.jobTitle && <p className="text-xs text-gray-500">{interview.jobTitle}</p>}
             </div>
-            <span className={`ml-auto rounded-full px-2.5 py-0.5 text-xs font-medium ${status.color}`}>
+            <span
+              className={`ml-auto rounded-full px-2.5 py-0.5 text-xs font-medium ${status.color}`}
+            >
               {status.label}
             </span>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <svg className="mt-0.5 shrink-0 text-gray-400" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <svg
+                className="mt-0.5 shrink-0 text-gray-400"
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <rect x={3} y={4} width={18} height={18} rx={2} />
                 <path d="M16 2v4M8 2v4M3 10h18" />
               </svg>
               <div className="text-sm text-gray-700">
                 <p>{formatDateTime(interview.startTime)}</p>
-                <p className="text-gray-500">{formatTimeOnly(interview.startTime)} – {formatTimeOnly(interview.endTime)}</p>
+                <p className="text-gray-500">
+                  {formatTimeOnly(interview.startTime)} – {formatTimeOnly(interview.endTime)}
+                </p>
               </div>
             </div>
 
             {interview.location && (
               <div className="flex items-start gap-3">
-                <svg className="mt-0.5 shrink-0 text-gray-400" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  className="mt-0.5 shrink-0 text-gray-400"
+                  width={16}
+                  height={16}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z" />
                   <circle cx={12} cy={10} r={3} />
                 </svg>
@@ -106,7 +138,15 @@ export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props)
 
             {interview.meetingUrl && (
               <div className="flex items-start gap-3">
-                <svg className="mt-0.5 shrink-0 text-gray-400" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  className="mt-0.5 shrink-0 text-gray-400"
+                  width={16}
+                  height={16}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>

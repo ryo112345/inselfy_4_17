@@ -1,12 +1,11 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-
-import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
-import { getResultBySessionId } from "@/features/work-values/api";
 import { Sidebar } from "@/app/components/Sidebar";
 import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
+import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
+import { getResultBySessionId } from "@/features/work-values/api";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +17,10 @@ export default async function WorkValuesResultPage({
   const { sessionId } = await params;
 
   const cookieStore = await cookies();
-  const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
 
   let result;
   try {

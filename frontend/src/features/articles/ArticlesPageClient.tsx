@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
-import type { ArticleItem } from "./api";
+import { useCallback, useMemo, useState } from "react";
 import { ArticleCard } from "./ArticleCard";
 import { ArticleSection } from "./ArticleSection";
+import type { ArticleItem } from "./api";
 
 type Props = {
   articles: ArticleItem[];
@@ -62,7 +62,10 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
       result = result.filter(
         (a) =>
           a.title.toLowerCase().includes(q) ||
-          a.body.replace(/<[^>]*>/g, "").toLowerCase().includes(q) ||
+          a.body
+            .replace(/<[^>]*>/g, "")
+            .toLowerCase()
+            .includes(q) ||
           a.authorName.toLowerCase().includes(q) ||
           a.tags.some((t) => t.toLowerCase().includes(q)),
       );
@@ -83,10 +86,7 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
   }, []);
 
   const featured = useMemo(() => articles.slice(0, 4), [articles]);
-  const featuredIds = useMemo(
-    () => new Set(featured.map((a) => a.id)),
-    [featured],
-  );
+  const featuredIds = useMemo(() => new Set(featured.map((a) => a.id)), [featured]);
 
   const { groups, remaining } = useMemo(() => {
     const nonFeatured = articles.filter((a) => !featuredIds.has(a.id));
@@ -162,14 +162,15 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
 
       {/* Tag Filter */}
       {allTags.length > 0 && (
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide" style={{ scrollbarWidth: "none" }}>
+        <div
+          className="flex gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide"
+          style={{ scrollbarWidth: "none" }}
+        >
           <button
             type="button"
             onClick={handleClearFilters}
             className={`px-3.5 py-1.5 text-[13px] font-medium rounded-full shrink-0 transition-all cursor-pointer ${
-              !activeTag
-                ? "bg-gray-900 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              !activeTag ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             すべて
@@ -204,12 +205,7 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
                 </span>
               )}
               {filteredArticles.length}件の記事
-              {searchQuery && (
-                <span className="text-gray-400">
-                  {" "}
-                  「{searchQuery}」
-                </span>
-              )}
+              {searchQuery && <span className="text-gray-400"> 「{searchQuery}」</span>}
             </p>
             <button
               type="button"
@@ -237,28 +233,20 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
               <p className="text-sm font-medium text-gray-500 mb-1">
                 一致する記事が見つかりませんでした
               </p>
-              <p className="text-[13px] text-gray-400">
-                キーワードを変えて検索してみてください
-              </p>
+              <p className="text-[13px] text-gray-400">キーワードを変えて検索してみてください</p>
             </div>
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {filteredArticles.slice(0, gridPageSize).map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={article}
-                    variant="grid"
-                  />
+                  <ArticleCard key={article.id} article={article} variant="grid" />
                 ))}
               </div>
               {filteredArticles.length > gridPageSize && (
                 <div className="flex justify-center mt-8">
                   <button
                     type="button"
-                    onClick={() =>
-                      setGridPageSize((prev) => prev + GRID_PAGE_SIZE)
-                    }
+                    onClick={() => setGridPageSize((prev) => prev + GRID_PAGE_SIZE)}
                     className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     もっと見る（残り
@@ -293,11 +281,7 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {featured.map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={article}
-                    variant="grid"
-                  />
+                  <ArticleCard key={article.id} article={article} variant="grid" />
                 ))}
               </div>
             </section>
@@ -317,25 +301,17 @@ export function ArticlesPageClient({ articles, isLoggedIn }: Props) {
           {/* Remaining articles */}
           {remaining.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">
-                最新の記事
-              </h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-4">最新の記事</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {remaining.slice(0, gridPageSize).map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={article}
-                    variant="grid"
-                  />
+                  <ArticleCard key={article.id} article={article} variant="grid" />
                 ))}
               </div>
               {remaining.length > gridPageSize && (
                 <div className="flex justify-center mt-8">
                   <button
                     type="button"
-                    onClick={() =>
-                      setGridPageSize((prev) => prev + GRID_PAGE_SIZE)
-                    }
+                    onClick={() => setGridPageSize((prev) => prev + GRID_PAGE_SIZE)}
                     className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     もっと見る

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Inter, Playfair_Display } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { Playfair_Display, Inter } from "next/font/google";
-import { useCareerInterestQuiz } from "@/features/career-interest/useCareerInterestQuiz";
-import type { ItemDTO } from "@/features/career-interest/api";
+import { useEffect } from "react";
 import { useAuth } from "@/features/auth/auth-context";
+import type { ItemDTO } from "@/features/career-interest/api";
+import { useCareerInterestQuiz } from "@/features/career-interest/useCareerInterestQuiz";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -166,9 +166,7 @@ function QuizScreen({
 
         {/* question text */}
         <div className="relative z-10 px-8 pb-2">
-          <p className="text-gray-800 text-[17px] leading-relaxed text-center">
-            {item.textJa}
-          </p>
+          <p className="text-gray-800 text-[17px] leading-relaxed text-center">{item.textJa}</p>
         </div>
 
         {/* prompt */}
@@ -180,11 +178,7 @@ function QuizScreen({
 
         {/* score buttons */}
         <div className="relative z-10 px-4 pb-8">
-          <div
-            className="flex gap-1"
-            role="radiogroup"
-            aria-label="興味度を選択"
-          >
+          <div className="flex gap-1" role="radiogroup" aria-label="興味度を選択">
             {SCORE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
@@ -218,7 +212,13 @@ function CompletedScreen({ onSubmit }: { onSubmit: () => void }) {
 
         <div className="relative z-10">
           <div className="w-14 h-14 rounded-full border-2 border-blue-400/60 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-7 h-7 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg
+              className="w-7 h-7 text-blue-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -263,13 +263,7 @@ function SubmittingScreen() {
   );
 }
 
-function ErrorScreen({
-  message,
-  onRetry,
-}: {
-  message: string | null;
-  onRetry: () => void;
-}) {
+function ErrorScreen({ message, onRetry }: { message: string | null; onRetry: () => void }) {
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
       <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#e8f0fa] border border-gray-200 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
@@ -293,16 +287,116 @@ function ErrorScreen({
 }
 
 const SHAPES = [
-  { type: "hex", size: 130, top: "-8%", left: "-10%", color: "rgba(180,220,210,0.35)", dur: "20s", dx: 20, dy: 15, rotate: 15 },
-  { type: "hex", size: 90, top: "8%", left: "75%", color: "rgba(170,210,200,0.30)", dur: "18s", dx: -15, dy: 25, rotate: -10 },
-  { type: "rect", size: 100, top: "-5%", left: "38%", color: "rgba(180,200,230,0.30)", dur: "22s", dx: 15, dy: -20, rotate: 30 },
-  { type: "rect", size: 75, top: "18%", left: "85%", color: "rgba(200,180,220,0.35)", dur: "17s", dx: -20, dy: 15, rotate: -20 },
-  { type: "hex", size: 110, top: "28%", left: "-8%", color: "rgba(240,210,180,0.30)", dur: "24s", dx: 25, dy: -15, rotate: 25 },
-  { type: "rect", size: 65, top: "6%", left: "20%", color: "rgba(160,210,200,0.35)", dur: "16s", dx: -10, dy: 20, rotate: 45 },
-  { type: "hex", size: 80, top: "52%", left: "80%", color: "rgba(190,220,210,0.28)", dur: "21s", dx: -20, dy: -15, rotate: -30 },
-  { type: "rect", size: 85, top: "45%", left: "0%", color: "rgba(180,195,230,0.30)", dur: "19s", dx: 15, dy: 20, rotate: 10 },
-  { type: "hex", size: 120, top: "32%", left: "38%", color: "rgba(230,200,170,0.20)", dur: "23s", dx: -12, dy: 18, rotate: -15 },
-  { type: "rect", size: 55, top: "62%", left: "42%", color: "rgba(190,215,200,0.28)", dur: "18s", dx: 18, dy: -12, rotate: 35 },
+  {
+    type: "hex",
+    size: 130,
+    top: "-8%",
+    left: "-10%",
+    color: "rgba(180,220,210,0.35)",
+    dur: "20s",
+    dx: 20,
+    dy: 15,
+    rotate: 15,
+  },
+  {
+    type: "hex",
+    size: 90,
+    top: "8%",
+    left: "75%",
+    color: "rgba(170,210,200,0.30)",
+    dur: "18s",
+    dx: -15,
+    dy: 25,
+    rotate: -10,
+  },
+  {
+    type: "rect",
+    size: 100,
+    top: "-5%",
+    left: "38%",
+    color: "rgba(180,200,230,0.30)",
+    dur: "22s",
+    dx: 15,
+    dy: -20,
+    rotate: 30,
+  },
+  {
+    type: "rect",
+    size: 75,
+    top: "18%",
+    left: "85%",
+    color: "rgba(200,180,220,0.35)",
+    dur: "17s",
+    dx: -20,
+    dy: 15,
+    rotate: -20,
+  },
+  {
+    type: "hex",
+    size: 110,
+    top: "28%",
+    left: "-8%",
+    color: "rgba(240,210,180,0.30)",
+    dur: "24s",
+    dx: 25,
+    dy: -15,
+    rotate: 25,
+  },
+  {
+    type: "rect",
+    size: 65,
+    top: "6%",
+    left: "20%",
+    color: "rgba(160,210,200,0.35)",
+    dur: "16s",
+    dx: -10,
+    dy: 20,
+    rotate: 45,
+  },
+  {
+    type: "hex",
+    size: 80,
+    top: "52%",
+    left: "80%",
+    color: "rgba(190,220,210,0.28)",
+    dur: "21s",
+    dx: -20,
+    dy: -15,
+    rotate: -30,
+  },
+  {
+    type: "rect",
+    size: 85,
+    top: "45%",
+    left: "0%",
+    color: "rgba(180,195,230,0.30)",
+    dur: "19s",
+    dx: 15,
+    dy: 20,
+    rotate: 10,
+  },
+  {
+    type: "hex",
+    size: 120,
+    top: "32%",
+    left: "38%",
+    color: "rgba(230,200,170,0.20)",
+    dur: "23s",
+    dx: -12,
+    dy: 18,
+    rotate: -15,
+  },
+  {
+    type: "rect",
+    size: 55,
+    top: "62%",
+    left: "42%",
+    color: "rgba(190,215,200,0.28)",
+    dur: "18s",
+    dx: 18,
+    dy: -12,
+    rotate: 35,
+  },
 ];
 
 function FloatingShapes() {
@@ -320,16 +414,18 @@ function FloatingShapes() {
           <div
             key={i}
             className="absolute blur-[3px]"
-            style={{
-              width: s.size,
-              height: s.size,
-              top: s.top,
-              left: s.left,
-              transform: `rotate(${s.rotate}deg)`,
-              "--dx": `${s.dx}px`,
-              "--dy": `${s.dy}px`,
-              animation: `shape-float ${s.dur} ease-in-out infinite`,
-            } as React.CSSProperties}
+            style={
+              {
+                width: s.size,
+                height: s.size,
+                top: s.top,
+                left: s.left,
+                transform: `rotate(${s.rotate}deg)`,
+                "--dx": `${s.dx}px`,
+                "--dy": `${s.dy}px`,
+                animation: `shape-float ${s.dur} ease-in-out infinite`,
+              } as React.CSSProperties
+            }
           >
             {s.type === "hex" ? (
               <svg viewBox="0 0 100 100" className="w-full h-full">

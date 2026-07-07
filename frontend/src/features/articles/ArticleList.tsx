@@ -1,5 +1,5 @@
-import type { ArticleItem } from "./api";
 import { ArticleSection } from "./ArticleSection";
+import type { ArticleItem } from "./api";
 
 type Props = {
   articles: ArticleItem[];
@@ -40,16 +40,10 @@ export function ArticleList({ articles }: Props) {
 
   return (
     <div className="space-y-8 px-6 py-6">
-      {remaining.length > 0 && (
-        <ArticleSection title="最新の記事" articles={remaining} />
-      )}
+      {remaining.length > 0 && <ArticleSection title="最新の記事" articles={remaining} />}
 
       {groups.map((group) => (
-        <ArticleSection
-          key={group.tag}
-          title={group.tag}
-          articles={group.articles}
-        />
+        <ArticleSection key={group.tag} title={group.tag} articles={group.articles} />
       ))}
     </div>
   );

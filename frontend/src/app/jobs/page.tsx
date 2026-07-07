@@ -1,25 +1,25 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { searchPublicJobPostings } from "@/features/job-posting/api";
-import type { JobPostingWithCompany } from "@/features/job-posting/api";
-import { Gallery } from "../companies/[id]/Gallery";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
-import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
-import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
-import { VALUE_NEEDS } from "@/features/work-values/lib/needs";
-import type { ValueId } from "@/features/work-values/lib/needs";
-import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
-import { ValuesFilterDrawer } from "@/features/work-values/ValuesFilterDrawer";
-import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
-import { applyToJob, checkApplied } from "@/features/job-application/api";
+import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 import {
   fetchPublicTeamScores,
   type PublicTeamScore as TeamScores,
 } from "@/features/company-profile/api";
+import { applyToJob, checkApplied } from "@/features/job-application/api";
+import type { JobPostingWithCompany } from "@/features/job-posting/api";
+import { searchPublicJobPostings } from "@/features/job-posting/api";
+import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
+import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
+import type { ValueId } from "@/features/work-values/lib/needs";
+import { VALUE_NEEDS } from "@/features/work-values/lib/needs";
+import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
+import { ValuesFilterDrawer } from "@/features/work-values/ValuesFilterDrawer";
+import { Gallery } from "../companies/[id]/Gallery";
 
 const ACCENT = "#3D8B6E";
 
@@ -83,7 +83,7 @@ function computeMatchScores(
   const overall =
     culture != null && aptitude != null
       ? Math.round((culture + aptitude) / 2)
-      : culture ?? aptitude!;
+      : (culture ?? aptitude!);
 
   let commonPoints: string[] = [];
   if (userWv && teamScores.wvScores && teamScores.wvScores.length > 0) {
@@ -120,7 +120,15 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
 }
 
-const JOB_CATEGORIES = ["すべて", "エンジニア", "デザイナー", "PM", "マーケティング", "営業", "その他"];
+const JOB_CATEGORIES = [
+  "すべて",
+  "エンジニア",
+  "デザイナー",
+  "PM",
+  "マーケティング",
+  "営業",
+  "その他",
+];
 const EMPLOYMENT_TYPES = ["すべて", "正社員", "契約社員", "業務委託", "インターン", "アルバイト"];
 const REMOTE_OPTIONS = ["すべて", "フルリモート", "一部リモート", "出社"];
 
@@ -169,29 +177,31 @@ export default function JobsPage() {
   }, []);
 
   const makeScrollHandler = useCallback(
-    (lastRef: React.MutableRefObject<number>) =>
-      (e: React.UIEvent<HTMLDivElement>) => {
-        const scrollTop = e.currentTarget.scrollTop;
-        const now = Date.now();
-        if (now - toggleCooldownRef.current < 400) {
-          lastRef.current = scrollTop;
-          return;
-        }
-        const delta = scrollTop - lastRef.current;
-        if (delta > 8) {
-          setFilterBarVisible(false);
-          toggleCooldownRef.current = now;
-        } else if (delta < -8) {
-          setFilterBarVisible(true);
-          toggleCooldownRef.current = now;
-        }
+    (lastRef: React.MutableRefObject<number>) => (e: React.UIEvent<HTMLDivElement>) => {
+      const scrollTop = e.currentTarget.scrollTop;
+      const now = Date.now();
+      if (now - toggleCooldownRef.current < 400) {
         lastRef.current = scrollTop;
-      },
+        return;
+      }
+      const delta = scrollTop - lastRef.current;
+      if (delta > 8) {
+        setFilterBarVisible(false);
+        toggleCooldownRef.current = now;
+      } else if (delta < -8) {
+        setFilterBarVisible(true);
+        toggleCooldownRef.current = now;
+      }
+      lastRef.current = scrollTop;
+    },
     [],
   );
 
   const handleLeftScroll = useMemo(() => makeScrollHandler(lastScrollLeftRef), [makeScrollHandler]);
-  const handleRightScroll = useMemo(() => makeScrollHandler(lastScrollRightRef), [makeScrollHandler]);
+  const handleRightScroll = useMemo(
+    () => makeScrollHandler(lastScrollRightRef),
+    [makeScrollHandler],
+  );
 
   useEffect(() => {
     if (user) {
@@ -215,51 +225,57 @@ export default function JobsPage() {
     return pairs.map(([id, score]) => `${id}:${score}`).join(",");
   }, [filterMode, valueThresholds, needThresholds]);
 
-  const fetchJobs = useCallback(async (reset: boolean, currentOffset: number) => {
-    if (!reset && fetchingRef.current) return;
-    fetchingRef.current = true;
-    if (reset) {
-      setLoading(true);
-      setError(null);
-    } else {
-      setLoadingMore(true);
-    }
-    try {
-      const data = await searchPublicJobPostings({
-        search: search.trim() || undefined,
-        category: category !== "すべて" ? category : undefined,
-        employmentType: employment !== "すべて" ? employment : undefined,
-        remotePolicy: remote !== "すべて" ? remote : undefined,
-        sort,
-        limit: PAGE_SIZE,
-        offset: currentOffset,
-        valueFilters: valueFiltersParam || undefined,
-        filterMode: valueFiltersParam ? filterMode : undefined,
-      });
+  const fetchJobs = useCallback(
+    async (reset: boolean, currentOffset: number) => {
+      if (!reset && fetchingRef.current) return;
+      fetchingRef.current = true;
       if (reset) {
-        setJobs(data.items);
+        setLoading(true);
+        setError(null);
       } else {
-        setJobs((prev) => {
-          const existingIds = new Set(prev.map((j) => j.id));
-          const newItems = data.items.filter((j) => !existingIds.has(j.id));
-          return [...prev, ...newItems];
-        });
+        setLoadingMore(true);
       }
-      setTotal(data.total);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-      fetchingRef.current = false;
-    }
-  }, [search, category, employment, remote, sort, valueFiltersParam, filterMode]);
+      try {
+        const data = await searchPublicJobPostings({
+          search: search.trim() || undefined,
+          category: category !== "すべて" ? category : undefined,
+          employmentType: employment !== "すべて" ? employment : undefined,
+          remotePolicy: remote !== "すべて" ? remote : undefined,
+          sort,
+          limit: PAGE_SIZE,
+          offset: currentOffset,
+          valueFilters: valueFiltersParam || undefined,
+          filterMode: valueFiltersParam ? filterMode : undefined,
+        });
+        if (reset) {
+          setJobs(data.items);
+        } else {
+          setJobs((prev) => {
+            const existingIds = new Set(prev.map((j) => j.id));
+            const newItems = data.items.filter((j) => !existingIds.has(j.id));
+            return [...prev, ...newItems];
+          });
+        }
+        setTotal(data.total);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+        fetchingRef.current = false;
+      }
+    },
+    [search, category, employment, remote, sort, valueFiltersParam, filterMode],
+  );
 
   useEffect(() => {
     const needsDebounce = search.trim() || valueFiltersParam;
-    const timeout = setTimeout(() => {
-      fetchJobs(true, 0);
-    }, needsDebounce ? 300 : 0);
+    const timeout = setTimeout(
+      () => {
+        fetchJobs(true, 0);
+      },
+      needsDebounce ? 300 : 0,
+    );
     return () => clearTimeout(timeout);
   }, [fetchJobs]);
 
@@ -314,7 +330,7 @@ export default function JobsPage() {
   }, [jobs]);
 
   const selectedJob = useMemo(
-    () => (selectedId ? jobs.find((j) => j.id === selectedId) ?? null : null),
+    () => (selectedId ? (jobs.find((j) => j.id === selectedId) ?? null) : null),
     [jobs, selectedId],
   );
 
@@ -325,7 +341,7 @@ export default function JobsPage() {
         ref={filterRef}
         className="shrink-0 border-b border-gray-200 bg-white px-4 py-2.5 md:px-6 md:py-3 transition-[transform,margin-bottom] duration-300 ease-in-out will-change-transform"
         style={{
-          transform: filterBarVisible ? 'none' : 'translateY(-100%)',
+          transform: filterBarVisible ? "none" : "translateY(-100%)",
           marginBottom: filterBarVisible ? 0 : -filterHeight,
         }}
       >
@@ -358,9 +374,24 @@ export default function JobsPage() {
 
         {/* Filter row */}
         <div className="flex items-center gap-2 md:gap-3 mt-2 overflow-x-auto">
-          <FilterSelect label="職種" value={category} onChange={setCategory} options={JOB_CATEGORIES} />
-          <FilterSelect label="雇用形態" value={employment} onChange={setEmployment} options={EMPLOYMENT_TYPES} />
-          <FilterSelect label="リモート" value={remote} onChange={setRemote} options={REMOTE_OPTIONS} />
+          <FilterSelect
+            label="職種"
+            value={category}
+            onChange={setCategory}
+            options={JOB_CATEGORIES}
+          />
+          <FilterSelect
+            label="雇用形態"
+            value={employment}
+            onChange={setEmployment}
+            options={EMPLOYMENT_TYPES}
+          />
+          <FilterSelect
+            label="リモート"
+            value={remote}
+            onChange={setRemote}
+            options={REMOTE_OPTIONS}
+          />
 
           {/* Values Filter Button */}
           {hasDiagnosis && (
@@ -404,7 +435,11 @@ export default function JobsPage() {
       {/* Main Content */}
       <div className="flex flex-1 min-h-0">
         {/* Left Panel - Job List */}
-        <div ref={listRef} onScroll={handleLeftScroll} className="w-full lg:w-[440px] lg:shrink-0 border-r border-gray-200 overflow-y-auto overscroll-contain bg-[var(--background)]">
+        <div
+          ref={listRef}
+          onScroll={handleLeftScroll}
+          className="w-full lg:w-[440px] lg:shrink-0 border-r border-gray-200 overflow-y-auto overscroll-contain bg-[var(--background)]"
+        >
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-[var(--accent)]" />
@@ -449,7 +484,11 @@ export default function JobsPage() {
         {/* Right Panel - Detail (hidden on mobile) */}
         <div className="hidden lg:flex flex-1 min-h-0 bg-gray-100">
           {selectedJob ? (
-            <JobDetail job={selectedJob} matchScores={selectedJob ? matchScoresMap.get(selectedJob.id) ?? null : null} onScroll={handleRightScroll} />
+            <JobDetail
+              job={selectedJob}
+              matchScores={selectedJob ? (matchScoresMap.get(selectedJob.id) ?? null) : null}
+              onScroll={handleRightScroll}
+            />
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
               <EmptyDetailIcon />
@@ -479,11 +518,24 @@ export default function JobsPage() {
 
 function ValuesFilterIcon() {
   return (
-    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
-      <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
-      <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
-      <line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" />
+    <svg
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="4" y1="21" x2="4" y2="14" />
+      <line x1="4" y1="10" x2="4" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12" y2="3" />
+      <line x1="20" y1="21" x2="20" y2="16" />
+      <line x1="20" y1="12" x2="20" y2="3" />
+      <line x1="1" y1="14" x2="7" y2="14" />
+      <line x1="9" y1="8" x2="15" y2="8" />
       <line x1="17" y1="16" x2="23" y2="16" />
     </svg>
   );
@@ -509,7 +561,9 @@ function FilterSelect({
         className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-sm text-gray-700 outline-none cursor-pointer"
       >
         {options.map((opt) => (
-          <option key={opt} value={opt}>{opt}</option>
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
         ))}
       </select>
     </div>
@@ -538,14 +592,24 @@ function JobCard({
   return (
     <>
       <Link href={`/jobs/${job.id}`} className="lg:hidden">
-        <CardInner job={job} isSelected={false} hasDiagnosis={hasDiagnosis} matchScores={matchScores} />
+        <CardInner
+          job={job}
+          isSelected={false}
+          hasDiagnosis={hasDiagnosis}
+          matchScores={matchScores}
+        />
       </Link>
       <button
         type="button"
         onClick={onSelect}
         className="hidden lg:block w-full text-left cursor-pointer"
       >
-        <CardInner job={job} isSelected={isSelected} hasDiagnosis={hasDiagnosis} matchScores={matchScores} />
+        <CardInner
+          job={job}
+          isSelected={isSelected}
+          hasDiagnosis={hasDiagnosis}
+          matchScores={matchScores}
+        />
       </button>
     </>
   );
@@ -590,7 +654,9 @@ function CardInner({
             tabIndex={0}
             className="shrink-0 mt-0.5 text-gray-300 hover:text-gray-500 transition-colors cursor-pointer"
             onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => { if (e.key === "Enter") e.stopPropagation(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.stopPropagation();
+            }}
           >
             <BookmarkOutlineIcon />
           </div>
@@ -668,7 +734,10 @@ function CardInner({
             </span>
           )}
           {salary && (
-            <span className="flex items-center gap-1 shrink-0 text-base font-bold" style={{ color: ACCENT }}>
+            <span
+              className="flex items-center gap-1 shrink-0 text-base font-bold"
+              style={{ color: ACCENT }}
+            >
               <SalaryIcon />
               {salary}
             </span>
@@ -705,16 +774,26 @@ function CardInner({
             tabIndex={0}
             className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer"
             style={{ backgroundColor: `${ACCENT}0a` }}
-            onClick={(e) => { e.stopPropagation(); e.preventDefault(); router.push("/work_values/start"); }}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); router.push("/work_values/start"); } }}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              router.push("/work_values/start");
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.stopPropagation();
+                router.push("/work_values/start");
+              }
+            }}
           >
             <SparklesIcon />
             <span className="text-gray-600">診断を受けると</span>
-            <span className="font-semibold" style={{ color: ACCENT }}>マッチ度</span>
+            <span className="font-semibold" style={{ color: ACCENT }}>
+              マッチ度
+            </span>
             <span className="text-gray-600">がわかります</span>
           </div>
         )}
-
       </div>
     </div>
   );
@@ -735,9 +814,7 @@ function DetailStatCell({
         <span className="text-gray-400">{icon}</span>
         {label}
       </div>
-      <div className="text-xl font-bold leading-tight text-gray-900">
-        {value}
-      </div>
+      <div className="text-xl font-bold leading-tight text-gray-900">{value}</div>
     </div>
   );
 }
@@ -768,7 +845,9 @@ function DetailConditionGroup({
         {filtered.map((r) => (
           <div key={r.label} className="flex flex-col gap-0.5">
             <dt className="text-sm font-medium text-gray-500">{r.label}</dt>
-            <dd className="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap">{r.value}</dd>
+            <dd className="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap">
+              {r.value}
+            </dd>
           </div>
         ))}
       </dl>
@@ -776,7 +855,15 @@ function DetailConditionGroup({
   );
 }
 
-function JobDetail({ job, matchScores, onScroll }: { job: JobPostingWithCompany; matchScores: MatchScores | null; onScroll?: React.UIEventHandler<HTMLDivElement> }) {
+function JobDetail({
+  job,
+  matchScores,
+  onScroll,
+}: {
+  job: JobPostingWithCompany;
+  matchScores: MatchScores | null;
+  onScroll?: React.UIEventHandler<HTMLDivElement>;
+}) {
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [applied, setApplied] = useState(false);
@@ -833,7 +920,13 @@ function JobDetail({ job, matchScores, onScroll }: { job: JobPostingWithCompany;
     { label: "休日・休暇", value: job.holidays },
   ];
   const compensationConditions = [
-    { label: "年収レンジ", value: job.salaryMin != null && job.salaryMax != null ? `${job.salaryMin}万円 〜 ${job.salaryMax}万円` : "" },
+    {
+      label: "年収レンジ",
+      value:
+        job.salaryMin != null && job.salaryMax != null
+          ? `${job.salaryMin}万円 〜 ${job.salaryMax}万円`
+          : "",
+    },
     { label: "給与詳細", value: job.salaryDetail },
     { label: "社会保険", value: job.insurance },
   ];
@@ -849,11 +942,7 @@ function JobDetail({ job, matchScores, onScroll }: { job: JobPostingWithCompany;
       {/* Cover image with gradient fade */}
       {job.coverImageUrl && (
         <div className="relative w-full overflow-hidden bg-gray-100">
-          <img
-            src={job.coverImageUrl}
-            alt=""
-            className="w-full aspect-[16/9] object-cover"
-          />
+          <img src={job.coverImageUrl} alt="" className="w-full aspect-[16/9] object-cover" />
         </div>
       )}
 
@@ -871,9 +960,7 @@ function JobDetail({ job, matchScores, onScroll }: { job: JobPostingWithCompany;
           </div>
           <div>
             <p className="text-base font-semibold text-gray-900">{job.companyName}</p>
-            {job.location && (
-              <p className="text-sm text-gray-500">{job.location}</p>
-            )}
+            {job.location && <p className="text-sm text-gray-500">{job.location}</p>}
           </div>
         </div>
 
@@ -1053,10 +1140,7 @@ function MatchBadge({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center gap-1.5">
       <span className="text-xs font-medium text-gray-700">{label}</span>
-      <span
-        className="text-sm font-bold tabular-nums"
-        style={{ color }}
-      >
+      <span className="text-sm font-bold tabular-nums" style={{ color }}>
         {value}%
       </span>
       <div className="w-12 h-[6px] rounded-full bg-gray-200 overflow-hidden">
@@ -1073,7 +1157,17 @@ function MatchBadge({ label, value }: { label: string; value: number }) {
 
 function SearchIcon({ className = "" }: { className?: string }) {
   return (
-    <svg className={className} width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className={className}
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="10.5" cy="10.5" r="7.5" />
       <path d="m21 21-4.5-4.5" />
     </svg>
@@ -1082,7 +1176,16 @@ function SearchIcon({ className = "" }: { className?: string }) {
 
 function LocationIcon() {
   return (
-    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={12}
+      height={12}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
       <circle cx="12" cy="10" r="3" />
     </svg>
@@ -1091,7 +1194,16 @@ function LocationIcon() {
 
 function SalaryIcon() {
   return (
-    <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={12}
+      height={12}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
       <line x1="1" y1="10" x2="23" y2="10" />
     </svg>
@@ -1100,7 +1212,16 @@ function SalaryIcon() {
 
 function BookmarkOutlineIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
   );
@@ -1108,7 +1229,16 @@ function BookmarkOutlineIcon() {
 
 function EmptyDetailIcon() {
   return (
-    <svg width={64} height={64} viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth={1} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={64}
+      height={64}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#d1d5db"
+      strokeWidth={1}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="2" y="3" width="20" height="18" rx="2" />
       <path d="M8 7h8M8 11h5M8 15h8" />
     </svg>
@@ -1117,7 +1247,16 @@ function EmptyDetailIcon() {
 
 function SparklesIcon() {
   return (
-    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z" />
     </svg>
   );
@@ -1125,7 +1264,16 @@ function SparklesIcon() {
 
 function EmptySearchIcon() {
   return (
-    <svg width={48} height={48} viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={48}
+      height={48}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#d1d5db"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="10.5" cy="10.5" r="7.5" />
       <path d="m21 21-4.5-4.5" />
       <path d="M8 8l5 5M13 8l-5 5" />
@@ -1149,47 +1297,105 @@ function DetailSectionHeader({ icon, title }: { icon: React.ReactNode; title: st
 
 function DetailYenIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 4l7 9 7-9" /><path d="M7 13h10" /><path d="M7 17h10" /><path d="M12 13v7" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 4l7 9 7-9" />
+      <path d="M7 13h10" />
+      <path d="M7 17h10" />
+      <path d="M12 13v7" />
     </svg>
   );
 }
 
 function DetailBriefcaseIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" /><path d="M3 13h18" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M3 13h18" />
     </svg>
   );
 }
 
 function DetailUsersIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
 }
 
 function DetailHomeIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 11l9-8 9 8" />
+      <path d="M5 10v10h14V10" />
     </svg>
   );
 }
 
 function DetailClockIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
     </svg>
   );
 }
 
 function DetailShieldIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z" />
     </svg>
   );
@@ -1197,7 +1403,15 @@ function DetailShieldIcon() {
 
 function DetailCameraIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <circle cx="12" cy="13" r="4" />
     </svg>
@@ -1206,16 +1420,34 @@ function DetailCameraIcon() {
 
 function DetailDocumentIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" />
+      <path d="M14 2v6h6" />
+      <path d="M8 13h8" />
+      <path d="M8 17h6" />
     </svg>
   );
 }
 
 function DetailCheckIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M9 11l3 3 8-8" />
       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
     </svg>

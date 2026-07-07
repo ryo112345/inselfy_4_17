@@ -1,20 +1,27 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { AdaptiveSelector, type Pair } from "./lib/adaptive-selector";
-import { NEED_IDS, type NeedId } from "./lib/needs";
+import { useCallback, useRef, useState } from "react";
 import {
+  type NeedDefDTO,
+  type ResponseDTO,
+  type ResultDTO,
+  type SessionDTO,
   startSession,
   startSessionByDiagnoseToken,
   submitResult,
   submitResultByDiagnoseToken,
-  type SessionDTO,
-  type NeedDefDTO,
-  type ResultDTO,
-  type ResponseDTO,
 } from "./api";
+import { AdaptiveSelector, type Pair } from "./lib/adaptive-selector";
+import { NEED_IDS, type NeedId } from "./lib/needs";
 
-export type QuizPhase = "idle" | "loading" | "active" | "completed" | "submitting" | "done" | "error";
+export type QuizPhase =
+  | "idle"
+  | "loading"
+  | "active"
+  | "completed"
+  | "submitting"
+  | "done"
+  | "error";
 
 export interface DebugNeedInfo {
   needId: NeedId;
@@ -102,34 +109,37 @@ export function useWorkValuesQuiz(diagnoseToken?: string) {
     }
   }, [diagnoseToken]);
 
-  const answer = useCallback(async (winner: NeedId) => {
-    const selector = selectorRef.current;
-    if (!selector || !state.currentPair) return;
+  const answer = useCallback(
+    async (winner: NeedId) => {
+      const selector = selectorRef.current;
+      if (!selector || !state.currentPair) return;
 
-    const pair: Pair = {
-      needA: NEED_IDS.indexOf(state.currentPair.needA),
-      needB: NEED_IDS.indexOf(state.currentPair.needB),
-    };
-    const winnerIndex = NEED_IDS.indexOf(winner);
-    selector.recordResponse(pair, winnerIndex);
+      const pair: Pair = {
+        needA: NEED_IDS.indexOf(state.currentPair.needA),
+        needB: NEED_IDS.indexOf(state.currentPair.needB),
+      };
+      const winnerIndex = NEED_IDS.indexOf(winner);
+      selector.recordResponse(pair, winnerIndex);
 
-    if (selector.isComplete) {
-      setState((s) => ({ ...s, phase: "completed", currentPair: null }));
-      return;
-    }
+      if (selector.isComplete) {
+        setState((s) => ({ ...s, phase: "completed", currentPair: null }));
+        return;
+      }
 
-    const nextPair = selector.nextPair();
-    if (!nextPair) return;
+      const nextPair = selector.nextPair();
+      if (!nextPair) return;
 
-    const debug = buildDebugInfo(selector);
+      const debug = buildDebugInfo(selector);
 
-    setState((s) => ({
-      ...s,
-      currentPair: { needA: NEED_IDS[nextPair.needA], needB: NEED_IDS[nextPair.needB] },
-      questionNumber: s.questionNumber + 1,
-      debug,
-    }));
-  }, [state.currentPair]);
+      setState((s) => ({
+        ...s,
+        currentPair: { needA: NEED_IDS[nextPair.needA], needB: NEED_IDS[nextPair.needB] },
+        questionNumber: s.questionNumber + 1,
+        debug,
+      }));
+    },
+    [state.currentPair],
+  );
 
   const submit = useCallback(async () => {
     const selector = selectorRef.current;
@@ -164,7 +174,14 @@ export function useWorkValuesQuiz(diagnoseToken?: string) {
     }
   }, [diagnoseToken]);
 
-  return { state, start, answer, submit, sessionId: sessionRef.current?.id ?? null, needDefs: needDefsRef.current };
+  return {
+    state,
+    start,
+    answer,
+    submit,
+    sessionId: sessionRef.current?.id ?? null,
+    needDefs: needDefsRef.current,
+  };
 }
 
 function buildDebugInfo(selector: AdaptiveSelector): DebugInfo {
@@ -181,7 +198,9 @@ function buildDebugInfo(selector: AdaptiveSelector): DebugInfo {
   }));
 
   needs.sort((a, b) => b.mu - a.mu);
-  needs.forEach((n, i) => { n.rank = i + 1; });
+  needs.forEach((n, i) => {
+    n.rank = i + 1;
+  });
 
   return {
     needs,

@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
+import Cropper from "react-easy-crop";
 import { XIcon } from "./Icons";
 import { PrimaryButton, SecondaryButton } from "./Modal";
 
@@ -29,7 +29,9 @@ export function ImageCropModal({ open, imageSrc, aspect, title, onClose, onConfi
     setCroppedArea(null);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, [open]);
 
   const onCropComplete = useCallback((_: Area, px: Area) => {
@@ -50,11 +52,7 @@ export function ImageCropModal({ open, imageSrc, aspect, title, onClose, onConfi
   if (!open) return null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex flex-col bg-black/60"
-      role="dialog"
-      aria-modal="true"
-    >
+    <div className="fixed inset-0 z-50 flex flex-col bg-black/60" role="dialog" aria-modal="true">
       <div className="flex items-center justify-between px-5 py-3">
         <h3 className="text-base font-bold text-white">{title}</h3>
         <button

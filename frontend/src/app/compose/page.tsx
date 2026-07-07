@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useAuth } from "@/features/auth/auth-context";
-import { createPost } from "@/features/timeline/api";
 import { ArticlePreviewCard, extractArticleId } from "@/features/timeline/ArticlePreviewCard";
+import { createPost } from "@/features/timeline/api";
 
 export default function ComposePage() {
   const { user, isLoading } = useAuth();
@@ -58,10 +58,7 @@ export default function ComposePage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2.5 border-b border-gray-200/80 bg-white">
-        <button
-          onClick={() => router.back()}
-          className="text-[15px] text-gray-600"
-        >
+        <button onClick={() => router.back()} className="text-[15px] text-gray-600">
           キャンセル
         </button>
         <button
@@ -92,9 +89,7 @@ export default function ComposePage() {
             style={{ minHeight: 120 }}
           />
 
-          {detectedArticleId && (
-            <ArticlePreviewCard articleId={detectedArticleId} />
-          )}
+          {detectedArticleId && <ArticlePreviewCard articleId={detectedArticleId} />}
         </div>
       </div>
 

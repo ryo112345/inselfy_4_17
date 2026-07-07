@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { estimateBT } from "./bradley-terry";
-import { N } from "./needs";
 import { execSync } from "node:child_process";
-import { writeFileSync, readFileSync, unlinkSync } from "node:fs";
+import { readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { estimateBT } from "./bradley-terry";
+import { N } from "./needs";
 
 function emptyWins(): number[][] {
   return Array.from({ length: N }, () => new Array(N).fill(0));
@@ -71,7 +71,9 @@ func TestCrossVerifyOutput(t *testing.T) {
         expect(Math.abs(tsResult.se[i] - goResult.se[i])).toBeLessThan(1e-3);
       }
     } finally {
-      try { unlinkSync(testFile); } catch {}
+      try {
+        unlinkSync(testFile);
+      } catch {}
     }
   });
 });

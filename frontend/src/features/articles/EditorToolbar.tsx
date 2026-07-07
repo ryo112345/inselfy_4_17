@@ -9,20 +9,10 @@ type Props = {
   isPaid: boolean;
 };
 
-export function EditorToolbar({
-  editor,
-  onImageUpload,
-  onInsertPaidSeparator,
-  isPaid,
-}: Props) {
+export function EditorToolbar({ editor, onImageUpload, onInsertPaidSeparator, isPaid }: Props) {
   if (!editor) return null;
 
-  const btn = (
-    active: boolean,
-    onClick: () => void,
-    label: string,
-    title: string,
-  ) => (
+  const btn = (active: boolean, onClick: () => void, label: string, title: string) => (
     <button
       type="button"
       onClick={onClick}
@@ -39,12 +29,7 @@ export function EditorToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-1 px-3 py-2 border-b border-gray-200 bg-gray-50/80 rounded-t-lg">
-      {btn(
-        editor.isActive("bold"),
-        () => editor.chain().focus().toggleBold().run(),
-        "B",
-        "太字",
-      )}
+      {btn(editor.isActive("bold"), () => editor.chain().focus().toggleBold().run(), "B", "太字")}
       {btn(
         editor.isActive("italic"),
         () => editor.chain().focus().toggleItalic().run(),
@@ -104,12 +89,7 @@ export function EditorToolbar({
 
       {btn(false, onImageUpload, "🖼", "画像を挿入")}
 
-      {btn(
-        false,
-        () => editor.chain().focus().setHorizontalRule().run(),
-        "—",
-        "区切り線",
-      )}
+      {btn(false, () => editor.chain().focus().setHorizontalRule().run(), "—", "区切り線")}
 
       {isPaid && (
         <>

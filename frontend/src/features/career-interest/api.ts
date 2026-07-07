@@ -5,8 +5,6 @@ import {
   careerInterestCiGetResultBySession,
   careerInterestCiStartSession,
   careerInterestCiSubmitResult,
-  teamDiagnoseStartDiagnoseCiSession,
-  teamDiagnoseSubmitDiagnoseCiResult,
   type ModelsAiReportResponse,
   type ModelsCiBasicScoreResponse,
   type ModelsCiItemResponse,
@@ -14,6 +12,8 @@ import {
   type ModelsCiResultResponse,
   type ModelsCiSessionResponse,
   type ModelsCiTypeScoreResponse,
+  teamDiagnoseStartDiagnoseCiSession,
+  teamDiagnoseSubmitDiagnoseCiResult,
 } from "@/external/client/api/generated";
 
 export type ItemDTO = ModelsCiItemResponse;
@@ -65,7 +65,10 @@ export async function submitResultByDiagnoseToken(
 }
 
 // cookieHeader はSSR（サーバコンポーネント）から呼ぶ際に認証Cookieを転送するために渡す
-export async function getResultBySessionId(sessionId: string, cookieHeader?: string): Promise<ResultDTO> {
+export async function getResultBySessionId(
+  sessionId: string,
+  cookieHeader?: string,
+): Promise<ResultDTO> {
   const { data, error, response } = await careerInterestCiGetResultBySession({
     path: { sessionId },
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
@@ -74,7 +77,10 @@ export async function getResultBySessionId(sessionId: string, cookieHeader?: str
   return data;
 }
 
-export async function getLatestResult(userId: string, cookieHeader?: string): Promise<ResultDTO | null> {
+export async function getLatestResult(
+  userId: string,
+  cookieHeader?: string,
+): Promise<ResultDTO | null> {
   const { data, error, response } = await careerInterestCiGetLatestResult({
     path: { userId },
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
@@ -87,7 +93,10 @@ export async function getLatestResult(userId: string, cookieHeader?: string): Pr
 export type AiReportDTO = ModelsAiReportResponse;
 
 // AIレポート取得。未生成（404）等のエラーは null を返す。
-export async function getAiReport(sessionId: string, cookieHeader?: string): Promise<AiReportDTO | null> {
+export async function getAiReport(
+  sessionId: string,
+  cookieHeader?: string,
+): Promise<AiReportDTO | null> {
   const { data, error } = await careerInterestCiGetAiReport({
     path: { sessionId },
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,

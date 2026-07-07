@@ -76,11 +76,7 @@ export default function CompanyRegisterPage() {
               strokeWidth={2}
               stroke="currentColor"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.5 12.75l6 6 9-13.5"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
           <h2 className="text-xl font-bold text-gray-900">登録を受け付けました</h2>
@@ -217,10 +213,7 @@ export default function CompanyRegisterPage() {
 
         <p className="text-center text-sm text-gray-600">
           すでにアカウントをお持ちの方は{" "}
-          <Link
-            href="/company/login"
-            className="font-medium text-blue-600 hover:text-blue-500"
-          >
+          <Link href="/company/login" className="font-medium text-blue-600 hover:text-blue-500">
             ログイン
           </Link>
         </p>

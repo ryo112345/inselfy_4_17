@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import type { ArticleItem } from "./api";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArticleCard } from "./ArticleCard";
+import type { ArticleItem } from "./api";
 
 type Props = {
   title: string;
@@ -40,8 +40,7 @@ export function ArticleSection({ title, articles, tag, onTagClick }: Props) {
   function scroll(direction: "left" | "right") {
     const el = scrollRef.current;
     if (!el) return;
-    const cardWidth =
-      el.querySelector<HTMLElement>("[data-card]")?.offsetWidth ?? 240;
+    const cardWidth = el.querySelector<HTMLElement>("[data-card]")?.offsetWidth ?? 240;
     const gap = 16;
     const amount = (cardWidth + gap) * 2;
     el.scrollBy({
@@ -106,11 +105,7 @@ export function ArticleSection({ title, articles, tag, onTagClick }: Props) {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {articles.map((article) => (
-            <div
-              key={article.id}
-              data-card
-              className="w-[220px] shrink-0 snap-start"
-            >
+            <div key={article.id} data-card className="w-[220px] shrink-0 snap-start">
               <ArticleCard article={article} />
             </div>
           ))}

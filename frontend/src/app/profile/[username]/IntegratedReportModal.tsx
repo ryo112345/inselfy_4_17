@@ -2,17 +2,25 @@
 
 import { useState } from "react";
 import { createIntegratedReportRequest } from "@/features/integrated-report/api";
-import { Modal, Field, PrimaryButton, SecondaryButton } from "./Modal";
+import { Field, Modal, PrimaryButton, SecondaryButton } from "./Modal";
 
 const TOPICS = [
-  { id: 1, title: "キャリアを「物語」として読み解く", sub: "選択の連なりが描く、あなただけのストーリー" },
+  {
+    id: 1,
+    title: "キャリアを「物語」として読み解く",
+    sub: "選択の連なりが描く、あなただけのストーリー",
+  },
   { id: 2, title: "あなたの取扱説明書", sub: "上司・同僚に渡したい「この人の活かし方」" },
   { id: 3, title: "あなたの「仕事の流儀」", sub: "無意識にこだわっている仕事の進め方・美学" },
   { id: 4, title: "面接で使える「自分の言語化」", sub: "診断と経歴から作る、あなたのストーリー" },
   { id: 5, title: "転職・異動の「判断パターン」分析", sub: "何がトリガーで動いてきたか" },
   { id: 6, title: "あなたの「仕事スイッチ」の入り方", sub: "いつ・なぜエンジンがかかるのか" },
   { id: 7, title: "あなたを一番成長させる「修羅場」", sub: "どんな困難が次のレベルに連れていくか" },
-  { id: 8, title: "あなたの「リーダーシップの型」", sub: "人を動かすとき、あなたは自然と何をしているか" },
+  {
+    id: 8,
+    title: "あなたの「リーダーシップの型」",
+    sub: "人を動かすとき、あなたは自然と何をしているか",
+  },
   { id: 9, title: "最高の相性のチームメイト像", sub: "どんな人と組むと力を発揮するか" },
   { id: 10, title: "見落としている「伸びしろ」", sub: "まだ活かしきれていない可能性" },
 ] as const;
@@ -68,11 +76,7 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
       footer={
         <>
           <SecondaryButton onClick={onClose}>キャンセル</SecondaryButton>
-          <PrimaryButton
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            loading={submitting}
-          >
+          <PrimaryButton onClick={handleSubmit} disabled={!canSubmit} loading={submitting}>
             この内容で生成する
           </PrimaryButton>
         </>
@@ -101,30 +105,21 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
             >
               <span
                 className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                  isSelected
-                    ? "bg-emerald-600 text-white"
-                    : "bg-gray-100 text-gray-400"
+                  isSelected ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-400"
                 }`}
               >
                 {isSelected ? idx + 1 : ""}
               </span>
               <span>
-                <span className="text-sm font-semibold text-gray-900">
-                  {topic.title}
-                </span>
-                <span className="mt-0.5 block text-xs text-gray-500">
-                  {topic.sub}
-                </span>
+                <span className="text-sm font-semibold text-gray-900">{topic.title}</span>
+                <span className="mt-0.5 block text-xs text-gray-500">{topic.sub}</span>
               </span>
             </button>
           );
         })}
       </div>
 
-      <Field
-        label="AIに聞きたいこと（自由記述）"
-        hint={`${[...freeText].length} / 200`}
-      >
+      <Field label="AIに聞きたいこと（自由記述）" hint={`${[...freeText].length} / 200`}>
         <textarea
           value={freeText}
           onChange={(e) => {
@@ -136,9 +131,7 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
         />
       </Field>
 
-      {error && (
-        <p className="mt-3 text-sm text-rose-600">{error}</p>
-      )}
+      {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
     </Modal>
   );
 }

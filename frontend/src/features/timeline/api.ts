@@ -1,5 +1,12 @@
 import "@/external/client/api/client";
 import {
+  type ModelsCommentListResponse,
+  type ModelsCommentResponse,
+  type ModelsCreatePostRequest,
+  type ModelsLikeToggleResponse,
+  type ModelsPostListResponse,
+  type ModelsPostResponse,
+  type ModelsRepostToggleResponse,
   postsCreatePost,
   postsCreatePostComment,
   postsDeletePost,
@@ -10,13 +17,6 @@ import {
   postsListTimelinePosts,
   postsTogglePostLike,
   postsTogglePostRepost,
-  type ModelsCommentListResponse,
-  type ModelsCommentResponse,
-  type ModelsCreatePostRequest,
-  type ModelsLikeToggleResponse,
-  type ModelsPostListResponse,
-  type ModelsPostResponse,
-  type ModelsRepostToggleResponse,
 } from "@/external/client/api/generated";
 
 export type PostItem = ModelsPostResponse;
@@ -26,10 +26,7 @@ export type CommentListResponse = ModelsCommentListResponse;
 export type LikeToggleResponse = ModelsLikeToggleResponse;
 export type RepostToggleResponse = ModelsRepostToggleResponse;
 
-export async function fetchPost(
-  postId: string,
-  viewerId = "",
-): Promise<PostItem> {
+export async function fetchPost(postId: string, viewerId = ""): Promise<PostItem> {
   const { data, error } = await postsGetPost({
     path: { postId },
     query: viewerId ? { viewerId } : undefined,
@@ -97,10 +94,7 @@ export async function fetchLikedPosts(
   return data;
 }
 
-export async function deletePost(
-  postId: string,
-  _userId: string,
-): Promise<void> {
+export async function deletePost(postId: string, _userId: string): Promise<void> {
   const { error } = await postsDeletePost({ path: { postId } });
   if (error) throw new Error("Failed to delete post");
 }
@@ -124,10 +118,7 @@ export async function fetchComments(
   return data;
 }
 
-export async function createComment(
-  postId: string,
-  content: string,
-): Promise<CommentItem> {
+export async function createComment(postId: string, content: string): Promise<CommentItem> {
   const { data, error } = await postsCreatePostComment({
     path: { postId },
     body: { content },

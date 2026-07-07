@@ -4,16 +4,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getAiReport,
   getResultBySessionId,
-  type ResultDTO,
   type NeedScoreDTO,
+  type ResultDTO,
 } from "@/features/work-values/api";
 import {
-  VALUE_LABELS,
-  VALUE_DESCRIPTIONS,
-  VALUE_ABBREVIATIONS,
-  VALUE_ENGLISH_NAMES,
-  VALUE_NEEDS,
   type NeedId,
+  VALUE_ABBREVIATIONS,
+  VALUE_DESCRIPTIONS,
+  VALUE_ENGLISH_NAMES,
+  VALUE_LABELS,
+  VALUE_NEEDS,
   type ValueId,
 } from "@/features/work-values/lib/needs";
 import { getWVPersona } from "@/features/work-values/lib/personas";
@@ -46,22 +46,33 @@ type BadgeColors = typeof DEFAULT_BADGE;
 const BADGE_STYLES = [
   {
     background: "linear-gradient(170deg, #98e0f0 0%, #6ad0e0 30%, #4ac0d4 60%, #58c0b8 100%)",
-    boxShadow: "0 6px 14px rgba(70,180,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+    boxShadow:
+      "0 6px 14px rgba(70,180,200,0.35), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
     border: "1px solid rgba(255,255,255,0.25)",
   },
   {
     background: "linear-gradient(170deg, #90dcd6 0%, #64d0c4 30%, #48c0b4 60%, #50bca8 100%)",
-    boxShadow: "0 6px 14px rgba(70,180,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+    boxShadow:
+      "0 6px 14px rgba(70,180,170,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
     border: "1px solid rgba(255,255,255,0.25)",
   },
   {
     background: "linear-gradient(170deg, #94dcc4 0%, #6cd0ac 30%, #54c498 60%, #4cbc90 100%)",
-    boxShadow: "0 6px 14px rgba(90,180,140,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
+    boxShadow:
+      "0 6px 14px rgba(90,180,140,0.3), 0 2px 4px rgba(0,0,0,0.1), inset 0 2px 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(0,0,0,0.12)",
     border: "1px solid rgba(255,255,255,0.25)",
   },
 ];
 
-export function WorkValuesResultContent({ sessionId, initialData, isOwner = true }: { sessionId: string; initialData?: ResultDTO | null; isOwner?: boolean }) {
+export function WorkValuesResultContent({
+  sessionId,
+  initialData,
+  isOwner = true,
+}: {
+  sessionId: string;
+  initialData?: ResultDTO | null;
+  isOwner?: boolean;
+}) {
   const [result, setResult] = useState<ResultDTO | null>(initialData ?? null);
   const [error, setError] = useState<string | null>(null);
   const colors = SCORE_COLORS;
@@ -97,15 +108,27 @@ export function WorkValuesResultContent({ sessionId, initialData, isOwner = true
     <div className="mx-auto max-w-2xl rounded-2xl bg-white shadow-sm px-6 pt-5 pb-8">
       <TopValuesCodeSection values={sortedValues} badge={badge} createdAt={result.createdAt} />
       <ValuesSection values={sortedValues} colors={colors} badge={badge} />
-      <NeedsSection values={sortedValues} needScoreMap={needScoreMap} colors={colors} badge={badge} />
+      <NeedsSection
+        values={sortedValues}
+        needScoreMap={needScoreMap}
+        colors={colors}
+        badge={badge}
+      />
 
       <AiReportSection sessionId={sessionId} badge={badge} isOwner={isOwner} />
     </div>
   );
 }
 
-
-function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO["values"]; badge: BadgeColors; createdAt: string }) {
+function TopValuesCodeSection({
+  values,
+  badge,
+  createdAt,
+}: {
+  values: ResultDTO["values"];
+  badge: BadgeColors;
+  createdAt: string;
+}) {
   const top3 = values.slice(0, 3);
   const persona = getWVPersona(values);
 
@@ -174,19 +197,49 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
           pointer-events: none;
         }
       `}</style>
-      <div className="wv-ripple-tr" style={{ animation: "wv-ripple-pulse 8s ease-in-out infinite" }} />
-      <div className="wv-ripple-bl" style={{ animation: "wv-ripple-pulse 8s ease-in-out infinite" }} />
+      <div
+        className="wv-ripple-tr"
+        style={{ animation: "wv-ripple-pulse 8s ease-in-out infinite" }}
+      />
+      <div
+        className="wv-ripple-bl"
+        style={{ animation: "wv-ripple-pulse 8s ease-in-out infinite" }}
+      />
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-        <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors" style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}>
-          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors"
+          style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}
+        >
+          <svg
+            width={13}
+            height={13}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
             <polyline points="16 6 12 2 8 6" />
             <line x1={12} y1={2} x2={12} y2={15} />
           </svg>
           Share Link
         </button>
-        <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors" style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}>
-          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors"
+          style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}
+        >
+          <svg
+            width={13}
+            height={13}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <rect x={2} y={2} width={20} height={20} rx={5} />
             <circle cx={12} cy={12} r={4} />
             <circle cx={18} cy={6} r={1.5} fill="currentColor" stroke="none" />
@@ -195,8 +248,20 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
         </button>
       </div>
       <div className="absolute top-4 left-4 z-10">
-        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border" style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}>
-          <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border"
+          style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}
+        >
+          <svg
+            width={13}
+            height={13}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <circle cx={12} cy={12} r={10} />
             <polyline points="12 6 12 12 16 14" />
           </svg>
@@ -206,7 +271,10 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
           })()}
         </span>
       </div>
-      <h2 className="relative text-[12px] font-bold tracking-[0.2em] mb-2 uppercase" style={{ color: "#8a9e94" }}>
+      <h2
+        className="relative text-[12px] font-bold tracking-[0.2em] mb-2 uppercase"
+        style={{ color: "#8a9e94" }}
+      >
         Your Work Values
       </h2>
       <p
@@ -215,7 +283,8 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
           backgroundImage: "linear-gradient(to right, #0E7B4E, #1B9E6A, #4ECFA0, #7EDDBB)",
         }}
       >
-        {persona.modifier}{persona.name}
+        {persona.modifier}
+        {persona.name}
       </p>
       <p className="relative text-[14px] mb-5 tracking-wide" style={{ color: "#8a9e94" }}>
         {persona.subtitle}
@@ -224,31 +293,35 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
       <div className="relative hidden md:grid grid-cols-3 items-center -mt-11">
         <div className="flex flex-col items-end gap-1 pr-4 justify-self-center translate-x-2">
           {top3.map((v) => (
-            <span key={v.valueId} className="text-[16px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+            <span
+              key={v.valueId}
+              className="text-[16px] font-semibold leading-snug tracking-wide"
+              style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}
+            >
               {VALUE_ENGLISH_NAMES[v.valueId as ValueId]}
             </span>
           ))}
         </div>
         <div className="flex items-end justify-center gap-2.5">
-            {top3.map((v, i) => {
-              const vid = v.valueId as ValueId;
-              const sizes = [
-                { size: "80px", text: "text-3xl", radius: "rounded-2xl" },
-                { size: "64px", text: "text-2xl", radius: "rounded-2xl" },
-                { size: "52px", text: "text-xl", radius: "rounded-xl" },
-              ];
-              const s = sizes[i];
-              return (
-                <span
-                  key={vid}
-                  className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center wv-badge-text wv-badge-glow wv-badge-float-${i + 1} shrink-0`}
-                  style={{ ...BADGE_STYLES[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
-                >
-                  {VALUE_ABBREVIATIONS[vid]}
-                </span>
-              );
-            })}
-          </div>
+          {top3.map((v, i) => {
+            const vid = v.valueId as ValueId;
+            const sizes = [
+              { size: "80px", text: "text-3xl", radius: "rounded-2xl" },
+              { size: "64px", text: "text-2xl", radius: "rounded-2xl" },
+              { size: "52px", text: "text-xl", radius: "rounded-xl" },
+            ];
+            const s = sizes[i];
+            return (
+              <span
+                key={vid}
+                className={`${s.radius} text-white ${s.text} font-bold flex items-center justify-center wv-badge-text wv-badge-glow wv-badge-float-${i + 1} shrink-0`}
+                style={{ ...BADGE_STYLES[i], width: s.size, height: s.size, aspectRatio: "1/1" }}
+              >
+                {VALUE_ABBREVIATIONS[vid]}
+              </span>
+            );
+          })}
+        </div>
         <div className="flex justify-start pl-4">
           <ValuesRadarChart values={values} badge={badge} />
         </div>
@@ -277,7 +350,11 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
         </div>
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-0.5">
           {top3.map((v) => (
-            <span key={v.valueId} className="text-[14px] font-semibold leading-snug tracking-wide" style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}>
+            <span
+              key={v.valueId}
+              className="text-[14px] font-semibold leading-snug tracking-wide"
+              style={{ color: "#1B6B4A", fontFamily: "system-ui, -apple-system, sans-serif" }}
+            >
               {VALUE_ENGLISH_NAMES[v.valueId as ValueId]}
             </span>
           ))}
@@ -288,7 +365,14 @@ function TopValuesCodeSection({ values, badge, createdAt }: { values: ResultDTO[
   );
 }
 
-const RADAR_ORDER: ValueId[] = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"];
+const RADAR_ORDER: ValueId[] = [
+  "achievement",
+  "status",
+  "autonomy",
+  "safety",
+  "altruism",
+  "comfort",
+];
 
 function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badge: BadgeColors }) {
   const cx = 95;
@@ -296,11 +380,14 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
   const R = 60;
   const scoreMap = new Map(values.map((v) => [v.valueId, v]));
   const top3Set = new Set(
-    [...values].sort((a, b) => a.rank - b.rank).slice(0, 3).map((v) => v.valueId)
+    [...values]
+      .sort((a, b) => a.rank - b.rank)
+      .slice(0, 3)
+      .map((v) => v.valueId),
   );
 
   const hexPoint = (i: number, r: number) => {
-    const angle = (Math.PI / 2) + (2 * Math.PI * i) / 6;
+    const angle = Math.PI / 2 + (2 * Math.PI * i) / 6;
     return { x: cx - Math.cos(angle) * r, y: cy - Math.sin(angle) * r };
   };
 
@@ -335,14 +422,7 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
         const pt = hexPoint(i, R + 20);
         return (
           <g key={vid}>
-            <circle
-              cx={pt.x}
-              cy={pt.y}
-              r={14}
-              fill="#ebf9f3"
-              stroke="#40b090"
-              strokeWidth={1}
-            />
+            <circle cx={pt.x} cy={pt.y} r={14} fill="#ebf9f3" stroke="#40b090" strokeWidth={1} />
             <text
               x={pt.x}
               y={pt.y}
@@ -367,18 +447,30 @@ function ValuesRadarChart({ values, badge }: { values: ResultDTO["values"]; badg
 
 type ScoreColors = typeof SCORE_COLORS;
 
-function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"]; colors: ScoreColors; badge: BadgeColors }) {
+function ValuesSection({
+  values,
+  colors,
+  badge,
+}: {
+  values: ResultDTO["values"];
+  colors: ScoreColors;
+  badge: BadgeColors;
+}) {
   const maxScore = Math.max(...values.map((v) => v.displayScore));
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
-  const toggle = (id: string) => setOpenIds((prev) => {
-    const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
-    return next;
-  });
+  const toggle = (id: string) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
 
   return (
     <section className="mb-6">
-      <h2 className="text-[13px] font-bold tracking-widest mb-1.5" style={{ color: badge.headingColor }}>
+      <h2
+        className="text-[13px] font-bold tracking-widest mb-1.5"
+        style={{ color: badge.headingColor }}
+      >
         WORK VALUES スコア
       </h2>
       <div className="border-t border-gray-200 mb-2" />
@@ -407,11 +499,17 @@ function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"];
                   </div>
                 </div>
 
-                <p className="hidden md:block text-[14px] font-medium leading-relaxed max-w-[220px] text-left" style={{ color: badge.descColor }}>
+                <p
+                  className="hidden md:block text-[14px] font-medium leading-relaxed max-w-[220px] text-left"
+                  style={{ color: badge.descColor }}
+                >
                   {VALUE_DESCRIPTIONS[vid]}
                 </p>
 
-                <span className="pl-2 text-[22px] font-bold tabular-nums ml-1 w-16 text-right shrink-0" style={{ color: barColor }}>
+                <span
+                  className="pl-2 text-[22px] font-bold tabular-nums ml-1 w-16 text-right shrink-0"
+                  style={{ color: barColor }}
+                >
                   {v.displayScore.toFixed(1)}
                 </span>
 
@@ -419,7 +517,10 @@ function ValuesSection({ values, colors, badge }: { values: ResultDTO["values"];
                   onClick={() => toggle(vid)}
                   className="relative z-10 bg-white text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
                 >
-                  <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                  <span
+                    className="transition-transform duration-200"
+                    style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                  >
                     <ChevronIcon size={14} />
                   </span>
                 </button>
@@ -457,7 +558,10 @@ function NeedsSection({
 }) {
   return (
     <section>
-      <h2 className="text-[13px] font-bold tracking-widest mb-1.5" style={{ color: badge.headingColor }}>
+      <h2
+        className="text-[13px] font-bold tracking-widest mb-1.5"
+        style={{ color: badge.headingColor }}
+      >
         WORK NEEDS スコア
       </h2>
       <div className="border-t border-gray-200 mb-2" />
@@ -484,7 +588,13 @@ function NeedsSection({
               {/* needs list */}
               <div className="flex flex-col">
                 {needsWithScores.map(({ nid, score }, i) => (
-                  <NeedRow key={nid} score={score} colors={colors} badge={badge} showDivider={i > 0} />
+                  <NeedRow
+                    key={nid}
+                    score={score}
+                    colors={colors}
+                    badge={badge}
+                    showDivider={i > 0}
+                  />
                 ))}
               </div>
             </div>
@@ -501,7 +611,17 @@ function NeedsSection({
 
 const MEDAL = ["🥇", "🥈", "🥉"] as const;
 
-function NeedRow({ score, colors, badge, showDivider = false }: { score: NeedScoreDTO; colors: ScoreColors; badge: BadgeColors; showDivider?: boolean }) {
+function NeedRow({
+  score,
+  colors,
+  badge,
+  showDivider = false,
+}: {
+  score: NeedScoreDTO;
+  colors: ScoreColors;
+  badge: BadgeColors;
+  showDivider?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const medal = score.rank <= 3 ? MEDAL[score.rank - 1] : null;
   const isTop = score.rank <= 3;
@@ -517,48 +637,63 @@ function NeedRow({ score, colors, badge, showDivider = false }: { score: NeedSco
     <div>
       {showDivider && <div className="border-t border-gray-200 ml-3 mt-1" />}
       <div className="flex items-center gap-2 py-1 overflow-hidden">
-      {/* rank */}
-      <span className="text-[13px] font-semibold w-10 text-right tabular-nums shrink-0 whitespace-nowrap" style={rankStyle}>
-        {score.rank}位
-      </span>
-
-      {/* label + medal */}
-      <div className="flex items-center gap-0.5 w-[88px] shrink-0">
-        <span className="text-[14px] truncate" style={{ color: badge.needLabelColor, fontWeight: badge.needLabelWeight }}>
-          {score.label}
+        {/* rank */}
+        <span
+          className="text-[13px] font-semibold w-10 text-right tabular-nums shrink-0 whitespace-nowrap"
+          style={rankStyle}
+        >
+          {score.rank}位
         </span>
-        {medal && <span className="text-[13px]">{medal}</span>}
-      </div>
 
-      <p className="hidden md:block flex-1 text-[13px] font-medium leading-snug min-w-0" style={{ color: badge.descColor }}>
-        {score.descriptionJa}
-      </p>
-      <div className="flex-1 md:hidden" />
-
-      {/* score bar */}
-      <div className="w-[72px] shrink-0">
-        <div className="h-[5px] rounded-full bg-gray-200 overflow-hidden">
-          <div
-            className="h-full rounded-full"
-            style={{ width: `${score.displayScore}%`, backgroundColor: barColor }}
-          />
+        {/* label + medal */}
+        <div className="flex items-center gap-0.5 w-[88px] shrink-0">
+          <span
+            className="text-[14px] truncate"
+            style={{ color: badge.needLabelColor, fontWeight: badge.needLabelWeight }}
+          >
+            {score.label}
+          </span>
+          {medal && <span className="text-[13px]">{medal}</span>}
         </div>
-      </div>
 
-      {/* score */}
-      <span className="text-[14px] font-bold tabular-nums w-10 text-right shrink-0" style={{ color: barColor }}>
-        {score.displayScore.toFixed(1)}
-      </span>
+        <p
+          className="hidden md:block flex-1 text-[13px] font-medium leading-snug min-w-0"
+          style={{ color: badge.descColor }}
+        >
+          {score.descriptionJa}
+        </p>
+        <div className="flex-1 md:hidden" />
 
-      {/* chevron */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
-      >
-        <span className="transition-transform duration-200" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-          <ChevronIcon size={14} />
+        {/* score bar */}
+        <div className="w-[72px] shrink-0">
+          <div className="h-[5px] rounded-full bg-gray-200 overflow-hidden">
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${score.displayScore}%`, backgroundColor: barColor }}
+            />
+          </div>
+        </div>
+
+        {/* score */}
+        <span
+          className="text-[14px] font-bold tabular-nums w-10 text-right shrink-0"
+          style={{ color: barColor }}
+        >
+          {score.displayScore.toFixed(1)}
         </span>
-      </button>
+
+        {/* chevron */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
+        >
+          <span
+            className="transition-transform duration-200"
+            style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+          >
+            <ChevronIcon size={14} />
+          </span>
+        </button>
       </div>
     </div>
   );
@@ -585,7 +720,11 @@ function ValueBadge({
     return (
       <span
         className={`${dim} rounded-full font-semibold flex items-center justify-center shrink-0`}
-        style={{ border: `1px solid ${badge.border}`, color: badge.text, backgroundColor: badge.bg }}
+        style={{
+          border: `1px solid ${badge.border}`,
+          color: badge.text,
+          backgroundColor: badge.bg,
+        }}
       >
         {VALUE_ABBREVIATIONS[valueId]}
       </span>
@@ -595,7 +734,13 @@ function ValueBadge({
   return (
     <span
       className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
-      style={{ backgroundColor: badge.text, color: badge.bg, fontSize: `${badge.badgeFontSize}px`, fontWeight: badge.badgeFontWeight, fontFamily: badge.badgeFontFamily }}
+      style={{
+        backgroundColor: badge.text,
+        color: badge.bg,
+        fontSize: `${badge.badgeFontSize}px`,
+        fontWeight: badge.badgeFontWeight,
+        fontFamily: badge.badgeFontFamily,
+      }}
     >
       {VALUE_ABBREVIATIONS[valueId]}
     </span>
@@ -611,7 +756,16 @@ function scoreColor(score: number, colors: ScoreColors): string {
 
 function ChevronIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="m6 9 6 6 6-6" />
     </svg>
   );
@@ -651,12 +805,25 @@ function useTypewriter(fullText: string | null, charsPerTick = 2, intervalMs = 3
     setDone(true);
   }, [fullText]);
 
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    },
+    [],
+  );
 
   return { displayed, done, start, skip };
 }
 
-function AiReportSection({ sessionId, badge, isOwner = true }: { sessionId: string; badge: BadgeColors; isOwner?: boolean }) {
+function AiReportSection({
+  sessionId,
+  badge,
+  isOwner = true,
+}: {
+  sessionId: string;
+  badge: BadgeColors;
+  isOwner?: boolean;
+}) {
   const [reportContent, setReportContent] = useState<string | null>(null);
   const [firstView, setFirstView] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -679,8 +846,12 @@ function AiReportSection({ sessionId, badge, isOwner = true }: { sessionId: stri
         }
       })
       .catch(() => {})
-      .finally(() => { if (!cancelled) setInitialLoading(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        if (!cancelled) setInitialLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [sessionId]);
 
   const handleClick = () => {
@@ -722,7 +893,8 @@ function AiReportSection({ sessionId, badge, isOwner = true }: { sessionId: stri
     }
   };
 
-  const reportProseClasses = "prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-emerald-800 [&_h2]:border-l-3 [&_h2]:border-emerald-600 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-emerald-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-emerald-400 [&_.catchphrase]:bg-emerald-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4";
+  const reportProseClasses =
+    "prose max-w-none text-gray-700 leading-relaxed mb-5 [&_h2]:text-[18px] [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-emerald-800 [&_h2]:border-l-3 [&_h2]:border-emerald-600 [&_h2]:pl-3 [&_h3]:text-[16px] [&_h3]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-emerald-700 [&_p]:text-[16px] [&_p]:mb-3 [&_p]:leading-[1.9] [&_ul]:text-[16px] [&_li]:mb-1 [&_.catchphrase]:text-[18px] [&_.catchphrase]:font-medium [&_.catchphrase]:leading-[1.8] [&_.catchphrase]:text-gray-800 [&_.catchphrase]:my-6 [&_.catchphrase]:px-4 [&_.catchphrase]:py-3 [&_.catchphrase]:border-l-3 [&_.catchphrase]:border-emerald-400 [&_.catchphrase]:bg-emerald-50/50 [&_.catchphrase]:rounded-r-md [&_blockquote]:border-l-3 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-4";
 
   return (
     <div ref={sectionRef} className="relative mt-10 scroll-mt-4">
@@ -731,14 +903,17 @@ function AiReportSection({ sessionId, badge, isOwner = true }: { sessionId: stri
           className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
           style={{
             background: "linear-gradient(180deg, #4a8c6f 0%, #2d6b4e 50%, #1f5c3f 100%)",
-            boxShadow: "0 4px 10px rgba(30,80,55,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
+            boxShadow:
+              "0 4px 10px rgba(30,80,55,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
           }}
         >
           inselfy.ai
         </span>
       </div>
       <div className="rounded-md border border-gray-200 bg-[#fbfdfb] px-8 pt-8 pb-7">
-        <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>AI キャリアレポート</h3>
+        <h3 className="text-[14px] font-bold mb-1.5" style={{ color: badge.headingColor }}>
+          AI キャリアレポート
+        </h3>
         <div className="border-t border-gray-200 mb-3" />
 
         {initialLoading ? (
@@ -756,30 +931,28 @@ function AiReportSection({ sessionId, badge, isOwner = true }: { sessionId: stri
             className={reportProseClasses}
             dangerouslySetInnerHTML={{ __html: markdownToHtml(reportContent) }}
           />
-        ) : (
-          isOwner ? (
-            <>
-              <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
-                AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
-              </p>
-              <button
-                onClick={handleClick}
-                disabled={loading}
-                className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer disabled:opacity-50"
-              >
-                レポートを作成する
-              </button>
-              {notFound && (
-                <p className="text-[13px] text-amber-600 mt-4">
-                  レポートはまだ作成中です。しばらくお待ちください。
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-[16px] text-gray-500 leading-relaxed">
-              レポートはまだ作成されていません。
+        ) : isOwner ? (
+          <>
+            <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
+              AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
             </p>
-          )
+            <button
+              onClick={handleClick}
+              disabled={loading}
+              className="bg-emerald-700 text-white text-[14px] font-semibold rounded-full px-6 py-2.5 shadow-[0_4px_12px_-4px_rgba(5,95,70,0.45)] hover:bg-emerald-800 hover:shadow-[0_6px_16px_-4px_rgba(5,95,70,0.55)] transition cursor-pointer disabled:opacity-50"
+            >
+              レポートを作成する
+            </button>
+            {notFound && (
+              <p className="text-[13px] text-amber-600 mt-4">
+                レポートはまだ作成中です。しばらくお待ちください。
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="text-[16px] text-gray-500 leading-relaxed">
+            レポートはまだ作成されていません。
+          </p>
         )}
       </div>
       {scrollSpacer && !done && <div className="h-screen" />}
@@ -789,21 +962,21 @@ function AiReportSection({ sessionId, badge, isOwner = true }: { sessionId: stri
 
 function markdownToHtml(md: string): string {
   let html = md
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^> (.+)$/gm, '<blockquote><p>$1</p></blockquote>')
-    .replace(/^[・-] (.+)$/gm, '<li>$1</li>')
-    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^/, '<p>')
-    .replace(/$/, '</p>')
-    .replace(/<p>(<h[23]>)/g, '$1')
-    .replace(/(<\/h[23]>)<\/p>/g, '$1')
-    .replace(/<p>(<ul>)/g, '$1')
-    .replace(/(<\/ul>)<\/p>/g, '$1')
-    .replace(/<p>(<blockquote>)/g, '$1')
-    .replace(/(<\/blockquote>)<\/p>/g, '$1');
+    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^> (.+)$/gm, "<blockquote><p>$1</p></blockquote>")
+    .replace(/^[・-] (.+)$/gm, "<li>$1</li>")
+    .replace(/((?:<li>.*<\/li>\n?)+)/g, "<ul>$1</ul>")
+    .replace(/\n\n/g, "</p><p>")
+    .replace(/^/, "<p>")
+    .replace(/$/, "</p>")
+    .replace(/<p>(<h[23]>)/g, "$1")
+    .replace(/(<\/h[23]>)<\/p>/g, "$1")
+    .replace(/<p>(<ul>)/g, "$1")
+    .replace(/(<\/ul>)<\/p>/g, "$1")
+    .replace(/<p>(<blockquote>)/g, "$1")
+    .replace(/(<\/blockquote>)<\/p>/g, "$1");
 
   // 最初の<p>をキャッチコピーとしてスタイル付与（最初の見出しより前の段落）
   html = html.replace(/^<p>/, '<p class="catchphrase">');

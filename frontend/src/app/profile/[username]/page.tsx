@@ -1,9 +1,8 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-
+import { Sidebar } from "@/app/components/Sidebar";
 import { fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
 import { fetchUserPosts } from "@/features/timeline/api";
-import { Sidebar } from "@/app/components/Sidebar";
 
 import { PanelNavigator } from "./PanelNavigator";
 import { ProfileColorContext } from "./ProfileColorContext";
@@ -34,15 +33,14 @@ async function getCurrentUsername(cookieHeader: string): Promise<string | null> 
   }
 }
 
-export default async function ProfilePage({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}) {
+export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
-  const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
   const [data, currentUsername] = await Promise.all([
     fetchPanelDataByUsername(username, cookieHeader),
     getCurrentUsername(cookieHeader),

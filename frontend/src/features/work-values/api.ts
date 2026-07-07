@@ -1,12 +1,5 @@
 import "@/external/client/api/client";
 import {
-  teamDiagnoseStartDiagnoseWvSession,
-  teamDiagnoseSubmitDiagnoseWvResult,
-  workValuesWvGetAiReport,
-  workValuesWvGetLatestResult,
-  workValuesWvGetResultBySession,
-  workValuesWvStartSession,
-  workValuesWvSubmitResult,
   type ModelsAiReportResponse,
   type ModelsWvNeedDefResponse,
   type ModelsWvNeedScore,
@@ -15,6 +8,13 @@ import {
   type ModelsWvResultResponse,
   type ModelsWvSessionResponse,
   type ModelsWvValueScoreResponse,
+  teamDiagnoseStartDiagnoseWvSession,
+  teamDiagnoseSubmitDiagnoseWvResult,
+  workValuesWvGetAiReport,
+  workValuesWvGetLatestResult,
+  workValuesWvGetResultBySession,
+  workValuesWvStartSession,
+  workValuesWvSubmitResult,
 } from "@/external/client/api/generated";
 
 export type PairDTO = ModelsWvPairResponse;
@@ -71,7 +71,10 @@ export async function submitResultByDiagnoseToken(
 }
 
 // cookieHeader はSSR（サーバコンポーネント）から呼ぶ際に認証Cookieを転送するために渡す
-export async function getResultBySessionId(sessionId: string, cookieHeader?: string): Promise<ResultDTO> {
+export async function getResultBySessionId(
+  sessionId: string,
+  cookieHeader?: string,
+): Promise<ResultDTO> {
   const { data, error, response } = await workValuesWvGetResultBySession({
     path: { sessionId },
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
@@ -80,7 +83,10 @@ export async function getResultBySessionId(sessionId: string, cookieHeader?: str
   return data;
 }
 
-export async function getLatestResult(userId: string, cookieHeader?: string): Promise<ResultDTO | null> {
+export async function getLatestResult(
+  userId: string,
+  cookieHeader?: string,
+): Promise<ResultDTO | null> {
   const { data, error, response } = await workValuesWvGetLatestResult({
     path: { userId },
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
@@ -93,7 +99,10 @@ export async function getLatestResult(userId: string, cookieHeader?: string): Pr
 export type AiReportDTO = ModelsAiReportResponse;
 
 // AIレポート取得。未生成（404）等のエラーは null を返す。
-export async function getAiReport(sessionId: string, cookieHeader?: string): Promise<AiReportDTO | null> {
+export async function getAiReport(
+  sessionId: string,
+  cookieHeader?: string,
+): Promise<AiReportDTO | null> {
   const { data, error } = await workValuesWvGetAiReport({
     path: { sessionId },
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,

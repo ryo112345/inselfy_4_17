@@ -18,28 +18,19 @@ import {
 export type ArticleItem = ModelsArticleResponse;
 export type ArticleListResponse = ModelsArticleListResponse;
 
-export async function fetchArticles(
-  limit = 20,
-  offset = 0,
-): Promise<ArticleListResponse> {
+export async function fetchArticles(limit = 20, offset = 0): Promise<ArticleListResponse> {
   const { data, error } = await articlesListArticles({ query: { limit, offset } });
   if (error || !data) throw new Error("Failed to fetch articles");
   return data;
 }
 
-export async function fetchMyArticles(
-  limit = 50,
-  offset = 0,
-): Promise<ArticleListResponse> {
+export async function fetchMyArticles(limit = 50, offset = 0): Promise<ArticleListResponse> {
   const { data, error } = await articlesListMyArticles({ query: { limit, offset } });
   if (error || !data) throw new Error("Failed to fetch articles");
   return data;
 }
 
-export async function fetchArticle(
-  id: string,
-  opts?: { cookie?: string },
-): Promise<ArticleItem> {
+export async function fetchArticle(id: string, opts?: { cookie?: string }): Promise<ArticleItem> {
   const { data, error } = await articlesGetArticle({
     path: { articleId: id },
     headers: opts?.cookie ? { cookie: opts.cookie } : undefined,
@@ -99,9 +90,7 @@ export async function deleteArticle(id: string): Promise<void> {
   if (error) throw new Error("Failed to delete article");
 }
 
-export async function createCheckoutSession(
-  articleId: string,
-): Promise<{ url: string }> {
+export async function createCheckoutSession(articleId: string): Promise<{ url: string }> {
   const { data, error } = await articlesCreateArticleCheckout({ path: { articleId } });
   if (error || !data) {
     throw new Error(error?.message ?? "Failed to create checkout session");
