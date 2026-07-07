@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { uploadArticleImage } from "./api";
 
@@ -30,7 +31,14 @@ export function CoverImageUpload({ value, onChange }: Props) {
   if (value) {
     return (
       <div className="relative group">
-        <img src={value} alt="カバー画像" className="w-full" />
+        <Image
+          src={value}
+          alt="カバー画像"
+          width={1600}
+          height={900}
+          sizes="(max-width: 768px) 100vw, 672px"
+          className="w-full h-auto"
+        />
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
           <button
             type="button"

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   BoltIcon,
@@ -205,7 +206,13 @@ export default function TestJobViewPage() {
         {/* ─── Hero ─── */}
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="relative w-full overflow-hidden bg-gray-100 aspect-[16/9]">
-            <img src="/job-cover.png" alt="" className="h-full w-full object-contain" />
+            <Image
+              src="/job-cover.png"
+              alt=""
+              fill
+              sizes="(max-width: 896px) 100vw, 864px"
+              className="object-contain"
+            />
           </div>
 
           <div className="px-6 pb-6 pt-6 sm:px-8">
@@ -213,9 +220,9 @@ export default function TestJobViewPage() {
               href={`/companies/${company.id}`}
               className="inline-flex items-center gap-3 group"
             >
-              <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
+              <div className="relative h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
                 {company.logoUrl ? (
-                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  <Image src={company.logoUrl} alt="" fill sizes="40px" className="object-cover" />
                 ) : (
                   <span className="text-sm font-bold" style={{ color: ACCENT }}>
                     {company.name.charAt(0)}
@@ -323,15 +330,17 @@ export default function TestJobViewPage() {
                   return (
                     <div
                       key={m.name}
-                      className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm"
+                      className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm"
                       style={{ backgroundColor: tone.bg, color: tone.fg }}
                       title={`${m.name} / ${m.role}`}
                     >
                       {m.avatarUrl ? (
-                        <img
+                        <Image
                           src={m.avatarUrl}
                           alt=""
-                          className="h-full w-full rounded-full object-cover"
+                          fill
+                          sizes="80px"
+                          className="rounded-full object-cover"
                         />
                       ) : (
                         initial
@@ -464,9 +473,9 @@ export default function TestJobViewPage() {
               href={`/companies/${company.id}`}
               className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors group"
             >
-              <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
+              <div className="relative h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
                 {company.logoUrl ? (
-                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  <Image src={company.logoUrl} alt="" fill sizes="56px" className="object-cover" />
                 ) : (
                   <span className="text-lg font-bold" style={{ color: ACCENT }}>
                     {company.name.charAt(0)}

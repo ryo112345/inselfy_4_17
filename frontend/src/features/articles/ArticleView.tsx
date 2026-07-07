@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sanitizeHtml } from "@/lib/sanitize";
@@ -269,7 +270,14 @@ export function ArticleView({ article, currentUsername }: Props) {
       {/* Cover image */}
       {article.coverImageUrl && (
         <div>
-          <img src={article.coverImageUrl} alt="" className="w-full" />
+          <Image
+            src={article.coverImageUrl}
+            alt=""
+            width={1600}
+            height={900}
+            sizes="(max-width: 768px) 100vw, 672px"
+            className="w-full h-auto"
+          />
         </div>
       )}
 

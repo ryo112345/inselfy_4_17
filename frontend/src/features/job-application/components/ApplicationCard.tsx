@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { SEEKING_STATUS_MAP } from "@/constants/seeking-status";
 import type { JobApplication } from "../api";
 import { daysAgo, STATUS_COLORS, STATUS_LABELS } from "../constants";
@@ -68,9 +69,11 @@ export function ApplicationCard({
       {/* Row 1: avatar + name + status */}
       <div className="flex items-center gap-3.5">
         {app.candidateAvatar ? (
-          <img
+          <Image
             src={app.candidateAvatar}
             alt=""
+            width={48}
+            height={48}
             className="h-12 w-12 rounded-full object-cover shrink-0"
           />
         ) : (

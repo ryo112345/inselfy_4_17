@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   BoltIcon,
   BookmarkIcon,
@@ -80,7 +81,14 @@ export function JobPostingForm({
         {/* Cover image */}
         {values.coverImage ? (
           <div className="relative group">
-            <img src={values.coverImage} alt="" className="w-full aspect-[16/9] object-cover" />
+            <Image
+              src={values.coverImage}
+              alt=""
+              width={1600}
+              height={900}
+              sizes="(max-width: 1024px) 100vw, 60vw"
+              className="w-full aspect-[16/9] object-cover"
+            />
             <button
               type="button"
               onClick={() => {
@@ -139,9 +147,9 @@ export function JobPostingForm({
         <div className="px-6 pb-6 pt-6 sm:px-8">
           {company && (
             <div className="inline-flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
+              <div className="relative h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
                 {company.logoUrl ? (
-                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  <Image src={company.logoUrl} alt="" fill sizes="40px" className="object-cover" />
                 ) : (
                   <span className="text-sm font-bold" style={{ color: ACCENT }}>
                     {company.companyName.charAt(0)}
@@ -392,7 +400,13 @@ export function JobPostingForm({
           <div className="mt-4 grid grid-cols-3 gap-2">
             {values.galleryImages.map((url, i) => (
               <div key={i} className="relative group rounded-lg overflow-hidden aspect-[4/3]">
-                <img src={url} alt="" className="h-full w-full object-cover" />
+                <Image
+                  src={url}
+                  alt=""
+                  fill
+                  sizes="(max-width: 1024px) 33vw, 250px"
+                  className="object-cover"
+                />
                 <button
                   type="button"
                   onClick={() =>
@@ -670,9 +684,9 @@ export function JobPostingForm({
           <div className="px-6 py-6 sm:px-7">
             <SectionTitle icon={<BuildingIcon />}>企業情報</SectionTitle>
             <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4">
-              <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
+              <div className="relative h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
                 {company.logoUrl ? (
-                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  <Image src={company.logoUrl} alt="" fill sizes="56px" className="object-cover" />
                 ) : (
                   <span className="text-lg font-bold" style={{ color: ACCENT }}>
                     {company.companyName.charAt(0)}
