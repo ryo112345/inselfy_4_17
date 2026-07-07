@@ -17,17 +17,24 @@ import { computeMatchScores, type MatchScores } from "./match";
 
 export type SortKey = "newest" | "salary";
 
-const PAGE_SIZE = 20;
+export const PAGE_SIZE = 20;
+
+/** サーバーコンポーネントで先読みした初期ページ（デフォルト検索条件・offset 0）。 */
+export type InitialJobSearchData = {
+  jobs: JobPostingWithCompany[];
+  total: number;
+};
 
 /**
  * 公開求人検索ページの状態（検索条件・価値観フィルタ・結果・ページング・
  * 診断マッチ度計算）を内包するフック。挙動は分割前のページと同一。
+ * initialData を渡すと初回マウント時のフェッチをスキップして SSR 結果をそのまま使う。
  */
-export function useJobSearch() {
+export function useJobSearch(initialData?: InitialJobSearchData) {
   const { user } = useAuth();
-  const [jobs, setJobs] = useState<JobPostingWithCompany[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<JobPostingWithCompany[]>(initialData?.jobs ?? []);
+  const [total, setTotal] = useState(initialData?.total ?? 0);
+  const [loading, setLoading] = useState(!initialData);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -127,7 +134,14 @@ export function useJobSearch() {
     [search, category, employment, remote, sort, valueFiltersParam, filterMode],
   );
 
+  // initialData がある場合、初回マウント時の検索条件は SSR 時と同一なのでフェッチ不要
+  const skipFirstFetchRef = useRef(initialData !== undefined);
+
   useEffect(() => {
+    if (skipFirstFetchRef.current) {
+      skipFirstFetchRef.current = false;
+      return;
+    }
     const needsDebounce = search.trim() || valueFiltersParam;
     const timeout = setTimeout(
       () => {
