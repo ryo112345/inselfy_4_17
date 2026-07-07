@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { searchPublicJobPostings } from "@/features/job-posting/api";
-import { type InitialJobSearchData, PAGE_SIZE } from "@/features/job-search/useJobSearch";
+import { PAGE_SIZE } from "@/features/job-search/constants";
+import type { InitialJobSearchData } from "@/features/job-search/useJobSearch";
 import { JobsPageClient } from "./JobsPageClient";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,8 @@ export default async function JobsPage() {
   try {
     const data = await searchPublicJobPostings({ sort: "newest", limit: PAGE_SIZE, offset: 0 });
     initialData = { jobs: data.items, total: data.total };
-  } catch {
+  } catch (err) {
+    console.error("jobs SSR prefetch failed:", err);
     initialData = undefined;
   }
   return <JobsPageClient initialData={initialData} />;
