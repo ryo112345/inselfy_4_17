@@ -75,25 +75,9 @@ func (r *PostRepository) GetWithUserByID(ctx context.Context, id string, viewerI
 		}
 		return nil, err
 	}
-	return &post.PostWithUser{
-		Post: post.Post{
-			ID:          uuidToString(row.ID),
-			UserID:      uuidToString(row.UserID),
-			Content:     row.Content,
-			QuotePostID: uuidToString(row.QuotePostID),
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-		},
-		Username:     row.Username,
-		Name:         row.UserName,
-		LikeCount:    int(row.LikeCount),
-		CommentCount: int(row.CommentCount),
-		RepostCount:  int(row.RepostCount),
-		LikedByMe:    row.LikedByMe,
-		RepostedByMe: row.RepostedByMe,
-		IsRepost:     row.IsRepost,
-		QuotedPost:   toQuotedPost(row.QuotePostID, row.QuoteContent, row.QuoteUsername, row.QuoteName, row.QuoteCreatedAt),
-	}, nil
+	pw := postRowConv.FromGetPostWithUserByIDRow(row)
+	pw.QuotedPost = toQuotedPost(row.QuotePostID, row.QuoteContent, row.QuoteUsername, row.QuoteName, row.QuoteCreatedAt)
+	return pw, nil
 }
 
 func (r *PostRepository) ListTimeline(ctx context.Context, limit, offset int, viewerID string) ([]*post.PostWithUser, int, error) {
@@ -113,25 +97,9 @@ func (r *PostRepository) ListTimeline(ctx context.Context, limit, offset int, vi
 	}
 	posts := make([]*post.PostWithUser, len(rows))
 	for i, row := range rows {
-		posts[i] = &post.PostWithUser{
-			Post: post.Post{
-				ID:          uuidToString(row.ID),
-				UserID:      uuidToString(row.UserID),
-				Content:     row.Content,
-				QuotePostID: uuidToString(row.QuotePostID),
-				CreatedAt:   row.CreatedAt.Time,
-				UpdatedAt:   row.UpdatedAt.Time,
-			},
-			Username:     row.Username,
-			Name:         row.UserName,
-			LikeCount:    int(row.LikeCount),
-			CommentCount: int(row.CommentCount),
-			RepostCount:  int(row.RepostCount),
-			LikedByMe:    row.LikedByMe,
-			RepostedByMe: row.RepostedByMe,
-			IsRepost:     row.IsRepost,
-			QuotedPost:   toQuotedPost(row.QuotePostID, row.QuoteContent, row.QuoteUsername, row.QuoteName, row.QuoteCreatedAt),
-		}
+		pw := postRowConv.FromListTimelinePostsRow(row)
+		pw.QuotedPost = toQuotedPost(row.QuotePostID, row.QuoteContent, row.QuoteUsername, row.QuoteName, row.QuoteCreatedAt)
+		posts[i] = pw
 	}
 	return posts, int(count), nil
 }
@@ -158,23 +126,7 @@ func (r *PostRepository) ListByUserID(ctx context.Context, userID string, limit,
 	}
 	posts := make([]*post.PostWithUser, len(rows))
 	for i, row := range rows {
-		posts[i] = &post.PostWithUser{
-			Post: post.Post{
-				ID:        uuidToString(row.ID),
-				UserID:    uuidToString(row.UserID),
-				Content:   row.Content,
-				CreatedAt: row.CreatedAt.Time,
-				UpdatedAt: row.UpdatedAt.Time,
-			},
-			Username:     row.Username,
-			Name:         row.UserName,
-			LikeCount:    int(row.LikeCount),
-			CommentCount: int(row.CommentCount),
-			RepostCount:  int(row.RepostCount),
-			LikedByMe:    row.LikedByMe,
-			RepostedByMe: row.RepostedByMe,
-			IsRepost:     row.IsRepost,
-		}
+		posts[i] = postRowConv.FromListPostsByUserIDRow(row)
 	}
 	return posts, int(count), nil
 }
@@ -199,25 +151,9 @@ func (r *PostRepository) ListLikedByUserID(ctx context.Context, userID string, l
 	}
 	posts := make([]*post.PostWithUser, len(rows))
 	for i, row := range rows {
-		posts[i] = &post.PostWithUser{
-			Post: post.Post{
-				ID:          uuidToString(row.ID),
-				UserID:      uuidToString(row.UserID),
-				Content:     row.Content,
-				QuotePostID: uuidToString(row.QuotePostID),
-				CreatedAt:   row.CreatedAt.Time,
-				UpdatedAt:   row.UpdatedAt.Time,
-			},
-			Username:     row.Username,
-			Name:         row.UserName,
-			LikeCount:    int(row.LikeCount),
-			CommentCount: int(row.CommentCount),
-			RepostCount:  int(row.RepostCount),
-			LikedByMe:    row.LikedByMe,
-			RepostedByMe: row.RepostedByMe,
-			IsRepost:     row.IsRepost,
-			QuotedPost:   toQuotedPost(row.QuotePostID, row.QuoteContent, row.QuoteUsername, row.QuoteName, row.QuoteCreatedAt),
-		}
+		pw := postRowConv.FromListLikedPostsByUserIDRow(row)
+		pw.QuotedPost = toQuotedPost(row.QuotePostID, row.QuoteContent, row.QuoteUsername, row.QuoteName, row.QuoteCreatedAt)
+		posts[i] = pw
 	}
 	return posts, int(count), nil
 }
