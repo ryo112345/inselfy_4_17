@@ -24,7 +24,8 @@ describe("Cross-verify TS vs Go BT estimation", () => {
     const backendDir = join(process.cwd(), "../backend");
     const output = execSync(
       `cd ${backendDir} && go test ./internal/domain/workvalues/ -run TestEstimateBT_TransitiveOrder -v -json`,
-      { encoding: "utf-8", timeout: 15000 },
+      // CI のコールドキャッシュでは go mod download + コンパイルが走るため余裕を持たせる
+      { encoding: "utf-8", timeout: 120_000 },
     ).trim();
 
     // Go tests pass → same algorithm logic. Now verify numeric output.
@@ -57,7 +58,8 @@ func TestCrossVerifyOutput(t *testing.T) {
     try {
       const testOutput = execSync(
         `cd ${backendDir} && go test ./internal/domain/workvalues/ -run TestCrossVerifyOutput -v`,
-        { encoding: "utf-8", timeout: 15000 },
+        // CI のコールドキャッシュでは go mod download + コンパイルが走るため余裕を持たせる
+        { encoding: "utf-8", timeout: 120_000 },
       );
 
       const line = testOutput.split("\n").find((l) => l.includes("CROSS_VERIFY:"));
