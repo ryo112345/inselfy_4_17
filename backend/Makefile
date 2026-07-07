@@ -46,6 +46,7 @@ oapi:
 	@test -f $(OPENAPI_SPEC) || (echo "OpenAPI spec not found at $(OPENAPI_SPEC). Run api-schema/scripts/generate-openapi.sh first."; exit 1)
 	@mkdir -p internal/adapter/http/generated/openapi
 	$(OAPI_CODEGEN) --config $(OAPI_CONFIG) $(OPENAPI_SPEC)
+	cp $(OPENAPI_SPEC) internal/adapter/http/generated/openapi/openapi.yaml
 
 .PHONY: sqlc
 sqlc:

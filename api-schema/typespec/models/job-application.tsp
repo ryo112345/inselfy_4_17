@@ -22,6 +22,7 @@ model ApplyJobRequest {
   jobPostingId: Uuid;
 
   /** 応募メッセージ */
+  @maxLength(5000)
   message: string;
 }
 

@@ -43,15 +43,19 @@ model ProposeInterviewRequest {
   applicationId: Uuid;
 
   /** メッセージ */
+  @maxLength(5000)
   message: string;
 
   /** 場所 */
+  @maxLength(255)
   location: string;
 
   /** 所要時間（分） */
   durationMinutes: integer;
 
   /** 候補日時（1-10件） */
+  @minItems(1)
+  @maxItems(10)
   slots: ProposeSlotInput[];
 
   /** 有効期限（日数） */

@@ -13,6 +13,7 @@ import (
 	storagegw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/storage"
 	stripegw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/stripe"
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
+	openapigen "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	ws "github.com/akiyama/inselfy/backend/internal/adapter/ws"
 	"github.com/akiyama/inselfy/backend/internal/driver/config"
@@ -145,6 +146,16 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	e := echo.New()
 	e.Use(echomw.Recover())
 	e.Use(echomw.Logger())
+
+	// Validate requests against the API contract (body schema, params, enums).
+	// Routes outside the spec pass through; auth stays with the middlewares below.
+	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML)
+	if err != nil {
+		cleanup()
+		return nil, nil, func() {}, err
+	}
+	e.Use(oapiValidator)
+
 	e.Use(echomw.CORSWithConfig(echomw.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000"},
 		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.OPTIONS},
