@@ -16,17 +16,24 @@ import (
 //   - /healthz: liveness  — プロセスが応答できるか（DB は見ない）。
 //   - /readyz:  readiness — DB へ ping が通り、リクエストを受けられる状態か。
 //
-// コンテナ/CI のヘルスチェックと Cloud Run の probe（C10 予定）が使う。
+// ルート直下（8081 直叩き）は compose / e2e-smoke.sh が使う。
+// Cloud Run の probe は port 8080（Next.js）にしか届かないため、
+// front の catch-all proxy（/api/* → 8081 へフルパス転送）を通る
+// /api/ プレフィックス版も登録する（C10 の startup/liveness probe が使う）。
 func wireHealth(e *echo.Echo, pool *pgxpool.Pool) {
-	e.GET("/healthz", func(c echo.Context) error {
+	livez := func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
-	})
-	e.GET("/readyz", func(c echo.Context) error {
+	}
+	readyz := func(c echo.Context) error {
 		ctx, cancel := context.WithTimeout(c.Request().Context(), 2*time.Second)
 		defer cancel()
 		if err := pool.Ping(ctx); err != nil {
 			return c.JSON(http.StatusServiceUnavailable, map[string]string{"status": "unavailable", "reason": "db ping failed"})
 		}
 		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
-	})
+	}
+	e.GET("/healthz", livez)
+	e.GET("/readyz", readyz)
+	e.GET("/api/healthz", livez)
+	e.GET("/api/readyz", readyz)
 }

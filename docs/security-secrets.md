@@ -10,7 +10,7 @@
 | 1. 予防（コミット前） | lefthook + gitleaks の pre-commit hook | 導入済み（`lefthook.yml`） |
 | 2. ブロック（push時） | ① lefthook + gitleaks の **pre-push hook**（ローカル側の無料近似） / ② GitHub Secret scanning + Push protection（サーバ側） | ① 導入済み（`lefthook.yml`。`--no-verify` コミットや pre-commit の fail-open をすり抜けた分を push 直前に捕まえる） / ② **未設定**（private リポジトリは Secret Protection 課金・$19/committer/月 が必要。public 化すれば無料なので、その時に Settings → Code security で ON にする） |
 | 3. 検知（CI） | gitleaks で**全履歴**スキャン（`security.yml`、週次も実行） | 導入済み |
-| 4. 最小化（そもそも持たない） | CI の値は GitHub Actions Secrets、GCP 認証は OIDC フェデレーション（長期キーを保存しない） | OIDC は C10 で実装予定 |
+| 4. 最小化（そもそも持たない） | CI の値は GitHub Actions Secrets、GCP 認証は OIDC フェデレーション（長期キーを保存しない） | **導入済み**（C10。WIF + `github-deployer` SA。CD 用のシークレットは GitHub に一切無し。DB パスワードも OIDC 認証後に Secret Manager から取得。`docs/cd-rollback.md`） |
 | 5. 対応（漏れた後） | 下記ランブック | 文書化済み |
 
 ## セットアップ（各開発者、初回のみ）
