@@ -8,7 +8,7 @@
 | 層 | 手段 | 状態 |
 |----|------|------|
 | 1. 予防（コミット前） | lefthook + gitleaks の pre-commit hook | 導入済み（`lefthook.yml`） |
-| 2. ブロック（push時） | GitHub Secret scanning + Push protection | **未設定**（private リポジトリは GHAS 課金が必要。public 化 or GHAS 導入時に Settings → Code security で ON にする） |
+| 2. ブロック（push時） | ① lefthook + gitleaks の **pre-push hook**（ローカル側の無料近似） / ② GitHub Secret scanning + Push protection（サーバ側） | ① 導入済み（`lefthook.yml`。`--no-verify` コミットや pre-commit の fail-open をすり抜けた分を push 直前に捕まえる） / ② **未設定**（private リポジトリは Secret Protection 課金・$19/committer/月 が必要。public 化すれば無料なので、その時に Settings → Code security で ON にする） |
 | 3. 検知（CI） | gitleaks で**全履歴**スキャン（`security.yml`、週次も実行） | 導入済み |
 | 4. 最小化（そもそも持たない） | CI の値は GitHub Actions Secrets、GCP 認証は OIDC フェデレーション（長期キーを保存しない） | OIDC は C10 で実装予定 |
 | 5. 対応（漏れた後） | 下記ランブック | 文書化済み |
@@ -18,12 +18,18 @@
 ```bash
 go install github.com/evilmartians/lefthook@latest
 go install github.com/zricethezav/gitleaks/v8@v8.30.1
-lefthook install   # .git/hooks に pre-commit を配線
+lefthook install   # .git/hooks に pre-commit / pre-push を配線
 ```
 
 **注意: `$(go env GOPATH)/bin`（通常 `~/go/bin`）が PATH に必要。** 無いと lefthook の hook は
-「Can't find lefthook in PATH」と警告するだけで**素通しする（fail-open）**。そもそも pre-commit は
-`--no-verify` で誰でも回避できる補助層であり、強制層はあくまで CI の gitleaks（層3）という設計。
+「Can't find lefthook in PATH」と警告するだけで**素通しする（fail-open）**。そもそも pre-commit /
+pre-push は `--no-verify` で誰でも回避できる補助層であり、強制層はあくまで CI の gitleaks（層3）という設計。
+
+pre-push の検出パターン上の限界も把握しておく（2026-07-07 実測）: gitleaks は
+「既知プレフィックスのトークン（`ghp_` 等）＋高エントロピー値」を捕まえる仕組みで、
+AWS の**アクセスキー ID 単体**（`AKIA...`）は検出しない（秘密情報は secret key 側で
+`generic-api-key` として検出）。既知のサンプルキー（`AKIAIOSFODNN7EXAMPLE` 等）は
+allowlist されるため誤検知しないが、検出率 100% の仕組みではない。
 
 ```bash
 # ~/.zshrc に追加

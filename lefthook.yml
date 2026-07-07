@@ -8,3 +8,12 @@ pre-commit:
   commands:
     gitleaks:
       run: gitleaks git --pre-commit --staged --no-banner
+
+# push で手元から外に出る直前の最後の砦（GitHub の Push protection は private では
+# 有料のため、その無料近似）。pre-commit を --no-verify や fail-open ですり抜けた
+# コミットをここで捕まえる。通常は未 push 分だけの高速スキャン、範囲が取れない場合
+# （origin/main 未取得など）は全履歴スキャン（実測8秒程度）にフォールバック。
+pre-push:
+  commands:
+    gitleaks:
+      run: gitleaks git --no-banner --log-opts "origin/main..HEAD" || gitleaks git --no-banner
