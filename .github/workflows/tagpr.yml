@@ -1,0 +1,33 @@
+# リリース自動化 (C8): main への push ごとに tagpr がリリースPRを作成・更新し、
+# マージすると自動でタグ＋GitHub Release＋CHANGELOG が作られる。
+# リリース作業を手順書ではなく「マージボタンを押すだけ」の仕組みにする。
+# 注意: リポジトリ設定で "Allow GitHub Actions to create and approve pull requests"
+# を有効にしておく必要がある（Settings → Actions → Workflow permissions）。
+name: tagpr
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false # リリースPRの作成・タグ付けを途中キャンセルしない
+
+jobs:
+  tagpr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # タグ・CHANGELOG コミットの push と Release 作成
+      pull-requests: write # リリースPRの作成・更新
+      issues: read # バージョンラベル（major/minor）の参照
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - uses: Songmu/tagpr@e84001bd5dac8defa0c75b3913937d284a3b3660 # v1.20.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

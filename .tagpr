@@ -1,0 +1,10 @@
+# tagpr の設定 (C8): main へのリリースPRをマージすると自動で
+# タグ付け・GitHub Release・CHANGELOG 更新が走る。
+# 書式は gitconfig 形式。https://github.com/Songmu/tagpr
+[tagpr]
+	vPrefix = true
+	releaseBranch = main
+	# アプリなのでバージョンファイルは持たず git タグのみで管理する
+	versionFile = -
+	changelog = true
+	release = true
