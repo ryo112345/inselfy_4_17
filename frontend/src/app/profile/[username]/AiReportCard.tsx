@@ -24,21 +24,27 @@ export function AiReportCard({
   const [requestStatus, setRequestStatus] = useState<"none" | "pending" | "ready">(
     intReportRequestId ? "pending" : "none",
   );
+  const [statusError, setStatusError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     // 未ログインでは呼ばない（401 が正常系になり、SDK の 401 インターセプタが
     // /login リダイレクトを起こすため）。従来どおり初期ステータス表示のままになる。
     if (!isAuthenticated) return;
     let cancelled = false;
+    setStatusError(false);
     getIntegratedReportStatus()
       .then((data) => {
         if (!cancelled && data?.status) setRequestStatus(data.status);
       })
-      .catch(() => {});
+      .catch(() => {
+        // 初期ステータス表示のまま続行するが、失敗したことは明示する
+        if (!cancelled) setStatusError(true);
+      });
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, reloadKey]);
 
   const steps = [
     { label: "職歴を入力", done: hasExperience },
@@ -112,6 +118,18 @@ export function AiReportCard({
           >
             {buttonLabel}
           </button>
+          {statusError && (
+            <p className="mt-3 text-[13px] text-red-700">
+              レポートの状態の取得に失敗しました。
+              <button
+                type="button"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className="ml-1 underline hover:no-underline"
+              >
+                再読み込み
+              </button>
+            </p>
+          )}
         </div>
       </section>
 

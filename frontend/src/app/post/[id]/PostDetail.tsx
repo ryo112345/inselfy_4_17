@@ -50,6 +50,7 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
   const [comments, setComments] = useState(initialComments);
   const [commentCount, setCommentCount] = useState(post.commentCount);
   const [commentContent, setCommentContent] = useState("");
+  const [commentError, setCommentError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -89,13 +90,15 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
     e.preventDefault();
     if (!commentContent.trim() || submitting || !currentUserId) return;
     setSubmitting(true);
+    setCommentError("");
     try {
       const newComment = await createComment(post.id, commentContent.trim());
       setComments((prev) => [...prev, newComment]);
       setCommentCount((c) => c + 1);
       setCommentContent("");
     } catch {
-      // ignore
+      // 入力値は保持したままエラーを表示し、再送できるようにする
+      setCommentError("返信の投稿に失敗しました。もう一度お試しください。");
     } finally {
       setSubmitting(false);
     }
@@ -262,6 +265,7 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
               className="w-full resize-none border-none bg-transparent text-[15px] outline-none placeholder:text-gray-400 text-gray-900 py-1 leading-normal"
               style={{ minHeight: 40 }}
             />
+            {commentError && <p className="text-sm text-red-600 mt-1">{commentError}</p>}
           </div>
           <button
             type="submit"

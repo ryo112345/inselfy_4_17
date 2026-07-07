@@ -18,26 +18,37 @@ type Props = {
 export function SimilarUsersCard({ userId, visible, className }: Props) {
   const [users, setUsers] = useState<ModelsSimilarUserItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setError(false);
     similarUsersGetSimilarUsers({ path: { userId }, query: { limit: 20 } })
-      .then(({ data, error }) => {
+      .then(({ data, error: apiError }) => {
         if (!cancelled) {
-          setUsers(error ? [] : (data?.items ?? []));
+          if (apiError) {
+            setError(true);
+          } else {
+            setUsers(data?.items ?? []);
+          }
           setLoading(false);
         }
       })
       .catch(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, reloadKey]);
 
-  if (!visible || (loading && users.length === 0)) return null;
-  if (!loading && users.length === 0) return null;
+  if (!visible || loading) return null;
+  // 0件（エラーなし）はカード自体を出さない。エラー時は0件と区別して表示する。
+  if (!error && users.length === 0) return null;
 
   return (
     <div className={className ?? "w-full max-w-[320px] ml-auto"}>
@@ -47,11 +58,24 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
           <p className="text-[12px] text-gray-400 mt-0.5">Work Values の結果から</p>
         </div>
 
-        <div className="divide-y divide-gray-100">
-          {users.map((u) => (
-            <SimilarUserRow key={u.userId} user={u} />
-          ))}
-        </div>
+        {error ? (
+          <div className="px-5 pb-5 flex items-center gap-2">
+            <span className="text-[13px] text-red-600">読み込みに失敗しました</span>
+            <button
+              type="button"
+              onClick={() => setReloadKey((k) => k + 1)}
+              className="text-[13px] text-[var(--accent)] hover:underline"
+            >
+              再読み込み
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {users.map((u) => (
+              <SimilarUserRow key={u.userId} user={u} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

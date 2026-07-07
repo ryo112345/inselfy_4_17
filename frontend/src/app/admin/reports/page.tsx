@@ -71,12 +71,14 @@ export default function AdminReportsPage() {
   const [ciReports, setCiReports] = useState<Report[]>([]);
   const [intReports, setIntReports] = useState<IntegratedReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [expandedPrompt, setExpandedPrompt] = useState<string | null>(null);
   const [promptContent, setPromptContent] = useState<Record<string, string>>({});
   const [loadingPrompt, setLoadingPrompt] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const [wvRes, ciRes, wvReportsRes, ciReportsRes, intPendingRes, intReportsRes] =
         await Promise.all([
@@ -111,13 +113,13 @@ export default function AdminReportsPage() {
         const data = await intReportsRes.json();
         setIntReports(data.reports ?? []);
       }
+      if (
+        ![wvRes, ciRes, wvReportsRes, ciReportsRes, intPendingRes, intReportsRes].every((r) => r.ok)
+      ) {
+        setLoadError(true);
+      }
     } catch {
-      setWvSessions([]);
-      setCiSessions([]);
-      setIntRequests([]);
-      setWvReports([]);
-      setCiReports([]);
-      setIntReports([]);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -308,6 +310,18 @@ export default function AdminReportsPage() {
           </button>
         </div>
 
+        {!loading && loadError && (
+          <div className="mb-4 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+            <p className="text-sm text-red-700">データの読み込みに失敗しました</p>
+            <button
+              type="button"
+              onClick={fetchData}
+              className="text-sm font-medium text-red-700 underline hover:no-underline cursor-pointer"
+            >
+              再読み込み
+            </button>
+          </div>
+        )}
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
