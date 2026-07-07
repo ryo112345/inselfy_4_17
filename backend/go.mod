@@ -18,7 +18,7 @@ require (
 	github.com/labstack/echo/v4 v4.15.1
 	github.com/oapi-codegen/runtime v1.4.0
 	github.com/stripe/stripe-go/v82 v82.5.1
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.52.0
 	google.golang.org/api v0.276.0
 )
 
