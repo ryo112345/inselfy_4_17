@@ -15,9 +15,9 @@ import { getLatestResult as getLatestWvResult } from "@/features/work-values/api
 import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
 import { computeMatchScores, type MatchScores } from "./match";
 
-export type SortKey = "newest" | "salary";
+import { PAGE_SIZE } from "./constants";
 
-export const PAGE_SIZE = 20;
+export type SortKey = "newest" | "salary";
 
 /** サーバーコンポーネントで先読みした初期ページ（デフォルト検索条件・offset 0）。 */
 export type InitialJobSearchData = {
