@@ -10,11 +10,11 @@ func ScoutTemplateResponse(t *scout.ScoutTemplate) any { return toTemplateRespon
 
 // ScoutTemplatesResponse converts a list of scout template entities to their API response.
 func ScoutTemplatesResponse(ts []*scout.ScoutTemplate) any {
-	items := make([]*openapi.ModelsScoutTemplateResponse, len(ts))
+	items := make([]openapi.ModelsScoutTemplateResponse, len(ts))
 	for i, t := range ts {
-		items[i] = toTemplateResponse(t)
+		items[i] = *toTemplateResponse(t)
 	}
-	return items
+	return &openapi.ModelsScoutTemplateListResponse{Items: items}
 }
 
 func toTemplateResponse(t *scout.ScoutTemplate) *openapi.ModelsScoutTemplateResponse {

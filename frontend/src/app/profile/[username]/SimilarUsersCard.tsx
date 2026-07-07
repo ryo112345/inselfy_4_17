@@ -24,7 +24,7 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
     similarUsersGetSimilarUsers({ path: { userId }, query: { limit: 20 } })
       .then(({ data, error }) => {
         if (!cancelled) {
-          setUsers(error ? [] : (data?.users ?? []));
+          setUsers(error ? [] : (data?.items ?? []));
           setLoading(false);
         }
       })

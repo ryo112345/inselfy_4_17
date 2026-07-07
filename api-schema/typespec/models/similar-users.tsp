@@ -50,7 +50,7 @@ model SimilarUserItem {
 /** 類似ユーザー一覧 */
 model SimilarUsersResponse {
   /** 類似ユーザー（0件時は null） */
-  users: SimilarUserItem[] | null;
+  items: SimilarUserItem[] | null;
 
   /** 件数 */
   total: int32;

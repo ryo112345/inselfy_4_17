@@ -73,12 +73,12 @@ Go 側は生成フィールド名が概ね同一（`session_id` → `SessionId` 
 
 | # | 状態 | 対象 | 変更 |
 |---|------|------|------|
-| W1 | [ ] | routes/scout-templates.tsp `listScoutTemplates` | 裸配列 → `ScoutTemplateListResponse {items}` |
-| W2 | [ ] | routes/job-postings.tsp `listCompanyJobPostings` | 裸配列 → `JobPostingListResponse {items, total}` 再利用 |
-| W3 | [ ] | models/talent.tsp `TalentListResponse` | `{users, total}` → `{items, total}` |
-| W4 | [ ] | models/similar-users.tsp `SimilarUsersResponse` | `{users, total}` → `{items, total}`（null 許容は維持） |
-| W5 | [ ] | models/company-team.tsp `TeamListResponse` / `PublicTeamScoresResponse` / `TeamScoresResponse` | `{teams}` / `{members}` → `{items}` |
-| W6 | [ ] | models/interview.tsp 一覧2種 | `{interviews}` → `{items}` |
+| W1 | [x] | routes/scout-templates.tsp `listScoutTemplates` | 裸配列 → `ScoutTemplateListResponse {items}` |
+| W2 | [x] | routes/job-postings.tsp `listCompanyJobPostings` | 裸配列 → `JobPostingListResponse {items, total}` 再利用 |
+| W3 | [x] | models/talent.tsp `TalentListResponse` | `{users, total}` → `{items, total}` |
+| W4 | [x] | models/similar-users.tsp `SimilarUsersResponse` | `{users, total}` → `{items, total}`（null 許容は維持） |
+| W5 | [x] | models/company-team.tsp `TeamListResponse` / `PublicTeamScoresResponse` / `TeamScoresResponse` | `{teams}` / `{members}` → `{items}` |
+| W6 | [x] | models/interview.tsp `CompanyInterviewListResponse` | `{interviews}` → `{items}`（候補者向け `CandidateInterviewListResponse` は `{interviews, pendingProposals}` の複合レスポンスのため据え置き） |
 
 ## 3. enum 化
 

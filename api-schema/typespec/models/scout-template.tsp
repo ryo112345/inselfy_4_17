@@ -43,3 +43,9 @@ model ScoutTemplateResponse {
   /** 更新日時 */
   updatedAt: utcDateTime;
 }
+
+/** スカウトテンプレート一覧 */
+model ScoutTemplateListResponse {
+  /** テンプレート */
+  items: ScoutTemplateResponse[];
+}

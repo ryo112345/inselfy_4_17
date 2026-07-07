@@ -81,7 +81,7 @@ export default function TeamDetailPage() {
       const res = await companyFetch(`/api/company/teams/${teamId}/scores`);
       if (!res.ok) return;
       const data = await res.json();
-      setMemberScores(data.members || []);
+      setMemberScores(data.items || []);
     } catch {}
   }, [teamId, companyFetch]);
 

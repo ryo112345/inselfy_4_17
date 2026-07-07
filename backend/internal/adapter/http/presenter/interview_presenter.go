@@ -57,7 +57,7 @@ func CompanyInterviewsResponse(interviews []*interview.InterviewWithNames) *open
 			JobTitle:           iv.JobTitle,
 		}
 	}
-	return &openapi.ModelsCompanyInterviewListResponse{Interviews: result}
+	return &openapi.ModelsCompanyInterviewListResponse{Items: result}
 }
 
 // CandidateInterviewsResponse builds the candidate interview-list API response.

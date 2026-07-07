@@ -68,7 +68,7 @@ model TeamResponse {
 /** チーム一覧 */
 model TeamListResponse {
   /** チーム */
-  teams: TeamResponse[];
+  items: TeamResponse[];
 }
 
 /** チームメンバー */
@@ -164,7 +164,7 @@ model MemberScoreResponse {
 /** チームスコア一覧 */
 model TeamScoresResponse {
   /** メンバーごとのスコア */
-  members: MemberScoreResponse[];
+  items: MemberScoreResponse[];
 }
 
 /** 公開スコアエントリ */
@@ -203,5 +203,5 @@ model PublicTeamScoreResponse {
 /** 公開チームスコア一覧 */
 model PublicTeamScoresResponse {
   /** チーム */
-  teams: PublicTeamScoreResponse[];
+  items: PublicTeamScoreResponse[];
 }

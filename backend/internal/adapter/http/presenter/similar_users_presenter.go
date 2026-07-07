@@ -12,7 +12,7 @@ func SimilarUsersResponse(users []workvalues.SimilarUser) *openapi.ModelsSimilar
 		items = append(items, toSimilarUserItem(u))
 	}
 	return &openapi.ModelsSimilarUsersResponse{
-		Users: &items,
+		Items: &items,
 		Total: int32(len(items)),
 	}
 }

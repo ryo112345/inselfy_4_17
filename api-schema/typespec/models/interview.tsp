@@ -117,7 +117,7 @@ model CandidateInterviewItem {
 /** 企業向け面接一覧 */
 model CompanyInterviewListResponse {
   /** 面接 */
-  interviews: CompanyInterviewItem[];
+  items: CompanyInterviewItem[];
 }
 
 /** 候補者に届いている日程提案 */

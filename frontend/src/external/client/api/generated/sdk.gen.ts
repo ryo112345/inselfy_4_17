@@ -513,7 +513,7 @@ export const companyInterviewsCancelCompanyInterview = <ThrowOnError extends boo
 
 /**
  * List job postings of the company
- * 自社求人一覧（企業認証）。裸の配列を返す（互換のため）
+ * 自社求人一覧（企業認証）
  */
 export const companyJobPostingsListCompanyJobPostings = <ThrowOnError extends boolean = false>(options?: Options<CompanyJobPostingsListCompanyJobPostingsData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<CompanyJobPostingsListCompanyJobPostingsResponse, CompanyJobPostingsListCompanyJobPostingsError, ThrowOnError>({
@@ -876,7 +876,7 @@ export const savedCandidatesSaveCandidate = <ThrowOnError extends boolean = fals
 
 /**
  * List scout templates
- * スカウトテンプレート一覧（企業認証）。裸の配列を返す（互換のため）
+ * スカウトテンプレート一覧（企業認証）
  */
 export const scoutTemplatesListScoutTemplates = <ThrowOnError extends boolean = false>(options?: Options<ScoutTemplatesListScoutTemplatesData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<ScoutTemplatesListScoutTemplatesResponse, ScoutTemplatesListScoutTemplatesError, ThrowOnError>({

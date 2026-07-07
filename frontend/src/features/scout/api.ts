@@ -227,7 +227,7 @@ export async function fetchTemplates(): Promise<ScoutTemplate[]> {
     cache: "no-store",
   });
   if (error || !data) throw new Error("Failed to fetch templates");
-  return data;
+  return data.items;
 }
 
 export async function createTemplate(body: {

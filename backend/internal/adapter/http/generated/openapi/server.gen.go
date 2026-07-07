@@ -532,8 +532,8 @@ type ModelsCompanyInterviewItem struct {
 
 // ModelsCompanyInterviewListResponse 企業向け面接一覧
 type ModelsCompanyInterviewListResponse struct {
-	// Interviews 面接
-	Interviews []ModelsCompanyInterviewItem `json:"interviews"`
+	// Items 面接
+	Items []ModelsCompanyInterviewItem `json:"items"`
 }
 
 // ModelsCompanyLoginRequest 企業ログインリクエスト
@@ -1876,8 +1876,8 @@ type ModelsPublicTeamScoreResponse struct {
 
 // ModelsPublicTeamScoresResponse 公開チームスコア一覧
 type ModelsPublicTeamScoresResponse struct {
-	// Teams チーム
-	Teams []ModelsPublicTeamScoreResponse `json:"teams"`
+	// Items チーム
+	Items []ModelsPublicTeamScoreResponse `json:"items"`
 }
 
 // ModelsQuotedPostResponse 引用投稿（要約）
@@ -2123,6 +2123,12 @@ type ModelsScoutSettingsResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// ModelsScoutTemplateListResponse スカウトテンプレート一覧
+type ModelsScoutTemplateListResponse struct {
+	// Items テンプレート
+	Items []ModelsScoutTemplateResponse `json:"items"`
+}
+
 // ModelsScoutTemplateResponse スカウトテンプレート
 type ModelsScoutTemplateResponse struct {
 	// Body 本文
@@ -2248,11 +2254,11 @@ type ModelsSimilarUserItem struct {
 
 // ModelsSimilarUsersResponse 類似ユーザー一覧
 type ModelsSimilarUsersResponse struct {
+	// Items 類似ユーザー（0件時は null）
+	Items *[]ModelsSimilarUserItem `json:"items"`
+
 	// Total 件数
 	Total int32 `json:"total"`
-
-	// Users 類似ユーザー（0件時は null）
-	Users *[]ModelsSimilarUserItem `json:"users"`
 }
 
 // ModelsSkillListResponse スキル一覧
@@ -2356,11 +2362,11 @@ type ModelsTalentExperience struct {
 
 // ModelsTalentListResponse 人材一覧
 type ModelsTalentListResponse struct {
+	// Items 人材カード
+	Items []ModelsTalentCard `json:"items"`
+
 	// Total 総件数
 	Total int `json:"total"`
-
-	// Users 人材カード
-	Users []ModelsTalentCard `json:"users"`
 }
 
 // ModelsTeamDetailResponse チーム詳細（メンバー付き）
@@ -2389,8 +2395,8 @@ type ModelsTeamDetailResponse struct {
 
 // ModelsTeamListResponse チーム一覧
 type ModelsTeamListResponse struct {
-	// Teams チーム
-	Teams []ModelsTeamResponse `json:"teams"`
+	// Items チーム
+	Items []ModelsTeamResponse `json:"items"`
 }
 
 // ModelsTeamMemberResponse チームメンバー
@@ -2464,8 +2470,8 @@ type ModelsTeamScoreEntry struct {
 
 // ModelsTeamScoresResponse チームスコア一覧
 type ModelsTeamScoresResponse struct {
-	// Members メンバーごとのスコア
-	Members []ModelsMemberScoreResponse `json:"members"`
+	// Items メンバーごとのスコア
+	Items []ModelsMemberScoreResponse `json:"items"`
 }
 
 // ModelsUnauthorizedError Unauthorized エラー

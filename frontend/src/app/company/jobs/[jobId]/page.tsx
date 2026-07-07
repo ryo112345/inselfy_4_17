@@ -553,7 +553,7 @@ export default function JobEditPage() {
     companyFetch("/api/company/teams").then(async (res) => {
       if (res.ok) {
         const data = await res.json();
-        setTeamsList(data.teams ?? []);
+        setTeamsList(data.items ?? []);
       }
     });
   }, [companyFetch]);
@@ -566,7 +566,7 @@ export default function JobEditPage() {
     companyFetch(`/api/company/teams/${teamId}/scores`).then(async (res) => {
       if (!res.ok) { setTeamScores(null); return; }
       const data = await res.json();
-      const members: { wvScores?: { id: string; displayScore: number }[]; ciScores?: { id: string; displayScore: number }[] }[] = data.members ?? [];
+      const members: { wvScores?: { id: string; displayScore: number }[]; ciScores?: { id: string; displayScore: number }[] }[] = data.items ?? [];
       const wvAgg = new Map<string, number[]>();
       const ciAgg = new Map<string, number[]>();
       for (const m of members) {

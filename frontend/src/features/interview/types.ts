@@ -32,7 +32,7 @@ export interface Interview {
 }
 
 export interface CompanyInterviewsResponse {
-  interviews: Interview[];
+  items: Interview[];
 }
 
 export interface CandidateInterviewsResponse {

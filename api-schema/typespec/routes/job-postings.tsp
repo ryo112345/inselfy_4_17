@@ -54,10 +54,10 @@ interface CompanyJobPostings {
     @body job: JobPostingResponse;
   } | BadRequestError;
 
-  /** 自社求人一覧（企業認証）。裸の配列を返す（互換のため） */
+  /** 自社求人一覧（企業認証） */
   @get
   @summary("List job postings of the company")
-  listCompanyJobPostings(): JobPostingResponse[] | BadRequestError;
+  listCompanyJobPostings(): JobPostingListResponse | BadRequestError;
 
   /** 求人取得（企業認証） */
   @get
