@@ -1,0 +1,10 @@
+# git hooks 管理（C9: シークレット漏洩の予防層）。
+# セットアップ（各開発者が一度だけ実行）:
+#   go install github.com/evilmartians/lefthook@latest
+#   go install github.com/zricethezav/gitleaks/v8@v8.30.1
+#   lefthook install
+# 詳細は docs/security-secrets.md を参照。
+pre-commit:
+  commands:
+    gitleaks:
+      run: gitleaks git --pre-commit --staged --no-banner
