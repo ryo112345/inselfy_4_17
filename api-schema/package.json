@@ -9,7 +9,7 @@
     "generate:ts": "./scripts/generate-ts.sh"
   },
   "devDependencies": {
-    "@typespec/compiler": "^0.60.0",
+    "@typespec/compiler": "^1.13.0",
     "@typespec/http": "^0.60.0",
     "@typespec/openapi3": "^0.60.0",
     "@hey-api/openapi-ts": "^0.64.0"
