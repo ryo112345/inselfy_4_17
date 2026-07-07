@@ -8,10 +8,12 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/backend-ci.yml"
+      - ".octocov.yml"
   pull_request:
     paths:
       - "backend/**"
       - ".github/workflows/backend-ci.yml"
+      - ".octocov.yml"
 
 permissions:
   contents: read
@@ -23,6 +25,12 @@ concurrency:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # octocov が PR にカバレッジをコメントするため
+      pull-requests: write
+      # octocov が前回レポートの取得・保存に GitHub Actions Artifacts を使うため
+      actions: write
     defaults:
       run:
         working-directory: backend
@@ -69,4 +77,9 @@ jobs:
           DB_USER: user
           DB_PASSWORD: password
           DB_NAME: inselfy
-        run: make test
+        run: make test-cover
+
+      # .octocov.yml: カバレッジを PR にコメントし、main の前回レポートより
+      # 下がったら（-1pt 超）落とす。レポートは Actions Artifacts に保存
+      - name: Report coverage (octocov)
+        uses: k1LoW/octocov-action@b3b6ee60482a667950f87553abf1df63217235d9 # v1.5.1

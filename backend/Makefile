@@ -73,6 +73,11 @@ build:
 test:
 	go test ./...
 
+# CI (octocov) と同じ形式でカバレッジを計測する。結果は go tool cover -func=coverage.out で確認
+.PHONY: test-cover
+test-cover:
+	go test ./... -coverprofile=coverage.out
+
 # Enforces the layer boundary (.golangci.yml depguard): controllers must not
 # import pgx; only admin_*_controller.go may use the pool directly. Install:
 #   go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
