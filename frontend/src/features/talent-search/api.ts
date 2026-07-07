@@ -47,14 +47,23 @@ export type CandidateDetail = {
 export async function fetchCandidateDetail(
   username: string,
   userId: string,
+  signal?: AbortSignal,
 ): Promise<CandidateDetail> {
   const [exp, skill, profile, wv, ci] = await Promise.all([
-    experiencesListExperiences({ path: { username } }).catch(() => null),
-    skillsListSkills({ path: { username } }).catch(() => null),
-    usersGetUserByUsername({ path: { username } }).catch(() => null),
-    workValuesWvGetLatestResult({ path: { userId } }).catch(() => null),
-    careerInterestCiGetLatestResult({ path: { userId } }).catch(() => null),
+    experiencesListExperiences({ path: { username }, signal }).catch(() => null),
+    skillsListSkills({ path: { username }, signal }).catch(() => null),
+    usersGetUserByUsername({ path: { username }, signal }).catch(() => null),
+    workValuesWvGetLatestResult({ path: { userId }, signal }).catch(() => null),
+    careerInterestCiGetLatestResult({ path: { userId }, signal }).catch(() => null),
   ]);
+  // wv/ci は未診断なら無いのが正常だが、プロフィール系3件が全滅なら取得失敗として扱う
+  if (
+    (exp === null || exp.error) &&
+    (skill === null || skill.error) &&
+    (profile === null || profile.error)
+  ) {
+    throw new Error("候補者情報の取得に失敗しました");
+  }
   return {
     experiences: (exp?.data?.items ?? []).map((e) => ({
       companyName: e.companyName,

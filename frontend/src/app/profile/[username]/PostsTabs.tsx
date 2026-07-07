@@ -30,6 +30,13 @@ export function PostsTabs({ posts = [], userId, currentUserId }: Props) {
   const [likedError, setLikedError] = useState(false);
   const [likedReloadKey, setLikedReloadKey] = useState(0);
 
+  // 別プロフィールに遷移したとき、前ユーザーのいいね一覧が残らないようリセットする
+  useEffect(() => {
+    setLikedPosts([]);
+    setLikedLoaded(false);
+    setLikedError(false);
+  }, [userId]);
+
   useEffect(() => {
     if (active !== "likes" || !userId || likedLoaded) return;
     setLikedLoading(true);

@@ -83,8 +83,10 @@ export type PaginatedJobPostingsResponse = {
 
 export async function searchPublicJobPostings(
   params: JobSearchParams = {},
+  signal?: AbortSignal,
 ): Promise<PaginatedJobPostingsResponse> {
   const { data, error } = await publicJobPostingsListPublicJobPostings({
+    signal,
     query: {
       search: params.search || undefined,
       category: params.category || undefined,

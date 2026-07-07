@@ -145,6 +145,8 @@ export default function JobsPage() {
   const PAGE_SIZE = 20;
   const sentinelRef = useRef<HTMLDivElement>(null);
   const fetchingRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const fetchedCompanyIdsRef = useRef<Set<string>>(new Set());
   const [hasDiagnosis, setHasDiagnosis] = useState<boolean | null>(null);
   const [userWv, setUserWv] = useState<WvResultDTO | null>(null);
   const [userCi, setUserCi] = useState<CiResultDTO | null>(null);
@@ -228,6 +230,11 @@ export default function JobsPage() {
   const fetchJobs = useCallback(
     async (reset: boolean, currentOffset: number) => {
       if (!reset && fetchingRef.current) return;
+      // reset（フィルタ変更）は進行中のリクエストを中断して置き換える。
+      // 古いレスポンスが後着して新しい検索結果を上書きするのを防ぐ。
+      abortRef.current?.abort();
+      const ac = new AbortController();
+      abortRef.current = ac;
       fetchingRef.current = true;
       if (reset) {
         setLoading(true);
@@ -236,17 +243,21 @@ export default function JobsPage() {
         setLoadingMore(true);
       }
       try {
-        const data = await searchPublicJobPostings({
-          search: search.trim() || undefined,
-          category: category !== "すべて" ? category : undefined,
-          employmentType: employment !== "すべて" ? employment : undefined,
-          remotePolicy: remote !== "すべて" ? remote : undefined,
-          sort,
-          limit: PAGE_SIZE,
-          offset: currentOffset,
-          valueFilters: valueFiltersParam || undefined,
-          filterMode: valueFiltersParam ? filterMode : undefined,
-        });
+        const data = await searchPublicJobPostings(
+          {
+            search: search.trim() || undefined,
+            category: category !== "すべて" ? category : undefined,
+            employmentType: employment !== "すべて" ? employment : undefined,
+            remotePolicy: remote !== "すべて" ? remote : undefined,
+            sort,
+            limit: PAGE_SIZE,
+            offset: currentOffset,
+            valueFilters: valueFiltersParam || undefined,
+            filterMode: valueFiltersParam ? filterMode : undefined,
+          },
+          ac.signal,
+        );
+        if (ac.signal.aborted) return;
         if (reset) {
           setJobs(data.items);
         } else {
@@ -257,12 +268,17 @@ export default function JobsPage() {
           });
         }
         setTotal(data.total);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (!ac.signal.aborted) {
+          setError(err instanceof Error ? err.message : "求人の取得に失敗しました");
+        }
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
-        fetchingRef.current = false;
+        // 中断された呼び出しの後始末は、置き換えた新しい呼び出し側が担う
+        if (!ac.signal.aborted) {
+          setLoading(false);
+          setLoadingMore(false);
+          fetchingRef.current = false;
+        }
       }
     },
     [search, category, employment, remote, sort, valueFiltersParam, filterMode],
@@ -298,13 +314,20 @@ export default function JobsPage() {
 
   useEffect(() => {
     if (!hasDiagnosis || jobs.length === 0) return;
-    const companyIds = [...new Set(jobs.map((j) => j.companyId))];
+    // 取得済みの企業は再取得せず、未取得分だけ差分フェッチする
+    const companyIds = [...new Set(jobs.map((j) => j.companyId))].filter(
+      (id) => !fetchedCompanyIdsRef.current.has(id),
+    );
+    if (companyIds.length === 0) return;
+    for (const id of companyIds) fetchedCompanyIdsRef.current.add(id);
     Promise.all(companyIds.map((id) => fetchPublicTeamScores(id))).then((results) => {
-      const map = new Map<string, TeamScores>();
-      for (const t of results.flat()) {
-        map.set(t.teamId, t);
-      }
-      setTeamScoresMap(map);
+      setTeamScoresMap((prev) => {
+        const map = new Map(prev);
+        for (const t of results.flat()) {
+          map.set(t.teamId, t);
+        }
+        return map;
+      });
     });
   }, [hasDiagnosis, jobs]);
 
