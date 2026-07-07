@@ -161,18 +161,33 @@ cd backend && make migrate-up
 
 ## Phase 4: デプロイ実行
 
-### 4-1. デプロイ
+### 4-1. デプロイ（通常: main にマージするだけ）
+
+デプロイは C10 で GitHub Actions の CD に移行済み（`.github/workflows/deploy.yml`）。
+**main にマージすると CI ゲート → キーレス(OIDC)デプロイまで自動で走る。**
+env vars / secrets 設定の正も deploy.yml に移った（cloudbuild.yaml は廃止）。
+パイプラインの全体像・ロールバック手順・マイグレーション規律は `docs/cd-rollback.md`。
+
+### 4-1b. 緊急手動デプロイ（GitHub Actions 障害時のみ）
 
 ```bash
-# クリーンな作業ツリー（git status が clean）で実行すること。
+# クリーンな作業ツリー（git status が clean）・main の HEAD で実行すること。
 # イメージタグ = git SHA なので、未コミット変更が混ざるとタグと中身がズレる。
-gcloud builds submit --config=cloudbuild.yaml \
-  --substitutions=_GIT_SHA=$(git rev-parse --short=12 HEAD)
+TAG=$(git rev-parse --short=12 HEAD)
+IMAGE="asia-northeast1-docker.pkg.dev/inselfy/inselfy/inselfy:${TAG}"
+gcloud auth configure-docker asia-northeast1-docker.pkg.dev --quiet
+docker build --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=943028700787-o7mad2o995vm6q7f3q5gg6avusrfds79.apps.googleusercontent.com -t "$IMAGE" .
+docker push "$IMAGE"
+# migrate（deploy.yml と同じ direct エンドポイント。パスワードは Secret Manager から）
+migrate -path backend/migrations -database "postgres://neondb_owner:$(gcloud secrets versions access latest --secret=db-password)@ep-super-pine-aohjguv8.c-2.ap-southeast-1.aws.neon.tech:5432/neondb?sslmode=require" up
+# 2段階デプロイ（env/secrets/probe のフラグは deploy.yml の Deploy revision ステップから丸ごとコピーする）
+gcloud run deploy inselfy --image "$IMAGE" --region asia-northeast1 --no-traffic --tag candidate ...
+curl -fsS "https://candidate---inselfy-2x4xavv5gq-an.a.run.app/api/readyz"
+gcloud run services update-traffic inselfy --region asia-northeast1 --to-latest
 ```
 
 イメージタグは git SHA に統一している（`latest` は使わない）。Cloud Run のリビジョン →
-イメージタグ → コミットが一意に辿れる。コミット起点の自動デプロイ化は C10 で行う
-（`docs/backend-refactor-backlog.md` 参照）。
+イメージタグ → コミットが一意に辿れる。
 
 ### 4-2. 動作確認
 

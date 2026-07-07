@@ -1,25 +1,25 @@
 # バックエンド CI: build → vet → golangci-lint(depguard) → test。
 # サードパーティ action はコミット SHA でピン留めする（タグは動かせるため）。
+# main への push では deploy.yml が workflow_call でこれを呼ぶ（CD のゲート、C10）。
+# push トリガを持たないのは deploy 経由との二重実行を避けるため。
 name: backend CI
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-ci.yml"
-      - ".octocov.yml"
   pull_request:
     paths:
       - "backend/**"
       - ".github/workflows/backend-ci.yml"
       - ".octocov.yml"
+  workflow_call: {}
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # workflow_call 時の github.workflow は「呼び出し元」の名前になるため、
+  # ${{ github.workflow }} だと deploy から呼ばれた 4 ワークフローが同一グループに
+  # なり相互キャンセルする。ファイル名を直書きして固有グループにする。
+  group: backend-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

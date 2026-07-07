@@ -1,0 +1,166 @@
+# 本番CD (C10): main への push を起点に CI ゲート → キーレス(OIDC)デプロイ。
+# - 長期クレデンシャルは GitHub に一切置かない（WIF + github-deployer SA。C9-4 の実践）
+# - イメージタグ = git SHA 12桁（Cloud Run リビジョン → コミットのトレーサビリティ）
+# - CI ゲート（backend/frontend/migrations/e2e）が全部緑でないと deploy ジョブは走らない
+# - デプロイは 2 段階: --no-traffic で新リビジョン作成 → candidate タグ URL で検証 →
+#   update-traffic --to-latest。検証に失敗しても本番トラフィックは無傷
+# - マイグレーションは deploy 前に実行する。ロールバック整合のため後方互換
+#   （expand-contract）縛り。詳細・ロールバック手順は docs/cd-rollback.md
+# サードパーティ action はコミット SHA でピン留めする（タグは動かせるため）。
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths: # イメージ・パイプラインに影響するものだけ（docs-only の push ではデプロイしない）
+      - "backend/**"
+      - "frontend/**"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "docker/**"
+      - "compose.yml"
+      - "scripts/e2e-smoke.sh"
+      - ".github/workflows/deploy.yml"
+      - ".github/workflows/backend-ci.yml"
+      - ".github/workflows/frontend-ci.yml"
+      - ".github/workflows/migrations-ci.yml"
+      - ".github/workflows/e2e-smoke.yml"
+      - ".octocov.yml"
+  workflow_dispatch: {} # 手動再デプロイ（main の HEAD を出し直す。ロールバック訓練後の復帰にも使う）
+
+permissions:
+  contents: read
+
+concurrency:
+  # デプロイの途中キャンセルは中途半端な状態を残すのでキャンセルせず直列化する。
+  # rollback.yml も同じグループに入れて相互排他にしている
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: inselfy
+  REGION: asia-northeast1
+  SERVICE: inselfy
+  IMAGE_REPO: asia-northeast1-docker.pkg.dev/inselfy/inselfy/inselfy
+  # WIF プロバイダ名・SA メールは非機密（クレデンシャルではない）なので直書きする
+  WIF_PROVIDER: projects/943028700787/locations/global/workloadIdentityPools/github/providers/github-oidc
+  DEPLOYER_SA: github-deployer@inselfy.iam.gserviceaccount.com
+
+jobs:
+  # --- CI ゲート: 単体 CI と同じものを reusable workflow として呼ぶ。
+  #     「テストが通らないものは本番に出られない」を needs: で構造的に保証する ---
+  backend:
+    uses: ./.github/workflows/backend-ci.yml
+    permissions:
+      contents: read
+      pull-requests: write # octocov（called workflow は caller が渡した以上の権限を持てないため明示）
+      actions: write # octocov の main ベースライン保存
+  frontend:
+    uses: ./.github/workflows/frontend-ci.yml
+    permissions:
+      contents: read
+  migrations:
+    uses: ./.github/workflows/migrations-ci.yml
+    permissions:
+      contents: read
+  e2e:
+    uses: ./.github/workflows/e2e-smoke.yml
+    permissions:
+      contents: read
+
+  deploy:
+    needs: [backend, frontend, migrations, e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC トークン発行（このジョブのみ）
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Resolve image tag (git SHA 12桁)
+        run: echo "IMAGE=${IMAGE_REPO}:${GITHUB_SHA::12}" >> "$GITHUB_ENV"
+
+      # キーレス認証: GitHub の OIDC トークンを WIF で GCP の短命トークンに交換する。
+      # SA キー JSON を GitHub Secrets に置かない（漏れるものを最初から持たない）
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - name: Configure docker auth for Artifact Registry
+        run: gcloud auth configure-docker asia-northeast1-docker.pkg.dev --quiet
+
+      - name: Build image
+        run: >
+          docker build
+          --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=943028700787-o7mad2o995vm6q7f3q5gg6avusrfds79.apps.googleusercontent.com
+          -t "$IMAGE" .
+
+      - name: Push image
+        run: docker push "$IMAGE"
+
+      # --- デプロイ前マイグレーション ---
+      # 旧リビジョンへのロールバック後も新スキーマで動けるよう、マイグレーションは
+      # 後方互換（expand-contract）縛り（docs/cd-rollback.md）。
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      # go install は sumdb で検証される。バージョンは migrations-ci / ローカルと揃える
+      - name: Install golang-migrate
+        run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.19.1
+
+      - name: Migrate production DB (Neon)
+        run: |
+          DB_PASSWORD=$(gcloud secrets versions access latest --secret=db-password)
+          echo "::add-mask::$DB_PASSWORD"
+          # ホストはアプリが使う pooler ではなく direct エンドポイント。
+          # golang-migrate は advisory lock（セッション必須）を使うため
+          # PgBouncer(transaction pooling) 経由では壊れうる
+          migrate -path backend/migrations \
+            -database "postgres://neondb_owner:${DB_PASSWORD}@ep-super-pine-aohjguv8.c-2.ap-southeast-1.aws.neon.tech:5432/neondb?sslmode=require" up
+
+      # --- 2段階デプロイ 1/2: トラフィック 0% の新リビジョンを作る ---
+      # --allow-unauthenticated は付けない: run.developer に setIamPolicy が無く失敗する。
+      # 既存の allUsers invoker バインディングはフラグ省略で維持されるので不要。
+      # probe は port 8080(Next) にしか届かないため front プロキシ経由の /api/* を使う。
+      # startup の猶予 5s×24=120s は Neon の scale-to-zero 復帰を考慮。
+      # liveness は誤殺を避けて緩め（30s×3）＋ DB を見ない /api/healthz
+      - name: Deploy revision (no traffic)
+        run: >
+          gcloud run deploy "$SERVICE" --image "$IMAGE" --region "$REGION"
+          --platform managed
+          --no-traffic --tag candidate
+          --set-env-vars 'API_PORT=8081,DB_USER=neondb_owner,DB_HOST=ep-super-pine-aohjguv8-pooler.c-2.ap-southeast-1.aws.neon.tech,DB_PORT=5432,DB_NAME=neondb,DB_SSLMODE=require,STORAGE_BACKEND=r2,R2_ACCOUNT_ID=3fb924380437d8136e9079f0f5598ce8,R2_BUCKET=inselfy-uploads,R2_PUBLIC_URL=https://pub-c9accd8c7dd34ac1b0edd86723d4555d.r2.dev,GOOGLE_CLIENT_ID=943028700787-o7mad2o995vm6q7f3q5gg6avusrfds79.apps.googleusercontent.com,LINE_CHANNEL_ID=2009609875,INITIAL_ADMIN_EMAIL=ryo.akiyama112345@gmail.com'
+          --set-secrets 'DB_PASSWORD=db-password:latest,JWT_SECRET=jwt-secret:latest,LINE_CHANNEL_SECRET=line-channel-secret:latest,STRIPE_SECRET_KEY=stripe-secret-key:latest,R2_ACCESS_KEY_ID=r2-access-key-id:latest,R2_SECRET_ACCESS_KEY=r2-secret-access-key:latest'
+          --startup-probe 'httpGet.path=/api/readyz,httpGet.port=8080,periodSeconds=5,timeoutSeconds=3,failureThreshold=24'
+          --liveness-probe 'httpGet.path=/api/healthz,httpGet.port=8080,periodSeconds=30,timeoutSeconds=5,failureThreshold=3'
+
+      # candidate タグ URL で front → API → DB の全チェーンを実リクエストで確認する。
+      # startup probe(/api/readyz) が通らないと deploy 自体が失敗するので二重の保険
+      - name: Smoke check candidate revision
+        run: |
+          CANDIDATE_URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format=json \
+            | jq -r '.status.traffic[] | select(.tag=="candidate") | .url')
+          echo "candidate: $CANDIDATE_URL"
+          for i in $(seq 1 12); do
+            if curl -fsS "$CANDIDATE_URL/api/readyz"; then exit 0; fi
+            sleep 5
+          done
+          echo "::error::candidate が ready にならない（本番トラフィックは無傷のまま失敗）"
+          exit 1
+
+      # --- 2段階デプロイ 2/2: 検証済みリビジョンへトラフィック切替 ---
+      - name: Shift traffic to new revision
+        run: gcloud run services update-traffic "$SERVICE" --region "$REGION" --to-latest
+
+      - name: Post-deploy smoke on live URL
+        run: |
+          SERVICE_URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
+          curl -fsS "$SERVICE_URL/api/readyz"
+          echo
+          gcloud run services describe "$SERVICE" --region "$REGION" \
+            --format='value(status.traffic.revisionName,status.traffic.percent)'

@@ -18,6 +18,8 @@ services:
   # --- E2E スモークテスト用（profile: e2e）---
   # 普段の `docker compose up` では起動しない。CI とローカル検証で
   # `docker compose --profile e2e up -d --build` として使う（scripts/e2e-smoke.sh 参照）。
+  # 注意: e2e も開発用と同じ db サービス／volume を共有している。ローカルの後片付けは
+  # `docker compose --profile e2e down`（-v 無し）。`down -v` は開発 DB を全消去する（CI 専用）。
 
   # マイグレーションを全件適用してから app を起動する
   migrate:
