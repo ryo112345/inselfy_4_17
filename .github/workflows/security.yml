@@ -1,0 +1,58 @@
+# セキュリティスキャン (C5):
+# - govulncheck: 依存の脆弱性を「実際に呼んでいる関数に到達可能か」で判定
+# - gitleaks: シークレットのコミット混入を全履歴で検知
+# 週次 schedule も回す（コード変更が無くても新規開示された脆弱性を拾うため）。
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 21 * * 0" # 毎週月曜 6:00 JST
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  govulncheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@v1.5.0
+
+      - name: Scan for reachable vulnerabilities
+        run: govulncheck ./...
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          # 直近コミットだけでは過去の混入を見逃すため全履歴をスキャンする
+          fetch-depth: 0
+
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - name: Install gitleaks
+        run: go install github.com/zricethezav/gitleaks/v8@v8.30.1
+
+      - name: Scan full git history for secrets
+        run: gitleaks git --no-banner .
