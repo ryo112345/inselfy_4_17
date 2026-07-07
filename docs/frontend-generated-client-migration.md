@@ -176,4 +176,4 @@ cd ../backend && make oapi && go build ./... && go vet ./... && make test
 契約チェックループが両側で閉じるので、次の根本改善（契約クリーンアップ）に着手できる:
 命名統一（camel/snake 混在の解消）、裸配列 → `{items, total}` ラッパー統一、二形レスポンス廃止、
 enum 化・`@maxLength`/`@format` 追加。これらは .tsp 修正 → 再生成 → 両側のコンパイルエラー修正で
-機能ごとに安全に刻める（別ドキュメント化する）。
+機能ごとに安全に刻める。→ **docs/contract-cleanup.md に別ドキュメント化し、命名統一・ラッパー統一・enum 化は 2026-07-07 実施済み**（二形レスポンス廃止と @maxLength/@format はスコープ外のまま残）。
