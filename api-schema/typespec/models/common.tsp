@@ -5,6 +5,13 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** 診断セッションのステータス（Work Values / Career Interest 共通） */
+union DiagnosisSessionStatus {
+  "in_progress",
+  "completed",
+  "expired",
+}
+
 /** 共通エラーレスポンス */
 @error
 model ErrorResponse {

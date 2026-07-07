@@ -5,13 +5,24 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** 通知種別 */
+union NotificationType {
+  "scout_received",
+  "scout_replied",
+  "scout_interested",
+  "scout_declined",
+  "scout_expired",
+  "credit_replenished",
+  "quality_warning",
+}
+
 /** 通知 */
 model NotificationResponse {
   /** ID */
   id: string;
 
   /** 通知種別 */
-  type: string;
+  type: NotificationType;
 
   /** タイトル */
   title: string;

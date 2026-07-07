@@ -12,13 +12,17 @@ import (
 // goverter:converter
 // goverter:output:file ./job_application_converter.gen.go
 // goverter:output:package github.com/akiyama/inselfy/backend/internal/adapter/http/presenter
-// goverter:extend copyTime omitEmptyString omitEmptyStringSlice
+// goverter:extend copyTime omitEmptyString omitEmptyStringSlice jobApplicationStatusToModel
 // goverter:matchIgnoreCase
 type jobApplicationConverter interface {
 	// goverter:autoMap JobApplication
 	// goverter:map IntSimilarity IntegratedSimilarity
 	ToResponse(a *jobapplication.JobApplicationWithDetails) *openapi.ModelsJobApplicationResponse
 	ToResponses(as []*jobapplication.JobApplicationWithDetails) []*openapi.ModelsJobApplicationResponse
+}
+
+func jobApplicationStatusToModel(s jobapplication.Status) openapi.ModelsJobApplicationStatus {
+	return openapi.ModelsJobApplicationStatus(s)
 }
 
 // omitEmptyString preserves the old `json:",omitempty"` behavior on string

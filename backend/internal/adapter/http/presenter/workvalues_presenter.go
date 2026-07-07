@@ -20,7 +20,7 @@ func WorkValuesSessionResponse(s *workvalues.Session) any {
 	}
 	return &openapi.ModelsWVSessionResponse{
 		Id:           s.ID,
-		Status:       s.Status,
+		Status:       openapi.ModelsDiagnosisSessionStatus(s.Status),
 		InitialPairs: pairs,
 		Needs:        needs,
 	}

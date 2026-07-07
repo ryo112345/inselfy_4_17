@@ -17,10 +17,17 @@ import (
 // goverter:extend emptySliceIfNil
 // goverter:extend copyTime
 // goverter:extend omitEmptyString
+// goverter:extend jobPostingStatusToModel
 // goverter:matchIgnoreCase
 type jobPostingConverter interface {
 	ToResponse(j *jobposting.JobPosting) *openapi.ModelsJobPostingResponse
 	ToResponses(js []*jobposting.JobPosting) []*openapi.ModelsJobPostingResponse
+}
+
+// jobPostingStatusToModel maps the free-form domain status string onto the
+// spec enum type (values are guaranteed by the interactor: draft / open).
+func jobPostingStatusToModel(s string) openapi.ModelsJobPostingStatus {
+	return openapi.ModelsJobPostingStatus(s)
 }
 
 // emptySliceIfNil normalizes nil slices to empty slices so JSON renders [] not null.

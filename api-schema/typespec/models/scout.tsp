@@ -5,6 +5,25 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** スカウトのステータス */
+union ScoutStatus {
+  "draft",
+  "sent",
+  "opened",
+  "replied",
+  "interested",
+  "declined",
+  "expired",
+}
+
+/** スカウト品質レベル */
+union ScoutQualityLevel {
+  "good",
+  "warning",
+  "temporarily_restricted",
+  "restricted",
+}
+
 /** スカウト送信リクエスト */
 model SendScoutRequest {
   /** 候補者ユーザーID */
@@ -50,7 +69,7 @@ model ScoutMessageResponse {
   body: string;
 
   /** ステータス */
-  status: string;
+  status: ScoutStatus;
 
   /** 企業名 */
   companyName: string;
@@ -134,7 +153,7 @@ model ScoutQualityScoreResponse {
   replyRate14d: float64;
 
   /** 品質レベル */
-  level: string;
+  level: ScoutQualityLevel;
 
   /** 直近14日の送信数 */
   sentLast14d: integer;

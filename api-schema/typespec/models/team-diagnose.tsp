@@ -23,10 +23,10 @@ model DiagnoseInfoResponse {
   userId: string;
 
   /** Work Values 診断ステータス */
-  wvStatus: string;
+  wvStatus: TeamDiagnosisStatus;
 
   /** Career Interest 診断ステータス */
-  ciStatus: string;
+  ciStatus: TeamDiagnosisStatus;
 
   /** 招待メールアドレス */
   email: string | null;
@@ -35,8 +35,8 @@ model DiagnoseInfoResponse {
 /** チーム診断ステータス更新リクエスト（指定したキーのみ更新） */
 model UpdateDiagnoseStatusRequest {
   /** Work Values 診断ステータス */
-  wvStatus?: string | null;
+  wvStatus?: TeamDiagnosisStatus;
 
   /** Career Interest 診断ステータス */
-  ciStatus?: string | null;
+  ciStatus?: TeamDiagnosisStatus;
 }

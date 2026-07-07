@@ -65,7 +65,7 @@ model WVSessionResponse {
   id: string;
 
   /** ステータス */
-  status: string;
+  status: DiagnosisSessionStatus;
 
   /** 初期ペア */
   initialPairs: WVPairResponse[];

@@ -37,7 +37,7 @@ func (c *jobApplicationConverterImpl) ToResponse(source *jobapplication.JobAppli
 		openapiModelsJobApplicationResponse.JobPostingId = (*source).JobApplication.JobPostingID
 		openapiModelsJobApplicationResponse.JobTitle = (*source).JobTitle
 		openapiModelsJobApplicationResponse.Message = (*source).JobApplication.Message
-		openapiModelsJobApplicationResponse.Status = string((*source).JobApplication.Status)
+		openapiModelsJobApplicationResponse.Status = jobApplicationStatusToModel((*source).JobApplication.Status)
 		openapiModelsJobApplicationResponse.UpdatedAt = copyTime((*source).JobApplication.UpdatedAt)
 		if (*source).WVSimilarity != nil {
 			xfloat643 := *(*source).WVSimilarity

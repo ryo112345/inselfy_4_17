@@ -1,11 +1,9 @@
-export type ScoutStatus =
-  | "draft"
-  | "sent"
-  | "opened"
-  | "replied"
-  | "interested"
-  | "declined"
-  | "expired";
+import type {
+  ModelsScoutQualityLevel,
+  ModelsScoutStatus,
+} from "@/external/client/api/generated";
+
+export type ScoutStatus = ModelsScoutStatus;
 
 export interface ScoutMessage {
   id: string;
@@ -52,7 +50,7 @@ export interface ScoutCredits {
 
 export interface QualityScore {
   replyRate14d: number;
-  level: "good" | "warning" | "temporarily_restricted" | "restricted";
+  level: ModelsScoutQualityLevel;
   sentLast14d: number;
   repliedLast14d: number;
   daysRemaining?: number;

@@ -5,6 +5,29 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** 面接スロットのステータス */
+union InterviewSlotStatus {
+  "proposed",
+  "selected",
+  "rejected",
+}
+
+/** 面接のステータス（completed / no_show は将来値） */
+union InterviewStatus {
+  "scheduled",
+  "completed",
+  "cancelled",
+  "no_show",
+}
+
+/** 面接日程提案のステータス（expired は将来値） */
+union InterviewProposalStatus {
+  "pending",
+  "confirmed",
+  "expired",
+  "cancelled",
+}
+
 /** 面接候補日時（提案リクエスト用、RFC3339 文字列） */
 model ProposeSlotInput {
   /** 開始日時（RFC3339） */
@@ -58,8 +81,8 @@ model InterviewSlotResponse {
   /** 終了日時 */
   endTime: utcDateTime;
 
-  /** ステータス（proposed / selected / rejected） */
-  status: string;
+  /** ステータス */
+  status: InterviewSlotStatus;
 }
 
 /** 面接（共通フィールド） */
@@ -82,8 +105,8 @@ model InterviewBase {
   /** ミーティングURL */
   meetingUrl: string;
 
-  /** ステータス（scheduled / completed / cancelled / no_show） */
-  status: string;
+  /** ステータス */
+  status: InterviewStatus;
 
   /** タイトル */
   title: string;
@@ -177,7 +200,7 @@ model SelectedInterview {
   endTime: utcDateTime;
 
   /** ステータス */
-  status: string;
+  status: InterviewStatus;
 }
 
 /** スロット選択結果 */
@@ -206,8 +229,8 @@ model ProposalSummary {
   /** メッセージ */
   message: string;
 
-  /** ステータス（pending / confirmed / expired / cancelled） */
-  status: string;
+  /** ステータス */
+  status: InterviewProposalStatus;
 
   /** 有効期限 */
   expiresAt: utcDateTime;

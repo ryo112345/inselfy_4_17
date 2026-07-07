@@ -13,6 +13,24 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for ModelsArticleStatus.
+const (
+	ModelsArticleStatusDraft     ModelsArticleStatus = "draft"
+	ModelsArticleStatusPublished ModelsArticleStatus = "published"
+)
+
+// Valid indicates whether the value is a known member of the ModelsArticleStatus enum.
+func (e ModelsArticleStatus) Valid() bool {
+	switch e {
+	case ModelsArticleStatusDraft:
+		return true
+	case ModelsArticleStatusPublished:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ModelsBadRequestErrorCode.
 const (
 	ModelsBadRequestErrorCodeBADREQUEST ModelsBadRequestErrorCode = "BAD_REQUEST"
@@ -28,6 +46,48 @@ func (e ModelsBadRequestErrorCode) Valid() bool {
 	}
 }
 
+// Defines values for ModelsCISkillLevel.
+const (
+	ModelsCISkillLevelAdvanced ModelsCISkillLevel = "advanced"
+	ModelsCISkillLevelEntry    ModelsCISkillLevel = "entry"
+	ModelsCISkillLevelMid      ModelsCISkillLevel = "mid"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCISkillLevel enum.
+func (e ModelsCISkillLevel) Valid() bool {
+	switch e {
+	case ModelsCISkillLevelAdvanced:
+		return true
+	case ModelsCISkillLevelEntry:
+		return true
+	case ModelsCISkillLevelMid:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsCompanyStatus.
+const (
+	ModelsCompanyStatusApproved ModelsCompanyStatus = "approved"
+	ModelsCompanyStatusPending  ModelsCompanyStatus = "pending"
+	ModelsCompanyStatusRejected ModelsCompanyStatus = "rejected"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCompanyStatus enum.
+func (e ModelsCompanyStatus) Valid() bool {
+	switch e {
+	case ModelsCompanyStatusApproved:
+		return true
+	case ModelsCompanyStatusPending:
+		return true
+	case ModelsCompanyStatusRejected:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ModelsConflictErrorCode.
 const (
 	ModelsConflictErrorCodeCONFLICT ModelsConflictErrorCode = "CONFLICT"
@@ -37,6 +97,27 @@ const (
 func (e ModelsConflictErrorCode) Valid() bool {
 	switch e {
 	case ModelsConflictErrorCodeCONFLICT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsDiagnosisSessionStatus.
+const (
+	ModelsDiagnosisSessionStatusCompleted  ModelsDiagnosisSessionStatus = "completed"
+	ModelsDiagnosisSessionStatusExpired    ModelsDiagnosisSessionStatus = "expired"
+	ModelsDiagnosisSessionStatusInProgress ModelsDiagnosisSessionStatus = "in_progress"
+)
+
+// Valid indicates whether the value is a known member of the ModelsDiagnosisSessionStatus enum.
+func (e ModelsDiagnosisSessionStatus) Valid() bool {
+	switch e {
+	case ModelsDiagnosisSessionStatusCompleted:
+		return true
+	case ModelsDiagnosisSessionStatusExpired:
+		return true
+	case ModelsDiagnosisSessionStatusInProgress:
 		return true
 	default:
 		return false
@@ -79,6 +160,126 @@ func (e ModelsIntegratedReportStatusResponseStatus) Valid() bool {
 	}
 }
 
+// Defines values for ModelsInterviewProposalStatus.
+const (
+	ModelsInterviewProposalStatusCancelled ModelsInterviewProposalStatus = "cancelled"
+	ModelsInterviewProposalStatusConfirmed ModelsInterviewProposalStatus = "confirmed"
+	ModelsInterviewProposalStatusExpired   ModelsInterviewProposalStatus = "expired"
+	ModelsInterviewProposalStatusPending   ModelsInterviewProposalStatus = "pending"
+)
+
+// Valid indicates whether the value is a known member of the ModelsInterviewProposalStatus enum.
+func (e ModelsInterviewProposalStatus) Valid() bool {
+	switch e {
+	case ModelsInterviewProposalStatusCancelled:
+		return true
+	case ModelsInterviewProposalStatusConfirmed:
+		return true
+	case ModelsInterviewProposalStatusExpired:
+		return true
+	case ModelsInterviewProposalStatusPending:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsInterviewSlotStatus.
+const (
+	ModelsInterviewSlotStatusProposed ModelsInterviewSlotStatus = "proposed"
+	ModelsInterviewSlotStatusRejected ModelsInterviewSlotStatus = "rejected"
+	ModelsInterviewSlotStatusSelected ModelsInterviewSlotStatus = "selected"
+)
+
+// Valid indicates whether the value is a known member of the ModelsInterviewSlotStatus enum.
+func (e ModelsInterviewSlotStatus) Valid() bool {
+	switch e {
+	case ModelsInterviewSlotStatusProposed:
+		return true
+	case ModelsInterviewSlotStatusRejected:
+		return true
+	case ModelsInterviewSlotStatusSelected:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsInterviewStatus.
+const (
+	ModelsInterviewStatusCancelled ModelsInterviewStatus = "cancelled"
+	ModelsInterviewStatusCompleted ModelsInterviewStatus = "completed"
+	ModelsInterviewStatusNoShow    ModelsInterviewStatus = "no_show"
+	ModelsInterviewStatusScheduled ModelsInterviewStatus = "scheduled"
+)
+
+// Valid indicates whether the value is a known member of the ModelsInterviewStatus enum.
+func (e ModelsInterviewStatus) Valid() bool {
+	switch e {
+	case ModelsInterviewStatusCancelled:
+		return true
+	case ModelsInterviewStatusCompleted:
+		return true
+	case ModelsInterviewStatusNoShow:
+		return true
+	case ModelsInterviewStatusScheduled:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsJobApplicationStatus.
+const (
+	ModelsJobApplicationStatusAccepted  ModelsJobApplicationStatus = "accepted"
+	ModelsJobApplicationStatusApplied   ModelsJobApplicationStatus = "applied"
+	ModelsJobApplicationStatusInterview ModelsJobApplicationStatus = "interview"
+	ModelsJobApplicationStatusOffer     ModelsJobApplicationStatus = "offer"
+	ModelsJobApplicationStatusRejected  ModelsJobApplicationStatus = "rejected"
+	ModelsJobApplicationStatusScreening ModelsJobApplicationStatus = "screening"
+	ModelsJobApplicationStatusWithdrawn ModelsJobApplicationStatus = "withdrawn"
+)
+
+// Valid indicates whether the value is a known member of the ModelsJobApplicationStatus enum.
+func (e ModelsJobApplicationStatus) Valid() bool {
+	switch e {
+	case ModelsJobApplicationStatusAccepted:
+		return true
+	case ModelsJobApplicationStatusApplied:
+		return true
+	case ModelsJobApplicationStatusInterview:
+		return true
+	case ModelsJobApplicationStatusOffer:
+		return true
+	case ModelsJobApplicationStatusRejected:
+		return true
+	case ModelsJobApplicationStatusScreening:
+		return true
+	case ModelsJobApplicationStatusWithdrawn:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsJobPostingStatus.
+const (
+	ModelsJobPostingStatusDraft ModelsJobPostingStatus = "draft"
+	ModelsJobPostingStatusOpen  ModelsJobPostingStatus = "open"
+)
+
+// Valid indicates whether the value is a known member of the ModelsJobPostingStatus enum.
+func (e ModelsJobPostingStatus) Valid() bool {
+	switch e {
+	case ModelsJobPostingStatusDraft:
+		return true
+	case ModelsJobPostingStatusOpen:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ModelsNotFoundErrorCode.
 const (
 	ModelsNotFoundErrorCodeNOTFOUND ModelsNotFoundErrorCode = "NOT_FOUND"
@@ -88,6 +289,144 @@ const (
 func (e ModelsNotFoundErrorCode) Valid() bool {
 	switch e {
 	case ModelsNotFoundErrorCodeNOTFOUND:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsNotificationType.
+const (
+	ModelsNotificationTypeCreditReplenished ModelsNotificationType = "credit_replenished"
+	ModelsNotificationTypeQualityWarning    ModelsNotificationType = "quality_warning"
+	ModelsNotificationTypeScoutDeclined     ModelsNotificationType = "scout_declined"
+	ModelsNotificationTypeScoutExpired      ModelsNotificationType = "scout_expired"
+	ModelsNotificationTypeScoutInterested   ModelsNotificationType = "scout_interested"
+	ModelsNotificationTypeScoutReceived     ModelsNotificationType = "scout_received"
+	ModelsNotificationTypeScoutReplied      ModelsNotificationType = "scout_replied"
+)
+
+// Valid indicates whether the value is a known member of the ModelsNotificationType enum.
+func (e ModelsNotificationType) Valid() bool {
+	switch e {
+	case ModelsNotificationTypeCreditReplenished:
+		return true
+	case ModelsNotificationTypeQualityWarning:
+		return true
+	case ModelsNotificationTypeScoutDeclined:
+		return true
+	case ModelsNotificationTypeScoutExpired:
+		return true
+	case ModelsNotificationTypeScoutInterested:
+		return true
+	case ModelsNotificationTypeScoutReceived:
+		return true
+	case ModelsNotificationTypeScoutReplied:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsScoutQualityLevel.
+const (
+	ModelsScoutQualityLevelGood                  ModelsScoutQualityLevel = "good"
+	ModelsScoutQualityLevelRestricted            ModelsScoutQualityLevel = "restricted"
+	ModelsScoutQualityLevelTemporarilyRestricted ModelsScoutQualityLevel = "temporarily_restricted"
+	ModelsScoutQualityLevelWarning               ModelsScoutQualityLevel = "warning"
+)
+
+// Valid indicates whether the value is a known member of the ModelsScoutQualityLevel enum.
+func (e ModelsScoutQualityLevel) Valid() bool {
+	switch e {
+	case ModelsScoutQualityLevelGood:
+		return true
+	case ModelsScoutQualityLevelRestricted:
+		return true
+	case ModelsScoutQualityLevelTemporarilyRestricted:
+		return true
+	case ModelsScoutQualityLevelWarning:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsScoutRespondResponseStatus.
+const (
+	ModelsScoutRespondResponseStatusOk ModelsScoutRespondResponseStatus = "ok"
+)
+
+// Valid indicates whether the value is a known member of the ModelsScoutRespondResponseStatus enum.
+func (e ModelsScoutRespondResponseStatus) Valid() bool {
+	switch e {
+	case ModelsScoutRespondResponseStatusOk:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsScoutStatus.
+const (
+	ModelsScoutStatusDeclined   ModelsScoutStatus = "declined"
+	ModelsScoutStatusDraft      ModelsScoutStatus = "draft"
+	ModelsScoutStatusExpired    ModelsScoutStatus = "expired"
+	ModelsScoutStatusInterested ModelsScoutStatus = "interested"
+	ModelsScoutStatusOpened     ModelsScoutStatus = "opened"
+	ModelsScoutStatusReplied    ModelsScoutStatus = "replied"
+	ModelsScoutStatusSent       ModelsScoutStatus = "sent"
+)
+
+// Valid indicates whether the value is a known member of the ModelsScoutStatus enum.
+func (e ModelsScoutStatus) Valid() bool {
+	switch e {
+	case ModelsScoutStatusDeclined:
+		return true
+	case ModelsScoutStatusDraft:
+		return true
+	case ModelsScoutStatusExpired:
+		return true
+	case ModelsScoutStatusInterested:
+		return true
+	case ModelsScoutStatusOpened:
+		return true
+	case ModelsScoutStatusReplied:
+		return true
+	case ModelsScoutStatusSent:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsStatusOkResponseStatus.
+const (
+	ModelsStatusOkResponseStatusOk ModelsStatusOkResponseStatus = "ok"
+)
+
+// Valid indicates whether the value is a known member of the ModelsStatusOkResponseStatus enum.
+func (e ModelsStatusOkResponseStatus) Valid() bool {
+	switch e {
+	case ModelsStatusOkResponseStatusOk:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsTeamDiagnosisStatus.
+const (
+	ModelsTeamDiagnosisStatusCompleted ModelsTeamDiagnosisStatus = "completed"
+	ModelsTeamDiagnosisStatusPending   ModelsTeamDiagnosisStatus = "pending"
+)
+
+// Valid indicates whether the value is a known member of the ModelsTeamDiagnosisStatus enum.
+func (e ModelsTeamDiagnosisStatus) Valid() bool {
+	switch e {
+	case ModelsTeamDiagnosisStatusCompleted:
+		return true
+	case ModelsTeamDiagnosisStatusPending:
 		return true
 	default:
 		return false
@@ -226,7 +565,7 @@ type ModelsArticleResponse struct {
 	Purchased bool `json:"purchased"`
 
 	// Status ステータス
-	Status string `json:"status"`
+	Status ModelsArticleStatus `json:"status"`
 
 	// Tags タグ
 	Tags []string `json:"tags"`
@@ -237,6 +576,9 @@ type ModelsArticleResponse struct {
 	// UpdatedAt 更新日時
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+// ModelsArticleStatus 記事ステータス
+type ModelsArticleStatus string
 
 // ModelsAttachSkillRequest スキル追加リクエスト
 type ModelsAttachSkillRequest struct {
@@ -332,7 +674,7 @@ type ModelsCIItemResponse struct {
 	QuestionNumber int32 `json:"questionNumber"`
 
 	// SkillLevel スキルレベル
-	SkillLevel string `json:"skillLevel"`
+	SkillLevel ModelsCISkillLevel `json:"skillLevel"`
 
 	// TextJa 設問文（日本語）
 	TextJa string `json:"textJa"`
@@ -380,8 +722,11 @@ type ModelsCISessionResponse struct {
 	Items []ModelsCIItemResponse `json:"items"`
 
 	// Status ステータス
-	Status string `json:"status"`
+	Status ModelsDiagnosisSessionStatus `json:"status"`
 }
+
+// ModelsCISkillLevel 設問のスキルレベル
+type ModelsCISkillLevel string
 
 // ModelsCIStartSessionRequest Career Interest セッション開始リクエスト
 type ModelsCIStartSessionRequest struct {
@@ -433,8 +778,8 @@ type ModelsCandidateInterviewItem struct {
 	// StartTime 開始日時
 	StartTime time.Time `json:"startTime"`
 
-	// Status ステータス（scheduled / completed / cancelled / no_show）
-	Status string `json:"status"`
+	// Status ステータス
+	Status ModelsInterviewStatus `json:"status"`
 
 	// Title タイトル
 	Title string `json:"title"`
@@ -523,8 +868,8 @@ type ModelsCompanyInterviewItem struct {
 	// StartTime 開始日時
 	StartTime time.Time `json:"startTime"`
 
-	// Status ステータス（scheduled / completed / cancelled / no_show）
-	Status string `json:"status"`
+	// Status ステータス
+	Status ModelsInterviewStatus `json:"status"`
 
 	// Title タイトル
 	Title string `json:"title"`
@@ -659,7 +1004,7 @@ type ModelsCompanyResponse struct {
 	PhoneNumber string `json:"phoneNumber"`
 
 	// Status アカウントステータス
-	Status string `json:"status"`
+	Status ModelsCompanyStatus `json:"status"`
 }
 
 // ModelsCompanyScoutReplyRequest 企業からのスカウト返信リクエスト
@@ -667,6 +1012,9 @@ type ModelsCompanyScoutReplyRequest struct {
 	// Body 本文
 	Body string `json:"body"`
 }
+
+// ModelsCompanyStatus 企業アカウントのステータス
+type ModelsCompanyStatus string
 
 // ModelsConflictError Conflict エラー
 type ModelsConflictError struct {
@@ -857,7 +1205,7 @@ type ModelsCreateUserRequest struct {
 // ModelsDiagnoseInfoResponse チーム診断リンク情報
 type ModelsDiagnoseInfoResponse struct {
 	// CiStatus Career Interest 診断ステータス
-	CiStatus string `json:"ciStatus"`
+	CiStatus ModelsTeamDiagnosisStatus `json:"ciStatus"`
 
 	// CompanyName 企業名
 	CompanyName string `json:"companyName"`
@@ -878,8 +1226,11 @@ type ModelsDiagnoseInfoResponse struct {
 	UserId string `json:"userId"`
 
 	// WvStatus Work Values 診断ステータス
-	WvStatus string `json:"wvStatus"`
+	WvStatus ModelsTeamDiagnosisStatus `json:"wvStatus"`
 }
+
+// ModelsDiagnosisSessionStatus 診断セッションのステータス（Work Values / Career Interest 共通）
+type ModelsDiagnosisSessionStatus string
 
 // ModelsEducationListResponse 学歴一覧
 type ModelsEducationListResponse struct {
@@ -1132,12 +1483,15 @@ type ModelsInterviewBase struct {
 	// StartTime 開始日時
 	StartTime time.Time `json:"startTime"`
 
-	// Status ステータス（scheduled / completed / cancelled / no_show）
-	Status string `json:"status"`
+	// Status ステータス
+	Status ModelsInterviewStatus `json:"status"`
 
 	// Title タイトル
 	Title string `json:"title"`
 }
+
+// ModelsInterviewProposalStatus 面接日程提案のステータス（expired は将来値）
+type ModelsInterviewProposalStatus string
 
 // ModelsInterviewSlotResponse 面接候補スロット
 type ModelsInterviewSlotResponse struct {
@@ -1150,9 +1504,15 @@ type ModelsInterviewSlotResponse struct {
 	// StartTime 開始日時
 	StartTime time.Time `json:"startTime"`
 
-	// Status ステータス（proposed / selected / rejected）
-	Status string `json:"status"`
+	// Status ステータス
+	Status ModelsInterviewSlotStatus `json:"status"`
 }
+
+// ModelsInterviewSlotStatus 面接スロットのステータス
+type ModelsInterviewSlotStatus string
+
+// ModelsInterviewStatus 面接のステータス（completed / no_show は将来値）
+type ModelsInterviewStatus string
 
 // ModelsJobApplicationListResponse 応募一覧
 type ModelsJobApplicationListResponse struct {
@@ -1217,7 +1577,7 @@ type ModelsJobApplicationResponse struct {
 	Message string `json:"message"`
 
 	// Status ステータス
-	Status string `json:"status"`
+	Status ModelsJobApplicationStatus `json:"status"`
 
 	// UpdatedAt 更新日時
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -1225,6 +1585,9 @@ type ModelsJobApplicationResponse struct {
 	// WvSimilarity Work Values 類似度
 	WvSimilarity *float64 `json:"wvSimilarity,omitempty"`
 }
+
+// ModelsJobApplicationStatus 応募ステータス
+type ModelsJobApplicationStatus string
 
 // ModelsJobPostingListResponse 求人一覧（ページング付き）
 type ModelsJobPostingListResponse struct {
@@ -1324,8 +1687,8 @@ type ModelsJobPostingRequest struct {
 	// SmokingPolicy 受動喫煙対策
 	SmokingPolicy string `json:"smokingPolicy"`
 
-	// Status ステータス（draft / published 等）
-	Status string `json:"status"`
+	// Status ステータス
+	Status ModelsJobPostingStatus `json:"status"`
 
 	// Tags タグ
 	Tags []string `json:"tags"`
@@ -1463,7 +1826,7 @@ type ModelsJobPostingResponse struct {
 	SmokingPolicy string `json:"smokingPolicy"`
 
 	// Status ステータス
-	Status string `json:"status"`
+	Status ModelsJobPostingStatus `json:"status"`
 
 	// Tags タグ
 	Tags []string `json:"tags"`
@@ -1496,6 +1859,9 @@ type ModelsJobPostingResponse struct {
 	WorkLocationChangeScope string `json:"workLocationChangeScope"`
 }
 
+// ModelsJobPostingStatus 求人ステータス
+type ModelsJobPostingStatus string
+
 // ModelsJobPostingTeamMember 求人のチームメンバー
 type ModelsJobPostingTeamMember struct {
 	// Name 名前
@@ -1520,7 +1886,7 @@ type ModelsMemberScoreResponse struct {
 	CiScores *[]ModelsTeamScoreEntry `json:"ciScores,omitempty"`
 
 	// CiStatus Career Interest 診断ステータス
-	CiStatus string `json:"ciStatus"`
+	CiStatus ModelsTeamDiagnosisStatus `json:"ciStatus"`
 
 	// IsAce エースメンバーか
 	IsAce bool `json:"isAce"`
@@ -1538,7 +1904,7 @@ type ModelsMemberScoreResponse struct {
 	WvScores *[]ModelsTeamScoreEntry `json:"wvScores,omitempty"`
 
 	// WvStatus Work Values 診断ステータス
-	WvStatus string `json:"wvStatus"`
+	WvStatus ModelsTeamDiagnosisStatus `json:"wvStatus"`
 }
 
 // ModelsMessageListResponse メッセージ一覧
@@ -1616,8 +1982,11 @@ type ModelsNotificationResponse struct {
 	Title string `json:"title"`
 
 	// Type 通知種別
-	Type string `json:"type"`
+	Type ModelsNotificationType `json:"type"`
 }
+
+// ModelsNotificationType 通知種別
+type ModelsNotificationType string
 
 // ModelsPendingProposalCheckResponse 未回答提案の有無
 type ModelsPendingProposalCheckResponse struct {
@@ -1732,8 +2101,8 @@ type ModelsProposalSummary struct {
 	// Message メッセージ
 	Message string `json:"message"`
 
-	// Status ステータス（pending / confirmed / expired / cancelled）
-	Status string `json:"status"`
+	// Status ステータス
+	Status ModelsInterviewProposalStatus `json:"status"`
 }
 
 // ModelsProposeInterviewRequest 面接日程提案リクエスト
@@ -2048,11 +2417,14 @@ type ModelsScoutMessageResponse struct {
 	SentAt *time.Time `json:"sentAt"`
 
 	// Status ステータス
-	Status string `json:"status"`
+	Status ModelsScoutStatus `json:"status"`
 
 	// Subject 件名
 	Subject string `json:"subject"`
 }
+
+// ModelsScoutQualityLevel スカウト品質レベル
+type ModelsScoutQualityLevel string
 
 // ModelsScoutQualityScoreResponse スカウト品質スコア
 type ModelsScoutQualityScoreResponse struct {
@@ -2060,7 +2432,7 @@ type ModelsScoutQualityScoreResponse struct {
 	DaysRemaining *int `json:"daysRemaining,omitempty"`
 
 	// Level 品質レベル
-	Level string `json:"level"`
+	Level ModelsScoutQualityLevel `json:"level"`
 
 	// RepliedLast14d 直近14日の返信数
 	RepliedLast14d int `json:"repliedLast14d"`
@@ -2110,9 +2482,12 @@ type ModelsScoutRespondResponse struct {
 	// ConversationId 応答により作成・特定された会話ID
 	ConversationId *string `json:"conversationId,omitempty"`
 
-	// Status 処理結果
-	Status string `json:"status"`
+	// Status 処理結果（"ok"）
+	Status ModelsScoutRespondResponseStatus `json:"status"`
 }
+
+// ModelsScoutRespondResponseStatus 処理結果（"ok"）
+type ModelsScoutRespondResponseStatus string
 
 // ModelsScoutSettingsResponse スカウト受け入れ設定
 type ModelsScoutSettingsResponse struct {
@@ -2122,6 +2497,9 @@ type ModelsScoutSettingsResponse struct {
 	// UpdatedAt 更新日時
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+// ModelsScoutStatus スカウトのステータス
+type ModelsScoutStatus string
 
 // ModelsScoutTemplateListResponse スカウトテンプレート一覧
 type ModelsScoutTemplateListResponse struct {
@@ -2183,7 +2561,7 @@ type ModelsSelectedInterview struct {
 	StartTime time.Time `json:"startTime"`
 
 	// Status ステータス
-	Status string `json:"status"`
+	Status ModelsInterviewStatus `json:"status"`
 }
 
 // ModelsSendMessageRequest メッセージ送信リクエスト
@@ -2300,8 +2678,11 @@ type ModelsStartConversationRequest struct {
 // ModelsStatusOkResponse 汎用 OK レスポンス
 type ModelsStatusOkResponse struct {
 	// Status 処理結果（"ok"）
-	Status string `json:"status"`
+	Status ModelsStatusOkResponseStatus `json:"status"`
 }
+
+// ModelsStatusOkResponseStatus 処理結果（"ok"）
+type ModelsStatusOkResponseStatus string
 
 // ModelsTalentCard 人材カード（検索・保存済み候補者で共通）
 type ModelsTalentCard struct {
@@ -2393,6 +2774,9 @@ type ModelsTeamDetailResponse struct {
 	Name string `json:"name"`
 }
 
+// ModelsTeamDiagnosisStatus チームメンバーの診断ステータス
+type ModelsTeamDiagnosisStatus string
+
 // ModelsTeamListResponse チーム一覧
 type ModelsTeamListResponse struct {
 	// Items チーム
@@ -2402,7 +2786,7 @@ type ModelsTeamListResponse struct {
 // ModelsTeamMemberResponse チームメンバー
 type ModelsTeamMemberResponse struct {
 	// CiStatus Career Interest 診断ステータス
-	CiStatus string `json:"ciStatus"`
+	CiStatus ModelsTeamDiagnosisStatus `json:"ciStatus"`
 
 	// CreatedAt 作成日時（RFC3339 文字列）
 	CreatedAt string `json:"createdAt"`
@@ -2423,7 +2807,7 @@ type ModelsTeamMemberResponse struct {
 	Name string `json:"name"`
 
 	// WvStatus Work Values 診断ステータス
-	WvStatus string `json:"wvStatus"`
+	WvStatus ModelsTeamDiagnosisStatus `json:"wvStatus"`
 }
 
 // ModelsTeamResponse チーム（サマリー）
@@ -2492,7 +2876,7 @@ type ModelsUnreadCountResponse struct {
 // ModelsUpdateApplicationStatusRequest 応募ステータス更新リクエスト
 type ModelsUpdateApplicationStatusRequest struct {
 	// Status 新しいステータス
-	Status *string `json:"status,omitempty"`
+	Status *ModelsJobApplicationStatus `json:"status,omitempty"`
 }
 
 // ModelsUpdateArticleRequest 記事更新リクエスト
@@ -2579,10 +2963,10 @@ type ModelsUpdateCompanyProfileRequest struct {
 // ModelsUpdateDiagnoseStatusRequest チーム診断ステータス更新リクエスト（指定したキーのみ更新）
 type ModelsUpdateDiagnoseStatusRequest struct {
 	// CiStatus Career Interest 診断ステータス
-	CiStatus *string `json:"ciStatus,omitempty"`
+	CiStatus *ModelsTeamDiagnosisStatus `json:"ciStatus,omitempty"`
 
 	// WvStatus Work Values 診断ステータス
-	WvStatus *string `json:"wvStatus,omitempty"`
+	WvStatus *ModelsTeamDiagnosisStatus `json:"wvStatus,omitempty"`
 }
 
 // ModelsUpdateEducationRequest 学歴更新リクエスト
@@ -2846,7 +3230,7 @@ type ModelsWVSessionResponse struct {
 	Needs []ModelsWVNeedDefResponse `json:"needs"`
 
 	// Status ステータス
-	Status string `json:"status"`
+	Status ModelsDiagnosisSessionStatus `json:"status"`
 }
 
 // ModelsWVStartSessionRequest Work Values セッション開始リクエスト

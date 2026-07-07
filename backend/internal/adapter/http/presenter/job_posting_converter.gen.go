@@ -58,7 +58,7 @@ func (c *jobPostingConverterImpl) ToResponse(source *jobposting.JobPosting) *ope
 		openapiModelsJobPostingResponse.SelectionProcess = (*source).SelectionProcess
 		openapiModelsJobPostingResponse.SkillsGained = (*source).SkillsGained
 		openapiModelsJobPostingResponse.SmokingPolicy = (*source).SmokingPolicy
-		openapiModelsJobPostingResponse.Status = (*source).Status
+		openapiModelsJobPostingResponse.Status = jobPostingStatusToModel((*source).Status)
 		openapiModelsJobPostingResponse.Tags = emptySliceIfNil((*source).Tags)
 		openapiModelsJobPostingResponse.TeamDescription = (*source).TeamDescription
 		if (*source).TeamID != nil {

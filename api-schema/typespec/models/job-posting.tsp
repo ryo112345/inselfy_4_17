@@ -5,6 +5,12 @@ using TypeSpec.Http;
 
 namespace Inselfy.Models;
 
+/** 求人ステータス */
+union JobPostingStatus {
+  "draft",
+  "open",
+}
+
 /** 求人のチームメンバー */
 model JobPostingTeamMember {
   /** 名前 */
@@ -28,8 +34,8 @@ model JobPostingRequest {
   /** 勤務地（表示用） */
   location: string | null;
 
-  /** ステータス（draft / published 等） */
-  status: string;
+  /** ステータス */
+  status: JobPostingStatus;
 
   /** 職種カテゴリ */
   jobCategory: string;
@@ -164,7 +170,7 @@ model JobPostingResponse {
   isActive: boolean;
 
   /** ステータス */
-  status: string;
+  status: JobPostingStatus;
 
   /** 職種カテゴリ */
   jobCategory: string;

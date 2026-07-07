@@ -137,7 +137,7 @@ export type ModelsArticleResponse = {
     /**
      * ステータス
      */
-    status: string;
+    status: ModelsArticleStatus;
     /**
      * カバー画像URL
      */
@@ -159,6 +159,11 @@ export type ModelsArticleResponse = {
      */
     publishedAt?: string;
 };
+
+/**
+ * 記事ステータス
+ */
+export type ModelsArticleStatus = 'draft' | 'published';
 
 /**
  * スキル追加リクエスト
@@ -296,7 +301,7 @@ export type ModelsCiItemResponse = {
     /**
      * スキルレベル
      */
-    skillLevel: string;
+    skillLevel: ModelsCiSkillLevel;
     /**
      * 活動種別
      */
@@ -366,12 +371,17 @@ export type ModelsCiSessionResponse = {
     /**
      * ステータス
      */
-    status: string;
+    status: ModelsDiagnosisSessionStatus;
     /**
      * 設問一覧
      */
     items: Array<ModelsCiItemResponse>;
 };
+
+/**
+ * 設問のスキルレベル
+ */
+export type ModelsCiSkillLevel = 'entry' | 'mid' | 'advanced';
 
 /**
  * Career Interest セッション開始リクエスト
@@ -440,9 +450,9 @@ export type ModelsCandidateInterviewItem = {
      */
     meetingUrl: string;
     /**
-     * ステータス（scheduled / completed / cancelled / no_show）
+     * ステータス
      */
-    status: string;
+    status: ModelsInterviewStatus;
     /**
      * タイトル
      */
@@ -568,9 +578,9 @@ export type ModelsCompanyInterviewItem = {
      */
     meetingUrl: string;
     /**
-     * ステータス（scheduled / completed / cancelled / no_show）
+     * ステータス
      */
-    status: string;
+    status: ModelsInterviewStatus;
     /**
      * タイトル
      */
@@ -768,7 +778,7 @@ export type ModelsCompanyResponse = {
     /**
      * アカウントステータス
      */
-    status: string;
+    status: ModelsCompanyStatus;
     /**
      * 作成日時
      */
@@ -784,6 +794,11 @@ export type ModelsCompanyScoutReplyRequest = {
      */
     body: string;
 };
+
+/**
+ * 企業アカウントのステータス
+ */
+export type ModelsCompanyStatus = 'pending' | 'approved' | 'rejected';
 
 /**
  * Conflict エラー
@@ -1078,16 +1093,21 @@ export type ModelsDiagnoseInfoResponse = {
     /**
      * Work Values 診断ステータス
      */
-    wvStatus: string;
+    wvStatus: ModelsTeamDiagnosisStatus;
     /**
      * Career Interest 診断ステータス
      */
-    ciStatus: string;
+    ciStatus: ModelsTeamDiagnosisStatus;
     /**
      * 招待メールアドレス
      */
     email: string | null;
 };
+
+/**
+ * 診断セッションのステータス（Work Values / Career Interest 共通）
+ */
+export type ModelsDiagnosisSessionStatus = 'in_progress' | 'completed' | 'expired';
 
 /**
  * 学歴一覧
@@ -1446,14 +1466,19 @@ export type ModelsInterviewBase = {
      */
     meetingUrl: string;
     /**
-     * ステータス（scheduled / completed / cancelled / no_show）
+     * ステータス
      */
-    status: string;
+    status: ModelsInterviewStatus;
     /**
      * タイトル
      */
     title: string;
 };
+
+/**
+ * 面接日程提案のステータス（expired は将来値）
+ */
+export type ModelsInterviewProposalStatus = 'pending' | 'confirmed' | 'expired' | 'cancelled';
 
 /**
  * 面接候補スロット
@@ -1472,10 +1497,20 @@ export type ModelsInterviewSlotResponse = {
      */
     endTime: string;
     /**
-     * ステータス（proposed / selected / rejected）
+     * ステータス
      */
-    status: string;
+    status: ModelsInterviewSlotStatus;
 };
+
+/**
+ * 面接スロットのステータス
+ */
+export type ModelsInterviewSlotStatus = 'proposed' | 'selected' | 'rejected';
+
+/**
+ * 面接のステータス（completed / no_show は将来値）
+ */
+export type ModelsInterviewStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show';
 
 /**
  * 応募一覧
@@ -1514,7 +1549,7 @@ export type ModelsJobApplicationResponse = {
     /**
      * ステータス
      */
-    status: string;
+    status: ModelsJobApplicationStatus;
     /**
      * 応募メッセージ
      */
@@ -1578,6 +1613,11 @@ export type ModelsJobApplicationResponse = {
 };
 
 /**
+ * 応募ステータス
+ */
+export type ModelsJobApplicationStatus = 'applied' | 'screening' | 'interview' | 'offer' | 'accepted' | 'rejected' | 'withdrawn';
+
+/**
  * 求人一覧（ページング付き）
  */
 export type ModelsJobPostingListResponse = {
@@ -1612,9 +1652,9 @@ export type ModelsJobPostingRequest = {
      */
     location: string | null;
     /**
-     * ステータス（draft / published 等）
+     * ステータス
      */
-    status: string;
+    status: ModelsJobPostingStatus;
     /**
      * 職種カテゴリ
      */
@@ -1796,7 +1836,7 @@ export type ModelsJobPostingResponse = {
     /**
      * ステータス
      */
-    status: string;
+    status: ModelsJobPostingStatus;
     /**
      * 職種カテゴリ
      */
@@ -1944,6 +1984,11 @@ export type ModelsJobPostingResponse = {
 };
 
 /**
+ * 求人ステータス
+ */
+export type ModelsJobPostingStatus = 'draft' | 'open';
+
+/**
  * 求人のチームメンバー
  */
 export type ModelsJobPostingTeamMember = {
@@ -1990,11 +2035,11 @@ export type ModelsMemberScoreResponse = {
     /**
      * Work Values 診断ステータス
      */
-    wvStatus: string;
+    wvStatus: ModelsTeamDiagnosisStatus;
     /**
      * Career Interest 診断ステータス
      */
-    ciStatus: string;
+    ciStatus: ModelsTeamDiagnosisStatus;
     /**
      * エースメンバーか
      */
@@ -2094,7 +2139,7 @@ export type ModelsNotificationResponse = {
     /**
      * 通知種別
      */
-    type: string;
+    type: ModelsNotificationType;
     /**
      * タイトル
      */
@@ -2116,6 +2161,11 @@ export type ModelsNotificationResponse = {
      */
     createdAt: string;
 };
+
+/**
+ * 通知種別
+ */
+export type ModelsNotificationType = 'scout_received' | 'scout_replied' | 'scout_interested' | 'scout_declined' | 'scout_expired' | 'credit_replenished' | 'quality_warning';
 
 /**
  * 未回答提案の有無
@@ -2276,9 +2326,9 @@ export type ModelsProposalSummary = {
      */
     message: string;
     /**
-     * ステータス（pending / confirmed / expired / cancelled）
+     * ステータス
      */
-    status: string;
+    status: ModelsInterviewProposalStatus;
     /**
      * 有効期限
      */
@@ -2712,7 +2762,7 @@ export type ModelsScoutMessageResponse = {
     /**
      * ステータス
      */
-    status: string;
+    status: ModelsScoutStatus;
     /**
      * 企業名
      */
@@ -2748,6 +2798,11 @@ export type ModelsScoutMessageResponse = {
 };
 
 /**
+ * スカウト品質レベル
+ */
+export type ModelsScoutQualityLevel = 'good' | 'warning' | 'temporarily_restricted' | 'restricted';
+
+/**
  * スカウト品質スコア
  */
 export type ModelsScoutQualityScoreResponse = {
@@ -2758,7 +2813,7 @@ export type ModelsScoutQualityScoreResponse = {
     /**
      * 品質レベル
      */
-    level: string;
+    level: ModelsScoutQualityLevel;
     /**
      * 直近14日の送信数
      */
@@ -2826,9 +2881,9 @@ export type ModelsScoutRespondRequest = {
  */
 export type ModelsScoutRespondResponse = {
     /**
-     * 処理結果
+     * 処理結果（"ok"）
      */
-    status: string;
+    status: 'ok';
     /**
      * 応答により作成・特定された会話ID
      */
@@ -2848,6 +2903,11 @@ export type ModelsScoutSettingsResponse = {
      */
     updatedAt: string;
 };
+
+/**
+ * スカウトのステータス
+ */
+export type ModelsScoutStatus = 'draft' | 'sent' | 'opened' | 'replied' | 'interested' | 'declined' | 'expired';
 
 /**
  * スカウトテンプレート一覧
@@ -2940,7 +3000,7 @@ export type ModelsSelectedInterview = {
     /**
      * ステータス
      */
-    status: string;
+    status: ModelsInterviewStatus;
 };
 
 /**
@@ -3116,7 +3176,7 @@ export type ModelsStatusOkResponse = {
     /**
      * 処理結果（"ok"）
      */
-    status: string;
+    status: 'ok';
 };
 
 /**
@@ -3248,6 +3308,11 @@ export type ModelsTeamDetailResponse = {
 };
 
 /**
+ * チームメンバーの診断ステータス
+ */
+export type ModelsTeamDiagnosisStatus = 'pending' | 'completed';
+
+/**
  * チーム一覧
  */
 export type ModelsTeamListResponse = {
@@ -3280,11 +3345,11 @@ export type ModelsTeamMemberResponse = {
     /**
      * Work Values 診断ステータス
      */
-    wvStatus: string;
+    wvStatus: ModelsTeamDiagnosisStatus;
     /**
      * Career Interest 診断ステータス
      */
-    ciStatus: string;
+    ciStatus: ModelsTeamDiagnosisStatus;
     /**
      * エースメンバーか
      */
@@ -3390,7 +3455,7 @@ export type ModelsUpdateApplicationStatusRequest = {
     /**
      * 新しいステータス
      */
-    status?: string;
+    status?: ModelsJobApplicationStatus;
 };
 
 /**
@@ -3512,11 +3577,11 @@ export type ModelsUpdateDiagnoseStatusRequest = {
     /**
      * Work Values 診断ステータス
      */
-    wvStatus?: string | null;
+    wvStatus?: ModelsTeamDiagnosisStatus;
     /**
      * Career Interest 診断ステータス
      */
-    ciStatus?: string | null;
+    ciStatus?: ModelsTeamDiagnosisStatus;
 };
 
 /**
@@ -3890,7 +3955,7 @@ export type ModelsWvSessionResponse = {
     /**
      * ステータス
      */
-    status: string;
+    status: ModelsDiagnosisSessionStatus;
     /**
      * 初期ペア
      */

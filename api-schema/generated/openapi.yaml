@@ -5270,7 +5270,8 @@ components:
           type: integer
           description: 画像数
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.ArticleStatus'
           description: ステータス
         coverImageUrl:
           type: string
@@ -5293,6 +5294,12 @@ components:
           format: date-time
           description: 公開日時
       description: 記事
+    Models.ArticleStatus:
+      type: string
+      enum:
+        - draft
+        - published
+      description: 記事ステータス
     Models.AttachSkillRequest:
       type: object
       required:
@@ -5438,7 +5445,8 @@ components:
           type: string
           description: 基本興味領域ID
         skillLevel:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.CISkillLevel'
           description: スキルレベル
         activityType:
           type: string
@@ -5510,7 +5518,8 @@ components:
           type: string
           description: セッションID
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.DiagnosisSessionStatus'
           description: ステータス
         items:
           type: array
@@ -5518,6 +5527,13 @@ components:
             $ref: '#/components/schemas/Models.CIItemResponse'
           description: 設問一覧
       description: Career Interest セッション
+    Models.CISkillLevel:
+      type: string
+      enum:
+        - entry
+        - mid
+        - advanced
+      description: 設問のスキルレベル
     Models.CIStartSessionRequest:
       type: object
       required:
@@ -5592,8 +5608,9 @@ components:
           type: string
           description: ミーティングURL
         status:
-          type: string
-          description: ステータス（scheduled / completed / cancelled / no_show）
+          allOf:
+            - $ref: '#/components/schemas/Models.InterviewStatus'
+          description: ステータス
         title:
           type: string
           description: タイトル
@@ -5724,8 +5741,9 @@ components:
           type: string
           description: ミーティングURL
         status:
-          type: string
-          description: ステータス（scheduled / completed / cancelled / no_show）
+          allOf:
+            - $ref: '#/components/schemas/Models.InterviewStatus'
+          description: ステータス
         title:
           type: string
           description: タイトル
@@ -5922,7 +5940,8 @@ components:
           type: string
           description: 電話番号
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.CompanyStatus'
           description: アカウントステータス
         createdAt:
           type: string
@@ -5938,6 +5957,13 @@ components:
           type: string
           description: 本文
       description: 企業からのスカウト返信リクエスト
+    Models.CompanyStatus:
+      type: string
+      enum:
+        - pending
+        - approved
+        - rejected
+      description: 企業アカウントのステータス
     Models.ConflictError:
       type: object
       required:
@@ -6259,16 +6285,25 @@ components:
           type: string
           description: 紐づくユーザーID（未紐づけは空文字）
         wvStatus:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.TeamDiagnosisStatus'
           description: Work Values 診断ステータス
         ciStatus:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.TeamDiagnosisStatus'
           description: Career Interest 診断ステータス
         email:
           type: string
           nullable: true
           description: 招待メールアドレス
       description: チーム診断リンク情報
+    Models.DiagnosisSessionStatus:
+      type: string
+      enum:
+        - in_progress
+        - completed
+        - expired
+      description: 診断セッションのステータス（Work Values / Career Interest 共通）
     Models.EducationListResponse:
       type: object
       required:
@@ -6651,12 +6686,21 @@ components:
           type: string
           description: ミーティングURL
         status:
-          type: string
-          description: ステータス（scheduled / completed / cancelled / no_show）
+          allOf:
+            - $ref: '#/components/schemas/Models.InterviewStatus'
+          description: ステータス
         title:
           type: string
           description: タイトル
       description: 面接（共通フィールド）
+    Models.InterviewProposalStatus:
+      type: string
+      enum:
+        - pending
+        - confirmed
+        - expired
+        - cancelled
+      description: 面接日程提案のステータス（expired は将来値）
     Models.InterviewSlotResponse:
       type: object
       required:
@@ -6677,9 +6721,25 @@ components:
           format: date-time
           description: 終了日時
         status:
-          type: string
-          description: ステータス（proposed / selected / rejected）
+          allOf:
+            - $ref: '#/components/schemas/Models.InterviewSlotStatus'
+          description: ステータス
       description: 面接候補スロット
+    Models.InterviewSlotStatus:
+      type: string
+      enum:
+        - proposed
+        - selected
+        - rejected
+      description: 面接スロットのステータス
+    Models.InterviewStatus:
+      type: string
+      enum:
+        - scheduled
+        - completed
+        - cancelled
+        - no_show
+      description: 面接のステータス（completed / no_show は将来値）
     Models.JobApplicationListResponse:
       type: object
       required:
@@ -6726,7 +6786,8 @@ components:
           type: string
           description: 企業ID
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.JobApplicationStatus'
           description: ステータス
         message:
           type: string
@@ -6781,6 +6842,17 @@ components:
           format: date-time
           description: 更新日時
       description: 応募（詳細付き）
+    Models.JobApplicationStatus:
+      type: string
+      enum:
+        - applied
+        - screening
+        - interview
+        - offer
+        - accepted
+        - rejected
+        - withdrawn
+      description: 応募ステータス
     Models.JobPostingListResponse:
       type: object
       required:
@@ -6853,8 +6925,9 @@ components:
           nullable: true
           description: 勤務地（表示用）
         status:
-          type: string
-          description: ステータス（draft / published 等）
+          allOf:
+            - $ref: '#/components/schemas/Models.JobPostingStatus'
+          description: ステータス
         jobCategory:
           type: string
           description: 職種カテゴリ
@@ -7046,7 +7119,8 @@ components:
           type: boolean
           description: 公開中か
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.JobPostingStatus'
           description: ステータス
         jobCategory:
           type: string
@@ -7170,6 +7244,12 @@ components:
           format: date-time
           description: 更新日時
       description: 求人
+    Models.JobPostingStatus:
+      type: string
+      enum:
+        - draft
+        - open
+      description: 求人ステータス
     Models.JobPostingTeamMember:
       type: object
       required:
@@ -7215,10 +7295,12 @@ components:
           type: string
           description: 紐づくユーザーID
         wvStatus:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.TeamDiagnosisStatus'
           description: Work Values 診断ステータス
         ciStatus:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.TeamDiagnosisStatus'
           description: Career Interest 診断ステータス
         isAce:
           type: boolean
@@ -7331,7 +7413,8 @@ components:
           type: string
           description: ID
         type:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.NotificationType'
           description: 通知種別
         title:
           type: string
@@ -7351,6 +7434,17 @@ components:
           format: date-time
           description: 作成日時
       description: 通知
+    Models.NotificationType:
+      type: string
+      enum:
+        - scout_received
+        - scout_replied
+        - scout_interested
+        - scout_declined
+        - scout_expired
+        - credit_replenished
+        - quality_warning
+      description: 通知種別
     Models.PendingProposalCheckResponse:
       type: object
       required:
@@ -7517,8 +7611,9 @@ components:
           type: string
           description: メッセージ
         status:
-          type: string
-          description: ステータス（pending / confirmed / expired / cancelled）
+          allOf:
+            - $ref: '#/components/schemas/Models.InterviewProposalStatus'
+          description: ステータス
         expiresAt:
           type: string
           format: date-time
@@ -7977,7 +8072,8 @@ components:
           type: string
           description: 本文
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.ScoutStatus'
           description: ステータス
         companyName:
           type: string
@@ -8014,6 +8110,14 @@ components:
           format: date-time
           description: 作成日時
       description: スカウトメッセージ
+    Models.ScoutQualityLevel:
+      type: string
+      enum:
+        - good
+        - warning
+        - temporarily_restricted
+        - restricted
+      description: スカウト品質レベル
     Models.ScoutQualityScoreResponse:
       type: object
       required:
@@ -8027,7 +8131,8 @@ components:
           format: double
           description: 直近14日の返信率
         level:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.ScoutQualityLevel'
           description: 品質レベル
         sentLast14d:
           type: integer
@@ -8093,7 +8198,9 @@ components:
       properties:
         status:
           type: string
-          description: 処理結果
+          enum:
+            - ok
+          description: 処理結果（"ok"）
         conversationId:
           type: string
           description: 応答により作成・特定された会話ID
@@ -8112,6 +8219,17 @@ components:
           format: date-time
           description: 更新日時
       description: スカウト受け入れ設定
+    Models.ScoutStatus:
+      type: string
+      enum:
+        - draft
+        - sent
+        - opened
+        - replied
+        - interested
+        - declined
+        - expired
+      description: スカウトのステータス
     Models.ScoutTemplateListResponse:
       type: object
       required:
@@ -8205,7 +8323,8 @@ components:
           format: date-time
           description: 終了日時
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.InterviewStatus'
           description: ステータス
       description: 確定した面接（スロット選択結果）
     Models.SendMessageRequest:
@@ -8389,6 +8508,8 @@ components:
       properties:
         status:
           type: string
+          enum:
+            - ok
           description: 処理結果（"ok"）
       description: 汎用 OK レスポンス
     Models.TalentCard:
@@ -8532,6 +8653,12 @@ components:
           type: string
           description: 作成日時（RFC3339 文字列）
       description: チーム詳細（メンバー付き）
+    Models.TeamDiagnosisStatus:
+      type: string
+      enum:
+        - pending
+        - completed
+      description: チームメンバーの診断ステータス
     Models.TeamListResponse:
       type: object
       required:
@@ -8569,10 +8696,12 @@ components:
           type: string
           description: 診断招待トークン
         wvStatus:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.TeamDiagnosisStatus'
           description: Work Values 診断ステータス
         ciStatus:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.TeamDiagnosisStatus'
           description: Career Interest 診断ステータス
         isAce:
           type: boolean
@@ -8679,7 +8808,8 @@ components:
       type: object
       properties:
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.JobApplicationStatus'
           description: 新しいステータス
       description: 応募ステータス更新リクエスト
     Models.UpdateArticleRequest:
@@ -8802,12 +8932,12 @@ components:
       type: object
       properties:
         wvStatus:
-          type: string
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Models.TeamDiagnosisStatus'
           description: Work Values 診断ステータス
         ciStatus:
-          type: string
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Models.TeamDiagnosisStatus'
           description: Career Interest 診断ステータス
       description: チーム診断ステータス更新リクエスト（指定したキーのみ更新）
     Models.UpdateEducationRequest:
@@ -9209,7 +9339,8 @@ components:
           type: string
           description: セッションID
         status:
-          type: string
+          allOf:
+            - $ref: '#/components/schemas/Models.DiagnosisSessionStatus'
           description: ステータス
         initialPairs:
           type: array
