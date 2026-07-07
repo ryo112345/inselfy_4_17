@@ -1,0 +1,93 @@
+# マイグレーション検証 CI (C3):
+# 1) append-only: 適用済みマイグレーションの書き換え・削除を禁止（追加のみ許可）。
+#    書き換えると適用済み環境とクリーン環境でスキーマが分岐するため（CLAUDE.md の
+#    `down -all 禁止` ルールを機械で担保する）。
+# 2) apply: クリーンな PostgreSQL に全マイグレーションを適用できることを検証。
+#    PR では新規追加分の up → down → up も検証し、down の可逆性を担保する。
+name: migrations CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/migrations/**"
+      - ".github/workflows/migrations-ci.yml"
+  pull_request:
+    paths:
+      - "backend/migrations/**"
+      - ".github/workflows/migrations-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  append-only:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+
+      - name: Existing migrations must not change
+        run: |
+          changed=$(git diff --name-status "origin/${{ github.base_ref }}...HEAD" -- backend/migrations/)
+          echo "changed files:"
+          echo "$changed"
+          bad=$(echo "$changed" | awk 'NF > 0 && $1 != "A"')
+          if [ -n "$bad" ]; then
+            echo "::error::既存マイグレーションの変更・削除・リネームは禁止です（新規追加のみ許可）"
+            echo "$bad"
+            exit 1
+          fi
+
+  apply:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # compose.yml と同じイメージに揃える
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: inselfy
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_URL: postgres://user:password@localhost:5432/inselfy?sslmode=disable
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      # go install は sumdb で検証されるため、バイナリ配布より供給元の信頼性が高い。
+      # バージョンはローカルの migrate CLI と揃える。
+      - name: Install golang-migrate
+        run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.19.1
+
+      - name: Apply all migrations to a clean database
+        run: migrate -path backend/migrations -database "$DB_URL" up
+
+      - name: Verify new migrations are down-reversible (up -> down -> up)
+        if: github.event_name == 'pull_request'
+        run: |
+          new_count=$(git diff --name-status "origin/${{ github.base_ref }}...HEAD" -- 'backend/migrations/*.up.sql' | awk '$1 == "A"' | wc -l)
+          echo "new migrations: $new_count"
+          if [ "$new_count" -gt 0 ]; then
+            migrate -path backend/migrations -database "$DB_URL" down "$new_count"
+            migrate -path backend/migrations -database "$DB_URL" up
+          fi
