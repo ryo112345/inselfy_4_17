@@ -3,3 +3,4 @@
 
 # Uploaded files (runtime data, not source code)
 backend/uploads/
+!.env.example
