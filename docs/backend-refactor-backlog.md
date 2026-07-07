@@ -20,7 +20,7 @@
 | 4 | [ ] | company_team_controller のレスポンス変換を presenter へ移動 | 中 | 統一 |
 | 5 | [ ] | usecase 層の入力正規化（TrimSpace）ヘルパー化 | 小 | 重複排除 |
 | 6 | [ ] | scout_interactor（667行）の分割＋ユニットテスト追加 | 大 | 分割 |
-| 7 | [ ] | initializer.go（728行）の機能別分割 | 中 | 整理 |
+| 7 | [ ] | initializer.go（775行）の機能別分割 | 中 | 整理 |
 
 #1 と #2 は controller-clean-route-refactor.md の「全件完了後の仕上げ」をこちらに引き継いだもの。
 
@@ -162,6 +162,10 @@ job_application などの interactor に散在。
 
 ## #6 scout_interactor（667行）の分割＋ユニットテスト追加
 
+**2026-07-07 検証済み:** 以下の行数・行番号は現状のコードと一致している（再調査不要）。
+テストのスタイル参考は `internal/usecase/mocks_test.go` と `interview_interactor_test.go`
+（スタブstruct＋テーブルテスト。モックライブラリ不使用）。
+
 **現状:** `internal/usecase/scout_interactor.go` に責務が同居している:
 
 - 送信＋品質評価: `Send` (L59, 125行), `evaluateQuality` (L236), `applyQualityTransitions` (L275),
@@ -194,10 +198,20 @@ job_application などの interactor に散在。
 - `test(backend): add unit tests for scout_interactor`
 - `refactor(backend): split scout_interactor by responsibility`
 
-## #7 initializer.go（728行）の機能別分割
+## #7 initializer.go（775行）の機能別分割
 
-**現状:** `internal/driver/initializer/api/initializer.go` に生成呼び出しが約80箇所。
-DI 配線が一枚岩で、機能追加のたびにこのファイルが伸びる。
+**現状（2026-07-07 更新）:** `internal/driver/initializer/api/initializer.go` は 775 行
+（2026-07-07 に OpenAPI リクエスト検証ミドルウェアの配線が追加されて増加）。
+生成呼び出しが約80箇所。DI 配線が一枚岩で、機能追加のたびにこのファイルが伸びる。
+
+**分割時の注意（2026-07-07 追加分）:**
+
+- `BuildServer` 冒頭のミドルウェア配線順序を崩さないこと:
+  `Recover → Logger → OpenAPIRequestValidator（openapigen.SpecYAML を埋め込みから読む）→ CORS → 各ルート`。
+  バリデータ構築が error を返すパスでは `cleanup()`（pool.Close）を呼んでから return している。
+- 認証ミドルウェアは5種（jwtMW / optionalJwtMW / companyJwtMW / anyJwtMW(L334付近) /
+  AdminAuth(L485付近の adminGroup)）をルート単位で使い分けている。機能別 wire ファイルに
+  ルート登録を移す際は、どのミドルウェアを受け取るかをシグネチャで明示する。
 
 **やること:**
 
