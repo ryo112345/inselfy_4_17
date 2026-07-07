@@ -1,4 +1,4 @@
-import { DocumentIcon, PlusIcon } from "./Icons";
+import { DocumentIcon, PlusIcon } from "@/components/icons";
 
 export function ResumeUploadCard() {
   return (

@@ -2,11 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-
+import { AwardIcon, XIcon } from "@/components/icons";
 import type { ModelsSkillResponse } from "@/external/client/api/generated";
-
 import { type ApiError, attachSkill, detachSkill } from "./api";
-import { AwardIcon, XIcon } from "./Icons";
 import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
