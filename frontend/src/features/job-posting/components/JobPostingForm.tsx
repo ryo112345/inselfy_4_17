@@ -40,9 +40,9 @@ import {
   InlineTagInput,
   InlineTextarea,
 } from "./inline-inputs";
+import { cardClass } from "./view-parts";
 
-export const cardClass =
-  "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
+export { cardClass };
 
 export type JobFormUploaders = {
   uploadCover: (file: File) => Promise<string>;
