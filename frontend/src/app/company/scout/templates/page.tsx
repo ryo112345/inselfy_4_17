@@ -5,11 +5,7 @@ import { useEffect, useState } from "react";
 import { useConfirm, useToast } from "@/components/ui";
 import { deleteTemplate, fetchTemplates } from "@/features/scout/api";
 import type { ScoutTemplate } from "@/features/scout/types";
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
-}
+import { formatDate } from "@/lib/date";
 
 export default function TemplateListPage() {
   const [templates, setTemplates] = useState<ScoutTemplate[]>([]);

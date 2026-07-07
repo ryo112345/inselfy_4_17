@@ -10,6 +10,7 @@ import type {
   ScoutMessage,
   ScoutStatus,
 } from "@/features/scout/types";
+import { formatDate } from "@/lib/date";
 
 const PAGE_SIZE = 20;
 const accent = "#2979ff";
@@ -50,12 +51,6 @@ function formatMonth(iso: string) {
 function formatReplenishDate(iso: string) {
   const d = new Date(iso);
   return `${d.getMonth() + 1}月${d.getDate()}日`;
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export default function ScoutListPage() {

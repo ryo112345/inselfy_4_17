@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
+import { timeAgo } from "@/lib/date";
 import { ArticlePreviewCard, extractArticleId, removeArticleUrl } from "./ArticlePreviewCard";
 import type { PostItem } from "./api";
 import { createPost, toggleLike, toggleRepost } from "./api";
@@ -17,17 +18,6 @@ type Props = {
 function useCurrentUserId(propUserId?: string) {
   const { user } = useAuth();
   return propUserId || user?.id;
-}
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return `${diff}秒`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}分`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}時間`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}日`;
-  return new Date(dateStr).toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
 }
 
 export function PostCard({ post, currentUserId: propUserId }: Props) {

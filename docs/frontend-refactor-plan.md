@@ -33,7 +33,7 @@
 | F5 | [x] | 共通UI部品の昇格・新設（Modal / Toast / ConfirmDialog） | 中 | 基盤 |
 | F6 | [x] | `alert()` / `confirm()` 全廃（F5 依存） | 中 | UX |
 | F7 | [x] | 共有アイコンの集約（`src/components/icons/`） | 中 | 重複排除 |
-| F8 | [ ] | 日付フォーマットの集約（`src/lib/date.ts`） | 小 | 重複排除 |
+| F8 | [x] | 日付フォーマットの集約（`src/lib/date.ts`） | 小 | 重複排除 |
 | F9 | [x] | API ボイラープレートの共通化（`run` / `unwrap`） | 中 | 重複排除 |
 | F10 | [ ] | テーマカラー・選択肢マスタ・ステータスマップの定数化 | 中 | 重複排除 |
 
@@ -232,6 +232,12 @@ Toast / ConfirmDialog は存在しない。
    表記ゆれは、画面ごとの現状表記を維持する引数を持たせるか、この機会に統一するかを
    ユーザーに確認してから実装する）。
 2. 18ファイルのローカル実装を削除して差し替え。
+
+**実施メモ（2026-07-07）:** 表記は**現状維持**（統一しない）と判断し、既存出力を再現する
+`formatDate`（YYYY/MM/DD）/ `formatDateCompact`（YYYY/M/D）/ `formatDateTime` / `formatDateTimeCompact` /
+`timeAgo` / `formatRelativeDate` / `formatRelativeTime` / `daysRemaining` を実装、15ファイルを差し替え。
+1箇所でしか使わない特殊形式（interviews と InterviewDetailPanel の曜日付き、PostDetail の長文形式、
+MessageThread の日付セパレータ）は現地に残した。
 
 **コミット:** `refactor(frontend): centralize date formatting in src/lib/date.ts`
 

@@ -11,6 +11,7 @@ import {
   updateScoutSettings,
 } from "@/features/scout/api";
 import type { ScoutMessage, ScoutSettings, ScoutStatus } from "@/features/scout/types";
+import { daysRemaining, formatDateCompact } from "@/lib/date";
 
 const PAGE_SIZE = 20;
 
@@ -23,19 +24,6 @@ const STATUS_BADGE: Record<ScoutStatus, { label: string; className: string }> = 
   declined: { label: "辞退", className: "bg-red-100 text-red-800" },
   expired: { label: "期限切れ", className: "bg-gray-100 text-gray-800" },
 };
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "-";
-  return new Date(dateStr).toLocaleDateString("ja-JP");
-}
-
-function daysRemaining(expiresAt: string | null): string | null {
-  if (!expiresAt) return null;
-  const diff = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return "期限切れ";
-  if (diff === 0) return "今日まで";
-  return `残り${diff}日`;
-}
 
 export function ScoutListView() {
   const { user, isLoading: authLoading } = useAuth();
@@ -275,7 +263,7 @@ export function ScoutListView() {
                   )}
 
                   <div className="flex flex-col gap-0.5 text-xs text-gray-400">
-                    <span>受信: {formatDate(scout.sentAt)}</span>
+                    <span>受信: {formatDateCompact(scout.sentAt)}</span>
                     {scout.expiresAt && (
                       <span
                         className={
@@ -284,7 +272,7 @@ export function ScoutListView() {
                             : ""
                         }
                       >
-                        期限: {formatDate(scout.expiresAt)}
+                        期限: {formatDateCompact(scout.expiresAt)}
                         {remaining && ` (${remaining})`}
                       </span>
                     )}

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui";
 import { fetchScoutDetail, replyToScoutAsCompany } from "@/features/scout/api";
 import type { ScoutDetail, ScoutStatus } from "@/features/scout/types";
+import { formatDateTime } from "@/lib/date";
 
 const STATUS_BADGE: Record<ScoutStatus, { bg: string; text: string; label: string }> = {
   draft: { bg: "bg-gray-100", text: "text-gray-600", label: "下書き" },
@@ -16,12 +17,6 @@ const STATUS_BADGE: Record<ScoutStatus, { bg: string; text: string; label: strin
   declined: { bg: "bg-red-50", text: "text-red-700", label: "辞退" },
   expired: { bg: "bg-gray-100", text: "text-gray-500", label: "期限切れ" },
 };
-
-function formatDateTime(dateStr: string | null): string {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
 
 export default function ScoutDetailPage() {
   const params = useParams();

@@ -11,17 +11,7 @@ import {
 } from "@/features/timeline/ArticlePreviewCard";
 import type { CommentItem, PostItem } from "@/features/timeline/api";
 import { createComment, toggleLike, toggleRepost } from "@/features/timeline/api";
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return `${diff}秒`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}分`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}時間`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}日`;
-  return new Date(dateStr).toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
-}
+import { timeAgo } from "@/lib/date";
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);

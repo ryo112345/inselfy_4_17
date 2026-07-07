@@ -1,5 +1,6 @@
 "use client";
 
+import { formatRelativeTime } from "@/lib/date";
 import type { Conversation } from "../types";
 
 type Props = {
@@ -8,20 +9,6 @@ type Props = {
   onSelect: (conv: Conversation) => void;
   getDisplayName: (conv: Conversation) => string;
 };
-
-function formatRelativeTime(dateStr: string): string {
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "今";
-  if (diffMin < 60) return `${diffMin}分前`;
-  const diffHour = Math.floor(diffMin / 60);
-  if (diffHour < 24) return `${diffHour}時間前`;
-  const diffDay = Math.floor(diffHour / 24);
-  if (diffDay < 7) return `${diffDay}日前`;
-  return d.toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
-}
 
 export function ConversationList({ conversations, selectedId, onSelect, getDisplayName }: Props) {
   if (conversations.length === 0) {
