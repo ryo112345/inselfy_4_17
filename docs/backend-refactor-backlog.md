@@ -18,7 +18,7 @@
 | 2 | [ ] | CLAUDE.md に経路ルールを明文化 | 小 | ドキュメント |
 | 3 | [ ] | post_repository の PostWithUser 詰め替えを goverter 化 | 小 | 重複排除 |
 | 4 | [ ] | company_team_controller のレスポンス変換を presenter へ移動 | 中 | 統一 |
-| 5 | [ ] | usecase 層の入力正規化（TrimSpace）ヘルパー化 | 小 | 重複排除 |
+| 5 | [x] | usecase 層の入力正規化（TrimSpace）ヘルパー化 | 小 | 重複排除 |
 | 6 | [x] | scout_interactor（667行）の分割＋ユニットテスト追加 | 大 | 分割 |
 | 7 | [x] | initializer.go（775行）の機能別分割 | 中 | 整理 |
 

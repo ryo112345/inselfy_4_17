@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"strings"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -21,9 +20,7 @@ func NewScoutTemplateInteractor(
 }
 
 func (i *ScoutTemplateInteractor) Create(ctx context.Context, input scout.CreateTemplateInput) (*scout.ScoutTemplate, error) {
-	input.Name = strings.TrimSpace(input.Name)
-	input.Subject = strings.TrimSpace(input.Subject)
-	input.Body = strings.TrimSpace(input.Body)
+	normalizeStrings(&input.Name, &input.Subject, &input.Body)
 	if err := scout.ValidateTemplate(input); err != nil {
 		return nil, err
 	}
@@ -60,9 +57,7 @@ func (i *ScoutTemplateInteractor) Get(ctx context.Context, companyID, templateID
 }
 
 func (i *ScoutTemplateInteractor) Update(ctx context.Context, companyID, templateID string, input scout.UpdateTemplateInput) (*scout.ScoutTemplate, error) {
-	input.Name = strings.TrimSpace(input.Name)
-	input.Subject = strings.TrimSpace(input.Subject)
-	input.Body = strings.TrimSpace(input.Body)
+	normalizeStrings(&input.Name, &input.Subject, &input.Body)
 	if err := scout.ValidateTemplateUpdate(input); err != nil {
 		return nil, err
 	}
