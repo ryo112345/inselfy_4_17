@@ -12,11 +12,15 @@
 
 ## 開発ルール
 
-### バックエンドの経路統一リファクタ（進行中）
+### バックエンドの経路ルール（移行完了・遵守必須）
 
-DB直結コントローラをクリーンアーキ経路（controller → InputPort → interactor → Repository/QueryService → gateway）
-に移行中。**手順・対象一覧・進捗チェックリストは `docs/controller-clean-route-refactor.md` を必ず読んでから作業する。**
-admin系コントローラは移行対象外（pool直結のままでよい）。
+- 経路は常に **controller → InputPort → interactor → (Repository | QueryService) → gateway**。
+  controller から DB（pgx/pool）へ直結しない。
+- 例外は **admin コントローラ（`admin_*_controller.go`）のみ pool 直結可**。それ以外の controller は
+  InputPort 経由必須（`.golangci.yml` の depguard でも機械的に強制。`make lint` で検査）。
+- 複合読み取り・動的SQLは Repository に押し込まず、**QueryService port を新設して gateway に置く**。
+- 移行の経緯・手順は `docs/controller-clean-route-refactor.md`（完了済み）。
+  残タスクは `docs/backend-refactor-backlog.md` で管理する。
 
 ### マイグレーション
 - dirty 状態の修復には `force <現在適用済みのバージョン>` を使い、その後 `up` で新しいマイグレーションだけ適用する
