@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { Sidebar } from "@/app/components/Sidebar";
 import { ACCENT } from "@/constants/theme";
 import { fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
@@ -34,16 +36,48 @@ async function getCurrentUsername(cookieHeader: string): Promise<string | null> 
   }
 }
 
+// generateMetadata とページ本体で同一リクエスト内のフェッチを共有する
+const getPanelData = cache((username: string, cookieHeader: string) =>
+  fetchPanelDataByUsername(username, cookieHeader),
+);
+
+function buildCookieHeader(cookieStore: Awaited<ReturnType<typeof cookies>>): string {
+  return cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
+  const cookieStore = await cookies();
+  const data = await getPanelData(username, buildCookieHeader(cookieStore));
+  if (!data) return {};
+  const title = `${data.user.name} (@${data.username}) | inselfy`;
+  const description = data.user.headline ?? undefined;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      ...(data.user.avatarUrl ? { images: [data.user.avatarUrl] } : {}),
+    },
+  };
+}
+
 export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
+  const cookieHeader = buildCookieHeader(cookieStore);
   const [data, currentUsername] = await Promise.all([
-    fetchPanelDataByUsername(username, cookieHeader),
+    getPanelData(username, cookieHeader),
     getCurrentUsername(cookieHeader),
   ]);
   if (!data) notFound();

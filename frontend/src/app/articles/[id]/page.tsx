@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { Sidebar } from "@/app/components/Sidebar";
 import { ArticleView } from "@/features/articles/ArticleView";
 import { fetchArticle } from "@/features/articles/api";
@@ -11,6 +13,35 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+// generateMetadata とページ本体で同一リクエスト内のフェッチを共有する
+const getArticle = cache((id: string, cookie: string) => fetchArticle(id, { cookie }));
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const cookieStore = await cookies();
+  let article: Awaited<ReturnType<typeof fetchArticle>>;
+  try {
+    article = await getArticle(id, cookieStore.toString());
+  } catch {
+    return {};
+  }
+  const description = article.body
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+  return {
+    title: `${article.title} | inselfy`,
+    description: description || undefined,
+    openGraph: {
+      title: article.title,
+      description: description || undefined,
+      type: "article",
+      ...(article.coverImageUrl ? { images: [article.coverImageUrl] } : {}),
+    },
+  };
+}
+
 export default async function ArticlePage({ params }: Props) {
   const { id } = await params;
   const cookieStore = await cookies();
@@ -20,7 +51,7 @@ export default async function ArticlePage({ params }: Props) {
 
   let article: Awaited<ReturnType<typeof fetchArticle>>;
   try {
-    article = await fetchArticle(id, { cookie: cookieStore.toString() });
+    article = await getArticle(id, cookieStore.toString());
   } catch {
     notFound();
   }
