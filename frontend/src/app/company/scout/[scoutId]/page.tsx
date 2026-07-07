@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useToast } from "@/components/ui";
 import { fetchScoutDetail, replyToScoutAsCompany } from "@/features/scout/api";
 import type { ScoutDetail, ScoutStatus } from "@/features/scout/types";
 
@@ -32,6 +33,7 @@ export default function ScoutDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
   const [sending, setSending] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     setLoading(true);
@@ -51,7 +53,7 @@ export default function ScoutDetailPage() {
       const updated = await fetchScoutDetail(scoutId);
       setDetail(updated);
     } catch (e: any) {
-      alert(e.message ?? "返信の送信に失敗しました");
+      showToast(e.message ?? "返信の送信に失敗しました", "error");
     } finally {
       setSending(false);
     }

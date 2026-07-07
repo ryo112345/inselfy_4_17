@@ -10,6 +10,7 @@ import {
   WV_FULL_LABELS,
   WV_ORDER,
 } from "@/app/components/SingleRadarChart";
+import { useConfirm } from "@/components/ui";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 
 type Member = {
@@ -64,6 +65,7 @@ export default function TeamDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { companyFetch } = useCompanyAuth();
+  const confirmDialog = useConfirm();
   const teamId = params.id as string;
 
   const [team, setTeam] = useState<TeamDetail | null>(null);
@@ -136,7 +138,15 @@ export default function TeamDetailPage() {
   };
 
   const handleRemoveMember = async (memberId: string, name: string) => {
-    if (!confirm(`${name}さんをチームから削除しますか？診断データも失われます。`)) return;
+    if (
+      !(await confirmDialog({
+        title: "メンバーの削除",
+        message: `${name}さんをチームから削除しますか？診断データも失われます。`,
+        confirmLabel: "削除する",
+        destructive: true,
+      }))
+    )
+      return;
     try {
       await companyFetch(`/api/company/teams/${teamId}/members/${memberId}`, {
         method: "DELETE",

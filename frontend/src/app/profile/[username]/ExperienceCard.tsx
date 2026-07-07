@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { BriefcaseIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
-import { Field, PrimaryButton, SecondaryButton } from "@/components/ui";
+import { Field, PrimaryButton, SecondaryButton, useConfirm } from "@/components/ui";
 import type { ModelsExperienceResponse } from "@/external/client/api/generated";
 import { type ApiError, createExperience, deleteExperience, updateExperience } from "./api";
 import { DashedButton } from "./DashedButton";
@@ -24,6 +24,7 @@ export function ExperienceCard({ username, experiences, isOwner = true }: Props)
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const confirmDialog = useConfirm();
 
   const groups = useMemo(() => {
     const sorted = [...experiences].sort((a, b) => {
@@ -39,8 +40,16 @@ export function ExperienceCard({ username, experiences, isOwner = true }: Props)
     return groupConsecutive(sorted);
   }, [experiences]);
 
-  const handleDelete = (id: string) => {
-    if (!confirm("この職歴を削除しますか?")) return;
+  const handleDelete = async (id: string) => {
+    if (
+      !(await confirmDialog({
+        title: "職歴の削除",
+        message: "この職歴を削除しますか?",
+        confirmLabel: "削除する",
+        destructive: true,
+      }))
+    )
+      return;
     setDeletingId(id);
     setDeleteError(null);
     startTransition(async () => {

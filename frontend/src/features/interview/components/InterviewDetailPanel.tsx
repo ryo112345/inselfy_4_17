@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Modal } from "@/components/ui";
+import { Modal, useConfirm, useToast } from "@/components/ui";
 import { cancelInterviewAsCompany } from "../api";
 import type { Interview } from "../types";
 
@@ -38,16 +38,27 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props) {
   const [cancelling, setCancelling] = useState(false);
+  const confirmDialog = useConfirm();
+  const { showToast } = useToast();
   const status = STATUS_LABELS[interview.status] ?? STATUS_LABELS.scheduled;
 
   const handleCancel = async () => {
-    if (!confirm("この面接をキャンセルしますか？")) return;
+    if (
+      !(await confirmDialog({
+        title: "面接のキャンセル",
+        message: "この面接をキャンセルしますか？",
+        confirmLabel: "キャンセルする",
+        cancelLabel: "戻る",
+        destructive: true,
+      }))
+    )
+      return;
     setCancelling(true);
     try {
       await cancelInterviewAsCompany(interview.id);
       onCancelled();
     } catch {
-      alert("キャンセルに失敗しました");
+      showToast("キャンセルに失敗しました", "error");
     } finally {
       setCancelling(false);
     }

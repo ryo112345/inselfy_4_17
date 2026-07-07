@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { CapIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
-import { Field, PrimaryButton, SecondaryButton } from "@/components/ui";
+import { Field, PrimaryButton, SecondaryButton, useConfirm } from "@/components/ui";
 import type { ModelsEducationResponse } from "@/external/client/api/generated";
 import { type ApiError, createEducation, deleteEducation, updateEducation } from "./api";
 import { DashedButton } from "./DashedButton";
@@ -30,9 +30,18 @@ export function EducationCard({ username, educations, isOwner = true }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const confirmDialog = useConfirm();
 
-  const handleDelete = (id: string) => {
-    if (!confirm("この学歴を削除しますか?")) return;
+  const handleDelete = async (id: string) => {
+    if (
+      !(await confirmDialog({
+        title: "学歴の削除",
+        message: "この学歴を削除しますか?",
+        confirmLabel: "削除する",
+        destructive: true,
+      }))
+    )
+      return;
     setDeletingId(id);
     setDeleteError(null);
     startTransition(async () => {
