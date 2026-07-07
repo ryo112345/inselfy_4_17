@@ -22,7 +22,7 @@
 | # | 状態 | 項目 | 規模 | 種別 |
 |---|------|------|------|------|
 | F1 | [x] | bfcache リロード強制スクリプトの削除 | 小 | パフォーマンス |
-| F2 | [ ] | `dangerouslySetInnerHTML` のサニタイズ（DOMPurify 導入） | 小 | セキュリティ |
+| F2 | [x] | `dangerouslySetInnerHTML` のサニタイズ（DOMPurify 導入） | 小 | セキュリティ |
 | F3 | [ ] | 通信失敗の握りつぶし解消（コメント投稿ほか） | 中 | バグ |
 | F4 | [ ] | stale-response / 競合状態の解消（AbortController 導入） | 中 | バグ |
 
