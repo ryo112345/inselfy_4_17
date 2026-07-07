@@ -1,4 +1,5 @@
 import "@typespec/http";
+import "@typespec/openapi";
 import "@typespec/openapi3";
 import "./models/common.tsp";
 import "./models/user.tsp";
@@ -60,6 +61,9 @@ using TypeSpec.OpenAPI;
 
 @service({
   title: "inselfy API",
+})
+@info({
+  version: "1.0.0",
 })
 @server("http://localhost:8081", "Development server")
 namespace Inselfy;
