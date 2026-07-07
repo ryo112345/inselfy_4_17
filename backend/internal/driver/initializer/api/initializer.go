@@ -114,6 +114,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// --- Static uploads ---
 	e.Static("/api/uploads", "./uploads")
 
+	wireHealth(e, pool)
 	wireAuth(e, d, jwtMW, companyJwtMW)
 	wireUser(e, d, jwtMW)
 	wireContent(e, d, jwtMW, optionalJwtMW, companyJwtMW)
