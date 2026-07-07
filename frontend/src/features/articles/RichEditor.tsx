@@ -8,6 +8,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useToast } from "@/components/ui";
 import { uploadArticleImage as uploadImage } from "./api";
 import { PaidSeparator } from "./PaidSeparatorExtension";
 
@@ -319,6 +320,7 @@ function BlockBtn({
 
 export function RichEditor({ content, onChange, isPaid }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showToast } = useToast();
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -389,11 +391,11 @@ export function RichEditor({ content, onChange, isPaid }: Props) {
         editor.chain().focus().setImage({ src: url }).run();
       } catch (err) {
         console.error("Image upload failed:", err);
-        alert("画像のアップロードに失敗しました");
+        showToast("画像のアップロードに失敗しました", "error");
       }
       e.target.value = "";
     },
-    [editor],
+    [editor, showToast],
   );
 
   return (

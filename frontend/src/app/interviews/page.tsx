@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useConfirm, useToast } from "@/components/ui";
 import { useAuth } from "@/features/auth/auth-context";
 import { cancelInterviewAsCandidate, fetchCandidateInterviews } from "@/features/interview/api";
 import { CalendarSlotSelector } from "@/features/interview/components/CalendarSlotSelector";
@@ -243,17 +244,28 @@ function InterviewCard({
   onCancelled?: () => void;
 }) {
   const [cancelling, setCancelling] = useState(false);
+  const confirmDialog = useConfirm();
+  const { showToast } = useToast();
   const status = STATUS_BADGES[interview.status] ?? STATUS_BADGES.scheduled;
   const days = daysUntil(interview.startTime);
 
   const handleCancel = async () => {
-    if (!confirm("この面接をキャンセルしますか？")) return;
+    if (
+      !(await confirmDialog({
+        title: "面接のキャンセル",
+        message: "この面接をキャンセルしますか？",
+        confirmLabel: "キャンセルする",
+        cancelLabel: "戻る",
+        destructive: true,
+      }))
+    )
+      return;
     setCancelling(true);
     try {
       await cancelInterviewAsCandidate(interview.id);
       onCancelled?.();
     } catch {
-      alert("キャンセルに失敗しました");
+      showToast("キャンセルに失敗しました", "error");
     } finally {
       setCancelling(false);
     }

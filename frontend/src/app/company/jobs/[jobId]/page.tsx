@@ -30,7 +30,7 @@ import {
   UsersIcon,
   YenIcon,
 } from "@/components/icons/job";
-import { SectionTitle } from "@/components/ui";
+import { SectionTitle, useConfirm, useToast } from "@/components/ui";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import {
   type JobPostingBody,
@@ -477,11 +477,15 @@ export default function JobEditPage() {
   const router = useRouter();
   const params = useParams();
   const jobId = params.jobId as string;
+  const confirmDialog = useConfirm();
+  const { showToast } = useToast();
   const [company, setCompany] = useState<CompanyProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [savingAction, setSavingAction] = useState<"save" | "publish" | "unpublish" | null>(null);
   const [saved, setSaved] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
+  const validationRef = useRef<HTMLDivElement>(null);
 
   const [title, setTitle] = useState(DEFAULTS.title);
   const [status, setStatus] = useState<"open" | "draft">(DEFAULTS.status);
@@ -765,29 +769,45 @@ export default function JobEditPage() {
     channelRef.current?.postMessage(msg);
   }, [previewPayload]);
 
-  const requiredOk =
-    title.trim() !== "" &&
-    jobCategory !== "" &&
-    employmentType !== "" &&
-    description.trim() !== "" &&
-    requiredQualifications.trim() !== "" &&
-    workLocation.trim() !== "" &&
-    contractType.trim() !== "" &&
-    probationPeriod.trim() !== "" &&
-    workHours.trim() !== "" &&
-    breakTime.trim() !== "" &&
-    holidays.trim() !== "" &&
-    (salaryMin != null || salaryMax != null || salaryDetail.trim() !== "") &&
-    insurance.trim() !== "" &&
-    smokingPolicy !== "" &&
-    workLocationChangeScope.trim() !== "" &&
-    jobDescriptionChangeScope.trim() !== "";
+  const missingRequired = [
+    { label: "求人タイトル", ok: title.trim() !== "" },
+    { label: "職種カテゴリ", ok: jobCategory !== "" },
+    { label: "雇用形態", ok: employmentType !== "" },
+    { label: "仕事内容", ok: description.trim() !== "" },
+    { label: "必須要件", ok: requiredQualifications.trim() !== "" },
+    { label: "勤務地", ok: workLocation.trim() !== "" },
+    { label: "契約期間", ok: contractType.trim() !== "" },
+    { label: "試用期間", ok: probationPeriod.trim() !== "" },
+    { label: "勤務時間", ok: workHours.trim() !== "" },
+    { label: "休憩時間", ok: breakTime.trim() !== "" },
+    { label: "休日・休暇", ok: holidays.trim() !== "" },
+    {
+      label: "想定年収または給与詳細",
+      ok: salaryMin != null || salaryMax != null || salaryDetail.trim() !== "",
+    },
+    { label: "社会保険", ok: insurance.trim() !== "" },
+    { label: "受動喫煙対策", ok: smokingPolicy !== "" },
+    { label: "就業場所の変更範囲", ok: workLocationChangeScope.trim() !== "" },
+    { label: "業務内容の変更範囲", ok: jobDescriptionChangeScope.trim() !== "" },
+  ]
+    .filter((f) => !f.ok)
+    .map((f) => f.label);
+  const requiredOk = missingRequired.length === 0;
+
+  // 公開バリデーション失敗時: 未入力一覧バナーを表示してスクロールする
+  const revealValidation = useCallback(() => {
+    setShowValidation(true);
+    showToast("公開するには必須項目をすべて入力してください", "error");
+    requestAnimationFrame(() => {
+      validationRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, [showToast]);
 
   const handleSave = useCallback(
     async (saveStatus?: "open" | "draft") => {
       const effectiveStatus = saveStatus ?? status;
       if (effectiveStatus === "open" && !requiredOk) {
-        alert("公開するには必須項目をすべて入力してください");
+        revealValidation();
         return;
       }
       const isStatusChange = saveStatus != null && saveStatus !== status;
@@ -841,7 +861,7 @@ export default function JobEditPage() {
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
-          alert(err.message ?? "保存に失敗しました");
+          showToast(err.message ?? "保存に失敗しました", "error");
         } else if (isStatusChange) {
           setStatus(effectiveStatus);
         } else {
@@ -894,11 +914,21 @@ export default function JobEditPage() {
       highlightTitleGrowth,
       galleryImages,
       requiredOk,
+      revealValidation,
+      showToast,
     ],
   );
 
   const handleDelete = useCallback(async () => {
-    if (!confirm("この求人を削除しますか？この操作は元に戻せません。")) return;
+    if (
+      !(await confirmDialog({
+        title: "求人の削除",
+        message: "この求人を削除しますか？この操作は元に戻せません。",
+        confirmLabel: "削除する",
+        destructive: true,
+      }))
+    )
+      return;
     setDeleting(true);
     try {
       const res = await companyFetch(`/api/company/jobs/${jobId}`, { method: "DELETE" });
@@ -906,12 +936,12 @@ export default function JobEditPage() {
         router.push("/company/jobs");
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.message ?? "削除に失敗しました");
+        showToast(err.message ?? "削除に失敗しました", "error");
       }
     } finally {
       setDeleting(false);
     }
-  }, [companyFetch, jobId, router]);
+  }, [companyFetch, confirmDialog, jobId, router, showToast]);
 
   const metaBadges = [employmentType, jobCategory, remotePolicy].filter(Boolean);
 
@@ -1020,13 +1050,23 @@ export default function JobEditPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!confirm("この求人を公開しますか？求職者に表示されるようになります。"))
+                  onClick={async () => {
+                    if (!requiredOk) {
+                      revealValidation();
+                      return;
+                    }
+                    if (
+                      !(await confirmDialog({
+                        title: "求人の公開",
+                        message: "この求人を公開しますか？求職者に表示されるようになります。",
+                        confirmLabel: "公開する",
+                      }))
+                    )
                       return;
                     handleSave("open");
                   }}
-                  disabled={savingAction !== null || !requiredOk}
-                  className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={savingAction !== null}
+                  className={`bg-[#2979ff] text-white px-5 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed ${requiredOk ? "" : "opacity-40"}`}
                   title={!requiredOk ? "必須項目を全て入力してください" : ""}
                 >
                   {savingAction === "publish" ? "公開中..." : "公開する"}
@@ -1036,8 +1076,14 @@ export default function JobEditPage() {
               <>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!confirm("この求人を非公開にしますか？求職者から見えなくなります。"))
+                  onClick={async () => {
+                    if (
+                      !(await confirmDialog({
+                        title: "求人の非公開",
+                        message: "この求人を非公開にしますか？求職者から見えなくなります。",
+                        confirmLabel: "非公開にする",
+                      }))
+                    )
                       return;
                     handleSave("draft");
                   }}
@@ -1061,6 +1107,24 @@ export default function JobEditPage() {
       </div>
 
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
+        {/* 公開バリデーション: 未入力の必須項目一覧 */}
+        {showValidation && missingRequired.length > 0 && (
+          <div
+            ref={validationRef}
+            className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4"
+          >
+            <p className="text-sm font-semibold text-rose-700">
+              公開するには以下の必須項目を入力してください
+            </p>
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-rose-600">
+              {missingRequired.map((label) => (
+                <li key={label} className="list-inside list-disc">
+                  {label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {/* Hero */}
         <section className={`overflow-hidden ${cardClass}`}>
           {/* Cover image */}

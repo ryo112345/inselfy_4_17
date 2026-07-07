@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useConfirm, useToast } from "@/components/ui";
 import { deleteTemplate, fetchTemplates } from "@/features/scout/api";
 import type { ScoutTemplate } from "@/features/scout/types";
 
@@ -15,6 +16,8 @@ export default function TemplateListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const confirmDialog = useConfirm();
+  const { showToast } = useToast();
 
   const load = () => {
     setLoading(true);
@@ -30,13 +33,21 @@ export default function TemplateListPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("このテンプレートを削除しますか？")) return;
+    if (
+      !(await confirmDialog({
+        title: "テンプレートの削除",
+        message: "このテンプレートを削除しますか？",
+        confirmLabel: "削除する",
+        destructive: true,
+      }))
+    )
+      return;
     setDeleting(id);
     try {
       await deleteTemplate(id);
       setTemplates((prev) => prev.filter((t) => t.id !== id));
     } catch (e: any) {
-      alert(e.message ?? "削除に失敗しました");
+      showToast(e.message ?? "削除に失敗しました", "error");
     } finally {
       setDeleting(null);
     }
