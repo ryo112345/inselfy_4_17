@@ -13,6 +13,7 @@ import {
   companyMessagingSendCompanyMessage,
   companyMessagingStartCompanyConversation,
 } from "@/external/client/api/generated";
+import { run } from "@/lib/api-result";
 import type {
   Conversation,
   ConversationListResponse,
@@ -36,45 +37,45 @@ export async function startConversation(body: {
   candidateId: string;
   body: string;
 }): Promise<Conversation> {
-  const { data, error } = await companyMessagingStartCompanyConversation({ body });
-  if (error || !data) {
-    throw new Error(error?.message ?? "会話の開始に失敗しました");
-  }
-  return data as Conversation;
+  return (await run(
+    companyMessagingStartCompanyConversation({ body }),
+    "会話の開始に失敗しました",
+  )) as Conversation;
 }
 
 export async function fetchCompanyConversations(params?: {
   limit?: number;
   offset?: number;
 }): Promise<ConversationListResponse> {
-  const { data, error } = await companyMessagingListCompanyConversations({
-    query: buildListQuery(params),
-  });
-  if (error || !data) throw new Error("会話一覧の取得に失敗しました");
-  return data as ConversationListResponse;
+  return (await run(
+    companyMessagingListCompanyConversations({
+      query: buildListQuery(params),
+    }),
+    "会話一覧の取得に失敗しました",
+  )) as ConversationListResponse;
 }
 
 export async function fetchCompanyConversationMessages(
   conversationId: string,
   params?: { limit?: number; offset?: number },
 ): Promise<MessageListResponse> {
-  const { data, error } = await companyMessagingListCompanyMessages({
-    path: { conversationId },
-    query: buildListQuery(params),
-  });
-  if (error || !data) throw new Error("メッセージの取得に失敗しました");
-  return data as MessageListResponse;
+  return (await run(
+    companyMessagingListCompanyMessages({
+      path: { conversationId },
+      query: buildListQuery(params),
+    }),
+    "メッセージの取得に失敗しました",
+  )) as MessageListResponse;
 }
 
 export async function sendMessageAsCompany(conversationId: string, body: string): Promise<Message> {
-  const { data, error } = await companyMessagingSendCompanyMessage({
-    path: { conversationId },
-    body: { body },
-  });
-  if (error || !data) {
-    throw new Error(error?.message ?? "メッセージの送信に失敗しました");
-  }
-  return data as Message;
+  return (await run(
+    companyMessagingSendCompanyMessage({
+      path: { conversationId },
+      body: { body },
+    }),
+    "メッセージの送信に失敗しました",
+  )) as Message;
 }
 
 export async function markReadAsCompany(conversationId: string): Promise<void> {
@@ -97,48 +98,48 @@ export async function startCandidateConversation(body: {
   recipientId: string;
   body: string;
 }): Promise<Conversation> {
-  const { data, error } = await candidateMessagingStartCandidateConversation({ body });
-  if (error || !data) {
-    throw new Error(error?.message ?? "会話の開始に失敗しました");
-  }
-  return data as Conversation;
+  return (await run(
+    candidateMessagingStartCandidateConversation({ body }),
+    "会話の開始に失敗しました",
+  )) as Conversation;
 }
 
 export async function fetchCandidateConversations(params?: {
   limit?: number;
   offset?: number;
 }): Promise<ConversationListResponse> {
-  const { data, error } = await candidateMessagingListCandidateConversations({
-    query: buildListQuery(params),
-  });
-  if (error || !data) throw new Error("会話一覧の取得に失敗しました");
-  return data as ConversationListResponse;
+  return (await run(
+    candidateMessagingListCandidateConversations({
+      query: buildListQuery(params),
+    }),
+    "会話一覧の取得に失敗しました",
+  )) as ConversationListResponse;
 }
 
 export async function fetchCandidateConversationMessages(
   conversationId: string,
   params?: { limit?: number; offset?: number },
 ): Promise<MessageListResponse> {
-  const { data, error } = await candidateMessagingListCandidateMessages({
-    path: { conversationId },
-    query: buildListQuery(params),
-  });
-  if (error || !data) throw new Error("メッセージの取得に失敗しました");
-  return data as MessageListResponse;
+  return (await run(
+    candidateMessagingListCandidateMessages({
+      path: { conversationId },
+      query: buildListQuery(params),
+    }),
+    "メッセージの取得に失敗しました",
+  )) as MessageListResponse;
 }
 
 export async function sendMessageAsCandidate(
   conversationId: string,
   body: string,
 ): Promise<Message> {
-  const { data, error } = await candidateMessagingSendCandidateMessage({
-    path: { conversationId },
-    body: { body },
-  });
-  if (error || !data) {
-    throw new Error(error?.message ?? "メッセージの送信に失敗しました");
-  }
-  return data as Message;
+  return (await run(
+    candidateMessagingSendCandidateMessage({
+      path: { conversationId },
+      body: { body },
+    }),
+    "メッセージの送信に失敗しました",
+  )) as Message;
 }
 
 export async function markReadAsCandidate(conversationId: string): Promise<void> {
