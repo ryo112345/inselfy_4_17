@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { adminFetch } from "@/features/admin/api";
+
 interface AdminUser {
   id: string;
   username: string;
@@ -34,7 +36,7 @@ export default function AdminUsersPage() {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), per_page: "20" });
     if (search) params.set("q", search);
-    const res = await fetch(`/api/admin/users?${params}`);
+    const res = await adminFetch(`/api/admin/users?${params}`);
     if (res.ok) {
       setData(await res.json());
     }
@@ -53,7 +55,7 @@ export default function AdminUsersPage() {
 
   const handleBypassLogin = async (userId: string, username: string) => {
     setLoggingInId(userId);
-    const res = await fetch(`/api/admin/users/${userId}/bypass-login`, {
+    const res = await adminFetch(`/api/admin/users/${userId}/bypass-login`, {
       method: "POST",
     });
     if (res.ok) {
@@ -64,7 +66,7 @@ export default function AdminUsersPage() {
 
   const handleDelete = async (userId: string) => {
     setDeletingId(userId);
-    const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
+    const res = await adminFetch(`/api/admin/users/${userId}`, { method: "DELETE" });
     if (res.ok) {
       setConfirmDeleteId(null);
       await fetchUsers();

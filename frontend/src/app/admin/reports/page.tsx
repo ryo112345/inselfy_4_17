@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 
+import { adminFetch } from "@/features/admin/api";
+
 interface PendingSession {
   session_id: string;
   user_id: string;
@@ -77,12 +79,12 @@ export default function AdminReportsPage() {
     setLoading(true);
     try {
       const [wvRes, ciRes, wvReportsRes, ciReportsRes, intPendingRes, intReportsRes] = await Promise.all([
-        fetch("/api/admin/reports/pending"),
-        fetch("/api/admin/ci-reports/pending"),
-        fetch("/api/admin/reports/list"),
-        fetch("/api/admin/ci-reports/list"),
-        fetch("/api/admin/integrated-reports/pending"),
-        fetch("/api/admin/integrated-reports/list"),
+        adminFetch("/api/admin/reports/pending"),
+        adminFetch("/api/admin/ci-reports/pending"),
+        adminFetch("/api/admin/reports/list"),
+        adminFetch("/api/admin/ci-reports/list"),
+        adminFetch("/api/admin/integrated-reports/pending"),
+        adminFetch("/api/admin/integrated-reports/list"),
       ]);
       if (wvRes.ok) {
         const data = await wvRes.json();
@@ -143,7 +145,7 @@ export default function AdminReportsPage() {
         : tab === "ci"
         ? `/api/admin/ci-sessions/${id}/prompt`
         : `/api/admin/integrated-requests/${id}/prompt`;
-      const res = await fetch(endpoint);
+      const res = await adminFetch(endpoint);
       if (!res.ok) throw new Error("プロンプトの取得に失敗しました");
       const data = await res.json();
       setPromptContent((prev) => ({ ...prev, [id]: data.prompt }));
@@ -167,7 +169,7 @@ export default function AdminReportsPage() {
       : tab === "ci"
       ? `/api/admin/ci-sessions/${id}/reset-viewed`
       : `/api/admin/integrated-requests/${id}/reset-viewed`;
-    const res = await fetch(endpoint, { method: "POST" });
+    const res = await adminFetch(endpoint, { method: "POST" });
     if (res.ok) {
       if (tab === "integrated") {
         setIntReports((prev) =>
