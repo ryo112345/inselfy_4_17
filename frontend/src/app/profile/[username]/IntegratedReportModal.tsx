@@ -49,7 +49,7 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
         topic1: selected[0],
         topic2: selected[1],
         topic3: selected[2],
-        free_text: freeText,
+        freeText: freeText,
       });
       onSubmitted();
       onClose();

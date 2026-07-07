@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 async function getReportUserId(requestId: string): Promise<string | null> {
   try {
     const data = await getIntegratedReport(requestId);
-    return data?.user_id ?? null;
+    return data?.userId ?? null;
   } catch {
     return null;
   }

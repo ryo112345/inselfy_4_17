@@ -66,14 +66,14 @@ model AiReportResponse {
   id: string;
 
   /** セッションID */
-  session_id: string;
+  sessionId: string;
 
   /** レポート本文（Markdown） */
   content: string;
 
   /** 作成日時 */
-  created_at: utcDateTime;
+  createdAt: utcDateTime;
 
   /** 初回閲覧かどうか（このレスポンスで閲覧済みが記録される） */
-  first_view: boolean;
+  firstView: boolean;
 }

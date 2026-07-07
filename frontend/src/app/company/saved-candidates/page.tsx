@@ -44,8 +44,8 @@ export default function SavedCandidatesPage() {
       const { users: newUsers, total } = await fetchSavedCandidates(PAGE_SIZE, offset);
       if (append) {
         setCandidates((prev) => {
-          const seen = new Set(prev.map((u) => u.user_id));
-          return [...prev, ...newUsers.filter((u) => !seen.has(u.user_id))];
+          const seen = new Set(prev.map((u) => u.userId));
+          return [...prev, ...newUsers.filter((u) => !seen.has(u.userId))];
         });
       } else {
         setCandidates(newUsers);
@@ -64,8 +64,8 @@ export default function SavedCandidatesPage() {
 
   // Auto-select first
   useEffect(() => {
-    if (candidates.length > 0 && (!selectedUserId || !candidates.some((u) => u.user_id === selectedUserId))) {
-      setSelectedUserId(candidates[0].user_id);
+    if (candidates.length > 0 && (!selectedUserId || !candidates.some((u) => u.userId === selectedUserId))) {
+      setSelectedUserId(candidates[0].userId);
     }
   }, [candidates, selectedUserId]);
 
@@ -87,7 +87,7 @@ export default function SavedCandidatesPage() {
       setDetailWv(null); setDetailCi(null); setDetailExperiences([]); setDetailSkills([]); setDetailAbout(null);
       return;
     }
-    const user = candidates.find((u) => u.user_id === selectedUserId);
+    const user = candidates.find((u) => u.userId === selectedUserId);
     if (!user) return;
     setDetailLoading(true);
     fetchCandidateDetail(user.username, selectedUserId)
@@ -102,13 +102,13 @@ export default function SavedCandidatesPage() {
   }, [selectedUserId, candidates]);
 
   const selectedUser = useMemo(
-    () => (selectedUserId ? candidates.find((u) => u.user_id === selectedUserId) ?? null : null),
+    () => (selectedUserId ? candidates.find((u) => u.userId === selectedUserId) ?? null : null),
     [candidates, selectedUserId],
   );
 
   const handleUnsave = useCallback(async (userId: string) => {
     await unsaveCandidate(userId);
-    setCandidates((prev) => prev.filter((c) => c.user_id !== userId));
+    setCandidates((prev) => prev.filter((c) => c.userId !== userId));
     setTotal((prev) => prev - 1);
   }, []);
 
@@ -155,12 +155,12 @@ export default function SavedCandidatesPage() {
         <div ref={leftPanelRef} className="w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 bg-gray-50/60 overflow-y-auto">
           <ul className="p-2.5 space-y-1.5">
             {candidates.map((u) => (
-              <li key={u.user_id}>
+              <li key={u.userId}>
                 <CandidateCard
                   user={u}
-                  isSelected={selectedUserId === u.user_id}
-                  onSelect={() => setSelectedUserId(u.user_id)}
-                  onUnsave={() => handleUnsave(u.user_id)}
+                  isSelected={selectedUserId === u.userId}
+                  onSelect={() => setSelectedUserId(u.userId)}
+                  onUnsave={() => handleUnsave(u.userId)}
                 />
               </li>
             ))}
@@ -185,7 +185,7 @@ export default function SavedCandidatesPage() {
               allExperiences={detailExperiences}
               allSkills={detailSkills}
               about={detailAbout}
-              onUnsave={() => handleUnsave(selectedUser.user_id)}
+              onUnsave={() => handleUnsave(selectedUser.userId)}
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center text-center px-6">
@@ -232,7 +232,7 @@ function CandidateCard({
   onUnsave: () => void;
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
-  const avatarBg = u.profile_color ?? "#94a3b8";
+  const avatarBg = u.profileColor ?? "#94a3b8";
   const recentExps = u.experiences.slice(0, 2);
   const topSkills = u.skills.slice(0, 4);
   const extraSkillCount = u.skills.length - 4;
@@ -246,8 +246,8 @@ function CandidateCard({
       }`}
     >
       <div className="flex items-center gap-3.5">
-        {u.avatar_url ? (
-          <img src={u.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
+        {u.avatarUrl ? (
+          <img src={u.avatarUrl} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
         ) : (
           <div
             className="h-12 w-12 rounded-full flex items-center justify-center text-white text-[15px] font-bold shrink-0"
@@ -284,7 +284,7 @@ function CandidateCard({
                 <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
               </svg>
               <p className="text-[15px] leading-snug truncate">
-                <span className="text-gray-700 font-medium">{exp.company_name}</span>
+                <span className="text-gray-700 font-medium">{exp.companyName}</span>
                 <span className="text-gray-300 mx-1.5">—</span>
                 <span className="text-gray-500">{exp.title}</span>
               </p>
@@ -302,10 +302,10 @@ function CandidateCard({
         {extraSkillCount > 0 && (
           <span className="text-[13px] text-gray-400 leading-none">+{extraSkillCount}</span>
         )}
-        {u.job_seeking_status && topSkills.length > 0 && (
+        {u.jobSeekingStatus && topSkills.length > 0 && (
           <span className="text-gray-200 text-[13px]">|</span>
         )}
-        {u.job_seeking_status && <SeekingDot status={u.job_seeking_status} />}
+        {u.jobSeekingStatus && <SeekingDot status={u.jobSeekingStatus} />}
       </div>
     </div>
   );
@@ -339,9 +339,9 @@ function CandidateDetail({
   onUnsave: () => void;
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
-  const avatarBg = u.profile_color ?? "#94a3b8";
-  const status = u.job_seeking_status ? SEEKING_STATUS_MAP[u.job_seeking_status] : null;
-  const experiences = allExperiences.length > 0 ? allExperiences : u.experiences.map((e) => ({ companyName: e.company_name, title: e.title, startYear: 0, startMonth: 0, endYear: null as number | null, endMonth: null as number | null, isCurrent: false, description: undefined as string | undefined }));
+  const avatarBg = u.profileColor ?? "#94a3b8";
+  const status = u.jobSeekingStatus ? SEEKING_STATUS_MAP[u.jobSeekingStatus] : null;
+  const experiences = allExperiences.length > 0 ? allExperiences : u.experiences.map((e) => ({ companyName: e.companyName, title: e.title, startYear: 0, startMonth: 0, endYear: null as number | null, endMonth: null as number | null, isCurrent: false, description: undefined as string | undefined }));
   const skillList = allSkills.length > 0 ? allSkills : u.skills;
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const aboutNeedsExpand = about ? about.length > 200 : false;
@@ -350,8 +350,8 @@ function CandidateDetail({
     <div className="flex-1 p-8 space-y-0">
       {/* Header */}
       <div className="flex items-start gap-4 pb-6">
-        {u.avatar_url ? (
-          <img src={u.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm" />
+        {u.avatarUrl ? (
+          <img src={u.avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm" />
         ) : (
           <div className="h-14 w-14 rounded-full flex items-center justify-center text-white text-base font-bold shrink-0 ring-2 ring-white shadow-sm" style={{ backgroundColor: avatarBg }}>
             {initials}
@@ -362,7 +362,7 @@ function CandidateDetail({
             <h2 className="text-xl font-bold text-gray-900 truncate leading-tight">{u.name}</h2>
             {status && (
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}>
-                <span className={`inline-block h-1.5 w-1.5 rounded-full ${u.job_seeking_status === "active" ? "bg-emerald-400" : u.job_seeking_status === "open" ? "bg-amber-400" : "bg-gray-300"}`} />
+                <span className={`inline-block h-1.5 w-1.5 rounded-full ${u.jobSeekingStatus === "active" ? "bg-emerald-400" : u.jobSeekingStatus === "open" ? "bg-amber-400" : "bg-gray-300"}`} />
                 {status.label}
               </span>
             )}
@@ -380,7 +380,7 @@ function CandidateDetail({
             保存を解除
           </button>
           <Link
-            href={`/company/scout/send?userId=${u.user_id}&username=${u.username}`}
+            href={`/company/scout/send?userId=${u.userId}&username=${u.username}`}
             className="rounded-lg border border-[#2979ff] bg-[#2979ff] px-3.5 py-2 text-xs font-medium text-white hover:bg-blue-600 transition-colors"
           >
             スカウトを送る

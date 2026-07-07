@@ -19,14 +19,14 @@ import {
 type TeamListItem = {
   id: string;
   name: string;
-  member_count: number;
-  wv_completed: number;
-  ci_completed: number;
+  memberCount: number;
+  wvCompleted: number;
+  ciCompleted: number;
 };
 
 type TeamScores = {
-  wv_scores: { id: string; score: number }[] | null;
-  ci_scores: { id: string; score: number }[] | null;
+  wvScores: { id: string; score: number }[] | null;
+  ciScores: { id: string; score: number }[] | null;
 };
 
 const ACCENT = "#3D8B6E";
@@ -566,24 +566,24 @@ export default function JobEditPage() {
     companyFetch(`/api/company/teams/${teamId}/scores`).then(async (res) => {
       if (!res.ok) { setTeamScores(null); return; }
       const data = await res.json();
-      const members: { wv_scores?: { id: string; display_score: number }[]; ci_scores?: { id: string; display_score: number }[] }[] = data.members ?? [];
+      const members: { wvScores?: { id: string; displayScore: number }[]; ciScores?: { id: string; displayScore: number }[] }[] = data.members ?? [];
       const wvAgg = new Map<string, number[]>();
       const ciAgg = new Map<string, number[]>();
       for (const m of members) {
-        if (m.wv_scores) for (const s of m.wv_scores) {
+        if (m.wvScores) for (const s of m.wvScores) {
           if (!wvAgg.has(s.id)) wvAgg.set(s.id, []);
-          wvAgg.get(s.id)!.push(s.display_score);
+          wvAgg.get(s.id)!.push(s.displayScore);
         }
-        if (m.ci_scores) for (const s of m.ci_scores) {
+        if (m.ciScores) for (const s of m.ciScores) {
           if (!ciAgg.has(s.id)) ciAgg.set(s.id, []);
-          ciAgg.get(s.id)!.push(s.display_score);
+          ciAgg.get(s.id)!.push(s.displayScore);
         }
       }
       const avg = (map: Map<string, number[]>) =>
         map.size > 0
           ? Array.from(map.entries()).map(([id, vals]) => ({ id, score: vals.reduce((a, b) => a + b, 0) / vals.length }))
           : null;
-      setTeamScores({ wv_scores: avg(wvAgg), ci_scores: avg(ciAgg) });
+      setTeamScores({ wvScores: avg(wvAgg), ciScores: avg(ciAgg) });
     });
   }, [companyFetch, teamId]);
 
@@ -611,7 +611,7 @@ export default function JobEditPage() {
     () => ({
       title, jobCategory, employmentType, hiringCount, description,
       appealPoints, challenges, teamDescription, teamMembers, teamLabel,
-      teamId, teamWVScores: teamScores?.wv_scores ?? null, teamCIScores: teamScores?.ci_scores ?? null,
+      teamId, teamWVScores: teamScores?.wvScores ?? null, teamCIScores: teamScores?.ciScores ?? null,
       skillsGained, tags,
       requiredQualifications, preferredQualifications, workLocation,
       workLocationChangeScope, jobDescriptionChangeScope, contractType,
@@ -1168,7 +1168,7 @@ export default function JobEditPage() {
                   <option value="">選択してください</option>
                   {teamsList.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name}（{t.member_count}名）
+                      {t.name}（{t.memberCount}名）
                     </option>
                   ))}
                 </select>
@@ -1324,13 +1324,13 @@ export default function JobEditPage() {
           {teamId && (
             <div className="border-t border-gray-200 px-6 py-5">
               <h4 className="text-sm font-medium text-gray-500 mb-3">チーム診断結果</h4>
-              {teamScores && (teamScores.wv_scores || teamScores.ci_scores) ? (
+              {teamScores && (teamScores.wvScores || teamScores.ciScores) ? (
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <div className="flex flex-col items-center">
                     <h5 className="text-sm font-medium text-gray-500 mb-1">Work Values</h5>
-                    {teamScores.wv_scores ? (
+                    {teamScores.wvScores ? (
                       <SingleRadarChart
-                        scores={teamScores.wv_scores}
+                        scores={teamScores.wvScores}
                         order={WV_ORDER}
                         fullLabels={WV_FULL_LABELS}
                         isWV={true}
@@ -1341,9 +1341,9 @@ export default function JobEditPage() {
                   </div>
                   <div className="flex flex-col items-center">
                     <h5 className="text-sm font-medium text-gray-500 mb-1">Career Interest</h5>
-                    {teamScores.ci_scores ? (
+                    {teamScores.ciScores ? (
                       <SingleRadarChart
-                        scores={teamScores.ci_scores}
+                        scores={teamScores.ciScores}
                         order={CI_ORDER}
                         fullLabels={CI_FULL_LABELS}
                         isWV={false}

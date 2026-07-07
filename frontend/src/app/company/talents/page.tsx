@@ -258,8 +258,8 @@ export default function TalentsPage() {
 
   // Auto-select first user when results load
   useEffect(() => {
-    if (users.length > 0 && (!selectedUserId || !users.some((u) => u.user_id === selectedUserId))) {
-      setSelectedUserId(users[0].user_id);
+    if (users.length > 0 && (!selectedUserId || !users.some((u) => u.userId === selectedUserId))) {
+      setSelectedUserId(users[0].userId);
     }
   }, [users, selectedUserId]);
 
@@ -273,7 +273,7 @@ export default function TalentsPage() {
       setDetailAbout(null);
       return;
     }
-    const user = users.find((u) => u.user_id === selectedUserId);
+    const user = users.find((u) => u.userId === selectedUserId);
     if (!user) return;
     setDetailLoading(true);
     fetchCandidateDetail(user.username, selectedUserId)
@@ -288,7 +288,7 @@ export default function TalentsPage() {
   }, [selectedUserId, users]);
 
   const selectedUser = useMemo(
-    () => (selectedUserId ? users.find((u) => u.user_id === selectedUserId) ?? null : null),
+    () => (selectedUserId ? users.find((u) => u.userId === selectedUserId) ?? null : null),
     [users, selectedUserId],
   );
 
@@ -413,8 +413,8 @@ export default function TalentsPage() {
       const { users: newUsers, total } = await searchTalents(kind, params);
       setUsers((prev) => {
         if (!append) return newUsers;
-        const seen = new Set(prev.map((u: TalentCard) => u.user_id));
-        return [...prev, ...newUsers.filter((u: TalentCard) => !seen.has(u.user_id))];
+        const seen = new Set(prev.map((u: TalentCard) => u.userId));
+        return [...prev, ...newUsers.filter((u: TalentCard) => !seen.has(u.userId))];
       });
       setTotal(total);
     } catch {
@@ -427,7 +427,7 @@ export default function TalentsPage() {
 
   useEffect(() => {
     if (users.length === 0) return;
-    const ids = users.map((u) => u.user_id);
+    const ids = users.map((u) => u.userId);
     bulkCheckSaved(ids)
       .then((saved) => {
         setSavedSet((prev) => {
@@ -867,14 +867,14 @@ export default function TalentsPage() {
           <div ref={leftPanelRef} className="w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 bg-gray-50/60 overflow-y-auto">
             <ul className="p-2.5 space-y-1.5">
               {users.map((u) => (
-                <li key={u.user_id}>
+                <li key={u.userId}>
                   <DiagnosticCandidateCard
                     user={u}
-                    isSelected={selectedUserId === u.user_id}
-                    onSelect={() => setSelectedUserId(u.user_id)}
+                    isSelected={selectedUserId === u.userId}
+                    onSelect={() => setSelectedUserId(u.userId)}
                     diagnosticType={diagnosticType}
-                    isSaved={savedSet.has(u.user_id)}
-                    onToggleSave={() => toggleSave(u.user_id)}
+                    isSaved={savedSet.has(u.userId)}
+                    onToggleSave={() => toggleSave(u.userId)}
                   />
                 </li>
               ))}
@@ -903,8 +903,8 @@ export default function TalentsPage() {
                 allSkills={detailSkills}
                 about={detailAbout}
                 diagnosticType={diagnosticType}
-                isSaved={savedSet.has(selectedUser.user_id)}
-                onToggleSave={() => toggleSave(selectedUser.user_id)}
+                isSaved={savedSet.has(selectedUser.userId)}
+                onToggleSave={() => toggleSave(selectedUser.userId)}
               />
             ) : (
               <div className="flex h-full flex-col items-center justify-center text-center px-6">
@@ -1028,12 +1028,12 @@ function DiagnosticCandidateCard({
   onToggleSave?: () => void;
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
-  const avatarBg = u.profile_color ?? "#94a3b8";
+  const avatarBg = u.profileColor ?? "#94a3b8";
   const recentExps = u.experiences.slice(0, 2);
   const topSkills = u.skills.slice(0, 4);
   const extraSkillCount = u.skills.length - 4;
-  const wvLabels = u.top_wv_labels.slice(0, 3);
-  const ciLabels = u.top_ci_labels.slice(0, 3);
+  const wvLabels = u.topWvLabels.slice(0, 3);
+  const ciLabels = u.topCiLabels.slice(0, 3);
 
   const inner = (
     <div
@@ -1045,8 +1045,8 @@ function DiagnosticCandidateCard({
     >
       {/* Row 1: Avatar + Name */}
       <div className="flex items-center gap-3.5">
-        {u.avatar_url ? (
-          <img src={u.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
+        {u.avatarUrl ? (
+          <img src={u.avatarUrl} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
         ) : (
           <div
             className="h-12 w-12 rounded-full flex items-center justify-center text-white text-[15px] font-bold shrink-0"
@@ -1081,7 +1081,7 @@ function DiagnosticCandidateCard({
                 <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
               </svg>
               <p className="text-[15px] leading-snug truncate">
-                <span className="text-gray-700 font-medium">{exp.company_name}</span>
+                <span className="text-gray-700 font-medium">{exp.companyName}</span>
                 <span className="text-gray-300 mx-1.5">—</span>
                 <span className="text-gray-500">{exp.title}</span>
               </p>
@@ -1100,10 +1100,10 @@ function DiagnosticCandidateCard({
         {extraSkillCount > 0 && (
           <span className="text-[13px] text-gray-400 leading-none">+{extraSkillCount}</span>
         )}
-        {u.job_seeking_status && topSkills.length > 0 && (
+        {u.jobSeekingStatus && topSkills.length > 0 && (
           <span className="text-gray-200 text-[13px]">|</span>
         )}
-        {u.job_seeking_status && <SeekingDot status={u.job_seeking_status} />}
+        {u.jobSeekingStatus && <SeekingDot status={u.jobSeekingStatus} />}
       </div>
 
       {/* Row 4: Top diagnostic labels */}
@@ -1166,9 +1166,9 @@ function MatchScoreBadge({ label, value }: { label: string; value: number }) {
 
 function MatchBadges({ user: u }: { user: TalentCard }) {
   const entries: { label: string; value: number }[] = [];
-  if (u.integrated_similarity != null) entries.push({ label: "総合", value: u.integrated_similarity });
-  if (u.wv_similarity != null) entries.push({ label: "文化", value: u.wv_similarity });
-  if (u.ci_similarity != null) entries.push({ label: "適職", value: u.ci_similarity });
+  if (u.integratedSimilarity != null) entries.push({ label: "総合", value: u.integratedSimilarity });
+  if (u.wvSimilarity != null) entries.push({ label: "文化", value: u.wvSimilarity });
+  if (u.ciSimilarity != null) entries.push({ label: "適職", value: u.ciSimilarity });
 
   if (entries.length === 0 && u.similarity != null) {
     entries.push({ label: "総合", value: u.similarity });
@@ -1222,10 +1222,10 @@ function CandidateDetail({
   onToggleSave?: () => void;
 }) {
   const initials = u.name.split(/\s/).map((s) => s[0]).join("").slice(0, 2);
-  const avatarBg = u.profile_color ?? "#94a3b8";
-  const status = u.job_seeking_status ? SEEKING_STATUS_MAP[u.job_seeking_status] : null;
+  const avatarBg = u.profileColor ?? "#94a3b8";
+  const status = u.jobSeekingStatus ? SEEKING_STATUS_MAP[u.jobSeekingStatus] : null;
 
-  const experiences = allExperiences.length > 0 ? allExperiences : u.experiences.map((e) => ({ companyName: e.company_name, title: e.title, startYear: 0, startMonth: 0, endYear: null as number | null, endMonth: null as number | null, isCurrent: false, description: undefined as string | undefined }));
+  const experiences = allExperiences.length > 0 ? allExperiences : u.experiences.map((e) => ({ companyName: e.companyName, title: e.title, startYear: 0, startMonth: 0, endYear: null as number | null, endMonth: null as number | null, isCurrent: false, description: undefined as string | undefined }));
   const skillList = allSkills.length > 0 ? allSkills : u.skills;
 
   const [aboutExpanded, setAboutExpanded] = useState(false);
@@ -1235,8 +1235,8 @@ function CandidateDetail({
     <div className="flex-1 p-8 space-y-0">
       {/* ── Header ── */}
       <div className="flex items-start gap-4 pb-6">
-        {u.avatar_url ? (
-          <img src={u.avatar_url} alt="" className="h-14 w-14 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm" />
+        {u.avatarUrl ? (
+          <img src={u.avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm" />
         ) : (
           <div
             className="h-14 w-14 rounded-full flex items-center justify-center text-white text-base font-bold shrink-0 ring-2 ring-white shadow-sm"
@@ -1251,7 +1251,7 @@ function CandidateDetail({
             {status && (
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}>
                 <span className={`inline-block h-1.5 w-1.5 rounded-full ${
-                  u.job_seeking_status === "active" ? "bg-emerald-400" : u.job_seeking_status === "open" ? "bg-amber-400" : "bg-gray-300"
+                  u.jobSeekingStatus === "active" ? "bg-emerald-400" : u.jobSeekingStatus === "open" ? "bg-amber-400" : "bg-gray-300"
                 }`} />
                 {status.label}
               </span>
@@ -1267,7 +1267,7 @@ function CandidateDetail({
             <SaveBookmark saved={!!isSaved} onToggle={onToggleSave} size={14} showLabel />
           )}
           <Link
-            href={`/company/scout/send?userId=${u.user_id}&username=${u.username}`}
+            href={`/company/scout/send?userId=${u.userId}&username=${u.username}`}
             className="rounded-lg border border-[#2979ff] bg-[#2979ff] px-3.5 py-2 text-xs font-medium text-white hover:bg-blue-600 transition-colors"
           >
             スカウトを送る
@@ -1372,8 +1372,8 @@ function CandidateDetail({
             <div className="rounded-xl border border-gray-150 bg-white p-4">
               <div className="flex items-center justify-between mb-1">
                 <h4 className="text-sm font-semibold text-gray-700">価値観（Work Values）</h4>
-                {u.wv_similarity != null && (
-                  <span className="text-xs text-gray-400">{Math.round(u.wv_similarity)}% match</span>
+                {u.wvSimilarity != null && (
+                  <span className="text-xs text-gray-400">{Math.round(u.wvSimilarity)}% match</span>
                 )}
               </div>
               {wvScores ? (
@@ -1385,8 +1385,8 @@ function CandidateDetail({
             <div className="rounded-xl border border-gray-150 bg-white p-4">
               <div className="flex items-center justify-between mb-1">
                 <h4 className="text-sm font-semibold text-gray-700">適職（Career Interest）</h4>
-                {u.ci_similarity != null && (
-                  <span className="text-xs text-gray-400">{Math.round(u.ci_similarity)}% match</span>
+                {u.ciSimilarity != null && (
+                  <span className="text-xs text-gray-400">{Math.round(u.ciSimilarity)}% match</span>
                 )}
               </div>
               {ciScores ? (

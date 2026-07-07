@@ -69,15 +69,15 @@ function buildWvKeywords(result: WvResultDTO): string {
   const sorted = [...result.values].sort((a, b) => a.rank - b.rank);
   return sorted
     .slice(0, 3)
-    .map((v) => VALUE_LABELS[v.value_id as ValueId] ?? v.value_id)
+    .map((v) => VALUE_LABELS[v.valueId as ValueId] ?? v.valueId)
     .join("・");
 }
 
 function buildCiKeywords(result: CiResultDTO): string {
-  const sorted = [...result.type_scores].sort((a, b) => a.rank - b.rank);
+  const sorted = [...result.typeScores].sort((a, b) => a.rank - b.rank);
   return sorted
     .slice(0, 3)
-    .map((t) => TYPE_LABELS[t.type_id as TypeId] ?? t.type_id)
+    .map((t) => TYPE_LABELS[t.typeId as TypeId] ?? t.typeId)
     .join("・");
 }
 
@@ -94,7 +94,7 @@ async function fetchLatestIntegratedRequest(userId: string): Promise<{ requestId
   try {
     const data = await getLatestIntegratedRequest(userId);
     if (!data) return null;
-    return { requestId: data.request_id, hasReport: data.has_report };
+    return { requestId: data.requestId, hasReport: data.hasReport };
   } catch {
     return null;
   }
@@ -127,8 +127,8 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
   ]);
 
   const [wvHasReport, ciHasReport] = await Promise.all([
-    wvResult?.session_id ? checkReportExists(wvResult.session_id, "work-values") : Promise.resolve(false),
-    ciResult?.session_id ? checkReportExists(ciResult.session_id, "career-interest") : Promise.resolve(false),
+    wvResult?.sessionId ? checkReportExists(wvResult.sessionId, "work-values") : Promise.resolve(false),
+    ciResult?.sessionId ? checkReportExists(ciResult.sessionId, "career-interest") : Promise.resolve(false),
   ]);
 
   const experiences: ModelsExperienceResponse[] = experiencesRes.data?.items ?? [];
@@ -139,17 +139,17 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
   if (wvResult) {
     diagnostics.push({
       label: "価値観診断",
-      date: formatDate(wvResult.created_at),
+      date: formatDate(wvResult.createdAt),
       keywords: buildWvKeywords(wvResult),
-      href: `/work_values/${wvResult.session_id}`,
+      href: `/work_values/${wvResult.sessionId}`,
     });
   }
   if (ciResult) {
     diagnostics.push({
       label: "キャリア興味診断",
-      date: formatDate(ciResult.created_at),
+      date: formatDate(ciResult.createdAt),
       keywords: buildCiKeywords(ciResult),
-      href: `/career_interest/${ciResult.session_id}`,
+      href: `/career_interest/${ciResult.sessionId}`,
     });
   }
 
@@ -159,8 +159,8 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
     experiences,
     educations,
     skills,
-    wvSessionId: wvResult?.session_id ?? null,
-    ciSessionId: ciResult?.session_id ?? null,
+    wvSessionId: wvResult?.sessionId ?? null,
+    ciSessionId: ciResult?.sessionId ?? null,
     wvResult,
     ciResult,
     wvHasReport,

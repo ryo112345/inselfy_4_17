@@ -41,9 +41,9 @@ export default function DiagnosePage() {
       .then(({ data, error }) => {
         if (error || !data) throw new Error();
         setMemberInfo(data);
-        if (data.wv_status === "completed" && data.ci_status === "completed") {
+        if (data.wvStatus === "completed" && data.ciStatus === "completed") {
           setPhase("done");
-        } else if (data.wv_status === "completed") {
+        } else if (data.wvStatus === "completed") {
           setPhase("wv_done");
         } else {
           setPhase("welcome");
@@ -53,10 +53,10 @@ export default function DiagnosePage() {
   }, [token]);
 
   const updateStatus = useCallback(
-    async (field: "wv_status" | "ci_status") => {
+    async (field: "wvStatus" | "ciStatus") => {
       await teamDiagnoseUpdateDiagnoseStatus({
         path: { token },
-        body: field === "wv_status" ? { wv_status: "completed" } : { ci_status: "completed" },
+        body: field === "wvStatus" ? { wvStatus: "completed" } : { ciStatus: "completed" },
       });
     },
     [token],
@@ -92,7 +92,7 @@ export default function DiagnosePage() {
           </div>
           <p className="text-lg font-bold text-gray-900 mb-2">すべての診断が完了しました</p>
           <p className="text-sm text-gray-500">
-            ご協力ありがとうございました。結果は{memberInfo?.company_name}の担当者に共有されます。
+            ご協力ありがとうございました。結果は{memberInfo?.companyName}の担当者に共有されます。
           </p>
         </div>
       </main>
@@ -113,9 +113,9 @@ export default function DiagnosePage() {
   if (phase === "wv") {
     return (
       <WVQuizWrapper
-        userId={memberInfo.user_id}
+        userId={memberInfo.userId}
         onComplete={() => {
-          updateStatus("wv_status");
+          updateStatus("wvStatus");
           setPhase("wv_done");
         }}
       />
@@ -136,9 +136,9 @@ export default function DiagnosePage() {
   if (phase === "ci") {
     return (
       <CIQuizWrapper
-        userId={memberInfo.user_id}
+        userId={memberInfo.userId}
         onComplete={() => {
-          updateStatus("ci_status");
+          updateStatus("ciStatus");
           setPhase("done");
         }}
       />
@@ -153,12 +153,12 @@ function WelcomeScreen({ memberInfo, onStart }: { memberInfo: MemberInfo; onStar
     <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
       <div className="w-full max-w-md rounded-3xl bg-white border border-gray-200 p-10 shadow-sm text-center">
         <div className="mb-6">
-          <p className="text-xs text-gray-400 mb-1">{memberInfo.company_name}</p>
-          <p className="text-sm text-gray-600 font-medium">{memberInfo.team_name}</p>
+          <p className="text-xs text-gray-400 mb-1">{memberInfo.companyName}</p>
+          <p className="text-sm text-gray-600 font-medium">{memberInfo.teamName}</p>
         </div>
 
         <p className="text-xl font-bold text-gray-900 mb-2">
-          {memberInfo.member_name}さん
+          {memberInfo.memberName}さん
         </p>
         <p className="text-sm text-gray-500 mb-8 leading-relaxed">
           チームの傾向を分析するため、2つの診断を受けていただきます。<br />
@@ -330,7 +330,7 @@ function WVQuizWrapper({ userId, onComplete }: { userId: string; onComplete: () 
                   <span className="shrink-0 w-8 h-8 rounded-full border border-gray-600 group-hover:border-emerald-400 flex items-center justify-center text-sm font-semibold text-gray-400 group-hover:text-emerald-400 transition-colors">
                     {label}
                   </span>
-                  <span>{needDefs[needId]?.description_ja ?? needId}</span>
+                  <span>{needDefs[needId]?.descriptionJa ?? needId}</span>
                 </span>
               </button>
             ))}
@@ -471,7 +471,7 @@ function CIQuizScreen({ item, questionNumber, maxQuestions, onAnswer }: {
         </div>
 
         <div className="px-8 pb-4">
-          <p className="text-gray-800 text-[17px] leading-relaxed text-center">{item.text_ja}</p>
+          <p className="text-gray-800 text-[17px] leading-relaxed text-center">{item.textJa}</p>
         </div>
         <div className="px-8 pb-3">
           <p className="text-gray-400 text-[13px] text-center">この活動にどの程度興味がありますか？</p>

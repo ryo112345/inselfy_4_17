@@ -8,7 +8,7 @@ namespace Inselfy.Models;
 /** 人材カードの職歴（要約） */
 model TalentExperience {
   /** 会社名 */
-  company_name: string;
+  companyName: string;
 
   /** 役職 */
   title: string;
@@ -17,7 +17,7 @@ model TalentExperience {
 /** 人材カード（検索・保存済み候補者で共通） */
 model TalentCard {
   /** ユーザーID */
-  user_id: string;
+  userId: string;
 
   /** ユーザー名 */
   username: string;
@@ -29,13 +29,13 @@ model TalentCard {
   headline: string | null;
 
   /** アバター画像URL */
-  avatar_url: string | null;
+  avatarUrl: string | null;
 
   /** プロフィールカラー */
-  profile_color: string | null;
+  profileColor: string | null;
 
   /** 求職ステータス */
-  job_seeking_status: string | null;
+  jobSeekingStatus: string | null;
 
   /** スキル */
   skills: string[];
@@ -44,22 +44,22 @@ model TalentCard {
   experiences: TalentExperience[];
 
   /** Work Values 上位ラベル */
-  top_wv_labels: string[];
+  topWvLabels: string[];
 
   /** Career Interest 上位ラベル */
-  top_ci_labels: string[];
+  topCiLabels: string[];
 
   /** 類似度 */
   similarity?: float64;
 
   /** Work Values 類似度 */
-  wv_similarity?: float64;
+  wvSimilarity?: float64;
 
   /** Career Interest 類似度 */
-  ci_similarity?: float64;
+  ciSimilarity?: float64;
 
   /** 統合類似度 */
-  integrated_similarity?: float64;
+  integratedSimilarity?: float64;
 }
 
 /** 人材一覧 */
@@ -74,7 +74,7 @@ model TalentListResponse {
 /** 保存済み候補者一括チェックリクエスト */
 model BulkCheckSavedRequest {
   /** ユーザーID一覧 */
-  user_ids: string[];
+  userIds: string[];
 }
 
 /** 保存済み判定 */

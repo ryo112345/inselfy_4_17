@@ -67,9 +67,9 @@ export function useWorkValuesQuiz(userId: string) {
       }
       needDefsRef.current = defs;
 
-      const initialPairs: Pair[] = session.initial_pairs.map((p) => ({
-        needA: NEED_IDS.indexOf(p.need_a as NeedId),
-        needB: NEED_IDS.indexOf(p.need_b as NeedId),
+      const initialPairs: Pair[] = session.initialPairs.map((p) => ({
+        needA: NEED_IDS.indexOf(p.needA as NeedId),
+        needB: NEED_IDS.indexOf(p.needB as NeedId),
       }));
 
       const selector = new AdaptiveSelector(initialPairs);
@@ -131,10 +131,10 @@ export function useWorkValuesQuiz(userId: string) {
     setState((s) => ({ ...s, phase: "submitting" }));
     try {
       const responses: ResponseDTO[] = selector.allResponses.map((r) => ({
-        need_a: NEED_IDS[r.needA],
-        need_b: NEED_IDS[r.needB],
+        needA: NEED_IDS[r.needA],
+        needB: NEED_IDS[r.needB],
         winner: NEED_IDS[r.winner],
-        question_number: r.questionNumber,
+        questionNumber: r.questionNumber,
       }));
 
       const bt = selector.currentBT;

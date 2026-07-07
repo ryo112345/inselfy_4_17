@@ -45,9 +45,9 @@ function computeMatchScores(
   let culture: number | null = null;
   let aptitude: number | null = null;
 
-  if (userWv && teamScores.wv_scores && teamScores.wv_scores.length > 0) {
-    const userMap = new Map(userWv.values.map((v) => [v.value_id, v.display_score]));
-    const teamMap = new Map(teamScores.wv_scores.map((s) => [s.id, s.score]));
+  if (userWv && teamScores.wvScores && teamScores.wvScores.length > 0) {
+    const userMap = new Map(userWv.values.map((v) => [v.valueId, v.displayScore]));
+    const teamMap = new Map(teamScores.wvScores.map((s) => [s.id, s.score]));
     let logSum = 0;
     let weightTotal = 0;
     for (const id of WV_ORDER) {
@@ -62,9 +62,9 @@ function computeMatchScores(
     if (weightTotal > 0) culture = Math.round(Math.exp(logSum / weightTotal) * 100);
   }
 
-  if (userCi && teamScores.ci_scores && teamScores.ci_scores.length > 0) {
-    const userMap = new Map(userCi.type_scores.map((s) => [s.type_id, s.score]));
-    const teamMap = new Map(teamScores.ci_scores.map((s) => [s.id, s.score]));
+  if (userCi && teamScores.ciScores && teamScores.ciScores.length > 0) {
+    const userMap = new Map(userCi.typeScores.map((s) => [s.typeId, s.score]));
+    const teamMap = new Map(teamScores.ciScores.map((s) => [s.id, s.score]));
     let logSum = 0;
     let count = 0;
     for (const id of CI_ORDER) {
@@ -86,16 +86,16 @@ function computeMatchScores(
       : culture ?? aptitude!;
 
   let commonPoints: string[] = [];
-  if (userWv && teamScores.wv_scores && teamScores.wv_scores.length > 0) {
-    const teamMap = new Map(teamScores.wv_scores.map((s) => [s.id, s.score]));
+  if (userWv && teamScores.wvScores && teamScores.wvScores.length > 0) {
+    const teamMap = new Map(teamScores.wvScores.map((s) => [s.id, s.score]));
     const highValueIds = WV_ORDER.filter((id) => (teamMap.get(id) ?? 0) >= 50) as ValueId[];
     const highNeedIds = new Set(highValueIds.flatMap((vid) => VALUE_NEEDS[vid] ?? []));
-    const needLabelMap = new Map(userWv.needs.map((n) => [n.need_id, n.label]));
+    const needLabelMap = new Map(userWv.needs.map((n) => [n.needId, n.label]));
     commonPoints = userWv.needs
-      .filter((n) => n.display_score >= 55 && highNeedIds.has(n.need_id as any))
-      .sort((a, b) => b.display_score - a.display_score)
+      .filter((n) => n.displayScore >= 55 && highNeedIds.has(n.needId as any))
+      .sort((a, b) => b.displayScore - a.displayScore)
       .slice(0, 3)
-      .map((n) => needLabelMap.get(n.need_id) ?? n.need_id);
+      .map((n) => needLabelMap.get(n.needId) ?? n.needId);
   }
 
   return { overall, culture: culture ?? overall, aptitude: aptitude ?? overall, commonPoints };
@@ -285,7 +285,7 @@ export default function JobsPage() {
     const companyIds = [...new Set(jobs.map((j) => j.companyId))];
     Promise.all(companyIds.map((id) => fetchPublicTeamScores(id))).then((results) => {
       const map = new Map<string, TeamScores>();
-      results.flat().forEach((t) => map.set(t.team_id, t));
+      results.flat().forEach((t) => map.set(t.teamId, t));
       setTeamScoresMap(map);
     });
   }, [hasDiagnosis, jobs]);

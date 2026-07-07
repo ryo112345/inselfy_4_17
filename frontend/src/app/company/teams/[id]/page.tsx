@@ -14,45 +14,45 @@ type Member = {
   id: string;
   name: string;
   email: string | null;
-  invite_token: string;
-  wv_status: string;
-  ci_status: string;
-  is_ace: boolean;
-  created_at: string;
+  inviteToken: string;
+  wvStatus: string;
+  ciStatus: string;
+  isAce: boolean;
+  createdAt: string;
 };
 
 type Score = {
   id: string;
-  display_score: number;
+  displayScore: number;
   rank: number;
 };
 
 type MemberScore = {
-  member_id: string;
-  member_name: string;
-  wv_status: string;
-  ci_status: string;
-  is_ace: boolean;
-  wv_scores: Score[] | null;
-  ci_scores: Score[] | null;
+  memberId: string;
+  memberName: string;
+  wvStatus: string;
+  ciStatus: string;
+  isAce: boolean;
+  wvScores: Score[] | null;
+  ciScores: Score[] | null;
 };
 
 type TeamDetail = {
   id: string;
-  company_id: string;
+  companyId: string;
   name: string;
   description: string | null;
-  is_public: boolean;
+  isPublic: boolean;
   members: Member[];
-  created_at: string;
+  createdAt: string;
 };
 
 type Phase = "empty" | "invite" | "in_progress" | "complete";
 
 function detectPhase(members: Member[]): Phase {
   if (members.length === 0) return "empty";
-  const wvDone = members.filter((m) => m.wv_status === "completed").length;
-  const ciDone = members.filter((m) => m.ci_status === "completed").length;
+  const wvDone = members.filter((m) => m.wvStatus === "completed").length;
+  const ciDone = members.filter((m) => m.ciStatus === "completed").length;
   if (wvDone === members.length && ciDone === members.length) return "complete";
   if (wvDone === 0 && ciDone === 0) return "invite";
   return "in_progress";
@@ -171,7 +171,7 @@ export default function TeamDetailPage() {
         body: JSON.stringify({
           name: team.name,
           description: team.description,
-          is_public: !team.is_public,
+          isPublic: !team.isPublic,
         }),
       });
       await fetchTeam();
@@ -205,10 +205,10 @@ export default function TeamDetailPage() {
   }
 
   const phase = detectPhase(team.members);
-  const hasAce = team.members.some((m) => m.is_ace);
-  const aceMember = team.members.find((m) => m.is_ace);
-  const wvCompleted = team.members.filter((m) => m.wv_status === "completed").length;
-  const ciCompleted = team.members.filter((m) => m.ci_status === "completed").length;
+  const hasAce = team.members.some((m) => m.isAce);
+  const aceMember = team.members.find((m) => m.isAce);
+  const wvCompleted = team.members.filter((m) => m.wvStatus === "completed").length;
+  const ciCompleted = team.members.filter((m) => m.ciStatus === "completed").length;
 
   return (
     <div>
@@ -231,8 +231,8 @@ export default function TeamDetailPage() {
             onClick={handleTogglePublic}
             className="mt-2 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
           >
-            <div className={`relative h-5 w-9 rounded-full transition-colors ${team.is_public ? "bg-emerald-500" : "bg-gray-300"}`}>
-              <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${team.is_public ? "translate-x-4" : "translate-x-0.5"}`} />
+            <div className={`relative h-5 w-9 rounded-full transition-colors ${team.isPublic ? "bg-emerald-500" : "bg-gray-300"}`}>
+              <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${team.isPublic ? "translate-x-4" : "translate-x-0.5"}`} />
             </div>
             <span>企業ページに公開</span>
           </button>
@@ -386,14 +386,14 @@ export default function TeamDetailPage() {
             </div>
             <div className="divide-y divide-gray-50">
               {team.members.map((member) => {
-                const wvDone = member.wv_status === "completed";
-                const ciDone = member.ci_status === "completed";
+                const wvDone = member.wvStatus === "completed";
+                const ciDone = member.ciStatus === "completed";
 
                 return (
                   <div
                     key={member.id}
                     className={`grid items-center px-6 py-3 transition-colors hover:bg-gray-50/60 ${
-                      member.is_ace ? "bg-amber-50/30" : ""
+                      member.isAce ? "bg-amber-50/30" : ""
                     }`}
                     style={{ gridTemplateColumns: "1fr 120px 120px 140px 40px" }}
                   >
@@ -401,13 +401,13 @@ export default function TeamDetailPage() {
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative shrink-0">
                         <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${
-                          member.is_ace
+                          member.isAce
                             ? "bg-amber-100 text-amber-700"
                             : "bg-gray-100 text-gray-600"
                         }`}>
                           {member.name.charAt(0)}
                         </div>
-                        {member.is_ace && (
+                        {member.isAce && (
                           <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 ring-2 ring-white">
                             <svg width={8} height={8} viewBox="0 0 24 24" fill="white" stroke="none">
                               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -418,7 +418,7 @@ export default function TeamDetailPage() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium text-gray-900 truncate">{member.name}</p>
-                          {member.is_ace && (
+                          {member.isAce && (
                             <span className="shrink-0 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
                               理想の人材像
                             </span>
@@ -443,14 +443,14 @@ export default function TeamDetailPage() {
                     {/* Invite URL */}
                     <div className="flex justify-center">
                       <button
-                        onClick={(e) => { e.stopPropagation(); copyInviteUrl(member.invite_token); }}
+                        onClick={(e) => { e.stopPropagation(); copyInviteUrl(member.inviteToken); }}
                         className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all cursor-pointer ${
-                          copiedToken === member.invite_token
+                          copiedToken === member.inviteToken
                             ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
                             : "bg-[#2979ff]/5 text-[#2979ff] border border-[#2979ff]/20 hover:bg-[#2979ff]/10"
                         }`}
                       >
-                        {copiedToken === member.invite_token ? (
+                        {copiedToken === member.inviteToken ? (
                           <>
                             <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                               <path d="M20 6L9 17l-5-5" />
@@ -473,7 +473,7 @@ export default function TeamDetailPage() {
                     <div className="flex justify-end">
                       <MemberMenu
                         member={member}
-                        onToggleAce={() => handleToggleAce(member.id, member.is_ace)}
+                        onToggleAce={() => handleToggleAce(member.id, member.isAce)}
                         onRemove={() => handleRemoveMember(member.id, member.name)}
                       />
                     </div>
@@ -517,10 +517,10 @@ function MemberMenu({
               onClick={() => { onToggleAce(); setOpen(false); }}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2"
             >
-              <svg width={14} height={14} viewBox="0 0 24 24" fill={member.is_ace ? "#f59e0b" : "none"} stroke={member.is_ace ? "#f59e0b" : "currentColor"} strokeWidth={1.5}>
+              <svg width={14} height={14} viewBox="0 0 24 24" fill={member.isAce ? "#f59e0b" : "none"} stroke={member.isAce ? "#f59e0b" : "currentColor"} strokeWidth={1.5}>
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
-              {member.is_ace ? "理想の人材像を解除" : "理想の人材像に設定"}
+              {member.isAce ? "理想の人材像を解除" : "理想の人材像に設定"}
             </button>
             <button
               onClick={() => { onRemove(); setOpen(false); }}
@@ -694,15 +694,15 @@ const WV_OUTLIER_THRESHOLD = 25;
 const CI_OUTLIER_THRESHOLD = 1.0;
 const MIN_MEMBERS_FOR_AVERAGE = 3;
 
-function computeAvg(members: MemberScore[], key: "wv_scores" | "ci_scores", order: readonly string[]) {
+function computeAvg(members: MemberScore[], key: "wvScores" | "ciScores", order: readonly string[]) {
   const completed = members.filter((m) => m[key] && m[key]!.length > 0);
   if (completed.length < MIN_MEMBERS_FOR_AVERAGE) return null;
 
-  const threshold = key === "wv_scores" ? WV_OUTLIER_THRESHOLD : CI_OUTLIER_THRESHOLD;
+  const threshold = key === "wvScores" ? WV_OUTLIER_THRESHOLD : CI_OUTLIER_THRESHOLD;
 
   return order.map((id) => {
     const entries = completed
-      .map((m) => ({ score: m[key]!.find((s) => s.id === id)?.display_score, isAce: m.is_ace }))
+      .map((m) => ({ score: m[key]!.find((s) => s.id === id)?.displayScore, isAce: m.isAce }))
       .filter((e): e is { score: number; isAce: boolean } => e.score != null);
     if (entries.length === 0) return { id, score: 0 };
 
@@ -742,21 +742,21 @@ function TeamRadarChartSection({
   onSetAce: (memberId: string) => void;
   onClearAce: () => void;
 }) {
-  const wvCompleted = memberScores.filter((m) => m.wv_scores && m.wv_scores.length > 0);
-  const ciCompleted = memberScores.filter((m) => m.ci_scores && m.ci_scores.length > 0);
+  const wvCompleted = memberScores.filter((m) => m.wvScores && m.wvScores.length > 0);
+  const ciCompleted = memberScores.filter((m) => m.ciScores && m.ciScores.length > 0);
 
   if (wvCompleted.length === 0 && ciCompleted.length === 0) return null;
 
-  const wvAvg = useMemo(() => computeAvg(memberScores, "wv_scores", WV_ORDER), [memberScores]);
-  const ciAvg = useMemo(() => computeAvg(memberScores, "ci_scores", CI_ORDER), [memberScores]);
+  const wvAvg = useMemo(() => computeAvg(memberScores, "wvScores", WV_ORDER), [memberScores]);
+  const ciAvg = useMemo(() => computeAvg(memberScores, "ciScores", CI_ORDER), [memberScores]);
 
   const isAverage = viewMode === "average";
   const selectedMember = !isAverage
-    ? memberScores.find((m) => m.member_id === viewMode) || null
+    ? memberScores.find((m) => m.memberId === viewMode) || null
     : null;
 
   const completedMembers = members.filter(
-    (m) => m.wv_status === "completed" && m.ci_status === "completed"
+    (m) => m.wvStatus === "completed" && m.ciStatus === "completed"
   );
 
   return (
@@ -816,9 +816,9 @@ function TeamRadarChartSection({
           >
             <option value="average">チーム平均</option>
             {memberScores
-              .filter((m) => (m.wv_scores && m.wv_scores.length > 0) || (m.ci_scores && m.ci_scores.length > 0))
+              .filter((m) => (m.wvScores && m.wvScores.length > 0) || (m.ciScores && m.ciScores.length > 0))
               .map((m) => (
-                <option key={m.member_id} value={m.member_id}>{m.member_name}</option>
+                <option key={m.memberId} value={m.memberId}>{m.memberName}</option>
               ))}
           </select>
         </div>
@@ -842,9 +842,9 @@ function TeamRadarChartSection({
                   : "データなし"}
               </div>
             )
-          ) : selectedMember?.wv_scores && selectedMember.wv_scores.length > 0 ? (
+          ) : selectedMember?.wvScores && selectedMember.wvScores.length > 0 ? (
             <SingleRadarChart
-              scores={selectedMember.wv_scores.map((s) => ({ id: s.id, score: s.display_score }))}
+              scores={selectedMember.wvScores.map((s) => ({ id: s.id, score: s.displayScore }))}
               order={WV_ORDER as readonly string[]}
               fullLabels={WV_FULL_LABELS}
               isWV={true}
@@ -871,9 +871,9 @@ function TeamRadarChartSection({
                   : "データなし"}
               </div>
             )
-          ) : selectedMember?.ci_scores && selectedMember.ci_scores.length > 0 ? (
+          ) : selectedMember?.ciScores && selectedMember.ciScores.length > 0 ? (
             <SingleRadarChart
-              scores={selectedMember.ci_scores.map((s) => ({ id: s.id, score: s.display_score }))}
+              scores={selectedMember.ciScores.map((s) => ({ id: s.id, score: s.displayScore }))}
               order={CI_ORDER as readonly string[]}
               fullLabels={CI_FULL_LABELS}
               isWV={false}

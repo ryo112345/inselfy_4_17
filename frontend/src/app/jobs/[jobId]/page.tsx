@@ -267,10 +267,10 @@ export default function JobDetailPage() {
       getLatestCiResult(user.id).catch(() => null),
     ]).then(([wv, ci]) => {
       setMyWVScores(
-        wv?.values?.map((v) => ({ id: v.value_id, score: v.display_score })) ?? null,
+        wv?.values?.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
       );
       setMyCIScores(
-        ci?.type_scores?.map((s) => ({ id: s.type_id, score: s.score })) ?? null,
+        ci?.typeScores?.map((s) => ({ id: s.typeId, score: s.score })) ?? null,
       );
     });
   }, [isAuthenticated, user, jobId]);
@@ -301,10 +301,10 @@ export default function JobDetailPage() {
         });
         if (data.teamId) {
           fetchPublicTeamScores(data.companyId).then((teams) => {
-            const team = teams.find((t) => t.team_id === data.teamId);
+            const team = teams.find((t) => t.teamId === data.teamId);
             if (team) {
-              setTeamWVScores(team.wv_scores ?? null);
-              setTeamCIScores(team.ci_scores ?? null);
+              setTeamWVScores(team.wvScores ?? null);
+              setTeamCIScores(team.ciScores ?? null);
             }
           });
         }

@@ -8,12 +8,12 @@ import {
 } from "@/app/components/SingleRadarChart";
 
 type PublicTeamScore = {
-  team_id: string;
-  team_name: string;
-  wv_scores: { id: string; score: number }[] | null;
-  ci_scores: { id: string; score: number }[] | null;
-  member_count: number;
-  completed_count: number;
+  teamId: string;
+  teamName: string;
+  wvScores: { id: string; score: number }[] | null;
+  ciScores: { id: string; score: number }[] | null;
+  memberCount: number;
+  completedCount: number;
 };
 
 export function TeamScoresSection({
@@ -25,7 +25,7 @@ export function TeamScoresSection({
 }) {
   const [activeIdx, setActiveIdx] = useState(0);
 
-  const teamsWithScores = teams.filter((t) => t.wv_scores || t.ci_scores);
+  const teamsWithScores = teams.filter((t) => t.wvScores || t.ciScores);
   if (teamsWithScores.length === 0) return null;
 
   const team = teamsWithScores[activeIdx] ?? teamsWithScores[0];
@@ -42,7 +42,7 @@ export function TeamScoresSection({
         <div className="mt-4 flex gap-2 px-6 overflow-x-auto">
           {teamsWithScores.map((t, i) => (
             <button
-              key={t.team_id}
+              key={t.teamId}
               onClick={() => setActiveIdx(i)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
                 i === activeIdx
@@ -50,7 +50,7 @@ export function TeamScoresSection({
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {t.team_name}
+              {t.teamName}
             </button>
           ))}
         </div>
@@ -58,16 +58,16 @@ export function TeamScoresSection({
 
       {teamsWithScores.length === 1 && (
         <div className="mt-3 px-6">
-          <p className="text-sm font-medium text-gray-700">{team.team_name}</p>
+          <p className="text-sm font-medium text-gray-700">{team.teamName}</p>
         </div>
       )}
 
       <div className="mt-4 grid grid-cols-1 gap-2 px-4 sm:grid-cols-2">
         <div className="flex flex-col items-center">
           <h3 className="text-sm font-medium text-gray-500 mb-1">Work Values</h3>
-          {team.wv_scores ? (
+          {team.wvScores ? (
             <SingleRadarChart
-              scores={team.wv_scores}
+              scores={team.wvScores}
               order={WV_ORDER}
               fullLabels={WV_FULL_LABELS}
               isWV={true}
@@ -78,9 +78,9 @@ export function TeamScoresSection({
         </div>
         <div className="flex flex-col items-center">
           <h3 className="text-sm font-medium text-gray-500 mb-1">Career Interest</h3>
-          {team.ci_scores ? (
+          {team.ciScores ? (
             <SingleRadarChart
-              scores={team.ci_scores}
+              scores={team.ciScores}
               order={CI_ORDER}
               fullLabels={CI_FULL_LABELS}
               isWV={false}

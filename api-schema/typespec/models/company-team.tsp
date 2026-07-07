@@ -23,7 +23,7 @@ model UpdateTeamRequest {
   description?: string | null;
 
   /** 公開フラグ（未指定なら変更しない） */
-  is_public?: boolean | null;
+  isPublic?: boolean | null;
 }
 
 /** チームメンバー追加リクエスト */
@@ -41,7 +41,7 @@ model TeamResponse {
   id: string;
 
   /** 企業ID */
-  company_id: string;
+  companyId: string;
 
   /** チーム名 */
   name: string;
@@ -50,19 +50,19 @@ model TeamResponse {
   description: string | null;
 
   /** 公開フラグ */
-  is_public: boolean;
+  isPublic: boolean;
 
   /** メンバー数 */
-  member_count: integer;
+  memberCount: integer;
 
   /** Work Values 完了数 */
-  wv_completed: integer;
+  wvCompleted: integer;
 
   /** Career Interest 完了数 */
-  ci_completed: integer;
+  ciCompleted: integer;
 
   /** 作成日時（RFC3339 文字列） */
-  created_at: string;
+  createdAt: string;
 }
 
 /** チーム一覧 */
@@ -83,19 +83,19 @@ model TeamMemberResponse {
   email: string | null;
 
   /** 診断招待トークン */
-  invite_token: string;
+  inviteToken: string;
 
   /** Work Values 診断ステータス */
-  wv_status: string;
+  wvStatus: string;
 
   /** Career Interest 診断ステータス */
-  ci_status: string;
+  ciStatus: string;
 
   /** エースメンバーか */
-  is_ace: boolean;
+  isAce: boolean;
 
   /** 作成日時（RFC3339 文字列） */
-  created_at: string;
+  createdAt: string;
 }
 
 /** チーム詳細（メンバー付き） */
@@ -104,7 +104,7 @@ model TeamDetailResponse {
   id: string;
 
   /** 企業ID */
-  company_id: string;
+  companyId: string;
 
   /** チーム名 */
   name: string;
@@ -113,13 +113,13 @@ model TeamDetailResponse {
   description: string | null;
 
   /** 公開フラグ */
-  is_public: boolean;
+  isPublic: boolean;
 
   /** メンバー一覧 */
   members: TeamMemberResponse[];
 
   /** 作成日時（RFC3339 文字列） */
-  created_at: string;
+  createdAt: string;
 }
 
 /** 診断スコア（ID・表示スコア・順位） */
@@ -128,7 +128,7 @@ model TeamScoreEntry {
   id: string;
 
   /** 表示スコア */
-  display_score: float64;
+  displayScore: float64;
 
   /** 順位 */
   rank: integer;
@@ -137,28 +137,28 @@ model TeamScoreEntry {
 /** メンバーごとの診断スコア */
 model MemberScoreResponse {
   /** メンバーID */
-  member_id: string;
+  memberId: string;
 
   /** メンバー名 */
-  member_name: string;
+  memberName: string;
 
   /** 紐づくユーザーID */
-  user_id: string;
+  userId: string;
 
   /** Work Values 診断ステータス */
-  wv_status: string;
+  wvStatus: string;
 
   /** Career Interest 診断ステータス */
-  ci_status: string;
+  ciStatus: string;
 
   /** エースメンバーか */
-  is_ace: boolean;
+  isAce: boolean;
 
   /** Work Values スコア */
-  wv_scores?: TeamScoreEntry[];
+  wvScores?: TeamScoreEntry[];
 
   /** Career Interest スコア */
-  ci_scores?: TeamScoreEntry[];
+  ciScores?: TeamScoreEntry[];
 }
 
 /** チームスコア一覧 */
@@ -179,25 +179,25 @@ model PublicScoreEntry {
 /** チームの公開集計スコア */
 model PublicTeamScoreResponse {
   /** チームID */
-  team_id: string;
+  teamId: string;
 
   /** チーム名 */
-  team_name: string;
+  teamName: string;
 
   /** Work Values 集計（完了者不足時は null） */
-  wv_scores: PublicScoreEntry[] | null;
+  wvScores: PublicScoreEntry[] | null;
 
   /** Work Needs 集計（完了者不足時は null） */
-  wn_scores: PublicScoreEntry[] | null;
+  wnScores: PublicScoreEntry[] | null;
 
   /** Career Interest 集計（完了者不足時は null） */
-  ci_scores: PublicScoreEntry[] | null;
+  ciScores: PublicScoreEntry[] | null;
 
   /** メンバー数 */
-  member_count: integer;
+  memberCount: integer;
 
   /** 診断完了者数 */
-  completed_count: integer;
+  completedCount: integer;
 }
 
 /** 公開チームスコア一覧 */

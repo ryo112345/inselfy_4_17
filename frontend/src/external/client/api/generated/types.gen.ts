@@ -25,7 +25,7 @@ export type ModelsAiReportResponse = {
     /**
      * セッションID
      */
-    session_id: string;
+    sessionId: string;
     /**
      * レポート本文（Markdown）
      */
@@ -33,11 +33,11 @@ export type ModelsAiReportResponse = {
     /**
      * 作成日時
      */
-    created_at: string;
+    createdAt: string;
     /**
      * 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
      */
-    first_view: boolean;
+    firstView: boolean;
 };
 
 /**
@@ -220,7 +220,7 @@ export type ModelsBulkCheckSavedRequest = {
     /**
      * ユーザーID一覧
      */
-    user_ids: Array<string>;
+    userIds: Array<string>;
 };
 
 /**
@@ -266,7 +266,7 @@ export type ModelsCiBasicScoreResponse = {
     /**
      * 基本興味領域ID
      */
-    basic_interest_id: string;
+    basicInterestId: string;
     /**
      * スコア
      */
@@ -284,27 +284,27 @@ export type ModelsCiItemResponse = {
     /**
      * 質問番号
      */
-    question_number: number;
+    questionNumber: number;
     /**
      * 項目コード
      */
-    item_code: string;
+    itemCode: string;
     /**
      * 基本興味領域ID
      */
-    basic_interest_id: string;
+    basicInterestId: string;
     /**
      * スキルレベル
      */
-    skill_level: string;
+    skillLevel: string;
     /**
      * 活動種別
      */
-    activity_type: string;
+    activityType: string;
     /**
      * 設問文（日本語）
      */
-    text_ja: string;
+    textJa: string;
 };
 
 /**
@@ -314,11 +314,11 @@ export type ModelsCiResponseItem = {
     /**
      * 質問番号
      */
-    question_number: number;
+    questionNumber: number;
     /**
      * 項目コード
      */
-    item_code: string;
+    itemCode: string;
     /**
      * 回答スコア
      */
@@ -336,23 +336,23 @@ export type ModelsCiResultResponse = {
     /**
      * セッションID
      */
-    session_id: string;
+    sessionId: string;
     /**
      * ユーザーID
      */
-    user_id: string;
+    userId: string;
     /**
      * 基本興味領域スコア
      */
-    basic_scores: Array<ModelsCiBasicScoreResponse>;
+    basicScores: Array<ModelsCiBasicScoreResponse>;
     /**
      * RIASEC タイプスコア
      */
-    type_scores: Array<ModelsCiTypeScoreResponse>;
+    typeScores: Array<ModelsCiTypeScoreResponse>;
     /**
      * 作成日時（RFC3339 文字列）
      */
-    created_at: string;
+    createdAt: string;
 };
 
 /**
@@ -380,7 +380,7 @@ export type ModelsCiStartSessionRequest = {
     /**
      * ユーザーID
      */
-    user_id: string;
+    userId: string;
 };
 
 /**
@@ -400,7 +400,7 @@ export type ModelsCiTypeScoreResponse = {
     /**
      * タイプID
      */
-    type_id: string;
+    typeId: string;
     /**
      * スコア
      */
@@ -988,7 +988,7 @@ export type ModelsCreateIntegratedReportRequest = {
     /**
      * 自由記述（200文字以内）
      */
-    free_text: string;
+    freeText: string;
 };
 
 /**
@@ -1058,31 +1058,31 @@ export type ModelsDiagnoseInfoResponse = {
     /**
      * チームメンバーID
      */
-    member_id: string;
+    memberId: string;
     /**
      * メンバー名
      */
-    member_name: string;
+    memberName: string;
     /**
      * チーム名
      */
-    team_name: string;
+    teamName: string;
     /**
      * 企業名
      */
-    company_name: string;
+    companyName: string;
     /**
      * 紐づくユーザーID（未紐づけは空文字）
      */
-    user_id: string;
+    userId: string;
     /**
      * Work Values 診断ステータス
      */
-    wv_status: string;
+    wvStatus: string;
     /**
      * Career Interest 診断ステータス
      */
-    ci_status: string;
+    ciStatus: string;
     /**
      * 招待メールアドレス
      */
@@ -1302,19 +1302,19 @@ export type ModelsIntegratedReportLatestRequestResponse = {
     /**
      * リクエストID
      */
-    request_id: string;
+    requestId: string;
     /**
      * ユーザーID
      */
-    user_id: string;
+    userId: string;
     /**
      * レポートが生成済みかどうか
      */
-    has_report: boolean;
+    hasReport: boolean;
     /**
      * リクエスト作成日時
      */
-    created_at: string;
+    createdAt: string;
 };
 
 /**
@@ -1328,7 +1328,7 @@ export type ModelsIntegratedReportMineResponse = {
     /**
      * リクエストID
      */
-    request_id: string;
+    requestId: string;
     /**
      * レポート本文（Markdown）
      */
@@ -1336,11 +1336,11 @@ export type ModelsIntegratedReportMineResponse = {
     /**
      * 作成日時
      */
-    created_at: string;
+    createdAt: string;
     /**
      * 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
      */
-    first_view: boolean;
+    firstView: boolean;
 };
 
 /**
@@ -1366,11 +1366,11 @@ export type ModelsIntegratedReportRequestResponse = {
     /**
      * 自由記述
      */
-    free_text: string;
+    freeText: string;
     /**
      * 作成日時
      */
-    created_at: string;
+    createdAt: string;
 };
 
 /**
@@ -1384,11 +1384,11 @@ export type ModelsIntegratedReportResponse = {
     /**
      * リクエストID
      */
-    request_id: string;
+    requestId: string;
     /**
      * ユーザーID
      */
-    user_id: string;
+    userId: string;
     /**
      * レポート本文（Markdown）
      */
@@ -1396,11 +1396,11 @@ export type ModelsIntegratedReportResponse = {
     /**
      * 作成日時
      */
-    created_at: string;
+    createdAt: string;
     /**
      * 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
      */
-    first_view: boolean;
+    firstView: boolean;
 };
 
 /**
@@ -1414,7 +1414,7 @@ export type ModelsIntegratedReportStatusResponse = {
     /**
      * リクエストID（pending / ready のときのみ）
      */
-    request_id?: string;
+    requestId?: string;
 };
 
 /**
@@ -1978,35 +1978,35 @@ export type ModelsMemberScoreResponse = {
     /**
      * メンバーID
      */
-    member_id: string;
+    memberId: string;
     /**
      * メンバー名
      */
-    member_name: string;
+    memberName: string;
     /**
      * 紐づくユーザーID
      */
-    user_id: string;
+    userId: string;
     /**
      * Work Values 診断ステータス
      */
-    wv_status: string;
+    wvStatus: string;
     /**
      * Career Interest 診断ステータス
      */
-    ci_status: string;
+    ciStatus: string;
     /**
      * エースメンバーか
      */
-    is_ace: boolean;
+    isAce: boolean;
     /**
      * Work Values スコア
      */
-    wv_scores?: Array<ModelsTeamScoreEntry>;
+    wvScores?: Array<ModelsTeamScoreEntry>;
     /**
      * Career Interest スコア
      */
-    ci_scores?: Array<ModelsTeamScoreEntry>;
+    ciScores?: Array<ModelsTeamScoreEntry>;
 };
 
 /**
@@ -2454,31 +2454,31 @@ export type ModelsPublicTeamScoreResponse = {
     /**
      * チームID
      */
-    team_id: string;
+    teamId: string;
     /**
      * チーム名
      */
-    team_name: string;
+    teamName: string;
     /**
      * Work Values 集計（完了者不足時は null）
      */
-    wv_scores: Array<ModelsPublicScoreEntry> | null;
+    wvScores: Array<ModelsPublicScoreEntry> | null;
     /**
      * Work Needs 集計（完了者不足時は null）
      */
-    wn_scores: Array<ModelsPublicScoreEntry> | null;
+    wnScores: Array<ModelsPublicScoreEntry> | null;
     /**
      * Career Interest 集計（完了者不足時は null）
      */
-    ci_scores: Array<ModelsPublicScoreEntry> | null;
+    ciScores: Array<ModelsPublicScoreEntry> | null;
     /**
      * メンバー数
      */
-    member_count: number;
+    memberCount: number;
     /**
      * 診断完了者数
      */
-    completed_count: number;
+    completedCount: number;
 };
 
 /**
@@ -2976,7 +2976,7 @@ export type ModelsSimilarUserExperience = {
     /**
      * 会社名
      */
-    company_name: string;
+    companyName: string;
     /**
      * 役職
      */
@@ -2984,7 +2984,7 @@ export type ModelsSimilarUserExperience = {
     /**
      * 現職か
      */
-    is_current: boolean;
+    isCurrent: boolean;
 };
 
 /**
@@ -2994,7 +2994,7 @@ export type ModelsSimilarUserItem = {
     /**
      * ユーザーID
      */
-    user_id: string;
+    userId: string;
     /**
      * ユーザー名
      */
@@ -3010,11 +3010,11 @@ export type ModelsSimilarUserItem = {
     /**
      * アバター画像URL
      */
-    avatar_url: string | null;
+    avatarUrl: string | null;
     /**
      * プロフィールカラー
      */
-    profile_color: string | null;
+    profileColor: string | null;
     /**
      * 類似度（0-1）
      */
@@ -3022,7 +3022,7 @@ export type ModelsSimilarUserItem = {
     /**
      * 上位の Work Needs ID
      */
-    top_needs: Array<string> | null;
+    topNeeds: Array<string> | null;
     /**
      * 職歴（現職優先の要約）
      */
@@ -3116,7 +3116,7 @@ export type ModelsTalentCard = {
     /**
      * ユーザーID
      */
-    user_id: string;
+    userId: string;
     /**
      * ユーザー名
      */
@@ -3132,15 +3132,15 @@ export type ModelsTalentCard = {
     /**
      * アバター画像URL
      */
-    avatar_url: string | null;
+    avatarUrl: string | null;
     /**
      * プロフィールカラー
      */
-    profile_color: string | null;
+    profileColor: string | null;
     /**
      * 求職ステータス
      */
-    job_seeking_status: string | null;
+    jobSeekingStatus: string | null;
     /**
      * スキル
      */
@@ -3152,11 +3152,11 @@ export type ModelsTalentCard = {
     /**
      * Work Values 上位ラベル
      */
-    top_wv_labels: Array<string>;
+    topWvLabels: Array<string>;
     /**
      * Career Interest 上位ラベル
      */
-    top_ci_labels: Array<string>;
+    topCiLabels: Array<string>;
     /**
      * 類似度
      */
@@ -3164,15 +3164,15 @@ export type ModelsTalentCard = {
     /**
      * Work Values 類似度
      */
-    wv_similarity?: number;
+    wvSimilarity?: number;
     /**
      * Career Interest 類似度
      */
-    ci_similarity?: number;
+    ciSimilarity?: number;
     /**
      * 統合類似度
      */
-    integrated_similarity?: number;
+    integratedSimilarity?: number;
 };
 
 /**
@@ -3182,7 +3182,7 @@ export type ModelsTalentExperience = {
     /**
      * 会社名
      */
-    company_name: string;
+    companyName: string;
     /**
      * 役職
      */
@@ -3214,7 +3214,7 @@ export type ModelsTeamDetailResponse = {
     /**
      * 企業ID
      */
-    company_id: string;
+    companyId: string;
     /**
      * チーム名
      */
@@ -3226,7 +3226,7 @@ export type ModelsTeamDetailResponse = {
     /**
      * 公開フラグ
      */
-    is_public: boolean;
+    isPublic: boolean;
     /**
      * メンバー一覧
      */
@@ -3234,7 +3234,7 @@ export type ModelsTeamDetailResponse = {
     /**
      * 作成日時（RFC3339 文字列）
      */
-    created_at: string;
+    createdAt: string;
 };
 
 /**
@@ -3266,23 +3266,23 @@ export type ModelsTeamMemberResponse = {
     /**
      * 診断招待トークン
      */
-    invite_token: string;
+    inviteToken: string;
     /**
      * Work Values 診断ステータス
      */
-    wv_status: string;
+    wvStatus: string;
     /**
      * Career Interest 診断ステータス
      */
-    ci_status: string;
+    ciStatus: string;
     /**
      * エースメンバーか
      */
-    is_ace: boolean;
+    isAce: boolean;
     /**
      * 作成日時（RFC3339 文字列）
      */
-    created_at: string;
+    createdAt: string;
 };
 
 /**
@@ -3296,7 +3296,7 @@ export type ModelsTeamResponse = {
     /**
      * 企業ID
      */
-    company_id: string;
+    companyId: string;
     /**
      * チーム名
      */
@@ -3308,23 +3308,23 @@ export type ModelsTeamResponse = {
     /**
      * 公開フラグ
      */
-    is_public: boolean;
+    isPublic: boolean;
     /**
      * メンバー数
      */
-    member_count: number;
+    memberCount: number;
     /**
      * Work Values 完了数
      */
-    wv_completed: number;
+    wvCompleted: number;
     /**
      * Career Interest 完了数
      */
-    ci_completed: number;
+    ciCompleted: number;
     /**
      * 作成日時（RFC3339 文字列）
      */
-    created_at: string;
+    createdAt: string;
 };
 
 /**
@@ -3338,7 +3338,7 @@ export type ModelsTeamScoreEntry = {
     /**
      * 表示スコア
      */
-    display_score: number;
+    displayScore: number;
     /**
      * 順位
      */
@@ -3502,11 +3502,11 @@ export type ModelsUpdateDiagnoseStatusRequest = {
     /**
      * Work Values 診断ステータス
      */
-    wv_status?: string | null;
+    wvStatus?: string | null;
     /**
      * Career Interest 診断ステータス
      */
-    ci_status?: string | null;
+    ciStatus?: string | null;
 };
 
 /**
@@ -3612,7 +3612,7 @@ export type ModelsUpdateTeamRequest = {
     /**
      * 公開フラグ（未指定なら変更しない）
      */
-    is_public?: boolean | null;
+    isPublic?: boolean | null;
 };
 
 /**
@@ -3774,7 +3774,7 @@ export type ModelsWvNeedDefResponse = {
     /**
      * 説明（日本語）
      */
-    description_ja: string;
+    descriptionJa: string;
 };
 
 /**
@@ -3784,7 +3784,7 @@ export type ModelsWvNeedScore = {
     /**
      * ニーズID
      */
-    need_id: string;
+    needId: string;
     /**
      * ラベル
      */
@@ -3792,11 +3792,11 @@ export type ModelsWvNeedScore = {
     /**
      * 説明（日本語）
      */
-    description_ja: string;
+    descriptionJa: string;
     /**
      * 表示スコア（0-100）
      */
-    display_score: number;
+    displayScore: number;
     /**
      * 順位
      */
@@ -3810,11 +3810,11 @@ export type ModelsWvPairResponse = {
     /**
      * ニーズA
      */
-    need_a: string;
+    needA: string;
     /**
      * ニーズB
      */
-    need_b: string;
+    needB: string;
 };
 
 /**
@@ -3824,19 +3824,19 @@ export type ModelsWvResponseItem = {
     /**
      * ニーズA
      */
-    need_a: string;
+    needA: string;
     /**
      * ニーズB
      */
-    need_b: string;
+    needB: string;
     /**
-     * 勝者（need_a か need_b の ID）
+     * 勝者（needA か needB の ID）
      */
     winner: string;
     /**
      * 質問番号
      */
-    question_number: number;
+    questionNumber: number;
 };
 
 /**
@@ -3850,11 +3850,11 @@ export type ModelsWvResultResponse = {
     /**
      * セッションID
      */
-    session_id: string;
+    sessionId: string;
     /**
      * ユーザーID
      */
-    user_id: string;
+    userId: string;
     /**
      * ニーズスコア（スコア降順）
      */
@@ -3866,7 +3866,7 @@ export type ModelsWvResultResponse = {
     /**
      * 作成日時（RFC3339 文字列）
      */
-    created_at: string;
+    createdAt: string;
 };
 
 /**
@@ -3884,7 +3884,7 @@ export type ModelsWvSessionResponse = {
     /**
      * 初期ペア
      */
-    initial_pairs: Array<ModelsWvPairResponse>;
+    initialPairs: Array<ModelsWvPairResponse>;
     /**
      * ニーズ定義一覧
      */
@@ -3898,7 +3898,7 @@ export type ModelsWvStartSessionRequest = {
     /**
      * ユーザーID
      */
-    user_id: string;
+    userId: string;
 };
 
 /**
@@ -3930,11 +3930,11 @@ export type ModelsWvValueScoreResponse = {
     /**
      * Value ID
      */
-    value_id: string;
+    valueId: string;
     /**
      * 表示スコア（0-100）
      */
-    display_score: number;
+    displayScore: number;
     /**
      * 順位
      */

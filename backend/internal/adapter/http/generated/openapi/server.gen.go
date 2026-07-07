@@ -142,16 +142,16 @@ type ModelsAiReportResponse struct {
 	Content string `json:"content"`
 
 	// CreatedAt 作成日時
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"createdAt"`
 
 	// FirstView 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
-	FirstView bool `json:"first_view"`
+	FirstView bool `json:"firstView"`
 
 	// Id レポートID
 	Id string `json:"id"`
 
 	// SessionId セッションID
-	SessionId string `json:"session_id"`
+	SessionId string `json:"sessionId"`
 }
 
 // ModelsAppliedResponse 応募済み判定
@@ -281,7 +281,7 @@ type ModelsBadRequestErrorCode string
 // ModelsBulkCheckSavedRequest 保存済み候補者一括チェックリクエスト
 type ModelsBulkCheckSavedRequest struct {
 	// UserIds ユーザーID一覧
-	UserIds []string `json:"user_ids"`
+	UserIds []string `json:"userIds"`
 }
 
 // ModelsBulkDeclineRequest スカウト一括辞退リクエスト
@@ -308,7 +308,7 @@ type ModelsBulkSavedResponse struct {
 // ModelsCIBasicScoreResponse 基本興味領域スコア
 type ModelsCIBasicScoreResponse struct {
 	// BasicInterestId 基本興味領域ID
-	BasicInterestId string `json:"basic_interest_id"`
+	BasicInterestId string `json:"basicInterestId"`
 
 	// Rank 順位
 	Rank int32 `json:"rank"`
@@ -320,31 +320,31 @@ type ModelsCIBasicScoreResponse struct {
 // ModelsCIItemResponse Career Interest 設問
 type ModelsCIItemResponse struct {
 	// ActivityType 活動種別
-	ActivityType string `json:"activity_type"`
+	ActivityType string `json:"activityType"`
 
 	// BasicInterestId 基本興味領域ID
-	BasicInterestId string `json:"basic_interest_id"`
+	BasicInterestId string `json:"basicInterestId"`
 
 	// ItemCode 項目コード
-	ItemCode string `json:"item_code"`
+	ItemCode string `json:"itemCode"`
 
 	// QuestionNumber 質問番号
-	QuestionNumber int32 `json:"question_number"`
+	QuestionNumber int32 `json:"questionNumber"`
 
 	// SkillLevel スキルレベル
-	SkillLevel string `json:"skill_level"`
+	SkillLevel string `json:"skillLevel"`
 
 	// TextJa 設問文（日本語）
-	TextJa string `json:"text_ja"`
+	TextJa string `json:"textJa"`
 }
 
 // ModelsCIResponseItem Career Interest 回答（1問分）
 type ModelsCIResponseItem struct {
 	// ItemCode 項目コード
-	ItemCode string `json:"item_code"`
+	ItemCode string `json:"itemCode"`
 
 	// QuestionNumber 質問番号
-	QuestionNumber int32 `json:"question_number"`
+	QuestionNumber int32 `json:"questionNumber"`
 
 	// Score 回答スコア
 	Score int32 `json:"score"`
@@ -353,22 +353,22 @@ type ModelsCIResponseItem struct {
 // ModelsCIResultResponse Career Interest 診断結果
 type ModelsCIResultResponse struct {
 	// BasicScores 基本興味領域スコア
-	BasicScores []ModelsCIBasicScoreResponse `json:"basic_scores"`
+	BasicScores []ModelsCIBasicScoreResponse `json:"basicScores"`
 
 	// CreatedAt 作成日時（RFC3339 文字列）
-	CreatedAt string `json:"created_at"`
+	CreatedAt string `json:"createdAt"`
 
 	// Id 結果ID
 	Id string `json:"id"`
 
 	// SessionId セッションID
-	SessionId string `json:"session_id"`
+	SessionId string `json:"sessionId"`
 
 	// TypeScores RIASEC タイプスコア
-	TypeScores []ModelsCITypeScoreResponse `json:"type_scores"`
+	TypeScores []ModelsCITypeScoreResponse `json:"typeScores"`
 
 	// UserId ユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 }
 
 // ModelsCISessionResponse Career Interest セッション
@@ -386,7 +386,7 @@ type ModelsCISessionResponse struct {
 // ModelsCIStartSessionRequest Career Interest セッション開始リクエスト
 type ModelsCIStartSessionRequest struct {
 	// UserId ユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 }
 
 // ModelsCISubmitResultRequest Career Interest 結果送信リクエスト
@@ -404,7 +404,7 @@ type ModelsCITypeScoreResponse struct {
 	Score float64 `json:"score"`
 
 	// TypeId タイプID
-	TypeId string `json:"type_id"`
+	TypeId string `json:"typeId"`
 }
 
 // ModelsCandidateInterviewItem 面接（候補者向け・企業情報付き）
@@ -803,7 +803,7 @@ type ModelsCreateExperienceRequest struct {
 // ModelsCreateIntegratedReportRequest 統合レポート生成リクエスト作成リクエスト
 type ModelsCreateIntegratedReportRequest struct {
 	// FreeText 自由記述（200文字以内）
-	FreeText string `json:"free_text"`
+	FreeText string `json:"freeText"`
 
 	// Topic1 トピック1（1〜10、topic2/topic3 と重複不可）
 	Topic1 int16 `json:"topic1"`
@@ -857,28 +857,28 @@ type ModelsCreateUserRequest struct {
 // ModelsDiagnoseInfoResponse チーム診断リンク情報
 type ModelsDiagnoseInfoResponse struct {
 	// CiStatus Career Interest 診断ステータス
-	CiStatus string `json:"ci_status"`
+	CiStatus string `json:"ciStatus"`
 
 	// CompanyName 企業名
-	CompanyName string `json:"company_name"`
+	CompanyName string `json:"companyName"`
 
 	// Email 招待メールアドレス
 	Email *string `json:"email"`
 
 	// MemberId チームメンバーID
-	MemberId string `json:"member_id"`
+	MemberId string `json:"memberId"`
 
 	// MemberName メンバー名
-	MemberName string `json:"member_name"`
+	MemberName string `json:"memberName"`
 
 	// TeamName チーム名
-	TeamName string `json:"team_name"`
+	TeamName string `json:"teamName"`
 
 	// UserId 紐づくユーザーID（未紐づけは空文字）
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 
 	// WvStatus Work Values 診断ステータス
-	WvStatus string `json:"wv_status"`
+	WvStatus string `json:"wvStatus"`
 }
 
 // ModelsEducationListResponse 学歴一覧
@@ -1028,16 +1028,16 @@ type ModelsGoogleLoginRequest struct {
 // ModelsIntegratedReportLatestRequestResponse ユーザーの最新統合レポートリクエスト
 type ModelsIntegratedReportLatestRequestResponse struct {
 	// CreatedAt リクエスト作成日時
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"createdAt"`
 
 	// HasReport レポートが生成済みかどうか
-	HasReport bool `json:"has_report"`
+	HasReport bool `json:"hasReport"`
 
 	// RequestId リクエストID
-	RequestId string `json:"request_id"`
+	RequestId string `json:"requestId"`
 
 	// UserId ユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 }
 
 // ModelsIntegratedReportMineResponse 自分の最新統合レポート
@@ -1046,25 +1046,25 @@ type ModelsIntegratedReportMineResponse struct {
 	Content string `json:"content"`
 
 	// CreatedAt 作成日時
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"createdAt"`
 
 	// FirstView 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
-	FirstView bool `json:"first_view"`
+	FirstView bool `json:"firstView"`
 
 	// Id レポートID
 	Id string `json:"id"`
 
 	// RequestId リクエストID
-	RequestId string `json:"request_id"`
+	RequestId string `json:"requestId"`
 }
 
 // ModelsIntegratedReportRequestResponse 統合レポート生成リクエスト（作成結果）
 type ModelsIntegratedReportRequestResponse struct {
 	// CreatedAt 作成日時
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"createdAt"`
 
 	// FreeText 自由記述
-	FreeText string `json:"free_text"`
+	FreeText string `json:"freeText"`
 
 	// Id リクエストID
 	Id string `json:"id"`
@@ -1085,25 +1085,25 @@ type ModelsIntegratedReportResponse struct {
 	Content string `json:"content"`
 
 	// CreatedAt 作成日時
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"createdAt"`
 
 	// FirstView 初回閲覧かどうか（このレスポンスで閲覧済みが記録される）
-	FirstView bool `json:"first_view"`
+	FirstView bool `json:"firstView"`
 
 	// Id レポートID
 	Id string `json:"id"`
 
 	// RequestId リクエストID
-	RequestId string `json:"request_id"`
+	RequestId string `json:"requestId"`
 
 	// UserId ユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 }
 
 // ModelsIntegratedReportStatusResponse 統合レポートのリクエスト状況
 type ModelsIntegratedReportStatusResponse struct {
 	// RequestId リクエストID（pending / ready のときのみ）
-	RequestId *string `json:"request_id,omitempty"`
+	RequestId *string `json:"requestId,omitempty"`
 
 	// Status none: リクエストなし / pending: 生成待ち / ready: レポートあり
 	Status ModelsIntegratedReportStatusResponseStatus `json:"status"`
@@ -1517,28 +1517,28 @@ type ModelsLikeToggleResponse struct {
 // ModelsMemberScoreResponse メンバーごとの診断スコア
 type ModelsMemberScoreResponse struct {
 	// CiScores Career Interest スコア
-	CiScores *[]ModelsTeamScoreEntry `json:"ci_scores,omitempty"`
+	CiScores *[]ModelsTeamScoreEntry `json:"ciScores,omitempty"`
 
 	// CiStatus Career Interest 診断ステータス
-	CiStatus string `json:"ci_status"`
+	CiStatus string `json:"ciStatus"`
 
 	// IsAce エースメンバーか
-	IsAce bool `json:"is_ace"`
+	IsAce bool `json:"isAce"`
 
 	// MemberId メンバーID
-	MemberId string `json:"member_id"`
+	MemberId string `json:"memberId"`
 
 	// MemberName メンバー名
-	MemberName string `json:"member_name"`
+	MemberName string `json:"memberName"`
 
 	// UserId 紐づくユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 
 	// WvScores Work Values スコア
-	WvScores *[]ModelsTeamScoreEntry `json:"wv_scores,omitempty"`
+	WvScores *[]ModelsTeamScoreEntry `json:"wvScores,omitempty"`
 
 	// WvStatus Work Values 診断ステータス
-	WvStatus string `json:"wv_status"`
+	WvStatus string `json:"wvStatus"`
 }
 
 // ModelsMessageListResponse メッセージ一覧
@@ -1853,25 +1853,25 @@ type ModelsPublicScoreEntry struct {
 // ModelsPublicTeamScoreResponse チームの公開集計スコア
 type ModelsPublicTeamScoreResponse struct {
 	// CiScores Career Interest 集計（完了者不足時は null）
-	CiScores *[]ModelsPublicScoreEntry `json:"ci_scores"`
+	CiScores *[]ModelsPublicScoreEntry `json:"ciScores"`
 
 	// CompletedCount 診断完了者数
-	CompletedCount int `json:"completed_count"`
+	CompletedCount int `json:"completedCount"`
 
 	// MemberCount メンバー数
-	MemberCount int `json:"member_count"`
+	MemberCount int `json:"memberCount"`
 
 	// TeamId チームID
-	TeamId string `json:"team_id"`
+	TeamId string `json:"teamId"`
 
 	// TeamName チーム名
-	TeamName string `json:"team_name"`
+	TeamName string `json:"teamName"`
 
 	// WnScores Work Needs 集計（完了者不足時は null）
-	WnScores *[]ModelsPublicScoreEntry `json:"wn_scores"`
+	WnScores *[]ModelsPublicScoreEntry `json:"wnScores"`
 
 	// WvScores Work Values 集計（完了者不足時は null）
-	WvScores *[]ModelsPublicScoreEntry `json:"wv_scores"`
+	WvScores *[]ModelsPublicScoreEntry `json:"wvScores"`
 }
 
 // ModelsPublicTeamScoresResponse 公開チームスコア一覧
@@ -2207,10 +2207,10 @@ type ModelsSendScoutRequest struct {
 // ModelsSimilarUserExperience 類似ユーザーの職歴（要約）
 type ModelsSimilarUserExperience struct {
 	// CompanyName 会社名
-	CompanyName string `json:"company_name"`
+	CompanyName string `json:"companyName"`
 
 	// IsCurrent 現職か
-	IsCurrent bool `json:"is_current"`
+	IsCurrent bool `json:"isCurrent"`
 
 	// Title 役職
 	Title string `json:"title"`
@@ -2219,7 +2219,7 @@ type ModelsSimilarUserExperience struct {
 // ModelsSimilarUserItem 類似ユーザー
 type ModelsSimilarUserItem struct {
 	// AvatarUrl アバター画像URL
-	AvatarUrl *string `json:"avatar_url"`
+	AvatarUrl *string `json:"avatarUrl"`
 
 	// Experiences 職歴（現職優先の要約）
 	Experiences *[]ModelsSimilarUserExperience `json:"experiences"`
@@ -2231,16 +2231,16 @@ type ModelsSimilarUserItem struct {
 	Name string `json:"name"`
 
 	// ProfileColor プロフィールカラー
-	ProfileColor *string `json:"profile_color"`
+	ProfileColor *string `json:"profileColor"`
 
 	// Similarity 類似度（0-1）
 	Similarity float64 `json:"similarity"`
 
 	// TopNeeds 上位の Work Needs ID
-	TopNeeds *[]string `json:"top_needs"`
+	TopNeeds *[]string `json:"topNeeds"`
 
 	// UserId ユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 
 	// Username ユーザー名
 	Username string `json:"username"`
@@ -2300,10 +2300,10 @@ type ModelsStatusOkResponse struct {
 // ModelsTalentCard 人材カード（検索・保存済み候補者で共通）
 type ModelsTalentCard struct {
 	// AvatarUrl アバター画像URL
-	AvatarUrl *string `json:"avatar_url"`
+	AvatarUrl *string `json:"avatarUrl"`
 
 	// CiSimilarity Career Interest 類似度
-	CiSimilarity *float64 `json:"ci_similarity,omitempty"`
+	CiSimilarity *float64 `json:"ciSimilarity,omitempty"`
 
 	// Experiences 職歴
 	Experiences []ModelsTalentExperience `json:"experiences"`
@@ -2312,16 +2312,16 @@ type ModelsTalentCard struct {
 	Headline *string `json:"headline"`
 
 	// IntegratedSimilarity 統合類似度
-	IntegratedSimilarity *float64 `json:"integrated_similarity,omitempty"`
+	IntegratedSimilarity *float64 `json:"integratedSimilarity,omitempty"`
 
 	// JobSeekingStatus 求職ステータス
-	JobSeekingStatus *string `json:"job_seeking_status"`
+	JobSeekingStatus *string `json:"jobSeekingStatus"`
 
 	// Name 表示名
 	Name string `json:"name"`
 
 	// ProfileColor プロフィールカラー
-	ProfileColor *string `json:"profile_color"`
+	ProfileColor *string `json:"profileColor"`
 
 	// Similarity 類似度
 	Similarity *float64 `json:"similarity,omitempty"`
@@ -2330,25 +2330,25 @@ type ModelsTalentCard struct {
 	Skills []string `json:"skills"`
 
 	// TopCiLabels Career Interest 上位ラベル
-	TopCiLabels []string `json:"top_ci_labels"`
+	TopCiLabels []string `json:"topCiLabels"`
 
 	// TopWvLabels Work Values 上位ラベル
-	TopWvLabels []string `json:"top_wv_labels"`
+	TopWvLabels []string `json:"topWvLabels"`
 
 	// UserId ユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 
 	// Username ユーザー名
 	Username string `json:"username"`
 
 	// WvSimilarity Work Values 類似度
-	WvSimilarity *float64 `json:"wv_similarity,omitempty"`
+	WvSimilarity *float64 `json:"wvSimilarity,omitempty"`
 }
 
 // ModelsTalentExperience 人材カードの職歴（要約）
 type ModelsTalentExperience struct {
 	// CompanyName 会社名
-	CompanyName string `json:"company_name"`
+	CompanyName string `json:"companyName"`
 
 	// Title 役職
 	Title string `json:"title"`
@@ -2366,10 +2366,10 @@ type ModelsTalentListResponse struct {
 // ModelsTeamDetailResponse チーム詳細（メンバー付き）
 type ModelsTeamDetailResponse struct {
 	// CompanyId 企業ID
-	CompanyId string `json:"company_id"`
+	CompanyId string `json:"companyId"`
 
 	// CreatedAt 作成日時（RFC3339 文字列）
-	CreatedAt string `json:"created_at"`
+	CreatedAt string `json:"createdAt"`
 
 	// Description 説明
 	Description *string `json:"description"`
@@ -2378,7 +2378,7 @@ type ModelsTeamDetailResponse struct {
 	Id string `json:"id"`
 
 	// IsPublic 公開フラグ
-	IsPublic bool `json:"is_public"`
+	IsPublic bool `json:"isPublic"`
 
 	// Members メンバー一覧
 	Members []ModelsTeamMemberResponse `json:"members"`
@@ -2396,10 +2396,10 @@ type ModelsTeamListResponse struct {
 // ModelsTeamMemberResponse チームメンバー
 type ModelsTeamMemberResponse struct {
 	// CiStatus Career Interest 診断ステータス
-	CiStatus string `json:"ci_status"`
+	CiStatus string `json:"ciStatus"`
 
 	// CreatedAt 作成日時（RFC3339 文字列）
-	CreatedAt string `json:"created_at"`
+	CreatedAt string `json:"createdAt"`
 
 	// Email 招待メールアドレス
 	Email *string `json:"email"`
@@ -2408,28 +2408,28 @@ type ModelsTeamMemberResponse struct {
 	Id string `json:"id"`
 
 	// InviteToken 診断招待トークン
-	InviteToken string `json:"invite_token"`
+	InviteToken string `json:"inviteToken"`
 
 	// IsAce エースメンバーか
-	IsAce bool `json:"is_ace"`
+	IsAce bool `json:"isAce"`
 
 	// Name メンバー名
 	Name string `json:"name"`
 
 	// WvStatus Work Values 診断ステータス
-	WvStatus string `json:"wv_status"`
+	WvStatus string `json:"wvStatus"`
 }
 
 // ModelsTeamResponse チーム（サマリー）
 type ModelsTeamResponse struct {
 	// CiCompleted Career Interest 完了数
-	CiCompleted int `json:"ci_completed"`
+	CiCompleted int `json:"ciCompleted"`
 
 	// CompanyId 企業ID
-	CompanyId string `json:"company_id"`
+	CompanyId string `json:"companyId"`
 
 	// CreatedAt 作成日時（RFC3339 文字列）
-	CreatedAt string `json:"created_at"`
+	CreatedAt string `json:"createdAt"`
 
 	// Description 説明
 	Description *string `json:"description"`
@@ -2438,22 +2438,22 @@ type ModelsTeamResponse struct {
 	Id string `json:"id"`
 
 	// IsPublic 公開フラグ
-	IsPublic bool `json:"is_public"`
+	IsPublic bool `json:"isPublic"`
 
 	// MemberCount メンバー数
-	MemberCount int `json:"member_count"`
+	MemberCount int `json:"memberCount"`
 
 	// Name チーム名
 	Name string `json:"name"`
 
 	// WvCompleted Work Values 完了数
-	WvCompleted int `json:"wv_completed"`
+	WvCompleted int `json:"wvCompleted"`
 }
 
 // ModelsTeamScoreEntry 診断スコア（ID・表示スコア・順位）
 type ModelsTeamScoreEntry struct {
 	// DisplayScore 表示スコア
-	DisplayScore float64 `json:"display_score"`
+	DisplayScore float64 `json:"displayScore"`
 
 	// Id スコアID（need/value/type）
 	Id string `json:"id"`
@@ -2573,10 +2573,10 @@ type ModelsUpdateCompanyProfileRequest struct {
 // ModelsUpdateDiagnoseStatusRequest チーム診断ステータス更新リクエスト（指定したキーのみ更新）
 type ModelsUpdateDiagnoseStatusRequest struct {
 	// CiStatus Career Interest 診断ステータス
-	CiStatus *string `json:"ci_status,omitempty"`
+	CiStatus *string `json:"ciStatus,omitempty"`
 
 	// WvStatus Work Values 診断ステータス
-	WvStatus *string `json:"wv_status,omitempty"`
+	WvStatus *string `json:"wvStatus,omitempty"`
 }
 
 // ModelsUpdateEducationRequest 学歴更新リクエスト
@@ -2645,7 +2645,7 @@ type ModelsUpdateTeamRequest struct {
 	Description *string `json:"description,omitempty"`
 
 	// IsPublic 公開フラグ（未指定なら変更しない）
-	IsPublic *bool `json:"is_public,omitempty"`
+	IsPublic *bool `json:"isPublic,omitempty"`
 
 	// Name チーム名
 	Name string `json:"name"`
@@ -2756,7 +2756,7 @@ type ModelsUserResponse struct {
 // ModelsWVNeedDefResponse Work Need 定義
 type ModelsWVNeedDefResponse struct {
 	// DescriptionJa 説明（日本語）
-	DescriptionJa string `json:"description_ja"`
+	DescriptionJa string `json:"descriptionJa"`
 
 	// Id ニーズID
 	Id string `json:"id"`
@@ -2768,16 +2768,16 @@ type ModelsWVNeedDefResponse struct {
 // ModelsWVNeedScore Work Need スコア
 type ModelsWVNeedScore struct {
 	// DescriptionJa 説明（日本語）
-	DescriptionJa string `json:"description_ja"`
+	DescriptionJa string `json:"descriptionJa"`
 
 	// DisplayScore 表示スコア（0-100）
-	DisplayScore float64 `json:"display_score"`
+	DisplayScore float64 `json:"displayScore"`
 
 	// Label ラベル
 	Label string `json:"label"`
 
 	// NeedId ニーズID
-	NeedId string `json:"need_id"`
+	NeedId string `json:"needId"`
 
 	// Rank 順位
 	Rank int32 `json:"rank"`
@@ -2786,31 +2786,31 @@ type ModelsWVNeedScore struct {
 // ModelsWVPairResponse 一対比較ペア
 type ModelsWVPairResponse struct {
 	// NeedA ニーズA
-	NeedA string `json:"need_a"`
+	NeedA string `json:"needA"`
 
 	// NeedB ニーズB
-	NeedB string `json:"need_b"`
+	NeedB string `json:"needB"`
 }
 
 // ModelsWVResponseItem Work Values 一対比較の回答（1問分）
 type ModelsWVResponseItem struct {
 	// NeedA ニーズA
-	NeedA string `json:"need_a"`
+	NeedA string `json:"needA"`
 
 	// NeedB ニーズB
-	NeedB string `json:"need_b"`
+	NeedB string `json:"needB"`
 
 	// QuestionNumber 質問番号
-	QuestionNumber int32 `json:"question_number"`
+	QuestionNumber int32 `json:"questionNumber"`
 
-	// Winner 勝者（need_a か need_b の ID）
+	// Winner 勝者（needA か needB の ID）
 	Winner string `json:"winner"`
 }
 
 // ModelsWVResultResponse Work Values 診断結果
 type ModelsWVResultResponse struct {
 	// CreatedAt 作成日時（RFC3339 文字列）
-	CreatedAt string `json:"created_at"`
+	CreatedAt string `json:"createdAt"`
 
 	// Id 結果ID
 	Id string `json:"id"`
@@ -2819,10 +2819,10 @@ type ModelsWVResultResponse struct {
 	Needs []ModelsWVNeedScore `json:"needs"`
 
 	// SessionId セッションID
-	SessionId string `json:"session_id"`
+	SessionId string `json:"sessionId"`
 
 	// UserId ユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 
 	// Values Value スコア
 	Values []ModelsWVValueScoreResponse `json:"values"`
@@ -2834,7 +2834,7 @@ type ModelsWVSessionResponse struct {
 	Id string `json:"id"`
 
 	// InitialPairs 初期ペア
-	InitialPairs []ModelsWVPairResponse `json:"initial_pairs"`
+	InitialPairs []ModelsWVPairResponse `json:"initialPairs"`
 
 	// Needs ニーズ定義一覧
 	Needs []ModelsWVNeedDefResponse `json:"needs"`
@@ -2846,7 +2846,7 @@ type ModelsWVSessionResponse struct {
 // ModelsWVStartSessionRequest Work Values セッション開始リクエスト
 type ModelsWVStartSessionRequest struct {
 	// UserId ユーザーID
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 }
 
 // ModelsWVSubmitResultRequest Work Values 結果送信リクエスト
@@ -2864,13 +2864,13 @@ type ModelsWVSubmitResultRequest struct {
 // ModelsWVValueScoreResponse Work Value スコア
 type ModelsWVValueScoreResponse struct {
 	// DisplayScore 表示スコア（0-100）
-	DisplayScore float64 `json:"display_score"`
+	DisplayScore float64 `json:"displayScore"`
 
 	// Rank 順位
 	Rank int32 `json:"rank"`
 
 	// ValueId Value ID
-	ValueId string `json:"value_id"`
+	ValueId string `json:"valueId"`
 }
 
 // CandidateApplicationsCheckAppliedParams defines parameters for CandidateApplicationsCheckApplied.

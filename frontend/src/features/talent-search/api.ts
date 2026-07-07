@@ -71,9 +71,9 @@ export async function fetchCandidateDetail(
     jobSeekingStatus: profile?.data?.jobSeekingStatus ?? null,
     profileColor: profile?.data?.profileColor ?? null,
     wvScores:
-      wv?.data?.values.map((v) => ({ id: v.value_id, score: v.display_score })) ?? null,
+      wv?.data?.values.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
     ciScores:
-      ci?.data?.type_scores.map((s) => ({ id: s.type_id, score: s.score })) ?? null,
+      ci?.data?.typeScores.map((s) => ({ id: s.typeId, score: s.score })) ?? null,
   };
 }
 
@@ -84,14 +84,14 @@ export async function fetchTeamScoreAverages(
   const wvAccum: Record<string, { sum: number; count: number }> = {};
   const ciAccum: Record<string, { sum: number; count: number }> = {};
   for (const m of data?.members ?? []) {
-    for (const s of m.wv_scores ?? []) {
+    for (const s of m.wvScores ?? []) {
       if (!wvAccum[s.id]) wvAccum[s.id] = { sum: 0, count: 0 };
-      wvAccum[s.id].sum += s.display_score;
+      wvAccum[s.id].sum += s.displayScore;
       wvAccum[s.id].count++;
     }
-    for (const s of m.ci_scores ?? []) {
+    for (const s of m.ciScores ?? []) {
       if (!ciAccum[s.id]) ciAccum[s.id] = { sum: 0, count: 0 };
-      ciAccum[s.id].sum += s.display_score;
+      ciAccum[s.id].sum += s.displayScore;
       ciAccum[s.id].count++;
     }
   }
@@ -146,6 +146,6 @@ export async function unsaveCandidate(userId: string): Promise<void> {
 }
 
 export async function bulkCheckSaved(userIds: string[]): Promise<Record<string, boolean>> {
-  const { data } = await savedCandidatesBulkCheckSaved({ body: { user_ids: userIds } });
+  const { data } = await savedCandidatesBulkCheckSaved({ body: { userIds: userIds } });
   return data?.saved ?? {};
 }

@@ -8,22 +8,22 @@ namespace Inselfy.Models;
 /** Work Values セッション開始リクエスト */
 model WVStartSessionRequest {
   /** ユーザーID */
-  user_id: string;
+  userId: string;
 }
 
 /** Work Values 一対比較の回答（1問分） */
 model WVResponseItem {
   /** ニーズA */
-  need_a: string;
+  needA: string;
 
   /** ニーズB */
-  need_b: string;
+  needB: string;
 
-  /** 勝者（need_a か need_b の ID） */
+  /** 勝者（needA か needB の ID） */
   winner: string;
 
   /** 質問番号 */
-  question_number: int32;
+  questionNumber: int32;
 }
 
 /** Work Values 結果送信リクエスト */
@@ -41,10 +41,10 @@ model WVSubmitResultRequest {
 /** 一対比較ペア */
 model WVPairResponse {
   /** ニーズA */
-  need_a: string;
+  needA: string;
 
   /** ニーズB */
-  need_b: string;
+  needB: string;
 }
 
 /** Work Need 定義 */
@@ -56,7 +56,7 @@ model WVNeedDefResponse {
   label: string;
 
   /** 説明（日本語） */
-  description_ja: string;
+  descriptionJa: string;
 }
 
 /** Work Values セッション */
@@ -68,7 +68,7 @@ model WVSessionResponse {
   status: string;
 
   /** 初期ペア */
-  initial_pairs: WVPairResponse[];
+  initialPairs: WVPairResponse[];
 
   /** ニーズ定義一覧 */
   needs: WVNeedDefResponse[];
@@ -77,16 +77,16 @@ model WVSessionResponse {
 /** Work Need スコア */
 model WVNeedScore {
   /** ニーズID */
-  need_id: string;
+  needId: string;
 
   /** ラベル */
   label: string;
 
   /** 説明（日本語） */
-  description_ja: string;
+  descriptionJa: string;
 
   /** 表示スコア（0-100） */
-  display_score: float64;
+  displayScore: float64;
 
   /** 順位 */
   rank: int32;
@@ -95,10 +95,10 @@ model WVNeedScore {
 /** Work Value スコア */
 model WVValueScoreResponse {
   /** Value ID */
-  value_id: string;
+  valueId: string;
 
   /** 表示スコア（0-100） */
-  display_score: float64;
+  displayScore: float64;
 
   /** 順位 */
   rank: int32;
@@ -110,10 +110,10 @@ model WVResultResponse {
   id: string;
 
   /** セッションID */
-  session_id: string;
+  sessionId: string;
 
   /** ユーザーID */
-  user_id: string;
+  userId: string;
 
   /** ニーズスコア（スコア降順） */
   needs: WVNeedScore[];
@@ -122,5 +122,5 @@ model WVResultResponse {
   values: WVValueScoreResponse[];
 
   /** 作成日時（RFC3339 文字列） */
-  created_at: string;
+  createdAt: string;
 }

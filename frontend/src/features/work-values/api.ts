@@ -25,7 +25,7 @@ export type ResultDTO = ModelsWvResultResponse;
 
 export async function startSession(userId: string): Promise<SessionDTO> {
   const { data, error, response } = await workValuesWvStartSession({
-    body: { user_id: userId },
+    body: { userId: userId },
   });
   if (error || !data) throw new Error(`Failed to start session: ${response.status}`);
   return data;

@@ -26,7 +26,7 @@ export default async function WorkValuesResultPage({
 
   const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
-  const data = await fetchPanelDataByUserId(result.user_id);
+  const data = await fetchPanelDataByUserId(result.userId);
   if (!data) notFound();
 
   const wvIndex = 2;

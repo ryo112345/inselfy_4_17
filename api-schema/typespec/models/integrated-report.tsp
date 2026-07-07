@@ -17,7 +17,7 @@ model CreateIntegratedReportRequest {
   topic3: int16;
 
   /** 自由記述（200文字以内） */
-  free_text: string;
+  freeText: string;
 }
 
 /** 統合レポート生成リクエスト（作成結果） */
@@ -35,10 +35,10 @@ model IntegratedReportRequestResponse {
   topic3: int16;
 
   /** 自由記述 */
-  free_text: string;
+  freeText: string;
 
   /** 作成日時 */
-  created_at: utcDateTime;
+  createdAt: utcDateTime;
 }
 
 /** 統合レポート（リクエストID指定） */
@@ -47,19 +47,19 @@ model IntegratedReportResponse {
   id: string;
 
   /** リクエストID */
-  request_id: string;
+  requestId: string;
 
   /** ユーザーID */
-  user_id: string;
+  userId: string;
 
   /** レポート本文（Markdown） */
   content: string;
 
   /** 作成日時 */
-  created_at: utcDateTime;
+  createdAt: utcDateTime;
 
   /** 初回閲覧かどうか（このレスポンスで閲覧済みが記録される） */
-  first_view: boolean;
+  firstView: boolean;
 }
 
 /** 自分の最新統合レポート */
@@ -68,16 +68,16 @@ model IntegratedReportMineResponse {
   id: string;
 
   /** リクエストID */
-  request_id: string;
+  requestId: string;
 
   /** レポート本文（Markdown） */
   content: string;
 
   /** 作成日時 */
-  created_at: utcDateTime;
+  createdAt: utcDateTime;
 
   /** 初回閲覧かどうか（このレスポンスで閲覧済みが記録される） */
-  first_view: boolean;
+  firstView: boolean;
 }
 
 /** 統合レポートのリクエスト状況 */
@@ -86,20 +86,20 @@ model IntegratedReportStatusResponse {
   status: "none" | "pending" | "ready";
 
   /** リクエストID（pending / ready のときのみ） */
-  request_id?: string;
+  requestId?: string;
 }
 
 /** ユーザーの最新統合レポートリクエスト */
 model IntegratedReportLatestRequestResponse {
   /** リクエストID */
-  request_id: string;
+  requestId: string;
 
   /** ユーザーID */
-  user_id: string;
+  userId: string;
 
   /** レポートが生成済みかどうか */
-  has_report: boolean;
+  hasReport: boolean;
 
   /** リクエスト作成日時 */
-  created_at: utcDateTime;
+  createdAt: utcDateTime;
 }
