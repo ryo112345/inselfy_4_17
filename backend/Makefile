@@ -3,6 +3,7 @@ MIGRATIONS_DIR ?= migrations
 OAPI_CODEGEN ?= $(shell go env GOPATH)/bin/oapi-codegen
 SQLC ?= $(shell go env GOPATH)/bin/sqlc
 GOVERTER ?= $(shell go env GOPATH)/bin/goverter
+GOLANGCI_LINT ?= $(shell go env GOPATH)/bin/golangci-lint
 OPENAPI_SPEC ?= ../api-schema/generated/openapi.yaml
 OAPI_CONFIG ?= oapi-codegen.yaml
 ENV_FILE ?= ../.env
@@ -71,3 +72,10 @@ build:
 .PHONY: test
 test:
 	go test ./...
+
+# Enforces the layer boundary (.golangci.yml depguard): controllers must not
+# import pgx; only admin_*_controller.go may use the pool directly. Install:
+#   go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
+.PHONY: lint
+lint:
+	$(GOLANGCI_LINT) run ./...
