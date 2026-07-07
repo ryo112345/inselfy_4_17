@@ -1,7 +1,7 @@
 "use client";
 
-import type { Message } from "../types";
 import { ProposalCard } from "@/features/interview/components/ProposalCard";
+import type { Message } from "../types";
 
 type Props = {
   message: Message;
@@ -16,17 +16,27 @@ function formatTime(dateStr: string): string {
   return d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
 }
 
-function StructuredMessageCard({ message, isCandidate, onProposalConfirmed }: { message: Message; isCandidate?: boolean; onProposalConfirmed?: () => void }) {
+function StructuredMessageCard({
+  message,
+  isCandidate,
+  onProposalConfirmed,
+}: {
+  message: Message;
+  isCandidate?: boolean;
+  onProposalConfirmed?: () => void;
+}) {
   const type = message.messageType;
 
   if (type === "interview_proposal") {
-    const meta = message.metadata as {
-      proposal_id?: string;
-      slots?: { id: string; start_time: string; end_time: string }[];
-      location?: string;
-      duration_minutes?: number;
-      expires_at?: string;
-    } | undefined;
+    const meta = message.metadata as
+      | {
+          proposal_id?: string;
+          slots?: { id: string; start_time: string; end_time: string }[];
+          location?: string;
+          duration_minutes?: number;
+          expires_at?: string;
+        }
+      | undefined;
     if (meta?.proposal_id && meta.slots) {
       return (
         <ProposalCard
@@ -48,17 +58,35 @@ function StructuredMessageCard({ message, isCandidate, onProposalConfirmed }: { 
     return (
       <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3">
         <div className="flex items-center gap-2 mb-1">
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#16a34a"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
           </svg>
           <span className="text-sm font-semibold text-green-800">面接日程が確定しました</span>
         </div>
         {meta?.start_time && (
           <p className="text-sm text-green-700 mt-1">
-            {new Date(meta.start_time).toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "short" })}
-            {" "}
-            {new Date(meta.start_time).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}
-            {meta.end_time && ` - ${new Date(meta.end_time).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}`}
+            {new Date(meta.start_time).toLocaleDateString("ja-JP", {
+              month: "long",
+              day: "numeric",
+              weekday: "short",
+            })}{" "}
+            {new Date(meta.start_time).toLocaleTimeString("ja-JP", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            {meta.end_time &&
+              ` - ${new Date(meta.end_time).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}`}
           </p>
         )}
         {message.body && <p className="text-sm text-green-700 mt-1">{message.body}</p>}
@@ -70,8 +98,19 @@ function StructuredMessageCard({ message, isCandidate, onProposalConfirmed }: { 
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
         <div className="flex items-center gap-2 mb-1">
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#dc2626"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
           </svg>
           <span className="text-sm font-semibold text-red-800">面接がキャンセルされました</span>
         </div>
@@ -87,16 +126,28 @@ function StructuredMessageCard({ message, isCandidate, onProposalConfirmed }: { 
   );
 }
 
-export function MessageBubble({ message, isMine, showTimestamp = true, isCandidate, onProposalConfirmed }: Props) {
+export function MessageBubble({
+  message,
+  isMine,
+  showTimestamp = true,
+  isCandidate,
+  onProposalConfirmed,
+}: Props) {
   const isStructured = message.messageType && message.messageType !== "text";
 
   if (isStructured) {
     return (
       <div className="flex justify-center my-2">
         <div className="max-w-[85%] w-full">
-          <StructuredMessageCard message={message} isCandidate={isCandidate} onProposalConfirmed={onProposalConfirmed} />
+          <StructuredMessageCard
+            message={message}
+            isCandidate={isCandidate}
+            onProposalConfirmed={onProposalConfirmed}
+          />
           {showTimestamp && (
-            <p className="text-[10px] text-gray-400 text-center mt-1">{formatTime(message.createdAt)}</p>
+            <p className="text-[10px] text-gray-400 text-center mt-1">
+              {formatTime(message.createdAt)}
+            </p>
           )}
         </div>
       </div>
@@ -116,16 +167,12 @@ export function MessageBubble({ message, isMine, showTimestamp = true, isCandida
               : "bg-white text-gray-900 rounded-2xl rounded-bl-none"
           }`}
         >
-          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-            {message.body}
-          </p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.body}</p>
         </div>
         {/* tail */}
         <div
           className={`absolute bottom-0 w-3 h-3 ${
-            isMine
-              ? "right-[-6px] bg-[#6EE580]"
-              : "left-[-6px] bg-white"
+            isMine ? "right-[-6px] bg-[#6EE580]" : "left-[-6px] bg-white"
           }`}
           style={{
             clipPath: isMine

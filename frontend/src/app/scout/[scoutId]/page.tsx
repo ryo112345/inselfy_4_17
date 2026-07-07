@@ -1,20 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
-import { useUnreadScout } from "@/features/scout/unread-context";
-import {
-  fetchReceivedScoutDetail,
-  respondToScout,
-} from "@/features/scout/api";
+import { fetchReceivedScoutDetail, respondToScout } from "@/features/scout/api";
 import type { ScoutDetail, ScoutReply, ScoutStatus } from "@/features/scout/types";
+import { useUnreadScout } from "@/features/scout/unread-context";
 
-const STATUS_BADGE: Record<
-  ScoutStatus,
-  { label: string; className: string }
-> = {
+const STATUS_BADGE: Record<ScoutStatus, { label: string; className: string }> = {
   draft: { label: "下書き", className: "bg-gray-100 text-gray-600" },
   sent: { label: "未読", className: "bg-blue-100 text-blue-800" },
   opened: { label: "既読", className: "bg-yellow-100 text-yellow-800" },
@@ -39,9 +33,7 @@ function formatDateTime(dateStr: string): string {
 
 function daysRemaining(expiresAt: string | null): string | null {
   if (!expiresAt) return null;
-  const diff = Math.ceil(
-    (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-  );
+  const diff = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   if (diff < 0) return "期限切れ";
   if (diff === 0) return "今日まで";
   return `残り${diff}日`;
@@ -84,10 +76,7 @@ export default function ScoutDetailPage() {
     loadDetail();
   }, [authLoading, user, loadDetail]);
 
-  function showToast(
-    message: string,
-    type: "success" | "error" = "success",
-  ) {
+  function showToast(message: string, type: "success" | "error" = "success") {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   }
@@ -97,11 +86,7 @@ export default function ScoutDetailPage() {
     setResponding(true);
     try {
       await respondToScout(scoutId, response);
-      showToast(
-        response === "interested"
-          ? "興味ありと回答しました"
-          : "辞退しました",
-      );
+      showToast(response === "interested" ? "興味ありと回答しました" : "辞退しました");
       await loadDetail();
     } catch {
       showToast("応答に失敗しました", "error");
@@ -129,9 +114,7 @@ export default function ScoutDetailPage() {
   if (error || !detail) {
     return (
       <div className="min-h-screen md:pl-[50px] bg-[#f6f7f5] flex items-center justify-center">
-        <p className="text-red-500 text-sm">
-          {error ?? "データが見つかりません"}
-        </p>
+        <p className="text-red-500 text-sm">{error ?? "データが見つかりません"}</p>
       </div>
     );
   }
@@ -139,8 +122,7 @@ export default function ScoutDetailPage() {
   const { message, replies } = detail;
   const badge = STATUS_BADGE[message.status];
   const remaining = daysRemaining(message.expiresAt);
-  const canRespond =
-    message.status === "sent" || message.status === "opened";
+  const canRespond = message.status === "sent" || message.status === "opened";
 
   return (
     <div className="min-h-screen md:pl-[50px] bg-[#f6f7f5]">
@@ -208,9 +190,7 @@ export default function ScoutDetailPage() {
 
           {/* Subject + body */}
           <div className="px-4 py-5 md:px-6 md:py-6">
-            <h1 className="text-base md:text-lg font-bold text-gray-900 mb-1">
-              {message.subject}
-            </h1>
+            <h1 className="text-base md:text-lg font-bold text-gray-900 mb-1">{message.subject}</h1>
             {message.jobTitle && (
               <p className="text-sm text-gray-500 mb-4 md:mb-5">
                 ポジション：
@@ -242,7 +222,11 @@ export default function ScoutDetailPage() {
                   className="inline-flex items-center gap-1.5 text-xs text-gray-600 border border-gray-200 px-3.5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 16.5v-13h-.25a.75.75 0 010-1.5h12.5a.75.75 0 010 1.5H16v13h.25a.75.75 0 010 1.5h-3.5a.75.75 0 01-.75-.75v-2.5a.75.75 0 00-.75-.75h-2.5a.75.75 0 00-.75.75v2.5a.75.75 0 01-.75.75h-3.5a.75.75 0 010-1.5H4zm3-11a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1zm3.5-3.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M4 16.5v-13h-.25a.75.75 0 010-1.5h12.5a.75.75 0 010 1.5H16v13h.25a.75.75 0 010 1.5h-3.5a.75.75 0 01-.75-.75v-2.5a.75.75 0 00-.75-.75h-2.5a.75.75 0 00-.75.75v2.5a.75.75 0 01-.75.75h-3.5a.75.75 0 010-1.5H4zm3-11a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1zm3.5-3.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   企業ページ
                 </Link>
@@ -252,7 +236,11 @@ export default function ScoutDetailPage() {
                     className="inline-flex items-center gap-1.5 text-xs text-gray-600 border border-gray-200 px-3.5 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M6 3.75A2.75 2.75 0 018.75 1h2.5A2.75 2.75 0 0114 3.75v.443c.572.055 1.14.122 1.706.2C17.053 4.582 18 5.75 18 7.07v3.469c0 1.126-.694 2.191-1.83 2.54-1.952.6-4.03.93-6.17.93s-4.219-.33-6.17-.93C2.694 12.73 2 11.665 2 10.539V7.07c0-1.321.947-2.489 2.294-2.676A41.047 41.047 0 016 4.193V3.75zm6.5 0v.325a41.622 41.622 0 00-5 0V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25zM10 10a1 1 0 00-1 1v.01a1 1 0 001 1h.01a1 1 0 001-1V11a1 1 0 00-1-1H10z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M6 3.75A2.75 2.75 0 018.75 1h2.5A2.75 2.75 0 0114 3.75v.443c.572.055 1.14.122 1.706.2C17.053 4.582 18 5.75 18 7.07v3.469c0 1.126-.694 2.191-1.83 2.54-1.952.6-4.03.93-6.17.93s-4.219-.33-6.17-.93C2.694 12.73 2 11.665 2 10.539V7.07c0-1.321.947-2.489 2.294-2.676A41.047 41.047 0 016 4.193V3.75zm6.5 0v.325a41.622 41.622 0 00-5 0V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25zM10 10a1 1 0 00-1 1v.01a1 1 0 001 1h.01a1 1 0 001-1V11a1 1 0 00-1-1H10z"
+                        clipRule="evenodd"
+                      />
                       <path d="M3 15.055v-.684c.126.053.255.1.39.142 2.092.642 4.313.987 6.61.987 2.297 0 4.518-.345 6.61-.987.135-.041.264-.089.39-.142v.684c0 1.347-.985 2.53-2.363 2.686A41.454 41.454 0 0110 18c-1.572 0-3.118-.12-4.637-.329C3.985 17.585 3 16.402 3 15.055z" />
                     </svg>
                     求人詳細
@@ -309,7 +297,11 @@ export default function ScoutDetailPage() {
                   className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs text-gray-600 border border-gray-200 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 16.5v-13h-.25a.75.75 0 010-1.5h12.5a.75.75 0 010 1.5H16v13h.25a.75.75 0 010 1.5h-3.5a.75.75 0 01-.75-.75v-2.5a.75.75 0 00-.75-.75h-2.5a.75.75 0 00-.75.75v2.5a.75.75 0 01-.75.75h-3.5a.75.75 0 010-1.5H4zm3-11a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1zm3.5-3.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M4 16.5v-13h-.25a.75.75 0 010-1.5h12.5a.75.75 0 010 1.5H16v13h.25a.75.75 0 010 1.5h-3.5a.75.75 0 01-.75-.75v-2.5a.75.75 0 00-.75-.75h-2.5a.75.75 0 00-.75.75v2.5a.75.75 0 01-.75.75h-3.5a.75.75 0 010-1.5H4zm3-11a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1zm3.5-3.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   企業ページ
                 </Link>
@@ -319,7 +311,11 @@ export default function ScoutDetailPage() {
                     className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs text-gray-600 border border-gray-200 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M6 3.75A2.75 2.75 0 018.75 1h2.5A2.75 2.75 0 0114 3.75v.443c.572.055 1.14.122 1.706.2C17.053 4.582 18 5.75 18 7.07v3.469c0 1.126-.694 2.191-1.83 2.54-1.952.6-4.03.93-6.17.93s-4.219-.33-6.17-.93C2.694 12.73 2 11.665 2 10.539V7.07c0-1.321.947-2.489 2.294-2.676A41.047 41.047 0 016 4.193V3.75zm6.5 0v.325a41.622 41.622 0 00-5 0V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25zM10 10a1 1 0 00-1 1v.01a1 1 0 001 1h.01a1 1 0 001-1V11a1 1 0 00-1-1H10z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M6 3.75A2.75 2.75 0 018.75 1h2.5A2.75 2.75 0 0114 3.75v.443c.572.055 1.14.122 1.706.2C17.053 4.582 18 5.75 18 7.07v3.469c0 1.126-.694 2.191-1.83 2.54-1.952.6-4.03.93-6.17.93s-4.219-.33-6.17-.93C2.694 12.73 2 11.665 2 10.539V7.07c0-1.321.947-2.489 2.294-2.676A41.047 41.047 0 016 4.193V3.75zm6.5 0v.325a41.622 41.622 0 00-5 0V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25zM10 10a1 1 0 00-1 1v.01a1 1 0 001 1h.01a1 1 0 001-1V11a1 1 0 00-1-1H10z"
+                        clipRule="evenodd"
+                      />
                       <path d="M3 15.055v-.684c.126.053.255.1.39.142 2.092.642 4.313.987 6.61.987 2.297 0 4.518-.345 6.61-.987.135-.041.264-.089.39-.142v.684c0 1.347-.985 2.53-2.363 2.686A41.454 41.454 0 0110 18c-1.572 0-3.118-.12-4.637-.329C3.985 17.585 3 16.402 3 15.055z" />
                     </svg>
                     求人詳細
@@ -333,16 +329,10 @@ export default function ScoutDetailPage() {
         {/* Reply thread */}
         {replies.length > 0 && (
           <div className="bg-white rounded-xl border border-gray-200 px-4 py-4 md:px-6 md:py-5">
-            <p className="text-xs font-medium text-gray-500 mb-4">
-              やりとり
-            </p>
+            <p className="text-xs font-medium text-gray-500 mb-4">やりとり</p>
             <div className="space-y-3">
               {replies.map((reply) => (
-                <ReplyBubble
-                  key={reply.id}
-                  reply={reply}
-                  userId={user.id}
-                />
+                <ReplyBubble key={reply.id} reply={reply} userId={user.id} />
               ))}
             </div>
           </div>
@@ -385,9 +375,7 @@ export default function ScoutDetailPage() {
             )}
             <span
               className={`text-sm font-medium ${
-                toast.type === "error"
-                  ? "text-red-800"
-                  : "text-emerald-800"
+                toast.type === "error" ? "text-red-800" : "text-emerald-800"
               }`}
             >
               {toast.message}
@@ -399,34 +387,18 @@ export default function ScoutDetailPage() {
   );
 }
 
-function ReplyBubble({
-  reply,
-  userId,
-}: {
-  reply: ScoutReply;
-  userId: string;
-}) {
+function ReplyBubble({ reply, userId }: { reply: ScoutReply; userId: string }) {
   const isCandidate = reply.senderType === "candidate";
 
   return (
-    <div
-      className={`flex ${isCandidate ? "justify-end" : "justify-start"}`}
-    >
+    <div className={`flex ${isCandidate ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[75%] rounded-xl px-4 py-3 ${
-          isCandidate
-            ? "bg-[#e8f5ef] text-gray-900"
-            : "bg-gray-100 text-gray-800"
+          isCandidate ? "bg-[#e8f5ef] text-gray-900" : "bg-gray-100 text-gray-800"
         }`}
       >
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-          {reply.body}
-        </p>
-        <p
-          className={`text-xs mt-1 ${
-            isCandidate ? "text-gray-500" : "text-gray-400"
-          }`}
-        >
+        <p className="text-sm leading-relaxed whitespace-pre-wrap">{reply.body}</p>
+        <p className={`text-xs mt-1 ${isCandidate ? "text-gray-500" : "text-gray-400"}`}>
           {formatDateTime(reply.createdAt)}
         </p>
       </div>

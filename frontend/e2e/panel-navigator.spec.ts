@@ -1,8 +1,6 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-test("full navigation: aaa -> aaho -> back -> > button shows diagnostics", async ({
-  page,
-}) => {
+test("full navigation: aaa -> aaho -> back -> > button shows diagnostics", async ({ page }) => {
   // 1. Go to profile aaa
   await page.goto("/profile/aaa");
   await page.waitForLoadState("networkidle");
@@ -30,7 +28,9 @@ test("full navigation: aaa -> aaho -> back -> > button shows diagnostics", async
   const reactAlive = await page.evaluate(() => {
     const el = document.querySelector('[data-testid="panel-next"]');
     if (!el) return false;
-    return Object.keys(el).some(k => k.startsWith("__reactFiber") || k.startsWith("__reactProps"));
+    return Object.keys(el).some(
+      (k) => k.startsWith("__reactFiber") || k.startsWith("__reactProps"),
+    );
   });
   expect(reactAlive).toBe(true);
 

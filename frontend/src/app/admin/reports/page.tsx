@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 
 import { adminFetch } from "@/features/admin/api";
 
@@ -78,14 +78,15 @@ export default function AdminReportsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [wvRes, ciRes, wvReportsRes, ciReportsRes, intPendingRes, intReportsRes] = await Promise.all([
-        adminFetch("/api/admin/reports/pending"),
-        adminFetch("/api/admin/ci-reports/pending"),
-        adminFetch("/api/admin/reports/list"),
-        adminFetch("/api/admin/ci-reports/list"),
-        adminFetch("/api/admin/integrated-reports/pending"),
-        adminFetch("/api/admin/integrated-reports/list"),
-      ]);
+      const [wvRes, ciRes, wvReportsRes, ciReportsRes, intPendingRes, intReportsRes] =
+        await Promise.all([
+          adminFetch("/api/admin/reports/pending"),
+          adminFetch("/api/admin/ci-reports/pending"),
+          adminFetch("/api/admin/reports/list"),
+          adminFetch("/api/admin/ci-reports/list"),
+          adminFetch("/api/admin/integrated-reports/pending"),
+          adminFetch("/api/admin/integrated-reports/list"),
+        ]);
       if (wvRes.ok) {
         const data = await wvRes.json();
         setWvSessions(data.sessions ?? []);
@@ -122,7 +123,9 @@ export default function AdminReportsPage() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const pendingSessions = tab === "wv" ? wvSessions : tab === "ci" ? ciSessions : [];
   const reports = tab === "wv" ? wvReports : tab === "ci" ? ciReports : [];
@@ -140,11 +143,12 @@ export default function AdminReportsPage() {
 
     setLoadingPrompt(id);
     try {
-      const endpoint = tab === "wv"
-        ? `/api/admin/sessions/${id}/prompt`
-        : tab === "ci"
-        ? `/api/admin/ci-sessions/${id}/prompt`
-        : `/api/admin/integrated-requests/${id}/prompt`;
+      const endpoint =
+        tab === "wv"
+          ? `/api/admin/sessions/${id}/prompt`
+          : tab === "ci"
+            ? `/api/admin/ci-sessions/${id}/prompt`
+            : `/api/admin/integrated-requests/${id}/prompt`;
       const res = await adminFetch(endpoint);
       if (!res.ok) throw new Error("プロンプトの取得に失敗しました");
       const data = await res.json();
@@ -164,22 +168,21 @@ export default function AdminReportsPage() {
   };
 
   const resetViewed = async (id: string) => {
-    const endpoint = tab === "wv"
-      ? `/api/admin/sessions/${id}/reset-viewed`
-      : tab === "ci"
-      ? `/api/admin/ci-sessions/${id}/reset-viewed`
-      : `/api/admin/integrated-requests/${id}/reset-viewed`;
+    const endpoint =
+      tab === "wv"
+        ? `/api/admin/sessions/${id}/reset-viewed`
+        : tab === "ci"
+          ? `/api/admin/ci-sessions/${id}/reset-viewed`
+          : `/api/admin/integrated-requests/${id}/reset-viewed`;
     const res = await adminFetch(endpoint, { method: "POST" });
     if (res.ok) {
       if (tab === "integrated") {
         setIntReports((prev) =>
-          prev.map((r) => r.request_id === id ? { ...r, viewed_at: null } : r)
+          prev.map((r) => (r.request_id === id ? { ...r, viewed_at: null } : r)),
         );
       } else {
         const setter = tab === "wv" ? setWvReports : setCiReports;
-        setter((prev) =>
-          prev.map((r) => r.session_id === id ? { ...r, viewed_at: null } : r)
-        );
+        setter((prev) => prev.map((r) => (r.session_id === id ? { ...r, viewed_at: null } : r)));
       }
     }
   };
@@ -189,7 +192,16 @@ export default function AdminReportsPage() {
       <div className="max-w-[900px] mx-auto px-6 py-12">
         <div className="flex items-center gap-3 mb-8">
           <Link href="/admin" className="text-gray-400 hover:text-gray-600 transition-colors">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </Link>
@@ -198,7 +210,11 @@ export default function AdminReportsPage() {
 
         <div className="flex gap-2 mb-4">
           <button
-            onClick={() => { setTab("wv"); setSection("pending"); setExpandedPrompt(null); }}
+            onClick={() => {
+              setTab("wv");
+              setSection("pending");
+              setExpandedPrompt(null);
+            }}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
               tab === "wv"
                 ? "bg-emerald-700 text-white"
@@ -207,15 +223,21 @@ export default function AdminReportsPage() {
           >
             Work Values
             {wvSessions.length > 0 && (
-              <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
-                tab === "wv" ? "bg-emerald-600" : "bg-gray-200 text-gray-600"
-              }`}>
+              <span
+                className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+                  tab === "wv" ? "bg-emerald-600" : "bg-gray-200 text-gray-600"
+                }`}
+              >
                 {wvSessions.length}
               </span>
             )}
           </button>
           <button
-            onClick={() => { setTab("ci"); setSection("pending"); setExpandedPrompt(null); }}
+            onClick={() => {
+              setTab("ci");
+              setSection("pending");
+              setExpandedPrompt(null);
+            }}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
               tab === "ci"
                 ? "bg-emerald-700 text-white"
@@ -224,15 +246,21 @@ export default function AdminReportsPage() {
           >
             Career Interest
             {ciSessions.length > 0 && (
-              <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
-                tab === "ci" ? "bg-emerald-600" : "bg-gray-200 text-gray-600"
-              }`}>
+              <span
+                className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+                  tab === "ci" ? "bg-emerald-600" : "bg-gray-200 text-gray-600"
+                }`}
+              >
                 {ciSessions.length}
               </span>
             )}
           </button>
           <button
-            onClick={() => { setTab("integrated"); setSection("pending"); setExpandedPrompt(null); }}
+            onClick={() => {
+              setTab("integrated");
+              setSection("pending");
+              setExpandedPrompt(null);
+            }}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
               tab === "integrated"
                 ? "bg-emerald-700 text-white"
@@ -241,9 +269,11 @@ export default function AdminReportsPage() {
           >
             統合レポート
             {intRequests.length > 0 && (
-              <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
-                tab === "integrated" ? "bg-emerald-600" : "bg-gray-200 text-gray-600"
-              }`}>
+              <span
+                className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+                  tab === "integrated" ? "bg-emerald-600" : "bg-gray-200 text-gray-600"
+                }`}
+              >
                 {intRequests.length}
               </span>
             )}
@@ -271,7 +301,9 @@ export default function AdminReportsPage() {
           >
             作成済み
             {(tab === "integrated" ? intReports : reports).length > 0 && (
-              <span className="ml-1.5 text-xs text-gray-400">{(tab === "integrated" ? intReports : reports).length}</span>
+              <span className="ml-1.5 text-xs text-gray-400">
+                {(tab === "integrated" ? intReports : reports).length}
+              </span>
             )}
           </button>
         </div>
@@ -293,9 +325,7 @@ export default function AdminReportsPage() {
                   <div key={r.id} className="bg-white rounded-lg border border-gray-200 p-4">
                     <div className="flex items-center justify-between">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
-                          {r.name}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">{r.name}</p>
                         <p className="text-xs text-gray-500 mt-0.5">
                           @{r.username}
                           <span className="ml-2">
@@ -333,9 +363,7 @@ export default function AdminReportsPage() {
                 <div key={r.id} className="bg-white rounded-lg border border-gray-200 p-4">
                   <div className="flex items-center justify-between">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
-                        {r.name}
-                      </p>
+                      <p className="text-sm font-medium text-gray-900">{r.name}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         @{r.username}
                         <span className="ml-2">
@@ -369,9 +397,7 @@ export default function AdminReportsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-gray-500 mb-4">
-                レポート未生成: {intRequests.length}件
-              </p>
+              <p className="text-sm text-gray-500 mb-4">レポート未生成: {intRequests.length}件</p>
               {intRequests.map((r) => {
                 const rid = r.request_id;
                 const isExpanded = expandedPrompt === rid;
@@ -384,9 +410,7 @@ export default function AdminReportsPage() {
                   >
                     <div className="flex items-center justify-between p-4">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
-                          {r.name}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">{r.name}</p>
                         <p className="text-xs text-gray-500 mt-0.5">
                           @{r.username}
                           <span className="ml-2">
@@ -394,7 +418,9 @@ export default function AdminReportsPage() {
                           </span>
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
-                          {[r.topic1, r.topic2, r.topic3].map((t) => TOPIC_LABELS[t] ?? `#${t}`).join(" / ")}
+                          {[r.topic1, r.topic2, r.topic3]
+                            .map((t) => TOPIC_LABELS[t] ?? `#${t}`)
+                            .join(" / ")}
                         </p>
                       </div>
                       <button
@@ -444,9 +470,7 @@ export default function AdminReportsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-gray-500 mb-4">
-              レポート未生成: {pendingSessions.length}件
-            </p>
+            <p className="text-sm text-gray-500 mb-4">レポート未生成: {pendingSessions.length}件</p>
             {pendingSessions.map((s) => {
               const sid = s.session_id;
               const isExpanded = expandedPrompt === sid;
@@ -459,9 +483,7 @@ export default function AdminReportsPage() {
                 >
                   <div className="flex items-center justify-between p-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
-                        {s.name}
-                      </p>
+                      <p className="text-sm font-medium text-gray-900">{s.name}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         @{s.username}
                         {s.completed_at && (

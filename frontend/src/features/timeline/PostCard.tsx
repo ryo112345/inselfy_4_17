@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { PostItem } from "./api";
-import { toggleLike, toggleRepost, createPost } from "./api";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
-import { CommentSection } from "./CommentSection";
 import { ArticlePreviewCard, extractArticleId, removeArticleUrl } from "./ArticlePreviewCard";
+import type { PostItem } from "./api";
+import { createPost, toggleLike, toggleRepost } from "./api";
+import { CommentSection } from "./CommentSection";
 
 type Props = {
   post: PostItem;
@@ -126,12 +126,21 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
 
   function handlePostClick(e: React.MouseEvent) {
     const target = e.target as HTMLElement;
-    if (target.closest("a") || target.closest("button") || target.closest("textarea") || target.closest("form")) return;
+    if (
+      target.closest("a") ||
+      target.closest("button") ||
+      target.closest("textarea") ||
+      target.closest("form")
+    )
+      return;
     router.push(`/post/${post.id}`);
   }
 
   return (
-    <article className="border-b border-gray-200/80 px-4 py-3 hover:bg-gray-50/60 transition-colors cursor-pointer" onClick={handlePostClick}>
+    <article
+      className="border-b border-gray-200/80 px-4 py-3 hover:bg-gray-50/60 transition-colors cursor-pointer"
+      onClick={handlePostClick}
+    >
       {post.isRepost && (
         <div className="flex items-center gap-2 ml-12 mb-1 text-[13px] text-gray-400">
           <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor">
@@ -141,19 +150,26 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
         </div>
       )}
       <div className="flex gap-3">
-        <Link href={`/profile/${post.username}`} className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white self-start" style={{ backgroundColor: "var(--accent)" }}>
+        <Link
+          href={`/profile/${post.username}`}
+          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white self-start"
+          style={{ backgroundColor: "var(--accent)" }}
+        >
           {initial}
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1">
-            <Link href={`/profile/${post.username}`} className="font-bold text-[15px] text-gray-900 hover:underline truncate">
+            <Link
+              href={`/profile/${post.username}`}
+              className="font-bold text-[15px] text-gray-900 hover:underline truncate"
+            >
               {post.name || post.username}
             </Link>
-            <span className="text-[15px] text-gray-400 truncate">
-              @{post.username}
-            </span>
+            <span className="text-[15px] text-gray-400 truncate">@{post.username}</span>
             <span className="text-gray-300">·</span>
-            <span className="text-[15px] text-gray-400 whitespace-nowrap">{timeAgo(post.createdAt)}</span>
+            <span className="text-[15px] text-gray-400 whitespace-nowrap">
+              {timeAgo(post.createdAt)}
+            </span>
           </div>
           {(() => {
             const articleId = extractArticleId(post.content);
@@ -169,9 +185,7 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
               </>
             );
           })()}
-          {post.quotedPost && (
-            <QuotedPostCard quote={post.quotedPost} />
-          )}
+          {post.quotedPost && <QuotedPostCard quote={post.quotedPost} />}
           <div className="flex items-center mt-2 -ml-2 max-w-[425px] justify-between">
             <PostAction
               icon={<CommentIcon />}
@@ -196,7 +210,9 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
                     </span>
                     {repostAnimating && <span className="repost-ring" />}
                   </span>
-                  {repostCount > 0 && <span className="text-[13px] -ml-1.5 pr-2">{repostCount}</span>}
+                  {repostCount > 0 && (
+                    <span className="text-[13px] -ml-1.5 pr-2">{repostCount}</span>
+                  )}
                 </span>
               </button>
               {showRepostMenu && (
@@ -211,7 +227,9 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
                     <span className="text-gray-400 group-hover:text-green-600 transition-colors duration-150">
                       <RetweetIcon />
                     </span>
-                    <span className="font-semibold">{reposted ? "リポストを取り消す" : "リポスト"}</span>
+                    <span className="font-semibold">
+                      {reposted ? "リポストを取り消す" : "リポスト"}
+                    </span>
                   </button>
                   <button
                     onClick={handleQuoteClick}
@@ -240,14 +258,38 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
                   {/* {likeAnimating && <span className="like-ring" />} */}
                   {likeAnimating && (
                     <>
-                      <span className="like-particle" style={{ "--angle": "0deg", "--color": "#FF9999" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "45deg", "--color": "#FFCC99" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "90deg", "--color": "#FFEE99" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "135deg", "--color": "#99EEBB" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "180deg", "--color": "#99DDFF" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "225deg", "--color": "#99BBFF" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "270deg", "--color": "#CC99FF" } as React.CSSProperties} />
-                      <span className="like-particle" style={{ "--angle": "315deg", "--color": "#FF99CC" } as React.CSSProperties} />
+                      <span
+                        className="like-particle"
+                        style={{ "--angle": "0deg", "--color": "#FF9999" } as React.CSSProperties}
+                      />
+                      <span
+                        className="like-particle"
+                        style={{ "--angle": "45deg", "--color": "#FFCC99" } as React.CSSProperties}
+                      />
+                      <span
+                        className="like-particle"
+                        style={{ "--angle": "90deg", "--color": "#FFEE99" } as React.CSSProperties}
+                      />
+                      <span
+                        className="like-particle"
+                        style={{ "--angle": "135deg", "--color": "#99EEBB" } as React.CSSProperties}
+                      />
+                      <span
+                        className="like-particle"
+                        style={{ "--angle": "180deg", "--color": "#99DDFF" } as React.CSSProperties}
+                      />
+                      <span
+                        className="like-particle"
+                        style={{ "--angle": "225deg", "--color": "#99BBFF" } as React.CSSProperties}
+                      />
+                      <span
+                        className="like-particle"
+                        style={{ "--angle": "270deg", "--color": "#CC99FF" } as React.CSSProperties}
+                      />
+                      <span
+                        className="like-particle"
+                        style={{ "--angle": "315deg", "--color": "#FF99CC" } as React.CSSProperties}
+                      />
                     </>
                   )}
                 </span>
@@ -264,31 +306,37 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
               onCommentCountChange={setCommentCount}
             />
           )}
-          {showQuoteForm && (
-            <QuoteForm
-              quotedPost={post}
-              onClose={() => setShowQuoteForm(false)}
-            />
-          )}
+          {showQuoteForm && <QuoteForm quotedPost={post} onClose={() => setShowQuoteForm(false)} />}
         </div>
       </div>
     </article>
   );
 }
 
-function QuotedPostCard({ quote }: { quote: { id?: string; content: string; username: string; name: string; createdAt: string } }) {
+function QuotedPostCard({
+  quote,
+}: {
+  quote: { id?: string; content: string; username: string; name: string; createdAt: string };
+}) {
   const initial = quote.name ? quote.name.charAt(0) : quote.username.charAt(0);
   const router = useRouter();
   const content = (
     <div className="px-3 py-2.5">
       <div className="flex items-center gap-1.5 mb-1">
-        <span className="flex w-5 h-5 items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: "var(--accent)" }}>
+        <span
+          className="flex w-5 h-5 items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0"
+          style={{ backgroundColor: "var(--accent)" }}
+        >
           {initial}
         </span>
-        <span className="font-bold text-[13px] text-gray-900 truncate">{quote.name || quote.username}</span>
+        <span className="font-bold text-[13px] text-gray-900 truncate">
+          {quote.name || quote.username}
+        </span>
         <span className="text-[13px] text-gray-400 truncate">@{quote.username}</span>
         <span className="text-gray-300">·</span>
-        <span className="text-[13px] text-gray-400 whitespace-nowrap">{timeAgo(quote.createdAt)}</span>
+        <span className="text-[13px] text-gray-400 whitespace-nowrap">
+          {timeAgo(quote.createdAt)}
+        </span>
       </div>
       <p className="text-[14px] text-gray-900 whitespace-pre-wrap break-words leading-relaxed line-clamp-3">
         {quote.content}
@@ -298,7 +346,14 @@ function QuotedPostCard({ quote }: { quote: { id?: string; content: string; user
   return (
     <div
       className={`mt-2 rounded-2xl border border-gray-200 overflow-hidden hover:bg-gray-50/50 transition-colors ${quote.id ? "cursor-pointer" : ""}`}
-      onClick={quote.id ? (e) => { e.stopPropagation(); router.push(`/post/${quote.id}`); } : undefined}
+      onClick={
+        quote.id
+          ? (e) => {
+              e.stopPropagation();
+              router.push(`/post/${quote.id}`);
+            }
+          : undefined
+      }
     >
       {content}
     </div>
@@ -349,7 +404,10 @@ function QuoteForm({ quotedPost, onClose }: { quotedPost: PostItem; onClose: () 
     <div className="mt-3 rounded-2xl border border-gray-200 bg-white p-3">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-2">
-          <span className="flex shrink-0 w-8 h-8 items-center justify-center rounded-full text-xs font-bold text-white" style={{ backgroundColor: "var(--accent)" }}>
+          <span
+            className="flex shrink-0 w-8 h-8 items-center justify-center rounded-full text-xs font-bold text-white"
+            style={{ backgroundColor: "var(--accent)" }}
+          >
             {initial}
           </span>
           <div className="flex-1 min-w-0">
@@ -364,16 +422,20 @@ function QuoteForm({ quotedPost, onClose }: { quotedPost: PostItem; onClose: () 
             />
           </div>
         </div>
-        <QuotedPostCard quote={{
-          content: quotedPost.content,
-          username: quotedPost.username,
-          name: quotedPost.name,
-          createdAt: quotedPost.createdAt,
-        }} />
+        <QuotedPostCard
+          quote={{
+            content: quotedPost.content,
+            username: quotedPost.username,
+            name: quotedPost.name,
+            createdAt: quotedPost.createdAt,
+          }}
+        />
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2">
             {content.length > 0 && (
-              <span className={`text-xs ${content.length > maxLength - 20 ? "text-rose-500" : "text-gray-400"}`}>
+              <span
+                className={`text-xs ${content.length > maxLength - 20 ? "text-rose-500" : "text-gray-400"}`}
+              >
                 {maxLength - content.length}
               </span>
             )}
@@ -423,10 +485,10 @@ function PostAction({
       className={`group flex-1 flex items-center transition-colors ${active && activeColor ? activeColor : "text-gray-400"}`}
     >
       <span className={`flex items-center rounded-full transition-colors ${hoverColor}`}>
-        <span className="flex items-center justify-center w-11 h-11">
-          {icon}
-        </span>
-        {count !== undefined && count > 0 && <span className="text-[13px] -ml-2 pr-2">{count}</span>}
+        <span className="flex items-center justify-center w-11 h-11">{icon}</span>
+        {count !== undefined && count > 0 && (
+          <span className="text-[13px] -ml-2 pr-2">{count}</span>
+        )}
       </span>
     </button>
   );
@@ -434,7 +496,16 @@ function PostAction({
 
 function CommentIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
@@ -442,7 +513,16 @@ function CommentIcon() {
 
 function RetweetIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <polyline points="17 1 21 5 17 9" />
       <path d="M3 11V9a4 4 0 0 1 4-4h14" />
       <polyline points="7 23 3 19 7 15" />
@@ -453,7 +533,16 @@ function RetweetIcon() {
 
 function QuoteIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
     </svg>
   );
@@ -461,7 +550,16 @@ function QuoteIcon() {
 
 function LikeIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
@@ -469,7 +567,16 @@ function LikeIcon() {
 
 function LikeIconFilled() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
@@ -477,7 +584,16 @@ function LikeIconFilled() {
 
 function ViewIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M18 20V10" />
       <path d="M12 20V4" />
       <path d="M6 20v-6" />
@@ -487,7 +603,16 @@ function ViewIcon() {
 
 function ShareIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
       <polyline points="16 6 12 2 8 6" />
       <line x1="12" y1="2" x2="12" y2="15" />

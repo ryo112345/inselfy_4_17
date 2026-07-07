@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   createContext,
   useCallback,
@@ -9,7 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import type { ReactNode } from "react";
 
 type CompanyUser = {
   id: string;
@@ -44,26 +44,23 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     setCompany(null);
   }, []);
 
-  const login = useCallback(
-    async (email: string, password: string): Promise<CompanyUser> => {
-      const res = await fetch("/api/company/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const err = new Error(data.message || "Login failed");
-        (err as any).code = data.code;
-        throw err;
-      }
-      const data: CompanyUser = await res.json();
-      setCompany(data);
-      return data;
-    },
-    [],
-  );
+  const login = useCallback(async (email: string, password: string): Promise<CompanyUser> => {
+    const res = await fetch("/api/company/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      const err = new Error(data.message || "Login failed");
+      (err as any).code = data.code;
+      throw err;
+    }
+    const data: CompanyUser = await res.json();
+    setCompany(data);
+    return data;
+  }, []);
 
   const refreshPromiseRef = useRef<Promise<boolean> | null>(null);
 
@@ -126,17 +123,13 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     [company, isLoading, login, logout, companyFetch],
   );
 
-  return (
-    <CompanyAuthContext value={value}>{children}</CompanyAuthContext>
-  );
+  return <CompanyAuthContext value={value}>{children}</CompanyAuthContext>;
 }
 
 export function useCompanyAuth() {
   const ctx = useContext(CompanyAuthContext);
   if (!ctx) {
-    throw new Error(
-      "useCompanyAuth must be used within CompanyAuthProvider",
-    );
+    throw new Error("useCompanyAuth must be used within CompanyAuthProvider");
   }
   return ctx;
 }

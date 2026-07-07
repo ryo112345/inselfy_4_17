@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { fetchTemplate, updateTemplate } from "@/features/scout/api";
-import { HighlightInput, HighlightTextarea } from "@/features/scout/components/VariableHighlightField";
+import {
+  HighlightInput,
+  HighlightTextarea,
+} from "@/features/scout/components/VariableHighlightField";
 
 export default function TemplateEditPage() {
   const params = useParams();
@@ -61,8 +64,18 @@ export default function TemplateEditPage() {
   return (
     <div className="space-y-6">
       {/* Back link */}
-      <Link href="/company/scout/templates" className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1">
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <Link
+        href="/company/scout/templates"
+        className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
           <path d="M15 18l-6-6 6-6" />
         </svg>
         テンプレート一覧

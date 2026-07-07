@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PostItem } from "./api";
 import { fetchTimeline } from "./api";
 import { PostCard } from "./PostCard";

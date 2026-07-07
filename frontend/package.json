@@ -9,7 +9,9 @@
     "preview": "next build && next start --hostname 0.0.0.0 --port 3001",
     "lint": "biome check",
     "lint:fix": "biome check --fix --unsafe",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@hey-api/client-fetch": "^0.10.2",

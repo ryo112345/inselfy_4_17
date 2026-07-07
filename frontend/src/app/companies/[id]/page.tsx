@@ -1,11 +1,8 @@
 import { notFound } from "next/navigation";
-import { Gallery } from "./Gallery";
+import { fetchPublicCompanyProfile, fetchPublicTeamScores } from "@/features/company-profile/api";
 import { ExpandableText } from "./ExpandableText";
+import { Gallery } from "./Gallery";
 import { TeamScoresSection } from "./TeamScoresSection";
-import {
-  fetchPublicCompanyProfile,
-  fetchPublicTeamScores,
-} from "@/features/company-profile/api";
 
 export const dynamic = "force-dynamic";
 
@@ -58,16 +55,9 @@ export default async function PublicCompanyProfilePage({
         <section className={`overflow-hidden ${cardClass}`}>
           <div className="relative overflow-hidden">
             {company.coverImageUrl ? (
-              <img
-                src={company.coverImageUrl}
-                alt=""
-                className="w-full"
-              />
+              <img src={company.coverImageUrl} alt="" className="w-full" />
             ) : (
-              <div
-                className="h-44 sm:h-56"
-                style={{ background: "#3D8B6E" }}
-              >
+              <div className="h-44 sm:h-56" style={{ background: "#3D8B6E" }}>
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
               </div>
             )}
@@ -78,20 +68,13 @@ export default async function PublicCompanyProfilePage({
             <div className="absolute -top-10 left-7">
               <div className="h-20 w-20 overflow-hidden rounded-xl border-4 border-white bg-white shadow-[0_4px_14px_rgba(16,24,40,0.1)]">
                 {company.logoUrl ? (
-                  <img
-                    src={company.logoUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <div
                     className="flex h-full w-full items-center justify-center"
                     style={{ background: "#3D8B6E20" }}
                   >
-                    <span
-                      className="text-xl font-bold"
-                      style={{ color: "#3D8B6E" }}
-                    >
+                    <span className="text-xl font-bold" style={{ color: "#3D8B6E" }}>
                       {company.companyName.charAt(0)}
                     </span>
                   </div>
@@ -104,9 +87,7 @@ export default async function PublicCompanyProfilePage({
                 {company.companyName}
               </h1>
               {company.headline && (
-                <p className="mt-1.5 text-lg text-gray-700">
-                  {company.headline}
-                </p>
+                <p className="mt-1.5 text-lg text-gray-700">{company.headline}</p>
               )}
 
               <div className="mt-3 flex flex-wrap items-center gap-2.5 text-sm text-gray-500">
@@ -131,9 +112,7 @@ export default async function PublicCompanyProfilePage({
                   className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition-colors hover:text-emerald-800"
                 >
                   <LinkIcon />
-                  {company.websiteUrl
-                    .replace(/^https?:\/\//, "")
-                    .replace(/\/$/, "")}
+                  {company.websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                   <ExternalIcon />
                 </a>
               )}
@@ -144,7 +123,9 @@ export default async function PublicCompanyProfilePage({
         {/* ─── About ─── */}
         {company.description && (
           <section className={`px-6 py-5 ${cardClass}`}>
-            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">事業内容</h2>
+            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+              事業内容
+            </h2>
             <div className="mt-3">
               <ExpandableText text={company.description} maxLines={6} />
             </div>
@@ -177,10 +158,7 @@ export default async function PublicCompanyProfilePage({
             <div className="mt-5 grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               {statItems.map(({ value, label }) => (
                 <div key={label} className="px-6 py-4 text-center sm:py-2">
-                  <p
-                    className="text-3xl font-bold"
-                    style={{ color: "#3D8B6E" }}
-                  >
+                  <p className="text-3xl font-bold" style={{ color: "#3D8B6E" }}>
                     {value}
                   </p>
                   <p className="mt-1 text-xs text-gray-500">{label}</p>
@@ -193,7 +171,9 @@ export default async function PublicCompanyProfilePage({
         {/* ─── Benefits ─── */}
         {(company.benefits.length > 0 || company.smokingPolicy) && (
           <section className={`px-6 py-5 ${cardClass}`}>
-            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">福利厚生・待遇</h2>
+            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+              福利厚生・待遇
+            </h2>
             <ul className="mt-4 flex flex-wrap gap-2">
               {company.benefits.map((b) => (
                 <li
@@ -241,9 +221,7 @@ export default async function PublicCompanyProfilePage({
                   }`}
                 >
                   <dt className="shrink-0 text-base text-gray-500">{label}</dt>
-                  <dd className="text-right text-base font-medium text-gray-900">
-                    {value}
-                  </dd>
+                  <dd className="text-right text-base font-medium text-gray-900">{value}</dd>
                 </div>
               ))}
             </dl>

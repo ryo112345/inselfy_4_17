@@ -1,25 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/features/auth/auth-context";
-import { applyToJob, checkApplied } from "@/features/job-application/api";
-import { Gallery } from "../../companies/[id]/Gallery";
-import { fetchPublicJobPosting } from "@/features/job-posting/api";
-import type { JobPosting } from "@/features/scout/types";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
+  CI_FULL_LABELS,
+  CI_ORDER,
   SingleRadarChart,
-  WV_ORDER, WV_FULL_LABELS,
-  CI_ORDER, CI_FULL_LABELS,
+  WV_FULL_LABELS,
+  WV_ORDER,
 } from "@/app/components/SingleRadarChart";
-import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
+import { useAuth } from "@/features/auth/auth-context";
 import { getLatestResult as getLatestCiResult } from "@/features/career-interest/api";
 import {
+  type PublicCompanyProfile as CompanyData,
   fetchPublicCompanyProfile,
   fetchPublicTeamScores,
-  type PublicCompanyProfile as CompanyData,
 } from "@/features/company-profile/api";
+import { applyToJob, checkApplied } from "@/features/job-application/api";
+import { fetchPublicJobPosting } from "@/features/job-posting/api";
+import type { JobPosting } from "@/features/scout/types";
+import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
+import { Gallery } from "../../companies/[id]/Gallery";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
@@ -56,8 +58,7 @@ const MOCK = {
     ],
   },
   job: {
-    title:
-      "バックエンドエンジニア｜Go / PostgreSQL / AWS でプロダクト基盤を設計",
+    title: "バックエンドエンジニア｜Go / PostgreSQL / AWS でプロダクト基盤を設計",
     jobCategory: "エンジニア",
     employmentType: "正社員",
     hiringCount: "1〜2名",
@@ -71,14 +72,7 @@ const MOCK = {
       "現在エンジニア5名のチームで、全員がフルスタック志向を持ちながらもバックエンドに強みを持つメンバーが揃っています。コードレビューを重視し、技術的な議論を日常的に行うカルチャーです。",
     skillsGained:
       "Go言語での大規模API設計スキル、統計モデルの実装経験、ベクトルデータベースの運用知識、AWSインフラの設計・構築スキルが身につきます。",
-    tags: [
-      "Go",
-      "PostgreSQL",
-      "AWS",
-      "pgvector",
-      "API設計",
-      "マッチングアルゴリズム",
-    ],
+    tags: ["Go", "PostgreSQL", "AWS", "pgvector", "API設計", "マッチングアルゴリズム"],
     requiredQualifications:
       "Go言語でのWebアプリケーション開発経験3年以上。RDBMSを用いたバックエンド開発の実務経験。",
     preferredQualifications:
@@ -88,19 +82,16 @@ const MOCK = {
     jobDescriptionChangeScope: "当面なし",
     contractType: "無期",
     probationPeriod: "入社後3ヶ月（条件変更なし）",
-    workHours:
-      "フレックスタイム制（コアタイムなし）標準労働時間8時間",
+    workHours: "フレックスタイム制（コアタイムなし）標準労働時間8時間",
     breakTime: "60分",
     holidays:
       "完全週休2日制（土日祝）、年末年始休暇、有給休暇（入社半年後10日付与）、慶弔休暇、産前産後休暇、育児休暇",
     salaryMin: 600,
     salaryMax: 1000,
-    salaryDetail:
-      "月給50万円〜83万円（固定残業代45時間分を含む）。経験・能力を考慮の上決定。",
+    salaryDetail: "月給50万円〜83万円（固定残業代45時間分を含む）。経験・能力を考慮の上決定。",
     insurance: "健康保険、厚生年金、雇用保険、労災保険",
     remotePolicy: "フルリモート",
-    selectionProcess:
-      "書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定",
+    selectionProcess: "書類選考 → 技術面接（コーディングテスト含む） → 最終面接 → 内定",
     publishedAt: "2026-04-15",
   },
   team: {
@@ -123,13 +114,7 @@ const AVATAR_TONES = [
   { bg: "#EEF3F4", fg: "#5A6B7B" },
 ];
 
-function SectionTitle({
-  children,
-  icon,
-}: {
-  children: React.ReactNode;
-  icon?: React.ReactNode;
-}) {
+function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       {icon && (
@@ -140,9 +125,7 @@ function SectionTitle({
           {icon}
         </span>
       )}
-      <h2 className="text-xl font-bold tracking-tight text-gray-900">
-        {children}
-      </h2>
+      <h2 className="text-xl font-bold tracking-tight text-gray-900">{children}</h2>
     </div>
   );
 }
@@ -162,9 +145,7 @@ function StatCell({
         <span className="text-gray-400">{icon}</span>
         {label}
       </div>
-      <div className="text-xl font-bold leading-tight text-gray-900 sm:text-2xl">
-        {value}
-      </div>
+      <div className="text-xl font-bold leading-tight text-gray-900 sm:text-2xl">{value}</div>
     </div>
   );
 }
@@ -187,23 +168,20 @@ function HighlightCard({
       <div className="flex items-center gap-3">
         <span
           className="flex h-11 w-11 items-center justify-center rounded-xl"
-          style={{ backgroundColor: tone.bg, color: tone.fg, boxShadow: `inset 0 0 0 1px ${tone.ring}` }}
+          style={{
+            backgroundColor: tone.bg,
+            color: tone.fg,
+            boxShadow: `inset 0 0 0 1px ${tone.ring}`,
+          }}
         >
           {icon}
         </span>
-        <span
-          className="text-sm font-semibold tracking-wide"
-          style={{ color: tone.fg }}
-        >
+        <span className="text-sm font-semibold tracking-wide" style={{ color: tone.fg }}>
           {label}
         </span>
       </div>
-      <h3 className="text-lg font-bold leading-snug text-gray-900">
-        {title}
-      </h3>
-      <p className="text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
-        {body}
-      </p>
+      <h3 className="text-lg font-bold leading-snug text-gray-900">{title}</h3>
+      <p className="text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">{body}</p>
     </div>
   );
 }
@@ -231,9 +209,7 @@ function ConditionGroup({
       <dl className="flex flex-col gap-3.5">
         {rows.map((r) => (
           <div key={r.label} className="flex flex-col gap-1">
-            <dt className="text-xs font-medium tracking-wide text-gray-500">
-              {r.label}
-            </dt>
+            <dt className="text-xs font-medium tracking-wide text-gray-500">{r.label}</dt>
             <dd className="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap">
               {r.value}
             </dd>
@@ -266,12 +242,8 @@ export default function JobDetailPage() {
       getLatestWvResult(user.id).catch(() => null),
       getLatestCiResult(user.id).catch(() => null),
     ]).then(([wv, ci]) => {
-      setMyWVScores(
-        wv?.values?.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
-      );
-      setMyCIScores(
-        ci?.typeScores?.map((s) => ({ id: s.typeId, score: s.score })) ?? null,
-      );
+      setMyWVScores(wv?.values?.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null);
+      setMyCIScores(ci?.typeScores?.map((s) => ({ id: s.typeId, score: s.score })) ?? null);
     });
   }, [isAuthenticated, user, jobId]);
 
@@ -344,9 +316,7 @@ export default function JobDetailPage() {
           {job.salaryMin}
           <span className="text-base font-medium text-gray-500">〜</span>
           {job.salaryMax}
-          <span className="ml-0.5 text-sm font-medium text-gray-500">
-            万円
-          </span>
+          <span className="ml-0.5 text-sm font-medium text-gray-500">万円</span>
         </span>
       ),
       icon: <YenIcon />,
@@ -415,44 +385,35 @@ export default function JobDetailPage() {
         <section className={`overflow-hidden ${cardClass}`}>
           {job.coverImageUrl && (
             <div className="relative w-full overflow-hidden bg-gray-100 aspect-[16/9]">
-              <img
-                src={job.coverImageUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
+              <img src={job.coverImageUrl} alt="" className="h-full w-full object-cover" />
             </div>
           )}
 
           <div className="px-6 pb-6 pt-6 sm:px-8">
-            {company && <Link
-              href={`/companies/${company.id}`}
-              className="inline-flex items-center gap-3 group"
-            >
-              <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
-                {company.logoUrl ? (
-                  <img
-                    src={company.logoUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span
-                    className="text-sm font-bold"
-                    style={{ color: ACCENT }}
-                  >
-                    {company.companyName.charAt(0)}
-                  </span>
-                )}
-              </div>
-              <div>
-                <p className="text-base font-medium text-gray-900 group-hover:underline">
-                  {company.companyName}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {company.industry} / {company.location}
-                </p>
-              </div>
-            </Link>}
+            {company && (
+              <Link
+                href={`/companies/${company.id}`}
+                className="inline-flex items-center gap-3 group"
+              >
+                <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
+                  {company.logoUrl ? (
+                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-sm font-bold" style={{ color: ACCENT }}>
+                      {company.companyName.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-base font-medium text-gray-900 group-hover:underline">
+                    {company.companyName}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {company.industry} / {company.location}
+                  </p>
+                </div>
+              </Link>
+            )}
 
             <h1 className="mt-5 text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px]">
               {job.title}
@@ -488,12 +449,7 @@ export default function JobDetailPage() {
             {/* Quick Facts strip */}
             <div className="mt-6 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-gray-50/40 sm:grid-cols-4 sm:divide-y-0">
               {quickFacts.map((f) => (
-                <StatCell
-                  key={f.label}
-                  label={f.label}
-                  value={f.value}
-                  icon={f.icon}
-                />
+                <StatCell key={f.label} label={f.label} value={f.value} icon={f.icon} />
               ))}
             </div>
 
@@ -516,9 +472,7 @@ export default function JobDetailPage() {
         {/* ─── Highlights (4 cards in 2x2 grid) ─── */}
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<LayersIcon />}>ハイライト</SectionTitle>
-          <p className="mt-2 text-sm text-gray-500">
-            この仕事を一目で掴むための4つの視点
-          </p>
+          <p className="mt-2 text-sm text-gray-500">この仕事を一目で掴むための4つの視点</p>
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {highlightCards.map((c) => (
               <HighlightCard key={c.label} {...c} />
@@ -539,122 +493,132 @@ export default function JobDetailPage() {
         )}
 
         {/* ─── Team description ─── */}
-        {(job.teamDescription || (job.teamMembers && job.teamMembers.length > 0) || job.teamLabel || teamWVScores || teamCIScores) && (
-        <section className={`overflow-hidden ${cardClass}`}>
-          <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
-            {((job.teamMembers && job.teamMembers.length > 0) || job.teamLabel) && (
-              <div
-                className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
-                style={{ background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)` }}
-              >
-                {job.teamMembers && job.teamMembers.length > 0 && (
-                  <div className="flex items-center -space-x-[18px]">
-                    {job.teamMembers.map((m: { name: string; photoUrl?: string }, i: number) => {
-                      const colors = [
-                        { bg: "#EAF4F0", fg: "#3D8B6E" },
-                        { bg: "#EEF2FB", fg: "#3B6FCC" },
-                        { bg: "#FEF7E6", fg: "#B07914" },
-                        { bg: "#F3EEFB", fg: "#7647C5" },
-                        { bg: "#FEE", fg: "#C54747" },
-                      ];
-                      const color = colors[i % colors.length];
-                      return (
-                        <div
-                          key={i}
-                          className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
-                          style={{ backgroundColor: color.bg, color: color.fg }}
-                        >
-                          {m.photoUrl ? (
-                            <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
-                          ) : (
-                            <span className={m.name.length >= 5 ? "text-xs" : m.name.length === 4 ? "text-sm" : m.name.length === 3 ? "text-base" : m.name.length === 2 ? "text-xl" : "text-2xl"}>
-                              {m.name.slice(0, 5)}
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
+        {(job.teamDescription ||
+          (job.teamMembers && job.teamMembers.length > 0) ||
+          job.teamLabel ||
+          teamWVScores ||
+          teamCIScores) && (
+          <section className={`overflow-hidden ${cardClass}`}>
+            <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
+              {((job.teamMembers && job.teamMembers.length > 0) || job.teamLabel) && (
+                <div
+                  className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
+                  style={{
+                    background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)`,
+                  }}
+                >
+                  {job.teamMembers && job.teamMembers.length > 0 && (
+                    <div className="flex items-center -space-x-[18px]">
+                      {job.teamMembers.map((m: { name: string; photoUrl?: string }, i: number) => {
+                        const colors = [
+                          { bg: "#EAF4F0", fg: "#3D8B6E" },
+                          { bg: "#EEF2FB", fg: "#3B6FCC" },
+                          { bg: "#FEF7E6", fg: "#B07914" },
+                          { bg: "#F3EEFB", fg: "#7647C5" },
+                          { bg: "#FEE", fg: "#C54747" },
+                        ];
+                        const color = colors[i % colors.length];
+                        return (
+                          <div
+                            key={i}
+                            className="flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
+                            style={{ backgroundColor: color.bg, color: color.fg }}
+                          >
+                            {m.photoUrl ? (
+                              <img
+                                src={m.photoUrl}
+                                alt={m.name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span
+                                className={
+                                  m.name.length >= 5
+                                    ? "text-xs"
+                                    : m.name.length === 4
+                                      ? "text-sm"
+                                      : m.name.length === 3
+                                        ? "text-base"
+                                        : m.name.length === 2
+                                          ? "text-xl"
+                                          : "text-2xl"
+                                }
+                              >
+                                {m.name.slice(0, 5)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {job.teamLabel && (
+                    <span className="text-base font-semibold" style={{ color: ACCENT }}>
+                      {job.teamLabel}
+                    </span>
+                  )}
+                </div>
+              )}
+              <div className="px-6 py-6 sm:px-7 sm:py-7">
+                <SectionTitle icon={<UsersIcon />}>チーム紹介</SectionTitle>
+                {job.teamDescription && (
+                  <p className="mt-4 text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
+                    {job.teamDescription}
+                  </p>
+                )}
+              </div>
+            </div>
+            {(teamWVScores || teamCIScores) && (
+              <div className="border-t border-gray-200 px-6 py-5">
+                <h3 className="border-l-[3px] border-emerald-600 pl-3 text-lg font-bold text-gray-900 mb-4">
+                  チーム診断結果
+                </h3>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="flex flex-col items-center">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Work Values</h4>
+                    {teamWVScores ? (
+                      <SingleRadarChart
+                        scores={teamWVScores}
+                        order={WV_ORDER}
+                        fullLabels={WV_FULL_LABELS}
+                        isWV={true}
+                        compareScores={myWVScores}
+                        compareLabel="あなた"
+                        mainLabel="チーム"
+                      />
+                    ) : (
+                      <div className="py-10 text-sm text-gray-400">データ準備中</div>
+                    )}
                   </div>
-                )}
-                {job.teamLabel && (
-                  <span className="text-base font-semibold" style={{ color: ACCENT }}>
-                    {job.teamLabel}
-                  </span>
-                )}
+                  <div className="flex flex-col items-center">
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Career Interest</h4>
+                    {teamCIScores ? (
+                      <SingleRadarChart
+                        scores={teamCIScores}
+                        order={CI_ORDER}
+                        fullLabels={CI_FULL_LABELS}
+                        isWV={false}
+                        compareScores={myCIScores}
+                        compareLabel="あなた"
+                        mainLabel="チーム"
+                      />
+                    ) : (
+                      <div className="py-10 text-sm text-gray-400">データ準備中</div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
-            <div className="px-6 py-6 sm:px-7 sm:py-7">
-              <SectionTitle icon={<UsersIcon />}>チーム紹介</SectionTitle>
-              {job.teamDescription && (
-                <p className="mt-4 text-base leading-relaxed text-gray-700 whitespace-pre-wrap">
-                  {job.teamDescription}
-                </p>
-              )}
-            </div>
-          </div>
-          {(teamWVScores || teamCIScores) && (
-            <div className="border-t border-gray-200 px-6 py-5">
-              <h3 className="border-l-[3px] border-emerald-600 pl-3 text-lg font-bold text-gray-900 mb-4">
-                チーム診断結果
-              </h3>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <div className="flex flex-col items-center">
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">Work Values</h4>
-                  {teamWVScores ? (
-                    <SingleRadarChart
-                      scores={teamWVScores}
-                      order={WV_ORDER}
-                      fullLabels={WV_FULL_LABELS}
-                      isWV={true}
-                      compareScores={myWVScores}
-                      compareLabel="あなた"
-                      mainLabel="チーム"
-                    />
-                  ) : (
-                    <div className="py-10 text-sm text-gray-400">データ準備中</div>
-                  )}
-                </div>
-                <div className="flex flex-col items-center">
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">Career Interest</h4>
-                  {teamCIScores ? (
-                    <SingleRadarChart
-                      scores={teamCIScores}
-                      order={CI_ORDER}
-                      fullLabels={CI_FULL_LABELS}
-                      isWV={false}
-                      compareScores={myCIScores}
-                      compareLabel="あなた"
-                      mainLabel="チーム"
-                    />
-                  ) : (
-                    <div className="py-10 text-sm text-gray-400">データ準備中</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
+          </section>
         )}
 
         {/* ─── Conditions (3-column grouped) ─── */}
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<DocumentIcon />}>募集要項</SectionTitle>
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <ConditionGroup
-              title="勤務情報"
-              rows={workConditions}
-              icon={<ClockIcon />}
-            />
-            <ConditionGroup
-              title="給与・報酬"
-              rows={compensationConditions}
-              icon={<YenIcon />}
-            />
-            <ConditionGroup
-              title="契約・その他"
-              rows={contractConditions}
-              icon={<ShieldIcon />}
-            />
+            <ConditionGroup title="勤務情報" rows={workConditions} icon={<ClockIcon />} />
+            <ConditionGroup title="給与・報酬" rows={compensationConditions} icon={<YenIcon />} />
+            <ConditionGroup title="契約・その他" rows={contractConditions} icon={<ShieldIcon />} />
           </div>
         </section>
 
@@ -698,19 +662,21 @@ export default function JobDetailPage() {
               ...benefitsList,
               ...(company?.benefits ?? []),
               ...(job.smokingPolicy ? [job.smokingPolicy] : []),
-            ].filter((v, i, a) => a.indexOf(v) === i).map((b) => (
-              <li
-                key={b}
-                className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-medium"
-                style={{
-                  borderColor: `${ACCENT}40`,
-                  backgroundColor: `${ACCENT}12`,
-                  color: ACCENT,
-                }}
-              >
-                {b}
-              </li>
-            ))}
+            ]
+              .filter((v, i, a) => a.indexOf(v) === i)
+              .map((b) => (
+                <li
+                  key={b}
+                  className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-medium"
+                  style={{
+                    borderColor: `${ACCENT}40`,
+                    backgroundColor: `${ACCENT}12`,
+                    color: ACCENT,
+                  }}
+                >
+                  {b}
+                </li>
+              ))}
           </ul>
         </section>
 
@@ -727,9 +693,7 @@ export default function JobDetailPage() {
                   >
                     {i + 1}
                   </span>
-                  <span className="text-base font-medium text-gray-800">
-                    {step}
-                  </span>
+                  <span className="text-base font-medium text-gray-800">{step}</span>
                 </div>
                 {i < arr.length - 1 && (
                   <svg
@@ -750,52 +714,44 @@ export default function JobDetailPage() {
 
         {/* ─── Company Info Mini ─── */}
         {company && (
-        <section className={`overflow-hidden ${cardClass}`}>
-          <div className="px-6 py-6 sm:px-7">
-            <SectionTitle icon={<BuildingIcon />}>企業情報</SectionTitle>
-            <Link
-              href={`/companies/${company.id}`}
-              className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors group"
-            >
-              <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
-                {company.logoUrl ? (
-                  <img
-                    src={company.logoUrl}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span
-                    className="text-lg font-bold"
-                    style={{ color: ACCENT }}
-                  >
-                    {company.companyName.charAt(0)}
-                  </span>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-lg font-bold text-gray-900 group-hover:underline">
-                  {company.companyName}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  {company.industry} / {company.location} / {company.employeeCount}
-                </p>
-              </div>
-              <svg
-                className="h-5 w-5 text-gray-400 shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
+          <section className={`overflow-hidden ${cardClass}`}>
+            <div className="px-6 py-6 sm:px-7">
+              <SectionTitle icon={<BuildingIcon />}>企業情報</SectionTitle>
+              <Link
+                href={`/companies/${company.id}`}
+                className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors group"
               >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </Link>
-          </div>
-        </section>
+                <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
+                  {company.logoUrl ? (
+                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-lg font-bold" style={{ color: ACCENT }}>
+                      {company.companyName.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-lg font-bold text-gray-900 group-hover:underline">
+                    {company.companyName}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {company.industry} / {company.location} / {company.employeeCount}
+                  </p>
+                </div>
+                <svg
+                  className="h-5 w-5 text-gray-400 shrink-0"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </Link>
+            </div>
+          </section>
         )}
-
 
         <p className="text-center text-sm text-gray-400 mt-2">
           {new Date(job.createdAt).toLocaleDateString("ja-JP")} 掲載
@@ -939,11 +895,7 @@ function SparkIcon() {
 
 function StarIcon() {
   return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-    >
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2l2.9 6.9L22 10l-5.5 4.7L18 22l-6-3.6L6 22l1.5-7.3L2 10l7.1-1.1z" />
     </svg>
   );
@@ -968,11 +920,7 @@ function FlagIcon() {
 
 function BoltIcon() {
   return (
-    <svg
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-    >
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
       <path d="M13 2L3 14h7l-1 8 11-13h-7z" />
     </svg>
   );

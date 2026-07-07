@@ -1,11 +1,11 @@
-import { fetchTimeline } from "@/features/timeline/api";
-import { Timeline } from "@/features/timeline/Timeline";
-import { PostForm } from "@/features/timeline/PostForm";
-import { FeedTabs } from "@/features/timeline/FeedTabs";
-import { Sidebar } from "@/app/components/Sidebar";
-import { LandingPage } from "@/app/components/LandingPage";
-import { MobilePostButton } from "@/features/timeline/MobilePostButton";
 import { cookies } from "next/headers";
+import { LandingPage } from "@/app/components/LandingPage";
+import { Sidebar } from "@/app/components/Sidebar";
+import { fetchTimeline } from "@/features/timeline/api";
+import { FeedTabs } from "@/features/timeline/FeedTabs";
+import { MobilePostButton } from "@/features/timeline/MobilePostButton";
+import { PostForm } from "@/features/timeline/PostForm";
+import { Timeline } from "@/features/timeline/Timeline";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
@@ -29,11 +29,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Sidebar
-        username={username}
-        displayName={displayName}
-        defaultOpen={sidebarOpen}
-      />
+      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
       <div className="flex justify-center min-h-screen md:pl-[50px]">
         <main className="w-full max-w-[600px] bg-white border-x border-gray-200/80">
           <FeedTabs />

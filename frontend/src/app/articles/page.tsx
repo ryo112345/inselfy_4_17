@@ -1,7 +1,7 @@
-import { fetchArticles } from "@/features/articles/api";
-import { ArticlesPageClient } from "@/features/articles/ArticlesPageClient";
-import { Sidebar } from "@/app/components/Sidebar";
 import { cookies } from "next/headers";
+import { Sidebar } from "@/app/components/Sidebar";
+import { ArticlesPageClient } from "@/features/articles/ArticlesPageClient";
+import { fetchArticles } from "@/features/articles/api";
 
 export default async function ArticlesPage() {
   const cookieStore = await cookies();
@@ -19,18 +19,11 @@ export default async function ArticlesPage() {
 
   return (
     <>
-      <Sidebar
-        username={username}
-        displayName={displayName}
-        defaultOpen={sidebarOpen}
-      />
+      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
       <div className="min-h-screen md:pl-[50px] bg-white">
         <div className="max-w-[1100px] mx-auto px-6 py-6">
           {articles ? (
-            <ArticlesPageClient
-              articles={articles.items ?? []}
-              isLoggedIn={isLoggedIn}
-            />
+            <ArticlesPageClient articles={articles.items ?? []} isLoggedIn={isLoggedIn} />
           ) : (
             <div className="flex items-center justify-center py-16 text-gray-400">
               <p className="text-sm">記事を読み込めませんでした</p>

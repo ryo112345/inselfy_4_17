@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { selectSlot, fetchProposalSlots } from "../api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fetchProposalSlots, selectSlot } from "../api";
 
 type Slot = {
   id: string;
@@ -97,7 +97,17 @@ type Selection = {
 
 type ConfirmedSlot = { startTime: string; endTime: string };
 
-export function ProposalCard({ proposalId, slots, message, location, expiresAt, durationMinutes, isCandidate, status: statusProp, onConfirmed }: Props) {
+export function ProposalCard({
+  proposalId,
+  slots,
+  message,
+  location,
+  expiresAt,
+  durationMinutes,
+  isCandidate,
+  status: statusProp,
+  onConfirmed,
+}: Props) {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [confirmed, setConfirmed] = useState(statusProp === "confirmed");
@@ -114,9 +124,11 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
         if (s === "confirmed") {
           setConfirmed(true);
           const selected = res.slots?.find(
-            (sl: { status: string; startTime: string; endTime: string }) => sl.status === "selected",
+            (sl: { status: string; startTime: string; endTime: string }) =>
+              sl.status === "selected",
           );
-          if (selected) setConfirmedSlot({ startTime: selected.startTime, endTime: selected.endTime });
+          if (selected)
+            setConfirmedSlot({ startTime: selected.startTime, endTime: selected.endTime });
         }
       })
       .catch(() => {});
@@ -158,16 +170,17 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
   const initialWeekStart = useMemo(() => {
     if (slots.length === 0) return getMonday(new Date());
     const earliest = slots.reduce((min, s) =>
-      new Date(s.start_time) < new Date(min.start_time) ? s : min
+      new Date(s.start_time) < new Date(min.start_time) ? s : min,
     );
     return getMonday(new Date(earliest.start_time));
   }, [slots]);
 
   const [weekStart, setWeekStart] = useState(initialWeekStart);
 
-  const weekDays = useMemo(() =>
-    Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
-  [weekStart]);
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart],
+  );
 
   const allWeeks = useMemo(() => {
     const weeks = new Set<string>();
@@ -185,19 +198,21 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
   const hasNext = currentWeekIdx < allWeeks.length - 1;
 
   const windows: AvailableWindow[] = useMemo(() => {
-    return slots.map((slot) => {
-      const start = new Date(slot.start_time);
-      const end = new Date(slot.end_time);
-      const dayStr = toDateStr(start);
-      const dayIndex = weekDays.findIndex((d) => toDateStr(d) === dayStr);
-      return {
-        slotId: slot.id,
-        dayIndex,
-        startMinutes: start.getHours() * 60 + start.getMinutes(),
-        endMinutes: end.getHours() * 60 + end.getMinutes(),
-        baseDate: start,
-      };
-    }).filter((w) => w.dayIndex >= 0);
+    return slots
+      .map((slot) => {
+        const start = new Date(slot.start_time);
+        const end = new Date(slot.end_time);
+        const dayStr = toDateStr(start);
+        const dayIndex = weekDays.findIndex((d) => toDateStr(d) === dayStr);
+        return {
+          slotId: slot.id,
+          dayIndex,
+          startMinutes: start.getHours() * 60 + start.getMinutes(),
+          endMinutes: end.getHours() * 60 + end.getMinutes(),
+          baseDate: start,
+        };
+      })
+      .filter((w) => w.dayIndex >= 0);
   }, [slots, weekDays]);
 
   const { minHour, maxHour } = useMemo(() => {
@@ -214,40 +229,48 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
   const hours = maxHour - minHour;
   const offsetY = (minutes: number) => ((minutes - minHour * 60) / 60) * HOUR_HEIGHT;
 
-  const handleClick = useCallback((dayIdx: number, e: React.MouseEvent<HTMLDivElement>) => {
-    if (!canSelect) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const rawMinutes = (y / HOUR_HEIGHT) * 60 + minHour * 60;
-    const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES;
-    const endMin = snapped + duration;
+  const handleClick = useCallback(
+    (dayIdx: number, e: React.MouseEvent<HTMLDivElement>) => {
+      if (!canSelect) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const rawMinutes = (y / HOUR_HEIGHT) * 60 + minHour * 60;
+      const snapped = Math.round(rawMinutes / SNAP_MINUTES) * SNAP_MINUTES;
+      const endMin = snapped + duration;
 
-    const window = windows.find(
-      (w) => w.dayIndex === dayIdx && snapped >= w.startMinutes && endMin <= w.endMinutes,
-    );
-    if (!window) return;
+      const window = windows.find(
+        (w) => w.dayIndex === dayIdx && snapped >= w.startMinutes && endMin <= w.endMinutes,
+      );
+      if (!window) return;
 
-    const startDate = new Date(window.baseDate);
-    startDate.setHours(Math.floor(snapped / 60), snapped % 60, 0, 0);
-    const endDate = new Date(window.baseDate);
-    endDate.setHours(Math.floor(endMin / 60), endMin % 60, 0, 0);
+      const startDate = new Date(window.baseDate);
+      startDate.setHours(Math.floor(snapped / 60), snapped % 60, 0, 0);
+      const endDate = new Date(window.baseDate);
+      endDate.setHours(Math.floor(endMin / 60), endMin % 60, 0, 0);
 
-    setSelection({
-      slotId: window.slotId,
-      dayIndex: dayIdx,
-      startMinutes: snapped,
-      endMinutes: endMin,
-      startIso: startDate.toISOString(),
-      endIso: endDate.toISOString(),
-    });
-  }, [canSelect, duration, minHour, windows]);
+      setSelection({
+        slotId: window.slotId,
+        dayIndex: dayIdx,
+        startMinutes: snapped,
+        endMinutes: endMin,
+        startIso: startDate.toISOString(),
+        endIso: endDate.toISOString(),
+      });
+    },
+    [canSelect, duration, minHour, windows],
+  );
 
   const handleConfirm = async () => {
     if (!selection) return;
     setConfirming(true);
     setError(null);
     try {
-      const res = await selectSlot(proposalId, selection.slotId, selection.startIso, selection.endIso);
+      const res = await selectSlot(
+        proposalId,
+        selection.slotId,
+        selection.startIso,
+        selection.endIso,
+      );
       setConfirmed(true);
       setConfirmedSlot({ startTime: res.interview.startTime, endTime: res.interview.endTime });
       onConfirmed?.();
@@ -262,15 +285,27 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
     return (
       <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3">
         <div className="flex items-center gap-2 mb-1">
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth={2.5}>
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#16a34a"
+            strokeWidth={2.5}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
           <span className="text-sm font-semibold text-green-800">日程が確定しました</span>
         </div>
         {confirmedSlot && (
           <p className="text-sm text-green-700 ml-5">
-            {new Date(confirmedSlot.startTime).toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "short" })}
-            {" "}{formatTimeFromDate(new Date(confirmedSlot.startTime))} – {formatTimeFromDate(new Date(confirmedSlot.endTime))}
+            {new Date(confirmedSlot.startTime).toLocaleDateString("ja-JP", {
+              month: "long",
+              day: "numeric",
+              weekday: "short",
+            })}{" "}
+            {formatTimeFromDate(new Date(confirmedSlot.startTime))} –{" "}
+            {formatTimeFromDate(new Date(confirmedSlot.endTime))}
           </p>
         )}
       </div>
@@ -298,7 +333,14 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
       {/* Header */}
       <div className="px-4 py-3 border-b border-blue-100">
         <div className="flex items-center gap-2 mb-1">
-          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth={2}>
+          <svg
+            width={18}
+            height={18}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#2563eb"
+            strokeWidth={2}
+          >
             <rect x="3" y="4" width="18" height="18" rx="2" />
             <path d="M16 2v4M8 2v4M3 10h18" />
           </svg>
@@ -314,7 +356,8 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
             const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
             return (
               <p key={i} className="text-sm font-medium text-gray-900">
-                {s.getMonth() + 1}/{s.getDate()}({weekdays[s.getDay()]}) {formatTimeFromDate(s)} – {formatTimeFromDate(e)}
+                {s.getMonth() + 1}/{s.getDate()}({weekdays[s.getDay()]}) {formatTimeFromDate(s)} –{" "}
+                {formatTimeFromDate(e)}
               </p>
             );
           })}
@@ -333,7 +376,16 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
               disabled={!hasPrev}
               className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default"
             >
-              <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+              <svg
+                width={12}
+                height={12}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
           )}
           <span className="text-xs font-medium text-gray-500">{formatWeekRange(weekStart)}</span>
@@ -343,7 +395,16 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
               disabled={!hasNext}
               className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default"
             >
-              <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+              <svg
+                width={12}
+                height={12}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
             </button>
           )}
         </div>
@@ -357,7 +418,9 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
             return (
               <div key={i} className={`py-1 text-center ${today ? "bg-blue-50 rounded-t" : ""}`}>
                 <p className="text-[10px] text-gray-500">{DAY_LABELS[d.getDay()]}</p>
-                <p className={`text-xs font-semibold ${hasWindow ? "text-blue-600" : today ? "text-blue-500" : "text-gray-400"}`}>
+                <p
+                  className={`text-xs font-semibold ${hasWindow ? "text-blue-600" : today ? "text-blue-500" : "text-gray-400"}`}
+                >
                   {d.getDate()}
                 </p>
               </div>
@@ -366,15 +429,23 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
         </div>
 
         {/* Time grid */}
-        <div className="overflow-y-auto" style={{ maxHeight: `${Math.min(hours, 6) * HOUR_HEIGHT + 8}px` }}>
-          <div className="grid grid-cols-[36px_repeat(7,1fr)]" style={{ height: `${hours * HOUR_HEIGHT}px` }}>
+        <div
+          className="overflow-y-auto"
+          style={{ maxHeight: `${Math.min(hours, 6) * HOUR_HEIGHT + 8}px` }}
+        >
+          <div
+            className="grid grid-cols-[36px_repeat(7,1fr)]"
+            style={{ height: `${hours * HOUR_HEIGHT}px` }}
+          >
             {/* Hour labels */}
             <div className="relative">
               {Array.from({ length: hours }, (_, i) => (
-                <div key={i} className="absolute right-1" style={{ top: `${i * HOUR_HEIGHT - 5}px` }}>
-                  <span className="text-[9px] text-gray-400">
-                    {formatTime((minHour + i) * 60)}
-                  </span>
+                <div
+                  key={i}
+                  className="absolute right-1"
+                  style={{ top: `${i * HOUR_HEIGHT - 5}px` }}
+                >
+                  <span className="text-[9px] text-gray-400">{formatTime((minHour + i) * 60)}</span>
                 </div>
               ))}
             </div>
@@ -410,19 +481,21 @@ export function ProposalCard({ proposalId, slots, message, location, expiresAt, 
                   ))}
 
                   {/* Selected slot */}
-                  {selection && selection.dayIndex === dayIdx && toDateStr(weekDays[dayIdx]) === toDateStr(new Date(selection.startIso)) && (
-                    <div
-                      className="absolute left-0.5 right-0.5 rounded-md bg-blue-600 text-white px-1.5 py-0.5 z-10 shadow-md ring-2 ring-blue-600 ring-offset-1"
-                      style={{
-                        top: `${offsetY(selection.startMinutes)}px`,
-                        height: `${offsetY(selection.endMinutes) - offsetY(selection.startMinutes)}px`,
-                      }}
-                    >
-                      <p className="text-[10px] font-medium leading-tight">
-                        {formatTime(selection.startMinutes)} – {formatTime(selection.endMinutes)}
-                      </p>
-                    </div>
-                  )}
+                  {selection &&
+                    selection.dayIndex === dayIdx &&
+                    toDateStr(weekDays[dayIdx]) === toDateStr(new Date(selection.startIso)) && (
+                      <div
+                        className="absolute left-0.5 right-0.5 rounded-md bg-blue-600 text-white px-1.5 py-0.5 z-10 shadow-md ring-2 ring-blue-600 ring-offset-1"
+                        style={{
+                          top: `${offsetY(selection.startMinutes)}px`,
+                          height: `${offsetY(selection.endMinutes) - offsetY(selection.startMinutes)}px`,
+                        }}
+                      >
+                        <p className="text-[10px] font-medium leading-tight">
+                          {formatTime(selection.startMinutes)} – {formatTime(selection.endMinutes)}
+                        </p>
+                      </div>
+                    )}
                 </div>
               );
             })}

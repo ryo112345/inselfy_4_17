@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { fetchArticle, type ArticleItem } from "@/features/articles/api";
+import { useEffect, useState } from "react";
+import { type ArticleItem, fetchArticle } from "@/features/articles/api";
 
-const articleUrlPattern = /\/articles\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+const articleUrlPattern =
+  /\/articles\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 
 export function extractArticleId(content: string): string | null {
   const match = content.match(articleUrlPattern);
@@ -37,7 +38,9 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
       .catch(() => {
         if (!cancelled) setFailed(true);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [articleId, article, failed]);
 
   if (failed || !article) return null;
@@ -60,11 +63,7 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
     >
       {article.coverImageUrl && (
         <div className="relative w-full aspect-[2/1] bg-gray-100">
-          <img
-            src={article.coverImageUrl}
-            alt=""
-            className="w-full h-full object-cover"
-          />
+          <img src={article.coverImageUrl} alt="" className="w-full h-full object-cover" />
         </div>
       )}
       <div className="px-3 py-2.5">
@@ -72,9 +71,7 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
           {article.title}
         </p>
         {excerpt && (
-          <p className="mt-1 text-[13px] text-gray-500 line-clamp-2 leading-relaxed">
-            {excerpt}
-          </p>
+          <p className="mt-1 text-[13px] text-gray-500 line-clamp-2 leading-relaxed">{excerpt}</p>
         )}
         <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-gray-400">
           <ArticleIcon />
@@ -84,7 +81,9 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
           {article.isPaid && (
             <>
               <span>·</span>
-              <span className="text-amber-600 font-medium">¥{article.priceYen.toLocaleString()}</span>
+              <span className="text-amber-600 font-medium">
+                ¥{article.priceYen.toLocaleString()}
+              </span>
             </>
           )}
         </div>
@@ -95,7 +94,16 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
 
 function ArticleIcon() {
   return (
-    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
     </svg>

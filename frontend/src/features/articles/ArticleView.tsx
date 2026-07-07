@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ArticleItem } from "./api";
 import { createCheckoutSession } from "./api";
 import { TableOfContents, type TOCItem } from "./TableOfContents";
@@ -42,9 +42,7 @@ function processHtmlForToc(html: string): {
 
 export function ArticleView({ article, currentUsername }: Props) {
   const isOwner =
-    currentUsername &&
-    currentUsername !== "guest" &&
-    currentUsername === article.authorUsername;
+    currentUsername && currentUsername !== "guest" && currentUsername === article.authorUsername;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [liked, setLiked] = useState(false);
@@ -108,30 +106,19 @@ export function ArticleView({ article, currentUsername }: Props) {
   const handleShareX = useCallback(() => {
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(article.title);
-    window.open(
-      `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
-      "_blank",
-      "noopener",
-    );
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, "_blank", "noopener");
   }, [article.title]);
 
   const handleShareLine = useCallback(() => {
     const url = encodeURIComponent(window.location.href);
-    window.open(
-      `https://social-plugins.line.me/lineit/share?url=${url}`,
-      "_blank",
-      "noopener",
-    );
+    window.open(`https://social-plugins.line.me/lineit/share?url=${url}`, "_blank", "noopener");
   }, []);
 
   const showFullBody = !article.isPaid || article.purchased || article.isAuthor;
   const readTime = estimateReadingTime(article.body, article.freePreview);
 
   const bodyHtml = showFullBody ? article.body : article.freePreview;
-  const { html: processedHtml, tocItems } = useMemo(
-    () => processHtmlForToc(bodyHtml),
-    [bodyHtml],
-  );
+  const { html: processedHtml, tocItems } = useMemo(() => processHtmlForToc(bodyHtml), [bodyHtml]);
 
   const publishedDate = article.publishedAt
     ? new Date(article.publishedAt).toLocaleDateString("ja-JP", {
@@ -178,9 +165,7 @@ export function ArticleView({ article, currentUsername }: Props) {
           strokeLinecap="round"
           strokeLinejoin="round"
           className={`transition-all duration-200 ${
-            liked
-              ? "text-red-500"
-              : "text-gray-400 group-hover/like:text-red-400"
+            liked ? "text-red-500" : "text-gray-400 group-hover/like:text-red-400"
           } ${likeAnimating ? "scale-125" : "scale-100"}`}
           style={{
             transitionTimingFunction: likeAnimating
@@ -217,9 +202,7 @@ export function ArticleView({ article, currentUsername }: Props) {
           strokeLinecap="round"
           strokeLinejoin="round"
           className={`transition-all duration-200 ${
-            bookmarked
-              ? "text-blue-500"
-              : "text-gray-400 group-hover/bm:text-blue-400"
+            bookmarked ? "text-blue-500" : "text-gray-400 group-hover/bm:text-blue-400"
           } ${bookmarkAnimating ? "scale-110" : "scale-100"}`}
         >
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
@@ -270,28 +253,19 @@ export function ArticleView({ article, currentUsername }: Props) {
     <article>
       {/* Breadcrumbs */}
       <nav className="px-5 py-3 text-xs text-gray-400 border-b border-gray-100 flex items-center gap-1.5 min-w-0">
-        <Link
-          href="/articles"
-          className="hover:text-gray-600 transition-colors shrink-0"
-        >
+        <Link href="/articles" className="hover:text-gray-600 transition-colors shrink-0">
           記事一覧
         </Link>
         <span className="shrink-0">/</span>
         <span className="text-gray-500 truncate">
-          {article.title.length > 30
-            ? article.title.slice(0, 30) + "…"
-            : article.title}
+          {article.title.length > 30 ? article.title.slice(0, 30) + "…" : article.title}
         </span>
       </nav>
 
       {/* Cover image */}
       {article.coverImageUrl && (
         <div>
-          <img
-            src={article.coverImageUrl}
-            alt=""
-            className="w-full"
-          />
+          <img src={article.coverImageUrl} alt="" className="w-full" />
         </div>
       )}
 
@@ -312,12 +286,8 @@ export function ArticleView({ article, currentUsername }: Props) {
                   {article.authorName.charAt(0)}
                 </span>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-900">
-                    {article.authorName}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    @{article.authorUsername}
-                  </span>
+                  <span className="text-sm font-medium text-gray-900">{article.authorName}</span>
+                  <span className="text-xs text-gray-400">@{article.authorUsername}</span>
                 </div>
               </Link>
             ) : (
@@ -325,9 +295,7 @@ export function ArticleView({ article, currentUsername }: Props) {
                 <span className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
                   {article.authorName.charAt(0)}
                 </span>
-                <span className="text-sm font-medium text-gray-700">
-                  {article.authorName}
-                </span>
+                <span className="text-sm font-medium text-gray-700">{article.authorName}</span>
               </div>
             )}
             {isOwner && (
@@ -378,7 +346,16 @@ export function ArticleView({ article, currentUsername }: Props) {
               ))}
               {article.isPaid && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-[var(--accent-light)] text-[var(--accent)]">
-                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width={14}
+                    height={14}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
@@ -418,8 +395,21 @@ export function ArticleView({ article, currentUsername }: Props) {
               </div>
 
               <div className="relative flex items-center justify-center my-8">
-                <svg aria-hidden className="absolute inset-x-0 top-1/2 w-full h-0.5" preserveAspectRatio="none">
-                  <line x1="0" y1="1" x2="100%" y2="1" stroke="#d6d9de" strokeWidth={2} strokeDasharray="5 6" strokeLinecap="round" />
+                <svg
+                  aria-hidden
+                  className="absolute inset-x-0 top-1/2 w-full h-0.5"
+                  preserveAspectRatio="none"
+                >
+                  <line
+                    x1="0"
+                    y1="1"
+                    x2="100%"
+                    y2="1"
+                    stroke="#d6d9de"
+                    strokeWidth={2}
+                    strokeDasharray="5 6"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 <span className="relative bg-white px-3 text-sm text-gray-400">
                   この先は有料コンテンツです
@@ -430,16 +420,16 @@ export function ArticleView({ article, currentUsername }: Props) {
                 <p className="text-xs text-gray-400 text-center mb-1">この記事のみ</p>
                 <div className="text-center mb-1">
                   <span className="text-sm text-gray-500">¥</span>
-                  <span className="text-xl font-bold text-gray-900">{article.priceYen.toLocaleString()}</span>
+                  <span className="text-xl font-bold text-gray-900">
+                    {article.priceYen.toLocaleString()}
+                  </span>
                 </div>
                 <p className="text-xs text-gray-400 text-center mb-4">
                   {article.charCount.toLocaleString()}字
                   {article.imageCount > 0 && ` / ${article.imageCount}画像`}
                 </p>
 
-                {error && (
-                  <p className="text-sm text-red-600 text-center mb-3">{error}</p>
-                )}
+                {error && <p className="text-sm text-red-600 text-center mb-3">{error}</p>}
 
                 <button
                   type="button"
@@ -464,9 +454,7 @@ export function ArticleView({ article, currentUsername }: Props) {
 
         {/* Share section */}
         <div className="mb-8">
-          <p className="text-sm font-medium text-gray-500 mb-3">
-            この記事をシェア
-          </p>
+          <p className="text-sm font-medium text-gray-500 mb-3">この記事をシェア</p>
           <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
@@ -548,9 +536,7 @@ export function ArticleView({ article, currentUsername }: Props) {
                 >
                   {article.authorName}
                 </Link>
-                <p className="text-sm text-gray-400 mb-3">
-                  @{article.authorUsername}
-                </p>
+                <p className="text-sm text-gray-400 mb-3">@{article.authorUsername}</p>
                 <Link
                   href={`/profile/${article.authorUsername}`}
                   className="inline-flex items-center px-4 py-1.5 text-sm font-medium text-[var(--accent)] border border-[var(--accent)] rounded-full hover:bg-[var(--accent)] hover:text-white transition-colors"

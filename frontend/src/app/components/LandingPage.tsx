@@ -5,10 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 
-const GoogleLogin = dynamic(
-  () => import("@react-oauth/google").then((mod) => mod.GoogleLogin),
-  { ssr: false },
-);
+const GoogleLogin = dynamic(() => import("@react-oauth/google").then((mod) => mod.GoogleLogin), {
+  ssr: false,
+});
 
 export function LandingPage() {
   const { login } = useAuth();
@@ -31,9 +30,7 @@ export function LandingPage() {
             <h2 className="text-[28px] font-extrabold leading-tight text-gray-900 sm:text-[32px]">
               いま、何が起きている？
             </h2>
-            <p className="text-lg font-bold text-gray-900">
-              今すぐ参加しよう。
-            </p>
+            <p className="text-lg font-bold text-gray-900">今すぐ参加しよう。</p>
           </div>
 
           <div className="space-y-4">
@@ -65,24 +62,17 @@ export function LandingPage() {
                 利用規約
               </a>
               と
-              <a
-                href="/privacy"
-                className="text-[var(--accent)] hover:underline"
-              >
+              <a href="/privacy" className="text-[var(--accent)] hover:underline">
                 プライバシーポリシー
               </a>
               に同意したものとみなされます。
             </p>
 
-            {error && (
-              <p className="text-center text-sm text-red-600">{error}</p>
-            )}
+            {error && <p className="text-center text-sm text-red-600">{error}</p>}
           </div>
 
           <div className="space-y-4 border-t border-gray-200 pt-8">
-            <p className="text-base font-bold text-gray-900">
-              アカウントをお持ちの方
-            </p>
+            <p className="text-base font-bold text-gray-900">アカウントをお持ちの方</p>
             <a
               href="/login"
               className="block w-full rounded-full border border-gray-300 py-2.5 text-center text-[15px] font-bold text-[var(--accent)] transition-colors hover:bg-[var(--accent-light)]"

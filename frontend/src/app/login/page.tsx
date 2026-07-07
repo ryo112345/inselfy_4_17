@@ -2,13 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 
-const GoogleLogin = dynamic(
-  () => import("@react-oauth/google").then((mod) => mod.GoogleLogin),
-  { ssr: false },
-);
+const GoogleLogin = dynamic(() => import("@react-oauth/google").then((mod) => mod.GoogleLogin), {
+  ssr: false,
+});
 
 function LoginContent() {
   const { login, isAuthenticated } = useAuth();
@@ -32,9 +31,7 @@ function LoginContent() {
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-sm">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">inselfy</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            価値観に寄り添う逆求人プラットフォーム
-          </p>
+          <p className="mt-2 text-sm text-gray-600">価値観に寄り添う逆求人プラットフォーム</p>
         </div>
 
         <div className="flex justify-center">
@@ -63,9 +60,7 @@ function LoginContent() {
           アカウントをお持ちでない場合も、こちらから新規登録できます
         </p>
 
-        {error && (
-          <p className="text-center text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="text-center text-sm text-red-600">{error}</p>}
       </div>
     </div>
   );

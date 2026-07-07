@@ -1,8 +1,6 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-test("profile → integrated-report → back → forward shows report content", async ({
-  page,
-}) => {
+test("profile → integrated-report → back → forward shows report content", async ({ page }) => {
   // Inject diagnostic logging
   await page.addInitScript(() => {
     (window as any).__navLog = [];
@@ -36,9 +34,7 @@ test("profile → integrated-report → back → forward shows report content", 
   await page.waitForLoadState("networkidle");
 
   // 2. Navigate to integrated report page
-  await page.goto(
-    "/integrated-report/9228c21c-c2b5-4847-a81c-4e0f177b1a06",
-  );
+  await page.goto("/integrated-report/9228c21c-c2b5-4847-a81c-4e0f177b1a06");
   await page.waitForLoadState("networkidle");
   apiLogs.length = 0;
 

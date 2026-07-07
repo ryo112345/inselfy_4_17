@@ -10,10 +10,7 @@ import {
   companyInterviewsProposeInterview,
   type ModelsProposalSlotsResponse,
 } from "@/external/client/api/generated";
-import type {
-  CompanyInterviewsResponse,
-  CandidateInterviewsResponse,
-} from "./types";
+import type { CandidateInterviewsResponse, CompanyInterviewsResponse } from "./types";
 
 // --- Company side ---
 
@@ -63,9 +60,7 @@ export async function fetchCompanyInterviews(
   return data as CompanyInterviewsResponse;
 }
 
-export async function cancelInterviewAsCompany(
-  interviewId: string,
-): Promise<void> {
+export async function cancelInterviewAsCompany(interviewId: string): Promise<void> {
   const { error } = await companyInterviewsCancelCompanyInterview({
     path: { interviewId },
   });
@@ -96,9 +91,7 @@ export async function selectSlot(
   return data;
 }
 
-export async function fetchProposalSlots(
-  proposalId: string,
-): Promise<ModelsProposalSlotsResponse> {
+export async function fetchProposalSlots(proposalId: string): Promise<ModelsProposalSlotsResponse> {
   const { data, error } = await candidateInterviewsGetProposalSlots({
     path: { proposalId },
   });
@@ -106,9 +99,7 @@ export async function fetchProposalSlots(
   return data;
 }
 
-export async function cancelInterviewAsCandidate(
-  interviewId: string,
-): Promise<void> {
+export async function cancelInterviewAsCandidate(interviewId: string): Promise<void> {
   const { error } = await candidateInterviewsCancelCandidateInterview({
     path: { interviewId },
   });

@@ -1,5 +1,5 @@
-import { SignUpForm } from "@/features/signup/components/SignUpForm";
 import { GoogleSignUpButton } from "@/features/signup/components/GoogleSignUpButton";
+import { SignUpForm } from "@/features/signup/components/SignUpForm";
 
 export default function SignUpPage() {
   return (

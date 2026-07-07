@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
-const WS_BASE =
-  process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8081/api/ws";
+const WS_BASE = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8081/api/ws";
 
 type WSMessage = {
   type: string;

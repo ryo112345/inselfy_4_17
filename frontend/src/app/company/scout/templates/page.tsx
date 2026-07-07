@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchTemplates, deleteTemplate } from "@/features/scout/api";
+import { useEffect, useState } from "react";
+import { deleteTemplate, fetchTemplates } from "@/features/scout/api";
 import type { ScoutTemplate } from "@/features/scout/types";
 
 function formatDate(dateStr: string): string {
@@ -45,8 +45,18 @@ export default function TemplateListPage() {
   return (
     <div className="space-y-6">
       {/* Back link */}
-      <Link href="/company/scout" className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1">
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <Link
+        href="/company/scout"
+        className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
           <path d="M15 18l-6-6 6-6" />
         </svg>
         スカウト一覧

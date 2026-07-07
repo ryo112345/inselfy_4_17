@@ -4,43 +4,111 @@ import { ScoutSection } from "./ScoutSection";
 
 const accent = "#2979ff";
 
-
-
 const pipelineStages = [
-  { label: "マッチ候補者", count: 12, unit: "人", href: "/company/talents", action: "候補者を見る", icon: "match" },
-  { label: "スカウト送信", count: 5, unit: "件", href: "/company/scout", action: "スカウト管理", icon: "scout" },
-  { label: "応募受付", count: 8, unit: "件", href: "/company/applications", action: "応募を確認", icon: "application" },
-  { label: "面談確定", count: 3, unit: "件", href: "/company/applications?status=interview", action: "面談一覧", icon: "interview" },
-  { label: "内定 / 目標", count: "7/10", unit: "人", href: "/company/applications?status=offer", action: "内定者一覧", icon: "offer" },
+  {
+    label: "マッチ候補者",
+    count: 12,
+    unit: "人",
+    href: "/company/talents",
+    action: "候補者を見る",
+    icon: "match",
+  },
+  {
+    label: "スカウト送信",
+    count: 5,
+    unit: "件",
+    href: "/company/scout",
+    action: "スカウト管理",
+    icon: "scout",
+  },
+  {
+    label: "応募受付",
+    count: 8,
+    unit: "件",
+    href: "/company/applications",
+    action: "応募を確認",
+    icon: "application",
+  },
+  {
+    label: "面談確定",
+    count: 3,
+    unit: "件",
+    href: "/company/applications?status=interview",
+    action: "面談一覧",
+    icon: "interview",
+  },
+  {
+    label: "内定 / 目標",
+    count: "7/10",
+    unit: "人",
+    href: "/company/applications?status=offer",
+    action: "内定者一覧",
+    icon: "offer",
+  },
 ];
-
-
-
 
 const jobs = [
-  { title: "バックエンドエンジニア", status: "公開中", applicants: 12, views: 340, daysLeft: 28, href: "/company/jobs/1" },
-  { title: "フロントエンドエンジニア", status: "公開中", applicants: 8, views: 280, daysLeft: 7, href: "/company/jobs/2" },
-  { title: "プロダクトマネージャー", status: "公開中", applicants: 5, views: 190, daysLeft: 45, href: "/company/jobs/3" },
-  { title: "デザイナー", status: "下書き", applicants: 0, views: 0, daysLeft: null, href: "/company/jobs/4" },
+  {
+    title: "バックエンドエンジニア",
+    status: "公開中",
+    applicants: 12,
+    views: 340,
+    daysLeft: 28,
+    href: "/company/jobs/1",
+  },
+  {
+    title: "フロントエンドエンジニア",
+    status: "公開中",
+    applicants: 8,
+    views: 280,
+    daysLeft: 7,
+    href: "/company/jobs/2",
+  },
+  {
+    title: "プロダクトマネージャー",
+    status: "公開中",
+    applicants: 5,
+    views: 190,
+    daysLeft: 45,
+    href: "/company/jobs/3",
+  },
+  {
+    title: "デザイナー",
+    status: "下書き",
+    applicants: 0,
+    views: 0,
+    daysLeft: null,
+    href: "/company/jobs/4",
+  },
 ];
-
 
 function PipelineArrow() {
   return (
     <div className="flex shrink-0 items-center px-1">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M7 4l6 6-6 6" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path
+          d="M7 4l6 6-6 6"
+          stroke="#cbd5e1"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </div>
   );
 }
 
-
-
-
 const sectionIcons: Record<string, React.ReactNode> = {
   採用パイプライン: (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z" />
       <path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11.05A22 22 0 0112 15z" />
       <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
@@ -48,19 +116,39 @@ const sectionIcons: Record<string, React.ReactNode> = {
     </svg>
   ),
   要対応: (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="2" y="6" width="15" height="15" rx="3" stroke="currentColor" strokeWidth="1.5" />
       <path d="M7 14l3 3L22 5" stroke="currentColor" strokeWidth="2.5" />
     </svg>
   ),
   スカウト状況: (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M22 2L11 13" />
       <path d="M22 2l-7 20-4-9-9-4 20-7z" />
     </svg>
   ),
   求人パフォーマンス: (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3 20L9 13l4 4L21 7" stroke="currentColor" strokeWidth="2.5" />
       <path d="M17 7h4v4" stroke="currentColor" strokeWidth="2" />
     </svg>
@@ -69,20 +157,44 @@ const sectionIcons: Record<string, React.ReactNode> = {
 
 const stageIcons: Record<string, React.ReactNode> = {
   match: (
-    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4.5 w-4.5 text-blue-500"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
       <circle cx="9" cy="7" r="4" />
       <path d="M19 8l2 2 4-4" />
     </svg>
   ),
   scout: (
-    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4.5 w-4.5 text-blue-500"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M22 2L11 13" />
       <path d="M22 2l-7 20-4-9-9-4 20-7z" />
     </svg>
   ),
   application: (
-    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4.5 w-4.5 text-blue-500"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
       <polyline points="14 2 14 8 20 8" />
       <line x1="16" y1="13" x2="8" y2="13" />
@@ -90,12 +202,28 @@ const stageIcons: Record<string, React.ReactNode> = {
     </svg>
   ),
   interview: (
-    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4.5 w-4.5 text-blue-500"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
     </svg>
   ),
   offer: (
-    <svg className="h-4.5 w-4.5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4.5 w-4.5 text-blue-500"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
   ),
@@ -132,7 +260,10 @@ export default function CompanyPage() {
                     {stageIcons[stage.icon]}
                     {stage.label}
                   </span>
-                  <span className="text-3xl font-bold text-gray-900" style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}>
+                  <span
+                    className="text-3xl font-bold text-gray-900"
+                    style={{ fontFamily: "var(--font-plus-jakarta-sans)" }}
+                  >
                     {stage.count}
                     <span className="ml-1 text-sm font-normal text-gray-400">{stage.unit}</span>
                   </span>
@@ -140,7 +271,15 @@ export default function CompanyPage() {
                     href={stage.href}
                     className="pipeline-action-btn mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-5 py-2 text-sm font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
                   >
-                    <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      className="h-3 w-3"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M4.5 2.5l3.5 3.5-3.5 3.5" />
                     </svg>
                     {stage.action}
@@ -182,7 +321,11 @@ export default function CompanyPage() {
                 return (
                   <tr key={job.title} className="transition-colors hover:bg-gray-50">
                     <td className="py-3.5 pl-5 pr-2">
-                      <Link href={job.href} className="text-base font-medium text-gray-900 hover:underline" style={{ textDecorationColor: accent }}>
+                      <Link
+                        href={job.href}
+                        className="text-base font-medium text-gray-900 hover:underline"
+                        style={{ textDecorationColor: accent }}
+                      >
                         {job.title}
                       </Link>
                     </td>
@@ -197,10 +340,19 @@ export default function CompanyPage() {
                         {job.status}
                       </span>
                     </td>
-                    <td className="px-2 py-3.5 text-right text-base text-gray-600">{job.views > 0 ? job.views.toLocaleString() : "—"}</td>
-                    <td className="px-2 py-3.5 text-right text-base font-medium text-gray-900">{job.applicants}</td>
-                    <td className="px-2 py-3.5 text-right text-base text-gray-600">{rate}{rate !== "—" ? "%" : ""}</td>
-                    <td className={`py-3.5 pl-2 pr-5 text-right text-base ${isUrgent ? "font-semibold text-red-500" : "text-gray-600"}`}>
+                    <td className="px-2 py-3.5 text-right text-base text-gray-600">
+                      {job.views > 0 ? job.views.toLocaleString() : "—"}
+                    </td>
+                    <td className="px-2 py-3.5 text-right text-base font-medium text-gray-900">
+                      {job.applicants}
+                    </td>
+                    <td className="px-2 py-3.5 text-right text-base text-gray-600">
+                      {rate}
+                      {rate !== "—" ? "%" : ""}
+                    </td>
+                    <td
+                      className={`py-3.5 pl-2 pr-5 text-right text-base ${isUrgent ? "font-semibold text-red-500" : "text-gray-600"}`}
+                    >
                       {job.daysLeft !== null ? `${job.daysLeft}日` : "—"}
                     </td>
                   </tr>
@@ -210,7 +362,6 @@ export default function CompanyPage() {
           </table>
         </div>
       </section>
-
     </div>
   );
 }

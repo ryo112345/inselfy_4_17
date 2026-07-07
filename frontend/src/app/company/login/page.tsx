@@ -48,17 +48,12 @@ export default function CompanyLoginPage() {
       <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-sm">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">企業ログイン</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            inselfy 企業アカウントにログイン
-          </p>
+          <p className="mt-2 text-sm text-gray-600">inselfy 企業アカウントにログイン</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               メールアドレス
             </label>
             <input
@@ -72,10 +67,7 @@ export default function CompanyLoginPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               パスワード
             </label>
             <input
@@ -88,9 +80,7 @@ export default function CompanyLoginPage() {
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
           <button
             type="submit"
@@ -103,10 +93,7 @@ export default function CompanyLoginPage() {
 
         <p className="text-center text-sm text-gray-600">
           アカウントをお持ちでない方は{" "}
-          <Link
-            href="/company/register"
-            className="font-medium text-blue-600 hover:text-blue-500"
-          >
+          <Link href="/company/register" className="font-medium text-blue-600 hover:text-blue-500">
             新規登録
           </Link>
         </p>

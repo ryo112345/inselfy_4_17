@@ -8,9 +8,9 @@ import {
   companyJobPostingsUploadGalleryImage,
   companyJobPostingsUploadJobCoverImage,
   companyJobPostingsUploadTeamMemberPhoto,
+  type ModelsJobPostingRequest,
   publicJobPostingsGetPublicJobPosting,
   publicJobPostingsListPublicJobPostings,
-  type ModelsJobPostingRequest,
 } from "@/external/client/api/generated";
 import type { JobPosting } from "../scout/types";
 
@@ -21,9 +21,7 @@ export type JobPostingWithCompany = JobPosting & {
 
 export type JobPostingBody = ModelsJobPostingRequest;
 
-export async function createJobPosting(
-  body: JobPostingBody,
-): Promise<JobPosting> {
+export async function createJobPosting(body: JobPostingBody): Promise<JobPosting> {
   const { data, error } = await companyJobPostingsCreateJobPosting({ body });
   if (error || !data) {
     throw new Error(error?.message ?? "Failed to create job posting");
@@ -48,10 +46,7 @@ export async function fetchJobPosting(id: string): Promise<JobPosting> {
   return data;
 }
 
-export async function updateJobPosting(
-  id: string,
-  body: JobPostingBody,
-): Promise<JobPosting> {
+export async function updateJobPosting(id: string, body: JobPostingBody): Promise<JobPosting> {
   const { data, error } = await companyJobPostingsUpdateJobPosting({
     path: { jobId: id },
     body,
@@ -107,9 +102,7 @@ export async function searchPublicJobPostings(
   return data as PaginatedJobPostingsResponse;
 }
 
-export async function fetchPublicJobPosting(
-  id: string,
-): Promise<JobPosting> {
+export async function fetchPublicJobPosting(id: string): Promise<JobPosting> {
   const { data, error } = await publicJobPostingsGetPublicJobPosting({
     path: { jobId: id },
     cache: "no-store",
@@ -118,9 +111,7 @@ export async function fetchPublicJobPosting(
   return data;
 }
 
-export async function uploadTeamMemberPhoto(
-  file: File,
-): Promise<string> {
+export async function uploadTeamMemberPhoto(file: File): Promise<string> {
   const { data, error } = await companyJobPostingsUploadTeamMemberPhoto({
     body: { file },
   });
@@ -128,9 +119,7 @@ export async function uploadTeamMemberPhoto(
   return data.url;
 }
 
-export async function uploadCoverImage(
-  file: File,
-): Promise<string> {
+export async function uploadCoverImage(file: File): Promise<string> {
   const { data, error } = await companyJobPostingsUploadJobCoverImage({
     body: { file },
   });
@@ -138,9 +127,7 @@ export async function uploadCoverImage(
   return data.url;
 }
 
-export async function uploadGalleryImage(
-  file: File,
-): Promise<string> {
+export async function uploadGalleryImage(file: File): Promise<string> {
   const { data, error } = await companyJobPostingsUploadGalleryImage({
     body: { file },
   });

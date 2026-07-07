@@ -5,15 +5,10 @@ import { useState, useTransition } from "react";
 
 import type { ModelsEducationResponse } from "@/external/client/api/generated";
 
-import {
-  createEducation,
-  deleteEducation,
-  updateEducation,
-  type ApiError,
-} from "./api";
+import { type ApiError, createEducation, deleteEducation, updateEducation } from "./api";
+import { DashedButton } from "./DashedButton";
 import { CapIcon, PencilIcon, PlusIcon, TrashIcon } from "./Icons";
 import { Field, PrimaryButton, SecondaryButton } from "./Modal";
-import { DashedButton } from "./DashedButton";
 import { useProfileColor } from "./ProfileColorContext";
 
 type Props = {
@@ -32,9 +27,7 @@ export function EducationCard({ username, educations, isOwner = true }: Props) {
   const router = useRouter();
   const pc = useProfileColor();
   const [formState, setFormState] = useState<
-    | { mode: "closed" }
-    | { mode: "create" }
-    | { mode: "edit"; education: ModelsEducationResponse }
+    { mode: "closed" } | { mode: "create" } | { mode: "edit"; education: ModelsEducationResponse }
   >({ mode: "closed" });
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -134,9 +127,7 @@ export function EducationCard({ username, educations, isOwner = true }: Props) {
                         </div>
                       )}
                     </div>
-                    {e.degree ? (
-                      <p className="mt-0.5 text-base text-gray-700">{e.degree}</p>
-                    ) : null}
+                    {e.degree ? <p className="mt-0.5 text-base text-gray-700">{e.degree}</p> : null}
                     <p className="mt-0.5 text-sm text-gray-500">
                       {formatYearsRange(e.startYear ?? null, e.endYear ?? null)}
                     </p>
@@ -227,7 +218,9 @@ function EducationForm({ username, mode, education, onClose }: FormProps) {
             >
               <option value="">年</option>
               {YEARS.map((y) => (
-                <option key={y} value={y}>{y}年</option>
+                <option key={y} value={y}>
+                  {y}年
+                </option>
               ))}
             </select>
           </Field>
@@ -241,7 +234,9 @@ function EducationForm({ username, mode, education, onClose }: FormProps) {
             >
               <option value="">年</option>
               {YEARS.map((y) => (
-                <option key={y} value={y}>{y}年</option>
+                <option key={y} value={y}>
+                  {y}年
+                </option>
               ))}
             </select>
           </Field>

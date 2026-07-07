@@ -115,11 +115,7 @@ export function PrimaryButton({
 
 type SecondaryButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-export function SecondaryButton({
-  children,
-  className = "",
-  ...rest
-}: SecondaryButtonProps) {
+export function SecondaryButton({ children, className = "", ...rest }: SecondaryButtonProps) {
   return (
     <button
       type="button"

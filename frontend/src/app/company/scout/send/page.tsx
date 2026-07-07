@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { sendScout, fetchCredits, fetchTemplates } from "@/features/scout/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { fetchJobPostings } from "@/features/job-posting/api";
-import type { ScoutCredits, ScoutTemplate, JobPosting } from "@/features/scout/types";
+import { fetchCredits, fetchTemplates, sendScout } from "@/features/scout/api";
+import type { JobPosting, ScoutCredits, ScoutTemplate } from "@/features/scout/types";
 
 export default function ScoutSendPage() {
   const router = useRouter();
@@ -74,8 +74,18 @@ export default function ScoutSendPage() {
   return (
     <div className="space-y-6">
       {/* Back link */}
-      <Link href="/company/scout" className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1">
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <Link
+        href="/company/scout"
+        className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
           <path d="M15 18l-6-6 6-6" />
         </svg>
         スカウト一覧
@@ -85,7 +95,8 @@ export default function ScoutSendPage() {
         <h1 className="text-2xl font-bold text-gray-900">スカウトを送る</h1>
         {credits && (
           <div className="text-sm text-gray-500">
-            クレジット残高: <span className="font-semibold text-gray-900">{credits.balance}</span> / {credits.maxStock}
+            クレジット残高: <span className="font-semibold text-gray-900">{credits.balance}</span> /{" "}
+            {credits.maxStock}
           </div>
         )}
       </div>
@@ -180,7 +191,9 @@ export default function ScoutSendPage() {
 
           {/* Template select */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">テンプレート（任意）</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              テンプレート（任意）
+            </label>
             {loadingData ? (
               <p className="text-sm text-gray-400">読み込み中...</p>
             ) : (

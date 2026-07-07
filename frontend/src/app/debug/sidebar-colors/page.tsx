@@ -23,9 +23,7 @@ export default function SidebarColorsPage() {
         }}
       >
         <div className="flex items-center justify-between px-3 h-14 shrink-0">
-          {sidebarOpen && (
-            <span className="text-lg font-semibold text-gray-900">Inselfy</span>
-          )}
+          {sidebarOpen && <span className="text-lg font-semibold text-gray-900">Inselfy</span>}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="flex h-8 w-8 items-center justify-center rounded-md text-gray-500 cursor-pointer ml-auto transition-colors"
@@ -33,11 +31,24 @@ export default function SidebarColorsPage() {
             onMouseEnter={() => setHovered("menu")}
             onMouseLeave={() => setHovered(null)}
           >
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              {sidebarOpen
-                ? <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></>
-                : <path d="M3 12h18M3 6h18M3 18h18" />
-              }
+            <svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {sidebarOpen ? (
+                <>
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M9 3v18" />
+                </>
+              ) : (
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              )}
             </svg>
           </button>
         </div>
@@ -111,7 +122,10 @@ export default function SidebarColorsPage() {
           )}
         </nav>
 
-        <div className="shrink-0 px-2 py-2 space-y-0.5" style={{ borderTop: `1px solid ${border}` }}>
+        <div
+          className="shrink-0 px-2 py-2 space-y-0.5"
+          style={{ borderTop: `1px solid ${border}` }}
+        >
           <div
             className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors"
             style={{ backgroundColor: hovered === "dl" ? hover : "transparent" }}
@@ -127,7 +141,9 @@ export default function SidebarColorsPage() {
             onMouseEnter={() => setHovered("user")}
             onMouseLeave={() => setHovered(null)}
           >
-            <span className="flex shrink-0 w-5 h-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">秋</span>
+            <span className="flex shrink-0 w-5 h-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+              秋
+            </span>
             {sidebarOpen && <span>秋山椋</span>}
           </div>
         </div>
@@ -149,7 +165,15 @@ export default function SidebarColorsPage() {
   );
 }
 
-function ColorInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function ColorInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <div className="flex items-center gap-4">
       <label className="w-24 text-sm font-medium text-gray-700">{label}</label>

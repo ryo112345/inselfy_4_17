@@ -1,5 +1,5 @@
 import { type BTResult, estimateBT } from "./bradley-terry";
-import { N, type NeedId, NEED_IDS } from "./needs";
+import { N, NEED_IDS, type NeedId } from "./needs";
 
 export interface Pair {
   needA: number;
@@ -52,7 +52,10 @@ export class AdaptiveSelector {
     return [...this.appearances];
   }
 
-  get boundaryGaps(): { upper: { diff: number; seSum: number }; lower: { diff: number; seSum: number } } {
+  get boundaryGaps(): {
+    upper: { diff: number; seSum: number };
+    lower: { diff: number; seSum: number };
+  } {
     const ranked = this.getRankedIndices();
     const mu = this.bt.mu;
     const se = this.bt.se;
@@ -106,7 +109,8 @@ export class AdaptiveSelector {
     for (let i = 0; i < N; i++) {
       for (let j = i + 1; j < N; j++) {
         if (this.askedPairs.has(pairKey(i, j))) continue;
-        if (this.appearances[i] >= MAX_APPEARANCES || this.appearances[j] >= MAX_APPEARANCES) continue;
+        if (this.appearances[i] >= MAX_APPEARANCES || this.appearances[j] >= MAX_APPEARANCES)
+          continue;
         if (this.violatesRecentConstraint(i, j)) continue;
 
         const pij = sigmoid(this.bt.mu[i] - this.bt.mu[j]);
@@ -128,7 +132,7 @@ export class AdaptiveSelector {
     const rankI = ranked.indexOf(i);
     const rankJ = ranked.indexOf(j);
 
-    const isBoundary = (rank: number) => rank >= 1 && rank <= 4 || rank >= 16 && rank <= 19;
+    const isBoundary = (rank: number) => (rank >= 1 && rank <= 4) || (rank >= 16 && rank <= 19);
     const isExtreme = (rank: number) => rank === 0 || rank === 20;
 
     if (isBoundary(rankI) || isBoundary(rankJ)) return 3.0;
@@ -195,9 +199,7 @@ export class AdaptiveSelector {
   }
 
   private getRankedIndices(): number[] {
-    return Array.from({ length: N }, (_, i) => i).sort(
-      (a, b) => this.bt.mu[b] - this.bt.mu[a],
-    );
+    return Array.from({ length: N }, (_, i) => i).sort((a, b) => this.bt.mu[b] - this.bt.mu[a]);
   }
 }
 

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Inter, Playfair_Display } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { Playfair_Display, Inter } from "next/font/google";
-import { useWorkValuesQuiz, type DebugInfo } from "@/features/work-values/useWorkValuesQuiz";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/auth-context";
 import type { NeedDefDTO } from "@/features/work-values/api";
 import type { NeedId } from "@/features/work-values/lib/needs";
-import { useAuth } from "@/features/auth/auth-context";
+import { type DebugInfo, useWorkValuesQuiz } from "@/features/work-values/useWorkValuesQuiz";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -150,7 +150,9 @@ function QuizScreen({
               </span>
               <span className="text-sm text-gray-500">/ {maxQuestions}</span>
             </div>
-            <span className={`${inter.className} text-sm font-medium text-emerald-400 tabular-nums`}>
+            <span
+              className={`${inter.className} text-sm font-medium text-emerald-400 tabular-nums`}
+            >
               {Math.round(progress)}%
             </span>
           </div>
@@ -228,7 +230,13 @@ function CompletedScreen({ onSubmit }: { onSubmit: () => void }) {
 
         <div className="relative z-10">
           <div className="w-14 h-14 rounded-full border-2 border-emerald-400/60 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-7 h-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <svg
+              className="w-7 h-7 text-emerald-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -263,9 +271,7 @@ function SubmittingScreen() {
         <FloatingSpheres />
         <div className="relative z-10">
           <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-          <p className={`${playfair.className} text-xl font-bold text-white mb-2`}>
-            Almost there
-          </p>
+          <p className={`${playfair.className} text-xl font-bold text-white mb-2`}>Almost there</p>
           <p className="text-gray-400 text-[15px]">結果を分析中...</p>
         </div>
       </div>
@@ -273,7 +279,13 @@ function SubmittingScreen() {
   );
 }
 
-function DebugPanel({ debug, needDefs }: { debug: DebugInfo; needDefs: Record<string, NeedDefDTO> }) {
+function DebugPanel({
+  debug,
+  needDefs,
+}: {
+  debug: DebugInfo;
+  needDefs: Record<string, NeedDefDTO>;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -329,11 +341,10 @@ function DebugPanel({ debug, needDefs }: { debug: DebugInfo; needDefs: Record<st
                       {needDefs[n.needId]?.label ?? n.needId}
                     </td>
                     <td className="py-0.5 pr-2 text-right tabular-nums">
-                      {n.mu >= 0 ? "+" : ""}{n.mu.toFixed(2)}
+                      {n.mu >= 0 ? "+" : ""}
+                      {n.mu.toFixed(2)}
                     </td>
-                    <td className="py-0.5 pr-2 text-right tabular-nums">
-                      {n.se.toFixed(2)}
-                    </td>
+                    <td className="py-0.5 pr-2 text-right tabular-nums">{n.se.toFixed(2)}</td>
                     <td className="py-0.5 text-right tabular-nums">{n.appearances}</td>
                   </tr>
                 );
@@ -367,13 +378,7 @@ function BoundaryBadge({
   );
 }
 
-function ErrorScreen({
-  message,
-  onRetry,
-}: {
-  message: string | null;
-  onRetry: () => void;
-}) {
+function ErrorScreen({ message, onRetry }: { message: string | null; onRetry: () => void }) {
   return (
     <main className="min-h-screen flex justify-center bg-[#f6f7f5] px-4 pt-[15vh] pb-12">
       <div className="relative w-full max-w-lg h-fit text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 py-14 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
@@ -397,18 +402,114 @@ function ErrorScreen({
 }
 
 const SPHERES = [
-  { size: 120, top: "-5%", left: "-5%", color: "rgba(120,140,220,0.20)", dur: "18s", dx: 40, dy: 30 },
-  { size: 110, top: "-8%", left: "75%", color: "rgba(200,120,140,0.15)", dur: "22s", dx: -35, dy: 45 },
-  { size: 140, top: "30%", left: "-10%",color: "rgba(100,180,190,0.13)", dur: "25s", dx: 30, dy: -40 },
-  { size: 80,  top: "60%", left: "-5%", color: "rgba(170,130,210,0.18)", dur: "20s", dx: 50, dy: 25 },
-  { size: 100, top: "50%", left: "78%", color: "rgba(210,170,100,0.15)", dur: "23s", dx: -40, dy: -35 },
-  { size: 60,  top: "10%", left: "20%", color: "rgba(130,200,160,0.18)", dur: "16s", dx: 35, dy: 50 },
-  { size: 70,  top: "5%",  left: "88%", color: "rgba(200,110,160,0.15)", dur: "19s", dx: -25, dy: 40 },
-  { size: 90,  top: "78%", left: "50%", color: "rgba(110,160,220,0.15)", dur: "21s", dx: 45, dy: -30 },
-  { size: 50,  top: "35%", left: "90%", color: "rgba(220,190,100,0.17)", dur: "17s", dx: -30, dy: 35 },
-  { size: 110, top: "72%", left: "15%", color: "rgba(160,120,200,0.12)", dur: "26s", dx: -35, dy: -25 },
-  { size: 45,  top: "-3%", left: "45%", color: "rgba(180,200,120,0.18)", dur: "15s", dx: -20, dy: 35 },
-  { size: 100, top: "80%", left: "80%", color: "rgba(120,180,200,0.15)", dur: "24s", dx: 30, dy: -20 },
+  {
+    size: 120,
+    top: "-5%",
+    left: "-5%",
+    color: "rgba(120,140,220,0.20)",
+    dur: "18s",
+    dx: 40,
+    dy: 30,
+  },
+  {
+    size: 110,
+    top: "-8%",
+    left: "75%",
+    color: "rgba(200,120,140,0.15)",
+    dur: "22s",
+    dx: -35,
+    dy: 45,
+  },
+  {
+    size: 140,
+    top: "30%",
+    left: "-10%",
+    color: "rgba(100,180,190,0.13)",
+    dur: "25s",
+    dx: 30,
+    dy: -40,
+  },
+  {
+    size: 80,
+    top: "60%",
+    left: "-5%",
+    color: "rgba(170,130,210,0.18)",
+    dur: "20s",
+    dx: 50,
+    dy: 25,
+  },
+  {
+    size: 100,
+    top: "50%",
+    left: "78%",
+    color: "rgba(210,170,100,0.15)",
+    dur: "23s",
+    dx: -40,
+    dy: -35,
+  },
+  {
+    size: 60,
+    top: "10%",
+    left: "20%",
+    color: "rgba(130,200,160,0.18)",
+    dur: "16s",
+    dx: 35,
+    dy: 50,
+  },
+  {
+    size: 70,
+    top: "5%",
+    left: "88%",
+    color: "rgba(200,110,160,0.15)",
+    dur: "19s",
+    dx: -25,
+    dy: 40,
+  },
+  {
+    size: 90,
+    top: "78%",
+    left: "50%",
+    color: "rgba(110,160,220,0.15)",
+    dur: "21s",
+    dx: 45,
+    dy: -30,
+  },
+  {
+    size: 50,
+    top: "35%",
+    left: "90%",
+    color: "rgba(220,190,100,0.17)",
+    dur: "17s",
+    dx: -30,
+    dy: 35,
+  },
+  {
+    size: 110,
+    top: "72%",
+    left: "15%",
+    color: "rgba(160,120,200,0.12)",
+    dur: "26s",
+    dx: -35,
+    dy: -25,
+  },
+  {
+    size: 45,
+    top: "-3%",
+    left: "45%",
+    color: "rgba(180,200,120,0.18)",
+    dur: "15s",
+    dx: -20,
+    dy: 35,
+  },
+  {
+    size: 100,
+    top: "80%",
+    left: "80%",
+    color: "rgba(120,180,200,0.15)",
+    dur: "24s",
+    dx: 30,
+    dy: -20,
+  },
 ];
 
 function FloatingSpheres() {
@@ -426,16 +527,18 @@ function FloatingSpheres() {
           <div
             key={i}
             className="absolute rounded-full blur-[5px]"
-            style={{
-              width: s.size,
-              height: s.size,
-              top: s.top,
-              left: s.left,
-              background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25) 0%, ${s.color} 40%, rgba(0,0,0,0.3) 100%)`,
-              "--dx": `${s.dx}px`,
-              "--dy": `${s.dy}px`,
-              animation: `sphere-float ${s.dur} ease-in-out infinite`,
-            } as React.CSSProperties}
+            style={
+              {
+                width: s.size,
+                height: s.size,
+                top: s.top,
+                left: s.left,
+                background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25) 0%, ${s.color} 40%, rgba(0,0,0,0.3) 100%)`,
+                "--dx": `${s.dx}px`,
+                "--dy": `${s.dy}px`,
+                animation: `sphere-float ${s.dur} ease-in-out infinite`,
+              } as React.CSSProperties
+            }
           />
         ))}
       </div>

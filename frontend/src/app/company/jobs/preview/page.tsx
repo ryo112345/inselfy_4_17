@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Gallery } from "@/app/companies/[id]/Gallery";
+import {
+  CI_FULL_LABELS,
+  CI_ORDER,
+  SingleRadarChart,
+  WV_FULL_LABELS,
+  WV_ORDER,
+} from "@/app/components/SingleRadarChart";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import {
   JOB_PREVIEW_CHANNEL,
   type JobFormPreviewPayload,
   type JobPreviewMessage,
 } from "@/features/job-posting/preview-channel";
-import {
-  SingleRadarChart,
-  WV_ORDER, WV_FULL_LABELS,
-  CI_ORDER, CI_FULL_LABELS,
-} from "@/app/components/SingleRadarChart";
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
@@ -75,13 +77,7 @@ const EMPTY_FORM: JobFormPreviewPayload = {
   galleryUrls: [],
 };
 
-function SectionTitle({
-  children,
-  icon,
-}: {
-  children: React.ReactNode;
-  icon?: React.ReactNode;
-}) {
+function SectionTitle({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
       {icon && (
@@ -92,9 +88,7 @@ function SectionTitle({
           {icon}
         </span>
       )}
-      <h2 className="text-xl font-bold tracking-tight text-gray-900">
-        {children}
-      </h2>
+      <h2 className="text-xl font-bold tracking-tight text-gray-900">{children}</h2>
     </div>
   );
 }
@@ -114,9 +108,7 @@ function StatCell({
         <span className="text-gray-400">{icon}</span>
         {label}
       </div>
-      <div className="text-xl font-bold leading-tight text-gray-900 sm:text-2xl">
-        {value}
-      </div>
+      <div className="text-xl font-bold leading-tight text-gray-900 sm:text-2xl">{value}</div>
     </div>
   );
 }
@@ -147,18 +139,13 @@ function HighlightCard({
         >
           {icon}
         </span>
-        <span
-          className="text-sm font-semibold tracking-wide"
-          style={{ color: tone.fg }}
-        >
+        <span className="text-sm font-semibold tracking-wide" style={{ color: tone.fg }}>
           {label}
         </span>
       </div>
       <h3 className="text-lg font-bold leading-snug text-gray-900">{title}</h3>
       <p className="text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
-        {body || (
-          <span className="italic text-gray-300">未入力</span>
-        )}
+        {body || <span className="italic text-gray-300">未入力</span>}
       </p>
     </div>
   );
@@ -187,9 +174,7 @@ function ConditionGroup({
       <dl className="flex flex-col gap-3.5">
         {rows.map((r) => (
           <div key={r.label} className="flex flex-col gap-1">
-            <dt className="text-xs font-medium tracking-wide text-gray-500">
-              {r.label}
-            </dt>
+            <dt className="text-xs font-medium tracking-wide text-gray-500">{r.label}</dt>
             <dd className="text-[15px] leading-relaxed text-gray-900 whitespace-pre-wrap">
               {r.value || <span className="italic text-gray-300">未入力</span>}
             </dd>
@@ -265,9 +250,7 @@ export default function CompanyJobPreviewPage() {
               <circle cx="12" cy="12" r="3" />
             </svg>
           </div>
-          <h1 className="text-base font-semibold text-gray-900">
-            プレビューを準備中です
-          </h1>
+          <h1 className="text-base font-semibold text-gray-900">プレビューを準備中です</h1>
           <p className="mt-2 text-sm text-gray-500 leading-relaxed">
             求人作成画面でフォームを編集すると、この画面にリアルタイムで反映されます。元のタブを閉じずに編集を続けてください。
           </p>
@@ -278,11 +261,7 @@ export default function CompanyJobPreviewPage() {
 
   const job = form;
 
-  const metaBadges = [
-    job.employmentType,
-    job.jobCategory,
-    job.remotePolicy,
-  ].filter(Boolean);
+  const metaBadges = [job.employmentType, job.jobCategory, job.remotePolicy].filter(Boolean);
 
   const quickFacts = [
     {
@@ -293,41 +272,31 @@ export default function CompanyJobPreviewPage() {
             {job.salaryMin ?? "?"}
             <span className="text-base font-medium text-gray-500">〜</span>
             {job.salaryMax ?? "?"}
-            <span className="ml-0.5 text-sm font-medium text-gray-500">
-              万円
-            </span>
+            <span className="ml-0.5 text-sm font-medium text-gray-500">万円</span>
           </span>
         ) : (
-          <span className="text-sm font-normal italic text-gray-300">
-            未入力
-          </span>
+          <span className="text-sm font-normal italic text-gray-300">未入力</span>
         ),
       icon: <YenIcon />,
     },
     {
       label: "雇用形態",
       value: job.employmentType || (
-        <span className="text-sm font-normal italic text-gray-300">
-          未入力
-        </span>
+        <span className="text-sm font-normal italic text-gray-300">未入力</span>
       ),
       icon: <BriefcaseIcon />,
     },
     {
       label: "採用人数",
       value: job.hiringCount || (
-        <span className="text-sm font-normal italic text-gray-300">
-          未入力
-        </span>
+        <span className="text-sm font-normal italic text-gray-300">未入力</span>
       ),
       icon: <UsersIcon />,
     },
     {
       label: "勤務形態",
       value: job.remotePolicy || (
-        <span className="text-sm font-normal italic text-gray-300">
-          未入力
-        </span>
+        <span className="text-sm font-normal italic text-gray-300">未入力</span>
       ),
       icon: <HomeIcon />,
     },
@@ -390,7 +359,10 @@ export default function CompanyJobPreviewPage() {
   ];
 
   const selectionSteps = job.selectionProcess
-    ? job.selectionProcess.split("→").map((s) => s.trim()).filter(Boolean)
+    ? job.selectionProcess
+        .split("→")
+        .map((s) => s.trim())
+        .filter(Boolean)
     : [];
 
   const benefitsList = (() => {
@@ -413,7 +385,11 @@ export default function CompanyJobPreviewPage() {
         {/* Hero */}
         <section className={`overflow-hidden ${cardClass}`}>
           {(form.coverImageDataUrl || form.coverImageUrl) && (
-            <img src={form.coverImageDataUrl ?? form.coverImageUrl!} alt="" className="w-full aspect-[16/9] object-cover" />
+            <img
+              src={form.coverImageDataUrl ?? form.coverImageUrl!}
+              alt=""
+              className="w-full aspect-[16/9] object-cover"
+            />
           )}
           <div className="px-6 pb-6 pt-6 sm:px-8">
             {company && (
@@ -423,16 +399,9 @@ export default function CompanyJobPreviewPage() {
               >
                 <div className="h-10 w-10 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden bg-white">
                   {company.logoUrl ? (
-                    <img
-                      src={company.logoUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <span
-                      className="text-sm font-bold"
-                      style={{ color: ACCENT }}
-                    >
+                    <span className="text-sm font-bold" style={{ color: ACCENT }}>
                       {company.companyName.charAt(0)}
                     </span>
                   )}
@@ -449,9 +418,7 @@ export default function CompanyJobPreviewPage() {
             )}
 
             <h1 className="mt-5 text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px]">
-              {job.title || (
-                <span className="italic text-gray-300">求人タイトルを入力</span>
-              )}
+              {job.title || <span className="italic text-gray-300">求人タイトルを入力</span>}
             </h1>
 
             {metaBadges.length > 0 && (
@@ -488,12 +455,7 @@ export default function CompanyJobPreviewPage() {
             {/* Quick Facts strip */}
             <div className="mt-6 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-gray-50/40 sm:grid-cols-4 sm:divide-y-0">
               {quickFacts.map((f) => (
-                <StatCell
-                  key={f.label}
-                  label={f.label}
-                  value={f.value}
-                  icon={f.icon}
-                />
+                <StatCell key={f.label} label={f.label} value={f.value} icon={f.icon} />
               ))}
             </div>
 
@@ -518,9 +480,7 @@ export default function CompanyJobPreviewPage() {
         {/* Highlights */}
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<LayersIcon />}>ハイライト</SectionTitle>
-          <p className="mt-2 text-sm text-gray-500">
-            この仕事を一目で掴むための4つの視点
-          </p>
+          <p className="mt-2 text-sm text-gray-500">この仕事を一目で掴むための4つの視点</p>
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {highlightCards.map((c) => (
               <HighlightCard key={c.label} {...c} />
@@ -532,9 +492,7 @@ export default function CompanyJobPreviewPage() {
         {job.galleryUrls.length > 0 && (
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="px-6 pb-2 pt-6 sm:px-7">
-              <SectionTitle icon={<CameraIcon />}>
-                フォトギャラリー
-              </SectionTitle>
+              <SectionTitle icon={<CameraIcon />}>フォトギャラリー</SectionTitle>
             </div>
             <div className="mt-3">
               <Gallery urls={job.galleryUrls} />
@@ -543,13 +501,19 @@ export default function CompanyJobPreviewPage() {
         )}
 
         {/* Team */}
-        {(job.teamDescription || job.teamMembers.length > 0 || job.teamLabel || job.teamWVScores || job.teamCIScores) && (
+        {(job.teamDescription ||
+          job.teamMembers.length > 0 ||
+          job.teamLabel ||
+          job.teamWVScores ||
+          job.teamCIScores) && (
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="grid grid-cols-1 sm:grid-cols-[360px_1fr]">
               {(job.teamMembers.length > 0 || job.teamLabel) && (
                 <div
                   className="flex flex-col items-center justify-center gap-4 px-6 py-8 sm:py-10"
-                  style={{ background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)` }}
+                  style={{
+                    background: `linear-gradient(135deg, ${ACCENT}14 0%, ${ACCENT}06 100%)`,
+                  }}
                 >
                   {job.teamMembers.length > 0 && (
                     <div className="flex items-center -space-x-[18px]">
@@ -569,9 +533,25 @@ export default function CompanyJobPreviewPage() {
                             style={{ backgroundColor: color.bg, color: color.fg }}
                           >
                             {m.photoUrl ? (
-                              <img src={m.photoUrl} alt={m.name} className="h-full w-full object-cover" />
+                              <img
+                                src={m.photoUrl}
+                                alt={m.name}
+                                className="h-full w-full object-cover"
+                              />
                             ) : (
-                              <span className={m.name.length >= 5 ? "text-xs" : m.name.length === 4 ? "text-sm" : m.name.length === 3 ? "text-base" : m.name.length === 2 ? "text-xl" : "text-2xl"}>
+                              <span
+                                className={
+                                  m.name.length >= 5
+                                    ? "text-xs"
+                                    : m.name.length === 4
+                                      ? "text-sm"
+                                      : m.name.length === 3
+                                        ? "text-base"
+                                        : m.name.length === 2
+                                          ? "text-xl"
+                                          : "text-2xl"
+                                }
+                              >
                                 {m.name.slice(0, 5)}
                               </span>
                             )}
@@ -638,21 +618,9 @@ export default function CompanyJobPreviewPage() {
         <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
           <SectionTitle icon={<DocumentIcon />}>募集要項</SectionTitle>
           <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <ConditionGroup
-              title="勤務情報"
-              rows={workConditions}
-              icon={<ClockIcon />}
-            />
-            <ConditionGroup
-              title="給与・報酬"
-              rows={compensationConditions}
-              icon={<YenIcon />}
-            />
-            <ConditionGroup
-              title="契約・その他"
-              rows={contractConditions}
-              icon={<ShieldIcon />}
-            />
+            <ConditionGroup title="勤務情報" rows={workConditions} icon={<ClockIcon />} />
+            <ConditionGroup title="給与・報酬" rows={compensationConditions} icon={<YenIcon />} />
+            <ConditionGroup title="契約・その他" rows={contractConditions} icon={<ShieldIcon />} />
           </div>
         </section>
 
@@ -671,9 +639,7 @@ export default function CompanyJobPreviewPage() {
                 必須要件
               </h3>
               <p className="mt-2.5 text-[15px] leading-relaxed text-gray-700 whitespace-pre-wrap">
-                {job.requiredQualifications || (
-                  <span className="italic text-gray-300">未入力</span>
-                )}
+                {job.requiredQualifications || <span className="italic text-gray-300">未入力</span>}
               </p>
             </div>
             <div>
@@ -697,10 +663,7 @@ export default function CompanyJobPreviewPage() {
           <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
             <SectionTitle icon={<GiftIcon />}>福利厚生・待遇</SectionTitle>
             <ul className="mt-5 flex flex-wrap gap-2">
-              {[
-                ...benefitsList,
-                ...(job.smokingPolicy ? [job.smokingPolicy] : []),
-              ].map((b) => (
+              {[...benefitsList, ...(job.smokingPolicy ? [job.smokingPolicy] : [])].map((b) => (
                 <li
                   key={b}
                   className="inline-flex items-center rounded-full border px-4 py-1.5 text-base font-medium"
@@ -761,27 +724,17 @@ export default function CompanyJobPreviewPage() {
               <div className="mt-5 flex items-center gap-4 rounded-xl border border-gray-200 p-4">
                 <div className="h-14 w-14 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden bg-white shrink-0">
                   {company.logoUrl ? (
-                    <img
-                      src={company.logoUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <span
-                      className="text-lg font-bold"
-                      style={{ color: ACCENT }}
-                    >
+                    <span className="text-lg font-bold" style={{ color: ACCENT }}>
                       {company.companyName.charAt(0)}
                     </span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-lg font-bold text-gray-900">
-                    {company.companyName}
-                  </p>
+                  <p className="text-lg font-bold text-gray-900">{company.companyName}</p>
                   <p className="text-sm text-gray-500 mt-1">
-                    {company.industry} / {company.location} /{" "}
-                    {company.employeeCount}
+                    {company.industry} / {company.location} / {company.employeeCount}
                   </p>
                 </div>
               </div>
@@ -797,50 +750,124 @@ export default function CompanyJobPreviewPage() {
 
 function BookmarkIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
 function YenIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 4l7 9 7-9" /><path d="M7 13h10" /><path d="M7 17h10" /><path d="M12 13v7" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 4l7 9 7-9" />
+      <path d="M7 13h10" />
+      <path d="M7 17h10" />
+      <path d="M12 13v7" />
     </svg>
   );
 }
 function BriefcaseIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" /><path d="M3 13h18" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M3 13h18" />
     </svg>
   );
 }
 function UsersIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
 }
 function HomeIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 11l9-8 9 8" /><path d="M5 10v10h14V10" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 11l9-8 9 8" />
+      <path d="M5 10v10h14V10" />
     </svg>
   );
 }
 function LayersIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2 2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2 2 7l10 5 10-5-10-5z" />
+      <path d="M2 17l10 5 10-5" />
+      <path d="M2 12l10 5 10-5" />
     </svg>
   );
 }
 function SparkIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3v4" /><path d="M12 17v4" /><path d="M3 12h4" /><path d="M17 12h4" /><path d="M5.6 5.6l2.8 2.8" /><path d="M15.6 15.6l2.8 2.8" /><path d="M5.6 18.4l2.8-2.8" /><path d="M15.6 8.4l2.8-2.8" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3v4" />
+      <path d="M12 17v4" />
+      <path d="M3 12h4" />
+      <path d="M17 12h4" />
+      <path d="M5.6 5.6l2.8 2.8" />
+      <path d="M15.6 15.6l2.8 2.8" />
+      <path d="M5.6 18.4l2.8-2.8" />
+      <path d="M15.6 8.4l2.8-2.8" />
     </svg>
   );
 }
@@ -853,8 +880,17 @@ function StarIcon() {
 }
 function FlagIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 22V4" /><path d="M4 4h13l-2 4 2 4H4" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 22V4" />
+      <path d="M4 4h13l-2 4 2 4H4" />
     </svg>
   );
 }
@@ -867,57 +903,139 @@ function BoltIcon() {
 }
 function CheckSquareIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 11l3 3 8-8" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 11l3 3 8-8" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
     </svg>
   );
 }
 function GiftIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13" /><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" /><path d="M8 8a2.5 2.5 0 0 1 0-5C10 3 12 5 12 8" /><path d="M16 8a2.5 2.5 0 0 0 0-5C14 3 12 5 12 8" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="8" width="18" height="4" rx="1" />
+      <path d="M12 8v13" />
+      <path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
+      <path d="M8 8a2.5 2.5 0 0 1 0-5C10 3 12 5 12 8" />
+      <path d="M16 8a2.5 2.5 0 0 0 0-5C14 3 12 5 12 8" />
     </svg>
   );
 }
 function DocumentIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="M8 13h8" />
+      <path d="M8 17h6" />
     </svg>
   );
 }
 function ClockIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
     </svg>
   );
 }
 function ShieldIcon() {
   return (
-    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z" />
     </svg>
   );
 }
 function RouteIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="6" cy="19" r="3" /><circle cx="18" cy="5" r="3" /><path d="M6 16V8a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="6" cy="19" r="3" />
+      <circle cx="18" cy="5" r="3" />
+      <path d="M6 16V8a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4" />
     </svg>
   );
 }
 function BuildingIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="3" width="16" height="18" rx="1" /><path d="M9 8h.01" /><path d="M14 8h.01" /><path d="M9 12h.01" /><path d="M14 12h.01" /><path d="M9 16h.01" /><path d="M14 16h.01" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="3" width="16" height="18" rx="1" />
+      <path d="M9 8h.01" />
+      <path d="M14 8h.01" />
+      <path d="M9 12h.01" />
+      <path d="M14 12h.01" />
+      <path d="M9 16h.01" />
+      <path d="M14 16h.01" />
     </svg>
   );
 }
 function CameraIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><circle cx="12" cy="13" r="4" />
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 8a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <circle cx="12" cy="13" r="4" />
     </svg>
   );
 }

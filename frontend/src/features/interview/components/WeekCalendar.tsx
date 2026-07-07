@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { Interview } from "../types";
-import { fetchCompanyInterviews } from "../api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchCompanyApplications, type JobApplication } from "@/features/job-application/api";
+import { fetchCompanyInterviews } from "../api";
+import type { Interview } from "../types";
 import { CalendarHeader } from "./CalendarHeader";
 import { InterviewBlock } from "./InterviewBlock";
 import { InterviewDetailPanel } from "./InterviewDetailPanel";
@@ -102,10 +102,13 @@ export function WeekCalendar() {
     }
   }, []);
 
-  const changeWeek = useCallback((newStart: Date) => {
-    setWeekStart(newStart);
-    loadInterviews(newStart);
-  }, [loadInterviews]);
+  const changeWeek = useCallback(
+    (newStart: Date) => {
+      setWeekStart(newStart);
+      loadInterviews(newStart);
+    },
+    [loadInterviews],
+  );
 
   const handlePrev = () => {
     const prev = new Date(weekStart);
@@ -123,11 +126,16 @@ export function WeekCalendar() {
     changeWeek(getMonday(new Date()));
   };
 
-  const [miniCalMonth, setMiniCalMonth] = useState(() => new Date(weekStart.getFullYear(), weekStart.getMonth(), 1));
+  const [miniCalMonth, setMiniCalMonth] = useState(
+    () => new Date(weekStart.getFullYear(), weekStart.getMonth(), 1),
+  );
 
-  const handleMiniCalDateClick = useCallback((date: Date) => {
-    changeWeek(getMonday(date));
-  }, [changeWeek]);
+  const handleMiniCalDateClick = useCallback(
+    (date: Date) => {
+      changeWeek(getMonday(date));
+    },
+    [changeWeek],
+  );
 
   const [initialized, setInitialized] = useState(false);
   if (!initialized) {
@@ -209,9 +217,7 @@ export function WeekCalendar() {
     if (!appSearch) return applications;
     const q = appSearch.toLowerCase();
     return applications.filter(
-      (a) =>
-        a.candidateName.toLowerCase().includes(q) ||
-        a.jobTitle.toLowerCase().includes(q),
+      (a) => a.candidateName.toLowerCase().includes(q) || a.jobTitle.toLowerCase().includes(q),
     );
   }, [applications, appSearch]);
 
@@ -237,7 +243,12 @@ export function WeekCalendar() {
       x = clickTarget.screenX - pickerWidth - 8;
     }
     const y = Math.min(clickTarget.screenY - 40, window.innerHeight - 380);
-    return { position: "fixed" as const, left: `${Math.max(8, x)}px`, top: `${Math.max(8, y)}px`, zIndex: 50 };
+    return {
+      position: "fixed" as const,
+      left: `${Math.max(8, x)}px`,
+      top: `${Math.max(8, y)}px`,
+      zIndex: 50,
+    };
   }, [clickTarget]);
 
   return (
@@ -266,112 +277,114 @@ export function WeekCalendar() {
           />
         </div>
 
-      <div className="flex-1 overflow-auto">
-        <div className="min-w-[700px]">
-          {/* Day headers */}
-          <div className="sticky top-0 z-10 grid grid-cols-[60px_repeat(7,1fr)] border-b border-gray-200 bg-white">
-            <div className="border-r border-gray-100" />
-            {weekDays.map((d, i) => {
-              const today = isToday(d);
-              return (
-                <div
-                  key={i}
-                  className={`border-r border-gray-100 px-2 py-2 text-center ${today ? "bg-blue-50" : ""}`}
-                >
-                  <p className="text-xs text-gray-500">{DAY_LABELS[i]}</p>
-                  <p className={`text-lg font-semibold ${today ? "text-blue-600" : "text-gray-900"}`}>
-                    {d.getDate()}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Time grid */}
-          <div ref={gridContainerRef} className="relative grid grid-cols-[60px_repeat(7,1fr)]">
-            {/* Hour labels */}
-            <div className="relative">
-              {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                <div
-                  key={i}
-                  className="border-r border-gray-100 pr-2 text-right"
-                  style={{ height: `${HOUR_HEIGHT}px` }}
-                >
-                  <span className="relative -top-2 text-xs text-gray-400">
-                    {String(START_HOUR + i).padStart(2, "0")}:00
-                  </span>
-                </div>
-              ))}
+        <div className="flex-1 overflow-auto">
+          <div className="min-w-[700px]">
+            {/* Day headers */}
+            <div className="sticky top-0 z-10 grid grid-cols-[60px_repeat(7,1fr)] border-b border-gray-200 bg-white">
+              <div className="border-r border-gray-100" />
+              {weekDays.map((d, i) => {
+                const today = isToday(d);
+                return (
+                  <div
+                    key={i}
+                    className={`border-r border-gray-100 px-2 py-2 text-center ${today ? "bg-blue-50" : ""}`}
+                  >
+                    <p className="text-xs text-gray-500">{DAY_LABELS[i]}</p>
+                    <p
+                      className={`text-lg font-semibold ${today ? "text-blue-600" : "text-gray-900"}`}
+                    >
+                      {d.getDate()}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
 
-            {/* Day columns */}
-            {weekDays.map((d, dayIdx) => {
-              const dayStr = toDateStr(d);
-              const dayInterviews = interviewsByDay.get(dayStr) ?? [];
-              const today = isToday(d);
+            {/* Time grid */}
+            <div ref={gridContainerRef} className="relative grid grid-cols-[60px_repeat(7,1fr)]">
+              {/* Hour labels */}
+              <div className="relative">
+                {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                  <div
+                    key={i}
+                    className="border-r border-gray-100 pr-2 text-right"
+                    style={{ height: `${HOUR_HEIGHT}px` }}
+                  >
+                    <span className="relative -top-2 text-xs text-gray-400">
+                      {String(START_HOUR + i).padStart(2, "0")}:00
+                    </span>
+                  </div>
+                ))}
+              </div>
 
-              return (
-                <div
-                  key={dayIdx}
-                  data-day-col
-                  className={`relative border-r border-gray-100 cursor-pointer ${today ? "bg-blue-50/30" : ""}`}
-                  style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
-                  onClick={(e) => {
-                    if ((e.target as HTMLElement).closest("button")) return;
-                    handleGridClick(e, dayIdx);
-                  }}
-                >
-                  {/* Hour lines */}
-                  {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                    <div
-                      key={i}
-                      className="absolute left-0 right-0 border-t border-gray-100"
-                      style={{ top: `${i * HOUR_HEIGHT}px` }}
-                    />
-                  ))}
+              {/* Day columns */}
+              {weekDays.map((d, dayIdx) => {
+                const dayStr = toDateStr(d);
+                const dayInterviews = interviewsByDay.get(dayStr) ?? [];
+                const today = isToday(d);
 
-                  {/* Current time indicator */}
-                  {todayIndex === dayIdx && nowPosition !== null && (
-                    <div
-                      className="absolute left-0 right-0 z-20 border-t-2 border-red-400"
-                      style={{ top: `${nowPosition}px` }}
-                    >
-                      <div className="absolute -left-1 -top-1.5 h-3 w-3 rounded-full bg-red-400" />
-                    </div>
-                  )}
+                return (
+                  <div
+                    key={dayIdx}
+                    data-day-col
+                    className={`relative border-r border-gray-100 cursor-pointer ${today ? "bg-blue-50/30" : ""}`}
+                    style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest("button")) return;
+                      handleGridClick(e, dayIdx);
+                    }}
+                  >
+                    {/* Hour lines */}
+                    {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                      <div
+                        key={i}
+                        className="absolute left-0 right-0 border-t border-gray-100"
+                        style={{ top: `${i * HOUR_HEIGHT}px` }}
+                      />
+                    ))}
 
-                  {/* Interview blocks */}
-                  {dayInterviews.map((iv) => (
-                    <InterviewBlock
-                      key={iv.id}
-                      interview={iv}
-                      top={getTimePosition(iv.startTime)}
-                      height={getTimeDuration(iv.startTime, iv.endTime)}
-                      onClick={setSelected}
-                    />
-                  ))}
+                    {/* Current time indicator */}
+                    {todayIndex === dayIdx && nowPosition !== null && (
+                      <div
+                        className="absolute left-0 right-0 z-20 border-t-2 border-red-400"
+                        style={{ top: `${nowPosition}px` }}
+                      >
+                        <div className="absolute -left-1 -top-1.5 h-3 w-3 rounded-full bg-red-400" />
+                      </div>
+                    )}
 
-                  {/* Click target preview */}
-                  {clickTarget && clickTarget.dayIndex === dayIdx && (
-                    <div
-                      className="absolute left-1 right-1 rounded-lg bg-blue-100 border-2 border-blue-400 border-dashed pointer-events-none z-10"
-                      style={{
-                        top: `${((clickTarget.startMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT}px`,
-                        height: `${HOUR_HEIGHT}px`,
-                      }}
-                    >
-                      <p className="text-xs font-medium text-blue-600 px-2 py-1">
-                        {formatTime(clickTarget.startMinutes)} – {formatTime(clickTarget.startMinutes + 60)}
-                      </p>
-                    </div>
-                  )}
+                    {/* Interview blocks */}
+                    {dayInterviews.map((iv) => (
+                      <InterviewBlock
+                        key={iv.id}
+                        interview={iv}
+                        top={getTimePosition(iv.startTime)}
+                        height={getTimeDuration(iv.startTime, iv.endTime)}
+                        onClick={setSelected}
+                      />
+                    ))}
 
-                </div>
-              );
-            })}
+                    {/* Click target preview */}
+                    {clickTarget && clickTarget.dayIndex === dayIdx && (
+                      <div
+                        className="absolute left-1 right-1 rounded-lg bg-blue-100 border-2 border-blue-400 border-dashed pointer-events-none z-10"
+                        style={{
+                          top: `${((clickTarget.startMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT}px`,
+                          height: `${HOUR_HEIGHT}px`,
+                        }}
+                      >
+                        <p className="text-xs font-medium text-blue-600 px-2 py-1">
+                          {formatTime(clickTarget.startMinutes)} –{" "}
+                          {formatTime(clickTarget.startMinutes + 60)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Interview detail modal */}
@@ -388,7 +401,11 @@ export function WeekCalendar() {
 
       {/* Application picker popover */}
       {clickTarget && (
-        <div ref={pickerRef} style={pickerStyle} className="w-72 rounded-xl border border-gray-200 bg-white shadow-xl">
+        <div
+          ref={pickerRef}
+          style={pickerStyle}
+          className="w-72 rounded-xl border border-gray-200 bg-white shadow-xl"
+        >
           <div className="px-3 py-2 border-b border-gray-100">
             <p className="text-xs font-semibold text-gray-700 mb-1.5">候補者を選択</p>
             <p className="text-[11px] text-gray-400 mb-2">
@@ -421,7 +438,9 @@ export function WeekCalendar() {
                     {app.candidateName.charAt(0)}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{app.candidateName}</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {app.candidateName}
+                    </p>
                     <p className="text-[11px] text-gray-500 truncate">{app.jobTitle}</p>
                   </div>
                 </button>

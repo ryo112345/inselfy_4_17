@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { fetchJobPostings } from "@/features/job-posting/api";
 import type { JobPosting } from "@/features/scout/types";
 
@@ -64,9 +64,7 @@ export default function JobListPage() {
                     <span className="text-sm text-gray-500">
                       {EMPLOYMENT_TYPE_LABEL[job.employmentType] ?? job.employmentType}
                     </span>
-                    {job.location && (
-                      <span className="text-sm text-gray-500">{job.location}</span>
-                    )}
+                    {job.location && <span className="text-sm text-gray-500">{job.location}</span>}
                   </div>
                   {job.description && (
                     <p className="text-sm text-gray-400 mt-2 line-clamp-2">{job.description}</p>
@@ -74,9 +72,7 @@ export default function JobListPage() {
                 </div>
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ml-4 ${
-                    job.isActive
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-gray-100 text-gray-500"
+                    job.isActive ? "bg-emerald-50 text-emerald-700" : "bg-gray-100 text-gray-500"
                   }`}
                 >
                   {job.isActive ? "公開中" : "非公開"}

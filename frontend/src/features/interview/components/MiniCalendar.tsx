@@ -50,25 +50,47 @@ export function MiniCalendar({
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-gray-800">{year}年 {mon + 1}月</span>
+        <span className="text-sm font-semibold text-gray-800">
+          {year}年 {mon + 1}月
+        </span>
         <div className="flex gap-1">
           <button
             onClick={() => onMonthChange(new Date(year, mon - 1, 1))}
             className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100"
           >
-            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            <svg
+              width={14}
+              height={14}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
           <button
             onClick={() => onMonthChange(new Date(year, mon + 1, 1))}
             className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100"
           >
-            <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+            <svg
+              width={14}
+              height={14}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
       </div>
       <div className="grid grid-cols-7 gap-0">
         {["日", "月", "火", "水", "木", "金", "土"].map((label) => (
-          <div key={label} className="text-center text-[10px] text-gray-400 py-1">{label}</div>
+          <div key={label} className="text-center text-[10px] text-gray-400 py-1">
+            {label}
+          </div>
         ))}
         {cells.map((date, i) => {
           const dateStr = toDateStr(date);

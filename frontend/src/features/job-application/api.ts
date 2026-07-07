@@ -15,10 +15,7 @@ export type JobApplication = ModelsJobApplicationResponse;
 export type JobApplicationListResponse = ModelsJobApplicationListResponse;
 export type JobApplicationStatus = ModelsJobApplicationStatus;
 
-export async function applyToJob(
-  jobPostingId: string,
-  message?: string,
-): Promise<JobApplication> {
+export async function applyToJob(jobPostingId: string, message?: string): Promise<JobApplication> {
   const { data, error } = await candidateApplicationsApplyToJob({
     body: { jobPostingId, message: message ?? "" },
   });
@@ -42,9 +39,7 @@ export async function fetchCandidateApplications(): Promise<JobApplicationListRe
   return data;
 }
 
-export async function withdrawApplication(
-  applicationId: string,
-): Promise<void> {
+export async function withdrawApplication(applicationId: string): Promise<void> {
   const { error } = await candidateApplicationsWithdrawApplication({
     path: { applicationId },
   });

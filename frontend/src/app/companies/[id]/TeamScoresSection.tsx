@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import {
+  CI_FULL_LABELS,
+  CI_ORDER,
   SingleRadarChart,
-  WV_ORDER, WV_FULL_LABELS,
-  CI_ORDER, CI_FULL_LABELS,
+  WV_FULL_LABELS,
+  WV_ORDER,
 } from "@/app/components/SingleRadarChart";
 
 type PublicTeamScore = {

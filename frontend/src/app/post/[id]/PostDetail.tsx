@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { PostItem, CommentItem } from "@/features/timeline/api";
-import { toggleLike, toggleRepost, createComment } from "@/features/timeline/api";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
-import { ArticlePreviewCard, extractArticleId, removeArticleUrl } from "@/features/timeline/ArticlePreviewCard";
+import {
+  ArticlePreviewCard,
+  extractArticleId,
+  removeArticleUrl,
+} from "@/features/timeline/ArticlePreviewCard";
+import type { CommentItem, PostItem } from "@/features/timeline/api";
+import { createComment, toggleLike, toggleRepost } from "@/features/timeline/api";
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -111,7 +115,16 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
           onClick={() => router.back()}
           className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors"
         >
-          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width={20}
+            height={20}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
@@ -121,12 +134,18 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
       <article className="px-4 pt-3 pb-2">
         <div className="flex items-center gap-3 mb-3">
           <Link href={`/profile/${post.username}`}>
-            <span className="flex w-12 h-12 items-center justify-center rounded-full text-base font-bold text-white" style={{ backgroundColor: "var(--accent)" }}>
+            <span
+              className="flex w-12 h-12 items-center justify-center rounded-full text-base font-bold text-white"
+              style={{ backgroundColor: "var(--accent)" }}
+            >
               {initial}
             </span>
           </Link>
           <div>
-            <Link href={`/profile/${post.username}`} className="font-bold text-[15px] text-gray-900 hover:underline block">
+            <Link
+              href={`/profile/${post.username}`}
+              className="font-bold text-[15px] text-gray-900 hover:underline block"
+            >
               {post.name || post.username}
             </Link>
             <span className="text-[14px] text-gray-400">@{post.username}</span>
@@ -159,11 +178,18 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
           >
             <div className="px-3 py-2.5">
               <div className="flex items-center gap-1.5 mb-1">
-                <span className="flex w-5 h-5 items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: "var(--accent)" }}>
+                <span
+                  className="flex w-5 h-5 items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0"
+                  style={{ backgroundColor: "var(--accent)" }}
+                >
                   {post.quotedPost.name?.charAt(0) || post.quotedPost.username.charAt(0)}
                 </span>
-                <span className="font-bold text-[13px] text-gray-900 truncate">{post.quotedPost.name || post.quotedPost.username}</span>
-                <span className="text-[13px] text-gray-400 truncate">@{post.quotedPost.username}</span>
+                <span className="font-bold text-[13px] text-gray-900 truncate">
+                  {post.quotedPost.name || post.quotedPost.username}
+                </span>
+                <span className="text-[13px] text-gray-400 truncate">
+                  @{post.quotedPost.username}
+                </span>
               </div>
               <p className="text-[14px] text-gray-900 whitespace-pre-wrap break-words leading-relaxed line-clamp-3">
                 {post.quotedPost.content}
@@ -253,9 +279,7 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
           <CommentCard key={c.id} comment={c} />
         ))}
         {comments.length === 0 && (
-          <div className="px-4 py-8 text-center text-sm text-gray-400">
-            まだ返信はありません
-          </div>
+          <div className="px-4 py-8 text-center text-sm text-gray-400">まだ返信はありません</div>
         )}
       </div>
     </div>
@@ -267,18 +291,26 @@ function CommentCard({ comment }: { comment: CommentItem }) {
   return (
     <article className="flex gap-3 px-4 py-3 border-b border-gray-200/80 hover:bg-gray-50/60 transition-colors">
       <Link href={`/profile/${comment.username}`} className="shrink-0">
-        <span className="flex w-10 h-10 items-center justify-center rounded-full text-sm font-bold text-white" style={{ backgroundColor: "var(--accent)" }}>
+        <span
+          className="flex w-10 h-10 items-center justify-center rounded-full text-sm font-bold text-white"
+          style={{ backgroundColor: "var(--accent)" }}
+        >
           {initial}
         </span>
       </Link>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1">
-          <Link href={`/profile/${comment.username}`} className="font-bold text-[15px] text-gray-900 hover:underline truncate">
+          <Link
+            href={`/profile/${comment.username}`}
+            className="font-bold text-[15px] text-gray-900 hover:underline truncate"
+          >
             {comment.name || comment.username}
           </Link>
           <span className="text-[15px] text-gray-400 truncate">@{comment.username}</span>
           <span className="text-gray-300">·</span>
-          <span className="text-[15px] text-gray-400 whitespace-nowrap">{timeAgo(comment.createdAt)}</span>
+          <span className="text-[15px] text-gray-400 whitespace-nowrap">
+            {timeAgo(comment.createdAt)}
+          </span>
         </div>
         <p className="mt-0.5 text-[15px] text-gray-900 whitespace-pre-wrap break-words leading-relaxed">
           {comment.content}
@@ -288,7 +320,13 @@ function CommentCard({ comment }: { comment: CommentItem }) {
   );
 }
 
-function ActionButton({ icon, active, activeColor, hoverColor, onClick }: {
+function ActionButton({
+  icon,
+  active,
+  activeColor,
+  hoverColor,
+  onClick,
+}: {
   icon: React.ReactNode;
   active: boolean;
   activeColor: string;
@@ -307,7 +345,16 @@ function ActionButton({ icon, active, activeColor, hoverColor, onClick }: {
 
 function CommentIcon() {
   return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
@@ -315,7 +362,16 @@ function CommentIcon() {
 
 function RetweetIcon() {
   return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <polyline points="17 1 21 5 17 9" />
       <path d="M3 11V9a4 4 0 0 1 4-4h14" />
       <polyline points="7 23 3 19 7 15" />
@@ -326,7 +382,16 @@ function RetweetIcon() {
 
 function LikeIcon() {
   return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
@@ -334,7 +399,16 @@ function LikeIcon() {
 
 function LikeIconFilled() {
   return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
@@ -342,7 +416,16 @@ function LikeIconFilled() {
 
 function ShareIcon() {
   return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
       <polyline points="16 6 12 2 8 6" />
       <line x1="12" y1="2" x2="12" y2="15" />

@@ -1,11 +1,28 @@
-export const WV_ORDER = ["achievement", "status", "autonomy", "safety", "altruism", "comfort"] as const;
+export const WV_ORDER = [
+  "achievement",
+  "status",
+  "autonomy",
+  "safety",
+  "altruism",
+  "comfort",
+] as const;
 export const WV_FULL_LABELS: Record<string, string> = {
-  achievement: "達成", status: "地位名声", autonomy: "自主性", safety: "支援", altruism: "人間関係", comfort: "労働条件",
+  achievement: "達成",
+  status: "地位名声",
+  autonomy: "自主性",
+  safety: "支援",
+  altruism: "人間関係",
+  comfort: "労働条件",
 };
 
 export const CI_ORDER = ["R", "I", "A", "S", "E", "C"] as const;
 export const CI_FULL_LABELS: Record<string, string> = {
-  R: "現実的", I: "研究的", A: "芸術的", S: "社会的", E: "企業的", C: "慣習的",
+  R: "現実的",
+  I: "研究的",
+  A: "芸術的",
+  S: "社会的",
+  E: "企業的",
+  C: "慣習的",
 };
 
 export function SingleRadarChart({
@@ -30,7 +47,7 @@ export function SingleRadarChart({
   const R = 115;
 
   const hexPoint = (i: number, r: number) => {
-    const angle = (Math.PI / 2) + (2 * Math.PI * i) / order.length;
+    const angle = Math.PI / 2 + (2 * Math.PI * i) / order.length;
     return { x: cx - Math.cos(angle) * r, y: cy - Math.sin(angle) * r };
   };
 
@@ -75,7 +92,7 @@ export function SingleRadarChart({
 
   const labelPositions = order.map((id, i) => {
     const pt = hexPoint(i, R + 30);
-    const angle = (Math.PI / 2) + (2 * Math.PI * i) / order.length;
+    const angle = Math.PI / 2 + (2 * Math.PI * i) / order.length;
     const cos = -Math.cos(angle);
     let anchor: "middle" | "start" | "end" = "middle";
     if (cos > 0.3) anchor = "start";
@@ -98,7 +115,13 @@ export function SingleRadarChart({
       {/* Compare overlay (team) — rendered first so it appears behind */}
       {hasCompare && (
         <>
-          <path d={comparePath} fill={compareFillColor} stroke={compareStrokeColor} strokeWidth={1.2} strokeDasharray="6 3" />
+          <path
+            d={comparePath}
+            fill={compareFillColor}
+            stroke={compareStrokeColor}
+            strokeWidth={1.2}
+            strokeDasharray="6 3"
+          />
           {comparePoints!.map((pt, i) => (
             <circle key={i} cx={pt.x} cy={pt.y} r={2.5} fill={compareStrokeColor} opacity={0.7} />
           ))}
@@ -114,9 +137,7 @@ export function SingleRadarChart({
       )}
       {labelPositions.map((lp) => {
         const val = scoreMap.get(lp.id);
-        const scoreStr = val != null
-          ? (isWV ? val.toFixed(0) : val.toFixed(1))
-          : "-";
+        const scoreStr = val != null ? (isWV ? val.toFixed(0) : val.toFixed(1)) : "-";
         return (
           <g key={lp.id}>
             <text
@@ -149,10 +170,22 @@ export function SingleRadarChart({
         <g transform={`translate(${cx + 15}, ${cy + R + 85})`}>
           <line x1={-120} y1={0} x2={-95} y2={0} stroke={strokeColor} strokeWidth={2.5} />
           <circle cx={-107.5} cy={0} r={3} fill={dotColor} />
-          <text x={-88} y={5} fill="#444" fontSize={16} fontWeight="600">{mainLabel ?? "候補者"}</text>
-          <line x1={10} y1={0} x2={35} y2={0} stroke={compareStrokeColor} strokeWidth={2.5} strokeDasharray="5 3" />
+          <text x={-88} y={5} fill="#444" fontSize={16} fontWeight="600">
+            {mainLabel ?? "候補者"}
+          </text>
+          <line
+            x1={10}
+            y1={0}
+            x2={35}
+            y2={0}
+            stroke={compareStrokeColor}
+            strokeWidth={2.5}
+            strokeDasharray="5 3"
+          />
           <circle cx={22.5} cy={0} r={2.5} fill={compareStrokeColor} />
-          <text x={42} y={5} fill="#444" fontSize={16} fontWeight="600">{compareLabel ?? "チーム"}</text>
+          <text x={42} y={5} fill="#444" fontSize={16} fontWeight="600">
+            {compareLabel ?? "チーム"}
+          </text>
         </g>
       )}
     </svg>

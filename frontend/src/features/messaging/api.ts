@@ -43,9 +43,10 @@ export async function startConversation(body: {
   return data as Conversation;
 }
 
-export async function fetchCompanyConversations(
-  params?: { limit?: number; offset?: number },
-): Promise<ConversationListResponse> {
+export async function fetchCompanyConversations(params?: {
+  limit?: number;
+  offset?: number;
+}): Promise<ConversationListResponse> {
   const { data, error } = await companyMessagingListCompanyConversations({
     query: buildListQuery(params),
   });
@@ -65,10 +66,7 @@ export async function fetchCompanyConversationMessages(
   return data as MessageListResponse;
 }
 
-export async function sendMessageAsCompany(
-  conversationId: string,
-  body: string,
-): Promise<Message> {
+export async function sendMessageAsCompany(conversationId: string, body: string): Promise<Message> {
   const { data, error } = await companyMessagingSendCompanyMessage({
     path: { conversationId },
     body: { body },
@@ -79,9 +77,7 @@ export async function sendMessageAsCompany(
   return data as Message;
 }
 
-export async function markReadAsCompany(
-  conversationId: string,
-): Promise<void> {
+export async function markReadAsCompany(conversationId: string): Promise<void> {
   await companyMessagingMarkCompanyConversationRead({
     path: { conversationId },
   });
@@ -108,9 +104,10 @@ export async function startCandidateConversation(body: {
   return data as Conversation;
 }
 
-export async function fetchCandidateConversations(
-  params?: { limit?: number; offset?: number },
-): Promise<ConversationListResponse> {
+export async function fetchCandidateConversations(params?: {
+  limit?: number;
+  offset?: number;
+}): Promise<ConversationListResponse> {
   const { data, error } = await candidateMessagingListCandidateConversations({
     query: buildListQuery(params),
   });
@@ -144,9 +141,7 @@ export async function sendMessageAsCandidate(
   return data as Message;
 }
 
-export async function markReadAsCandidate(
-  conversationId: string,
-): Promise<void> {
+export async function markReadAsCandidate(conversationId: string): Promise<void> {
   await candidateMessagingMarkCandidateConversationRead({
     path: { conversationId },
   });

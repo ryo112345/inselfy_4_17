@@ -30,10 +30,7 @@ function formatDateSeparator(dateStr: string): string {
   });
 }
 
-function shouldShowDateSeparator(
-  current: Message,
-  prev: Message | undefined,
-): boolean {
+function shouldShowDateSeparator(current: Message, prev: Message | undefined): boolean {
   if (!prev) return true;
   const currentDate = new Date(current.createdAt).toDateString();
   const prevDate = new Date(prev.createdAt).toDateString();
@@ -49,7 +46,6 @@ export function MessageThread({
   onBack,
   loading,
 }: Props) {
-
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -83,9 +79,7 @@ export function MessageThread({
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E]/10 text-[#3D8B6E] text-xs font-semibold">
           {counterpartName.charAt(0)}
         </div>
-        <span className="text-sm font-semibold text-gray-900">
-          {counterpartName}
-        </span>
+        <span className="text-sm font-semibold text-gray-900">{counterpartName}</span>
       </div>
 
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto bg-[#C8E8F5] px-4 py-4">
@@ -95,9 +89,7 @@ export function MessageThread({
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-sm text-gray-400">
-              メッセージを送って会話を始めましょう
-            </p>
+            <p className="text-sm text-gray-400">メッセージを送って会話を始めましょう</p>
           </div>
         ) : (
           <div className="flex flex-col gap-1">
@@ -105,16 +97,11 @@ export function MessageThread({
               const prev = idx > 0 ? messages[idx - 1] : undefined;
               const showDate = shouldShowDateSeparator(msg, prev);
               const isSystem = msg.senderType === "system";
-              const isMine =
-                !isSystem && msg.senderType === mySenderType && msg.senderId === myId;
-              const differentSender =
-                prev && prev.senderType !== msg.senderType;
+              const isMine = !isSystem && msg.senderType === mySenderType && msg.senderId === myId;
+              const differentSender = prev && prev.senderType !== msg.senderType;
 
               return (
-                <div
-                  key={msg.id}
-                  className={differentSender && !showDate ? "mt-3" : ""}
-                >
+                <div key={msg.id} className={differentSender && !showDate ? "mt-3" : ""}>
                   {showDate && (
                     <div className="my-4 flex items-center justify-center">
                       <span className="rounded-full bg-gray-200/70 px-3 py-1 text-[10px] font-medium text-gray-500">

@@ -11,11 +11,7 @@ export function Gallery({ urls }: { urls: string[] }) {
   return (
     <div>
       <div className="group relative aspect-video overflow-hidden bg-gray-100">
-        <img
-          src={urls[current]}
-          alt=""
-          className="h-full w-full object-contain"
-        />
+        <img src={urls[current]} alt="" className="h-full w-full object-contain" />
 
         {urls.length > 1 && (
           <>

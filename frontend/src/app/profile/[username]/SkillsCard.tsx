@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 
 import type { ModelsSkillResponse } from "@/external/client/api/generated";
 
-import { attachSkill, detachSkill, type ApiError } from "./api";
+import { type ApiError, attachSkill, detachSkill } from "./api";
 import { AwardIcon, XIcon } from "./Icons";
 import { useProfileColor } from "./ProfileColorContext";
 
@@ -102,7 +102,12 @@ export function SkillsCard({ username, skills, isOwner = true }: Props) {
             <li
               key={s.id}
               className="group inline-flex items-center gap-1.5 rounded-full border py-2 pl-4 text-base font-medium"
-              style={{ borderColor: `${pc}40`, backgroundColor: `${pc}12`, color: pc, paddingRight: isOwner ? undefined : "1rem" }}
+              style={{
+                borderColor: `${pc}40`,
+                backgroundColor: `${pc}12`,
+                color: pc,
+                paddingRight: isOwner ? undefined : "1rem",
+              }}
             >
               <span>{s.name}</span>
               {isOwner && (

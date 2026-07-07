@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  CI_FULL_LABELS,
+  CI_ORDER,
   SingleRadarChart,
-  WV_ORDER, WV_FULL_LABELS,
-  CI_ORDER, CI_FULL_LABELS,
+  WV_FULL_LABELS,
+  WV_ORDER,
 } from "@/app/components/SingleRadarChart";
+import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 
 type Member = {
   id: string;
@@ -197,7 +199,10 @@ export default function TeamDetailPage() {
     return (
       <div className="text-center py-16">
         <p className="text-gray-500">チームが見つかりません</p>
-        <Link href="/company/teams" className="text-sm text-[#2979ff] hover:underline mt-2 inline-block">
+        <Link
+          href="/company/teams"
+          className="text-sm text-[#2979ff] hover:underline mt-2 inline-block"
+        >
           チーム一覧に戻る
         </Link>
       </div>
@@ -217,7 +222,14 @@ export default function TeamDetailPage() {
         href="/company/teams"
         className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
       >
-        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <svg
+          width={16}
+          height={16}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
           <path d="M15 18l-6-6 6-6" />
         </svg>
         チーム一覧
@@ -231,8 +243,12 @@ export default function TeamDetailPage() {
             onClick={handleTogglePublic}
             className="mt-2 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
           >
-            <div className={`relative h-5 w-9 rounded-full transition-colors ${team.isPublic ? "bg-emerald-500" : "bg-gray-300"}`}>
-              <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${team.isPublic ? "translate-x-4" : "translate-x-0.5"}`} />
+            <div
+              className={`relative h-5 w-9 rounded-full transition-colors ${team.isPublic ? "bg-emerald-500" : "bg-gray-300"}`}
+            >
+              <div
+                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${team.isPublic ? "translate-x-4" : "translate-x-0.5"}`}
+              />
             </div>
             <span>企業ページに公開</span>
           </button>
@@ -242,8 +258,18 @@ export default function TeamDetailPage() {
             onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
             className="rounded-lg border border-gray-200 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
           >
-            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-              <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
+            <svg
+              width={18}
+              height={18}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+            >
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="19" cy="12" r="1" />
+              <circle cx="5" cy="12" r="1" />
             </svg>
           </button>
           {showDeleteConfirm && (
@@ -252,7 +278,16 @@ export default function TeamDetailPage() {
                 onClick={handleDeleteTeam}
                 className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer flex items-center gap-2"
               >
-                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width={14}
+                  height={14}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
                   <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -300,7 +335,14 @@ export default function TeamDetailPage() {
                 className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors cursor-pointer hover:opacity-90"
                 style={{ backgroundColor: "#2979ff" }}
               >
-                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  width={14}
+                  height={14}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path d="M12 5v14M5 12h14" />
                 </svg>
                 メンバーを追加
@@ -348,7 +390,10 @@ export default function TeamDetailPage() {
               </button>
               <button
                 type="button"
-                onClick={() => { setShowAddForm(false); setError(""); }}
+                onClick={() => {
+                  setShowAddForm(false);
+                  setError("");
+                }}
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 cursor-pointer"
               >
                 キャンセル
@@ -361,7 +406,16 @@ export default function TeamDetailPage() {
         {team.members.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
-              <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#2979ff"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <line x1="19" y1="8" x2="19" y2="14" />
@@ -400,16 +454,24 @@ export default function TeamDetailPage() {
                     {/* Name + Ace */}
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative shrink-0">
-                        <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${
-                          member.isAce
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-gray-100 text-gray-600"
-                        }`}>
+                        <div
+                          className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${
+                            member.isAce
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
                           {member.name.charAt(0)}
                         </div>
                         {member.isAce && (
                           <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 ring-2 ring-white">
-                            <svg width={8} height={8} viewBox="0 0 24 24" fill="white" stroke="none">
+                            <svg
+                              width={8}
+                              height={8}
+                              viewBox="0 0 24 24"
+                              fill="white"
+                              stroke="none"
+                            >
                               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                             </svg>
                           </div>
@@ -417,7 +479,9 @@ export default function TeamDetailPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-gray-900 truncate">{member.name}</p>
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {member.name}
+                          </p>
                           {member.isAce && (
                             <span className="shrink-0 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
                               理想の人材像
@@ -443,7 +507,10 @@ export default function TeamDetailPage() {
                     {/* Invite URL */}
                     <div className="flex justify-center">
                       <button
-                        onClick={(e) => { e.stopPropagation(); copyInviteUrl(member.inviteToken); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          copyInviteUrl(member.inviteToken);
+                        }}
                         className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all cursor-pointer ${
                           copiedToken === member.inviteToken
                             ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
@@ -452,14 +519,28 @@ export default function TeamDetailPage() {
                       >
                         {copiedToken === member.inviteToken ? (
                           <>
-                            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                            <svg
+                              width={12}
+                              height={12}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2.5}
+                            >
                               <path d="M20 6L9 17l-5-5" />
                             </svg>
                             コピー済
                           </>
                         ) : (
                           <>
-                            <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                            <svg
+                              width={12}
+                              height={12}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
                               <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
                               <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
                             </svg>
@@ -505,8 +586,18 @@ function MemberMenu({
         onClick={() => setOpen(!open)}
         className="rounded-lg p-1.5 text-gray-300 hover:bg-gray-100 hover:text-gray-500 transition-colors cursor-pointer"
       >
-        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-          <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
+        <svg
+          width={16}
+          height={16}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+        >
+          <circle cx="12" cy="5" r="1" />
+          <circle cx="12" cy="12" r="1" />
+          <circle cx="12" cy="19" r="1" />
         </svg>
       </button>
       {open && (
@@ -514,19 +605,41 @@ function MemberMenu({
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-gray-200 bg-white shadow-lg z-20 py-1">
             <button
-              onClick={() => { onToggleAce(); setOpen(false); }}
+              onClick={() => {
+                onToggleAce();
+                setOpen(false);
+              }}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2"
             >
-              <svg width={14} height={14} viewBox="0 0 24 24" fill={member.isAce ? "#f59e0b" : "none"} stroke={member.isAce ? "#f59e0b" : "currentColor"} strokeWidth={1.5}>
+              <svg
+                width={14}
+                height={14}
+                viewBox="0 0 24 24"
+                fill={member.isAce ? "#f59e0b" : "none"}
+                stroke={member.isAce ? "#f59e0b" : "currentColor"}
+                strokeWidth={1.5}
+              >
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
               {member.isAce ? "理想の人材像を解除" : "理想の人材像に設定"}
             </button>
             <button
-              onClick={() => { onRemove(); setOpen(false); }}
+              onClick={() => {
+                onRemove();
+                setOpen(false);
+              }}
               className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer flex items-center gap-2"
             >
-              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width={14}
+                height={14}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
                 <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -556,19 +669,38 @@ function PhaseBanner({
   if (phase === "empty") {
     return (
       <div className="rounded-xl bg-blue-50/60 border border-blue-200 px-5 py-3.5 mb-6 flex items-center gap-3">
-        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+        <svg
+          width={20}
+          height={20}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#2979ff"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="shrink-0"
+        >
           <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <line x1="19" y1="8" x2="19" y2="14" />
           <line x1="22" y1="11" x2="16" y2="11" />
         </svg>
-        <p className="text-sm text-blue-900 flex-1">まずメンバーを追加しましょう。登録すると一人ひとりに専用の診断URLが発行されます。</p>
+        <p className="text-sm text-blue-900 flex-1">
+          まずメンバーを追加しましょう。登録すると一人ひとりに専用の診断URLが発行されます。
+        </p>
         <button
           onClick={onAddMember}
           className="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white cursor-pointer hover:opacity-90"
           style={{ backgroundColor: "#2979ff" }}
         >
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg
+            width={14}
+            height={14}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path d="M12 5v14M5 12h14" />
           </svg>
           メンバーを追加
@@ -580,7 +712,17 @@ function PhaseBanner({
   if (phase === "complete") {
     return (
       <div className="rounded-xl bg-emerald-50/60 border border-emerald-200 px-5 py-3 mb-6 flex items-center gap-3">
-        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+        <svg
+          width={20}
+          height={20}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#10b981"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="shrink-0"
+        >
           <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
@@ -603,12 +745,32 @@ function PhaseBanner({
     <div className={`rounded-xl ${bg} ${border} border px-5 py-3.5 mb-6`}>
       <div className="flex items-center gap-3">
         {isInvite ? (
-          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2979ff" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <svg
+            width={20}
+            height={20}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#2979ff"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0"
+          >
             <path d="M22 2L11 13" />
             <path d="M22 2l-7 20-4-9-9-4 20-7z" />
           </svg>
         ) : (
-          <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <svg
+            width={20}
+            height={20}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#f59e0b"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0"
+          >
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
@@ -617,12 +779,34 @@ function PhaseBanner({
         {memberCount > 0 && (
           <div className="flex items-center gap-4 shrink-0">
             <div className="flex items-center gap-1.5">
-              <ProgressRing value={wvCompleted / memberCount} size={20} strokeWidth={2} color={wvCompleted === memberCount ? "#10b981" : "#48c88c"} trackColor="#e5f5ed" />
-              <span className="text-sm text-gray-600">価値観 <span className="font-medium">{wvCompleted}/{memberCount}</span></span>
+              <ProgressRing
+                value={wvCompleted / memberCount}
+                size={20}
+                strokeWidth={2}
+                color={wvCompleted === memberCount ? "#10b981" : "#48c88c"}
+                trackColor="#e5f5ed"
+              />
+              <span className="text-sm text-gray-600">
+                価値観{" "}
+                <span className="font-medium">
+                  {wvCompleted}/{memberCount}
+                </span>
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <ProgressRing value={ciCompleted / memberCount} size={20} strokeWidth={2} color={ciCompleted === memberCount ? "#10b981" : "#a878dc"} trackColor="#f0e8f8" />
-              <span className="text-sm text-gray-600">興味 <span className="font-medium">{ciCompleted}/{memberCount}</span></span>
+              <ProgressRing
+                value={ciCompleted / memberCount}
+                size={20}
+                strokeWidth={2}
+                color={ciCompleted === memberCount ? "#10b981" : "#a878dc"}
+                trackColor="#f0e8f8"
+              />
+              <span className="text-sm text-gray-600">
+                興味{" "}
+                <span className="font-medium">
+                  {ciCompleted}/{memberCount}
+                </span>
+              </span>
             </div>
           </div>
         )}
@@ -651,17 +835,35 @@ function ProgressRing({
 
   return (
     <svg width={size} height={size} className="shrink-0 -rotate-90">
-      <circle cx={center} cy={center} r={radius} fill="none" stroke={trackColor} strokeWidth={strokeWidth} />
       <circle
-        cx={center} cy={center} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth}
-        strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
+        cx={center}
+        cy={center}
+        r={radius}
+        fill="none"
+        stroke={trackColor}
+        strokeWidth={strokeWidth}
+      />
+      <circle
+        cx={center}
+        cy={center}
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
         className="transition-all duration-500"
       />
       {value === 1 && (
         <g transform={`rotate(90 ${center} ${center})`}>
           <polyline
             points={`${center - 4},${center} ${center - 1},${center + 3} ${center + 4},${center - 3}`}
-            fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+            fill="none"
+            stroke={color}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </g>
       )}
@@ -672,14 +874,28 @@ function ProgressRing({
 function DiagnosisStatus({ done }: { done: boolean }) {
   return done ? (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-sm font-medium text-emerald-700">
-      <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+      <svg
+        width={12}
+        height={12}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3}
+      >
         <path d="M20 6L9 17l-5-5" />
       </svg>
       完了
     </span>
   ) : (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 px-3 py-1 text-sm text-gray-400">
-      <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <svg
+        width={12}
+        height={12}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
         <circle cx="12" cy="12" r="6" />
       </svg>
       未受検
@@ -687,14 +903,17 @@ function DiagnosisStatus({ done }: { done: boolean }) {
   );
 }
 
-
 const OUTLIER_WEIGHT = 0.15;
 const ACE_WEIGHT = 1.8;
 const WV_OUTLIER_THRESHOLD = 25;
 const CI_OUTLIER_THRESHOLD = 1.0;
 const MIN_MEMBERS_FOR_AVERAGE = 3;
 
-function computeAvg(members: MemberScore[], key: "wvScores" | "ciScores", order: readonly string[]) {
+function computeAvg(
+  members: MemberScore[],
+  key: "wvScores" | "ciScores",
+  order: readonly string[],
+) {
   const completed = members.filter((m) => m[key] && m[key]!.length > 0);
   if (completed.length < MIN_MEMBERS_FOR_AVERAGE) return null;
 
@@ -756,7 +975,7 @@ function TeamRadarChartSection({
     : null;
 
   const completedMembers = members.filter(
-    (m) => m.wvStatus === "completed" && m.ciStatus === "completed"
+    (m) => m.wvStatus === "completed" && m.ciStatus === "completed",
   );
 
   return (
@@ -768,12 +987,29 @@ function TeamRadarChartSection({
           {isAverage && completedMembers.length > 0 && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
-                <svg width={14} height={14} viewBox="0 0 24 24" fill={aceMember ? "#f59e0b" : "none"} stroke={aceMember ? "#f59e0b" : "#9ca3af"} strokeWidth={1.5}>
+                <svg
+                  width={14}
+                  height={14}
+                  viewBox="0 0 24 24"
+                  fill={aceMember ? "#f59e0b" : "none"}
+                  stroke={aceMember ? "#f59e0b" : "#9ca3af"}
+                  strokeWidth={1.5}
+                >
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
                 <span className="text-sm text-gray-500">理想の人材像</span>
                 <div className="relative group">
-                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="cursor-help">
+                  <svg
+                    width={14}
+                    height={14}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#9ca3af"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="cursor-help"
+                  >
                     <circle cx="12" cy="12" r="10" />
                     <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
                     <circle cx="12" cy="17" r="0.5" fill="#9ca3af" />
@@ -797,12 +1033,18 @@ function TeamRadarChartSection({
               ) : (
                 <select
                   defaultValue=""
-                  onChange={(e) => { if (e.target.value) onSetAce(e.target.value); }}
+                  onChange={(e) => {
+                    if (e.target.value) onSetAce(e.target.value);
+                  }}
                   className="rounded-lg border border-gray-300 bg-white px-2.5 py-1 text-sm text-gray-700 focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none cursor-pointer"
                 >
-                  <option value="" disabled>選択</option>
+                  <option value="" disabled>
+                    選択
+                  </option>
                   {completedMembers.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
                   ))}
                 </select>
               )}
@@ -816,9 +1058,14 @@ function TeamRadarChartSection({
           >
             <option value="average">チーム平均</option>
             {memberScores
-              .filter((m) => (m.wvScores && m.wvScores.length > 0) || (m.ciScores && m.ciScores.length > 0))
+              .filter(
+                (m) =>
+                  (m.wvScores && m.wvScores.length > 0) || (m.ciScores && m.ciScores.length > 0),
+              )
               .map((m) => (
-                <option key={m.memberId} value={m.memberId}>{m.memberName}</option>
+                <option key={m.memberId} value={m.memberId}>
+                  {m.memberName}
+                </option>
               ))}
           </select>
         </div>
@@ -886,4 +1133,3 @@ function TeamRadarChartSection({
     </div>
   );
 }
-

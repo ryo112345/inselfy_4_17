@@ -46,7 +46,11 @@ export default function SetupPage() {
 
     setSubmitting(true);
 
-    const { data: updated, error: apiError, response } = await usersUpdateUserProfile({
+    const {
+      data: updated,
+      error: apiError,
+      response,
+    } = await usersUpdateUserProfile({
       path: { username: user.username },
       body: { username: trimmedUsername, name: trimmedName },
     });
@@ -70,9 +74,7 @@ export default function SetupPage() {
       <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold">プロフィール設定</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            ユーザー名と名前を設定してください
-          </p>
+          <p className="mt-2 text-sm text-gray-600">ユーザー名と名前を設定してください</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { proposeInterview, checkPendingProposal } from "../api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { checkPendingProposal, proposeInterview } from "../api";
 import { MiniCalendar } from "./MiniCalendar";
 
 type SlotEntry = {
@@ -83,7 +83,12 @@ const DURATION_OPTIONS = Array.from({ length: 8 }, (_, i) => {
   return { label, value: minutes };
 });
 
-export function SlotPicker({ applicationId, candidateName, initialDate, initialStartMinutes }: Props) {
+export function SlotPicker({
+  applicationId,
+  candidateName,
+  initialDate,
+  initialStartMinutes,
+}: Props) {
   const router = useRouter();
   const [duration, setDuration] = useState(60);
   const [weekStart, setWeekStart] = useState(() => {
@@ -97,7 +102,14 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
     if (initialDate && initialStartMinutes != null) {
       const target = new Date(initialDate);
       const endMinutes = Math.min(initialStartMinutes + 60, END_HOUR * 60);
-      return [{ id: `slot-${++slotIdCounter}`, dateStr: toDateStr(target), startMinutes: initialStartMinutes, endMinutes }];
+      return [
+        {
+          id: `slot-${++slotIdCounter}`,
+          dateStr: toDateStr(target),
+          startMinutes: initialStartMinutes,
+          endMinutes,
+        },
+      ];
     }
     return [];
   });
@@ -108,20 +120,29 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
   const [hasPending, setHasPending] = useState(false);
 
   useEffect(() => {
-    checkPendingProposal(applicationId).then((res) => setHasPending(res.hasPending)).catch(() => {});
+    checkPendingProposal(applicationId)
+      .then((res) => setHasPending(res.hasPending))
+      .catch(() => {});
   }, [applicationId]);
 
   const dragRef = useRef<{ dayIndex: number; startMinutes: number } | null>(null);
-  const [dragPreview, setDragPreview] = useState<{ dayIndex: number; startMinutes: number; endMinutes: number } | null>(null);
+  const [dragPreview, setDragPreview] = useState<{
+    dayIndex: number;
+    startMinutes: number;
+    endMinutes: number;
+  } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<number | null>(null);
 
-  const [miniCalMonth, setMiniCalMonth] = useState(() => new Date(weekStart.getFullYear(), weekStart.getMonth(), 1));
+  const [miniCalMonth, setMiniCalMonth] = useState(
+    () => new Date(weekStart.getFullYear(), weekStart.getMonth(), 1),
+  );
 
-  const weekDays = useMemo(() =>
-    Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
-  [weekStart]);
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart],
+  );
   const weekDaysRef = useRef(weekDays);
   weekDaysRef.current = weekDays;
 
@@ -141,15 +162,18 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
     return { dayIndex, minutes: clamped };
   }, []);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    const pos = getDayAndMinutes(e);
-    if (!pos) return;
-    const endMinutes = Math.min(pos.minutes + duration, END_HOUR * 60);
-    dragRef.current = { dayIndex: pos.dayIndex, startMinutes: pos.minutes };
-    setDragPreview({ dayIndex: pos.dayIndex, startMinutes: pos.minutes, endMinutes });
-    e.preventDefault();
-  }, [getDayAndMinutes, duration]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) return;
+      const pos = getDayAndMinutes(e);
+      if (!pos) return;
+      const endMinutes = Math.min(pos.minutes + duration, END_HOUR * 60);
+      dragRef.current = { dayIndex: pos.dayIndex, startMinutes: pos.minutes };
+      setDragPreview({ dayIndex: pos.dayIndex, startMinutes: pos.minutes, endMinutes });
+      e.preventDefault();
+    },
+    [getDayAndMinutes, duration],
+  );
 
   const dragMovedRef = useRef(false);
 
@@ -175,7 +199,7 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
       if (y > rect.bottom - EDGE_ZONE) {
         speed = Math.min(MAX_SPEED, ((y - (rect.bottom - EDGE_ZONE)) / EDGE_ZONE) * MAX_SPEED);
       } else if (y < rect.top + EDGE_ZONE) {
-        speed = -Math.min(MAX_SPEED, (((rect.top + EDGE_ZONE) - y) / EDGE_ZONE) * MAX_SPEED);
+        speed = -Math.min(MAX_SPEED, ((rect.top + EDGE_ZONE - y) / EDGE_ZONE) * MAX_SPEED);
       }
       if (speed !== 0) {
         container.scrollTop += speed;
@@ -193,7 +217,11 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
       endMinutes = Math.max(START_HOUR * 60, Math.min(END_HOUR * 60, endMinutes));
       const start = dragRef.current.startMinutes;
       if (endMinutes <= start) {
-        setDragPreview({ dayIndex: dragRef.current.dayIndex, startMinutes: endMinutes, endMinutes: start });
+        setDragPreview({
+          dayIndex: dragRef.current.dayIndex,
+          startMinutes: endMinutes,
+          endMinutes: start,
+        });
       } else {
         setDragPreview({ dayIndex: dragRef.current.dayIndex, startMinutes: start, endMinutes });
       }
@@ -220,7 +248,12 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
           const dragDateStr = toDateStr(weekDaysRef.current[dragPreview.dayIndex]);
           setSlots((prev) => [
             ...prev,
-            { id: `slot-${++slotIdCounter}`, dateStr: dragDateStr, startMinutes: dragPreview.startMinutes, endMinutes: dragPreview.endMinutes },
+            {
+              id: `slot-${++slotIdCounter}`,
+              dateStr: dragDateStr,
+              startMinutes: dragPreview.startMinutes,
+              endMinutes: dragPreview.endMinutes,
+            },
           ]);
         }
       }
@@ -258,7 +291,13 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
         endDate.setHours(Math.floor(s.endMinutes / 60), s.endMinutes % 60, 0, 0);
         return { startTime: startDate.toISOString(), endTime: endDate.toISOString() };
       });
-      await proposeInterview({ applicationId, message, location: location || undefined, durationMinutes: duration, slots: apiSlots });
+      await proposeInterview({
+        applicationId,
+        message,
+        location: location || undefined,
+        durationMinutes: duration,
+        slots: apiSlots,
+      });
       router.push("/company/calendar");
     } catch (e) {
       setError(e instanceof Error ? e.message : "エラーが発生しました");
@@ -280,7 +319,14 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
             onClick={handleBack}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
           >
-            <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg
+              width={20}
+              height={20}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -289,7 +335,8 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
               {hasPending ? "面接日程を再提案" : "面接日程を提案"}
             </h1>
             <p className="text-xs text-gray-500">
-              <span className="font-medium text-gray-700">{candidateName}</span> さんに候補日時を{hasPending ? "再" : ""}提案
+              <span className="font-medium text-gray-700">{candidateName}</span> さんに候補日時を
+              {hasPending ? "再" : ""}提案
             </p>
             {hasPending && (
               <p className="text-xs text-amber-600 mt-0.5">
@@ -312,7 +359,11 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
             disabled={submitting || slots.length === 0}
             className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors"
           >
-            {submitting ? "送信中..." : hasPending ? `日程を再提案する（${slots.length}件）` : `日程を提案する（${slots.length}件）`}
+            {submitting
+              ? "送信中..."
+              : hasPending
+                ? `日程を再提案する（${slots.length}件）`
+                : `日程を提案する（${slots.length}件）`}
           </button>
         </div>
       </div>
@@ -325,7 +376,14 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
               onClick={() => setWeekStart(addDays(weekStart, -7))}
               className="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
             >
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <svg
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -336,7 +394,14 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
               onClick={() => setWeekStart(addDays(weekStart, 7))}
               className="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
             >
-              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <svg
+                width={16}
+                height={16}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -349,7 +414,9 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
               className="rounded-lg border border-gray-200 px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300"
             >
               {DURATION_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
               ))}
             </select>
           </div>
@@ -365,7 +432,11 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
               className="w-48 rounded-lg border border-gray-200 px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300"
             />
           </div>
-          <span className="text-xs text-gray-400">空いている時間帯をドラッグしてください。候補者はその中から{duration >= 60 ? `${Math.floor(duration / 60)}時間` : ""}{duration % 60 > 0 ? `${duration % 60}分` : ""}を選びます</span>
+          <span className="text-xs text-gray-400">
+            空いている時間帯をドラッグしてください。候補者はその中から
+            {duration >= 60 ? `${Math.floor(duration / 60)}時間` : ""}
+            {duration % 60 > 0 ? `${duration % 60}分` : ""}を選びます
+          </span>
         </div>
       </div>
 
@@ -383,111 +454,128 @@ export function SlotPicker({ applicationId, candidateName, initialDate, initialS
 
         {/* Week calendar */}
         <div className="flex-1 flex flex-col min-h-0">
-      {/* Day Headers */}
-      <div className="grid grid-cols-[56px_repeat(7,1fr)] border-b border-gray-200 shrink-0">
-        <div />
-        {weekDays.map((d, i) => {
-          const today = isToday(d);
-          return (
-            <div key={i} className={`py-2 text-center border-l border-gray-100 ${today ? "bg-blue-50" : ""}`}>
-              <p className="text-[11px] text-gray-500">{DAY_LABELS[i]}</p>
-              <p className={`text-lg font-semibold ${today ? "text-blue-600" : "text-gray-900"}`}>
-                {d.getDate()}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Time Grid */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0">
-        <div className="grid grid-cols-[56px_repeat(7,1fr)]">
-          {/* Hour labels column */}
-          <div>
-            {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-              <div key={i} className="relative border-r border-gray-100" style={{ height: `${HOUR_HEIGHT}px` }}>
-                <span className="absolute -top-2.5 right-2 text-[11px] text-gray-400">
-                  {formatTime((START_HOUR + i) * 60)}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Day columns */}
-          <div
-            ref={gridRef}
-            className="col-span-7 grid grid-cols-7 relative select-none cursor-crosshair"
-            onMouseDown={handleMouseDown}
-            style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
-          >
-            {weekDays.map((d, dayIdx) => {
+          {/* Day Headers */}
+          <div className="grid grid-cols-[56px_repeat(7,1fr)] border-b border-gray-200 shrink-0">
+            <div />
+            {weekDays.map((d, i) => {
               const today = isToday(d);
-              const dayStr = toDateStr(d);
-              const daySlots = slots.filter((s) => s.dateStr === dayStr);
               return (
-                <div key={dayIdx} className={`relative border-l border-gray-100 ${today ? "bg-blue-50/30" : ""}`}>
-                  {/* Hour lines */}
-                  {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                    <div
-                      key={i}
-                      className="absolute left-0 right-0 border-t border-gray-100"
-                      style={{ top: `${i * HOUR_HEIGHT}px` }}
-                    />
-                  ))}
-                  {/* Half-hour lines */}
-                  {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                    <div
-                      key={`half-${i}`}
-                      className="absolute left-0 right-0 border-t border-dashed border-gray-50"
-                      style={{ top: `${i * HOUR_HEIGHT + HOUR_HEIGHT / 2}px` }}
-                    />
-                  ))}
-
-                  {/* Created slots */}
-                  {daySlots.map((slot) => (
-                    <div
-                      key={slot.id}
-                      className="absolute left-1 right-1 rounded-lg bg-blue-500 text-white px-2 py-1 cursor-pointer hover:bg-blue-600 transition-colors group z-10"
-                      style={{
-                        top: `${minutesToY(slot.startMinutes)}px`,
-                        height: `${minutesToY(slot.endMinutes) - minutesToY(slot.startMinutes)}px`,
-                      }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onClick={(e) => { e.stopPropagation(); removeSlot(slot.id); }}
-                    >
-                      <p className="text-xs font-medium leading-tight truncate">
-                        {formatTime(slot.startMinutes)} – {formatTime(slot.endMinutes)}
-                      </p>
-                      {(minutesToY(slot.endMinutes) - minutesToY(slot.startMinutes)) >= 48 && (
-                        <p className="text-[11px] opacity-70 mt-0.5">クリックで削除</p>
-                      )}
-                      <span className="absolute top-1 right-1.5 text-white/60 text-sm opacity-0 group-hover:opacity-100 transition-opacity">✕</span>
-                    </div>
-                  ))}
-
-                  {/* Drag preview */}
-                  {dragPreview && dragPreview.dayIndex === dayIdx && (
-                    <div
-                      className="absolute left-1 right-1 rounded-lg bg-blue-500 text-white z-20 pointer-events-none"
-                      style={{
-                        top: `${minutesToY(dragPreview.startMinutes)}px`,
-                        height: `${Math.max(minutesToY(dragPreview.endMinutes) - minutesToY(dragPreview.startMinutes), 4)}px`,
-                      }}
-                    >
-                      <p className="text-xs font-medium px-2 py-1">
-                        {formatTime(dragPreview.startMinutes)} – {formatTime(dragPreview.endMinutes)}
-                      </p>
-                    </div>
-                  )}
+                <div
+                  key={i}
+                  className={`py-2 text-center border-l border-gray-100 ${today ? "bg-blue-50" : ""}`}
+                >
+                  <p className="text-[11px] text-gray-500">{DAY_LABELS[i]}</p>
+                  <p
+                    className={`text-lg font-semibold ${today ? "text-blue-600" : "text-gray-900"}`}
+                  >
+                    {d.getDate()}
+                  </p>
                 </div>
               );
             })}
           </div>
-        </div>
-      </div>
+
+          {/* Time Grid */}
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0">
+            <div className="grid grid-cols-[56px_repeat(7,1fr)]">
+              {/* Hour labels column */}
+              <div>
+                {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                  <div
+                    key={i}
+                    className="relative border-r border-gray-100"
+                    style={{ height: `${HOUR_HEIGHT}px` }}
+                  >
+                    <span className="absolute -top-2.5 right-2 text-[11px] text-gray-400">
+                      {formatTime((START_HOUR + i) * 60)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Day columns */}
+              <div
+                ref={gridRef}
+                className="col-span-7 grid grid-cols-7 relative select-none cursor-crosshair"
+                onMouseDown={handleMouseDown}
+                style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
+              >
+                {weekDays.map((d, dayIdx) => {
+                  const today = isToday(d);
+                  const dayStr = toDateStr(d);
+                  const daySlots = slots.filter((s) => s.dateStr === dayStr);
+                  return (
+                    <div
+                      key={dayIdx}
+                      className={`relative border-l border-gray-100 ${today ? "bg-blue-50/30" : ""}`}
+                    >
+                      {/* Hour lines */}
+                      {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                        <div
+                          key={i}
+                          className="absolute left-0 right-0 border-t border-gray-100"
+                          style={{ top: `${i * HOUR_HEIGHT}px` }}
+                        />
+                      ))}
+                      {/* Half-hour lines */}
+                      {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                        <div
+                          key={`half-${i}`}
+                          className="absolute left-0 right-0 border-t border-dashed border-gray-50"
+                          style={{ top: `${i * HOUR_HEIGHT + HOUR_HEIGHT / 2}px` }}
+                        />
+                      ))}
+
+                      {/* Created slots */}
+                      {daySlots.map((slot) => (
+                        <div
+                          key={slot.id}
+                          className="absolute left-1 right-1 rounded-lg bg-blue-500 text-white px-2 py-1 cursor-pointer hover:bg-blue-600 transition-colors group z-10"
+                          style={{
+                            top: `${minutesToY(slot.startMinutes)}px`,
+                            height: `${minutesToY(slot.endMinutes) - minutesToY(slot.startMinutes)}px`,
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeSlot(slot.id);
+                          }}
+                        >
+                          <p className="text-xs font-medium leading-tight truncate">
+                            {formatTime(slot.startMinutes)} – {formatTime(slot.endMinutes)}
+                          </p>
+                          {minutesToY(slot.endMinutes) - minutesToY(slot.startMinutes) >= 48 && (
+                            <p className="text-[11px] opacity-70 mt-0.5">クリックで削除</p>
+                          )}
+                          <span className="absolute top-1 right-1.5 text-white/60 text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                            ✕
+                          </span>
+                        </div>
+                      ))}
+
+                      {/* Drag preview */}
+                      {dragPreview && dragPreview.dayIndex === dayIdx && (
+                        <div
+                          className="absolute left-1 right-1 rounded-lg bg-blue-500 text-white z-20 pointer-events-none"
+                          style={{
+                            top: `${minutesToY(dragPreview.startMinutes)}px`,
+                            height: `${Math.max(minutesToY(dragPreview.endMinutes) - minutesToY(dragPreview.startMinutes), 4)}px`,
+                          }}
+                        >
+                          <p className="text-xs font-medium px-2 py-1">
+                            {formatTime(dragPreview.startMinutes)} –{" "}
+                            {formatTime(dragPreview.endMinutes)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

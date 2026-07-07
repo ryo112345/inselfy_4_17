@@ -104,18 +104,35 @@ export default function AdminAdminsPage() {
             href="/admin"
             className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </Link>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--foreground)]">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-[var(--foreground)]"
+          >
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
           <h1 className="text-2xl font-bold">管理者管理</h1>
-          {admins && (
-            <span className="text-sm text-[var(--muted)] ml-2">{admins.length}件</span>
-          )}
+          {admins && <span className="text-sm text-[var(--muted)] ml-2">{admins.length}件</span>}
         </div>
 
         {issuedKey && (
@@ -185,16 +202,29 @@ export default function AdminAdminsPage() {
             <table className="w-full min-w-[700px]">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">管理者</th>
-                  <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">APIキー</th>
-                  <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">最終使用</th>
-                  <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">登録日</th>
-                  <th className="text-right text-xs font-medium text-[var(--muted)] px-5 py-3">操作</th>
+                  <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                    管理者
+                  </th>
+                  <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                    APIキー
+                  </th>
+                  <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                    最終使用
+                  </th>
+                  <th className="text-left text-xs font-medium text-[var(--muted)] px-5 py-3">
+                    登録日
+                  </th>
+                  <th className="text-right text-xs font-medium text-[var(--muted)] px-5 py-3">
+                    操作
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {admins.map((admin) => (
-                  <tr key={admin.id} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors">
+                  <tr
+                    key={admin.id}
+                    className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors"
+                  >
                     <td className="px-5 py-4">
                       <div className="text-sm font-medium">{admin.name || "-"}</div>
                       <div className="text-xs text-[var(--muted)]">{admin.email}</div>
@@ -212,7 +242,9 @@ export default function AdminAdminsPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="text-sm text-[var(--muted)]">{formatDate(admin.created_at)}</span>
+                      <span className="text-sm text-[var(--muted)]">
+                        {formatDate(admin.created_at)}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-2">

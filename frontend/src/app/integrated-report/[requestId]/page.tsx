@@ -1,12 +1,11 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-
-import { getIntegratedReport } from "@/features/integrated-report/api";
-import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 import { Sidebar } from "@/app/components/Sidebar";
 import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
+import { getIntegratedReport } from "@/features/integrated-report/api";
+import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +29,10 @@ export default async function IntegratedReportPage({
   if (!userId) notFound();
 
   const cookieStore = await cookies();
-  const cookieHeader = cookieStore.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
   const data = await fetchPanelDataByUserId(userId, cookieHeader);
   if (!data) notFound();
 

@@ -1,5 +1,5 @@
+import { Inter, Playfair_Display } from "next/font/google";
 import Link from "next/link";
-import { Playfair_Display, Inter } from "next/font/google";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -63,27 +63,123 @@ export default function CareerInterestPage() {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex items-baseline gap-1.5">
-      <span className={`${inter.className} text-2xl font-medium text-gray-700`}>
-        {value}
-      </span>
-      <span className="text-xs font-semibold tracking-wider text-blue-400 uppercase">
-        {label}
-      </span>
+      <span className={`${inter.className} text-2xl font-medium text-gray-700`}>{value}</span>
+      <span className="text-xs font-semibold tracking-wider text-blue-400 uppercase">{label}</span>
     </div>
   );
 }
 
 const SHAPES = [
-  { type: "hex", size: 130, top: "-8%", left: "-10%", color: "rgba(180,220,210,0.35)", dur: "20s", dx: 20, dy: 15, rotate: 15 },
-  { type: "hex", size: 90, top: "8%", left: "75%", color: "rgba(170,210,200,0.30)", dur: "18s", dx: -15, dy: 25, rotate: -10 },
-  { type: "rect", size: 100, top: "-5%", left: "38%", color: "rgba(180,200,230,0.30)", dur: "22s", dx: 15, dy: -20, rotate: 30 },
-  { type: "rect", size: 75, top: "18%", left: "85%", color: "rgba(200,180,220,0.35)", dur: "17s", dx: -20, dy: 15, rotate: -20 },
-  { type: "hex", size: 110, top: "28%", left: "-8%", color: "rgba(240,210,180,0.30)", dur: "24s", dx: 25, dy: -15, rotate: 25 },
-  { type: "rect", size: 65, top: "6%", left: "20%", color: "rgba(160,210,200,0.35)", dur: "16s", dx: -10, dy: 20, rotate: 45 },
-  { type: "hex", size: 80, top: "52%", left: "80%", color: "rgba(190,220,210,0.28)", dur: "21s", dx: -20, dy: -15, rotate: -30 },
-  { type: "rect", size: 85, top: "45%", left: "0%", color: "rgba(180,195,230,0.30)", dur: "19s", dx: 15, dy: 20, rotate: 10 },
-  { type: "hex", size: 120, top: "32%", left: "38%", color: "rgba(230,200,170,0.20)", dur: "23s", dx: -12, dy: 18, rotate: -15 },
-  { type: "rect", size: 55, top: "62%", left: "42%", color: "rgba(190,215,200,0.28)", dur: "18s", dx: 18, dy: -12, rotate: 35 },
+  {
+    type: "hex",
+    size: 130,
+    top: "-8%",
+    left: "-10%",
+    color: "rgba(180,220,210,0.35)",
+    dur: "20s",
+    dx: 20,
+    dy: 15,
+    rotate: 15,
+  },
+  {
+    type: "hex",
+    size: 90,
+    top: "8%",
+    left: "75%",
+    color: "rgba(170,210,200,0.30)",
+    dur: "18s",
+    dx: -15,
+    dy: 25,
+    rotate: -10,
+  },
+  {
+    type: "rect",
+    size: 100,
+    top: "-5%",
+    left: "38%",
+    color: "rgba(180,200,230,0.30)",
+    dur: "22s",
+    dx: 15,
+    dy: -20,
+    rotate: 30,
+  },
+  {
+    type: "rect",
+    size: 75,
+    top: "18%",
+    left: "85%",
+    color: "rgba(200,180,220,0.35)",
+    dur: "17s",
+    dx: -20,
+    dy: 15,
+    rotate: -20,
+  },
+  {
+    type: "hex",
+    size: 110,
+    top: "28%",
+    left: "-8%",
+    color: "rgba(240,210,180,0.30)",
+    dur: "24s",
+    dx: 25,
+    dy: -15,
+    rotate: 25,
+  },
+  {
+    type: "rect",
+    size: 65,
+    top: "6%",
+    left: "20%",
+    color: "rgba(160,210,200,0.35)",
+    dur: "16s",
+    dx: -10,
+    dy: 20,
+    rotate: 45,
+  },
+  {
+    type: "hex",
+    size: 80,
+    top: "52%",
+    left: "80%",
+    color: "rgba(190,220,210,0.28)",
+    dur: "21s",
+    dx: -20,
+    dy: -15,
+    rotate: -30,
+  },
+  {
+    type: "rect",
+    size: 85,
+    top: "45%",
+    left: "0%",
+    color: "rgba(180,195,230,0.30)",
+    dur: "19s",
+    dx: 15,
+    dy: 20,
+    rotate: 10,
+  },
+  {
+    type: "hex",
+    size: 120,
+    top: "32%",
+    left: "38%",
+    color: "rgba(230,200,170,0.20)",
+    dur: "23s",
+    dx: -12,
+    dy: 18,
+    rotate: -15,
+  },
+  {
+    type: "rect",
+    size: 55,
+    top: "62%",
+    left: "42%",
+    color: "rgba(190,215,200,0.28)",
+    dur: "18s",
+    dx: 18,
+    dy: -12,
+    rotate: 35,
+  },
 ];
 
 function FloatingShapes() {
@@ -101,16 +197,18 @@ function FloatingShapes() {
           <div
             key={i}
             className="absolute blur-[3px]"
-            style={{
-              width: s.size,
-              height: s.size,
-              top: s.top,
-              left: s.left,
-              transform: `rotate(${s.rotate}deg)`,
-              "--dx": `${s.dx}px`,
-              "--dy": `${s.dy}px`,
-              animation: `shape-float ${s.dur} ease-in-out infinite`,
-            } as React.CSSProperties}
+            style={
+              {
+                width: s.size,
+                height: s.size,
+                top: s.top,
+                left: s.left,
+                transform: `rotate(${s.rotate}deg)`,
+                "--dx": `${s.dx}px`,
+                "--dy": `${s.dy}px`,
+                animation: `shape-float ${s.dur} ease-in-out infinite`,
+              } as React.CSSProperties
+            }
           >
             {s.type === "hex" ? (
               <svg viewBox="0 0 100 100" className="w-full h-full">

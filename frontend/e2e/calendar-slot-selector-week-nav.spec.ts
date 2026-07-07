@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const USER_ID = "10000000-0000-0000-0000-000000000021"; // 高橋里奈
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY ?? "";

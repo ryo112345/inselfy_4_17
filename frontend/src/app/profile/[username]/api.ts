@@ -11,16 +11,16 @@ import {
   followsFollowUser,
   followsGetFollowStatus,
   followsUnfollowUser,
-  skillsAttachSkill,
-  skillsDetachSkill,
-  usersUpdateUserProfile,
-  usersUploadUserImage,
   type ModelsCreateEducationRequest,
   type ModelsCreateExperienceRequest,
   type ModelsFollowStatusResponse,
   type ModelsUpdateEducationRequest,
   type ModelsUpdateExperienceRequest,
   type ModelsUpdateUserProfileRequest,
+  skillsAttachSkill,
+  skillsDetachSkill,
+  usersUpdateUserProfile,
+  usersUploadUserImage,
 } from "@/external/client/api/generated";
 
 export type ApiError = {

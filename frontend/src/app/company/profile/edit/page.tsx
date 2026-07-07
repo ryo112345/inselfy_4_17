@@ -33,20 +33,46 @@ type ProfileData = {
 type FormData = Omit<ProfileData, "id" | "email" | "logoUrl" | "coverImageUrl" | "galleryUrls">;
 
 const employeeCountOptions = [
-  "", "1〜10名", "11〜50名", "51〜100名", "101〜300名",
-  "301〜500名", "501〜1000名", "1001〜5000名", "5001名以上",
+  "",
+  "1〜10名",
+  "11〜50名",
+  "51〜100名",
+  "101〜300名",
+  "301〜500名",
+  "501〜1000名",
+  "1001〜5000名",
+  "5001名以上",
 ];
 
 const industryOptions = [
-  "", "IT・通信", "Web・インターネット", "SaaS", "AI・機械学習",
-  "ゲーム・エンタメ", "金融・フィンテック", "コンサルティング", "人材・HR",
-  "広告・マーケティング", "メーカー・製造", "商社", "小売・流通",
-  "不動産・建設", "医療・ヘルスケア", "教育", "エネルギー", "その他",
+  "",
+  "IT・通信",
+  "Web・インターネット",
+  "SaaS",
+  "AI・機械学習",
+  "ゲーム・エンタメ",
+  "金融・フィンテック",
+  "コンサルティング",
+  "人材・HR",
+  "広告・マーケティング",
+  "メーカー・製造",
+  "商社",
+  "小売・流通",
+  "不動産・建設",
+  "医療・ヘルスケア",
+  "教育",
+  "エネルギー",
+  "その他",
 ];
 
 const smokingPolicyOptions = [
-  "", "屋内禁煙", "屋内原則禁煙（喫煙室あり）", "敷地内禁煙",
-  "敷地内禁煙（喫煙場所あり）", "屋内喫煙可", "対策なし",
+  "",
+  "屋内禁煙",
+  "屋内原則禁煙（喫煙室あり）",
+  "敷地内禁煙",
+  "敷地内禁煙（喫煙場所あり）",
+  "屋内喫煙可",
+  "対策なし",
 ];
 
 const monthOptions = [
@@ -84,11 +110,25 @@ export default function CompanyProfilePage() {
   const { companyFetch } = useCompanyAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [form, setForm] = useState<FormData>({
-    companyName: "", contactPersonName: "", phoneNumber: "", headline: "",
-    description: "", industry: "", location: "", employeeCount: "",
-    foundedYear: null, foundedMonth: null, websiteUrl: "",
-    representativeName: "", capital: "", revenue: "", benefits: [],
-    averageAge: "", averageOvertimeHours: "", paidLeaveRate: "", smokingPolicy: "",
+    companyName: "",
+    contactPersonName: "",
+    phoneNumber: "",
+    headline: "",
+    description: "",
+    industry: "",
+    location: "",
+    employeeCount: "",
+    foundedYear: null,
+    foundedMonth: null,
+    websiteUrl: "",
+    representativeName: "",
+    capital: "",
+    revenue: "",
+    benefits: [],
+    averageAge: "",
+    averageOvertimeHours: "",
+    paidLeaveRate: "",
+    smokingPolicy: "",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -127,9 +167,12 @@ export default function CompanyProfilePage() {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: name === "foundedYear" || name === "foundedMonth"
-        ? (value === "" ? null : Number(value))
-        : value,
+      [name]:
+        name === "foundedYear" || name === "foundedMonth"
+          ? value === ""
+            ? null
+            : Number(value)
+          : value,
     }));
     setIsDirty(true);
   };
@@ -159,7 +202,12 @@ export default function CompanyProfilePage() {
   };
 
   const handleImageUpload = async (type: "logo" | "cover" | "gallery", file: File) => {
-    const setter = type === "logo" ? setLogoUploading : type === "cover" ? setCoverUploading : setGalleryUploading;
+    const setter =
+      type === "logo"
+        ? setLogoUploading
+        : type === "cover"
+          ? setCoverUploading
+          : setGalleryUploading;
     setter(true);
     try {
       const fd = new FormData();
@@ -191,7 +239,8 @@ export default function CompanyProfilePage() {
 
   const handleImageDelete = async (type: "logo" | "cover" | "gallery", url?: string) => {
     try {
-      const qs = type === "gallery" ? `type=gallery&url=${encodeURIComponent(url!)}` : `type=${type}`;
+      const qs =
+        type === "gallery" ? `type=gallery&url=${encodeURIComponent(url!)}` : `type=${type}`;
       const res = await companyFetch(`/api/company/profile/image?${qs}`, { method: "DELETE" });
       if (res.ok) {
         setProfile((prev) => {
@@ -235,7 +284,11 @@ export default function CompanyProfilePage() {
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div className="relative h-44 bg-gradient-to-br from-gray-100 to-gray-50">
           {profile.coverImageUrl ? (
-            <img src={profile.coverImageUrl} alt="カバー画像" className="h-full w-full object-cover" />
+            <img
+              src={profile.coverImageUrl}
+              alt="カバー画像"
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
@@ -245,20 +298,34 @@ export default function CompanyProfilePage() {
             </div>
           )}
           <div className="absolute bottom-3 right-3 flex gap-2">
-            <button onClick={() => coverInputRef.current?.click()} disabled={coverUploading}
-              className="flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white cursor-pointer">
+            <button
+              onClick={() => coverInputRef.current?.click()}
+              disabled={coverUploading}
+              className="flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white cursor-pointer"
+            >
               {coverUploading ? <Spinner /> : <CameraIcon className="h-3.5 w-3.5" />}
               {profile.coverImageUrl ? "変更" : "追加"}
             </button>
             {profile.coverImageUrl && (
-              <button onClick={() => handleImageDelete("cover")}
-                className="flex items-center rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-red-500 shadow-sm backdrop-blur-sm transition-colors hover:bg-white cursor-pointer">
+              <button
+                onClick={() => handleImageDelete("cover")}
+                className="flex items-center rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-red-500 shadow-sm backdrop-blur-sm transition-colors hover:bg-white cursor-pointer"
+              >
                 <TrashIcon className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
-          <input ref={coverInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("cover", f); e.target.value = ""; }} />
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleImageUpload("cover", f);
+              e.target.value = "";
+            }}
+          />
 
           {/* Logo */}
           <div className="absolute -bottom-10 left-6">
@@ -270,21 +337,41 @@ export default function CompanyProfilePage() {
                   <BuildingIcon className="h-7 w-7 text-gray-300" />
                 </div>
               )}
-              <button onClick={() => logoInputRef.current?.click()} disabled={logoUploading}
-                className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100 cursor-pointer">
-                {logoUploading ? <Spinner className="text-white" /> : <CameraIcon className="h-5 w-5 text-white" />}
+              <button
+                onClick={() => logoInputRef.current?.click()}
+                disabled={logoUploading}
+                className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100 cursor-pointer"
+              >
+                {logoUploading ? (
+                  <Spinner className="text-white" />
+                ) : (
+                  <CameraIcon className="h-5 w-5 text-white" />
+                )}
               </button>
             </div>
-            <input ref={logoInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("logo", f); e.target.value = ""; }} />
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImageUpload("logo", f);
+                e.target.value = "";
+              }}
+            />
           </div>
         </div>
 
         <div className="flex items-center justify-between px-6 pt-14 pb-5">
           <p className="text-xs text-gray-400">JPG, PNG, WebP / 5MB以下</p>
           {profile.logoUrl && (
-            <button onClick={() => handleImageDelete("logo")}
-              className="text-xs text-red-400 hover:text-red-500 transition-colors cursor-pointer">ロゴを削除</button>
+            <button
+              onClick={() => handleImageDelete("logo")}
+              className="text-xs text-red-400 hover:text-red-500 transition-colors cursor-pointer"
+            >
+              ロゴを削除
+            </button>
           )}
         </div>
       </section>
@@ -294,54 +381,135 @@ export default function CompanyProfilePage() {
         <SectionTitle icon={<InfoIcon />}>基本情報</SectionTitle>
         <div className="mt-5 space-y-5">
           <Field label="企業名" required>
-            <input name="companyName" value={form.companyName} onChange={handleChange} className="field-input" placeholder="例: 株式会社Inselfy" />
+            <input
+              name="companyName"
+              value={form.companyName}
+              onChange={handleChange}
+              className="field-input"
+              placeholder="例: 株式会社Inselfy"
+            />
           </Field>
           <Field label="キャッチコピー" hint={`${form.headline.length}/100`}>
-            <input name="headline" value={form.headline} onChange={handleChange} maxLength={100} className="field-input" placeholder="例: AIで採用を変える" />
+            <input
+              name="headline"
+              value={form.headline}
+              onChange={handleChange}
+              maxLength={100}
+              className="field-input"
+              placeholder="例: AIで採用を変える"
+            />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="代表者名">
-              <input name="representativeName" value={form.representativeName} onChange={handleChange} className="field-input" placeholder="例: 山田 太郎" />
+              <input
+                name="representativeName"
+                value={form.representativeName}
+                onChange={handleChange}
+                className="field-input"
+                placeholder="例: 山田 太郎"
+              />
             </Field>
             <Field label="業種">
-              <select name="industry" value={form.industry} onChange={handleChange} className="field-input">
-                {industryOptions.map((opt) => <option key={opt} value={opt}>{opt || "選択してください"}</option>)}
+              <select
+                name="industry"
+                value={form.industry}
+                onChange={handleChange}
+                className="field-input"
+              >
+                {industryOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt || "選択してください"}
+                  </option>
+                ))}
               </select>
             </Field>
           </div>
           <div className="grid grid-cols-4 gap-4">
             <Field label="設立年">
-              <select name="foundedYear" value={form.foundedYear ?? ""} onChange={handleChange} className="field-input">
+              <select
+                name="foundedYear"
+                value={form.foundedYear ?? ""}
+                onChange={handleChange}
+                className="field-input"
+              >
                 <option value="">年</option>
-                {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => new Date().getFullYear() - i).map((y) => (
-                  <option key={y} value={y}>{y}年</option>
+                {Array.from(
+                  { length: new Date().getFullYear() - 1899 },
+                  (_, i) => new Date().getFullYear() - i,
+                ).map((y) => (
+                  <option key={y} value={y}>
+                    {y}年
+                  </option>
                 ))}
               </select>
             </Field>
             <Field label="設立月">
-              <select name="foundedMonth" value={form.foundedMonth ?? ""} onChange={handleChange} className="field-input">
-                {monthOptions.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+              <select
+                name="foundedMonth"
+                value={form.foundedMonth ?? ""}
+                onChange={handleChange}
+                className="field-input"
+              >
+                {monthOptions.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label="資本金">
-              <input name="capital" value={form.capital} onChange={handleChange} className="field-input" placeholder="例: 1億円" />
+              <input
+                name="capital"
+                value={form.capital}
+                onChange={handleChange}
+                className="field-input"
+                placeholder="例: 1億円"
+              />
             </Field>
             <Field label="売上高">
-              <input name="revenue" value={form.revenue} onChange={handleChange} className="field-input" placeholder="例: 10億円" />
+              <input
+                name="revenue"
+                value={form.revenue}
+                onChange={handleChange}
+                className="field-input"
+                placeholder="例: 10億円"
+              />
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="従業員規模">
-              <select name="employeeCount" value={form.employeeCount} onChange={handleChange} className="field-input">
-                {employeeCountOptions.map((opt) => <option key={opt} value={opt}>{opt || "選択してください"}</option>)}
+              <select
+                name="employeeCount"
+                value={form.employeeCount}
+                onChange={handleChange}
+                className="field-input"
+              >
+                {employeeCountOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt || "選択してください"}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label="所在地">
-              <input name="location" value={form.location} onChange={handleChange} className="field-input" placeholder="例: 東京都渋谷区神宮前1-2-3" />
+              <input
+                name="location"
+                value={form.location}
+                onChange={handleChange}
+                className="field-input"
+                placeholder="例: 東京都渋谷区神宮前1-2-3"
+              />
             </Field>
           </div>
           <Field label="Webサイト">
-            <input name="websiteUrl" value={form.websiteUrl} onChange={handleChange} type="url" className="field-input" placeholder="例: https://example.com" />
+            <input
+              name="websiteUrl"
+              value={form.websiteUrl}
+              onChange={handleChange}
+              type="url"
+              className="field-input"
+              placeholder="例: https://example.com"
+            />
           </Field>
         </div>
       </section>
@@ -352,14 +520,31 @@ export default function CompanyProfilePage() {
         <div className="mt-5 space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <Field label="担当者名">
-              <input name="contactPersonName" value={form.contactPersonName} onChange={handleChange} className="field-input" placeholder="例: 佐藤 花子" />
+              <input
+                name="contactPersonName"
+                value={form.contactPersonName}
+                onChange={handleChange}
+                className="field-input"
+                placeholder="例: 佐藤 花子"
+              />
             </Field>
             <Field label="電話番号">
-              <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} type="tel" className="field-input" placeholder="例: 03-1234-5678" />
+              <input
+                name="phoneNumber"
+                value={form.phoneNumber}
+                onChange={handleChange}
+                type="tel"
+                className="field-input"
+                placeholder="例: 03-1234-5678"
+              />
             </Field>
           </div>
           <Field label="メールアドレス">
-            <input value={profile.email} disabled className="field-input bg-gray-50 text-gray-400 cursor-not-allowed" />
+            <input
+              value={profile.email}
+              disabled
+              className="field-input bg-gray-50 text-gray-400 cursor-not-allowed"
+            />
           </Field>
         </div>
       </section>
@@ -369,8 +554,15 @@ export default function CompanyProfilePage() {
         <SectionTitle icon={<DocIcon />}>事業内容</SectionTitle>
         <div className="mt-5">
           <Field label="事業内容・企業紹介" hint={`${form.description.length}/2000`}>
-            <textarea name="description" value={form.description} onChange={handleChange} maxLength={2000} rows={6}
-              className="field-input resize-y" placeholder="企業の事業内容やミッション・ビジョンなどを記載してください" />
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              maxLength={2000}
+              rows={6}
+              className="field-input resize-y"
+              placeholder="企業の事業内容やミッション・ビジョンなどを記載してください"
+            />
           </Field>
         </div>
       </section>
@@ -378,21 +570,33 @@ export default function CompanyProfilePage() {
       {/* ── 写真ギャラリー ── */}
       <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <SectionTitle icon={<GalleryIcon />}>写真ギャラリー</SectionTitle>
-        <p className="mt-1 text-xs text-gray-400">オフィスの様子やチームの雰囲気が伝わる写真を追加しましょう（最大10枚）</p>
+        <p className="mt-1 text-xs text-gray-400">
+          オフィスの様子やチームの雰囲気が伝わる写真を追加しましょう（最大10枚）
+        </p>
         <div className="mt-4 grid grid-cols-3 gap-3">
           {profile.galleryUrls.map((url) => (
-            <div key={url} className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100">
+            <div
+              key={url}
+              className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-gray-100"
+            >
               <img src={url} alt="" className="h-full w-full object-cover" />
-              <button onClick={() => handleImageDelete("gallery", url)}
-                className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer">
+              <button
+                onClick={() => handleImageDelete("gallery", url)}
+                className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
+              >
                 <TrashIcon className="h-3.5 w-3.5" />
               </button>
             </div>
           ))}
           {profile.galleryUrls.length < 10 && (
-            <button onClick={() => galleryInputRef.current?.click()} disabled={galleryUploading}
-              className="flex aspect-[4/3] flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 cursor-pointer">
-              {galleryUploading ? <Spinner /> : (
+            <button
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={galleryUploading}
+              className="flex aspect-[4/3] flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-gray-300 hover:bg-gray-50 cursor-pointer"
+            >
+              {galleryUploading ? (
+                <Spinner />
+              ) : (
                 <>
                   <PlusIcon className="h-6 w-6" />
                   <span className="mt-1 text-xs">写真を追加</span>
@@ -401,8 +605,17 @@ export default function CompanyProfilePage() {
             </button>
           )}
         </div>
-        <input ref={galleryInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload("gallery", f); e.target.value = ""; }} />
+        <input
+          ref={galleryInputRef}
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleImageUpload("gallery", f);
+            e.target.value = "";
+          }}
+        />
       </section>
 
       {/* ── 福利厚生 ── */}
@@ -412,7 +625,10 @@ export default function CompanyProfilePage() {
           <Field label="福利厚生" hint={`${form.benefits.length}件`}>
             <TagInput
               tags={form.benefits}
-              onChange={(tags) => { setForm((prev) => ({ ...prev, benefits: tags })); setIsDirty(true); }}
+              onChange={(tags) => {
+                setForm((prev) => ({ ...prev, benefits: tags }));
+                setIsDirty(true);
+              }}
               placeholder="入力してEnterで追加（例: 社会保険完備）"
             />
           </Field>
@@ -422,39 +638,80 @@ export default function CompanyProfilePage() {
       {/* ── 働く環境 ── */}
       <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <SectionTitle icon={<ChartIcon />}>働く環境データ</SectionTitle>
-        <p className="mt-1 mb-5 text-xs text-gray-400">求職者が企業を比較検討する際の重要な指標です</p>
+        <p className="mt-1 mb-5 text-xs text-gray-400">
+          求職者が企業を比較検討する際の重要な指標です
+        </p>
         <div className="space-y-5">
           <div className="grid grid-cols-3 gap-4">
             <Field label="平均年齢">
-              <input name="averageAge" value={form.averageAge} onChange={handleChange} className="field-input" placeholder="例: 32.5歳" />
+              <input
+                name="averageAge"
+                value={form.averageAge}
+                onChange={handleChange}
+                className="field-input"
+                placeholder="例: 32.5歳"
+              />
             </Field>
             <Field label="月平均残業時間">
-              <input name="averageOvertimeHours" value={form.averageOvertimeHours} onChange={handleChange} className="field-input" placeholder="例: 15時間" />
+              <input
+                name="averageOvertimeHours"
+                value={form.averageOvertimeHours}
+                onChange={handleChange}
+                className="field-input"
+                placeholder="例: 15時間"
+              />
             </Field>
             <Field label="有給取得率">
-              <input name="paidLeaveRate" value={form.paidLeaveRate} onChange={handleChange} className="field-input" placeholder="例: 80%" />
+              <input
+                name="paidLeaveRate"
+                value={form.paidLeaveRate}
+                onChange={handleChange}
+                className="field-input"
+                placeholder="例: 80%"
+              />
             </Field>
           </div>
           <Field label="受動喫煙対策">
-            <select name="smokingPolicy" value={form.smokingPolicy} onChange={handleChange} className="field-input">
-              {smokingPolicyOptions.map((opt) => <option key={opt} value={opt}>{opt || "選択してください"}</option>)}
+            <select
+              name="smokingPolicy"
+              value={form.smokingPolicy}
+              onChange={handleChange}
+              className="field-input"
+            >
+              {smokingPolicyOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt || "選択してください"}
+                </option>
+              ))}
             </select>
           </Field>
         </div>
       </section>
 
       {/* ── Sticky Save Bar ── */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur-sm transition-all duration-300 ${isDirty ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}>
+      <div
+        className={`fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur-sm transition-all duration-300 ${isDirty ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
+      >
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-3">
           <p className="text-sm text-gray-500">未保存の変更があります</p>
           <div className="flex gap-3">
-            <button onClick={() => { if (profile) { setForm(toFormData(profile)); setIsDirty(false); } }}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 cursor-pointer">
+            <button
+              onClick={() => {
+                if (profile) {
+                  setForm(toFormData(profile));
+                  setIsDirty(false);
+                }
+              }}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 cursor-pointer"
+            >
               取り消す
             </button>
-            <button onClick={handleSave} disabled={isSaving}
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
               className="rounded-lg px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:opacity-90 disabled:opacity-50 cursor-pointer"
-              style={{ backgroundColor: accent }}>
+              style={{ backgroundColor: accent }}
+            >
               {isSaving ? "保存中..." : "保存する"}
             </button>
           </div>
@@ -463,7 +720,9 @@ export default function CompanyProfilePage() {
 
       {/* ── Toast ── */}
       {toast && (
-        <div className={`fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all ${toast.type === "success" ? "bg-emerald-600" : "bg-red-600"}`}>
+        <div
+          className={`fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all ${toast.type === "success" ? "bg-emerald-600" : "bg-red-600"}`}
+        >
           {toast.message}
         </div>
       )}
@@ -502,12 +761,23 @@ function SectionTitle({ icon, children }: { icon?: React.ReactNode; children: Re
   );
 }
 
-function Field({ label, required, hint, children }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between">
         <label className="text-sm font-medium text-gray-700">
-          {label}{required && <span className="ml-0.5 text-red-400">*</span>}
+          {label}
+          {required && <span className="ml-0.5 text-red-400">*</span>}
         </label>
         {hint && <span className="text-xs text-gray-400">{hint}</span>}
       </div>
@@ -516,7 +786,15 @@ function Field({ label, required, hint, children }: { label: string; required?: 
   );
 }
 
-function TagInput({ tags, onChange, placeholder }: { tags: string[]; onChange: (tags: string[]) => void; placeholder?: string }) {
+function TagInput({
+  tags,
+  onChange,
+  placeholder,
+}: {
+  tags: string[];
+  onChange: (tags: string[]) => void;
+  placeholder?: string;
+}) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -537,7 +815,10 @@ function TagInput({ tags, onChange, placeholder }: { tags: string[]; onChange: (
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {tags.map((tag, i) => (
-            <span key={i} className="inline-flex items-center gap-1 rounded-full bg-gray-100 py-1.5 pl-3.5 pr-2 text-sm text-gray-700">
+            <span
+              key={i}
+              className="inline-flex items-center gap-1 rounded-full bg-gray-100 py-1.5 pl-3.5 pr-2 text-sm text-gray-700"
+            >
               {tag}
               <button
                 type="button"
@@ -555,10 +836,17 @@ function TagInput({ tags, onChange, placeholder }: { tags: string[]; onChange: (
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") { e.preventDefault(); addTag(); }
-          if (e.key === "Backspace" && input === "" && tags.length > 0) { removeTag(tags.length - 1); }
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addTag();
+          }
+          if (e.key === "Backspace" && input === "" && tags.length > 0) {
+            removeTag(tags.length - 1);
+          }
         }}
-        onBlur={() => { if (input.trim()) addTag(); }}
+        onBlur={() => {
+          if (input.trim()) addTag();
+        }}
         placeholder={placeholder}
         className="field-input w-full text-sm"
       />
@@ -570,7 +858,13 @@ function Spinner({ className = "" }: { className?: string }) {
   return (
     <svg className={`h-4 w-4 animate-spin ${className}`} viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-      <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-75" />
+      <path
+        d="M4 12a8 8 0 018-8"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        className="opacity-75"
+      />
     </svg>
   );
 }
@@ -578,35 +872,180 @@ function Spinner({ className = "" }: { className?: string }) {
 /* ── Icons ── */
 
 function ImageIcon({ className }: { className?: string }) {
-  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>);
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <path d="M21 15l-5-5L5 21" />
+    </svg>
+  );
 }
 function CameraIcon({ className }: { className?: string }) {
-  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" /></svg>);
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  );
 }
 function BuildingIcon({ className }: { className?: string }) {
-  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2" /><path d="M10 22v-4h4v4" /></svg>);
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="2" width="16" height="20" rx="2" />
+      <path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2" />
+      <path d="M10 22v-4h4v4" />
+    </svg>
+  );
 }
 function TrashIcon({ className }: { className?: string }) {
-  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>);
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+    </svg>
+  );
 }
 function PlusIcon({ className }: { className?: string }) {
-  return (<svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>);
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
 }
 function InfoIcon() {
-  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2" /><path d="M10 22v-4h4v4" /></svg>);
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="2" width="16" height="20" rx="2" />
+      <path d="M9 6h2M13 6h2M9 10h2M13 10h2M9 14h2M13 14h2" />
+      <path d="M10 22v-4h4v4" />
+    </svg>
+  );
 }
 function ContactIcon() {
-  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>);
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
 }
 function DocIcon() {
-  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>);
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+    </svg>
+  );
 }
 function GalleryIcon() {
-  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>);
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <path d="M21 15l-5-5L5 21" />
+    </svg>
+  );
 }
 function HeartIcon() {
-  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>);
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+    </svg>
+  );
 }
 function ChartIcon() {
-  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>);
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 20V10M12 20V4M6 20v-6" />
+    </svg>
+  );
 }

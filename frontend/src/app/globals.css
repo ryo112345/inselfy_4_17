@@ -9,7 +9,7 @@
   --primary: #111111;
   --primary-foreground: #ffffff;
   --card: #ffffff;
-  --accent: #3D8B6E;
+  --accent: #3d8b6e;
   --accent-light: #e8f5ef;
 }
 
@@ -17,9 +17,9 @@ html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-noto-sans-jp), -apple-system, BlinkMacSystemFont,
-    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo",
-    sans-serif;
+  font-family:
+    var(--font-noto-sans-jp), -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
 }
 
 * {
@@ -102,10 +102,15 @@ body {
   inset: 2px;
   border-radius: 9999px;
   border: 3px solid transparent;
-  background: conic-gradient(#FF0000, #FF8C00, #FFD700, #00C853, #00B0FF, #7C4DFF, #F50057, #FF0000) border-box;
-  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  background: conic-gradient(#ff0000, #ff8c00, #ffd700, #00c853, #00b0ff, #7c4dff, #f50057, #ff0000)
+    border-box;
+  mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   pointer-events: none;
   animation: likeRing 0.45s ease-out forwards;
@@ -188,4 +193,3 @@ body {
   height: 0;
   float: left;
 }
-

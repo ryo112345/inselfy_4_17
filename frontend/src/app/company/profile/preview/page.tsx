@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import { TeamScoresSection } from "@/app/companies/[id]/TeamScoresSection";
+import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import {
   fetchPublicTeamScores,
   type PublicTeamScore as TeamScore,
@@ -48,7 +48,9 @@ export default function CompanyProfilePreviewPage() {
           const data = await res.json();
           if (!Array.isArray(data.benefits)) data.benefits = [];
           setCompany(data);
-          fetchPublicTeamScores(data.id).then(setTeamScores).catch(() => {});
+          fetchPublicTeamScores(data.id)
+            .then(setTeamScores)
+            .catch(() => {});
         }
       })
       .finally(() => setIsLoading(false));
@@ -61,7 +63,9 @@ export default function CompanyProfilePreviewPage() {
       if (!Array.isArray(data.benefits)) data.benefits = [];
       setCompany(data);
     };
-    return () => { channel.close(); };
+    return () => {
+      channel.close();
+    };
   }, []);
 
   if (isLoading) {
@@ -125,7 +129,10 @@ export default function CompanyProfilePreviewPage() {
                 {company.logoUrl ? (
                   <img src={company.logoUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center" style={{ background: "#3D8B6E20" }}>
+                  <div
+                    className="flex h-full w-full items-center justify-center"
+                    style={{ background: "#3D8B6E20" }}
+                  >
                     <span className="text-xl font-bold" style={{ color: "#3D8B6E" }}>
                       {company.companyName.charAt(0)}
                     </span>
@@ -135,7 +142,9 @@ export default function CompanyProfilePreviewPage() {
             </div>
 
             <div className="pt-14">
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900">{company.companyName}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+                {company.companyName}
+              </h1>
               {company.headline && (
                 <p className="mt-1.5 text-lg text-gray-700">{company.headline}</p>
               )}
@@ -155,8 +164,12 @@ export default function CompanyProfilePreviewPage() {
               </div>
 
               {company.websiteUrl && (
-                <a href={company.websiteUrl} target="_blank" rel="noopener noreferrer"
-                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition-colors hover:text-emerald-800">
+                <a
+                  href={company.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition-colors hover:text-emerald-800"
+                >
                   <LinkIcon />
                   {company.websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                   <ExternalIcon />
@@ -169,7 +182,9 @@ export default function CompanyProfilePreviewPage() {
         {/* About */}
         {company.description && (
           <section className={`px-6 py-5 ${cardClass}`}>
-            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">事業内容</h2>
+            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+              事業内容
+            </h2>
             <div className="mt-3">
               <ExpandableText text={company.description} maxLines={6} />
             </div>
@@ -183,7 +198,9 @@ export default function CompanyProfilePreviewPage() {
         {company.galleryUrls.length > 0 && (
           <section className={`overflow-hidden ${cardClass}`}>
             <div className="px-6 pb-2 pt-5">
-              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">フォトギャラリー</h2>
+              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+                フォトギャラリー
+              </h2>
             </div>
             <Gallery urls={company.galleryUrls} />
           </section>
@@ -193,12 +210,16 @@ export default function CompanyProfilePreviewPage() {
         {statItems.length > 0 && (
           <section className={`py-5 ${cardClass}`}>
             <div className="px-6">
-              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">数字で見る働く環境</h2>
+              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+                数字で見る働く環境
+              </h2>
             </div>
             <div className="mt-5 grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               {statItems.map(({ value, label }) => (
                 <div key={label} className="px-6 py-4 text-center sm:py-2">
-                  <p className="text-3xl font-bold" style={{ color: "#3D8B6E" }}>{value}</p>
+                  <p className="text-3xl font-bold" style={{ color: "#3D8B6E" }}>
+                    {value}
+                  </p>
                   <p className="mt-1 text-xs text-gray-500">{label}</p>
                 </div>
               ))}
@@ -209,17 +230,32 @@ export default function CompanyProfilePreviewPage() {
         {/* Benefits */}
         {(company.benefits.length > 0 || company.smokingPolicy) && (
           <section className={`px-6 py-5 ${cardClass}`}>
-            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">福利厚生・待遇</h2>
+            <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+              福利厚生・待遇
+            </h2>
             <ul className="mt-4 flex flex-wrap gap-2">
               {company.benefits.map((b) => (
-                <li key={b} className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium"
-                  style={{ borderColor: "#3D8B6E40", backgroundColor: "#3D8B6E12", color: "#3D8B6E" }}>
+                <li
+                  key={b}
+                  className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium"
+                  style={{
+                    borderColor: "#3D8B6E40",
+                    backgroundColor: "#3D8B6E12",
+                    color: "#3D8B6E",
+                  }}
+                >
                   {b}
                 </li>
               ))}
               {company.smokingPolicy && (
-                <li className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium"
-                  style={{ borderColor: "#3D8B6E40", backgroundColor: "#3D8B6E12", color: "#3D8B6E" }}>
+                <li
+                  className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium"
+                  style={{
+                    borderColor: "#3D8B6E40",
+                    backgroundColor: "#3D8B6E12",
+                    color: "#3D8B6E",
+                  }}
+                >
                   {company.smokingPolicy}
                 </li>
               )}
@@ -231,11 +267,16 @@ export default function CompanyProfilePreviewPage() {
         {detailItems.length > 0 && (
           <section className={`overflow-hidden py-5 ${cardClass}`}>
             <div className="px-6">
-              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">企業情報</h2>
+              <h2 className="border-l-[3px] border-emerald-600 pl-3 text-xl font-bold text-gray-900">
+                企業情報
+              </h2>
             </div>
             <dl className="mt-4">
               {detailItems.map(({ label, value }, i) => (
-                <div key={label} className={`flex items-baseline justify-between px-6 py-3.5 ${i % 2 === 0 ? "bg-gray-50/70" : ""}`}>
+                <div
+                  key={label}
+                  className={`flex items-baseline justify-between px-6 py-3.5 ${i % 2 === 0 ? "bg-gray-50/70" : ""}`}
+                >
                   <dt className="shrink-0 text-base text-gray-500">{label}</dt>
                   <dd className="text-right text-base font-medium text-gray-900">{value}</dd>
                 </div>
@@ -264,13 +305,27 @@ function ExpandableText({ text, maxLines = 6 }: { text: string; maxLines?: numbe
 
   return (
     <div>
-      <p ref={ref} className="whitespace-pre-wrap text-base leading-relaxed text-gray-800"
-        style={!expanded && needsExpansion ? { display: "-webkit-box", WebkitLineClamp: maxLines, WebkitBoxOrient: "vertical" as const, overflow: "hidden" } : undefined}>
+      <p
+        ref={ref}
+        className="whitespace-pre-wrap text-base leading-relaxed text-gray-800"
+        style={
+          !expanded && needsExpansion
+            ? {
+                display: "-webkit-box",
+                WebkitLineClamp: maxLines,
+                WebkitBoxOrient: "vertical" as const,
+                overflow: "hidden",
+              }
+            : undefined
+        }
+      >
         {text}
       </p>
       {needsExpansion && (
-        <button onClick={() => setExpanded(!expanded)}
-          className="mt-3 cursor-pointer text-sm font-medium text-emerald-700 transition-colors hover:text-emerald-800">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-3 cursor-pointer text-sm font-medium text-emerald-700 transition-colors hover:text-emerald-800"
+        >
           {expanded ? "閉じる" : "続きを読む"}
         </button>
       )}
@@ -289,13 +344,37 @@ function Gallery({ urls }: { urls: string[] }) {
         <img src={urls[current]} alt="" className="h-full w-full object-contain" />
         {urls.length > 1 && (
           <>
-            <button onClick={prev}
-              className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-sm opacity-0 transition-all hover:bg-white group-hover:opacity-100">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+            <button
+              onClick={prev}
+              className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-sm opacity-0 transition-all hover:bg-white group-hover:opacity-100"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
             </button>
-            <button onClick={next}
-              className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-sm opacity-0 transition-all hover:bg-white group-hover:opacity-100">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+            <button
+              onClick={next}
+              className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-sm opacity-0 transition-all hover:bg-white group-hover:opacity-100"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
             </button>
           </>
         )}
@@ -308,9 +387,14 @@ function Gallery({ urls }: { urls: string[] }) {
       {urls.length > 1 && (
         <div className="flex gap-2 overflow-x-auto px-4 py-3">
           {urls.map((url, i) => (
-            <button key={url} onClick={() => setCurrent(i)}
+            <button
+              key={url}
+              onClick={() => setCurrent(i)}
               className={`flex-shrink-0 cursor-pointer overflow-hidden rounded-lg transition-opacity ${i === current ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
-              style={i === current ? { outline: "2px solid #3D8B6E", outlineOffset: "1px" } : undefined}>
+              style={
+                i === current ? { outline: "2px solid #3D8B6E", outlineOffset: "1px" } : undefined
+              }
+            >
               <img src={url} alt="" className="h-14 w-20 object-cover" />
             </button>
           ))}
@@ -323,13 +407,53 @@ function Gallery({ urls }: { urls: string[] }) {
 /* ── Icons ── */
 
 function MapPinIcon() {
-  return (<svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>);
+  return (
+    <svg
+      className="h-[18px] w-[18px]"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
 }
 
 function LinkIcon() {
-  return (<svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>);
+  return (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
 }
 
 function ExternalIcon() {
-  return (<svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>);
+  return (
+    <svg
+      className="h-3 w-3"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
 }

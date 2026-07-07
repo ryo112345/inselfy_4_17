@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const USER_ID = "10000000-0000-0000-0000-000000000021"; // 高橋里奈
 const COMPANY_ID = "b0000000-0000-0000-0000-000000000001";
@@ -41,9 +41,7 @@ test("candidate sees cancelled proposal in real-time when company re-proposes", 
   const candidateCtx = await browser.newContext();
   const candidatePage = await candidateCtx.newPage();
 
-  await candidatePage.request.post(
-    `http://localhost:3000/api/admin/users/${USER_ID}/bypass-login`,
-  );
+  await candidatePage.request.post(`http://localhost:3000/api/admin/users/${USER_ID}/bypass-login`);
 
   await candidatePage.goto("/messages");
   await candidatePage.waitForLoadState("networkidle");
@@ -54,9 +52,7 @@ test("candidate sees cancelled proposal in real-time when company re-proposes", 
   await candidatePage.waitForTimeout(2000);
 
   // Scroll to bottom to see latest proposal
-  const messageContainer = candidatePage
-    .locator("[class*='overflow-y-auto']")
-    .last();
+  const messageContainer = candidatePage.locator("[class*='overflow-y-auto']").last();
   await messageContainer.evaluate((el) => el.scrollTo(0, el.scrollHeight));
   await candidatePage.waitForTimeout(1000);
 

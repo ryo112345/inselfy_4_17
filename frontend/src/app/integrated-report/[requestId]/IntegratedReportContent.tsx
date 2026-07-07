@@ -1,19 +1,25 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getIntegratedReport } from "@/features/integrated-report/api";
 import {
-  SingleRadarChart,
-  WV_ORDER, WV_FULL_LABELS,
-  CI_ORDER, CI_FULL_LABELS,
-} from "@/app/components/SingleRadarChart";
-import {
+  CI_DETAIL_AXES,
+  CI_DETAIL_GROUPS,
+  CI_DETAIL_LABELS,
   DetailRadarChart,
-  WV_DETAIL_AXES, WV_DETAIL_LABELS, WV_DETAIL_GROUPS,
-  CI_DETAIL_AXES, CI_DETAIL_LABELS, CI_DETAIL_GROUPS,
+  WV_DETAIL_AXES,
+  WV_DETAIL_GROUPS,
+  WV_DETAIL_LABELS,
 } from "@/app/components/DetailRadarChart";
-import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
+import {
+  CI_FULL_LABELS,
+  CI_ORDER,
+  SingleRadarChart,
+  WV_FULL_LABELS,
+  WV_ORDER,
+} from "@/app/components/SingleRadarChart";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
+import { getIntegratedReport } from "@/features/integrated-report/api";
+import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
 
 function useTypewriter(fullText: string | null, charsPerTick = 2, intervalMs = 30) {
   const [displayed, setDisplayed] = useState("");
@@ -45,7 +51,12 @@ function useTypewriter(fullText: string | null, charsPerTick = 2, intervalMs = 3
     setDone(true);
   }, [fullText]);
 
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    },
+    [],
+  );
 
   return { displayed, done, start, skip };
 }
@@ -89,20 +100,20 @@ type Props = {
 };
 
 export function IntegratedReportContent({ requestId, isOwner = true, wvResult, ciResult }: Props) {
-  const wvScores = useMemo(() =>
-    wvResult?.values?.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
+  const wvScores = useMemo(
+    () => wvResult?.values?.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
     [wvResult],
   );
-  const ciScores = useMemo(() =>
-    ciResult?.typeScores?.map((t) => ({ id: t.typeId, score: t.score })) ?? null,
+  const ciScores = useMemo(
+    () => ciResult?.typeScores?.map((t) => ({ id: t.typeId, score: t.score })) ?? null,
     [ciResult],
   );
-  const wvNeedScores = useMemo(() =>
-    wvResult?.needs?.map((n) => ({ id: n.needId, score: n.displayScore })) ?? null,
+  const wvNeedScores = useMemo(
+    () => wvResult?.needs?.map((n) => ({ id: n.needId, score: n.displayScore })) ?? null,
     [wvResult],
   );
-  const ciBasicScores = useMemo(() =>
-    ciResult?.basicScores?.map((b) => ({ id: b.basicInterestId, score: b.score })) ?? null,
+  const ciBasicScores = useMemo(
+    () => ciResult?.basicScores?.map((b) => ({ id: b.basicInterestId, score: b.score })) ?? null,
     [ciResult],
   );
   const hasCharts = !!wvScores || !!ciScores;
@@ -127,8 +138,12 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
         }
       })
       .catch(() => {})
-      .finally(() => { if (!cancelled) setInitialLoading(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        if (!cancelled) setInitialLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [requestId]);
 
   const handleClick = () => {
@@ -166,7 +181,8 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
               className="text-[13px] font-semibold text-white rounded-full px-5 py-1.5 tracking-wide"
               style={{
                 background: "linear-gradient(180deg, #b8860b 0%, #9a7209 50%, #7a5a07 100%)",
-                boxShadow: "0 4px 10px rgba(120,80,20,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
+                boxShadow:
+                  "0 4px 10px rgba(120,80,20,0.4), 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.15)",
               }}
             >
               inselfy.ai
@@ -180,17 +196,31 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
               <div className="mb-5">
                 <div className="grid grid-cols-2 gap-1 -mx-5 md:mx-0">
                   <div className="flex flex-col items-center">
-                    <span className="text-[11px] font-semibold text-gray-400 tracking-wider">Work Values</span>
+                    <span className="text-[11px] font-semibold text-gray-400 tracking-wider">
+                      Work Values
+                    </span>
                     {wvScores ? (
-                      <SingleRadarChart scores={wvScores} order={WV_ORDER} fullLabels={WV_FULL_LABELS} isWV={true} />
+                      <SingleRadarChart
+                        scores={wvScores}
+                        order={WV_ORDER}
+                        fullLabels={WV_FULL_LABELS}
+                        isWV={true}
+                      />
                     ) : (
                       <div className="py-8 text-[13px] text-gray-300">未受診</div>
                     )}
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-[11px] font-semibold text-gray-400 tracking-wider">Career Interest</span>
+                    <span className="text-[11px] font-semibold text-gray-400 tracking-wider">
+                      Career Interest
+                    </span>
                     {ciScores ? (
-                      <SingleRadarChart scores={ciScores} order={CI_ORDER} fullLabels={CI_FULL_LABELS} isWV={false} />
+                      <SingleRadarChart
+                        scores={ciScores}
+                        order={CI_ORDER}
+                        fullLabels={CI_FULL_LABELS}
+                        isWV={false}
+                      />
                     ) : (
                       <div className="py-8 text-[13px] text-gray-300">未受診</div>
                     )}
@@ -200,7 +230,9 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
 
                 {wvNeedScores && (
                   <div className="mt-4">
-                    <p className="text-[11px] font-semibold text-gray-400 tracking-wider text-center mb-1">Work Values — 21 Needs</p>
+                    <p className="text-[11px] font-semibold text-gray-400 tracking-wider text-center mb-1">
+                      Work Values — 21 Needs
+                    </p>
                     <DetailRadarChart
                       axes={WV_DETAIL_AXES}
                       labels={WV_DETAIL_LABELS}
@@ -216,7 +248,9 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
 
                 {ciBasicScores && (
                   <div className="mt-4">
-                    <p className="text-[11px] font-semibold text-gray-400 tracking-wider text-center mb-1">Career Interest — 20 Basic Interests</p>
+                    <p className="text-[11px] font-semibold text-gray-400 tracking-wider text-center mb-1">
+                      Career Interest — 20 Basic Interests
+                    </p>
                     <DetailRadarChart
                       axes={CI_DETAIL_AXES}
                       labels={CI_DETAIL_LABELS}

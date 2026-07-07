@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, type KeyboardEvent } from "react";
+import { type KeyboardEvent, useCallback, useRef, useState } from "react";
 
 type Props = {
   onSend: (body: string) => Promise<void>;
@@ -27,14 +27,11 @@ export function MessageInput({ onSend, disabled }: Props) {
     }
   }, [body, sending, onSend]);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-      }
-    },
-    [],
-  );
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+    }
+  }, []);
 
   const handleInput = useCallback(() => {
     const el = textareaRef.current;

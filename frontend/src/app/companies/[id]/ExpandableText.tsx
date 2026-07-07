@@ -1,14 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function ExpandableText({
-  text,
-  maxLines = 6,
-}: {
-  text: string;
-  maxLines?: number;
-}) {
+export function ExpandableText({ text, maxLines = 6 }: { text: string; maxLines?: number }) {
   const [expanded, setExpanded] = useState(false);
   const [needsExpansion, setNeedsExpansion] = useState(false);
   const ref = useRef<HTMLParagraphElement>(null);

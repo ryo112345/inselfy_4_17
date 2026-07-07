@@ -4,17 +4,28 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 
 import type { ModelsUserResponse } from "@/external/client/api/generated";
-import { updateProfile, uploadProfileImage, type ApiError } from "./api";
-import { CameraIcon, FaceIcon, MailIcon, MapPinIcon, PencilIcon, PlusIcon, XIcon } from "./Icons";
+import { type ApiError, updateProfile, uploadProfileImage } from "./api";
 import { FollowButton } from "./FollowButton";
-import { Field, PrimaryButton, SecondaryButton } from "./Modal";
+import { CameraIcon, FaceIcon, MailIcon, MapPinIcon, PencilIcon, PlusIcon, XIcon } from "./Icons";
 import { ImageCropModal } from "./ImageCropModal";
+import { Field, PrimaryButton, SecondaryButton } from "./Modal";
 
 const PRESET_COLORS = [
-  "#3D8B6E", "#059669", "#0D9488", "#0891B2",
-  "#2563EB", "#4F46E5", "#7C3AED", "#DB2777",
-  "#E11D48", "#DC2626", "#D97706", "#D68B6B",
-  "#65A30D", "#64748B", "#1E293B",
+  "#3D8B6E",
+  "#059669",
+  "#0D9488",
+  "#0891B2",
+  "#2563EB",
+  "#4F46E5",
+  "#7C3AED",
+  "#DB2777",
+  "#E11D48",
+  "#DC2626",
+  "#D97706",
+  "#D68B6B",
+  "#65A30D",
+  "#64748B",
+  "#1E293B",
 ];
 
 const JOB_SEEKING_LABELS: Record<string, { label: string; color: string }> = {
@@ -31,7 +42,13 @@ type Props = {
   isOwner?: boolean;
 };
 
-export function ProfileHeaderCard({ user, experienceCount, followersCount, followingCount, isOwner = true }: Props) {
+export function ProfileHeaderCard({
+  user,
+  experienceCount,
+  followersCount,
+  followingCount,
+  isOwner = true,
+}: Props) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user.name);
@@ -234,7 +251,7 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
             aria-label="プロフィールを編集"
             onClick={() => setIsEditing(true)}
             className="absolute right-4 top-[148px] md:top-[188px] flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white transition hover:opacity-80"
-          style={{ borderColor: headerColor, color: headerColor }}
+            style={{ borderColor: headerColor, color: headerColor }}
           >
             <PencilIcon className="h-[18px] w-[18px]" />
           </button>
@@ -244,7 +261,11 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
             <button
               type="button"
               aria-label="メッセージを送る"
-              onClick={() => router.push(`/messages?recipient=${user.id}&recipientName=${encodeURIComponent(user.name)}`)}
+              onClick={() =>
+                router.push(
+                  `/messages?recipient=${user.id}&recipientName=${encodeURIComponent(user.name)}`,
+                )
+              }
               className="flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white transition hover:opacity-80"
               style={{ borderColor: headerColor, color: headerColor }}
             >
@@ -496,7 +517,9 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
               </div>
             </div>
             <div className="mb-4">
-              <span className="mb-2 block text-sm font-semibold text-gray-700">プロフィールカラー</span>
+              <span className="mb-2 block text-sm font-semibold text-gray-700">
+                プロフィールカラー
+              </span>
               <div className="flex flex-wrap gap-2">
                 {PRESET_COLORS.map((color) => (
                   <button
@@ -532,7 +555,9 @@ export function ProfileHeaderCard({ user, experienceCount, followersCount, follo
                   {user.name}
                 </h1>
                 {jobStatus ? (
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${jobStatus.color}`}>
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${jobStatus.color}`}
+                  >
                     {jobStatus.label}
                   </span>
                 ) : null}

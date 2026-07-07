@@ -33,7 +33,9 @@ async function proxy(req: NextRequest) {
 
   const setCookies = res.headers.getSetCookie();
   if (setCookies.length > 0) {
-    console.log(`[proxy] ${req.method} ${url.pathname} → ${res.status}, forwarding ${setCookies.length} cookies:`);
+    console.log(
+      `[proxy] ${req.method} ${url.pathname} → ${res.status}, forwarding ${setCookies.length} cookies:`,
+    );
     for (const cookie of setCookies) {
       console.log(`  Set-Cookie: ${cookie.substring(0, 80)}...`);
       responseHeaders.append("Set-Cookie", cookie);
