@@ -12,6 +12,6 @@
     "@typespec/compiler": "^0.60.0",
     "@typespec/http": "^0.60.0",
     "@typespec/openapi3": "^0.60.0",
-    "@hey-api/openapi-ts": "^0.64.0"
+    "@hey-api/openapi-ts": "^0.99.0"
   }
 }
