@@ -11,7 +11,9 @@ function emptyWins(): number[][] {
 }
 
 describe("Cross-verify TS vs Go BT estimation", () => {
-  it("transitive order produces matching mu within tolerance", () => {
+  // go test の spawn を含むため vitest デフォルトの 5s では足りない（同期実行なので
+  // 中断はされず、完了後に超過判定で fail する）。execSync 側のタイムアウトに合わせる。
+  it("transitive order produces matching mu within tolerance", { timeout: 240_000 }, () => {
     const wins = emptyWins();
     for (let i = 0; i < N; i++) {
       for (let j = i + 1; j < N; j++) {
