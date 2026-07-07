@@ -5,10 +5,13 @@ import (
 	"time"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
+	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
 	"github.com/akiyama/inselfy/backend/internal/domain/interview"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
+	"github.com/akiyama/inselfy/backend/internal/domain/notification"
+	"github.com/akiyama/inselfy/backend/internal/domain/scout"
 	"github.com/akiyama/inselfy/backend/internal/domain/skill"
 	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
@@ -444,6 +447,213 @@ func (s *interviewQueryStub) PendingProposalByApplication(ctx context.Context, a
 		return s.pendingProposalByApplicationFn(ctx, applicationID)
 	}
 	return nil, nil
+}
+
+type scoutMessageRepoStub struct {
+	createFn                         func(ctx context.Context, m *scout.ScoutMessage) (*scout.ScoutMessage, error)
+	getByIDFn                        func(ctx context.Context, id string) (*scout.ScoutMessageWithNames, error)
+	listByCompanyIDFn                func(ctx context.Context, companyID string, status *string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error)
+	listByCandidateIDFn              func(ctx context.Context, candidateID string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error)
+	updateStatusFn                   func(ctx context.Context, id string, status scout.Status) error
+	markOpenedFn                     func(ctx context.Context, id string) error
+	markRepliedFn                    func(ctx context.Context, id string) error
+	getActiveByCompanyAndCandidateFn func(ctx context.Context, companyID, candidateID string) (*scout.ScoutMessage, error)
+	getLatestByCompanyAndCandidateFn func(ctx context.Context, companyID, candidateID string) (*scout.ScoutMessage, error)
+	countSentLastNDaysFn             func(ctx context.Context, companyID string, days int) (int, error)
+	countRepliedLastNDaysFn          func(ctx context.Context, companyID string, days int) (int, error)
+	countPendingByMonthFn            func(ctx context.Context, companyID string) ([]scout.PendingByMonth, error)
+	avgReplyDaysFn                   func(ctx context.Context, companyID string) (float64, error)
+}
+
+func (s *scoutMessageRepoStub) Create(ctx context.Context, m *scout.ScoutMessage) (*scout.ScoutMessage, error) {
+	return s.createFn(ctx, m)
+}
+func (s *scoutMessageRepoStub) GetByID(ctx context.Context, id string) (*scout.ScoutMessageWithNames, error) {
+	return s.getByIDFn(ctx, id)
+}
+func (s *scoutMessageRepoStub) ListByCompanyID(ctx context.Context, companyID string, status *string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error) {
+	return s.listByCompanyIDFn(ctx, companyID, status, limit, offset)
+}
+func (s *scoutMessageRepoStub) ListByCandidateID(ctx context.Context, candidateID string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error) {
+	return s.listByCandidateIDFn(ctx, candidateID, limit, offset)
+}
+func (s *scoutMessageRepoStub) UpdateStatus(ctx context.Context, id string, status scout.Status) error {
+	if s.updateStatusFn != nil {
+		return s.updateStatusFn(ctx, id, status)
+	}
+	return nil
+}
+func (s *scoutMessageRepoStub) MarkOpened(ctx context.Context, id string) error {
+	if s.markOpenedFn != nil {
+		return s.markOpenedFn(ctx, id)
+	}
+	return nil
+}
+func (s *scoutMessageRepoStub) MarkReplied(ctx context.Context, id string) error {
+	if s.markRepliedFn != nil {
+		return s.markRepliedFn(ctx, id)
+	}
+	return nil
+}
+func (s *scoutMessageRepoStub) GetActiveByCompanyAndCandidate(ctx context.Context, companyID, candidateID string) (*scout.ScoutMessage, error) {
+	if s.getActiveByCompanyAndCandidateFn != nil {
+		return s.getActiveByCompanyAndCandidateFn(ctx, companyID, candidateID)
+	}
+	return nil, domainerr.ErrNotFound
+}
+func (s *scoutMessageRepoStub) GetLatestByCompanyAndCandidate(ctx context.Context, companyID, candidateID string) (*scout.ScoutMessage, error) {
+	if s.getLatestByCompanyAndCandidateFn != nil {
+		return s.getLatestByCompanyAndCandidateFn(ctx, companyID, candidateID)
+	}
+	return nil, domainerr.ErrNotFound
+}
+func (s *scoutMessageRepoStub) CountSentLast14Days(_ context.Context, _ string) (int, error) {
+	return 0, nil
+}
+func (s *scoutMessageRepoStub) CountRepliedLast14Days(_ context.Context, _ string) (int, error) {
+	return 0, nil
+}
+func (s *scoutMessageRepoStub) CountSentLastNDays(ctx context.Context, companyID string, days int) (int, error) {
+	if s.countSentLastNDaysFn != nil {
+		return s.countSentLastNDaysFn(ctx, companyID, days)
+	}
+	return 0, nil
+}
+func (s *scoutMessageRepoStub) CountRepliedLastNDays(ctx context.Context, companyID string, days int) (int, error) {
+	if s.countRepliedLastNDaysFn != nil {
+		return s.countRepliedLastNDaysFn(ctx, companyID, days)
+	}
+	return 0, nil
+}
+func (s *scoutMessageRepoStub) ExpireOverdue(_ context.Context) (int64, error) {
+	return 0, nil
+}
+func (s *scoutMessageRepoStub) CountPendingByMonth(ctx context.Context, companyID string) ([]scout.PendingByMonth, error) {
+	if s.countPendingByMonthFn != nil {
+		return s.countPendingByMonthFn(ctx, companyID)
+	}
+	return nil, nil
+}
+func (s *scoutMessageRepoStub) AvgReplyDays(ctx context.Context, companyID string) (float64, error) {
+	if s.avgReplyDaysFn != nil {
+		return s.avgReplyDaysFn(ctx, companyID)
+	}
+	return 0, nil
+}
+
+// scoutCreditRepoStub records quality transition calls in transitions so tests
+// can assert which state change (if any) the interactor applied.
+type scoutCreditRepoStub struct {
+	getOrCreateFn func(ctx context.Context, companyID string) (*scout.ScoutCredit, error)
+	deductFn      func(ctx context.Context, companyID string) (*scout.ScoutCredit, error)
+	refundFn      func(ctx context.Context, companyID string) (*scout.ScoutCredit, error)
+	transitions   []string
+}
+
+func (s *scoutCreditRepoStub) GetOrCreate(ctx context.Context, companyID string) (*scout.ScoutCredit, error) {
+	return s.getOrCreateFn(ctx, companyID)
+}
+func (s *scoutCreditRepoStub) Deduct(ctx context.Context, companyID string) (*scout.ScoutCredit, error) {
+	return s.deductFn(ctx, companyID)
+}
+func (s *scoutCreditRepoStub) Refund(ctx context.Context, companyID string) (*scout.ScoutCredit, error) {
+	return s.refundFn(ctx, companyID)
+}
+func (s *scoutCreditRepoStub) SetQualityWarning(_ context.Context, _ string) error {
+	s.transitions = append(s.transitions, "set_warning")
+	return nil
+}
+func (s *scoutCreditRepoStub) ClearQualityWarning(_ context.Context, _ string) error {
+	s.transitions = append(s.transitions, "clear_warning")
+	return nil
+}
+func (s *scoutCreditRepoStub) SetTemporaryRestriction(_ context.Context, _ string) error {
+	s.transitions = append(s.transitions, "set_temp_restriction")
+	return nil
+}
+func (s *scoutCreditRepoStub) ClearTemporaryRestriction(_ context.Context, _ string) error {
+	s.transitions = append(s.transitions, "clear_temp_restriction")
+	return nil
+}
+func (s *scoutCreditRepoStub) SetQualityRestricted(_ context.Context, _ string) error {
+	s.transitions = append(s.transitions, "set_restricted")
+	return nil
+}
+func (s *scoutCreditRepoStub) ReplenishAll(_ context.Context) ([]*scout.ScoutCredit, error) {
+	return nil, nil
+}
+
+// scoutLedgerRepoStub accumulates created entries for assertions.
+type scoutLedgerRepoStub struct {
+	entries []*scout.CreditLedgerEntry
+}
+
+func (s *scoutLedgerRepoStub) Create(_ context.Context, entry *scout.CreditLedgerEntry) error {
+	s.entries = append(s.entries, entry)
+	return nil
+}
+
+type scoutReplyRepoStub struct {
+	listByScoutMessageIDFn func(ctx context.Context, scoutMessageID string) ([]*scout.ScoutReply, error)
+	created                []*scout.ScoutReply
+}
+
+func (s *scoutReplyRepoStub) Create(_ context.Context, r *scout.ScoutReply) (*scout.ScoutReply, error) {
+	s.created = append(s.created, r)
+	return r, nil
+}
+func (s *scoutReplyRepoStub) ListByScoutMessageID(ctx context.Context, scoutMessageID string) ([]*scout.ScoutReply, error) {
+	if s.listByScoutMessageIDFn != nil {
+		return s.listByScoutMessageIDFn(ctx, scoutMessageID)
+	}
+	return nil, nil
+}
+
+type scoutSettingsRepoStub struct {
+	getByUserIDFn func(ctx context.Context, userID string) (*scout.UserScoutSettings, error)
+	upsertFn      func(ctx context.Context, s *scout.UserScoutSettings) (*scout.UserScoutSettings, error)
+}
+
+func (s *scoutSettingsRepoStub) GetByUserID(ctx context.Context, userID string) (*scout.UserScoutSettings, error) {
+	if s.getByUserIDFn != nil {
+		return s.getByUserIDFn(ctx, userID)
+	}
+	return nil, domainerr.ErrNotFound
+}
+func (s *scoutSettingsRepoStub) Upsert(ctx context.Context, settings *scout.UserScoutSettings) (*scout.UserScoutSettings, error) {
+	if s.upsertFn != nil {
+		return s.upsertFn(ctx, settings)
+	}
+	return settings, nil
+}
+
+// notificationRepoStub accumulates created notifications for assertions.
+type notificationRepoStub struct {
+	created []*notification.Notification
+}
+
+func (s *notificationRepoStub) Create(_ context.Context, n *notification.Notification) (*notification.Notification, error) {
+	s.created = append(s.created, n)
+	return n, nil
+}
+func (s *notificationRepoStub) ListByUserID(_ context.Context, _ string, _, _ int) ([]*notification.Notification, int, error) {
+	return nil, 0, nil
+}
+func (s *notificationRepoStub) ListByCompanyID(_ context.Context, _ string, _, _ int) ([]*notification.Notification, int, error) {
+	return nil, 0, nil
+}
+func (s *notificationRepoStub) MarkAsRead(_ context.Context, _ string) error { return nil }
+func (s *notificationRepoStub) MarkAllAsReadByUserID(_ context.Context, _ string) error {
+	return nil
+}
+func (s *notificationRepoStub) MarkAllAsReadByCompanyID(_ context.Context, _ string) error {
+	return nil
+}
+func (s *notificationRepoStub) CountUnreadByUserID(_ context.Context, _ string) (int, error) {
+	return 0, nil
+}
+func (s *notificationRepoStub) CountUnreadByCompanyID(_ context.Context, _ string) (int, error) {
+	return 0, nil
 }
 
 // Unused placeholders to avoid "imported and not used" warnings if a test file
