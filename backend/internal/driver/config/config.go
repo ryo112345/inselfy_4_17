@@ -23,6 +23,10 @@ type Config struct {
 	JWTSecret      string `env:"JWT_SECRET" envDefault:"dev-secret-change-me"`
 
 	InitialAdminEmail string `env:"INITIAL_ADMIN_EMAIL" envDefault:""`
+	// Static bootstrap key for /api/admin. Personal tokens issued via
+	// /admin/admins also work; with neither configured, admin APIs reject
+	// every request (fail-closed).
+	AdminAPIKey string `env:"ADMIN_API_KEY" envDefault:""`
 
 	StripeSecretKey     string `env:"STRIPE_SECRET_KEY" envDefault:""`
 	StripeWebhookSecret string `env:"STRIPE_WEBHOOK_SECRET" envDefault:""`

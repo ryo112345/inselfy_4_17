@@ -451,10 +451,27 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	})
 
 	// --- Admin ---
+	// Authenticated via X-Admin-Key: static bootstrap key (ADMIN_API_KEY) or a
+	// personal token issued at /admin/admins. Fail-closed when neither is set.
+	if cfg.InitialAdminEmail != "" {
+		if err := sqlcgw.SeedAdmin(ctx, pool, cfg.InitialAdminEmail); err != nil {
+			cleanup()
+			return nil, nil, func() {}, err
+		}
+	}
 	adminUserCtrl := httpcontroller.NewAdminUserController(pool, jwtService)
 	adminReportCtrl := httpcontroller.NewAdminReportController(pool)
 	adminCompanyCtrl := httpcontroller.NewAdminCompanyController(pool, jwtService)
-	adminGroup := e.Group("/api/admin")
+	adminAdminCtrl := httpcontroller.NewAdminAdminController(pool)
+	adminGroup := e.Group("/api/admin", authmw.AdminAuth(pool, cfg.AdminAPIKey))
+	adminGroup.GET("/admins", adminAdminCtrl.List)
+	adminGroup.POST("/admins", adminAdminCtrl.Create)
+	adminGroup.POST("/admins/:id/api-key", func(c echo.Context) error {
+		return adminAdminCtrl.IssueKey(c, c.Param("id"))
+	})
+	adminGroup.DELETE("/admins/:id", func(c echo.Context) error {
+		return adminAdminCtrl.Delete(c, c.Param("id"))
+	})
 	adminGroup.GET("/users", adminUserCtrl.List)
 	adminGroup.GET("/companies", adminCompanyCtrl.List)
 	adminGroup.PATCH("/companies/:id/status", func(c echo.Context) error {

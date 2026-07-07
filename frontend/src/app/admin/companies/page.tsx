@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { adminFetch } from "@/features/admin/api";
+
 interface AdminCompany {
   id: string;
   email: string;
@@ -40,7 +42,7 @@ export default function AdminCompaniesPage() {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), per_page: "20" });
     if (statusFilter) params.set("status", statusFilter);
-    const res = await fetch(`/api/admin/companies?${params}`);
+    const res = await adminFetch(`/api/admin/companies?${params}`);
     if (res.ok) {
       setData(await res.json());
     }
@@ -53,7 +55,7 @@ export default function AdminCompaniesPage() {
 
   const handleBypassLogin = async (companyId: string) => {
     setLoggingInId(companyId);
-    const res = await fetch(`/api/admin/companies/${companyId}/bypass-login`, {
+    const res = await adminFetch(`/api/admin/companies/${companyId}/bypass-login`, {
       method: "POST",
     });
     if (res.ok) {
@@ -64,7 +66,7 @@ export default function AdminCompaniesPage() {
 
   const handleStatusChange = async (id: string, status: "approved" | "rejected") => {
     setActionId(id);
-    const res = await fetch(`/api/admin/companies/${id}/status`, {
+    const res = await adminFetch(`/api/admin/companies/${id}/status`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),

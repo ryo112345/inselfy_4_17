@@ -232,6 +232,17 @@ func (ns NullScoutMessageStatus) Value() (driver.Value, error) {
 	return string(ns.ScoutMessageStatus), nil
 }
 
+type Admin struct {
+	ID           pgtype.UUID        `json:"id"`
+	Email        string             `json:"email"`
+	Name         string             `json:"name"`
+	ApiKeyHash   pgtype.Text        `json:"api_key_hash"`
+	ApiKeyPrefix pgtype.Text        `json:"api_key_prefix"`
+	LastUsedAt   pgtype.Timestamptz `json:"last_used_at"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
 type AiReport struct {
 	ID        pgtype.UUID        `json:"id"`
 	SessionID pgtype.UUID        `json:"session_id"`
