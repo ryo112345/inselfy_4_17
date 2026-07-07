@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { Sidebar } from "@/app/components/Sidebar";
+import { ACCENT } from "@/constants/theme";
 import { fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
 import { fetchUserPosts } from "@/features/timeline/api";
 
@@ -51,7 +52,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     : null;
   const isOwner = (currentUsername ?? usernameFromCookie) === data.username;
 
-  const profileColor = data.user.profileColor ?? "#3D8B6E";
+  const profileColor = data.user.profileColor ?? ACCENT;
 
   let posts: Awaited<ReturnType<typeof fetchUserPosts>>["items"] = [];
   try {

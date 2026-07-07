@@ -9,6 +9,8 @@ import {
   WV_FULL_LABELS,
   WV_ORDER,
 } from "@/app/components/SingleRadarChart";
+import { JobSeekingBadge } from "@/components/ui";
+import { SEEKING_STATUS_MAP } from "@/constants/seeking-status";
 import {
   type TalentCard as Candidate,
   type CandidateExperience,
@@ -16,12 +18,6 @@ import {
   fetchSavedCandidates,
   unsaveCandidate,
 } from "@/features/talent-search/api";
-
-const SEEKING_STATUS_MAP: Record<string, { label: string; bg: string; text: string }> = {
-  active: { label: "スカウト歓迎", bg: "bg-emerald-50", text: "text-emerald-700" },
-  open: { label: "いい話があれば", bg: "bg-amber-50", text: "text-amber-700" },
-  not_seeking: { label: "スカウト不要", bg: "bg-gray-100", text: "text-gray-500" },
-};
 
 const PAGE_SIZE = 20;
 
@@ -482,16 +478,7 @@ function CandidateDetail({
         <div className="flex-1 min-w-0 pt-0.5">
           <div className="flex items-center gap-3 flex-wrap">
             <h2 className="text-xl font-bold text-gray-900 truncate leading-tight">{u.name}</h2>
-            {status && (
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${status.bg} ${status.text}`}
-              >
-                <span
-                  className={`inline-block h-1.5 w-1.5 rounded-full ${u.jobSeekingStatus === "active" ? "bg-emerald-400" : u.jobSeekingStatus === "open" ? "bg-amber-400" : "bg-gray-300"}`}
-                />
-                {status.label}
-              </span>
-            )}
+            <JobSeekingBadge status={u.jobSeekingStatus} />
           </div>
           {u.headline && <p className="text-sm text-gray-500 mt-1">{u.headline}</p>}
         </div>
@@ -676,11 +663,9 @@ function CandidateDetail({
 function SeekingDot({ status }: { status: string }) {
   const cfg = SEEKING_STATUS_MAP[status];
   if (!cfg) return null;
-  const dotColor =
-    status === "active" ? "bg-emerald-400" : status === "open" ? "bg-amber-400" : "bg-gray-300";
   return (
     <span className="inline-flex items-center gap-1">
-      <span className={`inline-block h-2 w-2 rounded-full ${dotColor}`} />
+      <span className={`inline-block h-2 w-2 rounded-full ${cfg.dot}`} />
       <span className={`text-[13px] leading-none ${cfg.text}`}>{cfg.label}</span>
     </span>
   );

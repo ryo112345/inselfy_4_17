@@ -4,6 +4,7 @@ import { Sidebar } from "@/app/components/Sidebar";
 import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
+import { ACCENT } from "@/constants/theme";
 import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 import { getResultBySessionId } from "@/features/work-values/api";
 
@@ -34,7 +35,7 @@ export default async function WorkValuesResultPage({
   if (!data) notFound();
 
   const wvIndex = 2;
-  const profileColor = data.user.profileColor ?? "#3D8B6E";
+  const profileColor = data.user.profileColor ?? ACCENT;
 
   return (
     <ProfileColorContext value={profileColor}>

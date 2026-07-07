@@ -45,11 +45,11 @@ export function ConversationList({ conversations, selectedId, onSelect, getDispl
               onClick={() => onSelect(conv)}
               className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
                 isSelected
-                  ? "bg-[#e8f5ef] border-l-2 border-[#3D8B6E]"
+                  ? "bg-[#e8f5ef] border-l-2 border-brand"
                   : "hover:bg-gray-50 border-l-2 border-transparent"
               }`}
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E]/10 text-[#3D8B6E] text-sm font-semibold">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand text-sm font-semibold">
                 {displayName?.charAt(0) ?? "?"}
               </div>
               <div className="min-w-0 flex-1">
@@ -64,7 +64,7 @@ export function ConversationList({ conversations, selectedId, onSelect, getDispl
                     {conv.lastMessageBody ?? "メッセージなし"}
                   </p>
                   {conv.unreadCount > 0 && (
-                    <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E] px-1.5 text-[10px] font-bold text-white">
+                    <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-brand px-1.5 text-[10px] font-bold text-white">
                       {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
                     </span>
                   )}

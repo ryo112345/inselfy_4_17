@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ACCENT } from "@/constants/theme";
 
 export function Gallery({ urls }: { urls: string[] }) {
   const [current, setCurrent] = useState(0);
@@ -69,7 +70,7 @@ export function Gallery({ urls }: { urls: string[] }) {
               style={
                 i === current
                   ? {
-                      outline: "2px solid #3D8B6E",
+                      outline: `2px solid ${ACCENT}`,
                       outlineOffset: "1px",
                     }
                   : undefined

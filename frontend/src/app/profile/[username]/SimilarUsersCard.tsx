@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ACCENT } from "@/constants/theme";
 import { NEED_LABELS, type NeedId } from "@/features/work-values/lib/needs";
 import "@/external/client/api/client";
 import {
@@ -82,7 +83,7 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
 }
 
 function SimilarUserRow({ user }: { user: ModelsSimilarUserItem }) {
-  const color = user.profileColor ?? "#3D8B6E";
+  const color = user.profileColor ?? ACCENT;
   const experiences = user.experiences ?? [];
   const topNeeds = user.topNeeds ?? [];
   const simColor =

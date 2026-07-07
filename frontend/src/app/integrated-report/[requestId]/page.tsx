@@ -4,6 +4,7 @@ import { Sidebar } from "@/app/components/Sidebar";
 import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
+import { ACCENT } from "@/constants/theme";
 import { getIntegratedReport } from "@/features/integrated-report/api";
 import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 
@@ -37,7 +38,7 @@ export default async function IntegratedReportPage({
   if (!data) notFound();
 
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
-  const profileColor = data.user.profileColor ?? "#3D8B6E";
+  const profileColor = data.user.profileColor ?? ACCENT;
 
   return (
     <ProfileColorContext value={profileColor}>

@@ -31,6 +31,7 @@ import {
   YenIcon,
 } from "@/components/icons/job";
 import { SectionTitle } from "@/components/ui";
+import { ACCENT } from "@/constants/theme";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import {
   JOB_PREVIEW_CHANNEL,
@@ -40,8 +41,6 @@ import {
 
 const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
-
-const ACCENT = "#3D8B6E";
 
 type CompanyProfile = {
   id: string;
@@ -313,7 +312,7 @@ export default function CompanyJobPreviewPage() {
       title: job.highlightTitleRole || "仕事内容",
       body: job.description,
       icon: <SparkIcon />,
-      tone: { bg: "#EAF4F0", ring: "#3D8B6E33", fg: "#3D8B6E" },
+      tone: { bg: "#EAF4F0", ring: `${ACCENT}33`, fg: ACCENT },
     },
     {
       label: "APPEAL",
@@ -524,7 +523,7 @@ export default function CompanyJobPreviewPage() {
                     <div className="flex items-center -space-x-[18px]">
                       {job.teamMembers.map((m, i) => {
                         const colors = [
-                          { bg: "#EAF4F0", fg: "#3D8B6E" },
+                          { bg: "#EAF4F0", fg: ACCENT },
                           { bg: "#EEF2FB", fg: "#3B6FCC" },
                           { bg: "#FEF7E6", fg: "#B07914" },
                           { bg: "#F3EEFB", fg: "#7647C5" },

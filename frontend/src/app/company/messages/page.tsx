@@ -157,7 +157,7 @@ export default function CompanyMessagesPage() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-brand" />
       </div>
     );
   }
@@ -177,7 +177,7 @@ export default function CompanyMessagesPage() {
           <div className="flex-1 overflow-y-auto scrollbar-hide">
             {loadingConvs ? (
               <div className="flex items-center justify-center py-12">
-                <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+                <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-brand" />
               </div>
             ) : (
               <ConversationList

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { TeamScoresSection } from "@/app/companies/[id]/TeamScoresSection";
+import { ACCENT } from "@/constants/theme";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import {
   fetchPublicTeamScores,
@@ -116,7 +117,7 @@ export default function CompanyProfilePreviewPage() {
             {company.coverImageUrl ? (
               <img src={company.coverImageUrl} alt="" className="w-full" />
             ) : (
-              <div className="h-44 sm:h-56" style={{ background: "#3D8B6E" }}>
+              <div className="h-44 sm:h-56" style={{ background: ACCENT }}>
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_30%,rgba(255,255,255,0.10),transparent_60%)]" />
               </div>
             )}
@@ -131,9 +132,9 @@ export default function CompanyProfilePreviewPage() {
                 ) : (
                   <div
                     className="flex h-full w-full items-center justify-center"
-                    style={{ background: "#3D8B6E20" }}
+                    style={{ background: `${ACCENT}20` }}
                   >
-                    <span className="text-xl font-bold" style={{ color: "#3D8B6E" }}>
+                    <span className="text-xl font-bold" style={{ color: ACCENT }}>
                       {company.companyName.charAt(0)}
                     </span>
                   </div>
@@ -217,7 +218,7 @@ export default function CompanyProfilePreviewPage() {
             <div className="mt-5 grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
               {statItems.map(({ value, label }) => (
                 <div key={label} className="px-6 py-4 text-center sm:py-2">
-                  <p className="text-3xl font-bold" style={{ color: "#3D8B6E" }}>
+                  <p className="text-3xl font-bold" style={{ color: ACCENT }}>
                     {value}
                   </p>
                   <p className="mt-1 text-xs text-gray-500">{label}</p>
@@ -239,9 +240,9 @@ export default function CompanyProfilePreviewPage() {
                   key={b}
                   className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium"
                   style={{
-                    borderColor: "#3D8B6E40",
-                    backgroundColor: "#3D8B6E12",
-                    color: "#3D8B6E",
+                    borderColor: `${ACCENT}40`,
+                    backgroundColor: `${ACCENT}12`,
+                    color: ACCENT,
                   }}
                 >
                   {b}
@@ -251,9 +252,9 @@ export default function CompanyProfilePreviewPage() {
                 <li
                   className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium"
                   style={{
-                    borderColor: "#3D8B6E40",
-                    backgroundColor: "#3D8B6E12",
-                    color: "#3D8B6E",
+                    borderColor: `${ACCENT}40`,
+                    backgroundColor: `${ACCENT}12`,
+                    color: ACCENT,
                   }}
                 >
                   {company.smokingPolicy}
@@ -392,7 +393,7 @@ function Gallery({ urls }: { urls: string[] }) {
               onClick={() => setCurrent(i)}
               className={`flex-shrink-0 cursor-pointer overflow-hidden rounded-lg transition-opacity ${i === current ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
               style={
-                i === current ? { outline: "2px solid #3D8B6E", outlineOffset: "1px" } : undefined
+                i === current ? { outline: `2px solid ${ACCENT}`, outlineOffset: "1px" } : undefined
               }
             >
               <img src={url} alt="" className="h-14 w-20 object-cover" />

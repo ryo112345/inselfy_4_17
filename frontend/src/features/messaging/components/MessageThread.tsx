@@ -76,7 +76,7 @@ export function MessageThread({
             </svg>
           </button>
         )}
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3D8B6E]/10 text-[#3D8B6E] text-xs font-semibold">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand text-xs font-semibold">
           {counterpartName.charAt(0)}
         </div>
         <span className="text-sm font-semibold text-gray-900">{counterpartName}</span>
@@ -85,7 +85,7 @@ export function MessageThread({
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto bg-[#C8E8F5] px-4 py-4">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-[#3D8B6E]" />
+            <span className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-brand" />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
