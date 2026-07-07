@@ -7,6 +7,7 @@ import { useAuth } from "@/features/auth/auth-context";
 import { fetchReceivedScoutDetail, respondToScout } from "@/features/scout/api";
 import type { ScoutDetail, ScoutReply, ScoutStatus } from "@/features/scout/types";
 import { useUnreadScout } from "@/features/scout/unread-context";
+import { daysRemaining, formatDateCompact, formatDateTimeCompact } from "@/lib/date";
 
 const STATUS_BADGE: Record<ScoutStatus, { label: string; className: string }> = {
   draft: { label: "下書き", className: "bg-gray-100 text-gray-600" },
@@ -17,27 +18,6 @@ const STATUS_BADGE: Record<ScoutStatus, { label: string; className: string }> = 
   declined: { label: "辞退", className: "bg-red-100 text-red-800" },
   expired: { label: "期限切れ", className: "bg-gray-100 text-gray-800" },
 };
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "-";
-  return new Date(dateStr).toLocaleDateString("ja-JP");
-}
-
-function formatDateTime(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${d.toLocaleDateString("ja-JP")} ${d.toLocaleTimeString("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}`;
-}
-
-function daysRemaining(expiresAt: string | null): string | null {
-  if (!expiresAt) return null;
-  const diff = Math.ceil((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return "期限切れ";
-  if (diff === 0) return "今日まで";
-  return `残り${diff}日`;
-}
 
 export default function ScoutDetailPage() {
   const params = useParams();
@@ -162,7 +142,7 @@ export default function ScoutDetailPage() {
                     {message.companyName}
                   </Link>
                   <div className="flex items-center gap-2 text-xs text-gray-400">
-                    <span>{formatDate(message.sentAt)}</span>
+                    <span>{formatDateCompact(message.sentAt)}</span>
                     {message.expiresAt && (
                       <>
                         <span>·</span>
@@ -173,7 +153,7 @@ export default function ScoutDetailPage() {
                               : ""
                           }
                         >
-                          {remaining ?? `期限 ${formatDate(message.expiresAt)}`}
+                          {remaining ?? `期限 ${formatDateCompact(message.expiresAt)}`}
                         </span>
                       </>
                     )}
@@ -399,7 +379,7 @@ function ReplyBubble({ reply, userId }: { reply: ScoutReply; userId: string }) {
       >
         <p className="text-sm leading-relaxed whitespace-pre-wrap">{reply.body}</p>
         <p className={`text-xs mt-1 ${isCandidate ? "text-gray-500" : "text-gray-400"}`}>
-          {formatDateTime(reply.createdAt)}
+          {formatDateTimeCompact(reply.createdAt)}
         </p>
       </div>
     </div>

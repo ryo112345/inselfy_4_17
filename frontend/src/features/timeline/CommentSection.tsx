@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { timeAgo } from "@/lib/date";
 import type { CommentItem } from "./api";
 import { createComment, fetchComments } from "./api";
 
@@ -10,17 +11,6 @@ type Props = {
   currentUserId?: string;
   onCommentCountChange?: (count: number) => void;
 };
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
-  const then = new Date(dateStr).getTime();
-  const diff = Math.floor((now - then) / 1000);
-  if (diff < 60) return `${diff}秒`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}分`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}時間`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}日`;
-  return new Date(dateStr).toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
-}
 
 export function CommentSection({ postId, currentUserId, onCommentCountChange }: Props) {
   const [comments, setComments] = useState<CommentItem[]>([]);

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-
 import { adminFetch } from "@/features/admin/api";
+import { formatDate } from "@/lib/date";
 
 interface AdminUser {
   id: string;
@@ -72,11 +72,6 @@ export default function AdminUsersPage() {
       await fetchUsers();
     }
     setDeletingId(null);
-  };
-
-  const formatDate = (iso: string) => {
-    const d = new Date(iso);
-    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
   };
 
   return (

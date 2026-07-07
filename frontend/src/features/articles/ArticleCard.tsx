@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { formatRelativeDate } from "@/lib/date";
 import type { ArticleItem } from "./api";
 
 type Props = {
@@ -11,21 +12,6 @@ function estimateReadingTime(body: string, freePreview: string): number {
   const html = body || freePreview;
   const text = html.replace(/<[^>]*>/g, "");
   return Math.max(1, Math.ceil(text.length / 500));
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return "今日";
-  if (diffDays === 1) return "昨日";
-  if (diffDays < 7) return `${diffDays}日前`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}週間前`;
-  return new Date(dateStr).toLocaleDateString("ja-JP", {
-    month: "short",
-    day: "numeric",
-  });
 }
 
 export function ArticleCard({ article, variant = "compact" }: Props) {

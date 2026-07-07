@@ -19,6 +19,7 @@ import type { ValueId } from "@/features/work-values/lib/needs";
 import { VALUE_NEEDS } from "@/features/work-values/lib/needs";
 import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
 import { ValuesFilterDrawer } from "@/features/work-values/ValuesFilterDrawer";
+import { formatRelativeDate } from "@/lib/date";
 import { Gallery } from "../companies/[id]/Gallery";
 
 const ACCENT = "#3D8B6E";
@@ -106,18 +107,6 @@ function formatSalary(min: number | null, max: number | null): string | null {
   if (min != null && max != null) return `${min}〜${max}万円`;
   if (min != null) return `${min}万円〜`;
   return `〜${max}万円`;
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return "今日";
-  if (diffDays === 1) return "昨日";
-  if (diffDays < 7) return `${diffDays}日前`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}週間前`;
-  return d.toLocaleDateString("ja-JP", { month: "short", day: "numeric" });
 }
 
 const JOB_CATEGORIES = [
@@ -719,7 +708,9 @@ function CardInner({
             )}
           </span>
           <span className="truncate font-medium text-gray-700">{job.companyName}</span>
-          <span className="shrink-0 text-gray-400 ml-auto">{formatDate(job.createdAt)}</span>
+          <span className="shrink-0 text-gray-400 ml-auto">
+            {formatRelativeDate(job.createdAt)}
+          </span>
         </div>
 
         {/* Meta badges (employment type, remote, category) */}

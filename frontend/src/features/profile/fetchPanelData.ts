@@ -1,3 +1,4 @@
+import { formatDateCompact } from "@/lib/date";
 import "@/external/client/api/client";
 import {
   educationsListEducations,
@@ -74,11 +75,6 @@ export async function fetchPanelDataByUserId(
   const userRes = await usersGetUserById({ path: { id: userId } });
   if (userRes.error || !userRes.data) return null;
   return fetchRest(userRes.data, userRes.data.username, cookieHeader);
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
 function buildWvKeywords(result: WvResultDTO): string {
@@ -173,7 +169,7 @@ async function fetchRest(
   if (wvResult) {
     diagnostics.push({
       label: "価値観診断",
-      date: formatDate(wvResult.createdAt),
+      date: formatDateCompact(wvResult.createdAt),
       keywords: buildWvKeywords(wvResult),
       href: `/work_values/${wvResult.sessionId}`,
     });
@@ -181,7 +177,7 @@ async function fetchRest(
   if (ciResult) {
     diagnostics.push({
       label: "キャリア興味診断",
-      date: formatDate(ciResult.createdAt),
+      date: formatDateCompact(ciResult.createdAt),
       keywords: buildCiKeywords(ciResult),
       href: `/career_interest/${ciResult.sessionId}`,
     });
