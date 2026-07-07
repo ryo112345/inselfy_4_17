@@ -62,14 +62,17 @@ export function MyArticles() {
   const [tab, setTab] = useState<Tab>("draft");
   const [articles, setArticles] = useState<ArticleItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
+    setError(false);
     fetchMyArticles()
       .then((res) => setArticles(res.items ?? []))
-      .catch(() => setArticles([]))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, []);
+  }, [reloadKey]);
 
   const drafts = articles.filter((a) => a.status === "draft");
   const published = articles.filter((a) => a.status === "published");
@@ -103,6 +106,17 @@ export function MyArticles() {
       {loading ? (
         <div className="flex items-center justify-center py-16 text-gray-400">
           <p className="text-sm">読み込み中…</p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-2">
+          <p className="text-sm text-red-600">記事の読み込みに失敗しました</p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="text-sm text-[var(--accent)] hover:underline"
+          >
+            再読み込み
+          </button>
         </div>
       ) : current.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-2">

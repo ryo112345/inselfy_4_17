@@ -27,18 +27,21 @@ export function PostsTabs({ posts = [], userId, currentUserId }: Props) {
   const [likedPosts, setLikedPosts] = useState<PostItem[]>([]);
   const [likedLoading, setLikedLoading] = useState(false);
   const [likedLoaded, setLikedLoaded] = useState(false);
+  const [likedError, setLikedError] = useState(false);
+  const [likedReloadKey, setLikedReloadKey] = useState(0);
 
   useEffect(() => {
     if (active !== "likes" || !userId || likedLoaded) return;
     setLikedLoading(true);
+    setLikedError(false);
     fetchLikedPosts(userId)
       .then((res) => {
         setLikedPosts(res.items ?? []);
         setLikedLoaded(true);
       })
-      .catch(() => setLikedPosts([]))
+      .catch(() => setLikedError(true))
       .finally(() => setLikedLoading(false));
-  }, [active, userId, likedLoaded]);
+  }, [active, userId, likedLoaded, likedReloadKey]);
 
   function renderContent() {
     if (active === "posts") {
@@ -56,6 +59,20 @@ export function PostsTabs({ posts = [], userId, currentUserId }: Props) {
         return (
           <div className="flex justify-center py-10">
             <div className="w-6 h-6 border-2 border-gray-300 border-t-[var(--accent)] rounded-full animate-spin" />
+          </div>
+        );
+      }
+      if (likedError) {
+        return (
+          <div className="flex flex-col items-center justify-center py-14 gap-2">
+            <p className="text-sm text-red-600">いいねの読み込みに失敗しました</p>
+            <button
+              type="button"
+              onClick={() => setLikedReloadKey((k) => k + 1)}
+              className="text-sm text-[var(--accent)] hover:underline"
+            >
+              再読み込み
+            </button>
           </div>
         );
       }

@@ -25,12 +25,17 @@ function timeAgo(dateStr: string): string {
 export function CommentSection({ postId, currentUserId, onCommentCountChange }: Props) {
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [content, setContent] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
+    setLoadError(false);
     fetchComments(postId, 50)
       .then((res) => {
         if (!cancelled) {
@@ -39,24 +44,29 @@ export function CommentSection({ postId, currentUserId, onCommentCountChange }: 
         }
       })
       .catch(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoadError(true);
+          setLoading(false);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [postId]);
+  }, [postId, reloadKey]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim() || submitting || !currentUserId) return;
     setSubmitting(true);
+    setSubmitError("");
     try {
       const newComment = await createComment(postId, content.trim());
       setComments((prev) => [...prev, newComment]);
       setContent("");
       onCommentCountChange?.(comments.length + 1);
     } catch {
-      // ignore
+      // 入力値は保持したままエラーを表示し、再送できるようにする
+      setSubmitError("コメントの投稿に失敗しました。もう一度お試しください。");
     } finally {
       setSubmitting(false);
     }
@@ -66,6 +76,17 @@ export function CommentSection({ postId, currentUserId, onCommentCountChange }: 
     <div className="mt-3 border-t border-gray-100 pt-3">
       {loading ? (
         <div className="text-sm text-gray-400 py-2">読み込み中...</div>
+      ) : loadError ? (
+        <div className="flex items-center gap-2 py-1">
+          <span className="text-sm text-red-600">コメントの読み込みに失敗しました</span>
+          <button
+            type="button"
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="text-sm text-[var(--accent)] hover:underline"
+          >
+            再読み込み
+          </button>
+        </div>
       ) : (
         <>
           {comments.length === 0 && (
@@ -78,6 +99,7 @@ export function CommentSection({ postId, currentUserId, onCommentCountChange }: 
           </div>
         </>
       )}
+      {currentUserId && submitError && <p className="mt-2 text-sm text-red-600">{submitError}</p>}
       {currentUserId && (
         <form onSubmit={handleSubmit} className="mt-3 flex gap-2 items-end">
           <textarea
