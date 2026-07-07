@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Area } from "react-easy-crop";
 import Cropper from "react-easy-crop";
+import { XIcon } from "@/components/icons";
 import { PrimaryButton, SecondaryButton } from "@/components/ui";
-import { XIcon } from "./Icons";
 
 type Props = {
   open: boolean;

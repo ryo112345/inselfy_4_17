@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { CheckIcon } from "@/components/icons";
 import { useAuth } from "@/features/auth/auth-context";
 import { getIntegratedReportStatus } from "@/features/integrated-report/api";
-import { CheckIcon } from "./Icons";
 import { IntegratedReportModal } from "./IntegratedReportModal";
 
 type Props = {
