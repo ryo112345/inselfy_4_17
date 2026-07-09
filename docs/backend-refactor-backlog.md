@@ -21,8 +21,12 @@
 | 5 | [x] | usecase 層の入力正規化（TrimSpace）ヘルパー化 | 小 | 重複排除 |
 | 6 | [x] | scout_interactor（667行）の分割＋ユニットテスト追加 | 大 | 分割 |
 | 7 | [x] | initializer.go（775行）の機能別分割 | 中 | 整理 |
+| 8 | [ ] | ルート登録の二重管理解消（生成 ServerInterface vs wire_*.go 手動登録） | 中〜大 | 再発防止 |
+| 9 | [ ] | displayName cookie の廃止 | 小 | 整理 |
 
 #1 と #2 は controller-clean-route-refactor.md の「全件完了後の仕上げ」をこちらに引き継いだもの。
+#8 と #9 はフロントリファクタ Phase E（2026-07-09、docs/frontend-refactor-plan.md）の作業中に
+発見して切り出したもの。
 
 ---
 
@@ -575,6 +579,50 @@ OIDC は「長期クレデンシャルをどこにも保存しない」設計と
   緩め（30s×3、DB を見ない）。
 - 既知の割り切り: deploy と e2e で docker build が二重実行される（将来 buildx の registry cache で
   最適化）。カナリア（段階切替）は未実装（`--to-tags=candidate=10` を挟めば足せる）。
+
+---
+
+## #8 ルート登録の二重管理解消
+
+**現状（2026-07-09 発見）:** oapi-codegen が `internal/adapter/http/generated/openapi/server.gen.go` に
+`ServerInterface`＋`RegisterHandlers` を生成し、`controller/server.go` がそれを実装しているが、
+**実際の echo ルート登録は `driver/initializer/api/wire_*.go` の手動登録**で行われており、
+`RegisterHandlers` は使われていない。このため:
+
+- スペックにルートを足して `server.go` に実装しても、wire に手動登録しないと 404 になる
+  （`GET /api/scouts/unread-count` 追加時に実際に踏んだ。`wire_scout.go` への追記で解決）。
+- スペック上のパスと実際に生えるパスがコンパイル時にもテストでも照合されない。
+
+**やること:** まず方針を決める（ユーザーと相談）:
+
+- **案a: RegisterHandlers に全面移行**して wire の手動登録を廃止。認証ミドルウェア
+  （jwtMW / companyJwtMW / AdminAuth）がルートグループ単位で掛かっている構造を、
+  per-route 適用か oapi-codegen の middleware オプションでどう表現するかが課題。変更が大きい。
+- **案b: 手動 wire に一本化**（server.go / ServerInterface 実装は現状のまま「実装漏れ検知」用と
+  割り切る）＋ドリフト検査を追加: 埋め込みの openapi.yaml のパス・メソッド一覧と
+  `e.Routes()` を突き合わせるユニットテストを書き、スペックにあるのに未登録なら fail させる。
+  既存構成に近く、C2 の生成コードドリフト検査とも相性がよい。
+
+**検証:** `go build ./... && make test`、全ルートのスモーク（案b ならドリフトテスト自体が検証になる）。
+
+**コミット:** 案b の場合 `test(backend): detect spec-vs-router drift`
+
+## #9 displayName cookie の廃止
+
+**現状（2026-07-09 発見）:** `controller/auth_controller.go` がログイン時に
+`setCookie("displayName", user.Name)`（HttpOnly、url.QueryEscape 済み）を設定している。
+HttpOnly なのでクライアント JS からは読めず、SSR 側の利用も username cookie で足りる範囲。
+日本語値を含むため、フロントの cookie 転送で ByteString エラーを起こした前科がある
+（frontend の fe81704 で転送側は修正済みだが、発生源はこの cookie）。
+
+**やること:**
+
+1. フロントで displayName cookie を参照している箇所が無いか横断調査（`cookieStore.get("displayName")` 等）。
+2. 無ければ backend の setCookie / clearAuthCookies から displayName を除去
+   （clear 側は既存 cookie の掃除のためしばらく残す）。
+3. 検証: ログイン→プロフィール SSR（isOwner フォールバック）→ログアウトの一連。
+
+**コミット:** `refactor(backend): stop issuing displayName cookie`
 
 ---
 
