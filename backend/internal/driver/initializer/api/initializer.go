@@ -105,16 +105,41 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		AllowCredentials: true,
 	}))
 
-	jwtMW := authmw.JWTAuth(jwtService)
-	optionalJwtMW := authmw.OptionalJWTAuth(jwtService)
-	companyJwtMW := authmw.CompanyJWTAuth(jwtService)
+	interviewCtrl, wsHub, err := registerRoutes(ctx, e, d)
+	if err != nil {
+		cleanup()
+		return nil, nil, func() {}, err
+	}
+
+	// --- Background goroutines (not needed for route registration) ---
+	go wsHub.Run()
+
+	interviewCtrl.SetWS(wsHub)
+
+	pgBroker := ws.NewPgMessageBroker(pool)
+	relay := ws.NewRelay(wsHub, pgBroker, d.participantRepo)
+	go relay.Start(ctx)
+
+	sched := scheduler.New(d.scoutMsgRepo, sqlcgw.NewScoutCreditRepository(pool))
+	sched.Start(ctx)
+
+	return e, cfg, cleanup, nil
+}
+
+// registerRoutes wires every route the server exposes onto e. Split out from
+// BuildServer so tests can build the full route table without a live DB or
+// background goroutines (see spec_drift_test.go).
+func registerRoutes(ctx context.Context, e *echo.Echo, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
+	jwtMW := authmw.JWTAuth(d.jwtService)
+	optionalJwtMW := authmw.OptionalJWTAuth(d.jwtService)
+	companyJwtMW := authmw.CompanyJWTAuth(d.jwtService)
 	// 書き込みは本人（候補者JWT）のみ、読み取りはログイン済みの候補者/企業どちらでも可
-	anyJwtMW := authmw.AnyJWTAuth(jwtService)
+	anyJwtMW := authmw.AnyJWTAuth(d.jwtService)
 
 	// --- Static uploads ---
 	e.Static("/api/uploads", "./uploads")
 
-	wireHealth(e, pool)
+	wireHealth(e, d.pool)
 	wireAuth(e, d, jwtMW, companyJwtMW)
 	wireUser(e, d, jwtMW)
 	wireContent(e, d, jwtMW, optionalJwtMW, companyJwtMW)
@@ -125,27 +150,15 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	wireMessaging(e, d, jwtMW, companyJwtMW)
 	interviewCtrl := wireInterview(e, d, jwtMW, companyJwtMW)
 	if err := wireAdmin(ctx, e, d, jwtMW, anyJwtMW); err != nil {
-		cleanup()
-		return nil, nil, func() {}, err
+		return nil, nil, err
 	}
 
 	// --- WebSocket ---
 	wsHub := ws.NewHub()
-	go wsHub.Run()
-
-	interviewCtrl.SetWS(wsHub)
-
-	pgBroker := ws.NewPgMessageBroker(pool)
-	relay := ws.NewRelay(wsHub, pgBroker, d.participantRepo)
-	go relay.Start(ctx)
-
 	wsTickets := ws.NewTicketStore()
-	wsCtrl := httpcontroller.NewWSController(wsHub, jwtService, wsTickets)
+	wsCtrl := httpcontroller.NewWSController(wsHub, d.jwtService, wsTickets)
 	e.GET("/api/ws/ticket", wsCtrl.IssueTicket)
 	e.GET("/api/ws", wsCtrl.HandleWS)
 
-	sched := scheduler.New(d.scoutMsgRepo, sqlcgw.NewScoutCreditRepository(pool))
-	sched.Start(ctx)
-
-	return e, cfg, cleanup, nil
+	return interviewCtrl, wsHub, nil
 }

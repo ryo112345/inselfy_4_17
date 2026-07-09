@@ -21,7 +21,7 @@
 | 5 | [x] | usecase 層の入力正規化（TrimSpace）ヘルパー化 | 小 | 重複排除 |
 | 6 | [x] | scout_interactor（667行）の分割＋ユニットテスト追加 | 大 | 分割 |
 | 7 | [x] | initializer.go（775行）の機能別分割 | 中 | 整理 |
-| 8 | [ ] | ルート登録の二重管理解消（生成 ServerInterface vs wire_*.go 手動登録） | 中〜大 | 再発防止 |
+| 8 | [x] | ルート登録の二重管理解消（生成 ServerInterface vs wire_*.go 手動登録） | 中〜大 | 再発防止 |
 | 9 | [x] | displayName cookie の廃止 | 小 | 整理 |
 
 #1 と #2 は controller-clean-route-refactor.md の「全件完了後の仕上げ」をこちらに引き継いだもの。
@@ -583,6 +583,26 @@ OIDC は「長期クレデンシャルをどこにも保存しない」設計と
 ---
 
 ## #8 ルート登録の二重管理解消
+
+**2026-07-10 完了（案b採用・ユーザー確認済み）:** 手動 wire に一本化し、ドリフト検査テスト
+`internal/driver/initializer/api/spec_drift_test.go` を追加。server.go / ServerInterface 実装は
+「実装漏れ検知」用として現状維持。
+
+- **準備リファクタ:** `BuildServer` からルート登録部を `registerRoutes(ctx, e, d)` に純粋抽出
+  （認証MW構築・全 wire 呼び出し・ws ルート登録まで。goroutine 起動＝wsHub.Run / relay /
+  scheduler / SetWS は BuildServer 側に残す）。テストは lazy な `pgxpool.New`（未接続）＋
+  ゼロ値 config（InitialAdminEmail 空 → SeedAdmin スキップ）で **DB なしに全ルート表を構築**できる。
+- **検査内容（双方向）:** 埋め込み openapi.yaml のパス×メソッド（kin-openapi でパース）と
+  `e.Routes()` を突き合わせ。パラメータ名はスペック `{userId}` / echo `:id` で揃っていないため
+  セグメント単位で `*` に正規化して比較。①スペックにあるのに未登録 → fail（F16 の
+  unread-count 404 の再発防止。実際に登録を1本外して検知することを確認済み）、
+  ②登録済みなのにスペックに無い → allowlist（`unspeccedRoutes`、理由必須）に無ければ fail。
+  echo が Group.Use 時に足す 404 catch-all（`echo.RouteNotFound`）は除外。
+- **導入時の実測:** スペック→ルーターの登録漏れは**ゼロ**。逆方向は allowlist 対象が
+  health/readyz・/api/uploads 静的配信・ws 2本・**Stripe webhook**・**admin API 全部（約28ルート）**。
+  admin API は X-Admin-Key 運用の内部向けで公開契約（TypeSpec）外という現状を allowlist で明文化した。
+  **admin API をスペックに載せるかは別タスク候補**（載せれば OpenAPI リクエスト検証MWも
+  admin に効くようになる。ただし generated 型・SDK への影響を要検討）。
 
 **現状（2026-07-09 発見）:** oapi-codegen が `internal/adapter/http/generated/openapi/server.gen.go` に
 `ServerInterface`＋`RegisterHandlers` を生成し、`controller/server.go` がそれを実装しているが、
