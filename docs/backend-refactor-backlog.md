@@ -22,7 +22,7 @@
 | 6 | [x] | scout_interactor（667行）の分割＋ユニットテスト追加 | 大 | 分割 |
 | 7 | [x] | initializer.go（775行）の機能別分割 | 中 | 整理 |
 | 8 | [ ] | ルート登録の二重管理解消（生成 ServerInterface vs wire_*.go 手動登録） | 中〜大 | 再発防止 |
-| 9 | [ ] | displayName cookie の廃止 | 小 | 整理 |
+| 9 | [x] | displayName cookie の廃止 | 小 | 整理 |
 
 #1 と #2 は controller-clean-route-refactor.md の「全件完了後の仕上げ」をこちらに引き継いだもの。
 #8 と #9 はフロントリファクタ Phase E（2026-07-09、docs/frontend-refactor-plan.md）の作業中に
@@ -608,6 +608,16 @@ OIDC は「長期クレデンシャルをどこにも保存しない」設計と
 **コミット:** 案b の場合 `test(backend): detect spec-vs-router drift`
 
 ## #9 displayName cookie の廃止
+
+**2026-07-10 完了:** フロントに `cookieStore.get("displayName")` が11箇所あった（Sidebar への
+SSR フォールバック用 prop）が、Sidebar は `user?.name ?? displayName` で auth 読込後は API 値を
+使い、ロード中はスケルトン表示のため cookie 値は実質不使用 → 11箇所とも読み取りを除去
+（Sidebar の `displayName` prop 自体は API 由来の `data.user.name` を渡す箇所があるため存続）。
+backend は `setUserInfoCookies` から発行を除去、`clearAuthCookies` は既存ブラウザの掃除のため
+displayName を残した。`buildCookieHeader` の再エンコードも残留 cookie 対策として維持。
+検証: bypass-login の Set-Cookie に displayName が無いこと、logout で displayName が
+Max-Age=0 で消されること、レガシー displayName cookie（日本語値）を付けた状態で
+home / profile（isOwner 判定含む）/ articles の SSR が 200 を返すことを実機確認済み。
 
 **現状（2026-07-09 発見）:** `controller/auth_controller.go` がログイン時に
 `setCookie("displayName", user.Name)`（HttpOnly、url.QueryEscape 済み）を設定している。

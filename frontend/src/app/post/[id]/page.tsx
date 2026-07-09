@@ -14,7 +14,6 @@ export default async function PostPage({ params }: Props) {
   const hasToken = !!cookieStore.get("inselfy_token")?.value;
   const userId = hasToken ? (cookieStore.get("userId")?.value ?? "") : "";
   const username = hasToken ? (cookieStore.get("username")?.value ?? "guest") : "guest";
-  const displayName = hasToken ? cookieStore.get("displayName")?.value : undefined;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
   let post: Awaited<ReturnType<typeof fetchPost>>;
@@ -27,7 +26,7 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <>
-      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
+      <Sidebar username={username} defaultOpen={sidebarOpen} />
       <div className="flex justify-center min-h-screen md:pl-[50px]">
         <main className="w-full max-w-[600px] border-x border-gray-200/80 min-h-screen bg-white">
           <PostDetail post={post} comments={comments.items} currentUserId={userId} />

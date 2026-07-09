@@ -17,7 +17,6 @@ export default async function HomePage() {
 
   const userId = cookieStore.get("userId")?.value ?? "";
   const username = cookieStore.get("username")?.value ?? "guest";
-  const displayName = cookieStore.get("displayName")?.value;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
   let posts: Awaited<ReturnType<typeof fetchTimeline>> | null = null;
@@ -29,7 +28,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
+      <Sidebar username={username} defaultOpen={sidebarOpen} />
       <div className="flex justify-center min-h-screen md:pl-[50px]">
         <main className="w-full max-w-[600px] bg-white border-x border-gray-200/80">
           <FeedTabs />

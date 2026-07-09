@@ -105,12 +105,12 @@ func setUserInfoCookies(ctx echo.Context, user *openapi.ModelsAuthUserResponse, 
 	}
 	setCookie("userId", user.Id)
 	setCookie("username", user.Username)
-	setCookie("displayName", user.Name)
 }
 
 func clearAuthCookies(ctx echo.Context) {
 	secure := ctx.Scheme() == "https"
 	expired := time.Unix(0, 0)
+	// displayName は発行を廃止済み。既存ブラウザに残る cookie の掃除のため clear 対象には残す。
 	for _, name := range []string{"inselfy_token", "userId", "username", "displayName"} {
 		ctx.SetCookie(&http.Cookie{
 			Name:     name,

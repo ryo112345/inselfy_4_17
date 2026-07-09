@@ -6,7 +6,6 @@ import { fetchArticles } from "@/features/articles/api";
 export default async function ArticlesPage() {
   const cookieStore = await cookies();
   const username = cookieStore.get("username")?.value ?? "guest";
-  const displayName = cookieStore.get("displayName")?.value;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
   const isLoggedIn = !!cookieStore.get("userId")?.value;
 
@@ -19,7 +18,7 @@ export default async function ArticlesPage() {
 
   return (
     <>
-      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
+      <Sidebar username={username} defaultOpen={sidebarOpen} />
       <div className="min-h-screen md:pl-[50px] bg-white">
         <div className="max-w-[1100px] mx-auto px-6 py-6">
           {articles ? (

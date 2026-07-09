@@ -46,7 +46,6 @@ export default async function ArticlePage({ params }: Props) {
   const { id } = await params;
   const cookieStore = await cookies();
   const username = cookieStore.get("username")?.value ?? "guest";
-  const displayName = cookieStore.get("displayName")?.value;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
   let article: Awaited<ReturnType<typeof fetchArticle>>;
@@ -59,7 +58,7 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <>
       <ScrollProgress />
-      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
+      <Sidebar username={username} defaultOpen={sidebarOpen} />
       <div className="flex justify-center min-h-screen md:pl-[50px]">
         <main className="w-full max-w-2xl bg-white border-x border-gray-200/80">
           <ArticleView article={article} currentUsername={username} />
