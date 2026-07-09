@@ -1,6 +1,9 @@
 .env
 .env.*
 
+# ルートの node_modules（lefthook 用。frontend は frontend/.gitignore 側）
+node_modules/
+
 # Uploaded files (runtime data, not source code)
 backend/uploads/
 !.env.example

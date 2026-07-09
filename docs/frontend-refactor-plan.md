@@ -711,4 +711,4 @@ exhaustive-deps 系は挙動が変わり得るので1件ずつ判断（無理に
 | 3 | ~~`EMPLOYMENT_TYPES` のズレ~~ → **編集側を正として解決済み**（F10 実施メモ参照） | F10 |
 | 4 | ~~scout 未読カウントのバックエンドエンドポイント追加の可否~~ → **追加済み**（F16 実施メモ参照） | F16 |
 | 5 | `app/test/jobs/**` ページの扱い（F11 で共通フォームに載せ替えるか、削除するか） | F11 |
-| 6 | ローカルで git hooks が動いていない（コミット時に `Can't find lefthook in PATH`）。lefthook を devDependencies＋npx 実行にするか、ローカルに install するか | 独立 |
+| 6 | ~~ローカルで git hooks が動いていない~~ → **解決済み（2026-07-10）**。原因は `~/go/bin` が非対話シェルの PATH に無く fail-open していたこと。lefthook をルート package.json の devDependencies に移し（hook スクリプトがルート node_modules をフォールバック探索するため PATH 不要に）、gitleaks は lefthook.yml の各コマンドで `$HOME/go/bin` を PATH に追加。セットアップはルートで `npm install`（詳細 docs/security-secrets.md） | 独立 |

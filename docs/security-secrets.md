@@ -16,14 +16,18 @@
 ## セットアップ（各開発者、初回のみ）
 
 ```bash
-go install github.com/evilmartians/lefthook@latest
+npm install   # リポジトリルートで。lefthook（devDependencies）が入り、prepare が .git/hooks を配線
 go install github.com/zricethezav/gitleaks/v8@v8.30.1
-lefthook install   # .git/hooks に pre-commit / pre-push を配線
 ```
 
-**注意: `$(go env GOPATH)/bin`（通常 `~/go/bin`）が PATH に必要。** 無いと lefthook の hook は
-「Can't find lefthook in PATH」と警告するだけで**素通しする（fail-open）**。そもそも pre-commit /
-pre-push は `--no-verify` で誰でも回避できる補助層であり、強制層はあくまで CI の gitleaks（層3）という設計。
+**lefthook は ルート package.json の devDependencies（2026-07-10〜）。** 以前は
+`go install` ＋ PATH 頼みだったが、非対話シェル（GUI クライアントやエージェント経由の
+`git commit`）では `~/.zshrc` が読まれず「Can't find lefthook in PATH」で**素通し（fail-open）**
+していた。hook スクリプトはリポジトリルートの `node_modules/lefthook` をフォールバック探索する
+ため、npm 化で PATH に依存しなくなる。gitleaks は引き続き go install だが、`lefthook.yml` の
+各コマンドが `$HOME/go/bin` を PATH に足すので同様に非対話シェルでも動く。
+そもそも pre-commit / pre-push は `--no-verify` で誰でも回避できる補助層であり、
+強制層はあくまで CI の gitleaks（層3）という設計。
 
 pre-push の検出パターン上の限界も把握しておく（2026-07-07 実測）: gitleaks は
 「既知プレフィックスのトークン（`ghp_` 等）＋高エントロピー値」を捕まえる仕組みで、
