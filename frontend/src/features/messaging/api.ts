@@ -85,9 +85,10 @@ export async function markReadAsCompany(conversationId: string): Promise<void> {
 }
 
 export async function fetchCompanyUnreadCount(): Promise<UnreadCountResponse> {
-  const { data, error } = await companyMessagingCountCompanyUnreadMessages({});
-  if (error || !data) return { count: 0 };
-  return data;
+  return (await run(
+    companyMessagingCountCompanyUnreadMessages({}),
+    "未読メッセージ数の取得に失敗しました",
+  )) as UnreadCountResponse;
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +150,8 @@ export async function markReadAsCandidate(conversationId: string): Promise<void>
 }
 
 export async function fetchCandidateUnreadCount(): Promise<UnreadCountResponse> {
-  const { data, error } = await candidateMessagingCountCandidateUnreadMessages({});
-  if (error || !data) return { count: 0 };
-  return data;
+  return (await run(
+    candidateMessagingCountCandidateUnreadMessages({}),
+    "未読メッセージ数の取得に失敗しました",
+  )) as UnreadCountResponse;
 }

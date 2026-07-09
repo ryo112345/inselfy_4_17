@@ -8741,6 +8741,35 @@ export type CandidateScoutsBulkRespondScoutsResponses = {
 
 export type CandidateScoutsBulkRespondScoutsResponse = CandidateScoutsBulkRespondScoutsResponses[keyof CandidateScoutsBulkRespondScoutsResponses];
 
+export type CandidateScoutsCountCandidateUnreadScoutsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/scouts/unread-count';
+};
+
+export type CandidateScoutsCountCandidateUnreadScoutsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type CandidateScoutsCountCandidateUnreadScoutsError = CandidateScoutsCountCandidateUnreadScoutsErrors[keyof CandidateScoutsCountCandidateUnreadScoutsErrors];
+
+export type CandidateScoutsCountCandidateUnreadScoutsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsUnreadCountResponse;
+};
+
+export type CandidateScoutsCountCandidateUnreadScoutsResponse = CandidateScoutsCountCandidateUnreadScoutsResponses[keyof CandidateScoutsCountCandidateUnreadScoutsResponses];
+
 export type CandidateScoutsGetCandidateScoutDetailData = {
     body?: never;
     path: {

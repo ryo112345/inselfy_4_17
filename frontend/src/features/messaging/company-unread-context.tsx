@@ -1,38 +1,11 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createUnreadContext } from "@/features/unread/create-unread-context";
 import { fetchCompanyUnreadCount } from "./api";
 
-type CompanyUnreadContextType = {
-  unreadCount: number;
-  refresh: () => void;
-};
-
-const CompanyUnreadContext = createContext<CompanyUnreadContextType>({
-  unreadCount: 0,
-  refresh: () => {},
+const { Provider, useUnread } = createUnreadContext("company-messaging", async () => {
+  const { count } = await fetchCompanyUnreadCount();
+  return count;
 });
 
-export function CompanyUnreadMessagingProvider({ children }: { children: ReactNode }) {
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const refresh = useCallback(() => {
-    fetchCompanyUnreadCount()
-      .then((data) => setUnreadCount(data.count ?? 0))
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  return (
-    <CompanyUnreadContext.Provider value={{ unreadCount, refresh }}>
-      {children}
-    </CompanyUnreadContext.Provider>
-  );
-}
-
-export function useCompanyUnreadMessaging() {
-  return useContext(CompanyUnreadContext);
-}
+export { Provider as CompanyUnreadMessagingProvider, useUnread as useCompanyUnreadMessaging };

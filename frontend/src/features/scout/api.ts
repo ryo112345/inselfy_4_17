@@ -3,6 +3,7 @@ import {
   candidateScoutsBulkDeclineScouts,
   candidateScoutsBulkRespondScouts,
   candidateScoutsCandidateScoutReply,
+  candidateScoutsCountCandidateUnreadScouts,
   candidateScoutsGetCandidateScoutDetail,
   candidateScoutsListCandidateScouts,
   candidateScoutsRespondToScout,
@@ -129,6 +130,13 @@ export async function fetchReceivedScouts(params?: {
     }),
     "Failed to fetch received scouts",
   )) as ScoutListResponse;
+}
+
+export async function fetchScoutUnreadCount(): Promise<{ count: number }> {
+  return (await run(
+    candidateScoutsCountCandidateUnreadScouts({ cache: "no-store" }),
+    "未読スカウト数の取得に失敗しました",
+  )) as { count: number };
 }
 
 export async function fetchReceivedScoutDetail(scoutId: string): Promise<ScoutDetail> {

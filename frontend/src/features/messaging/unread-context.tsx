@@ -1,38 +1,11 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createUnreadContext } from "@/features/unread/create-unread-context";
+import { fetchCandidateUnreadCount } from "./api";
 
-type UnreadMessagingContextType = {
-  unreadCount: number;
-  refresh: () => void;
-};
-
-const UnreadMessagingContext = createContext<UnreadMessagingContextType>({
-  unreadCount: 0,
-  refresh: () => {},
+const { Provider, useUnread } = createUnreadContext("messaging", async () => {
+  const { count } = await fetchCandidateUnreadCount();
+  return count;
 });
 
-export function UnreadMessagingProvider({ children }: { children: ReactNode }) {
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const refresh = useCallback(() => {
-    fetch("/api/messages/unread-count", { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setUnreadCount(data?.count ?? 0))
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  return (
-    <UnreadMessagingContext.Provider value={{ unreadCount, refresh }}>
-      {children}
-    </UnreadMessagingContext.Provider>
-  );
-}
-
-export function useUnreadMessaging() {
-  return useContext(UnreadMessagingContext);
-}
+export { Provider as UnreadMessagingProvider, useUnread as useUnreadMessaging };

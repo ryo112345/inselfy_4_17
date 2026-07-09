@@ -25,7 +25,7 @@ type ActiveTab = "company" | "personal" | "scout";
 export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
   const { user, isLoading: authLoading } = useAuth();
   const { refresh: refreshUnread, unreadCount: unreadMessages } = useUnreadMessaging();
-  const { hasUnread: hasUnreadScouts } = useUnreadScout();
+  const { unreadCount: unreadScouts } = useUnreadScout();
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialConvId = searchParams.get("conversation");
@@ -254,7 +254,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
   const tabs: { key: ActiveTab; label: string; badge: number | boolean }[] = [
     { key: "company", label: "企業", badge: companyUnread },
     { key: "personal", label: "個人", badge: personalUnread },
-    { key: "scout", label: "スカウト", badge: hasUnreadScouts },
+    { key: "scout", label: "スカウト", badge: unreadScouts > 0 },
   ];
 
   const isMessageTab = activeTab === "company" || activeTab === "personal";

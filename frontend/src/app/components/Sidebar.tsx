@@ -107,7 +107,7 @@ export function Sidebar({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  const { hasUnread: hasUnreadScouts } = useUnreadScout();
+  const { unreadCount: unreadScouts } = useUnreadScout();
   const { unreadCount: unreadMessages } = useUnreadMessaging();
 
   const profileHref = `/profile/${user?.username ?? username}`;
@@ -196,7 +196,7 @@ export function Sidebar({
                   >
                     <span className="relative shrink-0 w-5 h-5">
                       <item.icon />
-                      {item.label === "やりとり" && (hasUnreadScouts || unreadMessages > 0) && (
+                      {item.label === "やりとり" && (unreadScouts > 0 || unreadMessages > 0) && (
                         <span className="absolute -top-1.5 -right-2 flex h-2 w-2">
                           <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-[ping_2.5s_ease-in-out_infinite]" />
                           <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_4px_1px_rgba(16,185,129,0.35)]" />
