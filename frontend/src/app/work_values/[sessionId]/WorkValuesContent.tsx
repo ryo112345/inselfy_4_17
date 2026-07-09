@@ -18,6 +18,7 @@ import {
 } from "@/features/work-values/lib/needs";
 import { getWVPersona } from "@/features/work-values/lib/personas";
 import { markdownToHtml } from "@/lib/markdown";
+import { usePolling } from "@/lib/usePolling";
 
 const SCORE_COLORS = {
   tier1: "#149470",
@@ -854,6 +855,19 @@ function AiReportSection({
       cancelled = true;
     };
   }, [sessionId]);
+
+  // 「作成中」表示の間はポーリングし、レポートが生成され次第差し込む
+  usePolling(notFound && reportContent === null, async () => {
+    const data = await getAiReport(sessionId);
+    if (data?.content) {
+      setReportContent(data.content);
+      setFirstView(!!data.firstView);
+      setShowReport(true);
+      setNotFound(false);
+      return false;
+    }
+    return true;
+  });
 
   const handleClick = () => {
     if (reportContent) {
