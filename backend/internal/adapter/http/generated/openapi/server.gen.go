@@ -4457,6 +4457,9 @@ type ServerInterface interface {
 	// Bulk respond to scouts
 	// (POST /api/scouts/bulk-respond)
 	CandidateScoutsBulkRespondScouts(ctx echo.Context) error
+	// Count unread scouts for the candidate
+	// (GET /api/scouts/unread-count)
+	CandidateScoutsCountCandidateUnreadScouts(ctx echo.Context) error
 	// Get a received scout with replies
 	// (GET /api/scouts/{scoutId})
 	CandidateScoutsGetCandidateScoutDetail(ctx echo.Context, scoutId ModelsUuid) error
@@ -7177,6 +7180,17 @@ func (w *ServerInterfaceWrapper) CandidateScoutsBulkRespondScouts(ctx echo.Conte
 	return err
 }
 
+// CandidateScoutsCountCandidateUnreadScouts converts echo context to params.
+func (w *ServerInterfaceWrapper) CandidateScoutsCountCandidateUnreadScouts(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CandidateScoutsCountCandidateUnreadScouts(ctx)
+	return err
+}
+
 // CandidateScoutsGetCandidateScoutDetail converts echo context to params.
 func (w *ServerInterfaceWrapper) CandidateScoutsGetCandidateScoutDetail(ctx echo.Context) error {
 	var err error
@@ -8054,6 +8068,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/scouts", wrapper.CandidateScoutsListCandidateScouts)
 	router.POST(baseURL+"/api/scouts/bulk-decline", wrapper.CandidateScoutsBulkDeclineScouts)
 	router.POST(baseURL+"/api/scouts/bulk-respond", wrapper.CandidateScoutsBulkRespondScouts)
+	router.GET(baseURL+"/api/scouts/unread-count", wrapper.CandidateScoutsCountCandidateUnreadScouts)
 	router.GET(baseURL+"/api/scouts/:scoutId", wrapper.CandidateScoutsGetCandidateScoutDetail)
 	router.POST(baseURL+"/api/scouts/:scoutId/reply", wrapper.CandidateScoutsCandidateScoutReply)
 	router.POST(baseURL+"/api/scouts/:scoutId/respond", wrapper.CandidateScoutsRespondToScout)

@@ -49,6 +49,17 @@ func (c *CandidateScoutController) List(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, presenter.ScoutMessagesResponse(msgs, total))
 }
 
+// CountUnread handles GET /api/scouts/unread-count.
+func (c *CandidateScoutController) CountUnread(ctx echo.Context) error {
+	userID := authmw.UserID(ctx)
+
+	count, err := c.input.CountUnreadByCandidate(ctx.Request().Context(), userID)
+	if err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.JSON(http.StatusOK, presenter.ScoutUnreadCountResponse(count))
+}
+
 // GetDetail handles GET /api/scouts/:scoutID.
 func (c *CandidateScoutController) GetDetail(ctx echo.Context, scoutID string) error {
 	userID := authmw.UserID(ctx)

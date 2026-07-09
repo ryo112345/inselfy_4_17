@@ -166,6 +166,18 @@ func (q *Queries) CountScoutsSentLastNDays(ctx context.Context, arg *CountScouts
 	return count, err
 }
 
+const countUnreadScoutMessagesByCandidateID = `-- name: CountUnreadScoutMessagesByCandidateID :one
+SELECT count(*) FROM scout_messages
+WHERE candidate_id = $1 AND status = 'sent'
+`
+
+func (q *Queries) CountUnreadScoutMessagesByCandidateID(ctx context.Context, candidateID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countUnreadScoutMessagesByCandidateID, candidateID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createScoutMessage = `-- name: CreateScoutMessage :one
 INSERT INTO scout_messages (
     company_id, candidate_id, job_posting_id, template_id,

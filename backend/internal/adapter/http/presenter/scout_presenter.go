@@ -15,6 +15,11 @@ func ScoutMessageResponse(m *scout.ScoutMessageWithNames) any {
 	return scoutConv.ToScoutMessageResponse(m)
 }
 
+// ScoutUnreadCountResponse builds the unread-count API response.
+func ScoutUnreadCountResponse(count int) any {
+	return &openapi.ModelsUnreadCountResponse{Count: int32(count)}
+}
+
 // ScoutMessagesResponse builds the paginated scout-message list API response.
 func ScoutMessagesResponse(msgs []*scout.ScoutMessageWithNames, total int) any {
 	items := make([]openapi.ModelsScoutMessageResponse, len(msgs))

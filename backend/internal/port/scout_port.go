@@ -15,6 +15,7 @@ type ScoutInputPort interface {
 	CompanyReply(ctx context.Context, companyID, scoutID, body string) error
 
 	ListByCandidate(ctx context.Context, candidateID string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error)
+	CountUnreadByCandidate(ctx context.Context, candidateID string) (int, error)
 	GetReceivedDetail(ctx context.Context, candidateID, scoutID string) (*scout.ScoutMessageWithNames, []*scout.ScoutReply, error)
 	Respond(ctx context.Context, candidateID, scoutID string, response scout.CandidateResponse) error
 	CandidateReply(ctx context.Context, candidateID, scoutID, body string) error
@@ -31,6 +32,7 @@ type ScoutMessageRepository interface {
 	GetByID(ctx context.Context, id string) (*scout.ScoutMessageWithNames, error)
 	ListByCompanyID(ctx context.Context, companyID string, status *string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error)
 	ListByCandidateID(ctx context.Context, candidateID string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error)
+	CountUnreadByCandidateID(ctx context.Context, candidateID string) (int, error)
 	UpdateStatus(ctx context.Context, id string, status scout.Status) error
 	MarkOpened(ctx context.Context, id string) error
 	MarkReplied(ctx context.Context, id string) error

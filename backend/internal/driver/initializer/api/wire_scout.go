@@ -60,6 +60,7 @@ func wireScout(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	// --- Candidate Scouts ---
 	candidateScoutGroup := e.Group("/api/scouts", jwtMW)
 	candidateScoutGroup.GET("", candidateScoutCtrl.List)
+	candidateScoutGroup.GET("/unread-count", candidateScoutCtrl.CountUnread)
 	candidateScoutGroup.GET("/:scoutId", func(c echo.Context) error {
 		return candidateScoutCtrl.GetDetail(c, c.Param("scoutId"))
 	})
