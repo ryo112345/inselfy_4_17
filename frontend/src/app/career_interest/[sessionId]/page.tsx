@@ -7,6 +7,7 @@ import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
 import { ACCENT } from "@/constants/theme";
 import { getResultBySessionId } from "@/features/career-interest/api";
 import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
+import { buildCookieHeader } from "@/lib/cookie-header";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,7 @@ export default async function CareerInterestResultPage({
   const { sessionId } = await params;
 
   const cookieStore = await cookies();
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
+  const cookieHeader = buildCookieHeader(cookieStore);
 
   let result: Awaited<ReturnType<typeof getResultBySessionId>>;
   try {
