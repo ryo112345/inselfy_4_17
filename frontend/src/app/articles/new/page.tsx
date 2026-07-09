@@ -7,7 +7,6 @@ export default async function NewArticlePage() {
   const cookieStore = await cookies();
   const userId = cookieStore.get("userId")?.value;
   const username = cookieStore.get("username")?.value ?? "guest";
-  const displayName = cookieStore.get("displayName")?.value;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
   if (!userId) {
@@ -16,7 +15,7 @@ export default async function NewArticlePage() {
 
   return (
     <>
-      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
+      <Sidebar username={username} defaultOpen={sidebarOpen} />
       <div className="flex justify-center min-h-screen md:pl-[50px]">
         <main className="w-full max-w-2xl bg-white border-x border-gray-200/80">
           <ArticleForm />

@@ -18,12 +18,11 @@ const inter = Inter({
 export default async function WorkValuesPage() {
   const cookieStore = await cookies();
   const username = cookieStore.get("username")?.value ?? "guest";
-  const displayName = cookieStore.get("displayName")?.value;
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
 
   return (
     <>
-      <Sidebar username={username} displayName={displayName} defaultOpen={sidebarOpen} />
+      <Sidebar username={username} defaultOpen={sidebarOpen} />
       <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12 md:pl-[50px]">
         <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
           <FloatingSpheres />
