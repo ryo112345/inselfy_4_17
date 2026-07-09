@@ -458,6 +458,10 @@ func (s *Server) CandidateScoutsListCandidateScouts(ctx echo.Context, _ openapi.
 	return s.candScout.List(ctx)
 }
 
+func (s *Server) CandidateScoutsCountCandidateUnreadScouts(ctx echo.Context) error {
+	return s.candScout.CountUnread(ctx)
+}
+
 func (s *Server) CandidateScoutsGetCandidateScoutDetail(ctx echo.Context, scoutID string) error {
 	return s.candScout.GetDetail(ctx, scoutID)
 }

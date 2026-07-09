@@ -128,6 +128,19 @@ func (r *ScoutMessageRepository) ListByCandidateID(ctx context.Context, candidat
 	return msgs, int(count), nil
 }
 
+func (r *ScoutMessageRepository) CountUnreadByCandidateID(ctx context.Context, candidateID string) (int, error) {
+	q := queriesForContext(ctx, r.queries)
+	pgCandidateID, err := parseUUID(candidateID)
+	if err != nil {
+		return 0, domainerr.ErrBadRequest
+	}
+	count, err := q.CountUnreadScoutMessagesByCandidateID(ctx, pgCandidateID)
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
 func (r *ScoutMessageRepository) UpdateStatus(ctx context.Context, id string, status scout.Status) error {
 	q := queriesForContext(ctx, r.queries)
 	pgID, err := parseUUID(id)

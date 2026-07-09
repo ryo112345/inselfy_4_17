@@ -256,6 +256,10 @@ func (i *ScoutInteractor) CompanyReply(ctx context.Context, companyID, scoutID, 
 	return nil
 }
 
+func (i *ScoutInteractor) CountUnreadByCandidate(ctx context.Context, candidateID string) (int, error) {
+	return i.msgRepo.CountUnreadByCandidateID(ctx, candidateID)
+}
+
 func (i *ScoutInteractor) ListByCandidate(ctx context.Context, candidateID string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error) {
 	if limit <= 0 {
 		limit = 20

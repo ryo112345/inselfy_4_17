@@ -5397,6 +5397,35 @@ paths:
               $ref: '#/components/schemas/Models.BulkRespondRequest'
       security:
         - CandidateAuth: []
+  /api/scouts/unread-count:
+    get:
+      operationId: CandidateScouts_countCandidateUnreadScouts
+      summary: Count unread scouts for the candidate
+      description: 未読（未開封）スカウト数（要ログイン）
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnreadCountResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - CandidateScouts
+      security:
+        - CandidateAuth: []
   /api/scouts/{scoutId}:
     get:
       operationId: CandidateScouts_getCandidateScoutDetail

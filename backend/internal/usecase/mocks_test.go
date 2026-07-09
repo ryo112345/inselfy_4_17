@@ -477,6 +477,9 @@ func (s *scoutMessageRepoStub) ListByCompanyID(ctx context.Context, companyID st
 func (s *scoutMessageRepoStub) ListByCandidateID(ctx context.Context, candidateID string, limit, offset int) ([]*scout.ScoutMessageWithNames, int, error) {
 	return s.listByCandidateIDFn(ctx, candidateID, limit, offset)
 }
+func (s *scoutMessageRepoStub) CountUnreadByCandidateID(_ context.Context, _ string) (int, error) {
+	return 0, nil
+}
 func (s *scoutMessageRepoStub) UpdateStatus(ctx context.Context, id string, status scout.Status) error {
 	if s.updateStatusFn != nil {
 		return s.updateStatusFn(ctx, id, status)

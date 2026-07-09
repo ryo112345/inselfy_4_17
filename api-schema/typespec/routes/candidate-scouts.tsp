@@ -2,6 +2,7 @@ import "@typespec/http";
 import "@typespec/openapi3";
 import "../models/candidate-scout.tsp";
 import "../models/scout.tsp";
+import "../models/notification.tsp";
 import "../models/common.tsp";
 
 using TypeSpec.Http;
@@ -23,6 +24,12 @@ interface CandidateScouts {
     /** オフセット */
     @query offset?: int32,
   ): ScoutListResponse | AuthedErrors;
+
+  /** 未読（未開封）スカウト数（要ログイン） */
+  @get
+  @route("/unread-count")
+  @summary("Count unread scouts for the candidate")
+  countCandidateUnreadScouts(): UnreadCountResponse | AuthedErrors;
 
   /** 受信スカウト詳細（要ログイン） */
   @get

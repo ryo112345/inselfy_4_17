@@ -54,6 +54,10 @@ LIMIT $2 OFFSET $3;
 SELECT count(*) FROM scout_messages
 WHERE candidate_id = $1 AND status != 'draft';
 
+-- name: CountUnreadScoutMessagesByCandidateID :one
+SELECT count(*) FROM scout_messages
+WHERE candidate_id = $1 AND status = 'sent';
+
 -- name: UpdateScoutMessageStatus :exec
 UPDATE scout_messages
 SET status = $2, updated_at = NOW()
