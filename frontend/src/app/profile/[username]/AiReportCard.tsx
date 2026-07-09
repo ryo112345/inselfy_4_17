@@ -2,6 +2,9 @@
 
 import { useCallback, useState } from "react";
 import { CheckIcon } from "@/components/icons";
+import { useAuth } from "@/features/auth/auth-context";
+import { getIntegratedReportStatus } from "@/features/integrated-report/api";
+import { usePolling } from "@/lib/usePolling";
 import { IntegratedReportModal } from "./IntegratedReportModal";
 
 type Props = {
@@ -19,11 +22,23 @@ export function AiReportCard({
   intReportRequestId,
   intReportHasReport,
 }: Props) {
+  const { isAuthenticated } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   // 初期ステータスはサーバー（fetchPanelData）取得済みのリクエスト有無・レポート有無から導出
   const [requestStatus, setRequestStatus] = useState<"none" | "pending" | "ready">(
     intReportHasReport ? "ready" : intReportRequestId ? "pending" : "none",
   );
+
+  // 生成中はステータスをポーリングし、ready になったらカードを消す。
+  // 未ログインでは呼ばない（401 が SDK の /login リダイレクトを起こすため）。
+  usePolling(isAuthenticated && requestStatus === "pending", async () => {
+    const data = await getIntegratedReportStatus();
+    if (data?.status && data.status !== "pending") {
+      setRequestStatus(data.status);
+      return false;
+    }
+    return true;
+  });
 
   const steps = [
     { label: "職歴を入力", done: hasExperience },

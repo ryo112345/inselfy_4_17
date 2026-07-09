@@ -21,6 +21,7 @@ import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 import { getIntegratedReport } from "@/features/integrated-report/api";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
 import { markdownToHtml } from "@/lib/markdown";
+import { usePolling } from "@/lib/usePolling";
 
 function useTypewriter(fullText: string | null, charsPerTick = 2, intervalMs = 30) {
   const [displayed, setDisplayed] = useState("");
@@ -124,6 +125,18 @@ export function IntegratedReportContent({ requestId, isOwner = true, wvResult, c
       cancelled = true;
     };
   }, [requestId]);
+
+  // レポート未生成（生成中）の間はポーリングし、完成したら差し込む
+  usePolling(isOwner && !initialLoading && reportContent === null, async () => {
+    const data = await getIntegratedReport(requestId);
+    if (data?.content) {
+      setReportContent(data.content);
+      setFirstView(!!data.firstView);
+      if (!data.firstView) setShowReport(true);
+      return false;
+    }
+    return true;
+  });
 
   const handleClick = () => {
     if (reportContent) {
