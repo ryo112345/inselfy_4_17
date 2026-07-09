@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { getErrorMessage } from "@/lib/api-result";
 
 export default function NewTeamPage() {
   const router = useRouter();
@@ -34,8 +35,8 @@ export default function NewTeamPage() {
       }
       const team = await res.json();
       router.push(`/company/teams/${team.id}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err, "作成に失敗しました"));
       setSubmitting(false);
     }
   };

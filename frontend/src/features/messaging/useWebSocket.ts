@@ -21,7 +21,8 @@ async function fetchTicket(type: string): Promise<string | null> {
       credentials: "include",
     });
     if (!res.ok) return null;
-    const data = await res.json();
+    // /api/ws/ticket は WebSocket ハンドシェイク用で OpenAPI スペック外（手書き fetch 許容）
+    const data: { ticket?: string } = await res.json();
     return data.ticket ?? null;
   } catch {
     return null;

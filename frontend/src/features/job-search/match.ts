@@ -75,10 +75,10 @@ export function computeMatchScores(
   if (userWv && teamScores.wvScores && teamScores.wvScores.length > 0) {
     const teamMap = new Map(teamScores.wvScores.map((s) => [s.id, s.score]));
     const highValueIds = WV_ORDER.filter((id) => (teamMap.get(id) ?? 0) >= 50) as ValueId[];
-    const highNeedIds = new Set(highValueIds.flatMap((vid) => VALUE_NEEDS[vid] ?? []));
+    const highNeedIds = new Set<string>(highValueIds.flatMap((vid) => VALUE_NEEDS[vid] ?? []));
     const needLabelMap = new Map(userWv.needs.map((n) => [n.needId, n.label]));
     commonPoints = userWv.needs
-      .filter((n) => n.displayScore >= 55 && highNeedIds.has(n.needId as any))
+      .filter((n) => n.displayScore >= 55 && highNeedIds.has(n.needId))
       .sort((a, b) => b.displayScore - a.displayScore)
       .slice(0, 3)
       .map((n) => needLabelMap.get(n.needId) ?? n.needId);

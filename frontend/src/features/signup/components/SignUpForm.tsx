@@ -3,9 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import "@/external/client/api/client";
-import { type ModelsUserResponse, usersCreateUser } from "@/external/client/api/generated";
-
-type ApiError = { code: string; message: string };
+import { usersCreateUser } from "@/external/client/api/generated";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -36,12 +34,10 @@ export function SignUpForm() {
     });
 
     if (apiError) {
-      // hey-api over-unwraps typed error responses, so cast via unknown.
-      const err = apiError as unknown as ApiError;
-      if (err.code === "CONFLICT") {
+      if (apiError.code === "CONFLICT") {
         setError("このユーザー名はすでに使われています");
       } else {
-        setError(err.message || "登録に失敗しました");
+        setError(apiError.message || "登録に失敗しました");
       }
       setSubmitting(false);
       return;
@@ -52,8 +48,7 @@ export function SignUpForm() {
       return;
     }
 
-    const created = data as unknown as ModelsUserResponse;
-    router.push(`/profile/${created.username}`);
+    router.push(`/profile/${data.username}`);
   };
 
   return (

@@ -1,16 +1,31 @@
 const STORAGE_KEY = "inselfy_admin_api_key";
 
+// localStorage はプライベートモードや無効化環境で throw しうるので全て try/catch する
 export function getAdminKey(): string | null {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(STORAGE_KEY);
+  try {
+    return window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }
 
 export function setAdminKey(key: string) {
-  window.localStorage.setItem(STORAGE_KEY, key);
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, key);
+  } catch {
+    // 保存できなくても致命的ではない（次回リロードで再入力を促される）
+  }
 }
 
 export function clearAdminKey() {
-  window.localStorage.removeItem(STORAGE_KEY);
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
 }
 
 /**

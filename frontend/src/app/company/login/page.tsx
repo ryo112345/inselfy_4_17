@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { ApiError } from "@/lib/api-result";
 
 export default function CompanyLoginPage() {
   const { login, isAuthenticated } = useCompanyAuth();
@@ -30,10 +31,11 @@ export default function CompanyLoginPage() {
     try {
       await login(email, password);
       router.push("/company");
-    } catch (err: any) {
-      if (err.code === "ACCOUNT_PENDING") {
+    } catch (err) {
+      const code = err instanceof ApiError ? err.code : null;
+      if (code === "ACCOUNT_PENDING") {
         setError("アカウントは現在審査中です。承認後にログインできます。");
-      } else if (err.code === "ACCOUNT_REJECTED") {
+      } else if (code === "ACCOUNT_REJECTED") {
         setError("アカウントの登録が却下されました。");
       } else {
         setError("メールアドレスまたはパスワードが正しくありません。");

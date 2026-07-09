@@ -8,6 +8,7 @@ import {
   HighlightInput,
   HighlightTextarea,
 } from "@/features/scout/components/VariableHighlightField";
+import { getErrorMessage } from "@/lib/api-result";
 
 export default function TemplateEditPage() {
   const params = useParams();
@@ -46,8 +47,8 @@ export default function TemplateEditPage() {
         body: body.trim(),
       });
       router.push("/company/scout/templates");
-    } catch (e: any) {
-      setError(e.message ?? "保存に失敗しました");
+    } catch (e) {
+      setError(getErrorMessage(e, "保存に失敗しました"));
     } finally {
       setSaving(false);
     }
