@@ -24,6 +24,8 @@ type Props = {
   posts?: PostItem[];
   isOwner?: boolean;
   intReportRequestId?: string | null;
+  intReportHasReport?: boolean;
+  initialFollowing?: boolean | null;
   followersCount?: number;
   followingCount?: number;
 };
@@ -37,6 +39,8 @@ export function ProfileContent({
   posts,
   isOwner = true,
   intReportRequestId,
+  intReportHasReport,
+  initialFollowing = null,
   followersCount = 0,
   followingCount = 0,
 }: Props) {
@@ -48,6 +52,7 @@ export function ProfileContent({
         followersCount={followersCount}
         followingCount={followingCount}
         isOwner={isOwner}
+        initialFollowing={initialFollowing}
       />
       {isOwner && (
         <AiReportCard
@@ -55,6 +60,7 @@ export function ProfileContent({
           hasSkills={skills.length > 0}
           hasEducation={educations.length > 0}
           intReportRequestId={intReportRequestId}
+          intReportHasReport={intReportHasReport}
         />
       )}
       {isOwner && <ResumeUploadCard />}

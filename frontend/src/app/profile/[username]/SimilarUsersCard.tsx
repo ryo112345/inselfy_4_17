@@ -1,53 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ACCENT } from "@/constants/theme";
+import type { ModelsSimilarUserItem } from "@/external/client/api/generated";
 import { NEED_LABELS, type NeedId } from "@/features/work-values/lib/needs";
-import "@/external/client/api/client";
-import {
-  type ModelsSimilarUserItem,
-  similarUsersGetSimilarUsers,
-} from "@/external/client/api/generated";
 
 type Props = {
-  userId: string;
+  // サーバー（page.tsx）で取得した一覧。null はフェッチ失敗
+  users: ModelsSimilarUserItem[] | null;
   visible: boolean;
   className?: string;
 };
 
-export function SimilarUsersCard({ userId, visible, className }: Props) {
-  const [users, setUsers] = useState<ModelsSimilarUserItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(false);
-    similarUsersGetSimilarUsers({ path: { userId }, query: { limit: 20 } })
-      .then(({ data, error: apiError }) => {
-        if (!cancelled) {
-          if (apiError) {
-            setError(true);
-          } else {
-            setUsers(data?.items ?? []);
-          }
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setError(true);
-          setLoading(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [userId, reloadKey]);
+export function SimilarUsersCard({ users, visible, className }: Props) {
+  const router = useRouter();
+  const error = users === null;
 
-  if (!visible || loading) return null;
+  if (!visible) return null;
   // 0件（エラーなし）はカード自体を出さない。エラー時は0件と区別して表示する。
   if (!error && users.length === 0) return null;
 
@@ -64,7 +34,7 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
             <span className="text-[13px] text-red-600">読み込みに失敗しました</span>
             <button
               type="button"
-              onClick={() => setReloadKey((k) => k + 1)}
+              onClick={() => router.refresh()}
               className="text-[13px] text-[var(--accent)] hover:underline"
             >
               再読み込み
@@ -72,7 +42,7 @@ export function SimilarUsersCard({ userId, visible, className }: Props) {
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {users.map((u) => (
+            {(users ?? []).map((u) => (
               <SimilarUserRow key={u.userId} user={u} />
             ))}
           </div>

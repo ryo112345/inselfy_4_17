@@ -1,9 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { CheckIcon } from "@/components/icons";
-import { useAuth } from "@/features/auth/auth-context";
-import { getIntegratedReportStatus } from "@/features/integrated-report/api";
 import { IntegratedReportModal } from "./IntegratedReportModal";
 
 type Props = {
@@ -11,6 +9,7 @@ type Props = {
   hasSkills: boolean;
   hasEducation: boolean;
   intReportRequestId?: string | null;
+  intReportHasReport?: boolean;
 };
 
 export function AiReportCard({
@@ -18,33 +17,13 @@ export function AiReportCard({
   hasSkills,
   hasEducation,
   intReportRequestId,
+  intReportHasReport,
 }: Props) {
-  const { isAuthenticated } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
+  // 初期ステータスはサーバー（fetchPanelData）取得済みのリクエスト有無・レポート有無から導出
   const [requestStatus, setRequestStatus] = useState<"none" | "pending" | "ready">(
-    intReportRequestId ? "pending" : "none",
+    intReportHasReport ? "ready" : intReportRequestId ? "pending" : "none",
   );
-  const [statusError, setStatusError] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    // 未ログインでは呼ばない（401 が正常系になり、SDK の 401 インターセプタが
-    // /login リダイレクトを起こすため）。従来どおり初期ステータス表示のままになる。
-    if (!isAuthenticated) return;
-    let cancelled = false;
-    setStatusError(false);
-    getIntegratedReportStatus()
-      .then((data) => {
-        if (!cancelled && data?.status) setRequestStatus(data.status);
-      })
-      .catch(() => {
-        // 初期ステータス表示のまま続行するが、失敗したことは明示する
-        if (!cancelled) setStatusError(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated, reloadKey]);
 
   const steps = [
     { label: "職歴を入力", done: hasExperience },
@@ -118,18 +97,6 @@ export function AiReportCard({
           >
             {buttonLabel}
           </button>
-          {statusError && (
-            <p className="mt-3 text-[13px] text-red-700">
-              レポートの状態の取得に失敗しました。
-              <button
-                type="button"
-                onClick={() => setReloadKey((k) => k + 1)}
-                className="ml-1 underline hover:no-underline"
-              >
-                再読み込み
-              </button>
-            </p>
-          )}
         </div>
       </section>
 

@@ -63,6 +63,8 @@ export default async function IntegratedReportPage({
             experiences={data.experiences}
             educations={data.educations}
             skills={data.skills}
+            intReportRequestId={data.intReportRequestId}
+            intReportHasReport={data.intReportHasReport}
           />
         </PanelNavigator>
       </main>

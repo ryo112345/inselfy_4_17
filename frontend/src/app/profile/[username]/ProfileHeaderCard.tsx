@@ -53,6 +53,7 @@ type Props = {
   followersCount: number;
   followingCount: number;
   isOwner?: boolean;
+  initialFollowing?: boolean | null;
 };
 
 export function ProfileHeaderCard({
@@ -61,6 +62,7 @@ export function ProfileHeaderCard({
   followersCount,
   followingCount,
   isOwner = true,
+  initialFollowing = null,
 }: Props) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -295,7 +297,11 @@ export function ProfileHeaderCard({
             >
               <MailIcon className="h-[18px] w-[18px]" />
             </button>
-            <FollowButton username={user.username} profileColor={headerColor} />
+            <FollowButton
+              username={user.username}
+              profileColor={headerColor}
+              initialFollowing={initialFollowing}
+            />
           </div>
         )}
 

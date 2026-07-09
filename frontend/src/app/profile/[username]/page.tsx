@@ -4,8 +4,15 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { Sidebar } from "@/app/components/Sidebar";
 import { ACCENT } from "@/constants/theme";
+import "@/external/client/api/client";
+import {
+  followsGetFollowStatus,
+  type ModelsSimilarUserItem,
+  similarUsersGetSimilarUsers,
+} from "@/external/client/api/generated";
 import { fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
 import { fetchUserPosts } from "@/features/timeline/api";
+import { buildCookieHeader } from "@/lib/cookie-header";
 
 import { PanelNavigator } from "./PanelNavigator";
 import { ProfileColorContext } from "./ProfileColorContext";
@@ -36,17 +43,45 @@ async function getCurrentUsername(cookieHeader: string): Promise<string | null> 
   }
 }
 
+// フォロー状態。未ログイン（401）・エラー時は null（FollowButton はスペーサー表示）
+async function fetchInitialFollowing(
+  username: string,
+  cookieHeader: string,
+): Promise<boolean | null> {
+  try {
+    const { data, error } = await followsGetFollowStatus({
+      path: { username },
+      headers: { Cookie: cookieHeader },
+    });
+    if (error || !data) return null;
+    return data.following;
+  } catch {
+    return null;
+  }
+}
+
+// 類似ユーザー。エラー時は null（カード側でエラー＋再読み込みを表示）
+async function fetchSimilarUsers(
+  userId: string,
+  cookieHeader: string,
+): Promise<ModelsSimilarUserItem[] | null> {
+  try {
+    const { data, error } = await similarUsersGetSimilarUsers({
+      path: { userId },
+      query: { limit: 20 },
+      headers: { Cookie: cookieHeader },
+    });
+    if (error || !data) return null;
+    return data.items ?? [];
+  } catch {
+    return null;
+  }
+}
+
 // generateMetadata とページ本体で同一リクエスト内のフェッチを共有する
 const getPanelData = cache((username: string, cookieHeader: string) =>
   fetchPanelDataByUsername(username, cookieHeader),
 );
-
-function buildCookieHeader(cookieStore: Awaited<ReturnType<typeof cookies>>): string {
-  return cookieStore
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
-}
 
 export async function generateMetadata({
   params,
@@ -76,9 +111,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
   const cookieHeader = buildCookieHeader(cookieStore);
-  const [data, currentUsername] = await Promise.all([
+  const [data, currentUsername, initialFollowing] = await Promise.all([
     getPanelData(username, cookieHeader),
     getCurrentUsername(cookieHeader),
+    fetchInitialFollowing(username, cookieHeader),
   ]);
   if (!data) notFound();
   const usernameFromCookie = cookieStore.get("username")?.value
@@ -88,13 +124,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   const profileColor = data.user.profileColor ?? ACCENT;
 
-  let posts: Awaited<ReturnType<typeof fetchUserPosts>>["items"] = [];
-  try {
-    const res = await fetchUserPosts(data.user.id);
-    posts = res.items ?? [];
-  } catch {
-    posts = [];
-  }
+  const [posts, similarUsers] = await Promise.all([
+    fetchUserPosts(data.user.id)
+      .then((res) => res.items ?? [])
+      .catch(() => []),
+    fetchSimilarUsers(data.user.id, cookieHeader),
+  ]);
 
   return (
     <ProfileColorContext value={profileColor}>
@@ -119,6 +154,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           intReportHasReport={data.intReportHasReport}
           isOwner={isOwner}
           initialPanel={0}
+          // 類似ユーザーAPIは要ログイン。未ログイン閲覧では 401 をエラー表示にせずカード自体を出さない
+          similarUsers={currentUsername ? similarUsers : []}
         >
           <ProfileContent
             user={data.user}
@@ -129,6 +166,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             posts={posts}
             isOwner={isOwner}
             intReportRequestId={data.intReportRequestId}
+            intReportHasReport={data.intReportHasReport}
+            initialFollowing={initialFollowing}
             followersCount={data.followCounts.followersCount}
             followingCount={data.followCounts.followingCount}
           />

@@ -14,6 +14,7 @@ import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/C
 import { IntegratedReportContent } from "@/app/integrated-report/[requestId]/IntegratedReportContent";
 import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/WorkValuesContent";
 import { useAuth } from "@/features/auth/auth-context";
+import type { ModelsSimilarUserItem } from "@/external/client/api/generated";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
 import { SimilarUsersCard } from "./SimilarUsersCard";
@@ -21,6 +22,8 @@ import { SimilarUsersCard } from "./SimilarUsersCard";
 type Props = {
   children: ReactNode;
   userId?: string;
+  // サーバーで取得した類似ユーザー（null はフェッチ失敗）。userId とセットで渡す
+  similarUsers?: ModelsSimilarUserItem[] | null;
   username: string;
   displayName?: string;
   wvSessionId: string | null;
@@ -38,6 +41,7 @@ type Props = {
 export function PanelNavigator({
   children,
   userId,
+  similarUsers = null,
   username,
   displayName = username,
   wvSessionId,
@@ -211,7 +215,7 @@ export function PanelNavigator({
             pointerEvents: activeIndex === 0 && !expanded ? "auto" : "none",
           }}
         >
-          <SimilarUsersCard userId={userId!} visible={activeIndex === 0} />
+          <SimilarUsersCard users={similarUsers} visible={activeIndex === 0} />
         </div>
       )}
 
@@ -229,7 +233,7 @@ export function PanelNavigator({
       >
         {canGoSimilar && (
           <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen px-4 pt-4 pb-24 md:pb-0">
-            <SimilarUsersCard userId={userId!} visible={true} className="w-full" />
+            <SimilarUsersCard users={similarUsers} visible={true} className="w-full" />
           </div>
         )}
 
