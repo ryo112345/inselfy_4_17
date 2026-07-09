@@ -1,0 +1,11 @@
+{
+  "name": "inselfy-repo-hooks",
+  "private": true,
+  "description": "git hooks 用のツール置き場（アプリ本体は frontend/ と backend/）。npm install で lefthook が入り、prepare で .git/hooks に配線される",
+  "scripts": {
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "lefthook": "1.13.6"
+  }
+}

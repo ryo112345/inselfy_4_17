@@ -1,13 +1,15 @@
 # git hooks 管理（C9: シークレット漏洩の予防層）。
 # セットアップ（各開発者が一度だけ実行）:
-#   go install github.com/evilmartians/lefthook@latest
-#   go install github.com/zricethezav/gitleaks/v8@v8.30.1
-#   lefthook install
+#   npm install                                            # リポジトリルートで。lefthook が入り prepare が hook を配線
+#   go install github.com/zricethezav/gitleaks/v8@v8.30.1  # gitleaks 本体
 # 詳細は docs/security-secrets.md を参照。
+#
+# 各コマンドの PATH に $HOME/go/bin を足しているのは、非対話シェル（GUI クライアントや
+# エージェント経由の git commit）では ~/.zshrc が読まれず gitleaks が見つからないため。
 pre-commit:
   commands:
     gitleaks:
-      run: gitleaks git --pre-commit --staged --no-banner
+      run: PATH="$PATH:$HOME/go/bin" gitleaks git --pre-commit --staged --no-banner
 
 # push で手元から外に出る直前の最後の砦（GitHub の Push protection は private では
 # 有料のため、その無料近似）。pre-commit を --no-verify や fail-open ですり抜けた
@@ -16,4 +18,4 @@ pre-commit:
 pre-push:
   commands:
     gitleaks:
-      run: gitleaks git --no-banner --log-opts "origin/main..HEAD" || gitleaks git --no-banner
+      run: export PATH="$PATH:$HOME/go/bin"; gitleaks git --no-banner --log-opts "origin/main..HEAD" || gitleaks git --no-banner
