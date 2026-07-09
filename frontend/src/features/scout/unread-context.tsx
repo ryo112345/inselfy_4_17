@@ -1,41 +1,11 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createUnreadContext } from "@/features/unread/create-unread-context";
+import { fetchScoutUnreadCount } from "./api";
 
-type UnreadScoutContextType = {
-  hasUnread: boolean;
-  refresh: () => void;
-};
-
-const UnreadScoutContext = createContext<UnreadScoutContextType>({
-  hasUnread: false,
-  refresh: () => {},
+const { Provider, useUnread } = createUnreadContext("scout", async () => {
+  const { count } = await fetchScoutUnreadCount();
+  return count;
 });
 
-export function UnreadScoutProvider({ children }: { children: React.ReactNode }) {
-  const [hasUnread, setHasUnread] = useState(false);
-
-  const refresh = useCallback(() => {
-    fetch("/api/scouts?limit=50&offset=0")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        const unread = data?.items?.some((s: { status: string }) => s.status === "sent") ?? false;
-        setHasUnread(unread);
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  return (
-    <UnreadScoutContext.Provider value={{ hasUnread, refresh }}>
-      {children}
-    </UnreadScoutContext.Provider>
-  );
-}
-
-export function useUnreadScout() {
-  return useContext(UnreadScoutContext);
-}
+export { Provider as UnreadScoutProvider, useUnread as useUnreadScout };
