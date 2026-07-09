@@ -57,10 +57,10 @@
 
 | # | 状態 | 項目 | 規模 | 種別 |
 |---|------|------|------|------|
-| F16 | [ ] | 未読 Context 3種の統一（SDK化・メモ化・サーバカウント） | 中 | 統一 |
-| F17 | [ ] | プロフィールページのウォーターフォール解消 | 中 | パフォーマンス |
-| F18 | [ ] | 型安全性クリーンアップ（`err: any` / `as any` / 二重キャスト） | 中 | 型安全 |
-| F19 | [ ] | AIレポート生成ステータスのポーリング | 小 | UX |
+| F16 | [x] | 未読 Context 3種の統一（SDK化・メモ化・サーバカウント） | 中 | 統一 |
+| F17 | [x] | プロフィールページのウォーターフォール解消 | 中 | パフォーマンス |
+| F18 | [x] | 型安全性クリーンアップ（`err: any` / `as any` / 二重キャスト） | 中 | 型安全 |
+| F19 | [x] | AIレポート生成ステータスのポーリング | 小 | UX |
 
 ---
 
@@ -480,6 +480,12 @@ fetch 失敗でセグメントがクラッシュ、`app/articles/[id]/page.tsx` 
 
 **コミット:** `refactor(frontend): unify unread contexts on generated SDK`
 
+**実施メモ（2026-07-09）:** `features/unread/create-unread-context.tsx` に共通ファクトリを実装し
+3 Context を薄いラッパー化。scout 用に `GET /api/scouts/unread-count`（status='sent' の件数）を
+TypeSpec 追加→バックエンド実装（controller→InputPort→interactor→repository）→SDK 再生成で新設
+（`feat(backend)` コミット、curl で 1件/0件/未認証401 を確認）。scout の `hasUnread` は
+`unreadCount` に置き換え（consumer 2箇所修正）。
+
 ### F17 プロフィールページのウォーターフォール解消
 
 **現状:** `app/profile/[username]/page.tsx` は Server Component でデータ取得済みなのに、
@@ -497,6 +503,14 @@ fetch 失敗でセグメントがクラッシュ、`app/articles/[id]/page.tsx` 
    初回 `/api/auth/me` ウォーターフォール自体を消す。影響範囲が広いので着手前にユーザー確認。
 
 **コミット:** `perf(frontend): resolve profile page data on the server`
+
+**実施メモ（2026-07-09）:** フォロー状態・類似ユーザーを page.tsx で並行取得し props 注入。
+AIレポート状態は fetchPanelData 取得済みの `intReportHasReport` から導出（追加リクエスト不要）。
+着手中に既存バグを発見: `cookies()` はデコード済み値を返すため日本語入り `displayName` cookie を
+そのまま Cookie ヘッダに載せると fetch が throw し、**SSR の認証付きフェッチ全てが silent fail していた**
+（診断パネルの SSR 欠落等の原因）。`src/lib/cookie-header.ts` の `buildCookieHeader`（encodeURIComponent
+で再エンコード）に4ページを統一して修正（`fix(frontend)` コミット）。発展項目（auth-context の
+サーバー解決）は影響範囲が広いため未着手。
 
 ### F18 型安全性クリーンアップ
 
@@ -528,6 +542,11 @@ fetch 失敗でセグメントがクラッシュ、`app/articles/[id]/page.tsx` 
 
 **コミット:** `refactor(frontend): remove any-typed error handling and unsafe casts`
 
+**実施メモ（2026-07-09）:** `getErrorMessage` は新規ファイルでなく既存の `lib/api-result.ts` に追加
+（ApiError と同居）。SignUpForm の二重キャストは契約クリーンアップ済みの現行スペックでは不要になって
+いたため、スペック変更なしで撤廃（409 の `{code:"CONFLICT"}` 形状は curl で確認）。
+`as any` の実在箇所は plan 記載の `jobs/page.tsx` から `features/job-search/match.ts` に移動していた。
+
 ### F19 AIレポート生成ステータスのポーリング
 
 **現状:** `app/profile/[username]/AiReportCard.tsx:28-41`、
@@ -544,6 +563,11 @@ fetch 失敗でセグメントがクラッシュ、`app/articles/[id]/page.tsx` 
    pending 時のみクライアントポーリングの構成にする。
 
 **コミット:** `feat(frontend): poll AI report status while generating`
+
+**実施メモ（2026-07-09）:** `src/lib/usePolling.ts` を新設（vitest 6件付き）。適用は計画の3箇所＋
+同型の `CareerInterestContent` の計4箇所。WV/CI は「レポートを作成する」押下後の「作成中」表示
+（`notFound`）の間のみポーリング。AiReportCard は F17 のサーバー初期値＋pending 時のみポーリングの
+構成（未ログイン時は 401→/login リダイレクトを避けるため呼ばない）。
 
 ---
 
