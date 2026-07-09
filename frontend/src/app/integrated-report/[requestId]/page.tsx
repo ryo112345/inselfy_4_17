@@ -7,6 +7,7 @@ import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
 import { ACCENT } from "@/constants/theme";
 import { getIntegratedReport } from "@/features/integrated-report/api";
 import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
+import { buildCookieHeader } from "@/lib/cookie-header";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +31,7 @@ export default async function IntegratedReportPage({
   if (!userId) notFound();
 
   const cookieStore = await cookies();
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
+  const cookieHeader = buildCookieHeader(cookieStore);
   const data = await fetchPanelDataByUserId(userId, cookieHeader);
   if (!data) notFound();
 
