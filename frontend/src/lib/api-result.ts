@@ -17,8 +17,7 @@ export class ApiError extends Error {
 // 返さなかった場合に使う。
 export function unwrap(err: unknown, fallbackMessage?: string): ApiError {
   if (typeof err === "object" && err !== null) {
-    const code =
-      "code" in err && typeof err.code === "string" ? err.code : "UNKNOWN";
+    const code = "code" in err && typeof err.code === "string" ? err.code : "UNKNOWN";
     const message =
       "message" in err && typeof err.message === "string" && err.message !== ""
         ? err.message
@@ -26,6 +25,14 @@ export function unwrap(err: unknown, fallbackMessage?: string): ApiError {
     return new ApiError(code, message);
   }
   return new ApiError("UNKNOWN", fallbackMessage ?? String(err));
+}
+
+/**
+ * catch した unknown からユーザー向けメッセージを取り出す。
+ * `catch (err: any) { err.message }` の置き換え用。
+ */
+export function getErrorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error && err.message ? err.message : fallback;
 }
 
 /**

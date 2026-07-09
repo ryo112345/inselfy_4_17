@@ -12,6 +12,7 @@ import {
 } from "@/app/components/SingleRadarChart";
 import { useConfirm } from "@/components/ui";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { getErrorMessage } from "@/lib/api-result";
 
 type Member = {
   id: string;
@@ -130,8 +131,8 @@ export default function TeamDetailPage() {
       setMemberEmail("");
       setShowAddForm(false);
       await fetchTeam();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err, "追加に失敗しました"));
     } finally {
       setAdding(false);
     }

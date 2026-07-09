@@ -13,9 +13,8 @@ import { searchPublicJobPostings } from "@/features/job-posting/api";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
 import { getLatestResult as getLatestWvResult } from "@/features/work-values/api";
 import type { FilterMode } from "@/features/work-values/ValuesFilterDrawer";
-import { computeMatchScores, type MatchScores } from "./match";
-
 import { PAGE_SIZE } from "./constants";
+import { computeMatchScores, type MatchScores } from "./match";
 
 export type SortKey = "newest" | "salary";
 

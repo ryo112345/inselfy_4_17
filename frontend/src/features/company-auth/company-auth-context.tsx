@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { ApiError } from "@/lib/api-result";
 
 type CompanyUser = {
   id: string;
@@ -53,9 +54,7 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      const err = new Error(data.message || "Login failed");
-      (err as any).code = data.code;
-      throw err;
+      throw new ApiError(data.code ?? "UNKNOWN", data.message || "Login failed");
     }
     const data: CompanyUser = await res.json();
     setCompany(data);

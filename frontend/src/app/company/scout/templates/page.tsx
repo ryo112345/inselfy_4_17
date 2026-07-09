@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useConfirm, useToast } from "@/components/ui";
 import { deleteTemplate, fetchTemplates } from "@/features/scout/api";
 import type { ScoutTemplate } from "@/features/scout/types";
+import { getErrorMessage } from "@/lib/api-result";
 import { formatDate } from "@/lib/date";
 
 export default function TemplateListPage() {
@@ -42,8 +43,8 @@ export default function TemplateListPage() {
     try {
       await deleteTemplate(id);
       setTemplates((prev) => prev.filter((t) => t.id !== id));
-    } catch (e: any) {
-      showToast(e.message ?? "削除に失敗しました", "error");
+    } catch (e) {
+      showToast(getErrorMessage(e, "削除に失敗しました"), "error");
     } finally {
       setDeleting(null);
     }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui";
 import { fetchScoutDetail, replyToScoutAsCompany } from "@/features/scout/api";
 import type { ScoutDetail, ScoutStatus } from "@/features/scout/types";
+import { getErrorMessage } from "@/lib/api-result";
 import { formatDateTime } from "@/lib/date";
 
 const STATUS_BADGE: Record<ScoutStatus, { bg: string; text: string; label: string }> = {
@@ -47,8 +48,8 @@ export default function ScoutDetailPage() {
       // Refresh detail
       const updated = await fetchScoutDetail(scoutId);
       setDetail(updated);
-    } catch (e: any) {
-      showToast(e.message ?? "返信の送信に失敗しました", "error");
+    } catch (e) {
+      showToast(getErrorMessage(e, "返信の送信に失敗しました"), "error");
     } finally {
       setSending(false);
     }
