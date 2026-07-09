@@ -1,31 +1,19 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
-import { useAuth } from "@/features/auth/auth-context";
-import { fetchFollowStatus, followUser, unfollowUser } from "./api";
+import { followUser, unfollowUser } from "./api";
 
 type Props = {
   username: string;
   profileColor: string;
+  // サーバー（page.tsx）で取得した初期フォロー状態。null は未ログイン等（ボタン非表示）
+  initialFollowing: boolean | null;
 };
 
-export function FollowButton({ username, profileColor }: Props) {
-  const { isAuthenticated } = useAuth();
-  const [following, setFollowing] = useState<boolean | null>(null);
+export function FollowButton({ username, profileColor, initialFollowing }: Props) {
+  const [following, setFollowing] = useState(initialFollowing);
   const [pending, startTransition] = useTransition();
-
-  useEffect(() => {
-    // 未ログインでは呼ばない（401 が正常系になり、SDK の 401 インターセプタが
-    // /login リダイレクトを起こすため）。従来どおりスペーサー表示のままになる。
-    if (!isAuthenticated) {
-      setFollowing(null);
-      return;
-    }
-    fetchFollowStatus(username)
-      .then((s) => setFollowing(s.following))
-      .catch(() => setFollowing(null));
-  }, [username, isAuthenticated]);
 
   if (following === null) return <div className="w-[120px]" />;
 

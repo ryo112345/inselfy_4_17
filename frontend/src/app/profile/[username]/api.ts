@@ -9,11 +9,9 @@ import {
   experiencesDeleteExperience,
   experiencesUpdateExperience,
   followsFollowUser,
-  followsGetFollowStatus,
   followsUnfollowUser,
   type ModelsCreateEducationRequest,
   type ModelsCreateExperienceRequest,
-  type ModelsFollowStatusResponse,
   type ModelsUpdateEducationRequest,
   type ModelsUpdateExperienceRequest,
   type ModelsUpdateUserProfileRequest,
@@ -68,14 +66,6 @@ export async function attachSkill(username: string, name: string) {
 
 export async function detachSkill(username: string, name: string) {
   return run(skillsDetachSkill({ path: { username, name } }));
-}
-
-export type FollowStatus = ModelsFollowStatusResponse;
-
-// 注意: /follow-status は jwtMW 付きで未ログインだと 401 が返る。呼び出し元
-// （FollowButton）が isAuthenticated ガードを持ち、未ログインでは呼ばない前提。
-export async function fetchFollowStatus(username: string): Promise<FollowStatus> {
-  return run(followsGetFollowStatus({ path: { username } }), "Failed to fetch follow status");
 }
 
 export async function followUser(username: string): Promise<void> {
