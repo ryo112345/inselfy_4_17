@@ -3154,6 +3154,212 @@ export type ModelsScoutTemplateResponse = {
 };
 
 /**
+ * 横断検索結果（カテゴリごとの上位数件＋総件数）
+ */
+export type ModelsSearchAllResponse = {
+    /**
+     * ユーザー
+     */
+    users: ModelsSearchUserListResponse;
+    /**
+     * 記事
+     */
+    articles: ModelsSearchArticleListResponse;
+    /**
+     * 投稿
+     */
+    posts: ModelsSearchPostListResponse;
+    /**
+     * 求人
+     */
+    jobs: ModelsSearchJobListResponse;
+};
+
+/**
+ * 検索結果: 記事
+ */
+export type ModelsSearchArticleItem = {
+    /**
+     * 記事ID
+     */
+    id: ModelsUuid;
+    /**
+     * タイトル
+     */
+    title: string;
+    /**
+     * 本文スニペット（先頭部分）
+     */
+    excerpt: string;
+    /**
+     * 著者名
+     */
+    authorName: string;
+    /**
+     * タグ
+     */
+    tags: Array<string>;
+    /**
+     * 有料記事か
+     */
+    isPaid: boolean;
+    /**
+     * 公開日時
+     */
+    publishedAt: string;
+};
+
+/**
+ * 記事検索結果一覧
+ */
+export type ModelsSearchArticleListResponse = {
+    /**
+     * アイテム一覧
+     */
+    items: Array<ModelsSearchArticleItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 検索結果: 求人
+ */
+export type ModelsSearchJobItem = {
+    /**
+     * 求人ID
+     */
+    id: ModelsUuid;
+    /**
+     * 求人タイトル
+     */
+    title: string;
+    /**
+     * 企業名
+     */
+    companyName?: string;
+    /**
+     * 企業ロゴURL
+     */
+    companyLogoUrl?: string;
+    /**
+     * 雇用形態
+     */
+    employmentType: string;
+    /**
+     * 勤務地
+     */
+    location?: string;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
+ * 求人検索結果一覧
+ */
+export type ModelsSearchJobListResponse = {
+    /**
+     * アイテム一覧
+     */
+    items: Array<ModelsSearchJobItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 検索結果: 投稿
+ */
+export type ModelsSearchPostItem = {
+    /**
+     * 投稿ID
+     */
+    id: ModelsUuid;
+    /**
+     * 投稿者ユーザーID
+     */
+    userId: ModelsUuid;
+    /**
+     * 投稿者ユーザー名
+     */
+    username: string;
+    /**
+     * 投稿者表示名
+     */
+    name: string;
+    /**
+     * 本文
+     */
+    content: string;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
+ * 投稿検索結果一覧
+ */
+export type ModelsSearchPostListResponse = {
+    /**
+     * アイテム一覧
+     */
+    items: Array<ModelsSearchPostItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 検索結果: ユーザー
+ */
+export type ModelsSearchUserItem = {
+    /**
+     * ユーザーID
+     */
+    id: ModelsUuid;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * 見出し（肩書き）
+     */
+    headline?: string;
+    /**
+     * アバターURL
+     */
+    avatarUrl?: string;
+    /**
+     * プロフィールカラー
+     */
+    profileColor?: string;
+};
+
+/**
+ * ユーザー検索結果一覧
+ */
+export type ModelsSearchUserListResponse = {
+    /**
+     * アイテム一覧
+     */
+    items: Array<ModelsSearchUserItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
  * スロット選択リクエスト。slotId 指定か、startTime/endTime の直接指定
  */
 export type ModelsSelectSlotRequest = {
@@ -8872,6 +9078,212 @@ export type CandidateScoutsRespondToScoutResponses = {
 };
 
 export type CandidateScoutsRespondToScoutResponse = CandidateScoutsRespondToScoutResponses[keyof CandidateScoutsRespondToScoutResponses];
+
+export type SearchSearchAllData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * 検索キーワード
+         */
+        q: string;
+        /**
+         * カテゴリごとの取得件数（デフォルト3、最大10）
+         */
+        limitPerType?: number;
+    };
+    url: '/api/search';
+};
+
+export type SearchSearchAllErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type SearchSearchAllError = SearchSearchAllErrors[keyof SearchSearchAllErrors];
+
+export type SearchSearchAllResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSearchAllResponse;
+};
+
+export type SearchSearchAllResponse = SearchSearchAllResponses[keyof SearchSearchAllResponses];
+
+export type SearchSearchArticlesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * 検索キーワード
+         */
+        q: string;
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/search/articles';
+};
+
+export type SearchSearchArticlesErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type SearchSearchArticlesError = SearchSearchArticlesErrors[keyof SearchSearchArticlesErrors];
+
+export type SearchSearchArticlesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSearchArticleListResponse;
+};
+
+export type SearchSearchArticlesResponse = SearchSearchArticlesResponses[keyof SearchSearchArticlesResponses];
+
+export type SearchSearchJobsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * 検索キーワード
+         */
+        q: string;
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/search/jobs';
+};
+
+export type SearchSearchJobsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type SearchSearchJobsError = SearchSearchJobsErrors[keyof SearchSearchJobsErrors];
+
+export type SearchSearchJobsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSearchJobListResponse;
+};
+
+export type SearchSearchJobsResponse = SearchSearchJobsResponses[keyof SearchSearchJobsResponses];
+
+export type SearchSearchPostsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * 検索キーワード
+         */
+        q: string;
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/search/posts';
+};
+
+export type SearchSearchPostsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type SearchSearchPostsError = SearchSearchPostsErrors[keyof SearchSearchPostsErrors];
+
+export type SearchSearchPostsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSearchPostListResponse;
+};
+
+export type SearchSearchPostsResponse = SearchSearchPostsResponses[keyof SearchSearchPostsResponses];
+
+export type SearchSearchUsersData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * 検索キーワード
+         */
+        q: string;
+        /**
+         * 取得件数
+         */
+        limit?: number;
+        /**
+         * オフセット
+         */
+        offset?: number;
+    };
+    url: '/api/search/users';
+};
+
+export type SearchSearchUsersErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type SearchSearchUsersError = SearchSearchUsersErrors[keyof SearchSearchUsersErrors];
+
+export type SearchSearchUsersResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsSearchUserListResponse;
+};
+
+export type SearchSearchUsersResponse = SearchSearchUsersResponses[keyof SearchSearchUsersResponses];
 
 export type TeamDiagnoseGetDiagnoseByTokenData = {
     body?: never;

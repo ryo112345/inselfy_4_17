@@ -34,6 +34,7 @@ type Server struct {
 	companyTeam   *CompanyTeamController
 	jobPosting    *JobPostingController
 	interview     *InterviewController
+	search        *SearchController
 
 	// User-facing routes served by admin controllers (spec-covered, pool直結のまま).
 	adminIntReport *AdminIntegratedReportController
@@ -77,6 +78,7 @@ func NewServer(
 	companyTeam *CompanyTeamController,
 	jobPosting *JobPostingController,
 	interview *InterviewController,
+	search *SearchController,
 	adminIntReport *AdminIntegratedReportController,
 	adminReport *AdminReportController,
 	adminCIReport *AdminCIReportController,
@@ -111,6 +113,7 @@ func NewServer(
 		companyTeam:   companyTeam,
 		jobPosting:    jobPosting,
 		interview:     interview,
+		search:        search,
 
 		adminIntReport: adminIntReport,
 		adminReport:    adminReport,
@@ -776,6 +779,28 @@ func (s *Server) PublicJobPostingsListPublicJobPostings(ctx echo.Context, _ open
 
 func (s *Server) PublicJobPostingsGetPublicJobPosting(ctx echo.Context, jobID string) error {
 	return s.jobPosting.GetPublic(ctx, jobID)
+}
+
+// --- Search ---
+
+func (s *Server) SearchSearchAll(ctx echo.Context, _ openapi.SearchSearchAllParams) error {
+	return s.search.SearchAll(ctx)
+}
+
+func (s *Server) SearchSearchUsers(ctx echo.Context, _ openapi.SearchSearchUsersParams) error {
+	return s.search.SearchUsers(ctx)
+}
+
+func (s *Server) SearchSearchArticles(ctx echo.Context, _ openapi.SearchSearchArticlesParams) error {
+	return s.search.SearchArticles(ctx)
+}
+
+func (s *Server) SearchSearchPosts(ctx echo.Context, _ openapi.SearchSearchPostsParams) error {
+	return s.search.SearchPosts(ctx)
+}
+
+func (s *Server) SearchSearchJobs(ctx echo.Context, _ openapi.SearchSearchJobsParams) error {
+	return s.search.SearchJobs(ctx)
 }
 
 // --- Interviews ---

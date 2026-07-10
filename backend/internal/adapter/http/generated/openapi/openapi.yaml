@@ -30,6 +30,7 @@ tags:
   - name: JobPostings
   - name: Interviews
   - name: IntegratedReport
+  - name: Search
 paths:
   /api/applications:
     post:
@@ -5554,6 +5555,268 @@ paths:
               $ref: '#/components/schemas/Models.ScoutRespondRequest'
       security:
         - CandidateAuth: []
+  /api/search:
+    get:
+      operationId: Search_searchAll
+      summary: Search across users, articles, posts and jobs
+      description: 横断検索（要ログイン）。各カテゴリの上位数件と総件数を返す
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 検索キーワード
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          explode: false
+        - name: limitPerType
+          in: query
+          required: false
+          description: カテゴリごとの取得件数（デフォルト3、最大10）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SearchAllResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Search
+      security:
+        - CandidateAuth: []
+  /api/search/articles:
+    get:
+      operationId: Search_searchArticles
+      summary: Search articles
+      description: 記事検索（要ログイン）
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 検索キーワード
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SearchArticleListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Search
+      security:
+        - CandidateAuth: []
+  /api/search/jobs:
+    get:
+      operationId: Search_searchJobs
+      summary: Search jobs
+      description: 求人検索（要ログイン）
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 検索キーワード
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SearchJobListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Search
+      security:
+        - CandidateAuth: []
+  /api/search/posts:
+    get:
+      operationId: Search_searchPosts
+      summary: Search posts
+      description: 投稿検索（要ログイン）
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 検索キーワード
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SearchPostListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Search
+      security:
+        - CandidateAuth: []
+  /api/search/users:
+    get:
+      operationId: Search_searchUsers
+      summary: Search users
+      description: ユーザー検索（要ログイン）
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 検索キーワード
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          description: 取得件数
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: offset
+          in: query
+          required: false
+          description: オフセット
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.SearchUserListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Search
+      security:
+        - CandidateAuth: []
   /api/team-diagnose/{token}:
     get:
       operationId: TeamDiagnose_getDiagnoseByToken
@@ -10537,6 +10800,227 @@ components:
           format: date-time
           description: 更新日時
       description: スカウトテンプレート
+    Models.SearchAllResponse:
+      type: object
+      required:
+        - users
+        - articles
+        - posts
+        - jobs
+      properties:
+        users:
+          allOf:
+            - $ref: '#/components/schemas/Models.SearchUserListResponse'
+          description: ユーザー
+        articles:
+          allOf:
+            - $ref: '#/components/schemas/Models.SearchArticleListResponse'
+          description: 記事
+        posts:
+          allOf:
+            - $ref: '#/components/schemas/Models.SearchPostListResponse'
+          description: 投稿
+        jobs:
+          allOf:
+            - $ref: '#/components/schemas/Models.SearchJobListResponse'
+          description: 求人
+      description: 横断検索結果（カテゴリごとの上位数件＋総件数）
+    Models.SearchArticleItem:
+      type: object
+      required:
+        - id
+        - title
+        - excerpt
+        - authorName
+        - tags
+        - isPaid
+        - publishedAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: 記事ID
+        title:
+          type: string
+          description: タイトル
+        excerpt:
+          type: string
+          description: 本文スニペット（先頭部分）
+        authorName:
+          type: string
+          description: 著者名
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグ
+        isPaid:
+          type: boolean
+          description: 有料記事か
+        publishedAt:
+          type: string
+          format: date-time
+          description: 公開日時
+      description: '検索結果: 記事'
+    Models.SearchArticleListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.SearchArticleItem'
+          description: アイテム一覧
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 総件数
+      description: 記事検索結果一覧
+    Models.SearchJobItem:
+      type: object
+      required:
+        - id
+        - title
+        - employmentType
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: 求人ID
+        title:
+          type: string
+          description: 求人タイトル
+        companyName:
+          type: string
+          description: 企業名
+        companyLogoUrl:
+          type: string
+          description: 企業ロゴURL
+        employmentType:
+          type: string
+          description: 雇用形態
+        location:
+          type: string
+          description: 勤務地
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: '検索結果: 求人'
+    Models.SearchJobListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.SearchJobItem'
+          description: アイテム一覧
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 総件数
+      description: 求人検索結果一覧
+    Models.SearchPostItem:
+      type: object
+      required:
+        - id
+        - userId
+        - username
+        - name
+        - content
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: 投稿ID
+        userId:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: 投稿者ユーザーID
+        username:
+          type: string
+          description: 投稿者ユーザー名
+        name:
+          type: string
+          description: 投稿者表示名
+        content:
+          type: string
+          description: 本文
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: '検索結果: 投稿'
+    Models.SearchPostListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.SearchPostItem'
+          description: アイテム一覧
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 総件数
+      description: 投稿検索結果一覧
+    Models.SearchUserItem:
+      type: object
+      required:
+        - id
+        - username
+        - name
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        headline:
+          type: string
+          description: 見出し（肩書き）
+        avatarUrl:
+          type: string
+          description: アバターURL
+        profileColor:
+          type: string
+          description: プロフィールカラー
+      description: '検索結果: ユーザー'
+    Models.SearchUserListResponse:
+      type: object
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.SearchUserItem'
+          description: アイテム一覧
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 総件数
+      description: ユーザー検索結果一覧
     Models.SelectSlotRequest:
       type: object
       required:
