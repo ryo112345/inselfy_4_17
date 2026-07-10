@@ -29,3 +29,9 @@ type WorkValuesScoreRepository interface {
 	Save(ctx context.Context, sessionID string, scores []workvalues.ValueScore) error
 	GetBySessionID(ctx context.Context, sessionID string) ([]workvalues.ValueScore, error)
 }
+
+// AIレポート（ai_reports）の存在確認。本文の取得・生成は admin コントローラが担うため、
+// ここでは結果レスポンスに載せる存在フラグだけを扱う。
+type WorkValuesReportQueryService interface {
+	ExistsBySessionID(ctx context.Context, sessionID string) (bool, error)
+}

@@ -36,6 +36,7 @@ type Result struct {
 	DifferentiationLevel *string
 	BasicScores          []BasicScore
 	TypeScores           []TypeScore
+	HasReport            bool
 	CreatedAt            time.Time
 }
 

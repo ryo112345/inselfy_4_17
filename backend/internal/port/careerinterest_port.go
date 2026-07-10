@@ -35,3 +35,9 @@ type CareerInterestTypeScoreRepository interface {
 	Save(ctx context.Context, sessionID string, scores []careerinterest.TypeScore) error
 	GetBySessionID(ctx context.Context, sessionID string) ([]careerinterest.TypeScore, error)
 }
+
+// AIレポート（ci_ai_reports）の存在確認。本文の取得・生成は admin コントローラが担うため、
+// ここでは結果レスポンスに載せる存在フラグだけを扱う。
+type CareerInterestReportQueryService interface {
+	ExistsBySessionID(ctx context.Context, sessionID string) (bool, error)
+}

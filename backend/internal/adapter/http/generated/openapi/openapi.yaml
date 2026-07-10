@@ -7552,6 +7552,7 @@ components:
         - userId
         - basicScores
         - typeScores
+        - hasReport
         - createdAt
       properties:
         id:
@@ -7576,6 +7577,9 @@ components:
           items:
             $ref: '#/components/schemas/Models.CITypeScoreResponse'
           description: RIASEC タイプスコア
+        hasReport:
+          type: boolean
+          description: このセッションのAIレポートが生成済みかどうか
         createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）
@@ -12098,6 +12102,7 @@ components:
         - userId
         - needs
         - values
+        - hasReport
         - createdAt
       properties:
         id:
@@ -12122,6 +12127,9 @@ components:
           items:
             $ref: '#/components/schemas/Models.WVValueScoreResponse'
           description: Value スコア
+        hasReport:
+          type: boolean
+          description: このセッションのAIレポートが生成済みかどうか
         createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）

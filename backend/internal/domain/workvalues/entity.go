@@ -34,6 +34,7 @@ type Result struct {
 	ConsistencyLevel       *string
 	QuestionCount          int
 	Values                 []ValueScore
+	HasReport              bool
 	CreatedAt              time.Time
 }
 

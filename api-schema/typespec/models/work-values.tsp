@@ -115,6 +115,9 @@ model WVResultResponse {
   /** Value スコア */
   values: WVValueScoreResponse[];
 
+  /** このセッションのAIレポートが生成済みかどうか */
+  hasReport: boolean;
+
   /** 作成日時（RFC3339 文字列） */
   createdAt: string;
 }
