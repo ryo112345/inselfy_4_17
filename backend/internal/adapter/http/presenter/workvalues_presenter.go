@@ -63,6 +63,7 @@ func WorkValuesResultResponse(r *workvalues.Result) any {
 		UserId:    r.UserID,
 		Needs:     needs,
 		Values:    values,
+		HasReport: r.HasReport,
 		CreatedAt: r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }

@@ -51,6 +51,7 @@ func CareerInterestResultResponse(r *careerinterest.Result) any {
 		UserId:      r.UserID,
 		BasicScores: basicScores,
 		TypeScores:  typeScores,
+		HasReport:   r.HasReport,
 		CreatedAt:   r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }

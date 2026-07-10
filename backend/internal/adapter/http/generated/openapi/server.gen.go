@@ -831,6 +831,9 @@ type ModelsCIResultResponse struct {
 	// CreatedAt 作成日時（RFC3339 文字列）
 	CreatedAt string `json:"createdAt"`
 
+	// HasReport このセッションのAIレポートが生成済みかどうか
+	HasReport bool `json:"hasReport"`
+
 	// Id 結果ID
 	Id ModelsUuid `json:"id"`
 
@@ -3640,6 +3643,9 @@ type ModelsWVResponseItem struct {
 type ModelsWVResultResponse struct {
 	// CreatedAt 作成日時（RFC3339 文字列）
 	CreatedAt string `json:"createdAt"`
+
+	// HasReport このセッションのAIレポートが生成済みかどうか
+	HasReport bool `json:"hasReport"`
 
 	// Id 結果ID
 	Id ModelsUuid `json:"id"`

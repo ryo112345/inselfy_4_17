@@ -13,6 +13,7 @@ type WorkValuesInteractor struct {
 	sessionRepo port.WorkValuesSessionRepository
 	resultRepo  port.WorkValuesResultRepository
 	scoreRepo   port.WorkValuesScoreRepository
+	reportQS    port.WorkValuesReportQueryService
 }
 
 var _ port.WorkValuesInputPort = (*WorkValuesInteractor)(nil)
@@ -21,11 +22,13 @@ func NewWorkValuesInteractor(
 	sessionRepo port.WorkValuesSessionRepository,
 	resultRepo port.WorkValuesResultRepository,
 	scoreRepo port.WorkValuesScoreRepository,
+	reportQS port.WorkValuesReportQueryService,
 ) *WorkValuesInteractor {
 	return &WorkValuesInteractor{
 		sessionRepo: sessionRepo,
 		resultRepo:  resultRepo,
 		scoreRepo:   scoreRepo,
+		reportQS:    reportQS,
 	}
 }
 
@@ -87,6 +90,12 @@ func (i *WorkValuesInteractor) GetLatestResult(ctx context.Context, userID strin
 	}
 	result.Values = values
 
+	hasReport, err := i.reportQS.ExistsBySessionID(ctx, result.SessionID)
+	if err != nil {
+		return nil, err
+	}
+	result.HasReport = hasReport
+
 	return result, nil
 }
 
@@ -101,6 +110,12 @@ func (i *WorkValuesInteractor) GetResultBySessionID(ctx context.Context, session
 		return nil, err
 	}
 	result.Values = values
+
+	hasReport, err := i.reportQS.ExistsBySessionID(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	result.HasReport = hasReport
 
 	return result, nil
 }

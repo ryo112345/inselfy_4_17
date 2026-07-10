@@ -16,6 +16,7 @@ type CareerInterestInteractor struct {
 	resultRepo     port.CareerInterestResultRepository
 	basicScoreRepo port.CareerInterestBasicScoreRepository
 	typeScoreRepo  port.CareerInterestTypeScoreRepository
+	reportQS       port.CareerInterestReportQueryService
 }
 
 var _ port.CareerInterestInputPort = (*CareerInterestInteractor)(nil)
@@ -25,12 +26,14 @@ func NewCareerInterestInteractor(
 	resultRepo port.CareerInterestResultRepository,
 	basicScoreRepo port.CareerInterestBasicScoreRepository,
 	typeScoreRepo port.CareerInterestTypeScoreRepository,
+	reportQS port.CareerInterestReportQueryService,
 ) *CareerInterestInteractor {
 	return &CareerInterestInteractor{
 		sessionRepo:    sessionRepo,
 		resultRepo:     resultRepo,
 		basicScoreRepo: basicScoreRepo,
 		typeScoreRepo:  typeScoreRepo,
+		reportQS:       reportQS,
 	}
 }
 
@@ -114,6 +117,12 @@ func (i *CareerInterestInteractor) GetLatestResult(ctx context.Context, userID s
 	result.BasicScores = basicScores
 	result.TypeScores = typeScores
 
+	hasReport, err := i.reportQS.ExistsBySessionID(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	result.HasReport = hasReport
+
 	return result, nil
 }
 
@@ -133,6 +142,12 @@ func (i *CareerInterestInteractor) GetResultBySessionID(ctx context.Context, ses
 	}
 	result.BasicScores = basicScores
 	result.TypeScores = typeScores
+
+	hasReport, err := i.reportQS.ExistsBySessionID(ctx, result.SessionID)
+	if err != nil {
+		return nil, err
+	}
+	result.HasReport = hasReport
 
 	return result, nil
 }

@@ -355,6 +355,10 @@ export type ModelsCiResultResponse = {
      */
     typeScores: Array<ModelsCiTypeScoreResponse>;
     /**
+     * このセッションのAIレポートが生成済みかどうか
+     */
+    hasReport: boolean;
+    /**
      * 作成日時（RFC3339 文字列）
      */
     createdAt: string;
@@ -4349,6 +4353,10 @@ export type ModelsWvResultResponse = {
      * Value スコア
      */
     values: Array<ModelsWvValueScoreResponse>;
+    /**
+     * このセッションのAIレポートが生成済みかどうか
+     */
+    hasReport: boolean;
     /**
      * 作成日時（RFC3339 文字列）
      */

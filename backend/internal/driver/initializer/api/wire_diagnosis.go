@@ -16,6 +16,7 @@ func wireDiagnosis(e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.MiddlewareFunc) {
 		sqlcgw.NewWorkValuesSessionRepository(d.pool),
 		sqlcgw.NewWorkValuesResultRepository(d.pool),
 		sqlcgw.NewWorkValuesScoreRepository(d.pool),
+		sqlcgw.NewWorkValuesReportQueryService(d.pool),
 	)
 	wvCtrl := httpcontroller.NewWorkValuesController(wvInput)
 	ciInput := usecase.NewCareerInterestInteractor(
@@ -23,6 +24,7 @@ func wireDiagnosis(e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.MiddlewareFunc) {
 		sqlcgw.NewCareerInterestResultRepository(d.pool),
 		sqlcgw.NewCareerInterestBasicScoreRepository(d.pool),
 		sqlcgw.NewCareerInterestTypeScoreRepository(d.pool),
+		sqlcgw.NewCareerInterestReportQueryService(d.pool),
 	)
 	ciCtrl := httpcontroller.NewCareerInterestController(ciInput)
 

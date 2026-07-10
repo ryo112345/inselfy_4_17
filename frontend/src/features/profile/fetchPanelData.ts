@@ -16,14 +16,12 @@ import {
 } from "@/external/client/api/generated";
 import {
   type ResultDTO as CiResultDTO,
-  getAiReport as getCiAiReport,
   getLatestResult as getLatestCiResult,
 } from "@/features/career-interest/api";
 import { TYPE_LABELS, type TypeId } from "@/features/career-interest/lib/types";
 import { getLatestIntegratedRequest } from "@/features/integrated-report/api";
 import {
   getLatestResult as getLatestWvResult,
-  getAiReport as getWvAiReport,
   type ResultDTO as WvResultDTO,
 } from "@/features/work-values/api";
 import { VALUE_LABELS, type ValueId } from "@/features/work-values/lib/needs";
@@ -101,19 +99,6 @@ function buildCiKeywords(result: CiResultDTO): string {
     .join("・");
 }
 
-async function checkReportExists(
-  sessionId: string,
-  kind: "work-values" | "career-interest",
-): Promise<boolean> {
-  try {
-    const report =
-      kind === "work-values" ? await getWvAiReport(sessionId) : await getCiAiReport(sessionId);
-    return !!report?.content;
-  } catch {
-    return false;
-  }
-}
-
 async function fetchLatestIntegratedRequest(
   userId: string,
 ): Promise<{ requestId: string; hasReport: boolean } | null> {
@@ -153,15 +138,6 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
       fetchFollowCounts(username),
     ]);
 
-  const [wvHasReport, ciHasReport] = await Promise.all([
-    wvResult?.sessionId
-      ? checkReportExists(wvResult.sessionId, "work-values")
-      : Promise.resolve(false),
-    ciResult?.sessionId
-      ? checkReportExists(ciResult.sessionId, "career-interest")
-      : Promise.resolve(false),
-  ]);
-
   const experiences: ModelsExperienceResponse[] = experiencesRes.data?.items ?? [];
   const educations: ModelsEducationResponse[] = educationsRes.data?.items ?? [];
   const skills: ModelsSkillResponse[] = skillsRes.data?.items ?? [];
@@ -194,8 +170,8 @@ async function fetchRest(user: ModelsUserResponse, username: string): Promise<Pa
     ciSessionId: ciResult?.sessionId ?? null,
     wvResult,
     ciResult,
-    wvHasReport,
-    ciHasReport,
+    wvHasReport: wvResult?.hasReport ?? false,
+    ciHasReport: ciResult?.hasReport ?? false,
     intReportRequestId: intRequest?.requestId ?? null,
     intReportHasReport: intRequest?.hasReport ?? false,
     diagnostics,
