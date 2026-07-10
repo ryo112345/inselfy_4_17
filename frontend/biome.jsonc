@@ -32,9 +32,6 @@
         "noNonNullAssertion": "off"
       },
       "suspicious": {
-        // 並び替えのない静的リストが主体のため index key（79件）は許容。
-        // 動的に並び替わるリストで問題が出たら個別に修正する。
-        "noArrayIndexKey": "off",
         // any の排除（15件）は型設計を伴うため警告で可視化して段階対応
         "noExplicitAny": "warn"
       },

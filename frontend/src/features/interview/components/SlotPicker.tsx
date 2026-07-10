@@ -461,7 +461,7 @@ export function SlotPicker({
               const today = isToday(d);
               return (
                 <div
-                  key={i}
+                  key={d.getTime()}
                   className={`py-2 text-center border-l border-gray-100 ${today ? "bg-blue-50" : ""}`}
                 >
                   <p className="text-[11px] text-gray-500">{DAY_LABELS[i]}</p>
@@ -482,6 +482,7 @@ export function SlotPicker({
               <div>
                 {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                   <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: 固定時間グリッドの罫線・ラベル。index が時刻の同一性そのもので並び替え・挿入なし
                     key={i}
                     className="relative border-r border-gray-100"
                     style={{ height: `${HOUR_HEIGHT}px` }}
@@ -506,12 +507,13 @@ export function SlotPicker({
                   const daySlots = slots.filter((s) => s.dateStr === dayStr);
                   return (
                     <div
-                      key={dayIdx}
+                      key={dayStr}
                       className={`relative border-l border-gray-100 ${today ? "bg-blue-50/30" : ""}`}
                     >
                       {/* Hour lines */}
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                         <div
+                          // biome-ignore lint/suspicious/noArrayIndexKey: 固定時間グリッドの罫線・ラベル。index が時刻の同一性そのもので並び替え・挿入なし
                           key={i}
                           className="absolute left-0 right-0 border-t border-gray-100"
                           style={{ top: `${i * HOUR_HEIGHT}px` }}
@@ -520,6 +522,7 @@ export function SlotPicker({
                       {/* Half-hour lines */}
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                         <div
+                          // biome-ignore lint/suspicious/noArrayIndexKey: 固定時間グリッドの罫線・ラベル。index が時刻の同一性そのもので並び替え・挿入なし
                           key={`half-${i}`}
                           className="absolute left-0 right-0 border-t border-dashed border-gray-50"
                           style={{ top: `${i * HOUR_HEIGHT + HOUR_HEIGHT / 2}px` }}

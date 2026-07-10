@@ -831,7 +831,7 @@ function TagInput({
         <div className="flex flex-wrap gap-2">
           {tags.map((tag, i) => (
             <span
-              key={i}
+              key={tag}
               className="inline-flex items-center gap-1 rounded-full bg-gray-100 py-1.5 pl-3.5 pr-2 text-sm text-gray-700"
             >
               {tag}

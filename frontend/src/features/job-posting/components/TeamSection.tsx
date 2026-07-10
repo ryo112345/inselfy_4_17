@@ -104,6 +104,7 @@ function MemberChips({ values, set }: { values: JobFormValues; set: SetJobFormFi
     <div className="flex flex-wrap gap-2 items-center">
       {values.teamMembers.map((m, i) => (
         <span
+          // biome-ignore lint/suspicious/noArrayIndexKey: id を持たない編集中メンバーリスト（名前重複あり得る）。削除は onClick 内で index 指定
           key={i}
           className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700"
         >
@@ -187,6 +188,7 @@ export function SimpleTeamSection({
               {values.teamMembers.map((m, i) => {
                 const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
                 return (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: id を持たない編集中メンバーリスト（名前重複あり得る）
                   <label key={i} className="relative cursor-pointer group">
                     <div
                       className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
@@ -321,6 +323,7 @@ export function TeamSectionWithSelector({
               for (let r = 0; r < items.length; r += 5) rows.push(items.slice(r, r + 5));
               return rows.map((row, rowIdx) => (
                 <div
+                  // biome-ignore lint/suspicious/noArrayIndexKey: 5件ごとの位置分割による固定レイアウト行
                   key={rowIdx}
                   className="flex items-center -space-x-[18px]"
                   style={{ paddingLeft: rowIdx % 2 === 1 ? "1.75rem" : 0 }}

@@ -61,7 +61,7 @@ export function SingleRadarChart({
     const pts = order.map((_, i) => hexPoint(i, R * level));
     return `${pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
   });
-  const spokes = order.map((_, i) => hexPoint(i, R));
+  const spokes = order.map((id, i) => ({ id, ...hexPoint(i, R) }));
 
   const gridColor = "#d5d5d5";
   const fillColor = isWV ? "rgba(72,200,140,0.2)" : "rgba(160,120,220,0.2)";
@@ -75,7 +75,7 @@ export function SingleRadarChart({
   const scoreMap = new Map(scores?.map((s) => [s.id, s.score]) || []);
   const dataPoints = order.map((id, i) => {
     const val = normalize(scoreMap.get(id) || 0);
-    return hexPoint(i, R * Math.max(val, 0.05));
+    return { id, ...hexPoint(i, R * Math.max(val, 0.05)) };
   });
   const dataPath = `${dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
 
@@ -83,7 +83,7 @@ export function SingleRadarChart({
   const comparePoints = compareScores
     ? order.map((id, i) => {
         const val = normalize(compareMap.get(id) || 0);
-        return hexPoint(i, R * Math.max(val, 0.05));
+        return { id, ...hexPoint(i, R * Math.max(val, 0.05)) };
       })
     : null;
   const comparePath = comparePoints
@@ -106,11 +106,11 @@ export function SingleRadarChart({
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`} overflow="visible" className="w-full">
-      {gridPaths.map((d, i) => (
-        <path key={i} d={d} fill="none" stroke={gridColor} strokeWidth={0.6} />
+      {gridPaths.map((d) => (
+        <path key={d} d={d} fill="none" stroke={gridColor} strokeWidth={0.6} />
       ))}
-      {spokes.map((p, i) => (
-        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={gridColor} strokeWidth={0.6} />
+      {spokes.map((p) => (
+        <line key={p.id} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={gridColor} strokeWidth={0.6} />
       ))}
       {/* Compare overlay (team) — rendered first so it appears behind */}
       {hasCompare && (
@@ -122,16 +122,23 @@ export function SingleRadarChart({
             strokeWidth={1.2}
             strokeDasharray="6 3"
           />
-          {comparePoints!.map((pt, i) => (
-            <circle key={i} cx={pt.x} cy={pt.y} r={2.5} fill={compareStrokeColor} opacity={0.7} />
+          {comparePoints!.map((pt) => (
+            <circle
+              key={pt.id}
+              cx={pt.x}
+              cy={pt.y}
+              r={2.5}
+              fill={compareStrokeColor}
+              opacity={0.7}
+            />
           ))}
         </>
       )}
       {scores && (
         <>
           <path d={dataPath} fill={fillColor} stroke={strokeColor} strokeWidth={1.2} />
-          {dataPoints.map((pt, i) => (
-            <circle key={i} cx={pt.x} cy={pt.y} r={3} fill={dotColor} />
+          {dataPoints.map((pt) => (
+            <circle key={pt.id} cx={pt.x} cy={pt.y} r={3} fill={dotColor} />
           ))}
         </>
       )}

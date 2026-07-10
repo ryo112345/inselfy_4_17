@@ -701,10 +701,10 @@ function IntFloatingParticles() {
         }
       `}</style>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {INT_PARTICLES.map((s, i) =>
+        {INT_PARTICLES.map((s) =>
           s.type === "sphere" ? (
             <div
-              key={i}
+              key={`${s.top}-${s.left}-${s.size}`}
               className="absolute rounded-full blur-[3px]"
               style={
                 {
@@ -721,7 +721,7 @@ function IntFloatingParticles() {
             />
           ) : (
             <div
-              key={i}
+              key={`${s.top}-${s.left}-${s.size}`}
               className="absolute blur-[3px]"
               style={
                 {
@@ -882,9 +882,9 @@ function WvFloatingSpheres() {
         }
       `}</style>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {WV_SPHERES.map((s, i) => (
+        {WV_SPHERES.map((s) => (
           <div
-            key={i}
+            key={`${s.top}-${s.left}-${s.size}`}
             className="absolute rounded-full blur-[2px]"
             style={
               {
@@ -1062,9 +1062,9 @@ function CiFloatingShapes() {
         }
       `}</style>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {CI_SHAPES.map((s, i) => (
+        {CI_SHAPES.map((s) => (
           <div
-            key={i}
+            key={`${s.top}-${s.left}-${s.size}`}
             className="absolute blur-[3px]"
             style={
               {

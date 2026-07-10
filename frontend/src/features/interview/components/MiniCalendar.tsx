@@ -92,14 +92,14 @@ export function MiniCalendar({
             {label}
           </div>
         ))}
-        {cells.map((date, i) => {
+        {cells.map((date) => {
           const dateStr = toDateStr(date);
           const isCurrentMonth = date.getMonth() === mon;
           const isInWeek = dateStr >= weekStartStr && dateStr <= weekEndStr;
           const isTodayDate = dateStr === todayStr;
           return (
             <button
-              key={i}
+              key={dateStr}
               onClick={() => onDateClick(date)}
               className={`h-7 w-7 mx-auto flex items-center justify-center text-xs rounded-full transition-colors ${
                 isTodayDate

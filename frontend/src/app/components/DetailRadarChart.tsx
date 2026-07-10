@@ -142,7 +142,7 @@ export function DetailRadarChart({
   const scoreMap = new Map(scores?.map((s) => [s.id, s.score]) || []);
   const dataPoints = axes.map((id, i) => {
     const val = normalize(scoreMap.get(id) || 0);
-    return pt(axisAngle(i), R * Math.max(val, 0.05));
+    return { id, ...pt(axisAngle(i), R * Math.max(val, 0.05)) };
   });
   const dataPath = `${dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
 
@@ -178,19 +178,19 @@ export function DetailRadarChart({
   return (
     <div className="-mx-6 md:mx-0">
       <svg viewBox="65 57 430 335" className="w-full">
-        {gridPaths.map((d, i) => (
-          <path key={i} d={d} fill="none" stroke="#e5e5e5" strokeWidth={0.5} />
+        {gridPaths.map((d) => (
+          <path key={d} d={d} fill="none" stroke="#e5e5e5" strokeWidth={0.5} />
         ))}
-        {axes.map((_, i) => {
+        {axes.map((id, i) => {
           const p = pt(axisAngle(i), R);
           return (
-            <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#e5e5e5" strokeWidth={0.4} />
+            <line key={id} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#e5e5e5" strokeWidth={0.4} />
           );
         })}
 
-        {groupArcs.map((ga, i) => (
+        {groupArcs.map((ga) => (
           <path
-            key={i}
+            key={ga.d}
             d={ga.d}
             fill="none"
             stroke={ga.color}
@@ -203,8 +203,8 @@ export function DetailRadarChart({
         {scores && (
           <>
             <path d={dataPath} fill={fillColor} stroke={strokeColor} strokeWidth={1.2} />
-            {dataPoints.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r={2.5} fill={strokeColor} />
+            {dataPoints.map((p) => (
+              <circle key={p.id} cx={p.x} cy={p.y} r={2.5} fill={strokeColor} />
             ))}
           </>
         )}
@@ -239,8 +239,8 @@ export function DetailRadarChart({
         ))}
       </svg>
       <div className="grid grid-cols-3 justify-center md:flex md:flex-wrap md:justify-center gap-x-3 gap-y-1 -mt-3 px-2 w-fit mx-auto md:w-auto">
-        {groups.map((g, i) => (
-          <span key={i} className="flex items-center gap-1 text-[10px] text-gray-500">
+        {groups.map((g) => (
+          <span key={g.label} className="flex items-center gap-1 text-[10px] text-gray-500">
             <span
               className="inline-block w-2.5 h-1 rounded-full"
               style={{ backgroundColor: g.color, opacity: 0.7 }}

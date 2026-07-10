@@ -523,9 +523,9 @@ function FloatingSpheres() {
         }
       `}</style>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {SPHERES.map((s, i) => (
+        {SPHERES.map((s) => (
           <div
-            key={i}
+            key={`${s.top}-${s.left}-${s.size}`}
             className="absolute rounded-full blur-[5px]"
             style={
               {

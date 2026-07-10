@@ -8,10 +8,12 @@ const VARIABLE_TEST = /^\{\{[^}]+\}\}$/;
 function renderHighlighted(text: string): ReactNode[] {
   return text.split(VARIABLE_SPLIT).map((part, i) =>
     VARIABLE_TEST.test(part) ? (
+      // biome-ignore lint/suspicious/noArrayIndexKey: 文字列 split 由来で同一 part が繰り返し得る。並び替えなし
       <span key={i} className="text-blue-600 bg-blue-100 px-1 py-0.5 rounded text-xs">
         {part}
       </span>
     ) : (
+      // biome-ignore lint/suspicious/noArrayIndexKey: 文字列 split 由来で同一 part が繰り返し得る。並び替えなし
       <span key={i}>{part}</span>
     ),
   );

@@ -108,6 +108,7 @@ export function InlineTagInput({
     <div className="flex flex-wrap gap-2 items-center">
       {tags.map((tag, i) => (
         <span
+          // biome-ignore lint/suspicious/noArrayIndexKey: 親管理で重複し得る文字列タグの編集リスト。id なし
           key={i}
           className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700"
         >
@@ -167,6 +168,7 @@ export function BenefitTagInput({
     <div className="mt-5 flex flex-wrap gap-2 items-center">
       {tags.map((tag, i) => (
         <span
+          // biome-ignore lint/suspicious/noArrayIndexKey: 親管理で重複し得る文字列タグの編集リスト。id なし
           key={i}
           className="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-base font-medium"
           style={{

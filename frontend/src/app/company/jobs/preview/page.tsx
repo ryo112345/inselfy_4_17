@@ -419,7 +419,7 @@ export default function CompanyJobPreviewPage() {
                         const color = colors[i % colors.length];
                         return (
                           <div
-                            key={i}
+                            key={`${m.name}:${m.photoUrl ?? ""}`}
                             className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
                             style={{ backgroundColor: color.bg, color: color.fg }}
                           >
@@ -594,6 +594,7 @@ export default function CompanyJobPreviewPage() {
             <SectionTitle icon={<RouteIcon />}>選考フロー</SectionTitle>
             <ol className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
               {selectionSteps.map((step, i, arr) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: 文字列分割由来で同名ステップがあり得る固定表示リスト。並び替え・部分更新なし
                 <li key={i} className="flex items-center gap-2">
                   <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
                     <span
