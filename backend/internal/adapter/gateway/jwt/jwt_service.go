@@ -34,7 +34,7 @@ func (s *Service) GenerateAccessToken(userID string) (string, error) {
 		Subject:   userID,
 		Issuer:    issuer,
 		Audience:  jwtlib.ClaimStrings{audience},
-		ExpiresAt: jwtlib.NewNumericDate(time.Now().Add(15 * time.Minute)),
+		ExpiresAt: jwtlib.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		IssuedAt:  jwtlib.NewNumericDate(time.Now()),
 	}
 	token := jwtlib.NewWithClaims(jwtlib.SigningMethodHS256, claims)

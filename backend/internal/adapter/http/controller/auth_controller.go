@@ -76,7 +76,7 @@ func setAuthCookies(ctx echo.Context, resp *presenter.AuthTokenResponse) {
 		HttpOnly: true,
 		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   900,
+		MaxAge:   86400,
 	})
 	ctx.SetCookie(&http.Cookie{
 		Name:     "refresh_token",
