@@ -6,11 +6,11 @@ import { Sidebar } from "@/app/components/Sidebar";
 import { ACCENT } from "@/constants/theme";
 import "@/external/client/api/client";
 import {
-  followsGetFollowStatus,
   type ModelsSimilarUserItem,
   similarUsersGetSimilarUsers,
 } from "@/external/client/api/generated";
-import { fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
+import { getCurrentUsername, getUsernameFromCookie } from "@/features/auth/viewer";
+import { fetchInitialFollowing, fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
 import { fetchUserPosts } from "@/features/timeline/api";
 import { buildCookieHeader } from "@/lib/cookie-header";
 
@@ -19,46 +19,6 @@ import { ProfileColorContext } from "./ProfileColorContext";
 import { ProfileContent } from "./ProfileContent";
 
 export const dynamic = "force-dynamic";
-
-const BACKEND = process.env.INTERNAL_API_URL ?? "http://localhost:8081";
-
-async function getCurrentUsername(cookieHeader: string): Promise<string | null> {
-  try {
-    const res = await fetch(`${BACKEND}/api/auth/me`, {
-      headers: { Cookie: cookieHeader },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      return data.username ?? null;
-    }
-    const refreshRes = await fetch(`${BACKEND}/api/auth/refresh`, {
-      method: "POST",
-      headers: { Cookie: cookieHeader },
-    });
-    if (!refreshRes.ok) return null;
-    const data = await refreshRes.json();
-    return data.username ?? null;
-  } catch {
-    return null;
-  }
-}
-
-// フォロー状態。未ログイン（401）・エラー時は null（FollowButton はスペーサー表示）
-async function fetchInitialFollowing(
-  username: string,
-  cookieHeader: string,
-): Promise<boolean | null> {
-  try {
-    const { data, error } = await followsGetFollowStatus({
-      path: { username },
-      headers: { Cookie: cookieHeader },
-    });
-    if (error || !data) return null;
-    return data.following;
-  } catch {
-    return null;
-  }
-}
 
 // 類似ユーザー。エラー時は null（カード側でエラー＋再読み込みを表示）
 async function fetchSimilarUsers(
@@ -117,10 +77,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     fetchInitialFollowing(username, cookieHeader),
   ]);
   if (!data) notFound();
-  const usernameFromCookie = cookieStore.get("username")?.value
-    ? decodeURIComponent(cookieStore.get("username")!.value)
-    : null;
-  const isOwner = (currentUsername ?? usernameFromCookie) === data.username;
+  const isOwner = (currentUsername ?? getUsernameFromCookie(cookieStore)) === data.username;
 
   const profileColor = data.user.profileColor ?? ACCENT;
 

@@ -34,7 +34,8 @@ type Props = {
   ciHasReport?: boolean;
   intReportRequestId?: string | null;
   intReportHasReport?: boolean;
-  isOwner?: boolean;
+  // サーバーで解決した閲覧者判定。「省略＝オーナー扱い」の事故を防ぐため必須（F22）
+  isOwner: boolean;
   initialPanel?: number;
 };
 
@@ -52,7 +53,7 @@ export function PanelNavigator({
   ciHasReport,
   intReportRequestId,
   intReportHasReport,
-  isOwner: serverIsOwner = true,
+  isOwner: serverIsOwner,
   initialPanel = 0,
 }: Props) {
   const { user } = useAuth();
@@ -353,10 +354,10 @@ export function PanelNavigator({
 }
 
 function WorkValuesPlaceholder({
-  isOwner = true,
+  isOwner,
   displayName = "",
 }: {
-  isOwner?: boolean;
+  isOwner: boolean;
   displayName?: string;
 }) {
   return (
@@ -430,10 +431,10 @@ function WorkValuesPlaceholder({
 }
 
 function CareerInterestPlaceholder({
-  isOwner = true,
+  isOwner,
   displayName = "",
 }: {
-  isOwner?: boolean;
+  isOwner: boolean;
   displayName?: string;
 }) {
   return (
@@ -507,10 +508,10 @@ function CareerInterestPlaceholder({
 }
 
 function IntegratedReportPlaceholder({
-  isOwner = true,
+  isOwner,
   displayName = "",
 }: {
-  isOwner?: boolean;
+  isOwner: boolean;
   displayName?: string;
 }) {
   return (

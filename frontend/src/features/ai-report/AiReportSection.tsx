@@ -76,7 +76,7 @@ export function AiReportSection({
   accent,
   heading,
   variant,
-  isOwner = true,
+  isOwner,
   className,
   children,
 }: {
@@ -84,7 +84,7 @@ export function AiReportSection({
   accent: AiReportAccent;
   heading: string;
   variant: "generate" | "view";
-  isOwner?: boolean;
+  isOwner: boolean;
   className?: string;
   children?: ReactNode;
 }) {

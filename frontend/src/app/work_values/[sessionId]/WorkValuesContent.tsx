@@ -11,11 +11,11 @@ import { ValuesSection } from "@/features/work-values/components/ValuesSection";
 export function WorkValuesResultContent({
   sessionId,
   initialData,
-  isOwner = true,
+  isOwner,
 }: {
   sessionId: string;
   initialData?: ResultDTO | null;
-  isOwner?: boolean;
+  isOwner: boolean;
 }) {
   const [result, setResult] = useState<ResultDTO | null>(initialData ?? null);
   const [error, setError] = useState<string | null>(null);

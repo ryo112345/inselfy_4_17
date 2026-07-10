@@ -3,6 +3,7 @@ import "@/external/client/api/client";
 import {
   educationsListEducations,
   experiencesListExperiences,
+  followsGetFollowStatus,
   followsListFollowers,
   followsListFollowing,
   type ModelsEducationResponse,
@@ -75,6 +76,23 @@ export async function fetchPanelDataByUserId(
   const userRes = await usersGetUserById({ path: { id: userId } });
   if (userRes.error || !userRes.data) return null;
   return fetchRest(userRes.data, userRes.data.username, cookieHeader);
+}
+
+// フォロー状態。未ログイン（401）・エラー時は null（FollowButton はスペーサー表示）
+export async function fetchInitialFollowing(
+  username: string,
+  cookieHeader: string,
+): Promise<boolean | null> {
+  try {
+    const { data, error } = await followsGetFollowStatus({
+      path: { username },
+      headers: { Cookie: cookieHeader },
+    });
+    if (error || !data) return null;
+    return data.following;
+  } catch {
+    return null;
+  }
 }
 
 function buildWvKeywords(result: WvResultDTO): string {

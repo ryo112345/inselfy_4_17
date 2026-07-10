@@ -24,12 +24,12 @@ import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";
 
 type Props = {
   requestId: string;
-  isOwner?: boolean;
+  isOwner: boolean;
   wvResult?: WvResultDTO | null;
   ciResult?: CiResultDTO | null;
 };
 
-export function IntegratedReportContent({ requestId, isOwner = true, wvResult, ciResult }: Props) {
+export function IntegratedReportContent({ requestId, isOwner, wvResult, ciResult }: Props) {
   const wvScores = useMemo(
     () => wvResult?.values?.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
     [wvResult],
