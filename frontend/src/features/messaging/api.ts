@@ -1,4 +1,4 @@
-import "@/external/client/api/client";
+import { skipAuthRedirect } from "@/external/client/api/client";
 import {
   candidateMessagingCountCandidateUnreadMessages,
   candidateMessagingListCandidateConversations,
@@ -84,9 +84,10 @@ export async function markReadAsCompany(conversationId: string): Promise<void> {
   });
 }
 
+// 未読バッジのベストエフォート取得。未ログインの 401 で /login に飛ばさない
 export async function fetchCompanyUnreadCount(): Promise<UnreadCountResponse> {
   return (await run(
-    companyMessagingCountCompanyUnreadMessages({}),
+    companyMessagingCountCompanyUnreadMessages({ ...skipAuthRedirect }),
     "未読メッセージ数の取得に失敗しました",
   )) as UnreadCountResponse;
 }
@@ -149,9 +150,10 @@ export async function markReadAsCandidate(conversationId: string): Promise<void>
   });
 }
 
+// 未読バッジのベストエフォート取得。未ログインの 401 で /login に飛ばさない
 export async function fetchCandidateUnreadCount(): Promise<UnreadCountResponse> {
   return (await run(
-    candidateMessagingCountCandidateUnreadMessages({}),
+    candidateMessagingCountCandidateUnreadMessages({ ...skipAuthRedirect }),
     "未読メッセージ数の取得に失敗しました",
   )) as UnreadCountResponse;
 }

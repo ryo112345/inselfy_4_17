@@ -9,6 +9,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { ApiError } from "@/lib/api-result";
 
 type UnreadContextValue = {
   unreadCount: number;
@@ -33,6 +34,8 @@ export function createUnreadContext(name: string, fetchCount: () => Promise<numb
       fetchCount()
         .then(setUnreadCount)
         .catch((err) => {
+          // 未ログインの 401 は想定内（fetchCount 側で /login リダイレクトをオプトアウト済み）
+          if (err instanceof ApiError && err.code === "UNAUTHORIZED") return;
           console.error(`[${name}] failed to fetch unread count:`, err);
         });
     }, []);
