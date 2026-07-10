@@ -1,4 +1,4 @@
-import "@/external/client/api/client";
+import { skipAuthRedirect } from "@/external/client/api/client";
 import {
   candidateScoutsBulkDeclineScouts,
   candidateScoutsBulkRespondScouts,
@@ -132,9 +132,10 @@ export async function fetchReceivedScouts(params?: {
   )) as ScoutListResponse;
 }
 
+// 未読バッジのベストエフォート取得。未ログインの 401 で /login に飛ばさない
 export async function fetchScoutUnreadCount(): Promise<{ count: number }> {
   return (await run(
-    candidateScoutsCountCandidateUnreadScouts({ cache: "no-store" }),
+    candidateScoutsCountCandidateUnreadScouts({ cache: "no-store", ...skipAuthRedirect }),
     "未読スカウト数の取得に失敗しました",
   )) as { count: number };
 }

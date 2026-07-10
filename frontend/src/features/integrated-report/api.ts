@@ -1,4 +1,4 @@
-import "@/external/client/api/client";
+import { skipAuthRedirect } from "@/external/client/api/client";
 import {
   integratedReportCreateIntegratedReportRequest,
   integratedReportGetIntegratedReport,
@@ -13,11 +13,12 @@ import { run } from "@/lib/api-result";
 
 export type IntegratedReportStatus = ModelsIntegratedReportStatusResponse["status"];
 
-// リクエスト状況取得（要ログイン）。⚠️ 未ログインだと 401 が返り SDK の 401
-// インターセプタが /login リダイレクトを起こすため、呼び出し元は
-// isAuthenticated ガード必須（AiReportCard 参照）。
+// リクエスト状況取得（要ログイン）。ベストエフォート取得のため
+// 未ログインの 401 では /login に飛ばさず null を返す。
 export async function getIntegratedReportStatus(): Promise<ModelsIntegratedReportStatusResponse | null> {
-  const { data, error } = await integratedReportGetIntegratedReportStatus();
+  const { data, error } = await integratedReportGetIntegratedReportStatus({
+    ...skipAuthRedirect,
+  });
   if (error || !data) return null;
   return data;
 }
