@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ACCENT } from "@/constants/theme";
 import type { ModelsSimilarUserItem } from "@/external/client/api/generated";
-import { NEED_LABELS, type NeedId } from "@/features/work-values/lib/needs";
 
 type Props = {
   // サーバー（page.tsx）で取得した一覧。null はフェッチ失敗

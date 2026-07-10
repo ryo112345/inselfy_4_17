@@ -12,11 +12,11 @@ function stripHtml(html: string): string {
 
 function MyArticleCard({ article }: { article: ArticleItem }) {
   const plainText = stripHtml(article.body);
-  const excerpt = plainText.length > 100 ? plainText.slice(0, 100) + "…" : plainText;
+  const excerpt = plainText.length > 100 ? `${plainText.slice(0, 100)}…` : plainText;
 
   const date = article.publishedAt
     ? new Date(article.publishedAt).toLocaleDateString("ja-JP")
-    : new Date(article.updatedAt).toLocaleDateString("ja-JP") + " 更新";
+    : `${new Date(article.updatedAt).toLocaleDateString("ja-JP")} 更新`;
 
   const href = `/articles/${article.id}/edit`;
 
@@ -65,6 +65,7 @@ export function MyArticles() {
   const [error, setError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reloadKey は再読み込みトリガー
   useEffect(() => {
     setLoading(true);
     setError(false);

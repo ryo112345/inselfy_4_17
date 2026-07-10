@@ -49,7 +49,6 @@ export function ProfileContent({
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 md:px-0">
       <ProfileHeaderCard
         user={user}
-        experienceCount={experiences.length}
         followersCount={followersCount}
         followingCount={followingCount}
         isOwner={isOwner}

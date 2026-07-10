@@ -17,6 +17,7 @@ export function PostForm() {
 
   const detectedArticleId = useMemo(() => extractArticleId(content), [content]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: content 変更時に textarea の高さを再計測するための意図的な依存
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;

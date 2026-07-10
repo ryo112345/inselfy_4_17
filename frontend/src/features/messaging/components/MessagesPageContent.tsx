@@ -24,7 +24,7 @@ type ActiveTab = "company" | "personal" | "scout";
 
 export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
   const { user, isLoading: authLoading } = useAuth();
-  const { refresh: refreshUnread, unreadCount: unreadMessages } = useUnreadMessaging();
+  const { refresh: refreshUnread } = useUnreadMessaging();
   const { unreadCount: unreadScouts } = useUnreadScout();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -79,6 +79,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
     [refreshUnread],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 認証確定時に一覧取得とディープリンク処理を一度だけ行う意図
   useEffect(() => {
     if (authLoading || !user) return;
 
@@ -108,7 +109,6 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
         }
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user]);
 
   const handleSelectConv = useCallback(
@@ -148,7 +148,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
       setSelectedConv(conv);
       setMessages([
         {
-          id: conv.id + "-first",
+          id: `${conv.id}-first`,
           conversationId: conv.id,
           senderType: "candidate",
           senderId: user!.id,

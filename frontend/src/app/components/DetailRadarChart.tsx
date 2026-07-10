@@ -136,7 +136,7 @@ export function DetailRadarChart({
   const gridLevels = [0.25, 0.5, 0.75, 1.0];
   const gridPaths = gridLevels.map((level) => {
     const pts = axes.map((_, i) => pt(axisAngle(i), R * level));
-    return pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+    return `${pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
   });
 
   const scoreMap = new Map(scores?.map((s) => [s.id, s.score]) || []);
@@ -144,7 +144,7 @@ export function DetailRadarChart({
     const val = normalize(scoreMap.get(id) || 0);
     return pt(axisAngle(i), R * Math.max(val, 0.05));
   });
-  const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+  const dataPath = `${dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
 
   const halfStep = Math.PI / n;
   const groupArcs: { d: string; color: string }[] = [];

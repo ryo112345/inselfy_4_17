@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui";
 import { fetchScoutDetail, replyToScoutAsCompany } from "@/features/scout/api";
@@ -21,7 +21,6 @@ const STATUS_BADGE: Record<ScoutStatus, { bg: string; text: string; label: strin
 
 export default function ScoutDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const scoutId = params.scoutId as string;
 
   const [detail, setDetail] = useState<ScoutDetail | null>(null);

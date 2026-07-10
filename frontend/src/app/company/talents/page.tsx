@@ -36,6 +36,7 @@ export default function TalentsPage() {
 
   // Detect when split panel becomes sticky (header/search scrolled out of view)
   const panelStuckRef = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: リスト描画後に sticky 判定を張り直すための意図的な依存
   useEffect(() => {
     const panel = splitPanelRef.current;
     if (!panel) return;
@@ -52,6 +53,7 @@ export default function TalentsPage() {
   }, [users, loading]);
 
   // Forward wheel events to page scroll when header needs to show/hide
+  // biome-ignore lint/correctness/useExhaustiveDependencies: リスト描画後に wheel リスナーを張り直すための意図的な依存
   useEffect(() => {
     const panel = splitPanelRef.current;
     if (!panel) return;

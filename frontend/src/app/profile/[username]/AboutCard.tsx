@@ -79,19 +79,15 @@ export function AboutCard({ user, isOwner = true }: Props) {
             </PrimaryButton>
           </div>
         </div>
-      ) : (
-        <>
-          {user.about ? (
-            <p className="mt-3 whitespace-pre-wrap text-lg leading-relaxed text-gray-800">
-              {user.about}
-            </p>
-          ) : isOwner ? (
-            <p className="mt-3 text-lg leading-relaxed text-gray-500">
-              自己紹介を追加して、あなたのことを教えてください。
-            </p>
-          ) : null}
-        </>
-      )}
+      ) : user.about ? (
+        <p className="mt-3 whitespace-pre-wrap text-lg leading-relaxed text-gray-800">
+          {user.about}
+        </p>
+      ) : isOwner ? (
+        <p className="mt-3 text-lg leading-relaxed text-gray-500">
+          自己紹介を追加して、あなたのことを教えてください。
+        </p>
+      ) : null}
     </section>
   );
 }

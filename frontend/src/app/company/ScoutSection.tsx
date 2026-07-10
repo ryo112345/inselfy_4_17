@@ -169,36 +169,34 @@ export function ScoutSection() {
               <span className="text-sm font-normal text-gray-400">通</span>
             </div>
             {open && (
-              <>
-                <div className="mt-2.5 space-y-2">
-                  {data.pending.byMonth.map((m) => (
-                    <div key={m.month} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">{formatMonth(m.month)}送信分</span>
-                      <span className="flex items-baseline">
-                        <span
-                          className="inline-flex items-baseline justify-end font-medium text-gray-700"
-                          style={{ width: "3.5rem" }}
-                        >
-                          <span className="text-lg font-bold" style={num}>
-                            {m.count}
-                          </span>
-                          <span className="ml-1">通</span>
+              <div className="mt-2.5 space-y-2">
+                {data.pending.byMonth.map((m) => (
+                  <div key={m.month} className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">{formatMonth(m.month)}送信分</span>
+                    <span className="flex items-baseline">
+                      <span
+                        className="inline-flex items-baseline justify-end font-medium text-gray-700"
+                        style={{ width: "3.5rem" }}
+                      >
+                        <span className="text-lg font-bold" style={num}>
+                          {m.count}
                         </span>
-                        <span
-                          className={`inline-flex items-baseline justify-end ${m.daysLeft <= 14 ? "font-semibold text-red-500" : "text-gray-400"}`}
-                          style={{ width: "4.5rem" }}
-                        >
-                          残
-                          <span className="ml-1.5 text-lg font-bold" style={num}>
-                            {m.daysLeft}
-                          </span>{" "}
-                          日
-                        </span>
+                        <span className="ml-1">通</span>
                       </span>
-                    </div>
-                  ))}
-                </div>
-              </>
+                      <span
+                        className={`inline-flex items-baseline justify-end ${m.daysLeft <= 14 ? "font-semibold text-red-500" : "text-gray-400"}`}
+                        style={{ width: "4.5rem" }}
+                      >
+                        残
+                        <span className="ml-1.5 text-lg font-bold" style={num}>
+                          {m.daysLeft}
+                        </span>{" "}
+                        日
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
             )}
             <div className="mt-2 flex items-center justify-between text-sm">
               <span className="text-gray-500">平均返信日数</span>

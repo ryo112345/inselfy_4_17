@@ -22,6 +22,7 @@ export function CommentSection({ postId, currentUserId, onCommentCountChange }: 
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reloadKey は再読み込みトリガー
   useEffect(() => {
     let cancelled = false;
     setLoading(true);

@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { ItemDTO } from "@/features/career-interest/api";
 import { useCareerInterestQuiz } from "@/features/career-interest/useCareerInterestQuiz";
-import type { NeedId } from "@/features/work-values/lib/needs";
 import { useWorkValuesQuiz } from "@/features/work-values/useWorkValuesQuiz";
 import "@/external/client/api/client";
 import {

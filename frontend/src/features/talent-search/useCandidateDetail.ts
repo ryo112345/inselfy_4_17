@@ -17,6 +17,7 @@ export function useCandidateDetail(users: TalentCard[], selectedUserId: string |
   const [skills, setSkills] = useState<string[]>([]);
   const [about, setAbout] = useState<string | null>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reloadKey は再読み込みトリガー
   useEffect(() => {
     if (!selectedUserId) {
       setWvScores(null);

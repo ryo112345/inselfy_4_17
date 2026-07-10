@@ -31,12 +31,14 @@ export function PostsTabs({ posts = [], userId, currentUserId }: Props) {
   const [likedReloadKey, setLikedReloadKey] = useState(0);
 
   // 別プロフィールに遷移したとき、前ユーザーのいいね一覧が残らないようリセットする
+  // biome-ignore lint/correctness/useExhaustiveDependencies: userId 変更時に前ユーザーの一覧をリセットするトリガー
   useEffect(() => {
     setLikedPosts([]);
     setLikedLoaded(false);
     setLikedError(false);
   }, [userId]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: likedReloadKey は再読み込みトリガー
   useEffect(() => {
     if (active !== "likes" || !userId || likedLoaded) return;
     setLikedLoading(true);

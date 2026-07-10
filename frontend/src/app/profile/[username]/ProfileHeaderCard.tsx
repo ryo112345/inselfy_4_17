@@ -49,7 +49,6 @@ const PRESET_COLORS = [
 
 type Props = {
   user: ModelsUserResponse;
-  experienceCount: number;
   followersCount: number;
   followingCount: number;
   isOwner: boolean;
@@ -58,7 +57,6 @@ type Props = {
 
 export function ProfileHeaderCard({
   user,
-  experienceCount,
   followersCount,
   followingCount,
   isOwner,

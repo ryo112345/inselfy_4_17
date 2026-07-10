@@ -312,7 +312,7 @@ export default function ScoutDetailPage() {
             <p className="text-xs font-medium text-gray-500 mb-4">やりとり</p>
             <div className="space-y-3">
               {replies.map((reply) => (
-                <ReplyBubble key={reply.id} reply={reply} userId={user.id} />
+                <ReplyBubble key={reply.id} reply={reply} />
               ))}
             </div>
           </div>
@@ -363,7 +363,7 @@ export default function ScoutDetailPage() {
   );
 }
 
-function ReplyBubble({ reply, userId }: { reply: ScoutReply; userId: string }) {
+function ReplyBubble({ reply }: { reply: ScoutReply }) {
   const isCandidate = reply.senderType === "candidate";
 
   return (

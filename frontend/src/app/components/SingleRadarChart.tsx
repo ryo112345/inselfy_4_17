@@ -59,7 +59,7 @@ export function SingleRadarChart({
   const gridLevels = [0.25, 0.5, 0.75, 1.0];
   const gridPaths = gridLevels.map((level) => {
     const pts = order.map((_, i) => hexPoint(i, R * level));
-    return pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+    return `${pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
   });
   const spokes = order.map((_, i) => hexPoint(i, R));
 
@@ -77,7 +77,7 @@ export function SingleRadarChart({
     const val = normalize(scoreMap.get(id) || 0);
     return hexPoint(i, R * Math.max(val, 0.05));
   });
-  const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+  const dataPath = `${dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
 
   const compareMap = new Map(compareScores?.map((s) => [s.id, s.score]) || []);
   const comparePoints = compareScores
@@ -87,7 +87,7 @@ export function SingleRadarChart({
       })
     : null;
   const comparePath = comparePoints
-    ? comparePoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z"
+    ? `${comparePoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`
     : null;
 
   const labelPositions = order.map((id, i) => {

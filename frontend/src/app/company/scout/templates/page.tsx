@@ -25,6 +25,7 @@ export default function TemplateListPage() {
       .finally(() => setLoading(false));
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: マウント時のみ実行する意図
   useEffect(() => {
     load();
   }, []);

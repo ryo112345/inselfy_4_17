@@ -44,6 +44,28 @@ export default function CompanyMessagesPage() {
     }
   }, []);
 
+  const loadMessages = useCallback(
+    async (convId: string) => {
+      setLoadingMsgs(true);
+      try {
+        const data = await fetchCompanyConversationMessages(convId, {
+          limit: 100,
+        });
+        setMessages(data.items ?? []);
+        await markReadAsCompany(convId);
+        refreshUnread();
+        setConversations((prev) =>
+          prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0 } : c)),
+        );
+      } catch {
+        // ignore
+      } finally {
+        setLoadingMsgs(false);
+      }
+    },
+    [refreshUnread],
+  );
+
   useEffect(() => {
     if (!authLoading && company) {
       loadConversations().then((convs) => {
@@ -60,24 +82,7 @@ export default function CompanyMessagesPage() {
         }
       });
     }
-  }, [authLoading, company, loadConversations, candidateIdParam, candidateNameParam]);
-
-  const loadMessages = useCallback(async (convId: string) => {
-    setLoadingMsgs(true);
-    try {
-      const data = await fetchCompanyConversationMessages(convId, {
-        limit: 100,
-      });
-      setMessages(data.items ?? []);
-      await markReadAsCompany(convId);
-      refreshUnread();
-      setConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0 } : c)));
-    } catch {
-      // ignore
-    } finally {
-      setLoadingMsgs(false);
-    }
-  }, []);
+  }, [authLoading, company, loadConversations, loadMessages, candidateIdParam, candidateNameParam]);
 
   const handleSelectConv = useCallback(
     (conv: Conversation) => {

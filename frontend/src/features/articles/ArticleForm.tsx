@@ -71,6 +71,7 @@ export function ArticleForm({ article }: Props) {
 
   const titleRef = useRef<HTMLHeadingElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: contentEditable の初期値設定はマウント時のみ行う意図
   useEffect(() => {
     if (titleRef.current && article?.title) {
       titleRef.current.textContent = article.title;
@@ -102,7 +103,7 @@ export function ArticleForm({ article }: Props) {
       (_match, tag: string, _attrs: string | undefined, content: string) => {
         const text = content.replace(/<[^>]*>/g, "").trim();
         if (text) {
-          items.push({ id: `toc-${counter++}`, text, level: parseInt(tag[1]) });
+          items.push({ id: `toc-${counter++}`, text, level: parseInt(tag[1], 10) });
         }
         return "";
       },

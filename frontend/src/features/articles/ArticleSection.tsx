@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArticleCard } from "./ArticleCard";
 import type { ArticleItem } from "./api";

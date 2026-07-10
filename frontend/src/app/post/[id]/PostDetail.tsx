@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "@/features/auth/auth-context";
 import {
   ArticlePreviewCard,
   extractArticleId,
@@ -38,7 +37,7 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
   const [reposted, setReposted] = useState(post.repostedByMe);
   const [repostCount, setRepostCount] = useState(post.repostCount);
   const [comments, setComments] = useState(initialComments);
-  const [commentCount, setCommentCount] = useState(post.commentCount);
+  const [_commentCount, setCommentCount] = useState(post.commentCount);
   const [commentContent, setCommentContent] = useState("");
   const [commentError, setCommentError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -94,6 +93,7 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
     }
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: commentContent 変更時に textarea の高さを再計測するための意図的な依存
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
