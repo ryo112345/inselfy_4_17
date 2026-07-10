@@ -5,10 +5,11 @@ import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
 import { ACCENT } from "@/constants/theme";
+// SSR の SDK 呼び出しに認証 Cookie を自動転送する interceptor を登録する
+import "@/external/client/api/server";
 import { getCurrentUsername, getUsernameFromCookie } from "@/features/auth/viewer";
 import { fetchInitialFollowing, fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 import { getResultBySessionId } from "@/features/work-values/api";
-import { buildCookieHeader } from "@/lib/cookie-header";
 
 export const dynamic = "force-dynamic";
 
@@ -20,25 +21,22 @@ export default async function WorkValuesResultPage({
   const { sessionId } = await params;
 
   const cookieStore = await cookies();
-  const cookieHeader = buildCookieHeader(cookieStore);
 
   let result: Awaited<ReturnType<typeof getResultBySessionId>>;
   try {
-    result = await getResultBySessionId(sessionId, cookieHeader);
+    result = await getResultBySessionId(sessionId);
   } catch {
     notFound();
   }
 
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
   const [data, currentUsername] = await Promise.all([
-    fetchPanelDataByUserId(result.userId, cookieHeader),
-    getCurrentUsername(cookieHeader),
+    fetchPanelDataByUserId(result.userId),
+    getCurrentUsername(),
   ]);
   if (!data) notFound();
   const isOwner = (currentUsername ?? getUsernameFromCookie(cookieStore)) === data.username;
-  const initialFollowing = isOwner
-    ? null
-    : await fetchInitialFollowing(data.username, cookieHeader);
+  const initialFollowing = isOwner ? null : await fetchInitialFollowing(data.username);
 
   const wvIndex = 2;
   const profileColor = data.user.profileColor ?? ACCENT;

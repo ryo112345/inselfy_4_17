@@ -1,11 +1,14 @@
-import type { cookies } from "next/headers";
+import "server-only";
+import { cookies } from "next/headers";
+import { buildCookieHeader } from "@/lib/cookie-header";
 
 const BACKEND = process.env.INTERNAL_API_URL ?? "http://localhost:8081";
 
 // サーバコンポーネントから閲覧者（ログイン中ユーザー）の username を解決する。
 // access token 失効時は refresh を試す。未ログイン・失敗時は null。
-export async function getCurrentUsername(cookieHeader: string): Promise<string | null> {
+export async function getCurrentUsername(): Promise<string | null> {
   try {
+    const cookieHeader = buildCookieHeader(await cookies());
     const res = await fetch(`${BACKEND}/api/auth/me`, {
       headers: { Cookie: cookieHeader },
     });
