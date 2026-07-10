@@ -1,5 +1,5 @@
 import { type BTResult, estimateBT } from "./bradley-terry";
-import { N, NEED_IDS, type NeedId } from "./needs";
+import { N } from "./needs";
 
 export interface Pair {
   needA: number;

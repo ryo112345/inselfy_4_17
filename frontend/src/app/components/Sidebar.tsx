@@ -13,7 +13,6 @@ type Props = {
   displayName?: string | null;
   diagnostics?: DiagnosticSummary[];
   defaultOpen?: boolean;
-  debug?: boolean;
 };
 
 const navItems = [
@@ -36,13 +35,7 @@ const assessmentItems = [
   { label: "職業興味診断", href: "/career_interest/start" },
 ];
 
-export function Sidebar({
-  username,
-  displayName,
-  diagnostics = [],
-  defaultOpen = false,
-  debug,
-}: Props) {
+export function Sidebar({ username, displayName, diagnostics = [], defaultOpen = false }: Props) {
   const [open, setOpen] = useState(defaultOpen);
   const [menuOpen, setMenuOpen] = useState(false);
   const [assessmentOpen, setAssessmentOpen] = useState(false);
@@ -91,6 +84,7 @@ export function Sidebar({
   }, []);
 
   useEffect(() => {
+    // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store API は Safari 未対応
     document.cookie = `sidebar-open=${open}; path=/; max-age=31536000; SameSite=Lax`;
   }, [open]);
 
@@ -394,23 +388,6 @@ const UserMenu = forwardRef<
   );
 });
 
-function MenuIcon() {
-  return (
-    <svg
-      width={18}
-      height={18}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 12h18M3 6h18M3 18h18" />
-    </svg>
-  );
-}
-
 function PanelCloseIcon() {
   return (
     <svg
@@ -578,23 +555,6 @@ function BookmarkIcon() {
   );
 }
 
-function ChatIcon() {
-  return (
-    <svg
-      width={20}
-      height={20}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
 function SendIcon() {
   return (
     <svg
@@ -669,24 +629,6 @@ function LogoutIcon() {
   );
 }
 
-function DraftIcon() {
-  return (
-    <svg
-      width={20}
-      height={20}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-    </svg>
-  );
-}
-
 function CalendarIcon() {
   return (
     <svg
@@ -702,25 +644,6 @@ function CalendarIcon() {
       <rect x={3} y={4} width={18} height={18} rx={2} />
       <path d="M16 2v4M8 2v4M3 10h18" />
       <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
-    </svg>
-  );
-}
-
-function DownloadIcon() {
-  return (
-    <svg
-      width={20}
-      height={20}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
     </svg>
   );
 }

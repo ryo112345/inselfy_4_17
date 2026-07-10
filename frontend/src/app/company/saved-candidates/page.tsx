@@ -70,8 +70,9 @@ export default function SavedCandidatesPage() {
     [candidates.length],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: マウント時のみ実行する意図
   useEffect(() => {
-    fetchCandidates(false); /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    fetchCandidates(false);
   }, []);
 
   // Auto-select first
@@ -446,7 +447,6 @@ function CandidateDetail({
     .join("")
     .slice(0, 2);
   const avatarBg = u.profileColor ?? "#94a3b8";
-  const status = u.jobSeekingStatus ? SEEKING_STATUS_MAP[u.jobSeekingStatus] : null;
   const experiences =
     allExperiences.length > 0
       ? allExperiences

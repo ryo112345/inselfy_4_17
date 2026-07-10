@@ -113,7 +113,7 @@ export function SlotPicker({
     }
     return [];
   });
-  const [message, setMessage] = useState("以下の日程でご都合の良い日時をお選びください。");
+  const [message, _setMessage] = useState("以下の日程でご都合の良い日時をお選びください。");
   const [location, setLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -284,7 +284,7 @@ export function SlotPicker({
     setSubmitting(true);
     try {
       const apiSlots = slots.map((s) => {
-        const day = new Date(s.dateStr + "T00:00:00");
+        const day = new Date(`${s.dateStr}T00:00:00`);
         const startDate = new Date(day);
         startDate.setHours(Math.floor(s.startMinutes / 60), s.startMinutes % 60, 0, 0);
         const endDate = new Date(day);

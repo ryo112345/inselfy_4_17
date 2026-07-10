@@ -190,7 +190,6 @@ function SummaryCard({
 function TeamCard({ team }: { team: Team }) {
   const wvPct = team.memberCount > 0 ? team.wvCompleted / team.memberCount : 0;
   const ciPct = team.memberCount > 0 ? team.ciCompleted / team.memberCount : 0;
-  const allComplete = team.memberCount > 0 && wvPct === 1 && ciPct === 1;
 
   return (
     <Link

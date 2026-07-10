@@ -221,7 +221,6 @@ export default function TeamDetailPage() {
   }
 
   const phase = detectPhase(team.members);
-  const hasAce = team.members.some((m) => m.isAce);
   const aceMember = team.members.find((m) => m.isAce);
   const wvCompleted = team.members.filter((m) => m.wvStatus === "completed").length;
   const ciCompleted = team.members.filter((m) => m.ciStatus === "completed").length;

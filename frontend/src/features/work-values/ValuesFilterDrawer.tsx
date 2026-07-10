@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ACCENT } from "@/constants/theme";
 import type { NeedScoreDTO, ValueScoreDTO } from "./api";
-import type { NeedId, ValueId } from "./lib/needs";
 import { NEED_IDS, NEED_LABELS, VALUE_IDS, VALUE_LABELS } from "./lib/needs";
 
 export type FilterMode = "values" | "needs";

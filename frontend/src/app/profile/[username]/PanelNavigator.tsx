@@ -116,16 +116,6 @@ export function PanelNavigator({
     return () => window.removeEventListener("popstate", onPopState);
   }, [urlToIndex]);
 
-  const goTo = (index: number) => {
-    if (index < minIndex || index >= panelCount) return;
-    setActiveIndex(index);
-    window.history.pushState(
-      { ...window.history.state, panelIndex: index },
-      "",
-      urls[Math.max(0, index)],
-    );
-  };
-
   const desktopPanelPx = 672;
   const gapPx = 12;
 
@@ -150,6 +140,19 @@ export function PanelNavigator({
   const canGoSimilar = isMobile && showSimilar;
   const displayOffset = canGoSimilar ? 1 : 0;
   const minIndex = canGoSimilar ? -1 : 0;
+
+  const goTo = useCallback(
+    (index: number) => {
+      if (index < minIndex || index >= panelCount) return;
+      setActiveIndex(index);
+      window.history.pushState(
+        { ...window.history.state, panelIndex: index },
+        "",
+        urls[Math.max(0, index)],
+      );
+    },
+    [minIndex, urls],
+  );
 
   const trackRef = useRef<HTMLDivElement>(null);
   const touchRef = useRef<{ x: number; y: number; swiping: boolean | null } | null>(null);
@@ -183,7 +186,7 @@ export function PanelNavigator({
       touchRef.current = null;
       setDragX(0);
       setDragging(false);
-      if (!touch || !touch.swiping) return;
+      if (!touch?.swiping) return;
       const dx = e.changedTouches[0].clientX - touch.x;
       const vw = window.innerWidth;
       if (dx < -vw * 0.2) goTo(activeIndex + 1);

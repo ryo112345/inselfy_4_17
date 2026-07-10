@@ -7,6 +7,7 @@ export function ExpandableText({ text, maxLines = 6 }: { text: string; maxLines?
   const [needsExpansion, setNeedsExpansion] = useState(false);
   const ref = useRef<HTMLParagraphElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: text 変更時に行数を再計測するための意図的な依存
   useEffect(() => {
     const el = ref.current;
     if (!el) return;

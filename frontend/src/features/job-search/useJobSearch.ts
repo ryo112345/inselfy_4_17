@@ -149,7 +149,7 @@ export function useJobSearch(initialData?: InitialJobSearchData) {
       needsDebounce ? 300 : 0,
     );
     return () => clearTimeout(timeout);
-  }, [fetchJobs]);
+  }, [fetchJobs, search, valueFiltersParam]);
 
   useEffect(() => {
     if (!hasDiagnosis || jobs.length === 0) return;

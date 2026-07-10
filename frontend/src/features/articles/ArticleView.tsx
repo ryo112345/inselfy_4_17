@@ -31,7 +31,7 @@ function processHtmlForToc(html: string): {
     (_match, tag: string, attrs: string | undefined, content: string) => {
       const id = `toc-${counter++}`;
       const text = content.replace(/<[^>]*>/g, "").trim();
-      const level = parseInt(tag[1]);
+      const level = parseInt(tag[1], 10);
       if (text) {
         tocItems.push({ id, text, level });
       }
@@ -53,7 +53,7 @@ export function ArticleView({ article, currentUsername }: Props) {
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkAnimating, setBookmarkAnimating] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [pastEngagement, setPastEngagement] = useState(false);
+  const [_pastEngagement, setPastEngagement] = useState(false);
   const [hiddenByScroll, setHiddenByScroll] = useState(false);
 
   const engagementRef = useRef<HTMLDivElement>(null);
@@ -263,7 +263,7 @@ export function ArticleView({ article, currentUsername }: Props) {
         </Link>
         <span className="shrink-0">/</span>
         <span className="text-gray-500 truncate">
-          {article.title.length > 30 ? article.title.slice(0, 30) + "…" : article.title}
+          {article.title.length > 30 ? `${article.title.slice(0, 30)}…` : article.title}
         </span>
       </nav>
 

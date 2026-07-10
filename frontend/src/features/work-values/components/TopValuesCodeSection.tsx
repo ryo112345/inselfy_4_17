@@ -232,7 +232,7 @@ function ValuesRadarChart({ values }: { values: ResultDTO["values"] }) {
   const gridLevels = [0.25, 0.5, 0.75, 1.0];
   const gridPaths = gridLevels.map((level) => {
     const pts = RADAR_ORDER.map((_, i) => hexPoint(i, R * level));
-    return pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+    return `${pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
   });
 
   const dataPoints = RADAR_ORDER.map((vid, i) => {
@@ -240,7 +240,7 @@ function ValuesRadarChart({ values }: { values: ResultDTO["values"] }) {
     const score = v ? v.displayScore / 100 : 0;
     return hexPoint(i, R * Math.max(score, 0.05));
   });
-  const dataPath = dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+  const dataPath = `${dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
 
   const spokes = RADAR_ORDER.map((_, i) => hexPoint(i, R));
 

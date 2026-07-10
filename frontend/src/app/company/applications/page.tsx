@@ -40,6 +40,7 @@ export default function CompanyApplicationsPage() {
   const panelStuckRef = useRef(false);
 
   // Detect when split panel becomes sticky
+  // biome-ignore lint/correctness/useExhaustiveDependencies: リスト描画後に sticky 判定を張り直すための意図的な依存
   useEffect(() => {
     const panel = splitPanelRef.current;
     if (!panel) return;
@@ -56,6 +57,7 @@ export default function CompanyApplicationsPage() {
   }, [applications, loading]);
 
   // Forward wheel events to page scroll when header needs to show/hide
+  // biome-ignore lint/correctness/useExhaustiveDependencies: リスト描画後に wheel リスナーを張り直すための意図的な依存
   useEffect(() => {
     const panel = splitPanelRef.current;
     if (!panel) return;
@@ -88,6 +90,7 @@ export default function CompanyApplicationsPage() {
 
   // Save scroll positions continuously
   const restoredScrollRef = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: リスト描画後にスクロールリスナーを張り直すための意図的な依存
   useEffect(() => {
     const panel = leftPanelRef.current;
     const onPanelScroll = () => {

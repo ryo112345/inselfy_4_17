@@ -1,6 +1,5 @@
 import { execSync } from "node:child_process";
-import { readFileSync, unlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { estimateBT } from "./bradley-terry";
@@ -24,7 +23,7 @@ describe("Cross-verify TS vs Go BT estimation", () => {
     const tsResult = estimateBT(wins);
 
     const backendDir = join(process.cwd(), "../backend");
-    const output = execSync(
+    const _output = execSync(
       `cd ${backendDir} && go test ./internal/domain/workvalues/ -run TestEstimateBT_TransitiveOrder -v -json`,
       // CI のコールドキャッシュでは go mod download + コンパイルが走るため余裕を持たせる
       { encoding: "utf-8", timeout: 120_000 },

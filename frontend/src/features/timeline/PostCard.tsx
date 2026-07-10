@@ -363,6 +363,7 @@ function QuoteForm({ quotedPost, onClose }: { quotedPost: PostItem; onClose: () 
     textareaRef.current?.focus();
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: content 変更時に textarea の高さを再計測するための意図的な依存
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;

@@ -235,10 +235,10 @@ export function useTalentSearch() {
   );
 
   // Sync selectedUserId to URL when it changes (after search)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 検索後の selectedUserId 変更時のみ URL 同期する意図
   useEffect(() => {
     if (!searched) return;
     syncFiltersToURL();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUserId]);
 
   const buildDiagnosticParams = useCallback(
@@ -316,6 +316,7 @@ export function useTalentSearch() {
 
   // Auto-search on mount: restore from URL or from team page link
   const didRestoreRef = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: マウント時の復元処理のみ実行する意図
   useEffect(() => {
     if (didRestoreRef.current) return;
     didRestoreRef.current = true;
@@ -330,7 +331,6 @@ export function useTalentSearch() {
       syncFiltersToURL();
       fetchTalents(diagnosticType, buildDiagnosticParams(0, restoreLimit), false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
