@@ -96,8 +96,19 @@ export function AiReportSection({
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [scrollSpacer, setScrollSpacer] = useState(false);
+  // fetch/ポーリング成功時に true にすると、reportContent 反映後の
+  // レンダーでタイプライターを開始する（start は取得時点の
+  // reportContent をクロージャで掴むため、同期呼び出しでは空になる）
+  const [pendingTypewriter, setPendingTypewriter] = useState(false);
   const { displayed, done, start } = useTypewriter(reportContent);
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (pendingTypewriter && reportContent) {
+      setPendingTypewriter(false);
+      start();
+    }
+  }, [pendingTypewriter, reportContent, start]);
 
   useEffect(() => {
     let cancelled = false;
@@ -133,6 +144,7 @@ export function AiReportSection({
       if (variant === "generate") {
         setShowReport(true);
         setNotFound(false);
+        if (data.firstView) setPendingTypewriter(true);
       } else if (!data.firstView) {
         setShowReport(true);
       }
@@ -172,6 +184,7 @@ export function AiReportSection({
             setReportContent(data.content);
             setFirstView(!!data.firstView);
             setShowReport(true);
+            if (data.firstView) setPendingTypewriter(true);
           } else {
             setNotFound(true);
           }
