@@ -28,6 +28,7 @@ import "./models/company-team.tsp";
 import "./models/job-posting.tsp";
 import "./models/interview.tsp";
 import "./models/integrated-report.tsp";
+import "./models/search.tsp";
 import "./routes/users.tsp";
 import "./routes/experiences.tsp";
 import "./routes/educations.tsp";
@@ -55,6 +56,7 @@ import "./routes/company-teams.tsp";
 import "./routes/job-postings.tsp";
 import "./routes/interviews.tsp";
 import "./routes/integrated-report.tsp";
+import "./routes/search.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;

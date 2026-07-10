@@ -143,6 +143,7 @@ func registerRoutes(ctx context.Context, e *echo.Echo, d *deps) (*httpcontroller
 	wireAuth(e, d, jwtMW, companyJwtMW)
 	wireUser(e, d, jwtMW)
 	wireContent(e, d, jwtMW, optionalJwtMW, companyJwtMW)
+	wireSearch(e, d, jwtMW)
 	wireDiagnosis(e, d, jwtMW, anyJwtMW)
 	wireCompany(e, d, companyJwtMW)
 	wireScout(e, d, jwtMW, companyJwtMW)

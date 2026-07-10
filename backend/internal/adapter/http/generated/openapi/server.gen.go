@@ -2826,6 +2826,147 @@ type ModelsScoutTemplateResponse struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// ModelsSearchAllResponse 横断検索結果（カテゴリごとの上位数件＋総件数）
+type ModelsSearchAllResponse struct {
+	// Articles 記事
+	Articles ModelsSearchArticleListResponse `json:"articles"`
+
+	// Jobs 求人
+	Jobs ModelsSearchJobListResponse `json:"jobs"`
+
+	// Posts 投稿
+	Posts ModelsSearchPostListResponse `json:"posts"`
+
+	// Users ユーザー
+	Users ModelsSearchUserListResponse `json:"users"`
+}
+
+// ModelsSearchArticleItem 検索結果: 記事
+type ModelsSearchArticleItem struct {
+	// AuthorName 著者名
+	AuthorName string `json:"authorName"`
+
+	// Excerpt 本文スニペット（先頭部分）
+	Excerpt string `json:"excerpt"`
+
+	// Id 記事ID
+	Id ModelsUuid `json:"id"`
+
+	// IsPaid 有料記事か
+	IsPaid bool `json:"isPaid"`
+
+	// PublishedAt 公開日時
+	PublishedAt time.Time `json:"publishedAt"`
+
+	// Tags タグ
+	Tags []string `json:"tags"`
+
+	// Title タイトル
+	Title string `json:"title"`
+}
+
+// ModelsSearchArticleListResponse 記事検索結果一覧
+type ModelsSearchArticleListResponse struct {
+	// Items アイテム一覧
+	Items []ModelsSearchArticleItem `json:"items"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsSearchJobItem 検索結果: 求人
+type ModelsSearchJobItem struct {
+	// CompanyLogoUrl 企業ロゴURL
+	CompanyLogoUrl *string `json:"companyLogoUrl,omitempty"`
+
+	// CompanyName 企業名
+	CompanyName *string `json:"companyName,omitempty"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// EmploymentType 雇用形態
+	EmploymentType string `json:"employmentType"`
+
+	// Id 求人ID
+	Id ModelsUuid `json:"id"`
+
+	// Location 勤務地
+	Location *string `json:"location,omitempty"`
+
+	// Title 求人タイトル
+	Title string `json:"title"`
+}
+
+// ModelsSearchJobListResponse 求人検索結果一覧
+type ModelsSearchJobListResponse struct {
+	// Items アイテム一覧
+	Items []ModelsSearchJobItem `json:"items"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsSearchPostItem 検索結果: 投稿
+type ModelsSearchPostItem struct {
+	// Content 本文
+	Content string `json:"content"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id 投稿ID
+	Id ModelsUuid `json:"id"`
+
+	// Name 投稿者表示名
+	Name string `json:"name"`
+
+	// UserId 投稿者ユーザーID
+	UserId ModelsUuid `json:"userId"`
+
+	// Username 投稿者ユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsSearchPostListResponse 投稿検索結果一覧
+type ModelsSearchPostListResponse struct {
+	// Items アイテム一覧
+	Items []ModelsSearchPostItem `json:"items"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsSearchUserItem 検索結果: ユーザー
+type ModelsSearchUserItem struct {
+	// AvatarUrl アバターURL
+	AvatarUrl *string `json:"avatarUrl,omitempty"`
+
+	// Headline 見出し（肩書き）
+	Headline *string `json:"headline,omitempty"`
+
+	// Id ユーザーID
+	Id ModelsUuid `json:"id"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// ProfileColor プロフィールカラー
+	ProfileColor *string `json:"profileColor,omitempty"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsSearchUserListResponse ユーザー検索結果一覧
+type ModelsSearchUserListResponse struct {
+	// Items アイテム一覧
+	Items []ModelsSearchUserItem `json:"items"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
 // ModelsSelectSlotRequest スロット選択リクエスト。slotId 指定か、startTime/endTime の直接指定
 type ModelsSelectSlotRequest struct {
 	// EndTime 直接指定の終了日時（RFC3339、空文字可）
@@ -3863,6 +4004,63 @@ type CandidateScoutsListCandidateScoutsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// SearchSearchAllParams defines parameters for SearchSearchAll.
+type SearchSearchAllParams struct {
+	// Q 検索キーワード
+	Q string `form:"q" json:"q"`
+
+	// LimitPerType カテゴリごとの取得件数（デフォルト3、最大10）
+	LimitPerType *int32 `form:"limitPerType,omitempty" json:"limitPerType,omitempty"`
+}
+
+// SearchSearchArticlesParams defines parameters for SearchSearchArticles.
+type SearchSearchArticlesParams struct {
+	// Q 検索キーワード
+	Q string `form:"q" json:"q"`
+
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// SearchSearchJobsParams defines parameters for SearchSearchJobs.
+type SearchSearchJobsParams struct {
+	// Q 検索キーワード
+	Q string `form:"q" json:"q"`
+
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// SearchSearchPostsParams defines parameters for SearchSearchPosts.
+type SearchSearchPostsParams struct {
+	// Q 検索キーワード
+	Q string `form:"q" json:"q"`
+
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// SearchSearchUsersParams defines parameters for SearchSearchUsers.
+type SearchSearchUsersParams struct {
+	// Q 検索キーワード
+	Q string `form:"q" json:"q"`
+
+	// Limit 取得件数
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Offset オフセット
+	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // SimilarUsersGetSimilarUsersParams defines parameters for SimilarUsersGetSimilarUsers.
 type SimilarUsersGetSimilarUsersParams struct {
 	// Limit 取得件数（1-50、デフォルト10）
@@ -4469,6 +4667,21 @@ type ServerInterface interface {
 	// Respond to a scout
 	// (POST /api/scouts/{scoutId}/respond)
 	CandidateScoutsRespondToScout(ctx echo.Context, scoutId ModelsUuid) error
+	// Search across users, articles, posts and jobs
+	// (GET /api/search)
+	SearchSearchAll(ctx echo.Context, params SearchSearchAllParams) error
+	// Search articles
+	// (GET /api/search/articles)
+	SearchSearchArticles(ctx echo.Context, params SearchSearchArticlesParams) error
+	// Search jobs
+	// (GET /api/search/jobs)
+	SearchSearchJobs(ctx echo.Context, params SearchSearchJobsParams) error
+	// Search posts
+	// (GET /api/search/posts)
+	SearchSearchPosts(ctx echo.Context, params SearchSearchPostsParams) error
+	// Search users
+	// (GET /api/search/users)
+	SearchSearchUsers(ctx echo.Context, params SearchSearchUsersParams) error
 	// Get team-diagnose info by token
 	// (GET /api/team-diagnose/{token})
 	TeamDiagnoseGetDiagnoseByToken(ctx echo.Context, token string) error
@@ -7245,6 +7458,169 @@ func (w *ServerInterfaceWrapper) CandidateScoutsRespondToScout(ctx echo.Context)
 	return err
 }
 
+// SearchSearchAll converts echo context to params.
+func (w *ServerInterfaceWrapper) SearchSearchAll(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SearchSearchAllParams
+	// ------------- Required query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "limitPerType" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limitPerType", ctx.QueryParams(), &params.LimitPerType, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limitPerType: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SearchSearchAll(ctx, params)
+	return err
+}
+
+// SearchSearchArticles converts echo context to params.
+func (w *ServerInterfaceWrapper) SearchSearchArticles(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SearchSearchArticlesParams
+	// ------------- Required query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SearchSearchArticles(ctx, params)
+	return err
+}
+
+// SearchSearchJobs converts echo context to params.
+func (w *ServerInterfaceWrapper) SearchSearchJobs(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SearchSearchJobsParams
+	// ------------- Required query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SearchSearchJobs(ctx, params)
+	return err
+}
+
+// SearchSearchPosts converts echo context to params.
+func (w *ServerInterfaceWrapper) SearchSearchPosts(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SearchSearchPostsParams
+	// ------------- Required query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SearchSearchPosts(ctx, params)
+	return err
+}
+
+// SearchSearchUsers converts echo context to params.
+func (w *ServerInterfaceWrapper) SearchSearchUsers(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SearchSearchUsersParams
+	// ------------- Required query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, true, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "limit", ctx.QueryParams(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "offset", ctx.QueryParams(), &params.Offset, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SearchSearchUsers(ctx, params)
+	return err
+}
+
 // TeamDiagnoseGetDiagnoseByToken converts echo context to params.
 func (w *ServerInterfaceWrapper) TeamDiagnoseGetDiagnoseByToken(ctx echo.Context) error {
 	var err error
@@ -8072,6 +8448,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/scouts/:scoutId", wrapper.CandidateScoutsGetCandidateScoutDetail)
 	router.POST(baseURL+"/api/scouts/:scoutId/reply", wrapper.CandidateScoutsCandidateScoutReply)
 	router.POST(baseURL+"/api/scouts/:scoutId/respond", wrapper.CandidateScoutsRespondToScout)
+	router.GET(baseURL+"/api/search", wrapper.SearchSearchAll)
+	router.GET(baseURL+"/api/search/articles", wrapper.SearchSearchArticles)
+	router.GET(baseURL+"/api/search/jobs", wrapper.SearchSearchJobs)
+	router.GET(baseURL+"/api/search/posts", wrapper.SearchSearchPosts)
+	router.GET(baseURL+"/api/search/users", wrapper.SearchSearchUsers)
 	router.GET(baseURL+"/api/team-diagnose/:token", wrapper.TeamDiagnoseGetDiagnoseByToken)
 	router.POST(baseURL+"/api/team-diagnose/:token/career-interest/sessions", wrapper.TeamDiagnoseStartDiagnoseCiSession)
 	router.POST(baseURL+"/api/team-diagnose/:token/career-interest/sessions/:sessionId/results", wrapper.TeamDiagnoseSubmitDiagnoseCiResult)
