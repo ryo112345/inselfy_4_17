@@ -11,11 +11,11 @@ import { DEFAULT_BADGE, SCORE_COLORS } from "@/features/career-interest/componen
 export function CareerInterestResultContent({
   sessionId,
   initialData,
-  isOwner = true,
+  isOwner,
 }: {
   sessionId: string;
   initialData?: ResultDTO | null;
-  isOwner?: boolean;
+  isOwner: boolean;
 }) {
   const [result, setResult] = useState<ResultDTO | null>(initialData ?? null);
   const [error, setError] = useState<string | null>(null);

@@ -5,7 +5,8 @@ import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
 import { ACCENT } from "@/constants/theme";
-import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
+import { getCurrentUsername, getUsernameFromCookie } from "@/features/auth/viewer";
+import { fetchInitialFollowing, fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 import { getResultBySessionId } from "@/features/work-values/api";
 import { buildCookieHeader } from "@/lib/cookie-header";
 
@@ -29,8 +30,15 @@ export default async function WorkValuesResultPage({
   }
 
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
-  const data = await fetchPanelDataByUserId(result.userId, cookieHeader);
+  const [data, currentUsername] = await Promise.all([
+    fetchPanelDataByUserId(result.userId, cookieHeader),
+    getCurrentUsername(cookieHeader),
+  ]);
   if (!data) notFound();
+  const isOwner = (currentUsername ?? getUsernameFromCookie(cookieStore)) === data.username;
+  const initialFollowing = isOwner
+    ? null
+    : await fetchInitialFollowing(data.username, cookieHeader);
 
   const wvIndex = 2;
   const profileColor = data.user.profileColor ?? ACCENT;
@@ -46,12 +54,16 @@ export default async function WorkValuesResultPage({
       <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 md:ml-[50px]">
         <PanelNavigator
           username={data.username}
+          displayName={data.user.name}
           wvSessionId={data.wvSessionId}
           ciSessionId={data.ciSessionId}
           wvResult={data.wvResult}
           ciResult={data.ciResult}
+          wvHasReport={data.wvHasReport}
+          ciHasReport={data.ciHasReport}
           intReportRequestId={data.intReportRequestId}
           intReportHasReport={data.intReportHasReport}
+          isOwner={isOwner}
           initialPanel={wvIndex}
         >
           <ProfileContent
@@ -60,8 +72,12 @@ export default async function WorkValuesResultPage({
             experiences={data.experiences}
             educations={data.educations}
             skills={data.skills}
+            isOwner={isOwner}
             intReportRequestId={data.intReportRequestId}
             intReportHasReport={data.intReportHasReport}
+            initialFollowing={initialFollowing}
+            followersCount={data.followCounts.followersCount}
+            followingCount={data.followCounts.followingCount}
           />
         </PanelNavigator>
       </main>

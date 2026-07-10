@@ -52,7 +52,7 @@ type Props = {
   experienceCount: number;
   followersCount: number;
   followingCount: number;
-  isOwner?: boolean;
+  isOwner: boolean;
   initialFollowing?: boolean | null;
 };
 
@@ -61,7 +61,7 @@ export function ProfileHeaderCard({
   experienceCount,
   followersCount,
   followingCount,
-  isOwner = true,
+  isOwner,
   initialFollowing = null,
 }: Props) {
   const router = useRouter();

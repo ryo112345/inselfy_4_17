@@ -5,8 +5,9 @@ import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
 import { ACCENT } from "@/constants/theme";
+import { getCurrentUsername, getUsernameFromCookie } from "@/features/auth/viewer";
 import { getIntegratedReport } from "@/features/integrated-report/api";
-import { fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
+import { fetchInitialFollowing, fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 import { buildCookieHeader } from "@/lib/cookie-header";
 
 export const dynamic = "force-dynamic";
@@ -32,8 +33,15 @@ export default async function IntegratedReportPage({
 
   const cookieStore = await cookies();
   const cookieHeader = buildCookieHeader(cookieStore);
-  const data = await fetchPanelDataByUserId(userId, cookieHeader);
+  const [data, currentUsername] = await Promise.all([
+    fetchPanelDataByUserId(userId, cookieHeader),
+    getCurrentUsername(cookieHeader),
+  ]);
   if (!data) notFound();
+  const isOwner = (currentUsername ?? getUsernameFromCookie(cookieStore)) === data.username;
+  const initialFollowing = isOwner
+    ? null
+    : await fetchInitialFollowing(data.username, cookieHeader);
 
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
   const profileColor = data.user.profileColor ?? ACCENT;
@@ -49,12 +57,16 @@ export default async function IntegratedReportPage({
       <main className="min-h-screen bg-[#f6f7f5] pt-2 pb-8 md:ml-[50px]">
         <PanelNavigator
           username={data.username}
+          displayName={data.user.name}
           wvSessionId={data.wvSessionId}
           ciSessionId={data.ciSessionId}
           wvResult={data.wvResult}
           ciResult={data.ciResult}
+          wvHasReport={data.wvHasReport}
+          ciHasReport={data.ciHasReport}
           intReportRequestId={data.intReportRequestId}
           intReportHasReport={data.intReportHasReport}
+          isOwner={isOwner}
           initialPanel={1}
         >
           <ProfileContent
@@ -63,8 +75,12 @@ export default async function IntegratedReportPage({
             experiences={data.experiences}
             educations={data.educations}
             skills={data.skills}
+            isOwner={isOwner}
             intReportRequestId={data.intReportRequestId}
             intReportHasReport={data.intReportHasReport}
+            initialFollowing={initialFollowing}
+            followersCount={data.followCounts.followersCount}
+            followingCount={data.followCounts.followingCount}
           />
         </PanelNavigator>
       </main>

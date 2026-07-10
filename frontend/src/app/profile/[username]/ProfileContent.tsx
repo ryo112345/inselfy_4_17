@@ -22,7 +22,8 @@ type Props = {
   educations: ModelsEducationResponse[];
   skills: ModelsSkillResponse[];
   posts?: PostItem[];
-  isOwner?: boolean;
+  // 「省略＝オーナー扱い」の事故を防ぐため必須（F22）
+  isOwner: boolean;
   intReportRequestId?: string | null;
   intReportHasReport?: boolean;
   initialFollowing?: boolean | null;
@@ -37,7 +38,7 @@ export function ProfileContent({
   educations,
   skills,
   posts,
-  isOwner = true,
+  isOwner,
   intReportRequestId,
   intReportHasReport,
   initialFollowing = null,
