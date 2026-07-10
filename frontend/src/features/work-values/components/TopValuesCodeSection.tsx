@@ -238,23 +238,23 @@ function ValuesRadarChart({ values }: { values: ResultDTO["values"] }) {
   const dataPoints = RADAR_ORDER.map((vid, i) => {
     const v = scoreMap.get(vid);
     const score = v ? v.displayScore / 100 : 0;
-    return hexPoint(i, R * Math.max(score, 0.05));
+    return { id: vid, ...hexPoint(i, R * Math.max(score, 0.05)) };
   });
   const dataPath = `${dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
 
-  const spokes = RADAR_ORDER.map((_, i) => hexPoint(i, R));
+  const spokes = RADAR_ORDER.map((vid, i) => ({ id: vid, ...hexPoint(i, R) }));
 
   return (
     <svg width={190} height={190} className="shrink-0">
-      {gridPaths.map((d, i) => (
-        <path key={i} d={d} fill="none" stroke="#d0ddd6" strokeWidth={0.6} />
+      {gridPaths.map((d) => (
+        <path key={d} d={d} fill="none" stroke="#d0ddd6" strokeWidth={0.6} />
       ))}
-      {spokes.map((p, i) => (
-        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d0ddd6" strokeWidth={0.6} />
+      {spokes.map((p) => (
+        <line key={p.id} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d0ddd6" strokeWidth={0.6} />
       ))}
       <path d={dataPath} fill="rgba(61,139,110,0.15)" stroke="#5a9e82" strokeWidth={1.2} />
-      {dataPoints.map((pt, i) => (
-        <circle key={i} cx={pt.x} cy={pt.y} r={3} fill="#4a9474" />
+      {dataPoints.map((pt) => (
+        <circle key={pt.id} cx={pt.x} cy={pt.y} r={3} fill="#4a9474" />
       ))}
       {RADAR_ORDER.map((vid, i) => {
         const pt = hexPoint(i, R + 20);

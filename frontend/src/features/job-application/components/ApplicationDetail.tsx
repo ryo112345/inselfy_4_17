@@ -273,7 +273,10 @@ export function ApplicationDetail({
                 </h3>
                 <div className="space-y-0">
                   {detail.experiences.map((exp, i) => (
-                    <div key={i} className="flex gap-3 group">
+                    <div
+                      key={`${exp.companyName}-${exp.title}-${exp.startYear}-${exp.startMonth}`}
+                      className="flex gap-3 group"
+                    >
                       <div className="flex flex-col items-center w-4 shrink-0">
                         <div
                           className={`mt-1.5 h-2.5 w-2.5 rounded-full border-2 shrink-0 ${

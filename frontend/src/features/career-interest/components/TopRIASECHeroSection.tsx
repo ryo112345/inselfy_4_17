@@ -231,23 +231,23 @@ function RIASECRadarChart({ types }: { types: ResultDTO["typeScores"] }) {
   const dataPoints = RADAR_ORDER.map((tid, i) => {
     const t = scoreMap.get(tid);
     const score = t ? (t.score - 1) / 4 : 0;
-    return hexPoint(i, R * Math.max(score, 0.05));
+    return { id: tid, ...hexPoint(i, R * Math.max(score, 0.05)) };
   });
   const dataPath = `${dataPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ")} Z`;
 
-  const spokes = RADAR_ORDER.map((_, i) => hexPoint(i, R));
+  const spokes = RADAR_ORDER.map((tid, i) => ({ id: tid, ...hexPoint(i, R) }));
 
   return (
     <svg width={190} height={190} className="shrink-0">
-      {gridPaths.map((d, i) => (
-        <path key={i} d={d} fill="none" stroke="#d0c0e0" strokeWidth={0.6} />
+      {gridPaths.map((d) => (
+        <path key={d} d={d} fill="none" stroke="#d0c0e0" strokeWidth={0.6} />
       ))}
-      {spokes.map((p, i) => (
-        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d0c0e0" strokeWidth={0.6} />
+      {spokes.map((p) => (
+        <line key={p.id} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#d0c0e0" strokeWidth={0.6} />
       ))}
       <path d={dataPath} fill="rgba(139,92,200,0.15)" stroke="#8B5CC8" strokeWidth={1.2} />
-      {dataPoints.map((pt, i) => (
-        <circle key={i} cx={pt.x} cy={pt.y} r={3} fill="#8B5CC8" />
+      {dataPoints.map((pt) => (
+        <circle key={pt.id} cx={pt.x} cy={pt.y} r={3} fill="#8B5CC8" />
       ))}
       {RADAR_ORDER.map((tid, i) => {
         const pt = hexPoint(i, R + 20);

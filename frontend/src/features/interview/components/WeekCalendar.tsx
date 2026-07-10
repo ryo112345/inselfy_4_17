@@ -286,7 +286,7 @@ export function WeekCalendar() {
                 const today = isToday(d);
                 return (
                   <div
-                    key={i}
+                    key={d.getTime()}
                     className={`border-r border-gray-100 px-2 py-2 text-center ${today ? "bg-blue-50" : ""}`}
                   >
                     <p className="text-xs text-gray-500">{DAY_LABELS[i]}</p>
@@ -306,6 +306,7 @@ export function WeekCalendar() {
               <div className="relative">
                 {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                   <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: 固定時間グリッドの罫線・ラベル。index が時刻の同一性そのもので並び替え・挿入なし
                     key={i}
                     className="border-r border-gray-100 pr-2 text-right"
                     style={{ height: `${HOUR_HEIGHT}px` }}
@@ -325,7 +326,7 @@ export function WeekCalendar() {
 
                 return (
                   <div
-                    key={dayIdx}
+                    key={dayStr}
                     data-day-col
                     className={`relative border-r border-gray-100 cursor-pointer ${today ? "bg-blue-50/30" : ""}`}
                     style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
@@ -337,6 +338,7 @@ export function WeekCalendar() {
                     {/* Hour lines */}
                     {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                       <div
+                        // biome-ignore lint/suspicious/noArrayIndexKey: 固定時間グリッドの罫線・ラベル。index が時刻の同一性そのもので並び替え・挿入なし
                         key={i}
                         className="absolute left-0 right-0 border-t border-gray-100"
                         style={{ top: `${i * HOUR_HEIGHT}px` }}

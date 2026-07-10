@@ -177,6 +177,7 @@ export default function TalentsPage() {
         >
           <div className="w-full lg:w-[400px] lg:shrink-0 lg:border-r border-gray-200 p-3 space-y-3 animate-pulse">
             {[...Array(5)].map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: 内容を持たないスケルトン。index 以外のキーが存在しない
               <div key={i} className="rounded-xl bg-gray-100 p-4">
                 <div className="flex gap-3">
                   <div className="h-10 w-10 rounded-full bg-gray-200" />

@@ -264,6 +264,7 @@ export default function CompanyApplicationsPage() {
         >
           <div className="w-full lg:w-[520px] lg:shrink-0 lg:border-r border-gray-100 p-3 space-y-3 animate-pulse">
             {[...Array(5)].map((_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: 内容を持たないスケルトン。index 以外のキーが存在しない
               <div key={i} className="rounded-xl bg-gray-100 p-4">
                 <div className="flex gap-3.5">
                   <div className="h-12 w-12 rounded-full bg-gray-200" />

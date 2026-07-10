@@ -350,12 +350,12 @@ export function ProposalCard({
         {message && <p className="text-sm text-gray-700">{message}</p>}
         {location && <p className="text-xs text-gray-500 mt-1">場所: {location}</p>}
         <div className="mt-2 space-y-1">
-          {slots.map((slot, i) => {
+          {slots.map((slot) => {
             const s = new Date(slot.start_time);
             const e = new Date(slot.end_time);
             const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
             return (
-              <p key={i} className="text-sm font-medium text-gray-900">
+              <p key={slot.start_time} className="text-sm font-medium text-gray-900">
                 {s.getMonth() + 1}/{s.getDate()}({weekdays[s.getDay()]}) {formatTimeFromDate(s)} –{" "}
                 {formatTimeFromDate(e)}
               </p>
@@ -416,7 +416,10 @@ export function ProposalCard({
             const today = isToday(d);
             const hasWindow = windows.some((w) => w.dayIndex === i);
             return (
-              <div key={i} className={`py-1 text-center ${today ? "bg-blue-50 rounded-t" : ""}`}>
+              <div
+                key={d.getTime()}
+                className={`py-1 text-center ${today ? "bg-blue-50 rounded-t" : ""}`}
+              >
                 <p className="text-[10px] text-gray-500">{DAY_LABELS[d.getDay()]}</p>
                 <p
                   className={`text-xs font-semibold ${hasWindow ? "text-blue-600" : today ? "text-blue-500" : "text-gray-400"}`}
@@ -441,6 +444,7 @@ export function ProposalCard({
             <div className="relative">
               {Array.from({ length: hours }, (_, i) => (
                 <div
+                  // biome-ignore lint/suspicious/noArrayIndexKey: 固定時間グリッドの罫線・ラベル。index が時刻の同一性そのもので並び替え・挿入なし
                   key={i}
                   className="absolute right-1"
                   style={{ top: `${i * HOUR_HEIGHT - 5}px` }}
@@ -456,12 +460,13 @@ export function ProposalCard({
               const dayWindows = windows.filter((w) => w.dayIndex === dayIdx);
               return (
                 <div
-                  key={dayIdx}
+                  key={d.getTime()}
                   className={`relative border-l border-gray-100 ${today ? "bg-blue-50/20" : ""} ${canSelect ? "cursor-pointer" : ""}`}
                   onClick={(e) => handleClick(dayIdx, e)}
                 >
                   {Array.from({ length: hours }, (_, i) => (
                     <div
+                      // biome-ignore lint/suspicious/noArrayIndexKey: 固定時間グリッドの罫線・ラベル。index が時刻の同一性そのもので並び替え・挿入なし
                       key={i}
                       className="absolute left-0 right-0 border-t border-gray-100"
                       style={{ top: `${i * HOUR_HEIGHT}px` }}
@@ -469,9 +474,9 @@ export function ProposalCard({
                   ))}
 
                   {/* Available windows (light blue background) */}
-                  {dayWindows.map((w, wi) => (
+                  {dayWindows.map((w) => (
                     <div
-                      key={wi}
+                      key={`${w.startMinutes}-${w.endMinutes}`}
                       className="absolute left-0.5 right-0.5 rounded-md bg-blue-100/60 border border-blue-200/50"
                       style={{
                         top: `${offsetY(w.startMinutes)}px`,

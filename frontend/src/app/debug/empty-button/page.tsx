@@ -126,7 +126,7 @@ export default function DebugEmptyButtonPage() {
 
         {variants.map((v, i) => (
           <section
-            key={i}
+            key={v.label}
             className="rounded-2xl border border-gray-200/80 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]"
           >
             <div className="mb-3 flex items-start justify-between gap-4">

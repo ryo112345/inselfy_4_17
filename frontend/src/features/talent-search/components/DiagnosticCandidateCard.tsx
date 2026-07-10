@@ -200,8 +200,11 @@ export function DiagnosticCandidateCard({
       {/* Row 2: Recent experiences (up to 2) */}
       {recentExps.length > 0 && (
         <div className="mt-3 space-y-1">
-          {recentExps.map((exp, i) => (
-            <div key={i} className="flex items-center gap-1.5 min-w-0">
+          {recentExps.map((exp) => (
+            <div
+              key={`${exp.companyName}-${exp.title}`}
+              className="flex items-center gap-1.5 min-w-0"
+            >
               <svg
                 width={15}
                 height={15}

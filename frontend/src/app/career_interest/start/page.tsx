@@ -410,9 +410,9 @@ function FloatingShapes() {
         }
       `}</style>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {SHAPES.map((s, i) => (
+        {SHAPES.map((s) => (
           <div
-            key={i}
+            key={`${s.type}-${s.top}-${s.left}`}
             className="absolute blur-[3px]"
             style={
               {

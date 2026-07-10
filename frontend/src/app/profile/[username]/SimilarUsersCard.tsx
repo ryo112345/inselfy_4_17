@@ -86,8 +86,8 @@ function SimilarUserRow({ user }: { user: ModelsSimilarUserItem }) {
 
         {experiences.length > 0 && (
           <div className="mt-1.5 space-y-1.5">
-            {experiences.map((exp, i) => (
-              <div key={i} className="flex gap-1.5">
+            {experiences.map((exp) => (
+              <div key={`${exp.companyName}-${exp.title}`} className="flex gap-1.5">
                 <span
                   className={`mt-[5px] inline-block w-1.5 h-1.5 rounded-full shrink-0 ${exp.isCurrent ? "bg-emerald-400" : "bg-gray-300"}`}
                 />
