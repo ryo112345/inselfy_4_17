@@ -4,6 +4,7 @@ import { MobileFooter } from "@/app/components/MobileFooter";
 import { ConfirmDialogProvider, ToastProvider } from "@/components/ui";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { GoogleProvider } from "@/features/auth/google-provider";
+import { getViewer } from "@/features/auth/viewer";
 import { UnreadMessagingProvider } from "@/features/messaging/unread-context";
 import { UnreadScoutProvider } from "@/features/scout/unread-context";
 import "./globals.css";
@@ -26,12 +27,15 @@ export const metadata: Metadata = {
   description: "価値観に寄り添う逆求人プラットフォーム",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // 閲覧者をサーバー側で解決して注入し、クライアント初回の /api/auth/me
+  // ウォーターフォールを省略する（未解決時は null → 従来のクライアントフロー）
+  const initialUser = await getViewer();
   return (
     <html lang="ja" className={`${notoSansJp.variable} ${plusJakartaSans.variable}`}>
       <body className="antialiased">
         <GoogleProvider>
-          <AuthProvider>
+          <AuthProvider initialUser={initialUser}>
             <UnreadScoutProvider>
               <UnreadMessagingProvider>
                 <ToastProvider>

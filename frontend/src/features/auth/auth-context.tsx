@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
-type AuthUser = {
+export type AuthUser = {
   id: string;
   username: string;
   name: string;
@@ -23,9 +23,19 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function AuthProvider({
+  children,
+  initialUser,
+}: {
+  children: ReactNode;
+  // layout サーバー側で解決済みの閲覧者。渡されたらクライアント初回の
+  // /api/auth/me フェッチを省略する。null は「サーバー側で未解決
+  // （未ログイン or access token 失効）」を意味し、従来どおり
+  // クライアント側で /me → refresh のフローを実行する。
+  initialUser?: AuthUser | null;
+}) {
+  const [user, setUser] = useState<AuthUser | null>(initialUser ?? null);
+  const [isLoading, setIsLoading] = useState(!initialUser);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -52,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (initialUser) return;
     fetch("/api/auth/me", { credentials: "include" })
       .then(async (res) => {
         if (res.ok) {
@@ -67,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [initialUser]);
 
   const value = useMemo(
     () => ({
