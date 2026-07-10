@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 )
 
 type AdminReportController struct {
@@ -158,14 +159,13 @@ func (c *AdminReportController) GetReport(ctx echo.Context, sessionID string) er
 		_ = c.queries.MarkAIReportViewed(ctx.Request().Context(), pgSessionID)
 	}
 
-	resp := map[string]any{
-		"id":        pgUUIDToString(report.ID),
-		"sessionId": pgUUIDToString(report.SessionID),
-		"content":   report.Content,
-		"createdAt": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-		"firstView": firstView,
-	}
-	return ctx.JSON(http.StatusOK, resp)
+	return ctx.JSON(http.StatusOK, openapi.ModelsAiReportResponse{
+		Id:        pgUUIDToString(report.ID),
+		SessionId: pgUUIDToString(report.SessionID),
+		Content:   report.Content,
+		CreatedAt: report.CreatedAt.Time,
+		FirstView: firstView,
+	})
 }
 
 func (c *AdminReportController) ListReports(ctx echo.Context) error {

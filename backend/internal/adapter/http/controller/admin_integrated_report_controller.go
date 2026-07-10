@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 )
 
@@ -21,17 +22,10 @@ func NewAdminIntegratedReportController(pool *pgxpool.Pool) *AdminIntegratedRepo
 	return &AdminIntegratedReportController{queries: generated.New(pool)}
 }
 
-type createIntegratedReportRequestBody struct {
-	Topic1   int16  `json:"topic1"`
-	Topic2   int16  `json:"topic2"`
-	Topic3   int16  `json:"topic3"`
-	FreeText string `json:"freeText"`
-}
-
 func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) error {
 	userID := authmw.UserID(ctx)
 
-	var body createIntegratedReportRequestBody
+	var body openapi.ModelsCreateIntegratedReportRequest
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
@@ -63,13 +57,13 @@ func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) err
 		return internalError(ctx, err.Error())
 	}
 
-	return ctx.JSON(http.StatusCreated, map[string]any{
-		"id":        pgUUIDToString(req.ID),
-		"topic1":    req.Topic1,
-		"topic2":    req.Topic2,
-		"topic3":    req.Topic3,
-		"freeText":  req.FreeText,
-		"createdAt": req.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+	return ctx.JSON(http.StatusCreated, openapi.ModelsIntegratedReportRequestResponse{
+		Id:        pgUUIDToString(req.ID),
+		Topic1:    req.Topic1,
+		Topic2:    req.Topic2,
+		Topic3:    req.Topic3,
+		FreeText:  req.FreeText,
+		CreatedAt: req.CreatedAt.Time,
 	})
 }
 
@@ -162,13 +156,13 @@ func (ctrl *AdminIntegratedReportController) GetReport(ctx echo.Context, request
 		_ = ctrl.queries.MarkIntegratedReportViewed(ctx.Request().Context(), pgReqID)
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"id":        pgUUIDToString(report.ID),
-		"requestId": pgUUIDToString(report.RequestID),
-		"userId":    pgUUIDToString(report.UserID),
-		"content":   report.Content,
-		"createdAt": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-		"firstView": firstView,
+	return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportResponse{
+		Id:        pgUUIDToString(report.ID),
+		RequestId: pgUUIDToString(report.RequestID),
+		UserId:    pgUUIDToString(report.UserID),
+		Content:   report.Content,
+		CreatedAt: report.CreatedAt.Time,
+		FirstView: firstView,
 	})
 }
 
@@ -194,12 +188,12 @@ func (ctrl *AdminIntegratedReportController) GetReportByUser(ctx echo.Context) e
 		_ = ctrl.queries.MarkIntegratedReportViewed(ctx.Request().Context(), report.RequestID)
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"id":        pgUUIDToString(report.ID),
-		"requestId": pgUUIDToString(report.RequestID),
-		"content":   report.Content,
-		"createdAt": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-		"firstView": firstView,
+	return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportMineResponse{
+		Id:        pgUUIDToString(report.ID),
+		RequestId: pgUUIDToString(report.RequestID),
+		Content:   report.Content,
+		CreatedAt: report.CreatedAt.Time,
+		FirstView: firstView,
 	})
 }
 
@@ -215,7 +209,9 @@ func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) 
 	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx.Request().Context(), pgUserID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusOK, map[string]any{"status": "none"})
+			return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportStatusResponse{
+				Status: openapi.ModelsIntegratedReportStatusResponseStatusNone,
+			})
 		}
 		return internalError(ctx, err.Error())
 	}
@@ -223,17 +219,19 @@ func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) 
 	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), req.ID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return ctx.JSON(http.StatusOK, map[string]any{
-				"status":    "pending",
-				"requestId": pgUUIDToString(req.ID),
+			requestID := pgUUIDToString(req.ID)
+			return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportStatusResponse{
+				Status:    openapi.ModelsIntegratedReportStatusResponseStatusPending,
+				RequestId: &requestID,
 			})
 		}
 		return internalError(ctx, err.Error())
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"status":    "ready",
-		"requestId": pgUUIDToString(report.RequestID),
+	requestID := pgUUIDToString(report.RequestID)
+	return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportStatusResponse{
+		Status:    openapi.ModelsIntegratedReportStatusResponseStatusReady,
+		RequestId: &requestID,
 	})
 }
 
@@ -301,10 +299,10 @@ func (ctrl *AdminIntegratedReportController) GetLatestRequest(ctx echo.Context, 
 		hasReport = true
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"requestId": pgUUIDToString(req.ID),
-		"userId":    pgUUIDToString(req.UserID),
-		"hasReport": hasReport,
-		"createdAt": req.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+	return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportLatestRequestResponse{
+		RequestId: pgUUIDToString(req.ID),
+		UserId:    pgUUIDToString(req.UserID),
+		HasReport: hasReport,
+		CreatedAt: req.CreatedAt.Time,
 	})
 }
