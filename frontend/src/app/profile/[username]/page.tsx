@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { Sidebar } from "@/app/components/Sidebar";
 import { ACCENT } from "@/constants/theme";
-import "@/external/client/api/client";
+// SSR の SDK 呼び出しに認証 Cookie を自動転送する interceptor を登録する
+import "@/external/client/api/server";
 import {
   type ModelsSimilarUserItem,
   similarUsersGetSimilarUsers,
@@ -12,7 +13,6 @@ import {
 import { getCurrentUsername, getUsernameFromCookie } from "@/features/auth/viewer";
 import { fetchInitialFollowing, fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
 import { fetchUserPosts } from "@/features/timeline/api";
-import { buildCookieHeader } from "@/lib/cookie-header";
 
 import { PanelNavigator } from "./PanelNavigator";
 import { ProfileColorContext } from "./ProfileColorContext";
@@ -21,15 +21,11 @@ import { ProfileContent } from "./ProfileContent";
 export const dynamic = "force-dynamic";
 
 // 類似ユーザー。エラー時は null（カード側でエラー＋再読み込みを表示）
-async function fetchSimilarUsers(
-  userId: string,
-  cookieHeader: string,
-): Promise<ModelsSimilarUserItem[] | null> {
+async function fetchSimilarUsers(userId: string): Promise<ModelsSimilarUserItem[] | null> {
   try {
     const { data, error } = await similarUsersGetSimilarUsers({
       path: { userId },
       query: { limit: 20 },
-      headers: { Cookie: cookieHeader },
     });
     if (error || !data) return null;
     return data.items ?? [];
@@ -39,9 +35,7 @@ async function fetchSimilarUsers(
 }
 
 // generateMetadata とページ本体で同一リクエスト内のフェッチを共有する
-const getPanelData = cache((username: string, cookieHeader: string) =>
-  fetchPanelDataByUsername(username, cookieHeader),
-);
+const getPanelData = cache((username: string) => fetchPanelDataByUsername(username));
 
 export async function generateMetadata({
   params,
@@ -49,8 +43,7 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  const cookieStore = await cookies();
-  const data = await getPanelData(username, buildCookieHeader(cookieStore));
+  const data = await getPanelData(username);
   if (!data) return {};
   const title = `${data.user.name} (@${data.username}) | inselfy`;
   const description = data.user.headline ?? undefined;
@@ -70,11 +63,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   const { username } = await params;
   const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get("sidebar-open")?.value === "true";
-  const cookieHeader = buildCookieHeader(cookieStore);
   const [data, currentUsername, initialFollowing] = await Promise.all([
-    getPanelData(username, cookieHeader),
-    getCurrentUsername(cookieHeader),
-    fetchInitialFollowing(username, cookieHeader),
+    getPanelData(username),
+    getCurrentUsername(),
+    fetchInitialFollowing(username),
   ]);
   if (!data) notFound();
   const isOwner = (currentUsername ?? getUsernameFromCookie(cookieStore)) === data.username;
@@ -85,7 +77,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
     fetchUserPosts(data.user.id)
       .then((res) => res.items ?? [])
       .catch(() => []),
-    fetchSimilarUsers(data.user.id, cookieHeader),
+    fetchSimilarUsers(data.user.id),
   ]);
 
   return (

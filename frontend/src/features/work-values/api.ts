@@ -70,26 +70,19 @@ export async function submitResultByDiagnoseToken(
   return data;
 }
 
-// cookieHeader はSSR（サーバコンポーネント）から呼ぶ際に認証Cookieを転送するために渡す
-export async function getResultBySessionId(
-  sessionId: string,
-  cookieHeader?: string,
-): Promise<ResultDTO> {
+// SSR（サーバコンポーネント）からの認証Cookie転送は @/external/client/api/server の
+// interceptor が担うため、呼び出し側での cookie 手渡しは不要。
+export async function getResultBySessionId(sessionId: string): Promise<ResultDTO> {
   const { data, error, response } = await workValuesWvGetResultBySession({
     path: { sessionId },
-    headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
   });
   if (error || !data) throw new Error(`Failed to fetch result: ${response.status}`);
   return data;
 }
 
-export async function getLatestResult(
-  userId: string,
-  cookieHeader?: string,
-): Promise<ResultDTO | null> {
+export async function getLatestResult(userId: string): Promise<ResultDTO | null> {
   const { data, error, response } = await workValuesWvGetLatestResult({
     path: { userId },
-    headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
   });
   if (response.status === 404) return null;
   if (error || !data) throw new Error(`Failed to fetch latest result: ${response.status}`);
@@ -99,13 +92,9 @@ export async function getLatestResult(
 export type AiReportDTO = ModelsAiReportResponse;
 
 // AIレポート取得。未生成（404）等のエラーは null を返す。
-export async function getAiReport(
-  sessionId: string,
-  cookieHeader?: string,
-): Promise<AiReportDTO | null> {
+export async function getAiReport(sessionId: string): Promise<AiReportDTO | null> {
   const { data, error } = await workValuesWvGetAiReport({
     path: { sessionId },
-    headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
   });
   if (error || !data) return null;
   return data;
