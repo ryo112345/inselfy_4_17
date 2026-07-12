@@ -55,9 +55,17 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
   const readingTime = Math.max(1, Math.round(charCount / 500));
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: 親カード内にネストする記事プレビューの遷移領域のため a 要素にできない
     <div
+      role="link"
+      tabIndex={0}
       className="mt-2 rounded-2xl border border-gray-200 overflow-hidden hover:bg-gray-50/50 transition-colors cursor-pointer"
       onClick={(e) => {
+        e.stopPropagation();
+        router.push(`/articles/${article.id}`);
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== "Enter" || e.target !== e.currentTarget) return;
         e.stopPropagation();
         router.push(`/articles/${article.id}`);
       }}
@@ -102,6 +110,7 @@ export function ArticlePreviewCard({ articleId }: { articleId: string }) {
 function ArticleIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={14}
       height={14}
       viewBox="0 0 24 24"

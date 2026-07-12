@@ -178,13 +178,11 @@ function QuizScreen({
 
         {/* score buttons */}
         <div className="relative z-10 px-4 pb-8">
-          <div className="flex gap-1" role="radiogroup" aria-label="興味度を選択">
+          <div className="flex gap-1">
             {SCORE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
-                role="radio"
-                aria-checked={false}
                 aria-label={opt.label.replace("\n", "")}
                 onClick={() => onAnswer(opt.value)}
                 className="group flex-1 flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white/60 backdrop-blur-sm hover:border-blue-400 hover:bg-blue-50/80 active:scale-95 py-3.5 transition-all duration-150 cursor-pointer"
@@ -213,6 +211,7 @@ function CompletedScreen({ onSubmit }: { onSubmit: () => void }) {
         <div className="relative z-10">
           <div className="w-14 h-14 rounded-full border-2 border-blue-400/60 flex items-center justify-center mx-auto mb-6">
             <svg
+              aria-hidden="true"
               className="w-7 h-7 text-blue-500"
               fill="none"
               viewBox="0 0 24 24"
@@ -428,7 +427,7 @@ function FloatingShapes() {
             }
           >
             {s.type === "hex" ? (
-              <svg viewBox="0 0 100 100" className="w-full h-full">
+              <svg aria-hidden="true" viewBox="0 0 100 100" className="w-full h-full">
                 <polygon
                   points="50,2 93,25 93,75 50,98 7,75 7,25"
                   fill={s.color}
@@ -437,7 +436,7 @@ function FloatingShapes() {
                 />
               </svg>
             ) : (
-              <svg viewBox="0 0 100 100" className="w-full h-full">
+              <svg aria-hidden="true" viewBox="0 0 100 100" className="w-full h-full">
                 <rect
                   x="5"
                   y="5"

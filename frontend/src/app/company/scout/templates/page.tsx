@@ -59,6 +59,7 @@ export default function TemplateListPage() {
         className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
       >
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           viewBox="0 0 24 24"
           fill="none"
@@ -114,6 +115,7 @@ export default function TemplateListPage() {
                     編集
                   </Link>
                   <button
+                    type="button"
                     onClick={() => handleDelete(tmpl.id)}
                     disabled={deleting === tmpl.id}
                     className="border border-red-200 text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50 text-sm font-medium transition-colors disabled:opacity-40 cursor-pointer"

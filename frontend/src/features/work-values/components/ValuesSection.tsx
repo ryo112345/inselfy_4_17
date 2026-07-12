@@ -78,6 +78,7 @@ export function ValuesSection({
                 </span>
 
                 <button
+                  type="button"
                   onClick={() => toggle(vid)}
                   className="relative z-10 bg-white text-gray-900 shrink-0 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer mt-1"
                 >

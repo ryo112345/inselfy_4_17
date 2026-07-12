@@ -62,6 +62,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             >
               {toast.type === "error" ? (
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4 shrink-0"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -75,6 +76,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 </svg>
               ) : (
                 <svg
+                  aria-hidden="true"
                   className="h-4 w-4 shrink-0"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -94,6 +96,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 className="ml-1 shrink-0 rounded-full p-0.5 text-white/70 transition hover:text-white"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-3.5 w-3.5"
                   viewBox="0 0 24 24"
                   fill="none"

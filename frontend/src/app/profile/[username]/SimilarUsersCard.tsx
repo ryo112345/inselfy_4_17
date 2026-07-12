@@ -121,7 +121,13 @@ function SimilarUserRow({ user }: { user: ModelsSimilarUserItem }) {
 
 function SmallFaceIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
-    <svg className={className} style={style} viewBox="0 0 24 24" fill="currentColor">
+    <svg
+      aria-hidden="true"
+      className={className}
+      style={style}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
       <circle cx="12" cy="12" r="10" opacity={0.15} />
       <circle cx="9" cy="10" r="1.5" />
       <circle cx="15" cy="10" r="1.5" />

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { timeAgo } from "@/lib/date";
@@ -41,10 +42,11 @@ function AvatarCircle({
 }) {
   if (avatarUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={avatarUrl}
         alt=""
+        width={40}
+        height={40}
         className="shrink-0 w-10 h-10 rounded-full object-cover self-start"
       />
     );
@@ -160,15 +162,17 @@ export function JobResultCard({ job, keyword }: { job: SearchJobItem; keyword: s
       className="flex gap-3 px-4 py-3 border-b border-gray-200/80 hover:bg-gray-50/60 transition-colors"
     >
       {job.companyLogoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={job.companyLogoUrl}
           alt=""
+          width={40}
+          height={40}
           className="shrink-0 w-10 h-10 rounded-lg object-cover border border-gray-200 self-start"
         />
       ) : (
         <div className="shrink-0 w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center self-start">
           <svg
+            aria-hidden="true"
             width={18}
             height={18}
             viewBox="0 0 24 24"

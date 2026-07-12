@@ -36,6 +36,7 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <svg
+                  aria-hidden="true"
                   width={32}
                   height={32}
                   viewBox="0 0 24 24"
@@ -52,6 +53,7 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
             {article.isPaid && (
               <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-light)] text-[var(--accent)] backdrop-blur-sm">
                 <svg
+                  aria-hidden="true"
                   width={12}
                   height={12}
                   viewBox="0 0 24 24"
@@ -86,11 +88,23 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
               {article.title}
             </h3>
             <div className="flex items-center gap-2 mt-auto">
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: authorUsername があるときのみ link ロール・ハンドラを付与する遷移領域 */}
               <div
                 role={article.authorUsername ? "link" : undefined}
+                tabIndex={article.authorUsername ? 0 : undefined}
                 onClick={
                   article.authorUsername
                     ? (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/profile/${article.authorUsername}`);
+                      }
+                    : undefined
+                }
+                onKeyDown={
+                  article.authorUsername
+                    ? (e) => {
+                        if (e.key !== "Enter") return;
                         e.preventDefault();
                         e.stopPropagation();
                         router.push(`/profile/${article.authorUsername}`);
@@ -107,6 +121,7 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
               <div className="flex items-center gap-2 ml-auto shrink-0 text-[12px] text-gray-400">
                 <span className="flex items-center gap-0.5">
                   <svg
+                    aria-hidden="true"
                     width={12}
                     height={12}
                     viewBox="0 0 24 24"
@@ -144,6 +159,7 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <svg
+                aria-hidden="true"
                 width={32}
                 height={32}
                 viewBox="0 0 24 24"
@@ -160,6 +176,7 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
           {article.isPaid && (
             <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--accent-light)] text-[var(--accent)] backdrop-blur-sm">
               <svg
+                aria-hidden="true"
                 width={12}
                 height={12}
                 viewBox="0 0 24 24"
@@ -184,11 +201,23 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
         </div>
 
         <div className="flex items-center gap-2 px-3 pt-1 pb-3">
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: authorUsername があるときのみ link ロール・ハンドラを付与する遷移領域 */}
           <div
             role={article.authorUsername ? "link" : undefined}
+            tabIndex={article.authorUsername ? 0 : undefined}
             onClick={
               article.authorUsername
                 ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/profile/${article.authorUsername}`);
+                  }
+                : undefined
+            }
+            onKeyDown={
+              article.authorUsername
+                ? (e) => {
+                    if (e.key !== "Enter") return;
                     e.preventDefault();
                     e.stopPropagation();
                     router.push(`/profile/${article.authorUsername}`);
@@ -204,6 +233,7 @@ export function ArticleCard({ article, variant = "compact" }: Props) {
           </div>
           <div className="flex items-center gap-1.5 ml-auto shrink-0 text-[12px] text-gray-400">
             <svg
+              aria-hidden="true"
               width={11}
               height={11}
               viewBox="0 0 24 24"

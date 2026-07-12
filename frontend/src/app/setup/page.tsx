@@ -88,6 +88,7 @@ export default function SetupPage() {
                 onChange={(e) => setUsername(e.target.value.replace(/^@/, ""))}
                 placeholder="yamada_taro"
                 className="flex-1 bg-transparent px-2 py-2 text-sm focus:outline-none"
+                // biome-ignore lint/a11y/noAutofocus: 初期設定の単一入力画面。ページの目的そのものへの自動フォーカスで文脈喪失がない
                 autoFocus
               />
             </div>

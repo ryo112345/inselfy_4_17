@@ -211,7 +211,7 @@ function FloatingShapes() {
             }
           >
             {s.type === "hex" ? (
-              <svg viewBox="0 0 100 100" className="w-full h-full">
+              <svg aria-hidden="true" viewBox="0 0 100 100" className="w-full h-full">
                 <polygon
                   points="50,2 93,25 93,75 50,98 7,75 7,25"
                   fill={s.color}
@@ -220,7 +220,7 @@ function FloatingShapes() {
                 />
               </svg>
             ) : (
-              <svg viewBox="0 0 100 100" className="w-full h-full">
+              <svg aria-hidden="true" viewBox="0 0 100 100" className="w-full h-full">
                 <rect
                   x="5"
                   y="5"

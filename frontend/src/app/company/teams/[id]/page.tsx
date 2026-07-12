@@ -233,6 +233,7 @@ export default function TeamDetailPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
       >
         <svg
+          aria-hidden="true"
           width={16}
           height={16}
           viewBox="0 0 24 24"
@@ -250,6 +251,7 @@ export default function TeamDetailPage() {
           <h1 className="text-2xl font-bold text-gray-900">{team.name}</h1>
           {team.description && <p className="mt-1 text-sm text-gray-500">{team.description}</p>}
           <button
+            type="button"
             onClick={handleTogglePublic}
             className="mt-2 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
           >
@@ -265,10 +267,12 @@ export default function TeamDetailPage() {
         </div>
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
             className="rounded-lg border border-gray-200 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
           >
             <svg
+              aria-hidden="true"
               width={18}
               height={18}
               viewBox="0 0 24 24"
@@ -285,10 +289,12 @@ export default function TeamDetailPage() {
           {showDeleteConfirm && (
             <div className="absolute right-0 top-full mt-1 w-56 rounded-xl border border-gray-200 bg-white shadow-lg z-10 py-1">
               <button
+                type="button"
                 onClick={handleDeleteTeam}
                 className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer flex items-center gap-2"
               >
                 <svg
+                  aria-hidden="true"
                   width={14}
                   height={14}
                   viewBox="0 0 24 24"
@@ -341,11 +347,13 @@ export default function TeamDetailPage() {
             </h2>
             {team.members.length < 30 && (
               <button
+                type="button"
                 onClick={() => setShowAddForm(!showAddForm)}
                 className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors cursor-pointer hover:opacity-90"
                 style={{ backgroundColor: "#2979ff" }}
               >
                 <svg
+                  aria-hidden="true"
                   width={14}
                   height={14}
                   viewBox="0 0 24 24"
@@ -365,10 +373,14 @@ export default function TeamDetailPage() {
           <div className="border-b border-gray-100 bg-gray-50 px-6 py-5">
             <form onSubmit={handleAddMember} className="flex items-end gap-3">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-600 mb-1">
+                <label
+                  htmlFor="member-name"
+                  className="block text-sm font-medium text-gray-600 mb-1"
+                >
                   名前 <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="member-name"
                   type="text"
                   value={memberName}
                   onChange={(e) => setMemberName(e.target.value)}
@@ -378,10 +390,14 @@ export default function TeamDetailPage() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-600 mb-1">
+                <label
+                  htmlFor="member-email"
+                  className="block text-sm font-medium text-gray-600 mb-1"
+                >
                   メール（任意）
                 </label>
                 <input
+                  id="member-email"
                   type="email"
                   value={memberEmail}
                   onChange={(e) => setMemberEmail(e.target.value)}
@@ -417,6 +433,7 @@ export default function TeamDetailPage() {
           <div className="px-6 py-12 text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
               <svg
+                aria-hidden="true"
                 width={24}
                 height={24}
                 viewBox="0 0 24 24"
@@ -476,6 +493,7 @@ export default function TeamDetailPage() {
                         {member.isAce && (
                           <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 ring-2 ring-white">
                             <svg
+                              aria-hidden="true"
                               width={8}
                               height={8}
                               viewBox="0 0 24 24"
@@ -517,6 +535,7 @@ export default function TeamDetailPage() {
                     {/* Invite URL */}
                     <div className="flex justify-center">
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           copyInviteUrl(member.inviteToken);
@@ -530,6 +549,7 @@ export default function TeamDetailPage() {
                         {copiedToken === member.inviteToken ? (
                           <>
                             <svg
+                              aria-hidden="true"
                               width={12}
                               height={12}
                               viewBox="0 0 24 24"
@@ -544,6 +564,7 @@ export default function TeamDetailPage() {
                         ) : (
                           <>
                             <svg
+                              aria-hidden="true"
                               width={12}
                               height={12}
                               viewBox="0 0 24 24"
@@ -593,10 +614,12 @@ function MemberMenu({
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className="rounded-lg p-1.5 text-gray-300 hover:bg-gray-100 hover:text-gray-500 transition-colors cursor-pointer"
       >
         <svg
+          aria-hidden="true"
           width={16}
           height={16}
           viewBox="0 0 24 24"
@@ -612,9 +635,11 @@ function MemberMenu({
       </button>
       {open && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: メニュー外クリックで閉じるための透明オーバーレイ。メニュー項目自体はボタンでキーボード到達可能 */}
+          <div role="presentation" className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-gray-200 bg-white shadow-lg z-20 py-1">
             <button
+              type="button"
               onClick={() => {
                 onToggleAce();
                 setOpen(false);
@@ -622,6 +647,7 @@ function MemberMenu({
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2"
             >
               <svg
+                aria-hidden="true"
                 width={14}
                 height={14}
                 viewBox="0 0 24 24"
@@ -634,6 +660,7 @@ function MemberMenu({
               {member.isAce ? "理想の人材像を解除" : "理想の人材像に設定"}
             </button>
             <button
+              type="button"
               onClick={() => {
                 onRemove();
                 setOpen(false);
@@ -641,6 +668,7 @@ function MemberMenu({
               className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer flex items-center gap-2"
             >
               <svg
+                aria-hidden="true"
                 width={14}
                 height={14}
                 viewBox="0 0 24 24"
@@ -680,6 +708,7 @@ function PhaseBanner({
     return (
       <div className="rounded-xl bg-blue-50/60 border border-blue-200 px-5 py-3.5 mb-6 flex items-center gap-3">
         <svg
+          aria-hidden="true"
           width={20}
           height={20}
           viewBox="0 0 24 24"
@@ -699,11 +728,13 @@ function PhaseBanner({
           まずメンバーを追加しましょう。登録すると一人ひとりに専用の診断URLが発行されます。
         </p>
         <button
+          type="button"
           onClick={onAddMember}
           className="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white cursor-pointer hover:opacity-90"
           style={{ backgroundColor: "#2979ff" }}
         >
           <svg
+            aria-hidden="true"
             width={14}
             height={14}
             viewBox="0 0 24 24"
@@ -723,6 +754,7 @@ function PhaseBanner({
     return (
       <div className="rounded-xl bg-emerald-50/60 border border-emerald-200 px-5 py-3 mb-6 flex items-center gap-3">
         <svg
+          aria-hidden="true"
           width={20}
           height={20}
           viewBox="0 0 24 24"
@@ -756,6 +788,7 @@ function PhaseBanner({
       <div className="flex items-center gap-3">
         {isInvite ? (
           <svg
+            aria-hidden="true"
             width={20}
             height={20}
             viewBox="0 0 24 24"
@@ -771,6 +804,7 @@ function PhaseBanner({
           </svg>
         ) : (
           <svg
+            aria-hidden="true"
             width={20}
             height={20}
             viewBox="0 0 24 24"
@@ -844,7 +878,7 @@ function ProgressRing({
   const center = size / 2;
 
   return (
-    <svg width={size} height={size} className="shrink-0 -rotate-90">
+    <svg aria-hidden="true" width={size} height={size} className="shrink-0 -rotate-90">
       <circle
         cx={center}
         cy={center}
@@ -885,6 +919,7 @@ function DiagnosisStatus({ done }: { done: boolean }) {
   return done ? (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-sm font-medium text-emerald-700">
       <svg
+        aria-hidden="true"
         width={12}
         height={12}
         viewBox="0 0 24 24"
@@ -899,6 +934,7 @@ function DiagnosisStatus({ done }: { done: boolean }) {
   ) : (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-50 border border-gray-200 px-3 py-1 text-sm text-gray-400">
       <svg
+        aria-hidden="true"
         width={12}
         height={12}
         viewBox="0 0 24 24"
@@ -999,6 +1035,7 @@ function TeamRadarChartSection({
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5">
                 <svg
+                  aria-hidden="true"
                   width={14}
                   height={14}
                   viewBox="0 0 24 24"
@@ -1011,6 +1048,7 @@ function TeamRadarChartSection({
                 <span className="text-sm text-gray-500">理想の人材像</span>
                 <div className="relative group">
                   <svg
+                    aria-hidden="true"
                     width={14}
                     height={14}
                     viewBox="0 0 24 24"
@@ -1035,6 +1073,7 @@ function TeamRadarChartSection({
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-medium text-gray-700">{aceMember.name}</span>
                   <button
+                    type="button"
                     onClick={onClearAce}
                     className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
                   >

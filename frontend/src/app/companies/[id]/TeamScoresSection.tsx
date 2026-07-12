@@ -44,6 +44,7 @@ export function TeamScoresSection({
         <div className="mt-4 flex gap-2 px-6 overflow-x-auto">
           {teamsWithScores.map((t, i) => (
             <button
+              type="button"
               key={t.teamId}
               onClick={() => setActiveIdx(i)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors cursor-pointer ${

@@ -14,7 +14,11 @@ import { TagInput } from "./TagInput";
 const RichEditor = dynamic(() => import("./RichEditor").then((m) => m.RichEditor), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[300px] animate-pulse rounded-lg bg-gray-50" aria-label="読み込み中" />
+    <div
+      role="status"
+      className="min-h-[300px] animate-pulse rounded-lg bg-gray-50"
+      aria-label="読み込み中"
+    />
   ),
 });
 
@@ -69,7 +73,7 @@ export function ArticleForm({ article }: Props) {
     }
   }
 
-  const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: contentEditable の初期値設定はマウント時のみ行う意図
   useEffect(() => {
@@ -121,6 +125,7 @@ export function ArticleForm({ article }: Props) {
             className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
           >
             <svg
+              aria-hidden="true"
               width={14}
               height={14}
               viewBox="0 0 24 24"
@@ -136,6 +141,7 @@ export function ArticleForm({ article }: Props) {
             {saved && (
               <span className="flex items-center gap-1 text-sm text-[var(--accent)]">
                 <svg
+                  aria-hidden="true"
                   width={14}
                   height={14}
                   viewBox="0 0 24 24"
@@ -186,11 +192,14 @@ export function ArticleForm({ article }: Props) {
                 タイトル
               </span>
             )}
-            <h1
+            {/* biome-ignore lint/a11y/useSemanticElements: 見た目を本文と揃える contentEditable のタイトル入力。input では装飾・自動改行が再現できない */}
+            <div
               ref={titleRef}
               contentEditable
               suppressContentEditableWarning
               role="textbox"
+              aria-label="タイトル"
+              tabIndex={0}
               onInput={handleTitleInput}
               onKeyDown={(e) => {
                 if (e.key === "Enter") e.preventDefault();

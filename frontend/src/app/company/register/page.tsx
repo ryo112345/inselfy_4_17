@@ -70,6 +70,7 @@ export default function CompanyRegisterPage() {
         <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-8 shadow-sm text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
             <svg
+              aria-hidden="true"
               className="h-6 w-6 text-green-600"
               fill="none"
               viewBox="0 0 24 24"

@@ -24,10 +24,12 @@ export function Gallery({ urls }: { urls: string[] }) {
         {urls.length > 1 && (
           <>
             <button
+              type="button"
               onClick={prev}
               className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-sm opacity-0 transition-all hover:bg-white group-hover:opacity-100"
             >
               <svg
+                aria-hidden="true"
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -40,10 +42,12 @@ export function Gallery({ urls }: { urls: string[] }) {
               </svg>
             </button>
             <button
+              type="button"
               onClick={next}
               className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-gray-600 shadow-sm opacity-0 transition-all hover:bg-white group-hover:opacity-100"
             >
               <svg
+                aria-hidden="true"
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -69,6 +73,7 @@ export function Gallery({ urls }: { urls: string[] }) {
         <div className="flex gap-2 overflow-x-auto px-4 py-3">
           {urls.map((url, i) => (
             <button
+              type="button"
               key={url}
               onClick={() => setCurrent(i)}
               className={`flex-shrink-0 cursor-pointer overflow-hidden rounded-lg transition-opacity ${

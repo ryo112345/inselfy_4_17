@@ -76,6 +76,7 @@ export default function JobNewPage() {
               className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
             >
               <svg
+                aria-hidden="true"
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -98,6 +99,7 @@ export default function JobNewPage() {
               className="inline-flex items-center gap-1.5 border border-gray-300 bg-white text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors cursor-pointer"
             >
               <svg
+                aria-hidden="true"
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
                 fill="none"

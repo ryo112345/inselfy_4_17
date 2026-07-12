@@ -298,6 +298,7 @@ export function JobsPageClient({ initialData }: { initialData?: InitialJobSearch
 function ValuesFilterIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={14}
       height={14}
       viewBox="0 0 24 24"
@@ -354,6 +355,7 @@ function FilterSelect({
 function SearchIcon({ className = "" }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       width={16}
       height={16}
@@ -373,6 +375,7 @@ function SearchIcon({ className = "" }: { className?: string }) {
 function EmptyDetailIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={64}
       height={64}
       viewBox="0 0 24 24"
@@ -391,6 +394,7 @@ function EmptyDetailIcon() {
 function EmptySearchIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={48}
       height={48}
       viewBox="0 0 24 24"

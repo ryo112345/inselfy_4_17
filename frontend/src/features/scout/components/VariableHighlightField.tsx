@@ -20,11 +20,13 @@ function renderHighlighted(text: string): ReactNode[] {
 }
 
 export function HighlightInput({
+  id,
   value,
   onChange,
   placeholder,
   className = "",
 }: {
+  id?: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -41,6 +43,7 @@ export function HighlightInput({
         </div>
       )}
       <input
+        id={id}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -53,11 +56,13 @@ export function HighlightInput({
 }
 
 export function HighlightTextarea({
+  id,
   value,
   onChange,
   placeholder,
   className = "",
 }: {
+  id?: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -84,6 +89,7 @@ export function HighlightTextarea({
         </div>
       )}
       <textarea
+        id={id}
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}

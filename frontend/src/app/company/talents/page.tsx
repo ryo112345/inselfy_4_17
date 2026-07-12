@@ -267,6 +267,7 @@ export default function TalentsPage() {
               <div className="flex h-full flex-col items-center justify-center text-center px-6">
                 <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
                   <svg
+                    aria-hidden="true"
                     width={24}
                     height={24}
                     viewBox="0 0 24 24"
@@ -290,6 +291,7 @@ export default function TalentsPage() {
         <div className="flex flex-col items-center justify-center py-16">
           <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
             <svg
+              aria-hidden="true"
               width={24}
               height={24}
               viewBox="0 0 24 24"

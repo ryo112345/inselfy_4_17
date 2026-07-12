@@ -89,8 +89,10 @@ export function ValuesFilterDrawer({
   if (!open) return null;
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: 背景クリックで閉じる補助動線。キーボードはヘッダーの閉じるボタンで対応
     <div
       ref={backdropRef}
+      role="presentation"
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/30"
       onClick={(e) => {
         if (e.target === backdropRef.current) onClose();
@@ -279,6 +281,7 @@ function TabButton({
 function FilterIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={16}
       height={16}
       viewBox="0 0 24 24"
@@ -304,6 +307,7 @@ function FilterIcon() {
 function CloseIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={16}
       height={16}
       viewBox="0 0 24 24"

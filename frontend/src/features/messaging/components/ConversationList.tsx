@@ -15,6 +15,7 @@ export function ConversationList({ conversations, selectedId, onSelect, getDispl
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
         <svg
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -42,6 +43,7 @@ export function ConversationList({ conversations, selectedId, onSelect, getDispl
         return (
           <li key={conv.id}>
             <button
+              type="button"
               onClick={() => onSelect(conv)}
               className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
                 isSelected

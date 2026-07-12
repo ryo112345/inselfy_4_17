@@ -160,6 +160,7 @@ export default function SavedCandidatesPage() {
         <div className="rounded-lg border border-dashed border-gray-300 py-16 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
             <svg
+              aria-hidden="true"
               width={24}
               height={24}
               viewBox="0 0 24 24"
@@ -236,6 +237,7 @@ export default function SavedCandidatesPage() {
             <div className="flex h-full flex-col items-center justify-center text-center px-6">
               <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
                 <svg
+                  aria-hidden="true"
                   width={24}
                   height={24}
                   viewBox="0 0 24 24"
@@ -327,6 +329,7 @@ function CandidateCard({
           {u.headline && <p className="text-[15px] text-gray-500 truncate mt-0.5">{u.headline}</p>}
         </div>
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onUnsave();
@@ -335,6 +338,7 @@ function CandidateCard({
           title="保存を解除"
         >
           <svg
+            aria-hidden="true"
             width={16}
             height={16}
             viewBox="0 0 24 24"
@@ -358,6 +362,7 @@ function CandidateCard({
               className="flex items-center gap-1.5 min-w-0"
             >
               <svg
+                aria-hidden="true"
                 width={15}
                 height={15}
                 viewBox="0 0 24 24"
@@ -496,10 +501,12 @@ function CandidateDetail({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
+            type="button"
             onClick={onUnsave}
             className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-medium text-gray-600 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors cursor-pointer"
           >
             <svg
+              aria-hidden="true"
               width={14}
               height={14}
               viewBox="0 0 24 24"

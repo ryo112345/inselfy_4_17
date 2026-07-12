@@ -85,7 +85,7 @@ const jobs = [
 function PipelineArrow() {
   return (
     <div className="flex shrink-0 items-center px-1">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path
           d="M7 4l6 6-6 6"
           stroke="#cbd5e1"
@@ -101,6 +101,7 @@ function PipelineArrow() {
 const sectionIcons: Record<string, React.ReactNode> = {
   採用パイプライン: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -117,6 +118,7 @@ const sectionIcons: Record<string, React.ReactNode> = {
   ),
   要対応: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -129,6 +131,7 @@ const sectionIcons: Record<string, React.ReactNode> = {
   ),
   スカウト状況: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -143,6 +146,7 @@ const sectionIcons: Record<string, React.ReactNode> = {
   ),
   求人パフォーマンス: (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -158,6 +162,7 @@ const sectionIcons: Record<string, React.ReactNode> = {
 const stageIcons: Record<string, React.ReactNode> = {
   match: (
     <svg
+      aria-hidden="true"
       className="h-4.5 w-4.5 text-blue-500"
       viewBox="0 0 24 24"
       fill="none"
@@ -173,6 +178,7 @@ const stageIcons: Record<string, React.ReactNode> = {
   ),
   scout: (
     <svg
+      aria-hidden="true"
       className="h-4.5 w-4.5 text-blue-500"
       viewBox="0 0 24 24"
       fill="none"
@@ -187,6 +193,7 @@ const stageIcons: Record<string, React.ReactNode> = {
   ),
   application: (
     <svg
+      aria-hidden="true"
       className="h-4.5 w-4.5 text-blue-500"
       viewBox="0 0 24 24"
       fill="none"
@@ -203,6 +210,7 @@ const stageIcons: Record<string, React.ReactNode> = {
   ),
   interview: (
     <svg
+      aria-hidden="true"
       className="h-4.5 w-4.5 text-blue-500"
       viewBox="0 0 24 24"
       fill="none"
@@ -216,6 +224,7 @@ const stageIcons: Record<string, React.ReactNode> = {
   ),
   offer: (
     <svg
+      aria-hidden="true"
       className="h-4.5 w-4.5 text-blue-500"
       viewBox="0 0 24 24"
       fill="none"
@@ -272,6 +281,7 @@ export default function CompanyPage() {
                     className="pipeline-action-btn mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-5 py-2 text-sm font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
                   >
                     <svg
+                      aria-hidden="true"
                       className="h-3 w-3"
                       viewBox="0 0 12 12"
                       fill="none"

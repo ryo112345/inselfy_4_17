@@ -69,6 +69,7 @@ export default function DiagnosePage() {
         <div className="w-full max-w-md text-center rounded-3xl bg-white border border-gray-200 p-12 shadow-sm">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
             <svg
+              aria-hidden="true"
               width={28}
               height={28}
               viewBox="0 0 24 24"
@@ -93,6 +94,7 @@ export default function DiagnosePage() {
         <div className="w-full max-w-md text-center rounded-3xl bg-white border border-gray-200 p-12 shadow-sm">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
             <svg
+              aria-hidden="true"
               width={28}
               height={28}
               viewBox="0 0 24 24"
@@ -188,6 +190,7 @@ function WelcomeScreen({ memberInfo, onStart }: { memberInfo: MemberInfo; onStar
         </div>
 
         <button
+          type="button"
           onClick={onStart}
           className="w-full rounded-xl bg-[#2979ff] hover:bg-[#1565c0] text-white font-semibold py-4 text-base transition-colors cursor-pointer"
         >
@@ -239,6 +242,7 @@ function TransitionScreen({
       <div className="w-full max-w-md text-center rounded-3xl bg-white border border-gray-200 p-12 shadow-sm">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
           <svg
+            aria-hidden="true"
             width={28}
             height={28}
             viewBox="0 0 24 24"
@@ -252,6 +256,7 @@ function TransitionScreen({
         <p className="text-lg font-bold text-gray-900 mb-2">{title}</p>
         <p className="text-sm text-gray-500 mb-8">{subtitle}</p>
         <button
+          type="button"
           onClick={onNext}
           className="w-full rounded-xl bg-[#2979ff] hover:bg-[#1565c0] text-white font-semibold py-4 text-base transition-colors cursor-pointer"
         >
@@ -393,6 +398,7 @@ function WVQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
         <div className="w-full max-w-md text-center">
           <p className="text-red-400 mb-4">{state.error ?? "エラーが発生しました"}</p>
           <button
+            type="button"
             onClick={start}
             className="text-gray-400 hover:text-white underline cursor-pointer"
           >
@@ -480,6 +486,7 @@ function CIQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
         <div className="w-full max-w-md text-center">
           <p className="text-red-500 mb-4">{state.error ?? "エラーが発生しました"}</p>
           <button
+            type="button"
             onClick={start}
             className="text-gray-500 hover:text-gray-800 underline cursor-pointer"
           >

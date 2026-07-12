@@ -279,12 +279,16 @@ export default function TestJobViewPage() {
 
             <div className="mt-7 flex gap-3">
               <button
+                type="button"
                 className="flex-1 rounded-xl py-4 text-center text-base font-bold text-white transition-colors hover:opacity-90 cursor-pointer"
                 style={{ background: ACCENT }}
               >
                 この求人に応募する
               </button>
-              <button className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
+              <button
+                type="button"
+                className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
                 <BookmarkIcon />
               </button>
             </div>
@@ -451,6 +455,7 @@ export default function TestJobViewPage() {
                 </div>
                 {i < arr.length - 1 && (
                   <svg
+                    aria-hidden="true"
                     className="h-5 w-5 shrink-0 text-gray-300"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -492,6 +497,7 @@ export default function TestJobViewPage() {
                 </p>
               </div>
               <svg
+                aria-hidden="true"
                 className="h-5 w-5 text-gray-400 shrink-0"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -509,12 +515,16 @@ export default function TestJobViewPage() {
         <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm z-50 sm:hidden">
           <div className="mx-auto max-w-3xl flex items-center gap-3 px-4 py-3">
             <button
+              type="button"
               className="flex-1 rounded-xl py-3.5 text-center text-base font-bold text-white cursor-pointer"
               style={{ background: ACCENT }}
             >
               この求人に応募する
             </button>
-            <button className="rounded-xl border border-gray-300 px-4 py-3.5 text-base text-gray-700 cursor-pointer">
+            <button
+              type="button"
+              className="rounded-xl border border-gray-300 px-4 py-3.5 text-base text-gray-700 cursor-pointer"
+            >
               <BookmarkIcon />
             </button>
           </div>

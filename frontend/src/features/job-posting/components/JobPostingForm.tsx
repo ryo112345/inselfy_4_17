@@ -98,6 +98,7 @@ export function JobPostingForm({
               className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
             >
               <svg
+                aria-hidden="true"
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -111,6 +112,7 @@ export function JobPostingForm({
         ) : (
           <label className="flex flex-col items-center justify-center py-10 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors">
             <svg
+              aria-hidden="true"
               className="h-8 w-8 text-gray-300"
               viewBox="0 0 24 24"
               fill="none"
@@ -325,6 +327,7 @@ export function JobPostingForm({
 
           <div className="mt-7 flex gap-3">
             <button
+              type="button"
               disabled
               className="flex-1 rounded-xl py-4 text-center text-base font-bold text-white opacity-60"
               style={{ background: ACCENT }}
@@ -332,6 +335,7 @@ export function JobPostingForm({
               この求人に応募する
             </button>
             <button
+              type="button"
               disabled
               className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 opacity-60"
             >
@@ -418,6 +422,7 @@ export function JobPostingForm({
                   className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 >
                   <svg
+                    aria-hidden="true"
                     className="h-3 w-3"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -433,6 +438,7 @@ export function JobPostingForm({
         )}
         <label className="mt-3 flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 py-6 cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-colors">
           <svg
+            aria-hidden="true"
             className="h-5 w-5 text-gray-400"
             viewBox="0 0 24 24"
             fill="none"
@@ -662,6 +668,7 @@ export function JobPostingForm({
                   </div>
                   {i < arr.length - 1 && (
                     <svg
+                      aria-hidden="true"
                       className="h-5 w-5 shrink-0 text-gray-300"
                       viewBox="0 0 24 24"
                       fill="none"

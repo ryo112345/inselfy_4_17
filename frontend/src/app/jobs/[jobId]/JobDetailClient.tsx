@@ -259,6 +259,7 @@ export function JobDetailClient({ job, company, teamWVScores, teamCIScores }: Pr
 
             <div className="mt-7 flex gap-3">
               <button
+                type="button"
                 onClick={handleApply}
                 disabled={applied || applying}
                 className="flex-1 rounded-xl py-4 text-center text-base font-bold text-white transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default"
@@ -266,7 +267,10 @@ export function JobDetailClient({ job, company, teamWVScores, teamCIScores }: Pr
               >
                 {applying ? "送信中..." : applied ? "応募済み" : "この求人に応募する"}
               </button>
-              <button className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer">
+              <button
+                type="button"
+                className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
                 <BookmarkIcon />
               </button>
             </div>
@@ -504,6 +508,7 @@ export function JobDetailClient({ job, company, teamWVScores, teamCIScores }: Pr
                 </div>
                 {i < arr.length - 1 && (
                   <svg
+                    aria-hidden="true"
                     className="h-5 w-5 shrink-0 text-gray-300"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -552,6 +557,7 @@ export function JobDetailClient({ job, company, teamWVScores, teamCIScores }: Pr
                   </p>
                 </div>
                 <svg
+                  aria-hidden="true"
                   className="h-5 w-5 text-gray-400 shrink-0"
                   viewBox="0 0 24 24"
                   fill="none"

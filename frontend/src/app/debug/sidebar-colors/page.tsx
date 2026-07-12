@@ -9,29 +9,31 @@ export default function SidebarColorsPage() {
   const [bg, setBg] = useState("#f9f8f4");
   const [border, setBorder] = useState("#ece9e0");
   const [hover, setHover] = useState("#f2f0e8");
-  const [hovered, setHovered] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="flex min-h-screen">
       <aside
         className="shrink-0 flex flex-col h-screen sticky top-0 transition-all duration-200"
-        style={{
-          width: sidebarOpen ? 240 : 52,
-          backgroundColor: bg,
-          borderRight: `1px solid ${border}`,
-        }}
+        style={
+          {
+            width: sidebarOpen ? 240 : 52,
+            backgroundColor: bg,
+            borderRight: `1px solid ${border}`,
+            // ホバー色のプレビュー用。各行の hover:bg-(--hov) が参照する
+            "--hov": hover,
+          } as React.CSSProperties
+        }
       >
         <div className="flex items-center justify-between px-3 h-14 shrink-0">
           {sidebarOpen && <span className="text-lg font-semibold text-gray-900">Inselfy</span>}
           <button
+            type="button"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-gray-500 cursor-pointer ml-auto transition-colors"
-            style={{ backgroundColor: hovered === "menu" ? hover : "transparent" }}
-            onMouseEnter={() => setHovered("menu")}
-            onMouseLeave={() => setHovered(null)}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-gray-500 cursor-pointer ml-auto transition-colors hover:bg-(--hov)"
           >
             <svg
+              aria-hidden="true"
               width={18}
               height={18}
               viewBox="0 0 24 24"
@@ -57,12 +59,7 @@ export default function SidebarColorsPage() {
           <ul className="space-y-0.5">
             {navItems1.map((label) => (
               <li key={label}>
-                <div
-                  className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors"
-                  style={{ backgroundColor: hovered === label ? hover : "transparent" }}
-                  onMouseEnter={() => setHovered(label)}
-                  onMouseLeave={() => setHovered(null)}
-                >
+                <div className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors hover:bg-(--hov)">
                   <span className="shrink-0 w-5 h-5 rounded bg-gray-400/30" />
                   {sidebarOpen && <span>{label}</span>}
                 </div>
@@ -75,12 +72,7 @@ export default function SidebarColorsPage() {
           <ul className="space-y-0.5">
             {navItems2.map((label) => (
               <li key={label}>
-                <div
-                  className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors"
-                  style={{ backgroundColor: hovered === label ? hover : "transparent" }}
-                  onMouseEnter={() => setHovered(label)}
-                  onMouseLeave={() => setHovered(null)}
-                >
+                <div className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors hover:bg-(--hov)">
                   <span className="shrink-0 w-5 h-5 rounded bg-gray-400/30" />
                   {sidebarOpen && <span>{label}</span>}
                 </div>
@@ -93,24 +85,14 @@ export default function SidebarColorsPage() {
               <div className="my-2 mx-2 border-t" style={{ borderColor: border }} />
               <div className="px-2 py-1">
                 <p className="text-xs font-semibold text-gray-900 mb-0.5">最近の診断</p>
-                <div
-                  className="rounded-md px-2 py-1.5 cursor-pointer transition-colors"
-                  style={{ backgroundColor: hovered === "wv" ? hover : "transparent" }}
-                  onMouseEnter={() => setHovered("wv")}
-                  onMouseLeave={() => setHovered(null)}
-                >
+                <div className="rounded-md px-2 py-1.5 cursor-pointer transition-colors hover:bg-(--hov)">
                   <p className="text-sm text-gray-500">価値観診断</p>
                   <p className="text-xs">
                     <span className="text-gray-900">2026/4/16</span>
                     <span className="ml-3 text-gray-400">責任・創造性・自律性</span>
                   </p>
                 </div>
-                <div
-                  className="rounded-md px-2 py-1.5 cursor-pointer transition-colors"
-                  style={{ backgroundColor: hovered === "ci" ? hover : "transparent" }}
-                  onMouseEnter={() => setHovered("ci")}
-                  onMouseLeave={() => setHovered(null)}
-                >
+                <div className="rounded-md px-2 py-1.5 cursor-pointer transition-colors hover:bg-(--hov)">
                   <p className="text-sm text-gray-500">キャリア興味診断</p>
                   <p className="text-xs">
                     <span className="text-gray-900">2026/4/16</span>
@@ -126,21 +108,11 @@ export default function SidebarColorsPage() {
           className="shrink-0 px-2 py-2 space-y-0.5"
           style={{ borderTop: `1px solid ${border}` }}
         >
-          <div
-            className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors"
-            style={{ backgroundColor: hovered === "dl" ? hover : "transparent" }}
-            onMouseEnter={() => setHovered("dl")}
-            onMouseLeave={() => setHovered(null)}
-          >
+          <div className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors hover:bg-(--hov)">
             <span className="shrink-0 w-5 h-5 rounded bg-gray-400/30" />
             {sidebarOpen && <span>ダウンロード</span>}
           </div>
-          <div
-            className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors"
-            style={{ backgroundColor: hovered === "user" ? hover : "transparent" }}
-            onMouseEnter={() => setHovered("user")}
-            onMouseLeave={() => setHovered(null)}
-          >
+          <div className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-gray-700 cursor-pointer transition-colors hover:bg-(--hov)">
             <span className="flex shrink-0 w-5 h-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
               秋
             </span>
@@ -176,8 +148,11 @@ function ColorInput({
 }) {
   return (
     <div className="flex items-center gap-4">
-      <label className="w-24 text-sm font-medium text-gray-700">{label}</label>
+      <label htmlFor={`color-${label}`} className="w-24 text-sm font-medium text-gray-700">
+        {label}
+      </label>
       <input
+        id={`color-${label}`}
         type="color"
         value={value}
         onChange={(e) => onChange(e.target.value)}

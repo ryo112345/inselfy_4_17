@@ -273,6 +273,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
               const hasDot = typeof tab.badge === "boolean" && tab.badge;
               return (
                 <button
+                  type="button"
                   key={tab.key}
                   onClick={() => handleTabChange(tab.key)}
                   className={`relative flex-1 py-3 text-sm font-medium transition-colors text-center ${
@@ -353,6 +354,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
                 ) : (
                   <div className="flex flex-1 flex-col items-center justify-center text-center">
                     <svg
+                      aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"

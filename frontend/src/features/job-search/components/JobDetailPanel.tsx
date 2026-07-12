@@ -85,6 +85,7 @@ function DetailSectionHeader({ icon, title }: { icon: React.ReactNode; title: st
 function DetailYenIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -104,6 +105,7 @@ function DetailYenIcon() {
 function DetailBriefcaseIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -122,6 +124,7 @@ function DetailBriefcaseIcon() {
 function DetailUsersIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -141,6 +144,7 @@ function DetailUsersIcon() {
 function DetailHomeIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -158,6 +162,7 @@ function DetailHomeIcon() {
 function DetailClockIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -175,6 +180,7 @@ function DetailClockIcon() {
 function DetailShieldIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -191,6 +197,7 @@ function DetailShieldIcon() {
 function DetailCameraIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -208,6 +215,7 @@ function DetailCameraIcon() {
 function DetailDocumentIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -227,6 +235,7 @@ function DetailDocumentIcon() {
 function DetailCheckIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"

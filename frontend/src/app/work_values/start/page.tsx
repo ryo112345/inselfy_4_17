@@ -231,6 +231,7 @@ function CompletedScreen({ onSubmit }: { onSubmit: () => void }) {
         <div className="relative z-10">
           <div className="w-14 h-14 rounded-full border-2 border-emerald-400/60 flex items-center justify-center mx-auto mb-6">
             <svg
+              aria-hidden="true"
               className="w-7 h-7 text-emerald-400"
               fill="none"
               viewBox="0 0 24 24"

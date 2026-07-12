@@ -59,6 +59,7 @@ function StructuredMessageCard({
       <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3">
         <div className="flex items-center gap-2 mb-1">
           <svg
+            aria-hidden="true"
             width={16}
             height={16}
             viewBox="0 0 24 24"
@@ -99,6 +100,7 @@ function StructuredMessageCard({
       <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
         <div className="flex items-center gap-2 mb-1">
           <svg
+            aria-hidden="true"
             width={16}
             height={16}
             viewBox="0 0 24 24"

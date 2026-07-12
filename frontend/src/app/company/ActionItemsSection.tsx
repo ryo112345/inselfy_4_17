@@ -60,6 +60,7 @@ export function ActionItemsSection() {
           className="flex items-center gap-1.5 text-gray-500"
         >
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             viewBox="0 0 24 24"
             fill="none"
@@ -79,6 +80,7 @@ export function ActionItemsSection() {
           </svg>
           <p className="text-sm font-semibold">要対応</p>
           <svg
+            aria-hidden="true"
             className={`h-3.5 w-3.5 text-gray-400 transition-transform ${open ? "rotate-90" : ""}`}
             viewBox="0 0 12 12"
             fill="none"

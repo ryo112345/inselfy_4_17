@@ -232,7 +232,12 @@ export function AiReportSection({
               <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
                 AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
               </p>
-              <button onClick={handleClick} disabled={loading} className={theme.buttonClassName}>
+              <button
+                type="button"
+                onClick={handleClick}
+                disabled={loading}
+                className={theme.buttonClassName}
+              >
                 レポートを作成する
               </button>
               {notFound && (
@@ -252,7 +257,7 @@ export function AiReportSection({
               <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
                 あなたの診断結果と経歴をAIが統合分析したレポートが完成しています。
               </p>
-              <button onClick={handleClick} className={theme.buttonClassName}>
+              <button type="button" onClick={handleClick} className={theme.buttonClassName}>
                 レポートを見る
               </button>
             </>

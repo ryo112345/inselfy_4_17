@@ -177,7 +177,12 @@ export function DetailRadarChart({
 
   return (
     <div className="-mx-6 md:mx-0">
-      <svg viewBox="65 57 430 335" className="w-full">
+      <svg
+        role="img"
+        aria-label={`${isWV ? "Work Values" : "Career Interest"}の詳細レーダーチャート`}
+        viewBox="65 57 430 335"
+        className="w-full"
+      >
         {gridPaths.map((d) => (
           <path key={d} d={d} fill="none" stroke="#e5e5e5" strokeWidth={0.5} />
         ))}

@@ -37,6 +37,7 @@ export function PrevNextNav({ currentArticle }: Props) {
           >
             <span className="text-xs text-gray-400 mb-1.5 flex items-center gap-1">
               <svg
+                aria-hidden="true"
                 width={12}
                 height={12}
                 viewBox="0 0 24 24"
@@ -63,6 +64,7 @@ export function PrevNextNav({ currentArticle }: Props) {
             <span className="text-xs text-gray-400 mb-1.5 flex items-center gap-1">
               次の記事
               <svg
+                aria-hidden="true"
                 width={12}
                 height={12}
                 viewBox="0 0 24 24"

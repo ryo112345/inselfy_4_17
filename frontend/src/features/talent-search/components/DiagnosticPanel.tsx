@@ -42,6 +42,7 @@ export function DiagnosticPanel({ search }: { search: ReturnType<typeof useTalen
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <svg
+            aria-hidden="true"
             width={14}
             height={14}
             viewBox="0 0 24 24"
@@ -65,6 +66,7 @@ export function DiagnosticPanel({ search }: { search: ReturnType<typeof useTalen
             ] as const
           ).map(([key, label]) => (
             <button
+              type="button"
               key={key}
               onClick={() => setDiagnosticType(key)}
               className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${

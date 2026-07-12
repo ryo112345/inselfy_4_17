@@ -33,6 +33,7 @@ export function ScoutSection() {
       <section className="col-span-3">
         <div className="flex items-center gap-1.5 text-gray-500">
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             viewBox="0 0 24 24"
             fill="none"
@@ -63,6 +64,7 @@ export function ScoutSection() {
           className="flex items-center gap-1.5 text-gray-500"
         >
           <svg
+            aria-hidden="true"
             className="h-4 w-4"
             viewBox="0 0 24 24"
             fill="none"
@@ -76,6 +78,7 @@ export function ScoutSection() {
           </svg>
           <p className="text-sm font-semibold">スカウト状況</p>
           <svg
+            aria-hidden="true"
             className={`h-3.5 w-3.5 text-gray-400 transition-transform ${open ? "rotate-90" : ""}`}
             viewBox="0 0 12 12"
             fill="none"
@@ -213,6 +216,7 @@ export function ScoutSection() {
                 className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#2979ff]/30 bg-[#2979ff]/5 px-5 py-2 text-sm font-medium text-[#2979ff] transition-colors hover:bg-[#2979ff] hover:text-white"
               >
                 <svg
+                  aria-hidden="true"
                   className="h-3 w-3"
                   viewBox="0 0 12 12"
                   fill="none"

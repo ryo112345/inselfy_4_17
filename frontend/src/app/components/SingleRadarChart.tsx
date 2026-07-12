@@ -105,7 +105,13 @@ export function SingleRadarChart({
   const h = hasCompare ? 410 : 380;
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} overflow="visible" className="w-full">
+    <svg
+      role="img"
+      aria-label={`${isWV ? "Work Values" : "Career Interest"}のレーダーチャート`}
+      viewBox={`0 0 ${w} ${h}`}
+      overflow="visible"
+      className="w-full"
+    >
       {gridPaths.map((d) => (
         <path key={d} d={d} fill="none" stroke={gridColor} strokeWidth={0.6} />
       ))}

@@ -7,6 +7,7 @@ const adminMenuItems = [
     description: "ユーザーの検索・管理者権限の付与",
     icon: (
       <svg
+        aria-hidden="true"
         width="24"
         height="24"
         viewBox="0 0 24 24"
@@ -29,6 +30,7 @@ const adminMenuItems = [
     description: "職務経歴書のアップロード確認・処理",
     icon: (
       <svg
+        aria-hidden="true"
         width="24"
         height="24"
         viewBox="0 0 24 24"
@@ -50,6 +52,7 @@ const adminMenuItems = [
     description: "レポート未生成セッションの確認",
     icon: (
       <svg
+        aria-hidden="true"
         width="24"
         height="24"
         viewBox="0 0 24 24"
@@ -73,6 +76,7 @@ const adminMenuItems = [
     description: "求人票PDFのAI自動入力処理",
     icon: (
       <svg
+        aria-hidden="true"
         width="24"
         height="24"
         viewBox="0 0 24 24"
@@ -95,6 +99,7 @@ const adminMenuItems = [
     description: "企業の審査・承認管理",
     icon: (
       <svg
+        aria-hidden="true"
         width="24"
         height="24"
         viewBox="0 0 24 24"
@@ -123,6 +128,7 @@ const adminMenuItems = [
     description: "管理者の追加・削除",
     icon: (
       <svg
+        aria-hidden="true"
         width="24"
         height="24"
         viewBox="0 0 24 24"
@@ -145,6 +151,7 @@ export default function AdminPage() {
       <div className="max-w-[1100px] mx-auto px-6 py-12">
         <div className="flex items-center gap-3 mb-10">
           <svg
+            aria-hidden="true"
             width="28"
             height="28"
             viewBox="0 0 24 24"

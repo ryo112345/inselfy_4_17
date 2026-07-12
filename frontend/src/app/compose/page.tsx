@@ -59,10 +59,11 @@ export default function ComposePage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-2.5 border-b border-gray-200/80 bg-white">
-        <button onClick={() => router.back()} className="text-[15px] text-gray-600">
+        <button type="button" onClick={() => router.back()} className="text-[15px] text-gray-600">
           キャンセル
         </button>
         <button
+          type="button"
           onClick={handleSubmit}
           disabled={!content.trim() || isPending}
           className="rounded-full px-5 py-1.5 text-sm font-bold text-white disabled:opacity-40 transition-opacity"

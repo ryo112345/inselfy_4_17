@@ -31,6 +31,7 @@ export function SaveBookmark({
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       className={`shrink-0 flex items-center gap-1.5 rounded-lg transition-all cursor-pointer ${
         showLabel
@@ -44,6 +45,7 @@ export function SaveBookmark({
       title={saved ? "保存を解除" : "候補者を保存"}
     >
       <svg
+        aria-hidden="true"
         width={size}
         height={size}
         viewBox="0 0 24 24"
@@ -206,6 +208,7 @@ export function DiagnosticCandidateCard({
               className="flex items-center gap-1.5 min-w-0"
             >
               <svg
+                aria-hidden="true"
                 width={15}
                 height={15}
                 viewBox="0 0 24 24"

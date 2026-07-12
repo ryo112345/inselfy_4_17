@@ -80,6 +80,7 @@ export default function ScoutSendPage() {
         className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
       >
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           viewBox="0 0 24 24"
           fill="none"
@@ -136,12 +137,14 @@ export default function ScoutSendPage() {
           </div>
           <div className="flex items-center gap-3 pt-2">
             <button
+              type="button"
               onClick={() => setPreview(false)}
               className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors cursor-pointer"
             >
               編集に戻る
             </button>
             <button
+              type="button"
               onClick={handleSend}
               disabled={sending}
               className="bg-[#2979ff] text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
@@ -155,10 +158,14 @@ export default function ScoutSendPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
           {/* Candidate ID */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="scout-candidate-id"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               候補者ID <span className="text-red-500">*</span>
             </label>
             <input
+              id="scout-candidate-id"
               type="text"
               value={candidateId}
               onChange={(e) => setCandidateId(e.target.value)}
@@ -169,11 +176,17 @@ export default function ScoutSendPage() {
 
           {/* Job posting select */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">求人（任意）</label>
+            <label
+              htmlFor="scout-job-posting"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              求人（任意）
+            </label>
             {loadingData ? (
               <p className="text-sm text-gray-400">読み込み中...</p>
             ) : (
               <select
+                id="scout-job-posting"
                 value={jobPostingId}
                 onChange={(e) => setJobPostingId(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white"
@@ -192,13 +205,17 @@ export default function ScoutSendPage() {
 
           {/* Template select */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="scout-template"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               テンプレート（任意）
             </label>
             {loadingData ? (
               <p className="text-sm text-gray-400">読み込み中...</p>
             ) : (
               <select
+                id="scout-template"
                 value={selectedTemplateId}
                 onChange={(e) => handleTemplateSelect(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-white"
@@ -215,10 +232,11 @@ export default function ScoutSendPage() {
 
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="scout-subject" className="block text-sm font-medium text-gray-700 mb-1">
               件名 <span className="text-red-500">*</span>
             </label>
             <input
+              id="scout-subject"
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
@@ -229,10 +247,11 @@ export default function ScoutSendPage() {
 
           {/* Body */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="scout-body" className="block text-sm font-medium text-gray-700 mb-1">
               本文 <span className="text-red-500">*</span>
             </label>
             <textarea
+              id="scout-body"
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="スカウトメッセージの本文を入力..."
@@ -254,6 +273,7 @@ export default function ScoutSendPage() {
           {/* Actions */}
           <div className="flex items-center gap-3 pt-2">
             <button
+              type="button"
               onClick={() => setPreview(true)}
               disabled={!subject.trim() || !body.trim()}
               className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
@@ -261,6 +281,7 @@ export default function ScoutSendPage() {
               プレビュー
             </button>
             <button
+              type="button"
               onClick={handleSend}
               disabled={!candidateId.trim() || !subject.trim() || !body.trim() || sending}
               className="bg-[#2979ff] text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"

@@ -52,6 +52,7 @@ export default function TeamsPage() {
           style={{ backgroundColor: "#2979ff" }}
         >
           <svg
+            aria-hidden="true"
             width={16}
             height={16}
             viewBox="0 0 24 24"
@@ -78,6 +79,7 @@ export default function TeamsPage() {
             <SummaryCard
               icon={
                 <svg
+                  aria-hidden="true"
                   width={20}
                   height={20}
                   viewBox="0 0 24 24"
@@ -100,6 +102,7 @@ export default function TeamsPage() {
             <SummaryCard
               icon={
                 <svg
+                  aria-hidden="true"
                   width={20}
                   height={20}
                   viewBox="0 0 24 24"
@@ -120,6 +123,7 @@ export default function TeamsPage() {
             <SummaryCard
               icon={
                 <svg
+                  aria-hidden="true"
                   width={20}
                   height={20}
                   viewBox="0 0 24 24"
@@ -206,6 +210,7 @@ function TeamCard({ team }: { team: Team }) {
           </div>
           <div className="shrink-0 ml-3 text-gray-300 group-hover:text-[#2979ff] transition-colors">
             <svg
+              aria-hidden="true"
               width={18}
               height={18}
               viewBox="0 0 24 24"
@@ -224,6 +229,7 @@ function TeamCard({ team }: { team: Team }) {
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50">
               <svg
+                aria-hidden="true"
                 width={16}
                 height={16}
                 viewBox="0 0 24 24"
@@ -306,7 +312,7 @@ function ProgressRing({
   const center = size / 2;
 
   return (
-    <svg width={size} height={size} className="shrink-0 -rotate-90">
+    <svg aria-hidden="true" width={size} height={size} className="shrink-0 -rotate-90">
       <circle
         cx={center}
         cy={center}
@@ -349,7 +355,7 @@ function EmptyState() {
       <div className="px-12 py-16 text-center">
         {/* Illustration */}
         <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-50">
-          <svg width={48} height={48} viewBox="0 0 48 48" fill="none">
+          <svg aria-hidden="true" width={48} height={48} viewBox="0 0 48 48" fill="none">
             <circle cx="16" cy="16" r="6" stroke="#2979ff" strokeWidth={1.5} fill="none" />
             <path
               d="M8 34v-2a8 8 0 0116 0v2"
@@ -383,6 +389,7 @@ function EmptyState() {
             チーム作成
           </span>
           <svg
+            aria-hidden="true"
             width={12}
             height={12}
             viewBox="0 0 24 24"
@@ -399,6 +406,7 @@ function EmptyState() {
             メンバー追加
           </span>
           <svg
+            aria-hidden="true"
             width={12}
             height={12}
             viewBox="0 0 24 24"
@@ -415,6 +423,7 @@ function EmptyState() {
             診断実施
           </span>
           <svg
+            aria-hidden="true"
             width={12}
             height={12}
             viewBox="0 0 24 24"
@@ -438,6 +447,7 @@ function EmptyState() {
           style={{ backgroundColor: "#2979ff" }}
         >
           <svg
+            aria-hidden="true"
             width={16}
             height={16}
             viewBox="0 0 24 24"

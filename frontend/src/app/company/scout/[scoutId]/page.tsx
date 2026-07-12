@@ -87,6 +87,7 @@ export default function ScoutDetailPage() {
         className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
       >
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           viewBox="0 0 24 24"
           fill="none"
@@ -182,6 +183,7 @@ export default function ScoutDetailPage() {
           />
           <div className="flex justify-end">
             <button
+              type="button"
               onClick={handleReply}
               disabled={!replyBody.trim() || sending}
               className="bg-[#2979ff] text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"

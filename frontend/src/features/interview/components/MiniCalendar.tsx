@@ -55,10 +55,12 @@ export function MiniCalendar({
         </span>
         <div className="flex gap-1">
           <button
+            type="button"
             onClick={() => onMonthChange(new Date(year, mon - 1, 1))}
             className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100"
           >
             <svg
+              aria-hidden="true"
               width={14}
               height={14}
               viewBox="0 0 24 24"
@@ -70,10 +72,12 @@ export function MiniCalendar({
             </svg>
           </button>
           <button
+            type="button"
             onClick={() => onMonthChange(new Date(year, mon + 1, 1))}
             className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100"
           >
             <svg
+              aria-hidden="true"
               width={14}
               height={14}
               viewBox="0 0 24 24"
@@ -99,6 +103,7 @@ export function MiniCalendar({
           const isTodayDate = dateStr === todayStr;
           return (
             <button
+              type="button"
               key={dateStr}
               onClick={() => onDateClick(date)}
               className={`h-7 w-7 mx-auto flex items-center justify-center text-xs rounded-full transition-colors ${

@@ -7,6 +7,7 @@ type IconProps = { className?: string };
 export function BookmarkIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -23,6 +24,7 @@ export function BookmarkIcon({ className = "h-5 w-5" }: IconProps) {
 export function YenIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -42,6 +44,7 @@ export function YenIcon({ className = "h-4 w-4" }: IconProps) {
 export function BriefcaseIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -60,6 +63,7 @@ export function BriefcaseIcon({ className = "h-4 w-4" }: IconProps) {
 export function UsersIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -79,6 +83,7 @@ export function UsersIcon({ className = "h-4 w-4" }: IconProps) {
 export function HomeIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -96,6 +101,7 @@ export function HomeIcon({ className = "h-4 w-4" }: IconProps) {
 export function LayersIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -114,6 +120,7 @@ export function LayersIcon({ className = "h-5 w-5" }: IconProps) {
 export function SparkIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -136,7 +143,7 @@ export function SparkIcon({ className = "h-5 w-5" }: IconProps) {
 
 export function StarIcon({ className = "h-5 w-5" }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 2l2.9 6.9L22 10l-5.5 4.7L18 22l-6-3.6L6 22l1.5-7.3L2 10l7.1-1.1z" />
     </svg>
   );
@@ -145,6 +152,7 @@ export function StarIcon({ className = "h-5 w-5" }: IconProps) {
 export function FlagIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -161,7 +169,7 @@ export function FlagIcon({ className = "h-5 w-5" }: IconProps) {
 
 export function BoltIcon({ className = "h-5 w-5" }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M13 2L3 14h7l-1 8 11-13h-7z" />
     </svg>
   );
@@ -170,6 +178,7 @@ export function BoltIcon({ className = "h-5 w-5" }: IconProps) {
 export function CheckSquareIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -187,6 +196,7 @@ export function CheckSquareIcon({ className = "h-5 w-5" }: IconProps) {
 export function GiftIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -207,6 +217,7 @@ export function GiftIcon({ className = "h-5 w-5" }: IconProps) {
 export function CameraIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -224,6 +235,7 @@ export function CameraIcon({ className = "h-5 w-5" }: IconProps) {
 export function DocumentIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -243,6 +255,7 @@ export function DocumentIcon({ className = "h-5 w-5" }: IconProps) {
 export function ClockIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -260,6 +273,7 @@ export function ClockIcon({ className = "h-4 w-4" }: IconProps) {
 export function ShieldIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -276,6 +290,7 @@ export function ShieldIcon({ className = "h-4 w-4" }: IconProps) {
 export function RouteIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -294,6 +309,7 @@ export function RouteIcon({ className = "h-5 w-5" }: IconProps) {
 export function BuildingIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"

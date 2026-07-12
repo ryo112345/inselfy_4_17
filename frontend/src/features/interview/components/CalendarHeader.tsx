@@ -31,6 +31,7 @@ export function CalendarHeader({ weekStart, onPrev, onNext, onToday }: Props) {
       <h1 className="text-lg font-semibold text-gray-900">面接カレンダー</h1>
       <div className="flex items-center gap-3">
         <button
+          type="button"
           onClick={onToday}
           className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
         >
@@ -38,10 +39,12 @@ export function CalendarHeader({ weekStart, onPrev, onNext, onToday }: Props) {
         </button>
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={onPrev}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
           >
             <svg
+              aria-hidden="true"
               width={18}
               height={18}
               viewBox="0 0 24 24"
@@ -56,10 +59,12 @@ export function CalendarHeader({ weekStart, onPrev, onNext, onToday }: Props) {
             {formatWeekRange(weekStart)}
           </span>
           <button
+            type="button"
             onClick={onNext}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
           >
             <svg
+              aria-hidden="true"
               width={18}
               height={18}
               viewBox="0 0 24 24"

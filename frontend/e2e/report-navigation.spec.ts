@@ -1,12 +1,21 @@
 import { expect, test } from "@playwright/test";
 
+type NavLogEntry = {
+  event: string;
+  persisted: boolean;
+  navType: string | undefined;
+  url: string;
+  time: number;
+};
+type NavWindow = Window & { __navLog: NavLogEntry[] };
+
 test("profile → integrated-report → back → forward shows report content", async ({ page }) => {
   // Inject diagnostic logging
   await page.addInitScript(() => {
-    (window as any).__navLog = [];
+    (window as unknown as NavWindow).__navLog = [];
     window.addEventListener("pageshow", (e) => {
       const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
-      (window as any).__navLog.push({
+      (window as unknown as NavWindow).__navLog.push({
         event: "pageshow",
         persisted: e.persisted,
         navType: nav?.type,
@@ -41,7 +50,7 @@ test("profile → integrated-report → back → forward shows report content", 
   // 3. Browser back
   await page.goBack();
   await page.waitForTimeout(3000);
-  let navLog = await page.evaluate(() => (window as any).__navLog);
+  let navLog = await page.evaluate(() => (window as unknown as NavWindow).__navLog);
   console.log("=== After back navLog ===", JSON.stringify(navLog, null, 2));
   console.log("=== After back API ===", apiLogs);
   apiLogs.length = 0;
@@ -49,7 +58,7 @@ test("profile → integrated-report → back → forward shows report content", 
   // 4. Browser forward
   await page.goForward();
   await page.waitForTimeout(5000);
-  navLog = await page.evaluate(() => (window as any).__navLog);
+  navLog = await page.evaluate(() => (window as unknown as NavWindow).__navLog);
   console.log("=== After forward navLog ===", JSON.stringify(navLog, null, 2));
   console.log("=== After forward API ===", apiLogs);
 

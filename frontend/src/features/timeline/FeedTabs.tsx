@@ -14,6 +14,7 @@ export function FeedTabs() {
     <div className="flex border-b border-gray-200/80">
       {tabs.map((tab) => (
         <button
+          type="button"
           key={tab.id}
           onClick={() => setActive(tab.id)}
           className={`flex-1 py-3.5 text-sm font-semibold text-center transition-colors relative cursor-pointer ${

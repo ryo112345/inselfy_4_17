@@ -189,6 +189,7 @@ function PlusMenu({
           className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:border-gray-500 hover:text-gray-600 transition-colors bg-white"
         >
           <svg
+            aria-hidden="true"
             width={16}
             height={16}
             viewBox="0 0 24 24"
@@ -209,6 +210,7 @@ function PlusMenu({
             title="画像"
           >
             <svg
+              aria-hidden="true"
               width={16}
               height={16}
               viewBox="0 0 24 24"

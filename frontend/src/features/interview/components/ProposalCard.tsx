@@ -286,6 +286,7 @@ export function ProposalCard({
       <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3">
         <div className="flex items-center gap-2 mb-1">
           <svg
+            aria-hidden="true"
             width={16}
             height={16}
             viewBox="0 0 24 24"
@@ -334,6 +335,7 @@ export function ProposalCard({
       <div className="px-4 py-3 border-b border-blue-100">
         <div className="flex items-center gap-2 mb-1">
           <svg
+            aria-hidden="true"
             width={18}
             height={18}
             viewBox="0 0 24 24"
@@ -372,11 +374,13 @@ export function ProposalCard({
         <div className="flex items-center justify-center gap-2 py-1.5">
           {hasMultipleWeeks && (
             <button
+              type="button"
               onClick={() => hasPrev && setWeekStart(new Date(allWeeks[currentWeekIdx - 1]))}
               disabled={!hasPrev}
               className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default"
             >
               <svg
+                aria-hidden="true"
                 width={12}
                 height={12}
                 viewBox="0 0 24 24"
@@ -391,11 +395,13 @@ export function ProposalCard({
           <span className="text-xs font-medium text-gray-500">{formatWeekRange(weekStart)}</span>
           {hasMultipleWeeks && (
             <button
+              type="button"
               onClick={() => hasNext && setWeekStart(new Date(allWeeks[currentWeekIdx + 1]))}
               disabled={!hasNext}
               className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default"
             >
               <svg
+                aria-hidden="true"
                 width={12}
                 height={12}
                 viewBox="0 0 24 24"
@@ -459,6 +465,8 @@ export function ProposalCard({
               const today = isToday(d);
               const dayWindows = windows.filter((w) => w.dayIndex === dayIdx);
               return (
+                // biome-ignore lint/a11y/noStaticElementInteractions: クリック Y 座標から時刻を計算する選択グリッド。キーボードでは座標指定ができない
+                // biome-ignore lint/a11y/useKeyWithClickEvents: 同上
                 <div
                   key={d.getTime()}
                   className={`relative border-l border-gray-100 ${today ? "bg-blue-50/20" : ""} ${canSelect ? "cursor-pointer" : ""}`}
