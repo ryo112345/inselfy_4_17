@@ -260,6 +260,8 @@ export default function CompanyJobPreviewPage() {
     return company?.benefits ?? [];
   })();
 
+  const coverSrc = form.coverImageDataUrl || form.coverImageUrl;
+
   return (
     <div className="min-h-screen bg-[#f6f7f5]">
       {/* Preview Banner */}
@@ -270,9 +272,9 @@ export default function CompanyJobPreviewPage() {
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
         {/* Hero */}
         <section className={`overflow-hidden ${cardClass}`}>
-          {(form.coverImageDataUrl || form.coverImageUrl) && (
+          {coverSrc && (
             <Image
-              src={form.coverImageDataUrl ?? form.coverImageUrl!}
+              src={coverSrc}
               alt=""
               width={1600}
               height={900}

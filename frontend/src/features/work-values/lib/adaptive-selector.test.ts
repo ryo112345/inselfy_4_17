@@ -10,15 +10,21 @@ function makeInitialPairs(): Pair[] {
   return pairs;
 }
 
+function nextPairOrThrow(selector: AdaptiveSelector): Pair {
+  const pair = selector.nextPair();
+  if (!pair) throw new Error("nextPair() が null を返した");
+  return pair;
+}
+
 describe("AdaptiveSelector", () => {
   it("最初の21問は初期ペアを返す", () => {
     const initial = makeInitialPairs();
     const selector = new AdaptiveSelector(initial);
 
     for (let q = 0; q < 21; q++) {
-      const pair = selector.nextPair();
+      const pair = nextPairOrThrow(selector);
       expect(pair).toEqual(initial[q]);
-      selector.recordResponse(pair!, pair!.needA);
+      selector.recordResponse(pair, pair.needA);
     }
   });
 
@@ -26,15 +32,14 @@ describe("AdaptiveSelector", () => {
     const selector = new AdaptiveSelector(makeInitialPairs());
 
     for (let q = 0; q < 21; q++) {
-      const pair = selector.nextPair()!;
+      const pair = nextPairOrThrow(selector);
       selector.recordResponse(pair, pair.needA);
     }
 
-    const pair22 = selector.nextPair();
-    expect(pair22).not.toBeNull();
+    const pair22 = nextPairOrThrow(selector);
     // 初期ペアとは異なるペアが選ばれるはず（同じこともありえるが出題済みは除外される）
-    expect(pair22!.needA).toBeGreaterThanOrEqual(0);
-    expect(pair22!.needB).toBeLessThan(N);
+    expect(pair22.needA).toBeGreaterThanOrEqual(0);
+    expect(pair22.needB).toBeLessThan(N);
   });
 
   it("70問で終了する", () => {
@@ -42,7 +47,7 @@ describe("AdaptiveSelector", () => {
 
     for (let q = 0; q < 70; q++) {
       expect(selector.isComplete).toBe(false);
-      const pair = selector.nextPair()!;
+      const pair = nextPairOrThrow(selector);
       selector.recordResponse(pair, pair.needA);
     }
 
@@ -56,7 +61,7 @@ describe("AdaptiveSelector", () => {
     const counts = new Array(N).fill(0);
 
     for (let q = 0; q < 21; q++) {
-      const pair = selector.nextPair()!;
+      const pair = nextPairOrThrow(selector);
       counts[pair.needA]++;
       counts[pair.needB]++;
       selector.recordResponse(pair, pair.needA);

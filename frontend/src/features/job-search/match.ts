@@ -64,12 +64,13 @@ export function computeMatchScores(
     if (count > 0) aptitude = Math.round(Math.exp(logSum / count) * 100);
   }
 
-  if (culture == null && aptitude == null) return null;
-
   const overall =
-    culture != null && aptitude != null
-      ? Math.round((culture + aptitude) / 2)
-      : (culture ?? aptitude!);
+    culture != null
+      ? aptitude != null
+        ? Math.round((culture + aptitude) / 2)
+        : culture
+      : aptitude;
+  if (overall == null) return null;
 
   let commonPoints: string[] = [];
   if (userWv && teamScores.wvScores && teamScores.wvScores.length > 0) {

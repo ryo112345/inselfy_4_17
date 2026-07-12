@@ -83,13 +83,15 @@ export default function JobEditPage() {
       for (const m of members) {
         if (m.wvScores)
           for (const s of m.wvScores) {
-            if (!wvAgg.has(s.id)) wvAgg.set(s.id, []);
-            wvAgg.get(s.id)!.push(s.displayScore);
+            const vals = wvAgg.get(s.id) ?? [];
+            vals.push(s.displayScore);
+            wvAgg.set(s.id, vals);
           }
         if (m.ciScores)
           for (const s of m.ciScores) {
-            if (!ciAgg.has(s.id)) ciAgg.set(s.id, []);
-            ciAgg.get(s.id)!.push(s.displayScore);
+            const vals = ciAgg.get(s.id) ?? [];
+            vals.push(s.displayScore);
+            ciAgg.set(s.id, vals);
           }
       }
       const avg = (map: Map<string, number[]>) =>

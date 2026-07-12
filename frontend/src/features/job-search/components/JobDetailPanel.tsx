@@ -407,7 +407,7 @@ export function JobDetail({
         {quickFacts.length > 0 && (
           <div className="mt-5 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200/80 bg-gray-50/60 sm:grid-cols-4 sm:divide-y-0">
             {quickFacts.map((f) => (
-              <DetailStatCell key={f.label} label={f.label} value={f.value!} icon={f.icon} />
+              <DetailStatCell key={f.label} label={f.label} value={f.value} icon={f.icon} />
             ))}
           </div>
         )}

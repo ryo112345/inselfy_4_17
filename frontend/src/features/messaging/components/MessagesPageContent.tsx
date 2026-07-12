@@ -139,7 +139,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
 
   const handleSendNewConv = useCallback(
     async (body: string) => {
-      if (!newConvRecipient) return;
+      if (!newConvRecipient || !user) return;
       const conv = await startCandidateConversation({
         recipientId: newConvRecipient.id,
         body: body,
@@ -151,7 +151,7 @@ export function MessagesPageContent({ initialTab }: { initialTab: ActiveTab }) {
           id: `${conv.id}-first`,
           conversationId: conv.id,
           senderType: "candidate",
-          senderId: user!.id,
+          senderId: user.id,
           body,
           messageType: "text",
           createdAt: conv.createdAt,

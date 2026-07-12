@@ -32,6 +32,7 @@ type Props = {
 export function PostDetail({ post, comments: initialComments, currentUserId }: Props) {
   const router = useRouter();
   const initial = post.name ? post.name.charAt(0) : post.username.charAt(0);
+  const quotedPost = post.quotedPost;
   const [liked, setLiked] = useState(post.likedByMe);
   const [likeCount, setLikeCount] = useState(post.likeCount);
   const [reposted, setReposted] = useState(post.repostedByMe);
@@ -166,15 +167,15 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
           );
         })()}
 
-        {post.quotedPost && (
+        {quotedPost && (
           // biome-ignore lint/a11y/useSemanticElements: 引用カード全体の遷移領域。内部構造の都合で a 要素にできない
           <div
             role="link"
             tabIndex={0}
             className="rounded-2xl border border-gray-200 overflow-hidden hover:bg-gray-50/50 transition-colors cursor-pointer mb-3"
-            onClick={() => router.push(`/post/${post.quotedPost!.id}`)}
+            onClick={() => router.push(`/post/${quotedPost.id}`)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") router.push(`/post/${post.quotedPost!.id}`);
+              if (e.key === "Enter") router.push(`/post/${quotedPost.id}`);
             }}
           >
             <div className="px-3 py-2.5">
@@ -183,17 +184,15 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
                   className="flex w-5 h-5 items-center justify-center rounded-full text-[10px] font-bold text-white shrink-0"
                   style={{ backgroundColor: "var(--accent)" }}
                 >
-                  {post.quotedPost.name?.charAt(0) || post.quotedPost.username.charAt(0)}
+                  {quotedPost.name?.charAt(0) || quotedPost.username.charAt(0)}
                 </span>
                 <span className="font-bold text-[13px] text-gray-900 truncate">
-                  {post.quotedPost.name || post.quotedPost.username}
+                  {quotedPost.name || quotedPost.username}
                 </span>
-                <span className="text-[13px] text-gray-400 truncate">
-                  @{post.quotedPost.username}
-                </span>
+                <span className="text-[13px] text-gray-400 truncate">@{quotedPost.username}</span>
               </div>
               <p className="text-[14px] text-gray-900 whitespace-pre-wrap break-words leading-relaxed line-clamp-3">
-                {post.quotedPost.content}
+                {quotedPost.content}
               </p>
             </div>
           </div>

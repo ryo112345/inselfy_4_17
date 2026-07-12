@@ -83,19 +83,24 @@ export function ArticleForm({ article }: Props) {
   }, []);
 
   const handleTitleInput = useCallback(() => {
-    const text = titleRef.current?.textContent || "";
+    const el = titleRef.current;
+    if (!el) return;
+    const text = el.textContent || "";
     if (text.length <= 200) {
       setTitle(text);
     } else {
       const sel = window.getSelection();
       const offset = Math.min(sel?.focusOffset ?? 200, 200);
-      titleRef.current!.textContent = text.slice(0, 200);
+      el.textContent = text.slice(0, 200);
       setTitle(text.slice(0, 200));
-      const range = document.createRange();
-      range.setStart(titleRef.current!.firstChild!, offset);
-      range.collapse(true);
-      sel?.removeAllRanges();
-      sel?.addRange(range);
+      // textContent へ200文字を代入した直後なのでテキストノードは必ず存在する
+      if (el.firstChild) {
+        const range = document.createRange();
+        range.setStart(el.firstChild, offset);
+        range.collapse(true);
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      }
     }
   }, []);
 

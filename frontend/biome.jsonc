@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
   "files": {
     "includes": [
       "**",
@@ -12,16 +12,12 @@
       "!src/external/client/api/generated"
     ]
   },
-  // リンターは recommended を基本とする（error ゼロ運用）。ルール単位の無効化は
-  // 下記の理由付きのもののみ。箇所単位の例外は biome-ignore コメントに理由を書いて許容する。
+  // リンターは recommended をフル有効（error ゼロ運用・ルール単位の無効化なし）。
+  // 箇所単位の例外は biome-ignore コメントに理由を書いて許容する。
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "style": {
-        // 非nullアサーションはTSの実務スタイルとして許容
-        "noNonNullAssertion": "off"
-      }
+      "preset": "recommended"
     }
   },
   // 既存コードベースの流儀（2スペース・実質100桁前後）に合わせる

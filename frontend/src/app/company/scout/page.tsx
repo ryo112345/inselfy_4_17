@@ -93,7 +93,9 @@ export default function ScoutListPage() {
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const totalCredits = dashboard ? dashboard.credits.balance + dashboard.pending.total : 0;
   const creditPct =
-    totalCredits > 0 ? Math.round((dashboard!.credits.balance / totalCredits) * 100) : 0;
+    dashboard && totalCredits > 0
+      ? Math.round((dashboard.credits.balance / totalCredits) * 100)
+      : 0;
   const creditLow = dashboard
     ? dashboard.credits.balance / dashboard.credits.maxStock < 0.2
     : false;

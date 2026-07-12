@@ -119,7 +119,7 @@ export function SingleRadarChart({
         <line key={p.id} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={gridColor} strokeWidth={0.6} />
       ))}
       {/* Compare overlay (team) — rendered first so it appears behind */}
-      {hasCompare && (
+      {hasCompare && comparePoints && (
         <>
           <path
             d={comparePath}
@@ -128,7 +128,7 @@ export function SingleRadarChart({
             strokeWidth={1.2}
             strokeDasharray="6 3"
           />
-          {comparePoints!.map((pt) => (
+          {comparePoints.map((pt) => (
             <circle
               key={pt.id}
               cx={pt.x}

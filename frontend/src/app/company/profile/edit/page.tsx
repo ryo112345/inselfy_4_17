@@ -241,7 +241,7 @@ export default function CompanyProfilePage() {
   const handleImageDelete = async (type: "logo" | "cover" | "gallery", url?: string) => {
     try {
       const qs =
-        type === "gallery" ? `type=gallery&url=${encodeURIComponent(url!)}` : `type=${type}`;
+        type === "gallery" ? `type=gallery&url=${encodeURIComponent(url ?? "")}` : `type=${type}`;
       const res = await companyFetch(`/api/company/profile/image?${qs}`, { method: "DELETE" });
       if (res.ok) {
         setProfile((prev) => {

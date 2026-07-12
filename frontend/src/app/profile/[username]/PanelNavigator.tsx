@@ -246,9 +246,9 @@ export function PanelNavigator({
         </div>
 
         <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen md:w-[672px] pb-24 md:pb-0">
-          {showIntReport ? (
+          {showIntReport && intReportRequestId ? (
             <IntegratedReportContent
-              requestId={intReportRequestId!}
+              requestId={intReportRequestId}
               isOwner={isOwner}
               wvResult={wvResult ?? null}
               ciResult={ciResult ?? null}
@@ -259,9 +259,9 @@ export function PanelNavigator({
         </div>
 
         <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen md:w-[672px] pb-24 md:pb-0">
-          {showWvResult ? (
+          {showWvResult && wvSessionId ? (
             <WorkValuesResultContent
-              sessionId={wvSessionId!}
+              sessionId={wvSessionId}
               initialData={wvResult}
               isOwner={isOwner}
             />
@@ -271,9 +271,9 @@ export function PanelNavigator({
         </div>
 
         <div className="shrink-0 overflow-y-auto overscroll-contain scrollbar-hide w-screen md:w-[672px] pb-24 md:pb-0">
-          {showCiResult ? (
+          {showCiResult && ciSessionId ? (
             <CareerInterestResultContent
-              sessionId={ciSessionId!}
+              sessionId={ciSessionId}
               initialData={ciResult}
               isOwner={isOwner}
             />

@@ -66,15 +66,15 @@ test.describe("Talents page state preservation on browser back", () => {
     // Check initial count (should be 20 of N)
     const resultText = page.locator("text=/\\d+件中/");
     await expect(resultText).toBeVisible({ timeout: 10000 });
-    const beforeScroll = await resultText.textContent();
+    const beforeScroll = (await resultText.textContent()) ?? "";
 
     // Scroll to bottom to trigger infinite scroll
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(1500);
 
     // Wait for the count to update (more items loaded via infinite scroll)
-    await expect(resultText).not.toHaveText(beforeScroll!, { timeout: 10000 });
-    const afterInfiniteLoad = await resultText.textContent();
+    await expect(resultText).not.toHaveText(beforeScroll, { timeout: 10000 });
+    const afterInfiniteLoad = (await resultText.textContent()) ?? "";
 
     // Scroll down to see the new items
     await page.evaluate(() => window.scrollTo(0, 500));
@@ -93,7 +93,7 @@ test.describe("Talents page state preservation on browser back", () => {
 
     // Verify loaded count is preserved
     await expect(resultText).toBeVisible({ timeout: 10000 });
-    await expect(resultText).toHaveText(afterInfiniteLoad!, { timeout: 10000 });
+    await expect(resultText).toHaveText(afterInfiniteLoad, { timeout: 10000 });
 
     // Verify page scroll was restored (should be > 0)
     const scrollY = await page.evaluate(() => window.scrollY);

@@ -960,14 +960,14 @@ function computeAvg(
   key: "wvScores" | "ciScores",
   order: readonly string[],
 ) {
-  const completed = members.filter((m) => m[key] && m[key]!.length > 0);
+  const completed = members.filter((m) => (m[key]?.length ?? 0) > 0);
   if (completed.length < MIN_MEMBERS_FOR_AVERAGE) return null;
 
   const threshold = key === "wvScores" ? WV_OUTLIER_THRESHOLD : CI_OUTLIER_THRESHOLD;
 
   return order.map((id) => {
     const entries = completed
-      .map((m) => ({ score: m[key]!.find((s) => s.id === id)?.displayScore, isAce: m.isAce }))
+      .map((m) => ({ score: m[key]?.find((s) => s.id === id)?.displayScore, isAce: m.isAce }))
       .filter((e): e is { score: number; isAce: boolean } => e.score != null);
     if (entries.length === 0) return { id, score: 0 };
 
