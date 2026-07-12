@@ -1,0 +1,86 @@
+# インフラ CI: terraform fmt / validate / plan。
+# - PR (infra/** 変更時): plan の差分を確認できるようにする（apply はローカルから手動。
+#   自動 apply はしない — インフラ変更は人間が plan を読んでから適用する）
+# - 週次 schedule: コード変更が無くても「コンソール手動変更のドリフト」を検知する
+#   （スキーマ/生成コードのドリフト検査と同じ思想。-detailed-exitcode でドリフト時に fail）
+# 認証は deploy.yml と同じ WIF キーレス。ただし SA は read-only の terraform-planner
+# （state バケットのオブジェクト以外に書き込み権限を持たない）。
+name: terraform CI
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+      - ".github/workflows/terraform-ci.yml"
+  schedule:
+    - cron: "0 22 * * 0" # 毎週月曜 7:00 JST（security.yml の1時間後）
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write # WIF に必須
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TF_VERSION: "1.15.8"
+  # terraform バイナリは checksum 検証付きで直接ダウンロードする（action 依存を増やさない）
+  TF_SHA256: "d25ce7b6902013ad905db3d2eab0be4cd905887fe88b81a6171b8d5503c31f3d"
+  WIF_PROVIDER: projects/943028700787/locations/global/workloadIdentityPools/github/providers/github-oidc
+  PLANNER_SA: terraform-planner@inselfy.iam.gserviceaccount.com
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Install terraform
+        run: |
+          curl -fsSLO "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+          echo "${TF_SHA256}  terraform_${TF_VERSION}_linux_amd64.zip" | sha256sum -c -
+          unzip -q "terraform_${TF_VERSION}_linux_amd64.zip"
+          sudo install terraform /usr/local/bin/terraform
+          rm terraform terraform_${TF_VERSION}_linux_amd64.zip
+          terraform version
+
+      - name: Format check
+        run: terraform fmt -check -recursive -diff
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.PLANNER_SA }}
+
+      - name: Init & validate
+        run: |
+          terraform init -input=false
+          terraform validate
+
+      # -detailed-exitcode: 0=差分なし / 1=エラー / 2=差分あり。
+      # 週次実行では 2 を「ドリフト検知」として fail させる。
+      # PR では差分があるのが正常（それをレビューする）なので 2 は成功扱い。
+      - name: Plan
+        id: plan
+        run: |
+          set +e
+          terraform plan -input=false -no-color -detailed-exitcode -out=tfplan > plan.txt 2>&1
+          code=$?
+          set -e
+          {
+            echo '## terraform plan (infra/)'
+            echo '```'
+            tail -c 60000 plan.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          tail -50 plan.txt
+          if [ "$code" -eq 1 ]; then exit 1; fi
+          if [ "$code" -eq 2 ] && [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "::error::インフラにドリフトあり（コンソール手動変更 or 未適用の PR）。plan を確認して infra/ に反映するか apply すること"
+            exit 1
+          fi
