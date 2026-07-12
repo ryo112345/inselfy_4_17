@@ -5,8 +5,8 @@ import { AiReportSection } from "@/features/ai-report/AiReportSection";
 import {
   getAiReport,
   getResultBySessionId,
-  requestAiReport,
   type ResultDTO,
+  requestAiReport,
 } from "@/features/work-values/api";
 import { NeedsSection } from "@/features/work-values/components/NeedsSection";
 import { TopValuesCodeSection } from "@/features/work-values/components/TopValuesCodeSection";
