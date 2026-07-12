@@ -2,7 +2,7 @@ module github.com/akiyama/inselfy/backend
 
 go 1.25.0
 
-toolchain go1.25.11
+toolchain go1.25.12
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.7
