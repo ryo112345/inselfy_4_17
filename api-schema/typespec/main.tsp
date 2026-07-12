@@ -61,10 +61,10 @@ import "./routes/search.tsp";
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
 
-@service({
+@service(#{
   title: "inselfy API",
 })
-@info({
+@info(#{
   version: "1.0.0",
 })
 @server("http://localhost:8081", "Development server")
