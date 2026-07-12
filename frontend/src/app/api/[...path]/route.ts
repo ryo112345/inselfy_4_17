@@ -14,6 +14,13 @@ async function proxy(req: NextRequest) {
   if (authHeader) headers.set("Authorization", authHeader);
   const adminKey = req.headers.get("x-admin-key");
   if (adminKey) headers.set("X-Admin-Key", adminKey);
+  // Cloud Run が付与する trace ID。API 側のアクセスログとリクエストを
+  // Cloud Logging 上で紐づけるために必須（落とすと trace 相関が切れる）
+  const trace = req.headers.get("x-cloud-trace-context");
+  if (trace) headers.set("X-Cloud-Trace-Context", trace);
+  // 実クライアント IP をアクセスログに残す（無いと内部 IP になる）
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) headers.set("X-Forwarded-For", xff);
 
   const res = await fetch(dest, {
     method: req.method,
