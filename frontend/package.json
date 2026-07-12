@@ -14,7 +14,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@hey-api/client-fetch": "^0.10.2",
     "@react-oauth/google": "^0.13.5",
     "@stripe/stripe-js": "^9.9.0",
     "@tailwindcss/typography": "^0.5.20",

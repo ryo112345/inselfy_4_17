@@ -29,7 +29,7 @@ export type ResultDTO = ModelsWvResultResponse;
 // 認証Cookieのユーザー本人のセッションを開始する
 export async function startSession(): Promise<SessionDTO> {
   const { data, error, response } = await workValuesWvStartSession({});
-  if (error || !data) throw new Error(`Failed to start session: ${response.status}`);
+  if (error || !data) throw new Error(`Failed to start session: ${response?.status}`);
   return data;
 }
 
@@ -43,7 +43,7 @@ export async function submitResult(
     path: { sessionId },
     body: { responses, mu, se },
   });
-  if (error || !data) throw new Error(`Failed to submit result: ${response.status}`);
+  if (error || !data) throw new Error(`Failed to submit result: ${response?.status}`);
   return data;
 }
 
@@ -52,7 +52,7 @@ export async function startSessionByDiagnoseToken(token: string): Promise<Sessio
   const { data, error, response } = await teamDiagnoseStartDiagnoseWvSession({
     path: { token },
   });
-  if (error || !data) throw new Error(`Failed to start session: ${response.status}`);
+  if (error || !data) throw new Error(`Failed to start session: ${response?.status}`);
   return data;
 }
 
@@ -67,7 +67,7 @@ export async function submitResultByDiagnoseToken(
     path: { token, sessionId },
     body: { responses, mu, se },
   });
-  if (error || !data) throw new Error(`Failed to submit result: ${response.status}`);
+  if (error || !data) throw new Error(`Failed to submit result: ${response?.status}`);
   return data;
 }
 
@@ -77,7 +77,7 @@ export async function getResultBySessionId(sessionId: string): Promise<ResultDTO
   const { data, error, response } = await workValuesWvGetResultBySession({
     path: { sessionId },
   });
-  if (error || !data) throw new Error(`Failed to fetch result: ${response.status}`);
+  if (error || !data) throw new Error(`Failed to fetch result: ${response?.status}`);
   return data;
 }
 
@@ -85,8 +85,8 @@ export async function getLatestResult(userId: string): Promise<ResultDTO | null>
   const { data, error, response } = await workValuesWvGetLatestResult({
     path: { userId },
   });
-  if (response.status === 404) return null;
-  if (error || !data) throw new Error(`Failed to fetch latest result: ${response.status}`);
+  if (response?.status === 404) return null;
+  if (error || !data) throw new Error(`Failed to fetch latest result: ${response?.status}`);
   return data;
 }
 
@@ -106,5 +106,5 @@ export async function requestAiReport(sessionId: string): Promise<void> {
   const { error, response } = await workValuesWvRequestAiReport({
     path: { sessionId },
   });
-  if (error) throw new Error(`Failed to request AI report: ${response.status}`);
+  if (error) throw new Error(`Failed to request AI report: ${response?.status}`);
 }

@@ -23,7 +23,8 @@ function stripSkipHeader(request: Request): Request {
 
 client.setConfig({
   baseUrl,
-  fetch: (request: Request) => fetch(stripSkipHeader(request)),
+  fetch: (input: RequestInfo | URL, init?: RequestInit) =>
+    fetch(stripSkipHeader(new Request(input, init))),
 });
 
 let refreshPromise: Promise<boolean> | null = null;

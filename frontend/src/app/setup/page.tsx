@@ -56,7 +56,7 @@ export default function SetupPage() {
     });
 
     if (apiError || !updated) {
-      if (response.status === 409) {
+      if (response?.status === 409) {
         setError("このユーザー名はすでに使われています");
       } else {
         setError(apiError?.message || "設定に失敗しました");
