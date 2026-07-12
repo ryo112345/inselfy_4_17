@@ -30,6 +30,15 @@
   旧リビジョンも新スキーマで動く必要がある。カラム・テーブル削除や NOT NULL 化などの contract は
   「参照を消したリリースの**次の**リリース」でのみ行う。詳細は `docs/cd-rollback.md`
 
+### インフラ（Terraform）
+
+- GCP の standing infrastructure は `infra/` の Terraform で管理（state は GCS `inselfy-tfstate`）。
+- **管轄分け:** Terraform = 土台（サービスの存在・IAM・WIF・Secret の入れ物・予算）、
+  deploy.yml = リリース（イメージ・env・probe・max-instances・トラフィック）。
+  Cloud Run の env や probe を変えるときは deploy.yml を編集する（Terraform ではない）。
+- GCP をコンソールや gcloud で手動変更したら `terraform plan` でドリフトを確認し、
+  `infra/` に反映すること。詳細は `infra/README.md`。
+
 ### struct 変換マッパー（goverter）
 
 クリーンアーキを保ちつつ、層をまたぐ struct 詰め替えの手書き写経を減らすため
