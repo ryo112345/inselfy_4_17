@@ -39,6 +39,14 @@ COPY --from=frontend-builder /app/frontend/public ./frontend/public
 # 起動スクリプト: API/node のどちらかが死んだらコンテナごと落とす（詳細は docker/start.sh）
 COPY docker/start.sh ./start.sh
 
+# 非 root 実行（コンテナ突破時の被害を最小化）。node:22-alpine 同梱の node ユーザーを使う。
+# 書き込みが必要なのは 2 箇所だけで、残りは root 所有のまま読み取り専用:
+#   - /app/uploads: STORAGE_BACKEND=local（ローカル・e2e）のアップロード先
+#   - /app/frontend/.next/cache: next/image の最適化キャッシュ
+RUN mkdir -p /app/uploads /app/frontend/.next/cache \
+    && chown -R node:node /app/uploads /app/frontend/.next/cache
+USER node
+
 EXPOSE 8080
 
 CMD ["sh", "/app/start.sh"]
