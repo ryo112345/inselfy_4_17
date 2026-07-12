@@ -11,6 +11,7 @@ interface PendingSession {
   username: string;
   name: string;
   completed_at: string | null;
+  report_requested_at: string | null;
 }
 
 interface IntegratedRequest {
@@ -507,12 +508,24 @@ export default function AdminReportsPage() {
                 >
                   <div className="flex items-center justify-between p-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{s.name}</p>
+                      <p className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                        {s.name}
+                        {s.report_requested_at && (
+                          <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                            依頼済み
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-gray-500 mt-0.5">
                         @{s.username}
                         {s.completed_at && (
                           <span className="ml-2">
                             {new Date(s.completed_at).toLocaleDateString("ja-JP")} 完了
+                          </span>
+                        )}
+                        {s.report_requested_at && (
+                          <span className="ml-2">
+                            {new Date(s.report_requested_at).toLocaleDateString("ja-JP")} 依頼
                           </span>
                         )}
                       </p>

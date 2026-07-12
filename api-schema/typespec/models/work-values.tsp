@@ -118,6 +118,9 @@ model WVResultResponse {
   /** このセッションのAIレポートが生成済みかどうか */
   hasReport: boolean;
 
+  /** このセッションのAIレポート作成依頼が済んでいるかどうか */
+  reportRequested: boolean;
+
   /** 作成日時（RFC3339 文字列） */
   createdAt: string;
 }

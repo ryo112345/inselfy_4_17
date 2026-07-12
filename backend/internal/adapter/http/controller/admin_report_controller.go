@@ -28,6 +28,7 @@ type pendingSessionItem struct {
 	Username    string  `json:"username"`
 	Name        string  `json:"name"`
 	CompletedAt *string `json:"completed_at"`
+	RequestedAt *string `json:"report_requested_at"`
 }
 
 func (c *AdminReportController) ListPending(ctx echo.Context) error {
@@ -47,6 +48,10 @@ func (c *AdminReportController) ListPending(ctx echo.Context) error {
 		if r.CompletedAt.Valid {
 			t := r.CompletedAt.Time.Format("2006-01-02T15:04:05Z")
 			item.CompletedAt = &t
+		}
+		if r.ReportRequestedAt.Valid {
+			t := r.ReportRequestedAt.Time.UTC().Format("2006-01-02T15:04:05Z")
+			item.RequestedAt = &t
 		}
 		items = append(items, item)
 	}

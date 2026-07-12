@@ -365,6 +365,10 @@ func (s *Server) CareerInterestCiGetResultBySession(ctx echo.Context, sessionID 
 	return s.ci.GetResultBySessionID(ctx, sessionID)
 }
 
+func (s *Server) CareerInterestCiRequestAiReport(ctx echo.Context, sessionID string) error {
+	return s.ci.RequestAiReport(ctx, sessionID)
+}
+
 // --- WorkValues ---
 
 func (s *Server) WorkValuesWvStartSession(ctx echo.Context) error {
@@ -377,6 +381,10 @@ func (s *Server) WorkValuesWvSubmitResult(ctx echo.Context, sessionID string) er
 
 func (s *Server) WorkValuesWvGetLatestResult(ctx echo.Context, userID string) error {
 	return s.wv.GetLatestResult(ctx, userID)
+}
+
+func (s *Server) WorkValuesWvRequestAiReport(ctx echo.Context, sessionID string) error {
+	return s.wv.RequestAiReport(ctx, sessionID)
 }
 
 func (s *Server) WorkValuesWvGetResultBySession(ctx echo.Context, sessionID string) error {

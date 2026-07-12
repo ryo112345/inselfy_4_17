@@ -42,12 +42,22 @@ SELECT
     s.user_id,
     u.username,
     u.name,
-    s.completed_at
+    s.completed_at,
+    s.report_requested_at
 FROM career_interest_sessions s
 JOIN users u ON u.id = s.user_id
 LEFT JOIN ci_ai_reports r ON r.session_id = s.id
 WHERE s.status = 'completed' AND r.id IS NULL
 ORDER BY s.completed_at DESC;
+
+-- name: RequestCIReport :exec
+UPDATE career_interest_sessions SET report_requested_at = NOW()
+WHERE id = $1 AND report_requested_at IS NULL;
+
+-- name: CIReportRequested :one
+SELECT report_requested_at IS NOT NULL AS requested
+FROM career_interest_sessions
+WHERE id = $1;
 
 -- name: GetCIBasicScoresBySessionID :many
 SELECT basic_interest_id, score, rank

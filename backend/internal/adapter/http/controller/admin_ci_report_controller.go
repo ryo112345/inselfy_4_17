@@ -40,6 +40,10 @@ func (c *AdminCIReportController) ListPending(ctx echo.Context) error {
 			t := r.CompletedAt.Time.Format("2006-01-02T15:04:05Z")
 			item.CompletedAt = &t
 		}
+		if r.ReportRequestedAt.Valid {
+			t := r.ReportRequestedAt.Time.UTC().Format("2006-01-02T15:04:05Z")
+			item.RequestedAt = &t
+		}
 		items = append(items, item)
 	}
 

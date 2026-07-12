@@ -301,12 +301,13 @@ type CareerInterestResult struct {
 }
 
 type CareerInterestSession struct {
-	ID          pgtype.UUID        `json:"id"`
-	UserID      pgtype.UUID        `json:"user_id"`
-	Status      string             `json:"status"`
-	Items       []byte             `json:"items"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	CompletedAt pgtype.Timestamptz `json:"completed_at"`
+	ID                pgtype.UUID        `json:"id"`
+	UserID            pgtype.UUID        `json:"user_id"`
+	Status            string             `json:"status"`
+	Items             []byte             `json:"items"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	CompletedAt       pgtype.Timestamptz `json:"completed_at"`
+	ReportRequestedAt pgtype.Timestamptz `json:"report_requested_at"`
 }
 
 type CareerInterestTypeScore struct {
@@ -754,10 +755,11 @@ type WorkValuesScore struct {
 }
 
 type WorkValuesSession struct {
-	ID           pgtype.UUID        `json:"id"`
-	UserID       pgtype.UUID        `json:"user_id"`
-	Status       string             `json:"status"`
-	InitialPairs []byte             `json:"initial_pairs"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	CompletedAt  pgtype.Timestamptz `json:"completed_at"`
+	ID                pgtype.UUID        `json:"id"`
+	UserID            pgtype.UUID        `json:"user_id"`
+	Status            string             `json:"status"`
+	InitialPairs      []byte             `json:"initial_pairs"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	CompletedAt       pgtype.Timestamptz `json:"completed_at"`
+	ReportRequestedAt pgtype.Timestamptz `json:"report_requested_at"`
 }

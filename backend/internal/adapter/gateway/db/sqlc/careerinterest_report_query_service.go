@@ -34,3 +34,20 @@ func (s *CareerInterestReportQueryService) ExistsBySessionID(ctx context.Context
 	}
 	return exists, nil
 }
+
+func (s *CareerInterestReportQueryService) RequestedBySessionID(ctx context.Context, sessionID string) (bool, error) {
+	sid, err := parseUUID(sessionID)
+	if err != nil {
+		return false, domainerr.ErrBadRequest
+	}
+	var requested bool
+	err = s.pool.QueryRow(ctx,
+		`SELECT EXISTS (SELECT 1 FROM career_interest_sessions
+		 WHERE id = $1 AND report_requested_at IS NOT NULL)`,
+		sid,
+	).Scan(&requested)
+	if err != nil {
+		return false, err
+	}
+	return requested, nil
+}

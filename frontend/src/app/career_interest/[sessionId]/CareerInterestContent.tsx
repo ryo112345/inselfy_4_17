@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AiReportSection } from "@/features/ai-report/AiReportSection";
-import { getAiReport, getResultBySessionId, type ResultDTO } from "@/features/career-interest/api";
+import {
+  getAiReport,
+  getResultBySessionId,
+  requestAiReport,
+  type ResultDTO,
+} from "@/features/career-interest/api";
 import { BasicInterestsSection } from "@/features/career-interest/components/BasicInterestsSection";
 import { TopRIASECHeroSection } from "@/features/career-interest/components/TopRIASECHeroSection";
 import { TypesSection } from "@/features/career-interest/components/TypesSection";
@@ -30,6 +35,7 @@ export function CareerInterestResultContent({
   }, [sessionId, result]);
 
   const fetchReport = useCallback(() => getAiReport(sessionId), [sessionId]);
+  const requestReport = useCallback(() => requestAiReport(sessionId), [sessionId]);
 
   if (error) {
     return (
@@ -63,6 +69,8 @@ export function CareerInterestResultContent({
 
       <AiReportSection
         fetchReport={fetchReport}
+        requestReport={requestReport}
+        initialRequested={result.reportRequested}
         accent="purple"
         heading="AI キャリアレポート"
         variant="generate"

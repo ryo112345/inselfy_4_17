@@ -35,6 +35,7 @@ type Result struct {
 	QuestionCount          int
 	Values                 []ValueScore
 	HasReport              bool
+	ReportRequested        bool
 	CreatedAt              time.Time
 }
 

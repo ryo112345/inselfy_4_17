@@ -41,6 +41,9 @@ func wireDiagnosis(e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.MiddlewareFunc) {
 	wvGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
 		return wvCtrl.GetResultBySessionID(c, c.Param("sessionId"))
 	}, anyJwtMW)
+	wvGroup.POST("/sessions/:sessionId/ai-report/request", func(c echo.Context) error {
+		return wvCtrl.RequestAiReport(c, c.Param("sessionId"))
+	}, jwtMW)
 
 	// --- Career Interest ---
 	ciGroup := e.Group("/api/career-interest")
@@ -54,6 +57,9 @@ func wireDiagnosis(e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.MiddlewareFunc) {
 	ciGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
 		return ciCtrl.GetResultBySessionID(c, c.Param("sessionId"))
 	}, anyJwtMW)
+	ciGroup.POST("/sessions/:sessionId/ai-report/request", func(c echo.Context) error {
+		return ciCtrl.RequestAiReport(c, c.Param("sessionId"))
+	}, jwtMW)
 
 	// --- Team Diagnose (invite-token authorized) ---
 	diagCtrl := httpcontroller.NewTeamDiagnoseController(

@@ -60,4 +60,15 @@ interface WorkValues {
   wvGetAiReport(
     @path sessionId: Uuid,
   ): AiReportResponse | AuthedNotFoundErrors;
+
+  /** AIレポートの作成依頼（セッション所有者のみ・冪等） */
+  @post
+  @route("/sessions/{sessionId}/ai-report/request")
+  @summary("Request AI report generation for a work values session")
+  @useAuth(Models.CandidateAuth)
+  wvRequestAiReport(
+    @path sessionId: Uuid,
+  ): {
+    @statusCode statusCode: 204;
+  } | AuthedForbiddenErrors;
 }

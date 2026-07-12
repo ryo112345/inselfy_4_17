@@ -96,6 +96,12 @@ func (i *WorkValuesInteractor) GetLatestResult(ctx context.Context, userID strin
 	}
 	result.HasReport = hasReport
 
+	requested, err := i.reportQS.RequestedBySessionID(ctx, result.SessionID)
+	if err != nil {
+		return nil, err
+	}
+	result.ReportRequested = requested
+
 	return result, nil
 }
 
@@ -117,5 +123,23 @@ func (i *WorkValuesInteractor) GetResultBySessionID(ctx context.Context, session
 	}
 	result.HasReport = hasReport
 
+	requested, err := i.reportQS.RequestedBySessionID(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	result.ReportRequested = requested
+
 	return result, nil
+}
+
+// RequestAiReport はセッション所有者からの AI レポート作成依頼を記録する（冪等）。
+func (i *WorkValuesInteractor) RequestAiReport(ctx context.Context, sessionID, userID string) error {
+	session, err := i.sessionRepo.GetByID(ctx, sessionID)
+	if err != nil {
+		return err
+	}
+	if session.UserID != userID {
+		return port.ErrForbidden
+	}
+	return i.sessionRepo.RequestReport(ctx, sessionID)
 }

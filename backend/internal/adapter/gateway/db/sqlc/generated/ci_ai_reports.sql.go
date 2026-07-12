@@ -11,6 +11,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const cIReportRequested = `-- name: CIReportRequested :one
+SELECT report_requested_at IS NOT NULL AS requested
+FROM career_interest_sessions
+WHERE id = $1
+`
+
+func (q *Queries) CIReportRequested(ctx context.Context, id pgtype.UUID) (interface{}, error) {
+	row := q.db.QueryRow(ctx, cIReportRequested, id)
+	var requested interface{}
+	err := row.Scan(&requested)
+	return requested, err
+}
+
 const getCIAIReportBySessionID = `-- name: GetCIAIReportBySessionID :one
 SELECT id, session_id, user_id, content, created_at, viewed_at
 FROM ci_ai_reports
@@ -204,7 +217,8 @@ SELECT
     s.user_id,
     u.username,
     u.name,
-    s.completed_at
+    s.completed_at,
+    s.report_requested_at
 FROM career_interest_sessions s
 JOIN users u ON u.id = s.user_id
 LEFT JOIN ci_ai_reports r ON r.session_id = s.id
@@ -213,11 +227,12 @@ ORDER BY s.completed_at DESC
 `
 
 type ListCISessionsWithoutReportRow struct {
-	SessionID   pgtype.UUID        `json:"session_id"`
-	UserID      pgtype.UUID        `json:"user_id"`
-	Username    string             `json:"username"`
-	Name        string             `json:"name"`
-	CompletedAt pgtype.Timestamptz `json:"completed_at"`
+	SessionID         pgtype.UUID        `json:"session_id"`
+	UserID            pgtype.UUID        `json:"user_id"`
+	Username          string             `json:"username"`
+	Name              string             `json:"name"`
+	CompletedAt       pgtype.Timestamptz `json:"completed_at"`
+	ReportRequestedAt pgtype.Timestamptz `json:"report_requested_at"`
 }
 
 func (q *Queries) ListCISessionsWithoutReport(ctx context.Context) ([]*ListCISessionsWithoutReportRow, error) {
@@ -235,6 +250,7 @@ func (q *Queries) ListCISessionsWithoutReport(ctx context.Context) ([]*ListCISes
 			&i.Username,
 			&i.Name,
 			&i.CompletedAt,
+			&i.ReportRequestedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -253,6 +269,16 @@ WHERE session_id = $1 AND viewed_at IS NULL
 
 func (q *Queries) MarkCIAIReportViewed(ctx context.Context, sessionID pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, markCIAIReportViewed, sessionID)
+	return err
+}
+
+const requestCIReport = `-- name: RequestCIReport :exec
+UPDATE career_interest_sessions SET report_requested_at = NOW()
+WHERE id = $1 AND report_requested_at IS NULL
+`
+
+func (q *Queries) RequestCIReport(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, requestCIReport, id)
 	return err
 }
 

@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AiReportSection } from "@/features/ai-report/AiReportSection";
-import { getAiReport, getResultBySessionId, type ResultDTO } from "@/features/work-values/api";
+import {
+  getAiReport,
+  getResultBySessionId,
+  requestAiReport,
+  type ResultDTO,
+} from "@/features/work-values/api";
 import { NeedsSection } from "@/features/work-values/components/NeedsSection";
 import { TopValuesCodeSection } from "@/features/work-values/components/TopValuesCodeSection";
 import { DEFAULT_BADGE, SCORE_COLORS } from "@/features/work-values/components/theme";
@@ -30,6 +35,7 @@ export function WorkValuesResultContent({
   }, [sessionId, result]);
 
   const fetchReport = useCallback(() => getAiReport(sessionId), [sessionId]);
+  const requestReport = useCallback(() => requestAiReport(sessionId), [sessionId]);
 
   if (error) {
     return (
@@ -63,6 +69,8 @@ export function WorkValuesResultContent({
 
       <AiReportSection
         fetchReport={fetchReport}
+        requestReport={requestReport}
+        initialRequested={result.reportRequested}
         accent="emerald"
         heading="AI キャリアレポート"
         variant="generate"

@@ -70,3 +70,10 @@ func (c *CareerInterestController) GetResultBySessionID(ctx echo.Context, sessio
 	}
 	return ctx.JSON(http.StatusOK, presenter.CareerInterestResultResponse(r))
 }
+
+func (c *CareerInterestController) RequestAiReport(ctx echo.Context, sessionID string) error {
+	if err := c.input.RequestAiReport(ctx.Request().Context(), sessionID, authmw.UserID(ctx)); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.NoContent(http.StatusNoContent)
+}

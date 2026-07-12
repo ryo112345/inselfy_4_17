@@ -721,6 +721,48 @@ paths:
       security:
         - CandidateAuth: []
         - CompanyAuth: []
+  /api/career-interest/sessions/{sessionId}/ai-report/request:
+    post:
+      operationId: CareerInterest_ciRequestAiReport
+      summary: Request AI report generation for a career interest session
+      description: AIレポートの作成依頼（セッション所有者のみ・冪等）
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - CareerInterest
+      security:
+        - CandidateAuth: []
   /api/career-interest/sessions/{sessionId}/results:
     post:
       operationId: CareerInterest_ciSubmitResult
@@ -7061,6 +7103,48 @@ paths:
       security:
         - CandidateAuth: []
         - CompanyAuth: []
+  /api/work-values/sessions/{sessionId}/ai-report/request:
+    post:
+      operationId: WorkValues_wvRequestAiReport
+      summary: Request AI report generation for a work values session
+      description: AIレポートの作成依頼（セッション所有者のみ・冪等）
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - WorkValues
+      security:
+        - CandidateAuth: []
   /api/work-values/sessions/{sessionId}/results:
     post:
       operationId: WorkValues_wvSubmitResult
@@ -7553,6 +7637,7 @@ components:
         - basicScores
         - typeScores
         - hasReport
+        - reportRequested
         - createdAt
       properties:
         id:
@@ -7580,6 +7665,9 @@ components:
         hasReport:
           type: boolean
           description: このセッションのAIレポートが生成済みかどうか
+        reportRequested:
+          type: boolean
+          description: このセッションのAIレポート作成依頼が済んでいるかどうか
         createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）
@@ -12103,6 +12191,7 @@ components:
         - needs
         - values
         - hasReport
+        - reportRequested
         - createdAt
       properties:
         id:
@@ -12130,6 +12219,9 @@ components:
         hasReport:
           type: boolean
           description: このセッションのAIレポートが生成済みかどうか
+        reportRequested:
+          type: boolean
+          description: このセッションのAIレポート作成依頼が済んでいるかどうか
         createdAt:
           type: string
           description: 作成日時（RFC3339 文字列）

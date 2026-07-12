@@ -11,12 +11,14 @@ type WorkValuesInputPort interface {
 	SubmitResult(ctx context.Context, sessionID, userID string, input workvalues.SubmitInput) (*workvalues.Result, error)
 	GetLatestResult(ctx context.Context, userID string) (*workvalues.Result, error)
 	GetResultBySessionID(ctx context.Context, sessionID string) (*workvalues.Result, error)
+	RequestAiReport(ctx context.Context, sessionID, userID string) error
 }
 
 type WorkValuesSessionRepository interface {
 	Create(ctx context.Context, s *workvalues.Session) (*workvalues.Session, error)
 	GetByID(ctx context.Context, id string) (*workvalues.Session, error)
 	UpdateStatus(ctx context.Context, id, status string) error
+	RequestReport(ctx context.Context, id string) error
 }
 
 type WorkValuesResultRepository interface {
@@ -30,8 +32,9 @@ type WorkValuesScoreRepository interface {
 	GetBySessionID(ctx context.Context, sessionID string) ([]workvalues.ValueScore, error)
 }
 
-// AIレポート（ai_reports）の存在確認。本文の取得・生成は admin コントローラが担うため、
-// ここでは結果レスポンスに載せる存在フラグだけを扱う。
+// AIレポート（ai_reports）の存在・依頼状態の確認。本文の取得・生成は admin コントローラが
+// 担うため、ここでは結果レスポンスに載せるフラグだけを扱う。
 type WorkValuesReportQueryService interface {
 	ExistsBySessionID(ctx context.Context, sessionID string) (bool, error)
+	RequestedBySessionID(ctx context.Context, sessionID string) (bool, error)
 }

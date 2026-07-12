@@ -2,7 +2,6 @@
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { markdownToHtml } from "@/lib/markdown";
-import { usePolling } from "@/lib/usePolling";
 import { useTypewriter } from "./useTypewriter";
 
 export type AiReportData = { content?: string | null; firstView?: boolean } | null;
@@ -62,17 +61,24 @@ const THEMES: Record<AiReportAccent, Theme> = {
 /**
  * AI レポート表示セクション（WV / CI / 統合レポート共通）。
  *
- * variant:
- * - "generate": オーナーに「レポートを作成する」ボタンを出し、未生成なら
- *   「作成中」表示の間だけポーリングする（WV / CI）。
- * - "view": マウント直後からオーナーのみポーリングし、生成済みなら
- *   「レポートを見る」ボタンで開く（統合レポート）。
+ * レポートは管理者がバッチ生成する（〜1営業日）ため、ポーリングはせず
+ * マウント時の1回の fetch で有無を判定する。未生成なら「作成中」表示になり、
+ * 完成は次回訪問時に反映される。
  *
- * fetchReport は再フェッチのトリガーになるため、呼び出し側で useCallback 等で
- * 安定させること。
+ * variant:
+ * - "generate": 未依頼なら「レポートを作成する」ボタンを出し、押下で requestReport
+ *   （作成依頼の記録）を呼んで「作成中」表示に切り替える。依頼済み・未生成なら
+ *   最初から「作成中」表示（ボタン無効）。生成済み初回は「レポートを見る」ボタンで
+ *   開封演出を出す（WV / CI）。
+ * - "view": 生成済みなら「レポートを見る」ボタンで開く（統合レポート）。
+ *
+ * fetchReport / requestReport は再実行のトリガーになるため、呼び出し側で
+ * useCallback 等で安定させること。
  */
 export function AiReportSection({
   fetchReport,
+  requestReport,
+  initialRequested = false,
   accent,
   heading,
   variant,
@@ -81,6 +87,10 @@ export function AiReportSection({
   children,
 }: {
   fetchReport: () => Promise<AiReportData>;
+  /** 作成依頼を記録する（generate バリアントのみ） */
+  requestReport?: () => Promise<void>;
+  /** サーバー側で既に作成依頼済みか（generate バリアントのみ） */
+  initialRequested?: boolean;
   accent: AiReportAccent;
   heading: string;
   variant: "generate" | "view";
@@ -119,6 +129,10 @@ export function AiReportSection({
           setReportContent(data.content);
           setFirstView(!!data.firstView);
           if (!data.firstView) setShowReport(true);
+        } else if (variant === "generate" && isOwner && initialRequested) {
+          // 依頼済み・未生成なら最初から「作成中」表示にする（依頼状態は
+          // サーバー由来なのでリロードしてもボタンを押せる状態に戻らない）
+          setNotFound(true);
         }
       })
       .catch(() => {})
@@ -128,30 +142,7 @@ export function AiReportSection({
     return () => {
       cancelled = true;
     };
-  }, [fetchReport]);
-
-  // generate: 「作成中」表示の間だけ / view: 未生成の間オーナーのみポーリング
-  const pollingEnabled =
-    variant === "generate"
-      ? notFound && reportContent === null
-      : isOwner && !initialLoading && reportContent === null;
-
-  usePolling(pollingEnabled, async () => {
-    const data = await fetchReport();
-    if (data?.content) {
-      setReportContent(data.content);
-      setFirstView(!!data.firstView);
-      if (variant === "generate") {
-        setShowReport(true);
-        setNotFound(false);
-        if (data.firstView) setPendingTypewriter(true);
-      } else if (!data.firstView) {
-        setShowReport(true);
-      }
-      return false;
-    }
-    return true;
-  });
+  }, [fetchReport, variant, isOwner, initialRequested]);
 
   const handleClick = () => {
     if (reportContent) {
@@ -176,19 +167,13 @@ export function AiReportSection({
           }
         });
       }
-    } else if (variant === "generate") {
+    } else if (variant === "generate" && requestReport) {
+      // 作成依頼をサーバーに記録して「作成中」表示へ。失敗時はボタンを
+      // 押せるまま残す（再試行できる）
       setLoading(true);
-      fetchReport()
-        .then((data) => {
-          if (data?.content) {
-            setReportContent(data.content);
-            setFirstView(!!data.firstView);
-            setShowReport(true);
-            if (data.firstView) setPendingTypewriter(true);
-          } else {
-            setNotFound(true);
-          }
-        })
+      requestReport()
+        .then(() => setNotFound(true))
+        .catch(() => {})
         .finally(() => setLoading(false));
     }
   };
@@ -230,19 +215,21 @@ export function AiReportSection({
           isOwner ? (
             <>
               <p className="text-[16px] text-gray-500 leading-relaxed mb-5">
-                AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。
+                {reportContent
+                  ? "AIがあなたの診断結果を分析し、レポートを作成しました。"
+                  : "AIがあなたの診断結果を分析し、適した職業やキャリアアドバイスをレポートとして生成します。"}
               </p>
               <button
                 type="button"
                 onClick={handleClick}
-                disabled={loading}
+                disabled={loading || notFound}
                 className={theme.buttonClassName}
               >
-                レポートを作成する
+                {reportContent ? "レポートを見る" : "レポートを作成する"}
               </button>
               {notFound && (
                 <p className="text-[13px] text-amber-600 mt-4">
-                  レポートはまだ作成中です。しばらくお待ちください。
+                  レポートは1営業日以内に作成されます。完成後にこのページでご覧いただけます。
                 </p>
               )}
             </>
