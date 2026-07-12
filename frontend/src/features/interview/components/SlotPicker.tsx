@@ -316,10 +316,12 @@ export function SlotPicker({
       <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 shrink-0">
         <div className="flex items-center gap-4">
           <button
+            type="button"
             onClick={handleBack}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
           >
             <svg
+              aria-hidden="true"
               width={20}
               height={20}
               viewBox="0 0 24 24"
@@ -349,12 +351,14 @@ export function SlotPicker({
         <div className="flex items-center gap-3">
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button
+            type="button"
             onClick={handleBack}
             className="rounded-lg px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
           >
             キャンセル
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={submitting || slots.length === 0}
             className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors"
@@ -373,10 +377,12 @@ export function SlotPicker({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setWeekStart(addDays(weekStart, -7))}
               className="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
             >
               <svg
+                aria-hidden="true"
                 width={16}
                 height={16}
                 viewBox="0 0 24 24"
@@ -391,10 +397,12 @@ export function SlotPicker({
               {formatWeekRange(weekStart)}
             </span>
             <button
+              type="button"
               onClick={() => setWeekStart(addDays(weekStart, 7))}
               className="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100"
             >
               <svg
+                aria-hidden="true"
                 width={16}
                 height={16}
                 viewBox="0 0 24 24"
@@ -407,8 +415,11 @@ export function SlotPicker({
             </button>
           </div>
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500">面談時間</label>
+            <label htmlFor="slot-duration" className="text-xs text-gray-500">
+              面談時間
+            </label>
             <select
+              id="slot-duration"
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
               className="rounded-lg border border-gray-200 px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300"
@@ -423,8 +434,11 @@ export function SlotPicker({
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <label className="text-xs text-gray-500">場所</label>
+            <label htmlFor="slot-location" className="text-xs text-gray-500">
+              場所
+            </label>
             <input
+              id="slot-location"
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
@@ -493,8 +507,8 @@ export function SlotPicker({
                   </div>
                 ))}
               </div>
-
               {/* Day columns */}
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: マウス座標から時間帯を計算するドラッグ専用グリッド。キーボードでは操作できない補助UI */}
               <div
                 ref={gridRef}
                 className="col-span-7 grid grid-cols-7 relative select-none cursor-crosshair"
@@ -531,9 +545,11 @@ export function SlotPicker({
 
                       {/* Created slots */}
                       {daySlots.map((slot) => (
-                        <div
+                        <button
+                          type="button"
                           key={slot.id}
-                          className="absolute left-1 right-1 rounded-lg bg-blue-500 text-white px-2 py-1 cursor-pointer hover:bg-blue-600 transition-colors group z-10"
+                          aria-label={`${formatTime(slot.startMinutes)}–${formatTime(slot.endMinutes)} の枠を削除`}
+                          className="absolute left-1 right-1 rounded-lg bg-blue-500 text-white px-2 py-1 text-left cursor-pointer hover:bg-blue-600 transition-colors group z-10"
                           style={{
                             top: `${minutesToY(slot.startMinutes)}px`,
                             height: `${minutesToY(slot.endMinutes) - minutesToY(slot.startMinutes)}px`,
@@ -553,7 +569,7 @@ export function SlotPicker({
                           <span className="absolute top-1 right-1.5 text-white/60 text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                             ✕
                           </span>
-                        </div>
+                        </button>
                       ))}
 
                       {/* Drag preview */}

@@ -18,6 +18,7 @@ function isNewPosting(dateStr: string): boolean {
 function LocationIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={12}
       height={12}
       viewBox="0 0 24 24"
@@ -36,6 +37,7 @@ function LocationIcon() {
 function SalaryIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={12}
       height={12}
       viewBox="0 0 24 24"
@@ -124,9 +126,11 @@ function CardInner({
           <h3 className="flex-1 text-base font-bold leading-snug text-gray-900 line-clamp-2">
             {job.title}
           </h3>
+          {/* biome-ignore lint/a11y/useSemanticElements: カード全体が button/Link でラップされるため button をネストできない */}
           <div
             role="button"
             tabIndex={0}
+            aria-label="求人を保存"
             className="shrink-0 mt-0.5 text-gray-300 hover:text-gray-500 transition-colors cursor-pointer"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
@@ -254,6 +258,7 @@ function CardInner({
             マッチ度を確認できます
           </div>
         ) : (
+          // biome-ignore lint/a11y/useSemanticElements: カード全体が button/Link でラップされるため a をネストできない
           <div
             role="link"
             tabIndex={0}

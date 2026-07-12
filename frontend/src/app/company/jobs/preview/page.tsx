@@ -123,6 +123,7 @@ export default function CompanyJobPreviewPage() {
             style={{ backgroundColor: `${ACCENT}14`, color: ACCENT }}
           >
             <svg
+              aria-hidden="true"
               className="h-6 w-6"
               viewBox="0 0 24 24"
               fill="none"
@@ -270,9 +271,14 @@ export default function CompanyJobPreviewPage() {
         {/* Hero */}
         <section className={`overflow-hidden ${cardClass}`}>
           {(form.coverImageDataUrl || form.coverImageUrl) && (
-            <img
+            <Image
               src={form.coverImageDataUrl ?? form.coverImageUrl!}
               alt=""
+              width={1600}
+              height={900}
+              sizes="(max-width: 896px) 100vw, 864px"
+              // アップロード直後は data: URL のため最適化をバイパスする
+              unoptimized={!!form.coverImageDataUrl}
               className="w-full aspect-[16/9] object-cover"
             />
           )}
@@ -352,6 +358,7 @@ export default function CompanyJobPreviewPage() {
 
             <div className="mt-7 flex gap-3">
               <button
+                type="button"
                 disabled
                 className="flex-1 rounded-xl py-4 text-center text-base font-bold text-white opacity-60"
                 style={{ background: ACCENT }}
@@ -359,6 +366,7 @@ export default function CompanyJobPreviewPage() {
                 この求人に応募する
               </button>
               <button
+                type="button"
                 disabled
                 className="rounded-xl border border-gray-300 px-5 py-4 text-base font-medium text-gray-700 opacity-60"
               >
@@ -609,6 +617,7 @@ export default function CompanyJobPreviewPage() {
                   </div>
                   {i < arr.length - 1 && (
                     <svg
+                      aria-hidden="true"
                       className="h-5 w-5 shrink-0 text-gray-300"
                       viewBox="0 0 24 24"
                       fill="none"

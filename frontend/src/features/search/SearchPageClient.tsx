@@ -68,6 +68,7 @@ export function SearchPageClient({ initialQ, initialTab }: Props) {
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur px-4 pt-4 pb-2">
         <div className="relative">
           <svg
+            aria-hidden="true"
             width={18}
             height={18}
             viewBox="0 0 24 24"
@@ -102,6 +103,7 @@ export function SearchPageClient({ initialQ, initialTab }: Props) {
               className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center hover:bg-gray-400 cursor-pointer"
             >
               <svg
+                aria-hidden="true"
                 width={12}
                 height={12}
                 viewBox="0 0 24 24"
@@ -216,6 +218,7 @@ function DiscoverySection({
                   className="flex-1 flex items-center gap-2.5 text-left text-[14px] text-gray-700 py-1.5 hover:text-gray-900 cursor-pointer min-w-0"
                 >
                   <svg
+                    aria-hidden="true"
                     width={14}
                     height={14}
                     viewBox="0 0 24 24"
@@ -237,6 +240,7 @@ function DiscoverySection({
                   className="shrink-0 text-gray-300 hover:text-gray-500 cursor-pointer p-1"
                 >
                   <svg
+                    aria-hidden="true"
                     width={14}
                     height={14}
                     viewBox="0 0 24 24"

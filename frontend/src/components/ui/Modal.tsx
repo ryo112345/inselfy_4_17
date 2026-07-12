@@ -5,6 +5,7 @@ import { type ReactNode, useEffect } from "react";
 function XIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -52,15 +53,18 @@ export function Modal({ open, onClose, title, children, footer, size = "xl" }: M
   if (!open) return null;
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: 背景クリックで閉じる補助動線。キーボードは Escape と閉じるボタンで対応済み
     <div
+      role="presentation"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8"
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         className={`relative flex max-h-[calc(100vh-4rem)] w-full ${SIZE_CLASSES[size]} flex-col overflow-hidden rounded-2xl bg-white shadow-xl`}
-        onClick={(e) => e.stopPropagation()}
       >
         {title !== undefined ? (
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
@@ -96,6 +100,7 @@ type FieldProps = {
 
 export function Field({ label, hint, error, required, children }: FieldProps) {
   return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: children として渡される入力要素を内包して暗黙関連付けする
     <label className="mb-4 flex flex-col gap-1.5 last:mb-0">
       <span className="text-sm font-semibold text-gray-700">
         {label}

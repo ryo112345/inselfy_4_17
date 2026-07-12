@@ -121,6 +121,7 @@ export default function InterviewsPage() {
       <div className="flex gap-1 rounded-lg bg-gray-100 p-1 mb-6">
         {TABS.map((t) => (
           <button
+            type="button"
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
@@ -211,6 +212,7 @@ function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 py-16">
       <svg
+        aria-hidden="true"
         className="mb-3 text-gray-300"
         width={40}
         height={40}
@@ -293,6 +295,7 @@ function InterviewCard({
       <div className="space-y-2 mb-3">
         <div className="flex items-center gap-2.5">
           <svg
+            aria-hidden="true"
             className="shrink-0 text-gray-400"
             width={16}
             height={16}
@@ -317,6 +320,7 @@ function InterviewCard({
         {interview.location && (
           <div className="flex items-center gap-2.5">
             <svg
+              aria-hidden="true"
               className="shrink-0 text-gray-400"
               width={16}
               height={16}
@@ -335,6 +339,7 @@ function InterviewCard({
         {interview.meetingUrl && (
           <div className="flex items-center gap-2.5">
             <svg
+              aria-hidden="true"
               className="shrink-0 text-gray-400"
               width={16}
               height={16}
@@ -361,6 +366,7 @@ function InterviewCard({
       {!isPast && interview.status === "scheduled" && (
         <div className="flex justify-end border-t border-gray-100 pt-3">
           <button
+            type="button"
             onClick={handleCancel}
             disabled={cancelling}
             className="text-sm font-medium text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors"

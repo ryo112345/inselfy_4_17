@@ -73,6 +73,7 @@ export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props)
       footer={
         interview.status === "scheduled" ? (
           <button
+            type="button"
             onClick={handleCancel}
             disabled={cancelling}
             className="rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
@@ -101,6 +102,7 @@ export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props)
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <svg
+              aria-hidden="true"
               className="mt-0.5 shrink-0 text-gray-400"
               width={16}
               height={16}
@@ -123,6 +125,7 @@ export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props)
           {interview.location && (
             <div className="flex items-start gap-3">
               <svg
+                aria-hidden="true"
                 className="mt-0.5 shrink-0 text-gray-400"
                 width={16}
                 height={16}
@@ -141,6 +144,7 @@ export function InterviewDetailPanel({ interview, onClose, onCancelled }: Props)
           {interview.meetingUrl && (
             <div className="flex items-start gap-3">
               <svg
+                aria-hidden="true"
                 className="mt-0.5 shrink-0 text-gray-400"
                 width={16}
                 height={16}

@@ -120,6 +120,7 @@ function MemberChips({ values, set }: { values: JobFormValues; set: SetJobFormFi
             className="hover:text-red-500 cursor-pointer ml-0.5"
           >
             <svg
+              aria-hidden="true"
               className="h-3 w-3"
               viewBox="0 0 24 24"
               fill="none"
@@ -189,6 +190,7 @@ export function SimpleTeamSection({
                 const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
                 return (
                   // biome-ignore lint/suspicious/noArrayIndexKey: id を持たない編集中メンバーリスト（名前重複あり得る）
+                  // biome-ignore lint/a11y/noLabelWithoutControl: MemberPhotoInput 内の file input を内包して暗黙関連付けしている
                   <label key={i} className="relative cursor-pointer group">
                     <div
                       className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
@@ -209,6 +211,7 @@ export function SimpleTeamSection({
                     {!m.photoUrl && (
                       <span className="absolute bottom-0 left-0 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 group-hover:text-blue-500 group-hover:border-blue-300 transition-colors">
                         <svg
+                          aria-hidden="true"
                           className="h-3 w-3"
                           viewBox="0 0 24 24"
                           fill="none"
@@ -222,6 +225,7 @@ export function SimpleTeamSection({
                     {m.photoUrl && (
                       <span className="absolute bottom-0 left-0 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
                         <svg
+                          aria-hidden="true"
                           className="h-3 w-3"
                           viewBox="0 0 24 24"
                           fill="none"
@@ -333,6 +337,7 @@ export function TeamSectionWithSelector({
                     const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
                     const isReal = values.teamMembers.length > 0;
                     return (
+                      // biome-ignore lint/a11y/noLabelWithoutControl: MemberPhotoInput 内の file input を内包して暗黙関連付けしている
                       <label key={i} className={`relative ${isReal ? "cursor-pointer group" : ""}`}>
                         <div
                           className="relative flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-white text-2xl font-bold shadow-sm overflow-hidden"
@@ -355,6 +360,7 @@ export function TeamSectionWithSelector({
                         {isReal && !m.photoUrl && (
                           <span className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 group-hover:text-blue-500 group-hover:border-blue-300 transition-colors">
                             <svg
+                              aria-hidden="true"
                               className="h-3 w-3"
                               viewBox="0 0 24 24"
                               fill="none"
@@ -368,6 +374,7 @@ export function TeamSectionWithSelector({
                         {isReal && m.photoUrl && (
                           <span className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
                             <svg
+                              aria-hidden="true"
                               className="h-3 w-3"
                               viewBox="0 0 24 24"
                               fill="none"

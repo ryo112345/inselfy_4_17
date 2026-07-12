@@ -127,6 +127,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
         className={`fixed top-0 left-0 z-50 h-screen overflow-hidden hidden md:block ${initialRender.current ? "" : "transition-[width] duration-200 ease-in-out"} ${open ? "w-72" : "w-[50px]"}`}
       >
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             setOpen(!open);
@@ -169,6 +170,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
             <ul className="space-y-0.5">
               <li>
                 <button
+                  type="button"
                   ref={assessmentTriggerRef}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -234,6 +236,7 @@ export function Sidebar({ username, displayName, diagnostics = [], defaultOpen =
               </div>
             ) : user ? (
               <button
+                type="button"
                 ref={triggerRef}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -376,6 +379,7 @@ const UserMenu = forwardRef<
       <div className="border-t border-gray-100 my-1" />
 
       <button
+        type="button"
         onClick={onLogout}
         className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
       >
@@ -391,6 +395,7 @@ const UserMenu = forwardRef<
 function PanelCloseIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={18}
       height={18}
       viewBox="0 0 24 24"
@@ -409,6 +414,7 @@ function PanelCloseIcon() {
 function HomeIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -427,6 +433,7 @@ function HomeIcon() {
 function SearchIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -445,6 +452,7 @@ function SearchIcon() {
 function BuildingIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -465,6 +473,7 @@ function BuildingIcon() {
 function PenIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -483,6 +492,7 @@ function PenIcon() {
 function PersonIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -502,6 +512,7 @@ function PersonIcon() {
 function CompassIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -520,6 +531,7 @@ function CompassIcon() {
 function ArticleIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -541,6 +553,7 @@ function ArticleIcon() {
 function BookmarkIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -558,6 +571,7 @@ function BookmarkIcon() {
 function SendIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -576,6 +590,7 @@ function SendIcon() {
 function SettingsIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -594,6 +609,7 @@ function SettingsIcon() {
 function HelpIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -613,6 +629,7 @@ function HelpIcon() {
 function LogoutIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -632,6 +649,7 @@ function LogoutIcon() {
 function CalendarIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"

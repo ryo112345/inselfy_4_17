@@ -241,6 +241,7 @@ export function CalendarSlotSelector({
       <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
         <div className="flex items-center gap-2 mb-2">
           <svg
+            aria-hidden="true"
             width={18}
             height={18}
             viewBox="0 0 24 24"
@@ -276,6 +277,7 @@ export function CalendarSlotSelector({
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
         <div className="flex items-center gap-2">
           <svg
+            aria-hidden="true"
             width={18}
             height={18}
             viewBox="0 0 24 24"
@@ -343,11 +345,13 @@ export function CalendarSlotSelector({
         <div className="flex items-center justify-center gap-2 py-1.5">
           {hasMultipleWeeks && (
             <button
+              type="button"
               onClick={() => hasPrev && setWeekStart(new Date(allWeeks[currentWeekIdx - 1]))}
               disabled={!hasPrev}
               className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default"
             >
               <svg
+                aria-hidden="true"
                 width={12}
                 height={12}
                 viewBox="0 0 24 24"
@@ -362,11 +366,13 @@ export function CalendarSlotSelector({
           <span className="text-xs font-medium text-gray-500">{formatWeekRange(weekStart)}</span>
           {hasMultipleWeeks && (
             <button
+              type="button"
               onClick={() => hasNext && setWeekStart(new Date(allWeeks[currentWeekIdx + 1]))}
               disabled={!hasNext}
               className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-default"
             >
               <svg
+                aria-hidden="true"
                 width={12}
                 height={12}
                 viewBox="0 0 24 24"
@@ -432,6 +438,8 @@ export function CalendarSlotSelector({
               const today = isToday(d);
               const dayWindows = windows.filter((w) => w.dayIndex === dayIdx);
               return (
+                // biome-ignore lint/a11y/noStaticElementInteractions: クリック Y 座標から時刻を計算する選択グリッド。キーボードでは座標指定ができない
+                // biome-ignore lint/a11y/useKeyWithClickEvents: 同上
                 <div
                   key={d.getTime()}
                   className={`relative border-l border-gray-100 cursor-pointer ${today ? "bg-blue-50/20" : ""}`}
@@ -489,6 +497,7 @@ export function CalendarSlotSelector({
             <p className="text-[11px] text-gray-400">回答期限: {formatExpiry(expiresAt)}</p>
           )}
           <button
+            type="button"
             onClick={handleConfirm}
             disabled={!selection || confirming}
             className="ml-auto rounded-lg bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-[#357a60] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

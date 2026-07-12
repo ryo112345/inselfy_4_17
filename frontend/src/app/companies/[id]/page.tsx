@@ -271,6 +271,7 @@ export default async function PublicCompanyProfilePage({
 function MapPinIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-[18px] w-[18px]"
       viewBox="0 0 24 24"
       fill="none"
@@ -288,6 +289,7 @@ function MapPinIcon() {
 function LinkIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -305,6 +307,7 @@ function LinkIcon() {
 function ExternalIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-3 w-3"
       viewBox="0 0 24 24"
       fill="none"

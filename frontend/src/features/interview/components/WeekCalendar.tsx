@@ -325,6 +325,8 @@ export function WeekCalendar() {
                 const today = isToday(d);
 
                 return (
+                  // biome-ignore lint/a11y/noStaticElementInteractions: クリック Y 座標から時刻を計算する選択グリッド。キーボードでは座標指定ができない
+                  // biome-ignore lint/a11y/useKeyWithClickEvents: 同上
                   <div
                     key={dayStr}
                     data-day-col
@@ -432,6 +434,7 @@ export function WeekCalendar() {
             ) : (
               filteredApps.map((app) => (
                 <button
+                  type="button"
                   key={app.id}
                   onClick={() => handleSelectApp(app)}
                   className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-gray-50 transition-colors"

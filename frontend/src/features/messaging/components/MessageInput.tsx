@@ -58,6 +58,7 @@ export function MessageInput({ onSend, disabled }: Props) {
           style={{ minHeight: 40, maxHeight: 120 }}
         />
         <button
+          type="button"
           onClick={handleSend}
           disabled={!body.trim() || sending || disabled}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-white transition hover:bg-[#347a5f] disabled:opacity-40 disabled:cursor-not-allowed"
@@ -66,6 +67,7 @@ export function MessageInput({ onSend, disabled }: Props) {
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
           ) : (
             <svg
+              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"

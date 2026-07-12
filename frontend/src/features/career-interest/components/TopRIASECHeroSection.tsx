@@ -51,10 +51,12 @@ export function TopRIASECHeroSection({
       <div className="result-ripple-bl" />
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
         <button
+          type="button"
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-purple-50 transition-colors"
           style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}
         >
           <svg
+            aria-hidden="true"
             width={13}
             height={13}
             viewBox="0 0 24 24"
@@ -71,10 +73,12 @@ export function TopRIASECHeroSection({
           Share Link
         </button>
         <button
+          type="button"
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-purple-50 transition-colors"
           style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}
         >
           <svg
+            aria-hidden="true"
             width={13}
             height={13}
             viewBox="0 0 24 24"
@@ -97,6 +101,7 @@ export function TopRIASECHeroSection({
           style={{ borderColor: "#c8b8dc", backgroundColor: "#F8F3FD", color: "#8e6aae" }}
         >
           <svg
+            aria-hidden="true"
             width={13}
             height={13}
             viewBox="0 0 24 24"
@@ -238,7 +243,7 @@ function RIASECRadarChart({ types }: { types: ResultDTO["typeScores"] }) {
   const spokes = RADAR_ORDER.map((tid, i) => ({ id: tid, ...hexPoint(i, R) }));
 
   return (
-    <svg width={190} height={190} className="shrink-0">
+    <svg aria-hidden="true" width={190} height={190} className="shrink-0">
       {gridPaths.map((d) => (
         <path key={d} d={d} fill="none" stroke="#d0c0e0" strokeWidth={0.6} />
       ))}

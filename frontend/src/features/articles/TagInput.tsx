@@ -34,6 +34,8 @@ export function TagInput({ tags, onChange, max = 10 }: Props) {
   }
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: クリックで内部 input にフォーカスを移す補助動線。input 自体は Tab で到達可能
+    // biome-ignore lint/a11y/useKeyWithClickEvents: 同上
     <div
       className="flex flex-wrap items-center gap-1.5 cursor-text"
       onClick={() => inputRef.current?.focus()}

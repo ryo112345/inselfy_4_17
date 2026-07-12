@@ -62,6 +62,7 @@ export function ArticleSection({ title, articles, tag, onTagClick }: Props) {
           >
             もっと見る
             <svg
+              aria-hidden="true"
               width={14}
               height={14}
               viewBox="0 0 24 24"
@@ -80,10 +81,12 @@ export function ArticleSection({ title, articles, tag, onTagClick }: Props) {
       <div className="relative group/section">
         {canScrollLeft && (
           <button
+            type="button"
             onClick={() => scroll("left")}
             className="absolute -left-3 top-1/3 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 hover:text-gray-800 hover:shadow-lg transition-all opacity-0 group-hover/section:opacity-100 cursor-pointer"
           >
             <svg
+              aria-hidden="true"
               width={16}
               height={16}
               viewBox="0 0 24 24"
@@ -112,10 +115,12 @@ export function ArticleSection({ title, articles, tag, onTagClick }: Props) {
 
         {canScrollRight && (
           <button
+            type="button"
             onClick={() => scroll("right")}
             className="absolute -right-3 top-1/3 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-500 hover:text-gray-800 hover:shadow-lg transition-all opacity-0 group-hover/section:opacity-100 cursor-pointer"
           >
             <svg
+              aria-hidden="true"
               width={16}
               height={16}
               viewBox="0 0 24 24"

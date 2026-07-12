@@ -111,6 +111,7 @@ export default function AdminCompaniesPage() {
             className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
           >
             <svg
+              aria-hidden="true"
               width="20"
               height="20"
               viewBox="0 0 24 24"
@@ -124,6 +125,7 @@ export default function AdminCompaniesPage() {
             </svg>
           </Link>
           <svg
+            aria-hidden="true"
             width="24"
             height="24"
             viewBox="0 0 24 24"
@@ -145,6 +147,7 @@ export default function AdminCompaniesPage() {
         <div className="flex gap-1 mb-6">
           {tabs.map((tab) => (
             <button
+              type="button"
               key={tab.value}
               onClick={() => {
                 setStatusFilter(tab.value);
@@ -223,6 +226,7 @@ export default function AdminCompaniesPage() {
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
+                            type="button"
                             onClick={() => handleBypassLogin(c.id)}
                             disabled={loggingInId === c.id}
                             className="px-3 py-1.5 text-xs text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50 cursor-pointer"
@@ -232,6 +236,7 @@ export default function AdminCompaniesPage() {
                           {c.status === "pending" && (
                             <>
                               <button
+                                type="button"
                                 onClick={() => handleStatusChange(c.id, "approved")}
                                 disabled={actionId === c.id}
                                 className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 cursor-pointer"
@@ -239,6 +244,7 @@ export default function AdminCompaniesPage() {
                                 承認
                               </button>
                               <button
+                                type="button"
                                 onClick={() => handleStatusChange(c.id, "rejected")}
                                 disabled={actionId === c.id}
                                 className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
@@ -249,6 +255,7 @@ export default function AdminCompaniesPage() {
                           )}
                           {c.status === "rejected" && (
                             <button
+                              type="button"
                               onClick={() => handleStatusChange(c.id, "approved")}
                               disabled={actionId === c.id}
                               className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 cursor-pointer"
@@ -267,6 +274,7 @@ export default function AdminCompaniesPage() {
             {data.total_pages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-6">
                 <button
+                  type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                   className="px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -277,6 +285,7 @@ export default function AdminCompaniesPage() {
                   {data.page} / {data.total_pages}
                 </span>
                 <button
+                  type="button"
                   onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                   disabled={page >= data.total_pages}
                   className="px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"

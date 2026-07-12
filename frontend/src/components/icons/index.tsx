@@ -5,6 +5,7 @@ type IconProps = SVGProps<SVGSVGElement> & { className?: string };
 export function CameraIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -22,6 +23,7 @@ export function CameraIcon({ className }: IconProps) {
 export function PencilIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -39,6 +41,7 @@ export function PencilIcon({ className }: IconProps) {
 export function PlusIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -55,6 +58,7 @@ export function PlusIcon({ className }: IconProps) {
 export function CheckIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -71,6 +75,7 @@ export function CheckIcon({ className }: IconProps) {
 export function XIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -87,6 +92,7 @@ export function XIcon({ className }: IconProps) {
 export function TrashIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -107,6 +113,7 @@ export function TrashIcon({ className }: IconProps) {
 export function DocumentIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -127,6 +134,7 @@ export function DocumentIcon({ className }: IconProps) {
 export function AwardIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -144,6 +152,7 @@ export function AwardIcon({ className }: IconProps) {
 export function BriefcaseIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -162,6 +171,7 @@ export function BriefcaseIcon({ className }: IconProps) {
 export function CapIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -179,6 +189,7 @@ export function CapIcon({ className }: IconProps) {
 export function ClockIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -196,6 +207,7 @@ export function ClockIcon({ className }: IconProps) {
 export function MapPinIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -213,6 +225,7 @@ export function MapPinIcon({ className }: IconProps) {
 export function MailIcon({ className }: IconProps) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -229,7 +242,7 @@ export function MailIcon({ className }: IconProps) {
 
 export function FaceIcon({ className, style }: IconProps) {
   return (
-    <svg className={className} style={style} viewBox="0 0 64 64" fill="none">
+    <svg aria-hidden="true" className={className} style={style} viewBox="0 0 64 64" fill="none">
       <circle cx="16" cy="23" r="5.8" fill="currentColor" />
       <circle cx="18" cy="21" r="1.8" fill="white" />
       <circle cx="48" cy="23" r="5.8" fill="currentColor" />

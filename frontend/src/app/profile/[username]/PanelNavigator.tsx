@@ -286,6 +286,7 @@ export function PanelNavigator({
       <div className="fixed bottom-[76px] left-0 right-0 z-40 flex justify-center items-center gap-1.5 md:hidden">
         {Array.from({ length: panelCount - minIndex }, (_, i) => i + minIndex).map((idx) => (
           <button
+            type="button"
             key={idx}
             onClick={() => goTo(idx)}
             className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
@@ -297,12 +298,14 @@ export function PanelNavigator({
 
       <div className="hidden md:flex fixed bottom-6 right-6 z-40 items-center gap-1">
         <button
+          type="button"
           data-testid="panel-prev"
           onClick={() => goTo(activeIndex - 1)}
           disabled={activeIndex === minIndex}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-md transition hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
         >
           <svg
+            aria-hidden="true"
             width={18}
             height={18}
             viewBox="0 0 24 24"
@@ -316,10 +319,12 @@ export function PanelNavigator({
           </svg>
         </button>
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-md transition hover:bg-gray-50 cursor-pointer"
         >
           <svg
+            aria-hidden="true"
             width={18}
             height={18}
             viewBox="0 0 24 24"
@@ -333,12 +338,14 @@ export function PanelNavigator({
           </svg>
         </button>
         <button
+          type="button"
           data-testid="panel-next"
           onClick={() => goTo(activeIndex + 1)}
           disabled={activeIndex === panelCount - 1}
           className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-600 shadow-md transition hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
         >
           <svg
+            aria-hidden="true"
             width={18}
             height={18}
             viewBox="0 0 24 24"
@@ -737,7 +744,7 @@ function IntFloatingParticles() {
               }
             >
               {s.type === "hex" ? (
-                <svg viewBox="0 0 100 100" className="w-full h-full">
+                <svg aria-hidden="true" viewBox="0 0 100 100" className="w-full h-full">
                   <polygon
                     points="50,2 93,25 93,75 50,98 7,75 7,25"
                     fill={s.color}
@@ -746,7 +753,7 @@ function IntFloatingParticles() {
                   />
                 </svg>
               ) : (
-                <svg viewBox="0 0 100 100" className="w-full h-full">
+                <svg aria-hidden="true" viewBox="0 0 100 100" className="w-full h-full">
                   <rect
                     x="5"
                     y="5"
@@ -1080,7 +1087,7 @@ function CiFloatingShapes() {
             }
           >
             {s.type === "hex" ? (
-              <svg viewBox="0 0 100 100" className="w-full h-full">
+              <svg aria-hidden="true" viewBox="0 0 100 100" className="w-full h-full">
                 <polygon
                   points="50,2 93,25 93,75 50,98 7,75 7,25"
                   fill={s.color}
@@ -1089,7 +1096,7 @@ function CiFloatingShapes() {
                 />
               </svg>
             ) : (
-              <svg viewBox="0 0 100 100" className="w-full h-full">
+              <svg aria-hidden="true" viewBox="0 0 100 100" className="w-full h-full">
                 <rect
                   x="5"
                   y="5"

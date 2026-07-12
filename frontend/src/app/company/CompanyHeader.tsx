@@ -52,6 +52,7 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
   return (
     <>
       <button
+        type="button"
         onClick={() => setExpanded(true)}
         className={`fixed top-3 left-4 z-50 flex h-9 w-9 items-center justify-center rounded-md border border-[#ece9e0] bg-white text-gray-700 hover:bg-gray-50 transition-opacity duration-300 cursor-pointer ${
           expanded ? "opacity-0 pointer-events-none" : "opacity-100"
@@ -97,12 +98,14 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
                   マニュアル
                 </Link>
                 <button
+                  type="button"
                   onClick={handleLogout}
                   className="rounded border border-gray-300 px-4 py-1.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   ログアウト
                 </button>
                 <button
+                  type="button"
                   onClick={handleClose}
                   className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
                 >
@@ -170,6 +173,7 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
 function HamburgerIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={22}
       height={22}
       viewBox="0 0 24 24"
@@ -186,6 +190,7 @@ function HamburgerIcon() {
 function CloseIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -202,6 +207,7 @@ function CloseIcon() {
 function CompanyIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"
@@ -220,6 +226,7 @@ function CompanyIcon() {
 function MessageIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"
@@ -235,7 +242,7 @@ function MessageIcon() {
 
 function HomeIcon() {
   return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor">
+    <svg aria-hidden="true" className="w-full h-full" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 3L4 9v12h5v-7h6v7h5V9z" />
     </svg>
   );
@@ -244,6 +251,7 @@ function HomeIcon() {
 function JobIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"
@@ -263,6 +271,7 @@ function JobIcon() {
 function ApplicationIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"
@@ -281,6 +290,7 @@ function ApplicationIcon() {
 function TalentIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"
@@ -300,6 +310,7 @@ function TalentIcon() {
 function ScoutIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"
@@ -317,6 +328,7 @@ function ScoutIcon() {
 function TeamIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"
@@ -336,6 +348,7 @@ function TeamIcon() {
 function BookmarkIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -353,6 +366,7 @@ function BookmarkIcon() {
 function CalendarIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"
@@ -371,6 +385,7 @@ function CalendarIcon() {
 function SettingsIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="w-full h-full"
       viewBox="0 0 24 24"
       fill="none"

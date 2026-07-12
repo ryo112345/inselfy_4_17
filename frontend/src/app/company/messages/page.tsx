@@ -224,6 +224,7 @@ export default function CompanyMessagesPage() {
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
               <svg
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"

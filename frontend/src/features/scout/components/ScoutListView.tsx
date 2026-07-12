@@ -220,12 +220,19 @@ export function ScoutListView() {
             const isUnread = scout.status === "sent";
 
             return (
+              // biome-ignore lint/a11y/useSemanticElements: 内部に選択チェックボックスを含む行全体の遷移領域のため a 要素にできない
               <div
                 key={scout.id}
+                role="link"
+                tabIndex={0}
                 className={`bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4 cursor-pointer hover:shadow-md transition-shadow ${
                   isUnread ? "border-l-4 border-l-blue-500" : ""
                 }`}
                 onClick={() => router.push(`/scout/${scout.id}`)}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" || e.target !== e.currentTarget) return;
+                  router.push(`/scout/${scout.id}`);
+                }}
               >
                 <input
                   type="checkbox"
@@ -280,6 +287,7 @@ export function ScoutListView() {
                 </div>
 
                 <svg
+                  aria-hidden="true"
                   className="h-5 w-5 text-gray-300 shrink-0 mt-2"
                   viewBox="0 0 20 20"
                   fill="currentColor"
@@ -346,6 +354,7 @@ export function ScoutListView() {
             className="flex items-center gap-1.5 min-h-[44px] text-sm font-medium text-brand hover:bg-brand/8 rounded-lg px-3 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
           >
             <svg
+              aria-hidden="true"
               width={15}
               height={15}
               viewBox="0 0 24 24"
@@ -369,6 +378,7 @@ export function ScoutListView() {
             className="flex items-center gap-1.5 min-h-[44px] text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg px-3 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap"
           >
             <svg
+              aria-hidden="true"
               width={15}
               height={15}
               viewBox="0 0 24 24"
@@ -406,6 +416,7 @@ export function ScoutListView() {
           >
             {toast.type === "error" ? (
               <svg
+                aria-hidden="true"
                 className="h-5 w-5 shrink-0 text-red-500"
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -417,7 +428,12 @@ export function ScoutListView() {
                 />
               </svg>
             ) : (
-              <svg className="h-5 w-5 shrink-0 text-brand" viewBox="0 0 20 20" fill="currentColor">
+              <svg
+                aria-hidden="true"
+                className="h-5 w-5 shrink-0 text-brand"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"

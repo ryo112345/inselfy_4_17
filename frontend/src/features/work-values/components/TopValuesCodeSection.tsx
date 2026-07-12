@@ -51,10 +51,12 @@ export function TopValuesCodeSection({
       <div className="result-ripple-bl" />
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
         <button
+          type="button"
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors"
           style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}
         >
           <svg
+            aria-hidden="true"
             width={13}
             height={13}
             viewBox="0 0 24 24"
@@ -71,10 +73,12 @@ export function TopValuesCodeSection({
           Share Link
         </button>
         <button
+          type="button"
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] border cursor-pointer hover:bg-emerald-50 transition-colors"
           style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}
         >
           <svg
+            aria-hidden="true"
             width={13}
             height={13}
             viewBox="0 0 24 24"
@@ -97,6 +101,7 @@ export function TopValuesCodeSection({
           style={{ borderColor: "#b8dcc8", backgroundColor: "#F5FBF8", color: "#5dae8e" }}
         >
           <svg
+            aria-hidden="true"
             width={13}
             height={13}
             viewBox="0 0 24 24"
@@ -245,7 +250,7 @@ function ValuesRadarChart({ values }: { values: ResultDTO["values"] }) {
   const spokes = RADAR_ORDER.map((vid, i) => ({ id: vid, ...hexPoint(i, R) }));
 
   return (
-    <svg width={190} height={190} className="shrink-0">
+    <svg aria-hidden="true" width={190} height={190} className="shrink-0">
       {gridPaths.map((d) => (
         <path key={d} d={d} fill="none" stroke="#d0ddd6" strokeWidth={0.6} />
       ))}

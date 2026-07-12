@@ -84,6 +84,7 @@ export default function AdminUsersPage() {
             className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
           >
             <svg
+              aria-hidden="true"
               width="20"
               height="20"
               viewBox="0 0 24 24"
@@ -97,6 +98,7 @@ export default function AdminUsersPage() {
             </svg>
           </Link>
           <svg
+            aria-hidden="true"
             width="24"
             height="24"
             viewBox="0 0 24 24"
@@ -213,6 +215,7 @@ export default function AdminUsersPage() {
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
+                            type="button"
                             onClick={() => handleBypassLogin(user.id, user.username)}
                             disabled={loggingInId === user.id}
                             className="px-3 py-1.5 text-xs text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50"
@@ -229,6 +232,7 @@ export default function AdminUsersPage() {
                           {confirmDeleteId === user.id ? (
                             <div className="flex items-center gap-1.5">
                               <button
+                                type="button"
                                 onClick={() => handleDelete(user.id)}
                                 disabled={deletingId === user.id}
                                 className="px-3 py-1.5 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
@@ -236,6 +240,7 @@ export default function AdminUsersPage() {
                                 {deletingId === user.id ? "削除中..." : "確認"}
                               </button>
                               <button
+                                type="button"
                                 onClick={() => setConfirmDeleteId(null)}
                                 className="px-3 py-1.5 text-xs border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
                               >
@@ -244,6 +249,7 @@ export default function AdminUsersPage() {
                             </div>
                           ) : (
                             <button
+                              type="button"
                               onClick={() => setConfirmDeleteId(user.id)}
                               className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-md hover:bg-red-50 transition-colors"
                             >
@@ -261,6 +267,7 @@ export default function AdminUsersPage() {
             {data.total_pages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-6">
                 <button
+                  type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                   className="px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -271,6 +278,7 @@ export default function AdminUsersPage() {
                   {data.page} / {data.total_pages}
                 </span>
                 <button
+                  type="button"
                   onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                   disabled={page >= data.total_pages}
                   className="px-3 py-1.5 text-sm border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"

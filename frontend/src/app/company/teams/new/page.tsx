@@ -48,6 +48,7 @@ export default function NewTeamPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-6"
       >
         <svg
+          aria-hidden="true"
           width={16}
           height={16}
           viewBox="0 0 24 24"
@@ -64,10 +65,11 @@ export default function NewTeamPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-1.5">
             チーム名 <span className="text-red-500">*</span>
           </label>
           <input
+            id="team-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -78,8 +80,14 @@ export default function NewTeamPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">説明（任意）</label>
+          <label
+            htmlFor="team-description"
+            className="block text-sm font-medium text-gray-700 mb-1.5"
+          >
+            説明（任意）
+          </label>
           <textarea
+            id="team-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={500}

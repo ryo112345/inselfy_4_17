@@ -126,14 +126,23 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
     router.push(`/post/${post.id}`);
   }
 
+  function handlePostKeyDown(e: React.KeyboardEvent) {
+    if (e.key !== "Enter" || e.target !== e.currentTarget) return;
+    router.push(`/post/${post.id}`);
+  }
+
   return (
-    <article
+    // biome-ignore lint/a11y/useSemanticElements: 内部にボタン・フォームを含むカード全体の遷移領域のため a 要素にできない
+    <div
+      role="link"
+      tabIndex={0}
       className="border-b border-gray-200/80 px-4 py-3 hover:bg-gray-50/60 transition-colors cursor-pointer"
       onClick={handlePostClick}
+      onKeyDown={handlePostKeyDown}
     >
       {post.isRepost && (
         <div className="flex items-center gap-2 ml-12 mb-1 text-[13px] text-gray-400">
-          <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor">
+          <svg aria-hidden="true" width={14} height={14} viewBox="0 0 24 24" fill="currentColor">
             <path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2h4v2h-4c-2.209 0-4-1.791-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM19.5 20.12l-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2h-4V4h4c2.209 0 4 1.791 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14z" />
           </svg>
           <span>リポスト</span>
@@ -187,6 +196,7 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
             />
             <div className="relative flex-1" ref={menuRef}>
               <button
+                type="button"
                 onClick={handleRepostButtonClick}
                 className={`group flex items-center transition-colors ${reposted ? "text-green-600" : "text-gray-400"}`}
               >
@@ -211,6 +221,7 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
                   style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)" }}
                 >
                   <button
+                    type="button"
                     onClick={handleRepost}
                     className="group flex items-center gap-3 w-full px-4 py-2.5 text-[15px] text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                   >
@@ -222,6 +233,7 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
                     </span>
                   </button>
                   <button
+                    type="button"
                     onClick={handleQuoteClick}
                     className="group flex items-center gap-3 w-full px-4 py-2.5 text-[15px] text-gray-700 hover:bg-gray-50 transition-colors duration-150"
                   >
@@ -234,6 +246,7 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
               )}
             </div>
             <button
+              type="button"
               onClick={handleLike}
               className={`group flex-1 flex items-center transition-colors ${liked ? "text-[#F91880]" : "text-gray-400"}`}
             >
@@ -299,7 +312,7 @@ export function PostCard({ post, currentUserId: propUserId }: Props) {
           {showQuoteForm && <QuoteForm quotedPost={post} onClose={() => setShowQuoteForm(false)} />}
         </div>
       </div>
-    </article>
+    </div>
   );
 }
 
@@ -334,11 +347,23 @@ function QuotedPostCard({
     </div>
   );
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: quote.id があるときのみ link ロール・ハンドラを付与する遷移領域
     <div
+      role={quote.id ? "link" : undefined}
+      tabIndex={quote.id ? 0 : undefined}
       className={`mt-2 rounded-2xl border border-gray-200 overflow-hidden hover:bg-gray-50/50 transition-colors ${quote.id ? "cursor-pointer" : ""}`}
       onClick={
         quote.id
           ? (e) => {
+              e.stopPropagation();
+              router.push(`/post/${quote.id}`);
+            }
+          : undefined
+      }
+      onKeyDown={
+        quote.id
+          ? (e) => {
+              if (e.key !== "Enter" || e.target !== e.currentTarget) return;
               e.stopPropagation();
               router.push(`/post/${quote.id}`);
             }
@@ -472,6 +497,7 @@ function PostAction({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`group flex-1 flex items-center transition-colors ${active && activeColor ? activeColor : "text-gray-400"}`}
     >
@@ -488,6 +514,7 @@ function PostAction({
 function CommentIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={18}
       height={18}
       viewBox="0 0 24 24"
@@ -505,6 +532,7 @@ function CommentIcon() {
 function RetweetIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={18}
       height={18}
       viewBox="0 0 24 24"
@@ -525,6 +553,7 @@ function RetweetIcon() {
 function QuoteIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={18}
       height={18}
       viewBox="0 0 24 24"
@@ -542,6 +571,7 @@ function QuoteIcon() {
 function LikeIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={18}
       height={18}
       viewBox="0 0 24 24"
@@ -559,6 +589,7 @@ function LikeIcon() {
 function LikeIconFilled() {
   return (
     <svg
+      aria-hidden="true"
       width={18}
       height={18}
       viewBox="0 0 24 24"
@@ -576,6 +607,7 @@ function LikeIconFilled() {
 function ViewIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={18}
       height={18}
       viewBox="0 0 24 24"
@@ -595,6 +627,7 @@ function ViewIcon() {
 function ShareIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={18}
       height={18}
       viewBox="0 0 24 24"

@@ -174,7 +174,12 @@ function TimelineRail({ isLast = false }: { isLast?: boolean }) {
       className="pointer-events-none absolute left-[24px] top-[64px] w-[2px] -translate-x-1/2"
       style={{ bottom: isLast ? "0px" : "-28px" }}
     >
-      <svg preserveAspectRatio="none" viewBox="0 0 2 100" className="block h-full w-full">
+      <svg
+        aria-hidden="true"
+        preserveAspectRatio="none"
+        viewBox="0 0 2 100"
+        className="block h-full w-full"
+      >
         <line
           x1="1"
           y1="0"
@@ -198,7 +203,12 @@ function RoleRail({ isLast = false }: { isLast?: boolean }) {
       className="pointer-events-none absolute left-[5px] top-[17px] w-[2px] -translate-x-1/2"
       style={{ bottom: isLast ? "0px" : "-20px" }}
     >
-      <svg preserveAspectRatio="none" viewBox="0 0 2 100" className="block h-full w-full">
+      <svg
+        aria-hidden="true"
+        preserveAspectRatio="none"
+        viewBox="0 0 2 100"
+        className="block h-full w-full"
+      >
         <line
           x1="1"
           y1="0"

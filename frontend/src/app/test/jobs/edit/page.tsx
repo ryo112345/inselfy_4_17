@@ -89,6 +89,7 @@ export default function TestJobEditPage() {
               className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
             >
               <svg
+                aria-hidden="true"
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -115,7 +116,10 @@ export default function TestJobEditPage() {
               />
               {statusLabel}
             </button>
-            <button className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors cursor-pointer">
+            <button
+              type="button"
+              className="bg-[#2979ff] text-white px-5 py-1.5 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors cursor-pointer"
+            >
               保存する
             </button>
           </div>

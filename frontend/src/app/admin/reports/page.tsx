@@ -195,6 +195,7 @@ export default function AdminReportsPage() {
         <div className="flex items-center gap-3 mb-8">
           <Link href="/admin" className="text-gray-400 hover:text-gray-600 transition-colors">
             <svg
+              aria-hidden="true"
               width="20"
               height="20"
               viewBox="0 0 24 24"
@@ -212,6 +213,7 @@ export default function AdminReportsPage() {
 
         <div className="flex gap-2 mb-4">
           <button
+            type="button"
             onClick={() => {
               setTab("wv");
               setSection("pending");
@@ -235,6 +237,7 @@ export default function AdminReportsPage() {
             )}
           </button>
           <button
+            type="button"
             onClick={() => {
               setTab("ci");
               setSection("pending");
@@ -258,6 +261,7 @@ export default function AdminReportsPage() {
             )}
           </button>
           <button
+            type="button"
             onClick={() => {
               setTab("integrated");
               setSection("pending");
@@ -284,6 +288,7 @@ export default function AdminReportsPage() {
 
         <div className="flex gap-1 mb-6 border-b border-gray-200">
           <button
+            type="button"
             onClick={() => setSection("pending")}
             className={`px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px ${
               section === "pending"
@@ -294,6 +299,7 @@ export default function AdminReportsPage() {
             未生成
           </button>
           <button
+            type="button"
             onClick={() => setSection("generated")}
             className={`px-3 py-2 text-sm font-medium transition-colors cursor-pointer border-b-2 -mb-px ${
               section === "generated"
@@ -354,6 +360,7 @@ export default function AdminReportsPage() {
                           <span className="text-xs text-emerald-600 font-medium">未閲覧</span>
                         )}
                         <button
+                          type="button"
                           onClick={() => resetViewed(r.request_id)}
                           disabled={!r.viewed_at}
                           className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
@@ -392,6 +399,7 @@ export default function AdminReportsPage() {
                         <span className="text-xs text-emerald-600 font-medium">未閲覧</span>
                       )}
                       <button
+                        type="button"
                         onClick={() => resetViewed(r.session_id)}
                         disabled={!r.viewed_at}
                         className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
@@ -438,6 +446,7 @@ export default function AdminReportsPage() {
                         </p>
                       </div>
                       <button
+                        type="button"
                         onClick={() => togglePrompt(rid)}
                         disabled={isLoadingThis}
                         className="shrink-0 ml-4 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
@@ -462,6 +471,7 @@ export default function AdminReportsPage() {
                             Claude Code に渡すプロンプト
                           </p>
                           <button
+                            type="button"
                             onClick={() => copyPrompt(rid)}
                             className="text-xs text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
                           >
@@ -508,6 +518,7 @@ export default function AdminReportsPage() {
                       </p>
                     </div>
                     <button
+                      type="button"
                       onClick={() => togglePrompt(sid)}
                       disabled={isLoadingThis}
                       className="shrink-0 ml-4 px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
@@ -532,6 +543,7 @@ export default function AdminReportsPage() {
                           Claude Code に渡すプロンプト
                         </p>
                         <button
+                          type="button"
                           onClick={() => copyPrompt(sid)}
                           className="text-xs text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
                         >

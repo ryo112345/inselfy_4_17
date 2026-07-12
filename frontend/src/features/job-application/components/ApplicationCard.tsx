@@ -109,6 +109,7 @@ export function ApplicationCard({
       {/* Row 2: job title + elapsed time */}
       <div className="mt-3 flex items-center gap-1.5 min-w-0">
         <svg
+          aria-hidden="true"
           width={15}
           height={15}
           viewBox="0 0 24 24"

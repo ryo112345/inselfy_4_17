@@ -75,6 +75,7 @@ export function CoverImageUpload({ value, onChange }: Props) {
         className="group w-full py-8 flex flex-col items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100/80 border-b border-gray-200/80 transition-colors cursor-pointer"
       >
         <svg
+          aria-hidden="true"
           width={28}
           height={28}
           viewBox="0 0 24 24"

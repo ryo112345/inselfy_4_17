@@ -105,10 +105,12 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
     <div>
       <div className="sticky top-0 z-10 flex items-center gap-4 px-4 py-3 bg-white/80 backdrop-blur-sm border-b border-gray-200/80">
         <button
+          type="button"
           onClick={() => router.back()}
           className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors"
         >
           <svg
+            aria-hidden="true"
             width={20}
             height={20}
             viewBox="0 0 24 24"
@@ -165,9 +167,15 @@ export function PostDetail({ post, comments: initialComments, currentUserId }: P
         })()}
 
         {post.quotedPost && (
+          // biome-ignore lint/a11y/useSemanticElements: 引用カード全体の遷移領域。内部構造の都合で a 要素にできない
           <div
+            role="link"
+            tabIndex={0}
             className="rounded-2xl border border-gray-200 overflow-hidden hover:bg-gray-50/50 transition-colors cursor-pointer mb-3"
             onClick={() => router.push(`/post/${post.quotedPost!.id}`)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") router.push(`/post/${post.quotedPost!.id}`);
+            }}
           >
             <div className="px-3 py-2.5">
               <div className="flex items-center gap-1.5 mb-1">
@@ -329,6 +337,7 @@ function ActionButton({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${active ? activeColor : "text-gray-400"} ${hoverColor}`}
     >
@@ -340,6 +349,7 @@ function ActionButton({
 function CommentIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -357,6 +367,7 @@ function CommentIcon() {
 function RetweetIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -377,6 +388,7 @@ function RetweetIcon() {
 function LikeIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -394,6 +406,7 @@ function LikeIcon() {
 function LikeIconFilled() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"
@@ -411,6 +424,7 @@ function LikeIconFilled() {
 function ShareIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={20}
       height={20}
       viewBox="0 0 24 24"

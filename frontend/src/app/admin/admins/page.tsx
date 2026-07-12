@@ -100,6 +100,7 @@ export default function AdminAdminsPage() {
             className="text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
           >
             <svg
+              aria-hidden="true"
               width="20"
               height="20"
               viewBox="0 0 24 24"
@@ -113,6 +114,7 @@ export default function AdminAdminsPage() {
             </svg>
           </Link>
           <svg
+            aria-hidden="true"
             width="24"
             height="24"
             viewBox="0 0 24 24"
@@ -143,12 +145,14 @@ export default function AdminAdminsPage() {
                 {issuedKey.key}
               </code>
               <button
+                type="button"
                 onClick={copyKey}
                 className="px-4 py-2 text-xs bg-[var(--foreground)] text-white rounded-md hover:opacity-90 transition-opacity shrink-0"
               >
                 {copied ? "コピーしました" : "コピー"}
               </button>
               <button
+                type="button"
                 onClick={() => setIssuedKey(null)}
                 className="px-4 py-2 text-xs border border-gray-200 rounded-md hover:bg-gray-50 transition-colors shrink-0"
               >
@@ -244,6 +248,7 @@ export default function AdminAdminsPage() {
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          type="button"
                           onClick={() => handleIssueKey(admin)}
                           disabled={issuingId === admin.id}
                           className="px-3 py-1.5 text-xs text-blue-600 border border-blue-200 rounded-md hover:bg-blue-50 transition-colors disabled:opacity-50"
@@ -257,6 +262,7 @@ export default function AdminAdminsPage() {
                         {confirmDeleteId === admin.id ? (
                           <div className="flex items-center gap-1.5">
                             <button
+                              type="button"
                               onClick={() => handleDelete(admin.id)}
                               disabled={deletingId === admin.id}
                               className="px-3 py-1.5 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
@@ -264,6 +270,7 @@ export default function AdminAdminsPage() {
                               {deletingId === admin.id ? "削除中..." : "確認"}
                             </button>
                             <button
+                              type="button"
                               onClick={() => setConfirmDeleteId(null)}
                               className="px-3 py-1.5 text-xs border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
                             >
@@ -272,6 +279,7 @@ export default function AdminAdminsPage() {
                           </div>
                         ) : (
                           <button
+                            type="button"
                             onClick={() => setConfirmDeleteId(admin.id)}
                             className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-md hover:bg-red-50 transition-colors"
                           >

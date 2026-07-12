@@ -35,6 +35,7 @@ export function ExpandableText({ text, maxLines = 6 }: { text: string; maxLines?
       </p>
       {needsExpansion && (
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           className="mt-3 cursor-pointer text-sm font-medium text-emerald-700 transition-colors hover:text-emerald-800"
         >

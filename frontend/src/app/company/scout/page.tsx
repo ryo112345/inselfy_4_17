@@ -290,6 +290,7 @@ export default function ScoutListPage() {
       <div className="flex gap-1 border-b border-gray-200">
         {STATUS_TABS.map((tab) => (
           <button
+            type="button"
             key={tab.value}
             onClick={() => {
               setActiveTab(tab.value);
@@ -380,6 +381,7 @@ export default function ScoutListPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <button
+            type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
             className="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
@@ -390,6 +392,7 @@ export default function ScoutListPage() {
             {page + 1} / {totalPages}
           </span>
           <button
+            type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
             className="border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"

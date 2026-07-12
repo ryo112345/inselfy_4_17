@@ -26,6 +26,7 @@ export function InterviewBlock({ interview, top, height, onClick }: Props) {
 
   return (
     <button
+      type="button"
       onClick={() => onClick(interview)}
       className={`absolute left-1 right-1 rounded-lg border px-2 overflow-hidden cursor-pointer transition-shadow hover:shadow-md ${style.bg} ${style.border} ${style.text}`}
       style={{ top: `${top}px`, height: `${Math.max(height, 24)}px` }}

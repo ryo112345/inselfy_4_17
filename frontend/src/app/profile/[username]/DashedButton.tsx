@@ -21,7 +21,7 @@ export function DashedButton({ color, onClick, children }: Props) {
       style={{ color }}
     >
       <svg
-        aria-hidden
+        aria-hidden="true"
         className="pointer-events-none absolute inset-0 h-full w-full"
         preserveAspectRatio="none"
       >

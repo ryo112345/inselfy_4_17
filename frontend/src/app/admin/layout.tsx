@@ -52,6 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="admin_..."
+            // biome-ignore lint/a11y/noAutofocus: 単一入力の認証専用画面。ページの目的そのものへの自動フォーカスで文脈喪失がない
             autoFocus
             className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400 transition-colors mb-3"
           />
@@ -71,6 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => {
           clearAdminKey();
           setAuthed(false);

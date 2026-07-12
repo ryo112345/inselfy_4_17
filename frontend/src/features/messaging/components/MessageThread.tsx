@@ -59,10 +59,12 @@ export function MessageThread({
       <div className="flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3">
         {onBack && (
           <button
+            type="button"
             onClick={onBack}
             className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 md:hidden"
           >
             <svg
+              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"

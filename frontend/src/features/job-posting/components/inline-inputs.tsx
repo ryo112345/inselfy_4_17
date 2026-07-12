@@ -119,6 +119,7 @@ export function InlineTagInput({
             className="hover:text-red-500 cursor-pointer ml-0.5"
           >
             <svg
+              aria-hidden="true"
               className="h-3 w-3"
               viewBox="0 0 24 24"
               fill="none"
@@ -184,6 +185,7 @@ export function BenefitTagInput({
             className="hover:opacity-60 cursor-pointer ml-0.5"
           >
             <svg
+              aria-hidden="true"
               className="h-3.5 w-3.5"
               viewBox="0 0 24 24"
               fill="none"

@@ -48,6 +48,7 @@ export default function TemplateNewPage() {
         className="text-sm text-[#2979ff] hover:underline inline-flex items-center gap-1"
       >
         <svg
+          aria-hidden="true"
           className="h-4 w-4"
           viewBox="0 0 24 24"
           fill="none"
@@ -71,10 +72,11 @@ export default function TemplateNewPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="template-name" className="block text-sm font-medium text-gray-700 mb-1">
             テンプレート名 <span className="text-red-500">*</span>
           </label>
           <input
+            id="template-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -85,10 +87,14 @@ export default function TemplateNewPage() {
 
         {/* Subject */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="template-subject"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             件名 <span className="text-red-500">*</span>
           </label>
           <HighlightInput
+            id="template-subject"
             value={subject}
             onChange={setSubject}
             placeholder="例: {{candidate_name}}様へ {{company_name}} からのスカウト"
@@ -97,10 +103,11 @@ export default function TemplateNewPage() {
 
         {/* Body */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="template-body" className="block text-sm font-medium text-gray-700 mb-1">
             本文 <span className="text-red-500">*</span>
           </label>
           <HighlightTextarea
+            id="template-body"
             value={body}
             onChange={setBody}
             placeholder="スカウトメッセージのテンプレート本文..."
@@ -121,6 +128,7 @@ export default function TemplateNewPage() {
         {/* Actions */}
         <div className="flex items-center gap-3 pt-2">
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
             className="bg-[#2979ff] text-white px-6 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"

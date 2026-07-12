@@ -165,6 +165,7 @@ export default function CompanyApplicationsPage() {
         {/* Keyword search */}
         <div className="relative">
           <svg
+            aria-hidden="true"
             className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none"
             fill="none"
             viewBox="0 0 24 24"
@@ -191,6 +192,7 @@ export default function CompanyApplicationsPage() {
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <svg
+                aria-hidden="true"
                 className="h-3.5 w-3.5"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -284,6 +286,7 @@ export default function CompanyApplicationsPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-16 text-center">
           <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
             <svg
+              aria-hidden="true"
               className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
@@ -343,6 +346,7 @@ export default function CompanyApplicationsPage() {
               <div className="flex h-full flex-col items-center justify-center text-center px-6">
                 <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
                   <svg
+                    aria-hidden="true"
                     width={24}
                     height={24}
                     viewBox="0 0 24 24"

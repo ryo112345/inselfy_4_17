@@ -309,6 +309,7 @@ export default function CompanyProfilePage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => window.open("/company/profile/preview", "_blank")}
           className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 cursor-pointer"
         >
@@ -338,6 +339,7 @@ export default function CompanyProfilePage() {
           )}
           <div className="absolute bottom-3 right-3 flex gap-2">
             <button
+              type="button"
               onClick={() => coverInputRef.current?.click()}
               disabled={coverUploading}
               className="flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white cursor-pointer"
@@ -347,6 +349,7 @@ export default function CompanyProfilePage() {
             </button>
             {profile.coverImageUrl && (
               <button
+                type="button"
                 onClick={() => handleImageDelete("cover")}
                 className="flex items-center rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-red-500 shadow-sm backdrop-blur-sm transition-colors hover:bg-white cursor-pointer"
               >
@@ -383,6 +386,7 @@ export default function CompanyProfilePage() {
                 </div>
               )}
               <button
+                type="button"
                 onClick={() => logoInputRef.current?.click()}
                 disabled={logoUploading}
                 className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100 cursor-pointer"
@@ -412,6 +416,7 @@ export default function CompanyProfilePage() {
           <p className="text-xs text-gray-400">JPG, PNG, WebP / 5MB以下</p>
           {profile.logoUrl && (
             <button
+              type="button"
               onClick={() => handleImageDelete("logo")}
               className="text-xs text-red-400 hover:text-red-500 transition-colors cursor-pointer"
             >
@@ -632,6 +637,7 @@ export default function CompanyProfilePage() {
                 className="object-cover"
               />
               <button
+                type="button"
                 onClick={() => handleImageDelete("gallery", url)}
                 className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
               >
@@ -641,6 +647,7 @@ export default function CompanyProfilePage() {
           ))}
           {profile.galleryUrls.length < 10 && (
             <button
+              type="button"
               onClick={() => galleryInputRef.current?.click()}
               disabled={galleryUploading}
               className="flex aspect-[4/3] flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-500 cursor-pointer"
@@ -747,6 +754,7 @@ export default function CompanyProfilePage() {
           <p className="text-sm text-gray-500">未保存の変更があります</p>
           <div className="flex gap-3">
             <button
+              type="button"
               onClick={() => {
                 if (profile) {
                   setForm(toFormData(profile));
@@ -758,6 +766,7 @@ export default function CompanyProfilePage() {
               取り消す
             </button>
             <button
+              type="button"
               onClick={handleSave}
               disabled={isSaving}
               className="rounded-lg px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:opacity-90 disabled:opacity-50 cursor-pointer"
@@ -835,10 +844,10 @@ function Field({
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between">
-        <label className="text-sm font-medium text-gray-700">
+        <span className="text-sm font-medium text-gray-700">
           {label}
           {required && <span className="ml-0.5 text-red-400">*</span>}
-        </label>
+        </span>
         {hint && <span className="text-xs text-gray-400">{hint}</span>}
       </div>
       {children}
@@ -916,7 +925,12 @@ function TagInput({
 
 function Spinner({ className = "" }: { className?: string }) {
   return (
-    <svg className={`h-4 w-4 animate-spin ${className}`} viewBox="0 0 24 24" fill="none">
+    <svg
+      aria-hidden="true"
+      className={`h-4 w-4 animate-spin ${className}`}
+      viewBox="0 0 24 24"
+      fill="none"
+    >
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
       <path
         d="M4 12a8 8 0 018-8"
@@ -934,6 +948,7 @@ function Spinner({ className = "" }: { className?: string }) {
 function EyeIcon({ className = "h-4 w-4" }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -951,6 +966,7 @@ function EyeIcon({ className = "h-4 w-4" }: { className?: string }) {
 function ImageIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -968,6 +984,7 @@ function ImageIcon({ className }: { className?: string }) {
 function CameraIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -984,6 +1001,7 @@ function CameraIcon({ className }: { className?: string }) {
 function BuildingIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -1001,6 +1019,7 @@ function BuildingIcon({ className }: { className?: string }) {
 function TrashIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -1020,6 +1039,7 @@ function TrashIcon({ className }: { className?: string }) {
 function PlusIcon({ className }: { className?: string }) {
   return (
     <svg
+      aria-hidden="true"
       className={className}
       viewBox="0 0 24 24"
       fill="none"
@@ -1034,6 +1054,7 @@ function PlusIcon({ className }: { className?: string }) {
 function InfoIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -1051,6 +1072,7 @@ function InfoIcon() {
 function ContactIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -1067,6 +1089,7 @@ function ContactIcon() {
 function DocIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -1085,6 +1108,7 @@ function DocIcon() {
 function GalleryIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -1102,6 +1126,7 @@ function GalleryIcon() {
 function HeartIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"
@@ -1117,6 +1142,7 @@ function HeartIcon() {
 function ChartIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="h-4 w-4"
       viewBox="0 0 24 24"
       fill="none"

@@ -9,6 +9,7 @@ const accentColor = "#2979ff";
 function ChipCloseIcon() {
   return (
     <svg
+      aria-hidden="true"
       width={10}
       height={10}
       viewBox="0 0 24 24"
@@ -52,6 +53,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
       <div className="flex gap-2">
         <div className="relative flex-1">
           <svg
+            aria-hidden="true"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
             width={16}
             height={16}
@@ -73,6 +75,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
           />
         </div>
         <button
+          type="button"
           onClick={handleSearch}
           disabled={loading}
           className="rounded-lg px-5 py-2 text-sm font-medium text-white transition-all hover:opacity-90 disabled:opacity-50 cursor-pointer shrink-0"
@@ -80,7 +83,12 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
         >
           {loading ? (
             <span className="flex items-center gap-1.5">
-              <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+              <svg
+                aria-hidden="true"
+                className="animate-spin h-3.5 w-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
                 <circle
                   className="opacity-25"
                   cx="12"
@@ -201,6 +209,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
         <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
           {skills.map((s) => (
             <button
+              type="button"
               key={`skill-${s}`}
               onClick={() => removeSkill(s)}
               className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-100 px-2.5 py-0.5 text-xs text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer"
@@ -211,6 +220,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
           ))}
           {location && (
             <button
+              type="button"
               onClick={() => setLocation("")}
               className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
             >
@@ -220,6 +230,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
           )}
           {industry && (
             <button
+              type="button"
               onClick={() => setIndustry("")}
               className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
             >
@@ -229,6 +240,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
           )}
           {seekingStatus && (
             <button
+              type="button"
               onClick={() => setSeekingStatus("")}
               className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
             >
@@ -238,6 +250,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
           )}
           {jobType && (
             <button
+              type="button"
               onClick={() => setJobType("")}
               className="inline-flex items-center gap-1 rounded-full bg-gray-100 border border-gray-200 px-2.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer"
             >
@@ -247,6 +260,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
           )}
           {diagnosedOnly && (
             <button
+              type="button"
               onClick={() => setDiagnosedOnly(false)}
               className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-xs text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
             >
@@ -255,6 +269,7 @@ export function SearchFilterPanel({ search }: { search: ReturnType<typeof useTal
             </button>
           )}
           <button
+            type="button"
             onClick={() => {
               setSkills([]);
               setLocation("");

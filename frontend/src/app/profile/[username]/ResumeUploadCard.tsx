@@ -4,7 +4,7 @@ export function ResumeUploadCard() {
   return (
     <section className="relative rounded-2xl bg-white/60 px-6 py-6 text-center backdrop-blur-sm">
       <svg
-        aria-hidden
+        aria-hidden="true"
         className="pointer-events-none absolute inset-0 h-full w-full"
         preserveAspectRatio="none"
       >
