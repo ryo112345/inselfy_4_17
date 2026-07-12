@@ -12,8 +12,8 @@ import {
   teamDiagnoseSubmitDiagnoseWvResult,
   workValuesWvGetAiReport,
   workValuesWvGetLatestResult,
-  workValuesWvRequestAiReport,
   workValuesWvGetResultBySession,
+  workValuesWvRequestAiReport,
   workValuesWvStartSession,
   workValuesWvSubmitResult,
 } from "@/external/client/api/generated";
