@@ -17,7 +17,7 @@
     "@hey-api/client-fetch": "^0.10.2",
     "@react-oauth/google": "^0.13.5",
     "@stripe/stripe-js": "^9.3.1",
-    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/typography": "^0.5.20",
     "@tiptap/extension-image": "^3.22.4",
     "@tiptap/extension-placeholder": "^3.22.4",
     "@tiptap/extension-underline": "^3.22.4",
