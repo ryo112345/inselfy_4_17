@@ -4,22 +4,29 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
 
 	initializer "github.com/akiyama/inselfy/backend/internal/driver/initializer/api"
+	"github.com/akiyama/inselfy/backend/internal/driver/logging"
 )
 
 func main() {
+	logging.Setup()
+
 	ctx := context.Background()
 	e, cfg, cleanup, err := initializer.BuildServer(ctx)
 	if err != nil {
-		log.Fatalf("failed to initialize server: %v", err)
+		slog.Error("failed to initialize server", "error", err)
+		os.Exit(1)
 	}
 	defer cleanup()
 
 	addr := fmt.Sprintf(":%d", cfg.APIPort)
-	log.Printf("starting HTTP server on %s", addr)
+	slog.Info("starting HTTP server", "addr", addr)
 	if err := e.Start(addr); err != nil {
-		log.Fatalf("server exited: %v", err)
+		slog.Error("server exited", "error", err)
+		cleanup()
+		os.Exit(1)
 	}
 }

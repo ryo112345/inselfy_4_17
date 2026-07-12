@@ -43,6 +43,10 @@ type Config struct {
 	DBSSLMode string `env:"DB_SSLMODE" envDefault:"disable"`
 
 	AppURL string `env:"APP_URL" envDefault:"http://localhost:5173"`
+
+	// Cloud Logging がログとリクエストの trace を紐づけるのに使う。
+	// 未設定（ローカル）なら trace 注釈なしで動く
+	GoogleCloudProject string `env:"GOOGLE_CLOUD_PROJECT" envDefault:""`
 }
 
 func Load() (*Config, error) {

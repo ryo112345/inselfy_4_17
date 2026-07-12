@@ -86,8 +86,13 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	}
 
 	e := echo.New()
+	// 構造化ログに混ざる非JSON出力（バナー・起動行）を抑制する
+	e.HideBanner = true
+	e.HidePort = true
 	e.Use(echomw.Recover())
-	e.Use(echomw.Logger())
+	// Structured access log + request-scoped logger with Cloud Trace
+	// correlation (see adapter/http/middleware/logging_middleware.go).
+	e.Use(authmw.RequestLogging(cfg.GoogleCloudProject))
 
 	// Validate requests against the API contract (body schema, params, enums).
 	// Routes outside the spec pass through; auth stays with the middlewares below.
