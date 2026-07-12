@@ -7730,31 +7730,6 @@ components:
           format: int32
           description: 順位
       description: RIASEC タイプスコア
-    Models.CandidateAuth:
-      type: object
-      required:
-        - type
-        - in
-        - name
-      properties:
-        type:
-          type: string
-          enum:
-            - apiKey
-          description: API key authentication
-        in:
-          type: string
-          enum:
-            - cookie
-          description: location of the API key
-        name:
-          type: string
-          enum:
-            - inselfy_token
-          description: name of the API key
-      description: |-
-        候補者認証。`inselfy_token` cookie の JWT を検証する
-        （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
     Models.CandidateInterviewItem:
       type: object
       required:
@@ -7895,31 +7870,6 @@ components:
           format: date-time
           description: 作成日時
       description: コメント
-    Models.CompanyAuth:
-      type: object
-      required:
-        - type
-        - in
-        - name
-      properties:
-        type:
-          type: string
-          enum:
-            - apiKey
-          description: API key authentication
-        in:
-          type: string
-          enum:
-            - cookie
-          description: location of the API key
-        name:
-          type: string
-          enum:
-            - company_token
-          description: name of the API key
-      description: |-
-        企業認証。`company_token` cookie の JWT を検証する
-        （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
     Models.CompanyInterviewItem:
       type: object
       required:
@@ -11663,6 +11613,8 @@ components:
       description: 未読件数
     Models.UpdateApplicationStatusRequest:
       type: object
+      required:
+        - status
       properties:
         status:
           allOf:

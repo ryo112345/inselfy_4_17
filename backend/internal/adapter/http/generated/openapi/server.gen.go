@@ -72,96 +72,6 @@ func (e ModelsCISkillLevel) Valid() bool {
 	}
 }
 
-// Defines values for ModelsCandidateAuthIn.
-const (
-	ModelsCandidateAuthInCookie ModelsCandidateAuthIn = "cookie"
-)
-
-// Valid indicates whether the value is a known member of the ModelsCandidateAuthIn enum.
-func (e ModelsCandidateAuthIn) Valid() bool {
-	switch e {
-	case ModelsCandidateAuthInCookie:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ModelsCandidateAuthName.
-const (
-	ModelsCandidateAuthNameInselfyToken ModelsCandidateAuthName = "inselfy_token"
-)
-
-// Valid indicates whether the value is a known member of the ModelsCandidateAuthName enum.
-func (e ModelsCandidateAuthName) Valid() bool {
-	switch e {
-	case ModelsCandidateAuthNameInselfyToken:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ModelsCandidateAuthType.
-const (
-	ModelsCandidateAuthTypeApiKey ModelsCandidateAuthType = "apiKey"
-)
-
-// Valid indicates whether the value is a known member of the ModelsCandidateAuthType enum.
-func (e ModelsCandidateAuthType) Valid() bool {
-	switch e {
-	case ModelsCandidateAuthTypeApiKey:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ModelsCompanyAuthIn.
-const (
-	ModelsCompanyAuthInCookie ModelsCompanyAuthIn = "cookie"
-)
-
-// Valid indicates whether the value is a known member of the ModelsCompanyAuthIn enum.
-func (e ModelsCompanyAuthIn) Valid() bool {
-	switch e {
-	case ModelsCompanyAuthInCookie:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ModelsCompanyAuthName.
-const (
-	ModelsCompanyAuthNameCompanyToken ModelsCompanyAuthName = "company_token"
-)
-
-// Valid indicates whether the value is a known member of the ModelsCompanyAuthName enum.
-func (e ModelsCompanyAuthName) Valid() bool {
-	switch e {
-	case ModelsCompanyAuthNameCompanyToken:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for ModelsCompanyAuthType.
-const (
-	ModelsCompanyAuthTypeApiKey ModelsCompanyAuthType = "apiKey"
-)
-
-// Valid indicates whether the value is a known member of the ModelsCompanyAuthType enum.
-func (e ModelsCompanyAuthType) Valid() bool {
-	switch e {
-	case ModelsCompanyAuthTypeApiKey:
-		return true
-	default:
-		return false
-	}
-}
-
 // Defines values for ModelsCompanyStatus.
 const (
 	ModelsCompanyStatusApproved ModelsCompanyStatus = "approved"
@@ -883,28 +793,6 @@ type ModelsCITypeScoreResponse struct {
 	TypeId string `json:"typeId"`
 }
 
-// ModelsCandidateAuth 候補者認証。`inselfy_token` cookie の JWT を検証する
-// （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
-type ModelsCandidateAuth struct {
-	// In location of the API key
-	In ModelsCandidateAuthIn `json:"in"`
-
-	// Name name of the API key
-	Name ModelsCandidateAuthName `json:"name"`
-
-	// Type API key authentication
-	Type ModelsCandidateAuthType `json:"type"`
-}
-
-// ModelsCandidateAuthIn location of the API key
-type ModelsCandidateAuthIn string
-
-// ModelsCandidateAuthName name of the API key
-type ModelsCandidateAuthName string
-
-// ModelsCandidateAuthType API key authentication
-type ModelsCandidateAuthType string
-
 // ModelsCandidateInterviewItem 面接（候補者向け・企業情報付き）
 type ModelsCandidateInterviewItem struct {
 	// ApplicationId 応募ID
@@ -991,28 +879,6 @@ type ModelsCommentResponse struct {
 	// Username ユーザー名
 	Username string `json:"username"`
 }
-
-// ModelsCompanyAuth 企業認証。`company_token` cookie の JWT を検証する
-// （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
-type ModelsCompanyAuth struct {
-	// In location of the API key
-	In ModelsCompanyAuthIn `json:"in"`
-
-	// Name name of the API key
-	Name ModelsCompanyAuthName `json:"name"`
-
-	// Type API key authentication
-	Type ModelsCompanyAuthType `json:"type"`
-}
-
-// ModelsCompanyAuthIn location of the API key
-type ModelsCompanyAuthIn string
-
-// ModelsCompanyAuthName name of the API key
-type ModelsCompanyAuthName string
-
-// ModelsCompanyAuthType API key authentication
-type ModelsCompanyAuthType string
 
 // ModelsCompanyInterviewItem 面接（企業向け・候補者情報付き）
 type ModelsCompanyInterviewItem struct {
@@ -3318,7 +3184,7 @@ type ModelsUnreadCountResponse struct {
 // ModelsUpdateApplicationStatusRequest 応募ステータス更新リクエスト
 type ModelsUpdateApplicationStatusRequest struct {
 	// Status 新しいステータス
-	Status *ModelsJobApplicationStatus `json:"status,omitempty"`
+	Status ModelsJobApplicationStatus `json:"status"`
 }
 
 // ModelsUpdateArticleRequest 記事更新リクエスト

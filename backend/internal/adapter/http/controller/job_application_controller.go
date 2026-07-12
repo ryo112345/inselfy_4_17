@@ -105,11 +105,7 @@ func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID 
 		return badRequest(ctx, "invalid request body")
 	}
 
-	status := ""
-	if body.Status != nil {
-		status = string(*body.Status)
-	}
-	if err := c.input.UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(status)); err != nil {
+	if err := c.input.UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(body.Status)); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.JSON(http.StatusOK, openapi.ModelsStatusOkResponse{Status: "ok"})
