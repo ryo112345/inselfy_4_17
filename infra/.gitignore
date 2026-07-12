@@ -1,0 +1,7 @@
+# state は GCS バックエンドにあるのでローカルには置かない（万一生成されても commit しない）
+*.tfstate
+*.tfstate.*
+.terraform/
+crash.log
+crash.*.log
+*.tfvars
