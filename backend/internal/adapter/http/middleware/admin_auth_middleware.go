@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+	"github.com/akiyama/inselfy/backend/internal/driver/logging"
 )
 
 // AdminIDKey holds the authenticated admin's ID when a personal token was
@@ -30,6 +31,7 @@ func AdminAuth(pool *pgxpool.Pool, staticKey string) echo.MiddlewareFunc {
 				return c.JSON(http.StatusUnauthorized, unauthorizedResponse)
 			}
 			if staticKey != "" && subtle.ConstantTimeCompare([]byte(key), []byte(staticKey)) == 1 {
+				annotateAuditLogger(c, "static_key", "")
 				return next(c)
 			}
 			sum := sha256.Sum256([]byte(key))
@@ -40,7 +42,21 @@ func AdminAuth(pool *pgxpool.Pool, staticKey string) echo.MiddlewareFunc {
 			}
 			_ = queries.TouchAdminLastUsed(c.Request().Context(), admin.ID)
 			c.Set(AdminIDKey, admin.ID)
+			annotateAuditLogger(c, "personal_token", admin.ID.String())
 			return next(c)
 		}
 	}
+}
+
+// annotateAuditLogger enriches the request-scoped logger with the admin's
+// identity, so the access log (and any handler logs) of admin operations
+// records who performed them. RequestLogging re-reads the logger from the
+// request context after the handler chain, so this propagates upstream.
+func annotateAuditLogger(c echo.Context, authMethod, adminID string) {
+	ctx := c.Request().Context()
+	logger := logging.FromContext(ctx).With("admin_auth", authMethod)
+	if adminID != "" {
+		logger = logger.With("admin_id", adminID)
+	}
+	c.SetRequest(c.Request().WithContext(logging.WithLogger(ctx, logger)))
 }
