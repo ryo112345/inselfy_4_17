@@ -10,3 +10,10 @@ backend/uploads/
 
 # Test coverage profile (make test-cover / CI)
 backend/coverage.out
+
+# Terraform の生成物（provider バイナリは 100MB 超・state は秘匿情報）。
+# infra/.gitignore にも同じ除外があるが、infra/ 追加前の古いブランチに checkout すると
+# infra/.gitignore ごとディスクから消えて無防備になるため、ルートにも保険として置く
+.terraform/
+*.tfstate
+*.tfstate.*
