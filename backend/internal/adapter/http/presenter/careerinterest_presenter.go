@@ -49,9 +49,10 @@ func CareerInterestResultResponse(r *careerinterest.Result) any {
 		Id:          r.ID,
 		SessionId:   r.SessionID,
 		UserId:      r.UserID,
-		BasicScores: basicScores,
-		TypeScores:  typeScores,
-		HasReport:   r.HasReport,
-		CreatedAt:   r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		BasicScores:     basicScores,
+		TypeScores:      typeScores,
+		HasReport:       r.HasReport,
+		ReportRequested: r.ReportRequested,
+		CreatedAt:       r.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }

@@ -47,9 +47,19 @@ SELECT
     s.user_id,
     u.username,
     u.name,
-    s.completed_at
+    s.completed_at,
+    s.report_requested_at
 FROM work_values_sessions s
 JOIN users u ON u.id = s.user_id
 LEFT JOIN ai_reports r ON r.session_id = s.id
 WHERE s.status = 'completed' AND r.id IS NULL
 ORDER BY s.completed_at DESC;
+
+-- name: RequestWVReport :exec
+UPDATE work_values_sessions SET report_requested_at = NOW()
+WHERE id = $1 AND report_requested_at IS NULL;
+
+-- name: WVReportRequested :one
+SELECT report_requested_at IS NOT NULL AS requested
+FROM work_values_sessions
+WHERE id = $1;

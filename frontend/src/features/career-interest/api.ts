@@ -3,6 +3,7 @@ import {
   careerInterestCiGetAiReport,
   careerInterestCiGetLatestResult,
   careerInterestCiGetResultBySession,
+  careerInterestCiRequestAiReport,
   careerInterestCiStartSession,
   careerInterestCiSubmitResult,
   type ModelsAiReportResponse,
@@ -92,4 +93,12 @@ export async function getAiReport(sessionId: string): Promise<AiReportDTO | null
   });
   if (error || !data) return null;
   return data;
+}
+
+// AIレポートの作成依頼（セッション所有者のみ・冪等）
+export async function requestAiReport(sessionId: string): Promise<void> {
+  const { error, response } = await careerInterestCiRequestAiReport({
+    path: { sessionId },
+  });
+  if (error) throw new Error(`Failed to request AI report: ${response.status}`);
 }

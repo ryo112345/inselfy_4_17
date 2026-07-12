@@ -37,6 +37,7 @@ type Result struct {
 	BasicScores          []BasicScore
 	TypeScores           []TypeScore
 	HasReport            bool
+	ReportRequested      bool
 	CreatedAt            time.Time
 }
 

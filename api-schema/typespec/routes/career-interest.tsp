@@ -60,4 +60,15 @@ interface CareerInterest {
   ciGetAiReport(
     @path sessionId: Uuid,
   ): AiReportResponse | AuthedNotFoundErrors;
+
+  /** AIレポートの作成依頼（セッション所有者のみ・冪等） */
+  @post
+  @route("/sessions/{sessionId}/ai-report/request")
+  @summary("Request AI report generation for a career interest session")
+  @useAuth(Models.CandidateAuth)
+  ciRequestAiReport(
+    @path sessionId: Uuid,
+  ): {
+    @statusCode statusCode: 204;
+  } | AuthedForbiddenErrors;
 }

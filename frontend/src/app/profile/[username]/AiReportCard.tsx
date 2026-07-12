@@ -2,8 +2,6 @@
 
 import { useCallback, useState } from "react";
 import { CheckIcon } from "@/components/icons";
-import { getIntegratedReportStatus } from "@/features/integrated-report/api";
-import { usePolling } from "@/lib/usePolling";
 import { IntegratedReportModal } from "./IntegratedReportModal";
 
 type Props = {
@@ -22,21 +20,12 @@ export function AiReportCard({
   intReportHasReport,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
-  // 初期ステータスはサーバー（fetchPanelData）取得済みのリクエスト有無・レポート有無から導出
+  // 初期ステータスはサーバー（fetchPanelData）取得済みのリクエスト有無・レポート有無から導出。
+  // レポートは管理者がバッチ生成する（〜1営業日）ため生成中のポーリングはせず、
+  // ready への遷移（カードが消える）は次回ページ表示時の初期ステータスで反映される。
   const [requestStatus, setRequestStatus] = useState<"none" | "pending" | "ready">(
     intReportHasReport ? "ready" : intReportRequestId ? "pending" : "none",
   );
-
-  // 生成中はステータスをポーリングし、ready になったらカードを消す。
-  // getIntegratedReportStatus は 401 で /login に飛ばないオプトアウト済み。
-  usePolling(requestStatus === "pending", async () => {
-    const data = await getIntegratedReportStatus();
-    if (data?.status && data.status !== "pending") {
-      setRequestStatus(data.status);
-      return false;
-    }
-    return true;
-  });
 
   const steps = [
     { label: "職歴を入力", done: hasExperience },

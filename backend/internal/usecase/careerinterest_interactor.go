@@ -123,6 +123,12 @@ func (i *CareerInterestInteractor) GetLatestResult(ctx context.Context, userID s
 	}
 	result.HasReport = hasReport
 
+	requested, err := i.reportQS.RequestedBySessionID(ctx, sessionID)
+	if err != nil {
+		return nil, err
+	}
+	result.ReportRequested = requested
+
 	return result, nil
 }
 
@@ -149,5 +155,23 @@ func (i *CareerInterestInteractor) GetResultBySessionID(ctx context.Context, ses
 	}
 	result.HasReport = hasReport
 
+	requested, err := i.reportQS.RequestedBySessionID(ctx, result.SessionID)
+	if err != nil {
+		return nil, err
+	}
+	result.ReportRequested = requested
+
 	return result, nil
+}
+
+// RequestAiReport はセッション所有者からの AI レポート作成依頼を記録する（冪等）。
+func (i *CareerInterestInteractor) RequestAiReport(ctx context.Context, sessionID, userID string) error {
+	session, err := i.sessionRepo.GetByID(ctx, sessionID)
+	if err != nil {
+		return err
+	}
+	if session.UserID != userID {
+		return port.ErrForbidden
+	}
+	return i.sessionRepo.RequestReport(ctx, sessionID)
 }

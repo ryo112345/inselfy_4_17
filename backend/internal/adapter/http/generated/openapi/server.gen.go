@@ -837,6 +837,9 @@ type ModelsCIResultResponse struct {
 	// Id 結果ID
 	Id ModelsUuid `json:"id"`
 
+	// ReportRequested このセッションのAIレポート作成依頼が済んでいるかどうか
+	ReportRequested bool `json:"reportRequested"`
+
 	// SessionId セッションID
 	SessionId ModelsUuid `json:"sessionId"`
 
@@ -3653,6 +3656,9 @@ type ModelsWVResultResponse struct {
 	// Needs ニーズスコア（スコア降順）
 	Needs []ModelsWVNeedScore `json:"needs"`
 
+	// ReportRequested このセッションのAIレポート作成依頼が済んでいるかどうか
+	ReportRequested bool `json:"reportRequested"`
+
 	// SessionId セッションID
 	SessionId ModelsUuid `json:"sessionId"`
 
@@ -4319,6 +4325,9 @@ type ServerInterface interface {
 	// Get the AI report for a career interest session
 	// (GET /api/career-interest/sessions/{sessionId}/ai-report)
 	CareerInterestCiGetAiReport(ctx echo.Context, sessionId ModelsUuid) error
+	// Request AI report generation for a career interest session
+	// (POST /api/career-interest/sessions/{sessionId}/ai-report/request)
+	CareerInterestCiRequestAiReport(ctx echo.Context, sessionId ModelsUuid) error
 	// Get the career interest result by session
 	// (GET /api/career-interest/sessions/{sessionId}/results)
 	CareerInterestCiGetResultBySession(ctx echo.Context, sessionId ModelsUuid) error
@@ -4778,6 +4787,9 @@ type ServerInterface interface {
 	// Get the AI report for a work values session
 	// (GET /api/work-values/sessions/{sessionId}/ai-report)
 	WorkValuesWvGetAiReport(ctx echo.Context, sessionId ModelsUuid) error
+	// Request AI report generation for a work values session
+	// (POST /api/work-values/sessions/{sessionId}/ai-report/request)
+	WorkValuesWvRequestAiReport(ctx echo.Context, sessionId ModelsUuid) error
 	// Get the work values result by session
 	// (GET /api/work-values/sessions/{sessionId}/results)
 	WorkValuesWvGetResultBySession(ctx echo.Context, sessionId ModelsUuid) error
@@ -5084,6 +5096,24 @@ func (w *ServerInterfaceWrapper) CareerInterestCiGetAiReport(ctx echo.Context) e
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.CareerInterestCiGetAiReport(ctx, sessionId)
+	return err
+}
+
+// CareerInterestCiRequestAiReport converts echo context to params.
+func (w *ServerInterfaceWrapper) CareerInterestCiRequestAiReport(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CareerInterestCiRequestAiReport(ctx, sessionId)
 	return err
 }
 
@@ -8231,6 +8261,24 @@ func (w *ServerInterfaceWrapper) WorkValuesWvGetAiReport(ctx echo.Context) error
 	return err
 }
 
+// WorkValuesWvRequestAiReport converts echo context to params.
+func (w *ServerInterfaceWrapper) WorkValuesWvRequestAiReport(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(CandidateAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.WorkValuesWvRequestAiReport(ctx, sessionId)
+	return err
+}
+
 // WorkValuesWvGetResultBySession converts echo context to params.
 func (w *ServerInterfaceWrapper) WorkValuesWvGetResultBySession(ctx echo.Context) error {
 	var err error
@@ -8336,6 +8384,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/auth/refresh", wrapper.AuthRefreshToken)
 	router.POST(baseURL+"/api/career-interest/sessions", wrapper.CareerInterestCiStartSession)
 	router.GET(baseURL+"/api/career-interest/sessions/:sessionId/ai-report", wrapper.CareerInterestCiGetAiReport)
+	router.POST(baseURL+"/api/career-interest/sessions/:sessionId/ai-report/request", wrapper.CareerInterestCiRequestAiReport)
 	router.GET(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiGetResultBySession)
 	router.POST(baseURL+"/api/career-interest/sessions/:sessionId/results", wrapper.CareerInterestCiSubmitResult)
 	router.GET(baseURL+"/api/career-interest/users/:userId/results/latest", wrapper.CareerInterestCiGetLatestResult)
@@ -8489,6 +8538,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/api/users/:username/upload-image", wrapper.UsersUploadUserImage)
 	router.POST(baseURL+"/api/work-values/sessions", wrapper.WorkValuesWvStartSession)
 	router.GET(baseURL+"/api/work-values/sessions/:sessionId/ai-report", wrapper.WorkValuesWvGetAiReport)
+	router.POST(baseURL+"/api/work-values/sessions/:sessionId/ai-report/request", wrapper.WorkValuesWvRequestAiReport)
 	router.GET(baseURL+"/api/work-values/sessions/:sessionId/results", wrapper.WorkValuesWvGetResultBySession)
 	router.POST(baseURL+"/api/work-values/sessions/:sessionId/results", wrapper.WorkValuesWvSubmitResult)
 	router.GET(baseURL+"/api/work-values/users/:userId/results/latest", wrapper.WorkValuesWvGetLatestResult)

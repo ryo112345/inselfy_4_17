@@ -359,6 +359,10 @@ export type ModelsCiResultResponse = {
      */
     hasReport: boolean;
     /**
+     * このセッションのAIレポート作成依頼が済んでいるかどうか
+     */
+    reportRequested: boolean;
+    /**
      * 作成日時（RFC3339 文字列）
      */
     createdAt: string;
@@ -4358,6 +4362,10 @@ export type ModelsWvResultResponse = {
      */
     hasReport: boolean;
     /**
+     * このセッションのAIレポート作成依頼が済んでいるかどうか
+     */
+    reportRequested: boolean;
+    /**
      * 作成日時（RFC3339 文字列）
      */
     createdAt: string;
@@ -5035,6 +5043,45 @@ export type CareerInterestCiGetAiReportResponses = {
 };
 
 export type CareerInterestCiGetAiReportResponse = CareerInterestCiGetAiReportResponses[keyof CareerInterestCiGetAiReportResponses];
+
+export type CareerInterestCiRequestAiReportData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/career-interest/sessions/{sessionId}/ai-report/request';
+};
+
+export type CareerInterestCiRequestAiReportErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type CareerInterestCiRequestAiReportError = CareerInterestCiRequestAiReportErrors[keyof CareerInterestCiRequestAiReportErrors];
+
+export type CareerInterestCiRequestAiReportResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type CareerInterestCiRequestAiReportResponse = CareerInterestCiRequestAiReportResponses[keyof CareerInterestCiRequestAiReportResponses];
 
 export type CareerInterestCiGetResultBySessionData = {
     body?: never;
@@ -10344,6 +10391,45 @@ export type WorkValuesWvGetAiReportResponses = {
 };
 
 export type WorkValuesWvGetAiReportResponse = WorkValuesWvGetAiReportResponses[keyof WorkValuesWvGetAiReportResponses];
+
+export type WorkValuesWvRequestAiReportData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/work-values/sessions/{sessionId}/ai-report/request';
+};
+
+export type WorkValuesWvRequestAiReportErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type WorkValuesWvRequestAiReportError = WorkValuesWvRequestAiReportErrors[keyof WorkValuesWvRequestAiReportErrors];
+
+export type WorkValuesWvRequestAiReportResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type WorkValuesWvRequestAiReportResponse = WorkValuesWvRequestAiReportResponses[keyof WorkValuesWvRequestAiReportResponses];
 
 export type WorkValuesWvGetResultBySessionData = {
     body?: never;

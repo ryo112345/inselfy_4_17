@@ -132,3 +132,18 @@ func (r *CareerInterestSessionRepository) UpdateStatus(ctx context.Context, id, 
 	}
 	return nil
 }
+
+// RequestReport は AI レポート作成依頼を記録する。既に依頼済みなら何もしない（冪等）。
+func (r *CareerInterestSessionRepository) RequestReport(ctx context.Context, id string) error {
+	uuid, err := parseUUID(id)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+
+	_, err = r.pool.Exec(ctx,
+		`UPDATE career_interest_sessions SET report_requested_at = NOW()
+		 WHERE id = $1 AND report_requested_at IS NULL`,
+		uuid,
+	)
+	return err
+}

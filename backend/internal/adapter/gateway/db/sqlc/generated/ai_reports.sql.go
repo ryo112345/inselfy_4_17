@@ -141,7 +141,8 @@ SELECT
     s.user_id,
     u.username,
     u.name,
-    s.completed_at
+    s.completed_at,
+    s.report_requested_at
 FROM work_values_sessions s
 JOIN users u ON u.id = s.user_id
 LEFT JOIN ai_reports r ON r.session_id = s.id
@@ -150,11 +151,12 @@ ORDER BY s.completed_at DESC
 `
 
 type ListSessionsWithoutReportRow struct {
-	SessionID   pgtype.UUID        `json:"session_id"`
-	UserID      pgtype.UUID        `json:"user_id"`
-	Username    string             `json:"username"`
-	Name        string             `json:"name"`
-	CompletedAt pgtype.Timestamptz `json:"completed_at"`
+	SessionID         pgtype.UUID        `json:"session_id"`
+	UserID            pgtype.UUID        `json:"user_id"`
+	Username          string             `json:"username"`
+	Name              string             `json:"name"`
+	CompletedAt       pgtype.Timestamptz `json:"completed_at"`
+	ReportRequestedAt pgtype.Timestamptz `json:"report_requested_at"`
 }
 
 func (q *Queries) ListSessionsWithoutReport(ctx context.Context) ([]*ListSessionsWithoutReportRow, error) {
@@ -172,6 +174,7 @@ func (q *Queries) ListSessionsWithoutReport(ctx context.Context) ([]*ListSession
 			&i.Username,
 			&i.Name,
 			&i.CompletedAt,
+			&i.ReportRequestedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -190,6 +193,16 @@ WHERE session_id = $1 AND viewed_at IS NULL
 
 func (q *Queries) MarkAIReportViewed(ctx context.Context, sessionID pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, markAIReportViewed, sessionID)
+	return err
+}
+
+const requestWVReport = `-- name: RequestWVReport :exec
+UPDATE work_values_sessions SET report_requested_at = NOW()
+WHERE id = $1 AND report_requested_at IS NULL
+`
+
+func (q *Queries) RequestWVReport(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, requestWVReport, id)
 	return err
 }
 
@@ -229,4 +242,17 @@ func (q *Queries) UpsertAIReport(ctx context.Context, arg *UpsertAIReportParams)
 		&i.ViewedAt,
 	)
 	return &i, err
+}
+
+const wVReportRequested = `-- name: WVReportRequested :one
+SELECT report_requested_at IS NOT NULL AS requested
+FROM work_values_sessions
+WHERE id = $1
+`
+
+func (q *Queries) WVReportRequested(ctx context.Context, id pgtype.UUID) (interface{}, error) {
+	row := q.db.QueryRow(ctx, wVReportRequested, id)
+	var requested interface{}
+	err := row.Scan(&requested)
+	return requested, err
 }

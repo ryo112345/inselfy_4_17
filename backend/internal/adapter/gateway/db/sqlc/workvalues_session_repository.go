@@ -110,6 +110,22 @@ func (r *WorkValuesSessionRepository) UpdateStatus(ctx context.Context, id, stat
 	return nil
 }
 
+// RequestReport は AI レポート作成依頼を記録する。既に依頼済みなら何もしない（冪等）。
+func (r *WorkValuesSessionRepository) RequestReport(ctx context.Context, id string) error {
+	uuid, err := parseUUID(id)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+
+	conn := r.connForContext(ctx)
+	_, err = conn.Exec(ctx,
+		`UPDATE work_values_sessions SET report_requested_at = NOW()
+		 WHERE id = $1 AND report_requested_at IS NULL`,
+		uuid,
+	)
+	return err
+}
+
 type dbConn interface {
 	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 	Exec(ctx context.Context, sql string, args ...any) (interface{ RowsAffected() int64 }, error)
