@@ -5,8 +5,8 @@ import { AiReportSection } from "@/features/ai-report/AiReportSection";
 import {
   getAiReport,
   getResultBySessionId,
-  requestAiReport,
   type ResultDTO,
+  requestAiReport,
 } from "@/features/career-interest/api";
 import { BasicInterestsSection } from "@/features/career-interest/components/BasicInterestsSection";
 import { TopRIASECHeroSection } from "@/features/career-interest/components/TopRIASECHeroSection";

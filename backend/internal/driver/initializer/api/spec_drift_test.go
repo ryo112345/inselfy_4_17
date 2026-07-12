@@ -31,6 +31,8 @@ import (
 var unspeccedRoutes = map[string]string{
 	"GET /healthz":             "liveness probe (C7)",
 	"GET /readyz":              "readiness probe (C7)",
+	"GET /api/healthz":         "liveness probe via front proxy (C10)",
+	"GET /api/readyz":          "readiness probe via front proxy (C10)",
 	"GET /api/uploads*":        "static file serving",
 	"GET /api/ws":              "websocket upgrade",
 	"GET /api/ws/ticket":       "websocket auth ticket",
