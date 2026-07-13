@@ -35,15 +35,11 @@ jobs:
           go-version: "1.25.0"
           cache-dependency-path: backend/go.sum
 
-      # ローカルと同じバージョンに固定する（ズレると差分が偽陽性になる）
-      # sqlc v1.31.1 はビルドに go >= 1.26 を要求する（setup-go は GOTOOLCHAIN=local に
-      # するため 1.25.0 のままだと install が落ちる）。sqlc のビルドだけ 1.26 を使う。
-      # 生成コードは sqlc 自体のバージョンで決まり、ビルドに使う Go には依存しない。
-      - name: Install Go codegen tools
-        run: |
-          go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.6.0
-          GOTOOLCHAIN=go1.26.0 go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
-          go install github.com/jmattheis/goverter/cmd/goverter@v1.9.4
+      # goverter は backend/go.mod の tool ディレクティブで管理され go tool 経由で
+      # 実行されるためインストール不要。oapi-codegen / sqlc は tool 化できないため、
+      # Makefile に固定したバージョンを install する（ローカルとズレると差分が偽陽性になる）。
+      - name: Install codegen tools
+        run: make -C backend install-codegen-tools
 
       - name: Install TypeSpec toolchain
         run: npm ci --prefix api-schema

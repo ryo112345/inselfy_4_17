@@ -10,6 +10,11 @@ updates:
       time: "09:00"
       timezone: "Asia/Tokyo"
     open-pull-requests-limit: 5
+    # 毎週バラバラに PR が来る SDK 群は 1 本の PR にまとめる
+    groups:
+      aws-sdk:
+        patterns:
+          - "github.com/aws/aws-sdk-go-v2*"
 
   - package-ecosystem: "npm"
     directory: "/frontend"

@@ -12,12 +12,22 @@
 
 ## 開発ルール
 
+### バックエンドの検証（必須）
+
+- バックエンドを変更したら、必ず `backend/` で **`make check`**（build + lint + test）を通すこと。
+- codegen ツールのうち goverter は `go.mod` の `tool` ディレクティブで管理
+  （`go tool` 経由で実行されるためインストール不要）。oapi-codegen / sqlc は tool 化できない
+  （依存衝突・Go バージョン要求）ため `make install-codegen-tools` で導入する
+  （バージョンは Makefile の `OAPI_CODEGEN_VERSION` / `SQLC_VERSION` が唯一の情報源）。
+
 ### バックエンドの経路ルール（移行完了・遵守必須）
 
 - 経路は常に **controller → InputPort → interactor → (Repository | QueryService) → gateway**。
   controller から DB（pgx/pool）へ直結しない。
 - 例外は **admin コントローラ（`admin_*_controller.go`）のみ pool 直結可**。それ以外の controller は
   InputPort 経由必須（`.golangci.yml` の depguard でも機械的に強制。`make lint` で検査）。
+- depguard は全レイヤー境界を強制する: domain ← port ← usecase ← adapter/driver の一方向のみ。
+  domain/port/usecase から外側レイヤーや pgx を import すると lint で落ちる。
 - 複合読み取り・動的SQLは Repository に押し込まず、**QueryService port を新設して gateway に置く**。
 - 移行の経緯・手順は `docs/controller-clean-route-refactor.md`（完了済み）。
   残タスクは `docs/backend-refactor-backlog.md` で管理する。
@@ -63,8 +73,8 @@
 - 共通の小さな変換関数（`copyTime`、`emptySliceIfNil` 等）は同パッケージで `// goverter:extend` 再利用。
 - 再生成: `make goverter`。フィールド追加時は entity/request/response に足して再生成するだけ
   （マッパーの手編集は不要・漏れはコンパイルエラーで検出）。
-- **注意:** goverter バイナリはモジュールと同じ Go バージョンでビルドが必要。インストールは
-  `GOTOOLCHAIN=go1.25.0 go install github.com/jmattheis/goverter/cmd/goverter@v1.9.4`。
+- goverter は `go.mod` の `tool` ディレクティブで管理され `go tool` 経由で実行されるため、
+  インストール不要（Go バージョン不一致問題も起きない）。
 
 ## ディレクトリ構成
 - (TODO: プロジェクト構成が決まったら記載)
