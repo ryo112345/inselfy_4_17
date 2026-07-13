@@ -3,6 +3,7 @@ package presenter
 import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // messagingConv is the goverter-generated conversation read-model→response mapper.
@@ -20,7 +21,7 @@ func MessagingConversationsResponse(convs []*messaging.ConversationWithPreview, 
 	for _, c := range messagingConv.ToConversationResponses(convs) {
 		items = append(items, *c)
 	}
-	return &openapi.ModelsConversationListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsConversationListResponse{Items: items, Total: cast.Int32(total)}
 }
 
 // MessagingMessageResponse builds the single-message API response.
@@ -34,12 +35,12 @@ func MessagingMessagesResponse(msgs []*messaging.Message, total int) any {
 	for i, m := range msgs {
 		items[i] = *toMessageResponse(m)
 	}
-	return &openapi.ModelsMessageListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsMessageListResponse{Items: items, Total: cast.Int32(total)}
 }
 
 // MessagingUnreadCountResponse builds the unread-count API response.
 func MessagingUnreadCountResponse(count int) any {
-	return &openapi.ModelsUnreadCountResponse{Count: int32(count)}
+	return &openapi.ModelsUnreadCountResponse{Count: cast.Int32(count)}
 }
 
 // MessagingOKResponse builds the fixed OK API response.

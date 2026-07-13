@@ -6,6 +6,7 @@ import (
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // WorkValuesSessionResponse converts a session entity to its API response.
@@ -53,15 +54,15 @@ func WorkValuesResultResponse(r *workvalues.Result) any {
 		values[i] = openapi.ModelsWVValueScoreResponse{
 			ValueId:      v.ValueID,
 			DisplayScore: math.Round(v.DisplayScore*10) / 10,
-			Rank:         int32(v.Rank),
+			Rank:         cast.Int32(v.Rank),
 		}
 	}
 
 	return &openapi.ModelsWVResultResponse{
-		Id:        r.ID,
-		SessionId: r.SessionID,
-		UserId:    r.UserID,
-		Needs:     needs,
+		Id:              r.ID,
+		SessionId:       r.SessionID,
+		UserId:          r.UserID,
+		Needs:           needs,
 		Values:          values,
 		HasReport:       r.HasReport,
 		ReportRequested: r.ReportRequested,

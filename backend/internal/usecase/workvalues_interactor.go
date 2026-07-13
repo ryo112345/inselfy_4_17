@@ -34,7 +34,7 @@ func NewWorkValuesInteractor(
 
 func (i *WorkValuesInteractor) StartSession(ctx context.Context, userID string) (*workvalues.Session, error) {
 	seed := uint64(time.Now().UnixNano())
-	rng := rand.New(rand.NewPCG(seed, 0))
+	rng := rand.New(rand.NewPCG(seed, 0)) //nolint:gosec // G404: ペアシャッフル用途で暗号強度は不要
 	pairs := workvalues.GenerateInitialPairs(rng)
 
 	session := &workvalues.Session{

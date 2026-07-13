@@ -76,8 +76,10 @@ func validateCommon(title, body string, isPaid bool, priceYen int, tags []string
 	return nil
 }
 
-var htmlTagRe = regexp.MustCompile(`<[^>]*>`)
-var imgTagRe = regexp.MustCompile(`<img[\s>]`)
+var (
+	htmlTagRe = regexp.MustCompile(`<[^>]*>`)
+	imgTagRe  = regexp.MustCompile(`<img[\s>]`)
+)
 
 func CountChars(body string) int {
 	text := htmlTagRe.ReplaceAllString(body, "")

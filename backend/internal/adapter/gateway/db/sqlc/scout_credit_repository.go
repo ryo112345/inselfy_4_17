@@ -10,6 +10,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -163,9 +164,9 @@ func (r *ScoutCreditLedgerRepository) Create(ctx context.Context, entry *scout.C
 	}
 	return q.CreateScoutCreditLedger(ctx, &generated.CreateScoutCreditLedgerParams{
 		CompanyID:      pgCompanyID,
-		Delta:          int32(entry.Delta),
+		Delta:          cast.Int32(entry.Delta),
 		Reason:         entry.Reason,
 		ScoutMessageID: optionalUUID(entry.ScoutMessageID),
-		BalanceAfter:   int32(entry.BalanceAfter),
+		BalanceAfter:   cast.Int32(entry.BalanceAfter),
 	})
 }

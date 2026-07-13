@@ -11,6 +11,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -84,8 +85,8 @@ func (r *PostRepository) ListTimeline(ctx context.Context, limit, offset int, vi
 	q := queriesForContext(ctx, r.queries)
 	viewerUUID, _ := parseUUID(viewerID)
 	rows, err := q.ListTimelinePosts(ctx, &generated.ListTimelinePostsParams{
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		Limit:  cast.Int32(limit),
+		Offset: cast.Int32(offset),
 		UserID: viewerUUID,
 	})
 	if err != nil {
@@ -113,8 +114,8 @@ func (r *PostRepository) ListByUserID(ctx context.Context, userID string, limit,
 	viewerUUID, _ := parseUUID(viewerID)
 	rows, err := q.ListPostsByUserID(ctx, &generated.ListPostsByUserIDParams{
 		UserID:   pgUserID,
-		Limit:    int32(limit),
-		Offset:   int32(offset),
+		Limit:    cast.Int32(limit),
+		Offset:   cast.Int32(offset),
 		UserID_2: viewerUUID,
 	})
 	if err != nil {
@@ -139,8 +140,8 @@ func (r *PostRepository) ListLikedByUserID(ctx context.Context, userID string, l
 	}
 	rows, err := q.ListLikedPostsByUserID(ctx, &generated.ListLikedPostsByUserIDParams{
 		UserID: pgUserID,
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		Limit:  cast.Int32(limit),
+		Offset: cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -334,8 +335,8 @@ func (r *PostRepository) ListComments(ctx context.Context, postID string, limit,
 	}
 	rows, err := q.ListPostComments(ctx, &generated.ListPostCommentsParams{
 		PostID: pgPostID,
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		Limit:  cast.Int32(limit),
+		Offset: cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err

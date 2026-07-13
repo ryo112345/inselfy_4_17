@@ -13,20 +13,20 @@ import (
 
 func main() {
 	logging.Setup()
-
-	ctx := context.Background()
-	e, cfg, cleanup, err := initializer.BuildServer(ctx)
-	if err != nil {
-		slog.Error("failed to initialize server", "error", err)
+	if err := run(); err != nil {
+		slog.Error("server exited", "error", err)
 		os.Exit(1)
+	}
+}
+
+func run() error {
+	e, cfg, cleanup, err := initializer.BuildServer(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to initialize server: %w", err)
 	}
 	defer cleanup()
 
 	addr := fmt.Sprintf(":%d", cfg.APIPort)
 	slog.Info("starting HTTP server", "addr", addr)
-	if err := e.Start(addr); err != nil {
-		slog.Error("server exited", "error", err)
-		cleanup()
-		os.Exit(1)
-	}
+	return e.Start(addr)
 }

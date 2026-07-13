@@ -3,6 +3,7 @@ package presenter
 import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // ArticleSingleResponse converts a single article to its API response.
@@ -59,7 +60,7 @@ func ArticlesListResponse(articles []*article.ArticleWithAuthor, total int) any 
 			PublishedAt:    a.Article.PublishedAt,
 		}
 	}
-	return &openapi.ModelsArticleListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsArticleListResponse{Items: items, Total: cast.Int32(total)}
 }
 
 // ArticleCheckoutResponse builds the Stripe checkout-session API response.

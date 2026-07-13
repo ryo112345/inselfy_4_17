@@ -25,6 +25,7 @@ type stubInput struct {
 func (s *stubInput) Create(ctx context.Context, in user.CreateUserInput) (*user.User, error) {
 	return s.createFn(ctx, in)
 }
+
 func (s *stubInput) GetByUsername(ctx context.Context, u string) (*user.User, error) {
 	return s.getFn(ctx, u)
 }
@@ -57,7 +58,7 @@ func TestUpdateProfile_DistinguishesAbsentFromNull(t *testing.T) {
 
 	// Body: headline present with value, about explicitly null, location absent.
 	body := `{"headline":"Backend","about":null}`
-	req := httptest.NewRequest(http.MethodPatch, "/api/users/alice", strings.NewReader(body))
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodPatch, "/api/users/alice", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	ectx := e.NewContext(req, rec)
@@ -94,7 +95,7 @@ func TestUpdateProfile_RejectsNullName(t *testing.T) {
 	e := echo.New()
 
 	body := `{"name": null}`
-	req := httptest.NewRequest(http.MethodPatch, "/api/users/alice", strings.NewReader(body))
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodPatch, "/api/users/alice", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	ectx := e.NewContext(req, rec)

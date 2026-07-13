@@ -82,7 +82,7 @@ func validateCore(
 	if runeLen(description) > MaxDescriptionLength {
 		return ErrDescriptionTooLong
 	}
-	maxYear := int16(time.Now().Year() + 1)
+	maxYear := int16(time.Now().Year() + 1) //nolint:gosec // G115: 西暦+1 は int16 に収まる
 	if startYear < MinYear || startYear > maxYear {
 		return ErrStartYearOutOfRange
 	}

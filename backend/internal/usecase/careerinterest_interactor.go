@@ -39,7 +39,7 @@ func NewCareerInterestInteractor(
 
 func (i *CareerInterestInteractor) StartSession(ctx context.Context, userID string) (*careerinterest.Session, error) {
 	seed := uint64(time.Now().UnixNano())
-	rng := rand.New(rand.NewPCG(seed, 0))
+	rng := rand.New(rand.NewPCG(seed, 0)) //nolint:gosec // G404: 質問シャッフル用途で暗号強度は不要
 	items := careerinterest.GenerateItems(rng)
 
 	session := &careerinterest.Session{

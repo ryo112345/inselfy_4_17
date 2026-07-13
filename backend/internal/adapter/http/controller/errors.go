@@ -194,10 +194,6 @@ func unauthorized(ctx echo.Context, message string) error {
 	return errorResponse(ctx, http.StatusUnauthorized, "UNAUTHORIZED", message)
 }
 
-func forbidden(ctx echo.Context, message string) error {
-	return errorResponse(ctx, http.StatusForbidden, "FORBIDDEN", message)
-}
-
 func notFoundError(ctx echo.Context, message string) error {
 	return errorResponse(ctx, http.StatusNotFound, "NOT_FOUND", message)
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/interview"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -46,7 +47,7 @@ func (r *InterviewProposalRepository) Create(ctx context.Context, p *interview.P
 			return nil, domainerr.ErrBadRequest
 		}
 	}
-	dur := int32(p.DurationMinutes)
+	dur := cast.Int32(p.DurationMinutes)
 	if dur <= 0 {
 		dur = 60
 	}

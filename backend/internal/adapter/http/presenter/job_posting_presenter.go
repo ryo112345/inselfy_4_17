@@ -3,6 +3,7 @@ package presenter
 import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobposting"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // jobPostingConv is the goverter-generated entity→response mapper.
@@ -18,5 +19,5 @@ func JobPostingsPaginatedResponse(js []*jobposting.JobPosting, total int) any {
 	for _, r := range jobPostingConv.ToResponses(js) {
 		items = append(items, *r)
 	}
-	return &openapi.ModelsJobPostingListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsJobPostingListResponse{Items: items, Total: cast.Int32(total)}
 }

@@ -3,6 +3,7 @@ package presenter
 import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/post"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 var postConv postConverter = &postConverterImpl{}
@@ -16,7 +17,7 @@ func PostsListResponse(posts []*post.PostWithUser, total int) any {
 	for i, pw := range posts {
 		items[i] = *postConv.ToPostResponse(pw)
 	}
-	return &openapi.ModelsPostListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsPostListResponse{Items: items, Total: cast.Int32(total)}
 }
 
 // PostLikeToggleResponse builds the like-toggle API response.
@@ -38,5 +39,5 @@ func PostCommentsListResponse(comments []*post.CommentWithUser, total int) any {
 	for i, c := range comments {
 		items[i] = *postConv.ToCommentResponse(c)
 	}
-	return &openapi.ModelsCommentListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsCommentListResponse{Items: items, Total: cast.Int32(total)}
 }

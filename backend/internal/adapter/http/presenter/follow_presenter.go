@@ -3,6 +3,7 @@ package presenter
 import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/follow"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // FollowStatusResponse converts a follow status to its API response.
@@ -26,5 +27,5 @@ func FollowUsersResponse(users []*follow.FollowWithUser, total int) any {
 			CreatedAt: u.CreatedAt,
 		}
 	}
-	return &openapi.ModelsFollowUserListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsFollowUserListResponse{Items: items, Total: cast.Int32(total)}
 }

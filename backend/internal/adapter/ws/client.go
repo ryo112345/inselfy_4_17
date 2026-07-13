@@ -36,7 +36,7 @@ func NewClient(ctx context.Context, hub *Hub, conn *websocket.Conn, key string) 
 func (c *Client) ReadPump() {
 	defer func() {
 		c.Hub.Unregister(c)
-		c.Conn.Close(websocket.StatusNormalClosure, "")
+		_ = c.Conn.Close(websocket.StatusNormalClosure, "")
 	}()
 
 	c.Conn.SetReadLimit(maxMsgSize)
@@ -56,7 +56,7 @@ func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.Conn.Close(websocket.StatusNormalClosure, "")
+		_ = c.Conn.Close(websocket.StatusNormalClosure, "")
 	}()
 
 	for {

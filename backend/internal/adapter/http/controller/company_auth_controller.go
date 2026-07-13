@@ -92,7 +92,8 @@ func (c *CompanyAuthController) Logout(ctx echo.Context) error {
 
 func setCompanyAuthCookies(ctx echo.Context, resp *presenter.CompanyAuthTokenResponse) {
 	secure := ctx.Scheme() == "https"
-	ctx.SetCookie(&http.Cookie{
+	// ローカル開発は http のため Secure は scheme で切り替える（本番は常に https）
+	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は上記の通り動的に設定
 		Name:     "company_token",
 		Value:    resp.AccessToken,
 		Path:     "/",
@@ -101,7 +102,7 @@ func setCompanyAuthCookies(ctx echo.Context, resp *presenter.CompanyAuthTokenRes
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   86400,
 	})
-	ctx.SetCookie(&http.Cookie{
+	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定
 		Name:     "company_refresh_token",
 		Value:    resp.RefreshToken,
 		Path:     "/api/company/auth",
@@ -111,7 +112,8 @@ func setCompanyAuthCookies(ctx echo.Context, resp *presenter.CompanyAuthTokenRes
 		MaxAge:   604800,
 	})
 	setCookie := func(name, value string) {
-		ctx.SetCookie(&http.Cookie{
+		// companyId/companyName はフロントの JS から参照するため HttpOnly を付けない
+		ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: JS 参照用のため HttpOnly なし・Secure は動的
 			Name:     name,
 			Value:    url.QueryEscape(value),
 			Path:     "/",
@@ -128,7 +130,7 @@ func clearCompanyAuthCookies(ctx echo.Context) {
 	secure := ctx.Scheme() == "https"
 	expired := time.Unix(0, 0)
 	for _, name := range []string{"company_token", "companyId", "companyName"} {
-		ctx.SetCookie(&http.Cookie{
+		ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的・JS 参照用 cookie は HttpOnly なし
 			Name:     name,
 			Value:    "",
 			Path:     "/",
@@ -139,7 +141,7 @@ func clearCompanyAuthCookies(ctx echo.Context) {
 			Expires:  expired,
 		})
 	}
-	ctx.SetCookie(&http.Cookie{
+	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定（ローカルは http）
 		Name:     "company_refresh_token",
 		Value:    "",
 		Path:     "/api/company/auth",

@@ -10,7 +10,7 @@ import (
 )
 
 func TestValidateCreate(t *testing.T) {
-	y := int16(time.Now().Year())
+	y := int16(time.Now().Year()) //nolint:gosec // G115: 西暦は int16 に収まる
 	endY := y
 	endM := int16(6)
 

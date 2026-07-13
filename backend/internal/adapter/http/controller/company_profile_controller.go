@@ -138,7 +138,7 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 	if err != nil {
 		return internalError(ctx, "failed to open file")
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	imageURL, err := c.storage.Save(ctx.Request().Context(), key, src)
 	if err != nil {
@@ -168,15 +168,15 @@ func (c *CompanyProfileController) DeleteImage(ctx echo.Context) error {
 	imageURL := ctx.QueryParam("url")
 	reqCtx := ctx.Request().Context()
 
-	switch {
-	case imageType == "gallery":
+	switch imageType {
+	case "gallery":
 		if imageURL == "" {
 			return badRequest(ctx, "url is required for gallery delete")
 		}
 		if err := c.input.RemoveGalleryURL(reqCtx, companyID, imageURL); err != nil {
 			return internalError(ctx, err.Error())
 		}
-	case imageType == "logo" || imageType == "cover":
+	case "logo", "cover":
 		if err := c.input.ClearImageURL(reqCtx, companyID, imageKind(imageType)); err != nil {
 			return internalError(ctx, err.Error())
 		}

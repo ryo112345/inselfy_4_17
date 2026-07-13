@@ -186,7 +186,7 @@ func HandleImageUpload(storage port.FileStorage, subdir string) echo.HandlerFunc
 		if err != nil {
 			return internalError(ctx, "failed to open file")
 		}
-		defer src.Close()
+		defer func() { _ = src.Close() }()
 
 		key := fmt.Sprintf("%s/%s%s", subdir, uuid.New().String()[:8], ext)
 		url, err := storage.Save(ctx.Request().Context(), key, src)

@@ -10,6 +10,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -148,8 +149,8 @@ func (r *ConversationRepository) ListByCandidate(ctx context.Context, candidateI
 	}
 	rows, err := q.ListConversationsByCandidate(ctx, &generated.ListConversationsByCandidateParams{
 		UserID:    pgCandidateID,
-		RowLimit:  int32(limit),
-		RowOffset: int32(offset),
+		RowLimit:  cast.Int32(limit),
+		RowOffset: cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -173,8 +174,8 @@ func (r *ConversationRepository) ListByCompany(ctx context.Context, companyID st
 	}
 	rows, err := q.ListConversationsByCompany(ctx, &generated.ListConversationsByCompanyParams{
 		CompanyID: pgCompanyID,
-		Limit:     int32(limit),
-		Offset:    int32(offset),
+		Limit:     cast.Int32(limit),
+		Offset:    cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err

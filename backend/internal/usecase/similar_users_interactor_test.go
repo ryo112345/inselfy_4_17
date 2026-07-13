@@ -19,9 +19,11 @@ type similarUsersQueryStub struct {
 func (s *similarUsersQueryStub) LatestMu(ctx context.Context, userID string) (map[string]float64, error) {
 	return s.latestMu(ctx, userID)
 }
+
 func (s *similarUsersQueryStub) ListPublicUsersWithMu(ctx context.Context, excludeUserID string) ([]workvalues.UserWithMu, error) {
 	return s.listUsers(ctx, excludeUserID)
 }
+
 func (s *similarUsersQueryStub) RecentExperiences(ctx context.Context, userIDs []string) (map[string][]workvalues.SimilarUserExperience, error) {
 	return s.experiences(ctx, userIDs)
 }

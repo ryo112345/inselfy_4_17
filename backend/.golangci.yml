@@ -1,17 +1,98 @@
-# 経路ルール（CLAUDE.md「バックエンドの経路ルール」）の機械的な担保。
-# controller は InputPort 経由必須で、DB 直結（pgx）は admin コントローラのみ許可。
 # 実行: make lint（golangci-lint v2 系。導入方法は Makefile のコメント参照）
+# 方針: バグ検出力の高いリンターは全部入れる。純スタイル系（行長・関数長・複雑度など）は
+# ノイズ源になるので入れない。生成コード（DO NOT EDIT）はデフォルトの exclusion で除外される。
 version: "2"
 
 linters:
-  default: none
+  # standard: errcheck / govet / ineffassign / staticcheck / unused
+  default: standard
   enable:
+    # --- 経路ルール（CLAUDE.md「バックエンドの経路ルール」）の機械的な担保 ---
     - depguard
+    # --- リソースリーク・DB/HTTP の扱い ---
+    - bodyclose      # http.Response.Body の Close 漏れ
+    - rowserrcheck   # sql.Rows.Err() のチェック漏れ
+    - sqlclosecheck  # sql.Rows/Stmt の Close 漏れ
+    - noctx          # context なしの HTTP リクエスト
+    - fatcontext     # ループ内での context 積み重ね
+    # --- エラーハンドリング ---
+    - errorlint      # errors.Is/As を使わない比較、%w 以外の wrap
+    - nilerr         # err != nil なのに nil を返す
+    - nilnesserr     # nil チェック対象の取り違え
+    - errname        # sentinel error の命名（ErrXxx）
+    # --- バグ・怪しいコード ---
+    - gocritic       # 多数の bug/perf/style 診断（高シグナル）
+    - gosec          # セキュリティ（SQL組み立て、weak rand、file permission 等）
+    - durationcheck  # time.Duration の乗算ミス
+    - makezero       # make([]T, n) への append
+    - exhaustive     # enum switch の網羅性（default があれば OK）
+    - copyloopvar    # Go 1.22+ で不要になったループ変数コピー
+    - intrange       # Go 1.22+ の for range n への書き換え
+    - unconvert      # 不要な型変換
+    - unparam        # 常に同じ値の引数・使われない引数
+    - wastedassign   # 無駄な代入
+    - predeclared    # 予約識別子（len, cap 等）のシャドーイング
+    - usestdlibvars  # http.MethodGet 等の標準定数を使う
+    - mirror         # []byte/string の無駄な往復変換
+    - perfsprint     # fmt.Sprintf より速い等価表現
+    - prealloc       # 容量が自明な slice の事前確保
+    - misspell       # コメント・文字列の英語タイポ
+    # --- ログ ---
+    - sloglint       # slog の引数ペア崩れ・キー重複
+    # --- テスト ---
+    - usetesting     # t.Setenv / t.TempDir 等の活用
+    - thelper        # テストヘルパーの t.Helper() 漏れ
+    # --- nolint コメントの規律 ---
+    - nolintlint     # 理由なし・対象リンター指定なしの //nolint を禁止
   settings:
     depguard:
+      # 依存方向は domain ← port ← usecase ← adapter/driver の一方向のみ。
+      # list-mode: lax は「deny に一致しない import はすべて許可」（境界チェックだけを行う）
       rules:
+        # domain は最内層: 他レイヤーにも DB ドライバにも依存しない
+        domain-pure:
+          list-mode: lax
+          files:
+            - "**/internal/domain/**"
+          deny:
+            - pkg: "github.com/akiyama/inselfy/backend/internal/port"
+              desc: "domain は port に依存しない（port が domain を参照する向きのみ）"
+            - pkg: "github.com/akiyama/inselfy/backend/internal/usecase"
+              desc: "domain は usecase に依存しない"
+            - pkg: "github.com/akiyama/inselfy/backend/internal/adapter"
+              desc: "domain は adapter に依存しない"
+            - pkg: "github.com/akiyama/inselfy/backend/internal/driver"
+              desc: "domain は driver に依存しない"
+            - pkg: "github.com/jackc/pgx"
+              desc: "domain は DB ドライバに依存しない"
+
+        # port はインターフェース定義のみ: domain 以外の内部レイヤーを参照しない
+        port-pure:
+          list-mode: lax
+          files:
+            - "**/internal/port/**"
+          deny:
+            - pkg: "github.com/akiyama/inselfy/backend/internal/usecase"
+              desc: "port は usecase に依存しない"
+            - pkg: "github.com/akiyama/inselfy/backend/internal/adapter"
+              desc: "port は adapter に依存しない"
+            - pkg: "github.com/akiyama/inselfy/backend/internal/driver"
+              desc: "port は driver に依存しない"
+
+        # usecase は port 経由でのみ外側と通信する
+        usecase-no-outer:
+          list-mode: lax
+          files:
+            - "**/internal/usecase/**"
+          deny:
+            - pkg: "github.com/akiyama/inselfy/backend/internal/adapter"
+              desc: "usecase は adapter を直接参照しない（Repository/QueryService port 経由）"
+            - pkg: "github.com/akiyama/inselfy/backend/internal/driver"
+              desc: "usecase は driver に依存しない"
+            - pkg: "github.com/jackc/pgx"
+              desc: "usecase は DB ドライバに依存しない（gateway に閉じ込める）"
+
         controller-no-pgx:
-          # lax: deny に一致しない import はすべて許可（境界チェックだけを行う）
           list-mode: lax
           files:
             - "**/internal/adapter/http/controller/**"
@@ -19,3 +100,32 @@ linters:
           deny:
             - pkg: "github.com/jackc/pgx"
               desc: "controller は InputPort 経由。pool 直結は admin_*_controller.go のみ許可"
+            - pkg: "github.com/akiyama/inselfy/backend/internal/adapter/gateway"
+              desc: "controller は gateway を直接参照しない。直結は admin_*_controller.go のみ許可"
+    exhaustive:
+      # default 節があれば網羅していなくてもよい
+      default-signifies-exhaustive: true
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    misspell:
+      locale: US
+      ignore-rules:
+        # "cancelled"（英式）は面接ステータスの正式な API/DB 値
+        - cancelled
+  exclusions:
+    rules:
+      # テストヘルパーは「常に同じ引数」でも汎用シグネチャを許容する
+      - path: _test\.go
+        linters:
+          - unparam
+
+issues:
+  # 同一問題の表示打ち切りをなくし、全件を一度に表示する
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+formatters:
+  enable:
+    - gofumpt    # gofmt の厳格版
+    - goimports  # import の整列

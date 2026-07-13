@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -86,7 +85,7 @@ func (ctrl *InterviewController) Propose(c echo.Context) error {
 					"proposal_id": cpID,
 				},
 			})
-			ctrl.ws.Send(fmt.Sprintf("candidate:%s", out.Proposal.CandidateID), payload)
+			ctrl.ws.Send("candidate:"+out.Proposal.CandidateID, payload)
 		}
 	}
 
@@ -204,4 +203,3 @@ func (ctrl *InterviewController) GetProposalSlots(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, presenter.ProposalSlotsResponse(proposal, slots))
 }
-

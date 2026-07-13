@@ -50,7 +50,7 @@ func GaussianWVSimilarity(userScores, targetScores map[string]float64) float64 {
 func GaussianCISimilarity(userScores, targetScores [6]float64) float64 {
 	var logSum float64
 	count := 0
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		if userScores[i] == 0 && targetScores[i] == 0 {
 			continue
 		}

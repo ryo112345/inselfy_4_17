@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -30,7 +31,7 @@ func (r *WorkValuesScoreRepository) Save(ctx context.Context, sessionID string, 
 			`INSERT INTO work_values_scores (session_id, value_id, mu, display_score, rank)
 			 VALUES ($1, $2, $3, $4, $5)
 			 ON CONFLICT (session_id, value_id) DO UPDATE SET mu = $3, display_score = $4, rank = $5`,
-			sid, s.ValueID, float32(s.Mu), float32(s.DisplayScore), int16(s.Rank),
+			sid, s.ValueID, float32(s.Mu), float32(s.DisplayScore), cast.Int16(s.Rank),
 		)
 		if err != nil {
 			return err

@@ -69,7 +69,7 @@ func (c *AuthController) Logout(ctx echo.Context) error {
 
 func setAuthCookies(ctx echo.Context, resp *presenter.AuthTokenResponse) {
 	secure := ctx.Scheme() == "https"
-	ctx.SetCookie(&http.Cookie{
+	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定（ローカルは http）
 		Name:     "inselfy_token",
 		Value:    resp.AccessToken,
 		Path:     "/",
@@ -78,7 +78,7 @@ func setAuthCookies(ctx echo.Context, resp *presenter.AuthTokenResponse) {
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   86400,
 	})
-	ctx.SetCookie(&http.Cookie{
+	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定（ローカルは http）
 		Name:     "refresh_token",
 		Value:    resp.RefreshToken,
 		Path:     "/api/auth",
@@ -93,7 +93,7 @@ func setAuthCookies(ctx echo.Context, resp *presenter.AuthTokenResponse) {
 func setUserInfoCookies(ctx echo.Context, user *openapi.ModelsAuthUserResponse, secure bool) {
 	maxAge := 604800
 	setCookie := func(name, value string) {
-		ctx.SetCookie(&http.Cookie{
+		ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的・JS 参照用 cookie は HttpOnly なし
 			Name:     name,
 			Value:    url.QueryEscape(value),
 			Path:     "/",
@@ -112,7 +112,7 @@ func clearAuthCookies(ctx echo.Context) {
 	expired := time.Unix(0, 0)
 	// displayName は発行を廃止済み。既存ブラウザに残る cookie の掃除のため clear 対象には残す。
 	for _, name := range []string{"inselfy_token", "userId", "username", "displayName"} {
-		ctx.SetCookie(&http.Cookie{
+		ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的・JS 参照用 cookie は HttpOnly なし
 			Name:     name,
 			Value:    "",
 			Path:     "/",
@@ -123,7 +123,7 @@ func clearAuthCookies(ctx echo.Context) {
 			Expires:  expired,
 		})
 	}
-	ctx.SetCookie(&http.Cookie{
+	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定（ローカルは http）
 		Name:     "refresh_token",
 		Value:    "",
 		Path:     "/api/auth",

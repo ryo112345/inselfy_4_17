@@ -170,22 +170,22 @@ func Validate(j *JobPosting) error {
 	return validateSalaryRange(j.SalaryMin, j.SalaryMax)
 }
 
-func validateSalaryRange(min, max *int32) error {
-	if min != nil && (*min < 0 || *min > MaxSalary) {
+func validateSalaryRange(minSalary, maxSalary *int32) error {
+	if minSalary != nil && (*minSalary < 0 || *minSalary > MaxSalary) {
 		return domainerr.NewValidation("salaryMin は 0〜%d（万円）の範囲で指定してください", MaxSalary)
 	}
-	if max != nil && (*max < 0 || *max > MaxSalary) {
+	if maxSalary != nil && (*maxSalary < 0 || *maxSalary > MaxSalary) {
 		return domainerr.NewValidation("salaryMax は 0〜%d（万円）の範囲で指定してください", MaxSalary)
 	}
-	if min != nil && max != nil && *min > *max {
+	if minSalary != nil && maxSalary != nil && *minSalary > *maxSalary {
 		return domainerr.NewValidation("salaryMin は salaryMax 以下にしてください")
 	}
 	return nil
 }
 
-func maxRunes(name, value string, max int) error {
-	if len([]rune(value)) > max {
-		return domainerr.NewValidation("%s は %d 文字以下にしてください", name, max)
+func maxRunes(name, value string, limit int) error {
+	if len([]rune(value)) > limit {
+		return domainerr.NewValidation("%s は %d 文字以下にしてください", name, limit)
 	}
 	return nil
 }

@@ -49,13 +49,13 @@ func TestEstimateBT_AllWinMax(t *testing.T) {
 
 func TestEstimateBT_TransitiveOrder(t *testing.T) {
 	var wins [N][N]int
-	for i := 0; i < N; i++ {
+	for i := range N {
 		for j := i + 1; j < N; j++ {
 			wins[i][j] = 1
 		}
 	}
 	result := EstimateBT(wins)
-	for i := 0; i < N-1; i++ {
+	for i := range N - 1 {
 		if result.Mu[i] <= result.Mu[i+1] {
 			t.Errorf("mu[%d] = %f <= mu[%d] = %f", i, result.Mu[i], i+1, result.Mu[i+1])
 		}
@@ -66,7 +66,7 @@ func TestEstimateBT_MatchesTS(t *testing.T) {
 	// Verify Go and TS implementations produce consistent results
 	// by checking a known transitive order case.
 	var wins [N][N]int
-	for i := 0; i < N; i++ {
+	for i := range N {
 		for j := i + 1; j < N; j++ {
 			wins[i][j] = 1
 		}

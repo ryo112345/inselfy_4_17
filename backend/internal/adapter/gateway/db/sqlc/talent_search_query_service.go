@@ -79,7 +79,8 @@ func talentFilterConditions(f talentsearch.Filter, startIdx int) (string, []any,
 
 func scanTalentCard(rows interface {
 	Scan(dest ...any) error
-}) (talentsearch.Card, error) {
+},
+) (talentsearch.Card, error) {
 	var uid pgtype.UUID
 	var username, name string
 	var headline, avatarURL, profileColor, seekingStatus pgtype.Text

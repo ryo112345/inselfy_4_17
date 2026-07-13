@@ -9,6 +9,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -36,7 +37,7 @@ func (r *ArticlePurchaseRepository) Create(ctx context.Context, p *article.Purch
 		ArticleID:       articleID,
 		BuyerUserID:     buyerID,
 		StripeSessionID: p.StripeSessionID,
-		AmountYen:       int32(p.AmountYen),
+		AmountYen:       cast.Int32(p.AmountYen),
 	})
 	if err != nil {
 		return nil, err
@@ -48,11 +49,11 @@ func (r *ArticlePurchaseRepository) HasPurchased(ctx context.Context, articleID,
 	q := queriesForContext(ctx, r.queries)
 	aID, err := parseUUID(articleID)
 	if err != nil {
-		return false, nil
+		return false, nil //nolint:nilerr // 不正な ID は「未購入」として扱う仕様
 	}
 	bID, err := parseUUID(buyerUserID)
 	if err != nil {
-		return false, nil
+		return false, nil //nolint:nilerr // 不正な ID は「未購入」として扱う仕様
 	}
 	return q.HasPurchasedArticle(ctx, &generated.HasPurchasedArticleParams{
 		ArticleID:   aID,

@@ -3,6 +3,7 @@ package presenter
 import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/search"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // SearchAllResponse builds the blended cross-content search response.
@@ -27,7 +28,7 @@ func SearchUserListResponse(p search.Page[search.UserHit]) *openapi.ModelsSearch
 			ProfileColor: u.ProfileColor,
 		}
 	}
-	return &openapi.ModelsSearchUserListResponse{Items: items, Total: int32(p.Total)}
+	return &openapi.ModelsSearchUserListResponse{Items: items, Total: cast.Int32(p.Total)}
 }
 
 func SearchArticleListResponse(p search.Page[search.ArticleHit]) *openapi.ModelsSearchArticleListResponse {
@@ -43,7 +44,7 @@ func SearchArticleListResponse(p search.Page[search.ArticleHit]) *openapi.Models
 			PublishedAt: a.PublishedAt,
 		}
 	}
-	return &openapi.ModelsSearchArticleListResponse{Items: items, Total: int32(p.Total)}
+	return &openapi.ModelsSearchArticleListResponse{Items: items, Total: cast.Int32(p.Total)}
 }
 
 func SearchPostListResponse(p search.Page[search.PostHit]) *openapi.ModelsSearchPostListResponse {
@@ -58,7 +59,7 @@ func SearchPostListResponse(p search.Page[search.PostHit]) *openapi.ModelsSearch
 			CreatedAt: po.CreatedAt,
 		}
 	}
-	return &openapi.ModelsSearchPostListResponse{Items: items, Total: int32(p.Total)}
+	return &openapi.ModelsSearchPostListResponse{Items: items, Total: cast.Int32(p.Total)}
 }
 
 func SearchJobListResponse(p search.Page[search.JobHit]) *openapi.ModelsSearchJobListResponse {
@@ -74,5 +75,5 @@ func SearchJobListResponse(p search.Page[search.JobHit]) *openapi.ModelsSearchJo
 			CreatedAt:      j.CreatedAt,
 		}
 	}
-	return &openapi.ModelsSearchJobListResponse{Items: items, Total: int32(p.Total)}
+	return &openapi.ModelsSearchJobListResponse{Items: items, Total: cast.Int32(p.Total)}
 }

@@ -20,6 +20,7 @@ func (s *teamMemberRepoStub) MarkWVCompleted(_ context.Context, _ string) error 
 	s.wvCalls++
 	return s.wvErr
 }
+
 func (s *teamMemberRepoStub) MarkCICompleted(_ context.Context, _ string) error {
 	s.ciCalls++
 	return s.ciErr

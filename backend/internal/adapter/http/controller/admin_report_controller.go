@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -84,7 +85,7 @@ func (c *AdminReportController) SaveReport(ctx echo.Context, sessionID string) e
 
 	session, err := c.queries.GetWVSessionByID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "session not found")
 		}
 		return internalError(ctx, err.Error())
@@ -116,7 +117,7 @@ func (c *AdminReportController) GetSessionScores(ctx echo.Context, sessionID str
 	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
 	row, err := c.queries.GetWVNeedsScoresBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "scores not found")
 		}
 		return internalError(ctx, err.Error())
@@ -153,7 +154,7 @@ func (c *AdminReportController) GetReport(ctx echo.Context, sessionID string) er
 	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
 	report, err := c.queries.GetAIReportBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "report not found")
 		}
 		return internalError(ctx, err.Error())

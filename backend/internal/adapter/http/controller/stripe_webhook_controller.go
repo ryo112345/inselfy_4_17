@@ -52,6 +52,8 @@ func (c *StripeWebhookController) HandleWebhook(ctx echo.Context) error {
 		if err := c.purchaseRepo.CompleteBySessionID(ctx.Request().Context(), session.ID, paymentIntentID); err != nil {
 			return internalError(ctx, "failed to complete purchase")
 		}
+	default:
+		// 購読していないイベントは 200 を返して無視する
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{"status": "ok"})

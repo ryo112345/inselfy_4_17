@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -78,10 +79,14 @@ func (i *CompanyAuthInteractor) Login(ctx context.Context, email, password strin
 	}
 
 	switch account.Status {
+	case company.StatusApproved:
+		// 承認済みのみログイン可
 	case company.StatusPending:
 		return nil, nil, company.ErrAccountPending
 	case company.StatusRejected:
 		return nil, nil, company.ErrAccountRejected
+	default:
+		return nil, nil, fmt.Errorf("unexpected account status: %s", account.Status)
 	}
 
 	return i.issueTokenPair(ctx, account)

@@ -30,9 +30,11 @@ func (s *companyTeamRepoStub) CreateTeam(ctx context.Context, companyID, name st
 	}
 	return &company.Team{ID: "team-1", CompanyID: companyID, Name: name, Description: description}, nil
 }
+
 func (s *companyTeamRepoStub) GetTeam(_ context.Context, teamID, companyID string) (*company.Team, error) {
 	return &company.Team{ID: teamID, CompanyID: companyID}, nil
 }
+
 func (s *companyTeamRepoStub) UpdateTeam(_ context.Context, _, _, _ string, _ *string, _ *bool) error {
 	return nil
 }
@@ -43,51 +45,60 @@ func (s *companyTeamRepoStub) GetTeamOwner(ctx context.Context, teamID string) (
 	}
 	return "company-1", nil
 }
+
 func (s *companyTeamRepoStub) ListMembers(_ context.Context, _ string) ([]company.TeamMember, error) {
 	return nil, nil
 }
+
 func (s *companyTeamRepoStub) CountMembers(ctx context.Context, teamID string) (int, error) {
 	if s.countMembersFn != nil {
 		return s.countMembersFn(ctx, teamID)
 	}
 	return 0, nil
 }
+
 func (s *companyTeamRepoStub) CreateMemberUser(ctx context.Context, username, name string) (string, error) {
 	if s.createMemberUserFn != nil {
 		return s.createMemberUserFn(ctx, username, name)
 	}
 	return "user-1", nil
 }
+
 func (s *companyTeamRepoStub) AddMember(ctx context.Context, teamID, userID, name string, email *string, inviteToken string) (*company.TeamMember, error) {
 	if s.addMemberFn != nil {
 		return s.addMemberFn(ctx, teamID, userID, name, email, inviteToken)
 	}
 	return &company.TeamMember{ID: "member-1", Name: name, Email: email, InviteToken: inviteToken}, nil
 }
+
 func (s *companyTeamRepoStub) GetMemberUserID(ctx context.Context, teamID, memberID string) (string, error) {
 	if s.getMemberUserIDFn != nil {
 		return s.getMemberUserIDFn(ctx, teamID, memberID)
 	}
 	return "user-1", nil
 }
+
 func (s *companyTeamRepoStub) DeleteMember(ctx context.Context, teamID, memberID string) error {
 	if s.deleteMemberFn != nil {
 		return s.deleteMemberFn(ctx, teamID, memberID)
 	}
 	return nil
 }
+
 func (s *companyTeamRepoStub) DeleteMemberUser(ctx context.Context, userID string) error {
 	if s.deleteMemberUserFn != nil {
 		return s.deleteMemberUserFn(ctx, userID)
 	}
 	return nil
 }
+
 func (s *companyTeamRepoStub) UnsetAce(ctx context.Context, teamID string) error {
 	if s.unsetAceFn != nil {
 		return s.unsetAceFn(ctx, teamID)
 	}
 	return nil
 }
+
 func (s *companyTeamRepoStub) SetAce(ctx context.Context, teamID, memberID string) error {
 	if s.setAceFn != nil {
 		return s.setAceFn(ctx, teamID, memberID)
@@ -106,30 +117,35 @@ type companyTeamQueryStub struct {
 func (s *companyTeamQueryStub) ListTeamSummaries(_ context.Context, _ string) ([]company.TeamSummary, error) {
 	return nil, nil
 }
+
 func (s *companyTeamQueryStub) ListPublicTeams(ctx context.Context, companyID string) ([]company.PublicTeamInfo, error) {
 	if s.listPublicTeamsFn != nil {
 		return s.listPublicTeamsFn(ctx, companyID)
 	}
 	return nil, nil
 }
+
 func (s *companyTeamQueryStub) ListMemberStates(ctx context.Context, teamID string) ([]company.TeamMemberState, error) {
 	if s.listMemberStatesFn != nil {
 		return s.listMemberStatesFn(ctx, teamID)
 	}
 	return nil, nil
 }
+
 func (s *companyTeamQueryStub) ListUserWVScores(ctx context.Context, userID string) ([]company.ScoreRow, error) {
 	if s.listUserWVScoresFn != nil {
 		return s.listUserWVScoresFn(ctx, userID)
 	}
 	return nil, nil
 }
+
 func (s *companyTeamQueryStub) ListUserCIScores(ctx context.Context, userID string) ([]company.ScoreRow, error) {
 	if s.listUserCIScoresFn != nil {
 		return s.listUserCIScoresFn(ctx, userID)
 	}
 	return nil, nil
 }
+
 func (s *companyTeamQueryStub) GetLatestWNMu(ctx context.Context, userID string) (map[string]float64, error) {
 	if s.getLatestWNMuFn != nil {
 		return s.getLatestWNMuFn(ctx, userID)

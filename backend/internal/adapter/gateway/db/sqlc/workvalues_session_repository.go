@@ -35,7 +35,7 @@ func (r *WorkValuesSessionRepository) Create(ctx context.Context, s *workvalues.
 		return nil, domainerr.ErrBadRequest
 	}
 
-	conn := r.connForContext(ctx)
+	conn := r.pool
 	var id, status string
 	var createdAt time.Time
 	err = conn.QueryRow(ctx,
@@ -63,7 +63,7 @@ func (r *WorkValuesSessionRepository) GetByID(ctx context.Context, id string) (*
 		return nil, domainerr.ErrBadRequest
 	}
 
-	conn := r.connForContext(ctx)
+	conn := r.pool
 	var s workvalues.Session
 	var pairsJSON []byte
 	var completedAt *time.Time
@@ -92,7 +92,7 @@ func (r *WorkValuesSessionRepository) UpdateStatus(ctx context.Context, id, stat
 		return domainerr.ErrBadRequest
 	}
 
-	conn := r.connForContext(ctx)
+	conn := r.pool
 	var query string
 	if status == workvalues.StatusCompleted {
 		query = `UPDATE work_values_sessions SET status = $2, completed_at = NOW() WHERE id = $1`
@@ -117,20 +117,11 @@ func (r *WorkValuesSessionRepository) RequestReport(ctx context.Context, id stri
 		return domainerr.ErrBadRequest
 	}
 
-	conn := r.connForContext(ctx)
+	conn := r.pool
 	_, err = conn.Exec(ctx,
 		`UPDATE work_values_sessions SET report_requested_at = NOW()
 		 WHERE id = $1 AND report_requested_at IS NULL`,
 		uuid,
 	)
 	return err
-}
-
-type dbConn interface {
-	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
-	Exec(ctx context.Context, sql string, args ...any) (interface{ RowsAffected() int64 }, error)
-}
-
-func (r *WorkValuesSessionRepository) connForContext(ctx context.Context) *pgxpool.Pool {
-	return r.pool
 }

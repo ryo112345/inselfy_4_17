@@ -3,17 +3,18 @@ package presenter
 import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // SimilarUsersResponse builds the similar-users API response.
 func SimilarUsersResponse(users []workvalues.SimilarUser) *openapi.ModelsSimilarUsersResponse {
-	var items []openapi.ModelsSimilarUserItem
+	items := make([]openapi.ModelsSimilarUserItem, 0, len(users))
 	for _, u := range users {
 		items = append(items, toSimilarUserItem(u))
 	}
 	return &openapi.ModelsSimilarUsersResponse{
 		Items: &items,
-		Total: int32(len(items)),
+		Total: cast.Int32(len(items)),
 	}
 }
 

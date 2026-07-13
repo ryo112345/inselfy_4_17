@@ -16,14 +16,14 @@ type BTResult struct {
 func EstimateBT(wins [N][N]int) BTResult {
 	mu := make([]float64, N)
 
-	for iter := 0; iter < maxIter; iter++ {
+	for range maxIter {
 		grad := make([]float64, N)
 		H := make([][]float64, N)
 		for i := range H {
 			H[i] = make([]float64, N)
 		}
 
-		for i := 0; i < N; i++ {
+		for i := range N {
 			for j := i + 1; j < N; j++ {
 				nij := wins[i][j] + wins[j][i]
 				if nij == 0 {
@@ -50,7 +50,7 @@ func EstimateBT(wins [N][N]int) BTResult {
 		}
 
 		maxDelta := 0.0
-		for i := 0; i < N; i++ {
+		for i := range N {
 			mu[i] -= delta[i]
 			if d := math.Abs(delta[i]); d > maxDelta {
 				maxDelta = d
@@ -81,7 +81,7 @@ func computeSE(mu []float64, wins [N][N]int) []float64 {
 		H[i] = make([]float64, N)
 	}
 
-	for i := 0; i < N; i++ {
+	for i := range N {
 		for j := i + 1; j < N; j++ {
 			nij := wins[i][j] + wins[j][i]
 			if nij == 0 {
@@ -107,7 +107,7 @@ func computeSE(mu []float64, wins [N][N]int) []float64 {
 	}
 
 	se := make([]float64, N)
-	for i := 0; i < N; i++ {
+	for i := range N {
 		v := inv[i][i]
 		if v < 0 {
 			v = 0
@@ -121,19 +121,19 @@ func sigmoid(x float64) float64 {
 	return 1.0 / (1.0 + math.Exp(-x))
 }
 
-func solveLinear(H [][]float64, b []float64) []float64 {
-	n := len(H)
+func solveLinear(hess [][]float64, b []float64) []float64 {
+	n := len(hess)
 	A := make([][]float64, n)
 	for i := range A {
 		row := make([]float64, n+1)
-		for j := 0; j < n; j++ {
-			row[j] = -H[i][j]
+		for j := range n {
+			row[j] = -hess[i][j]
 		}
 		row[n] = -b[i]
 		A[i] = row
 	}
 
-	for col := 0; col < n; col++ {
+	for col := range n {
 		pivotRow := col
 		pivotVal := math.Abs(A[col][col])
 		for row := col + 1; row < n; row++ {
@@ -152,7 +152,7 @@ func solveLinear(H [][]float64, b []float64) []float64 {
 		for j := col; j <= n; j++ {
 			A[col][j] /= pivot
 		}
-		for row := 0; row < n; row++ {
+		for row := range n {
 			if row == col {
 				continue
 			}
@@ -170,17 +170,17 @@ func solveLinear(H [][]float64, b []float64) []float64 {
 	return result
 }
 
-func invertMatrix(M [][]float64) [][]float64 {
-	n := len(M)
+func invertMatrix(mat [][]float64) [][]float64 {
+	n := len(mat)
 	aug := make([][]float64, n)
 	for i := range aug {
 		row := make([]float64, 2*n)
-		copy(row, M[i])
+		copy(row, mat[i])
 		row[n+i] = 1
 		aug[i] = row
 	}
 
-	for col := 0; col < n; col++ {
+	for col := range n {
 		pivotRow := col
 		pivotVal := math.Abs(aug[col][col])
 		for row := col + 1; row < n; row++ {
@@ -196,15 +196,15 @@ func invertMatrix(M [][]float64) [][]float64 {
 			aug[col], aug[pivotRow] = aug[pivotRow], aug[col]
 		}
 		pivot := aug[col][col]
-		for j := 0; j < 2*n; j++ {
+		for j := range 2 * n {
 			aug[col][j] /= pivot
 		}
-		for row := 0; row < n; row++ {
+		for row := range n {
 			if row == col {
 				continue
 			}
 			factor := aug[row][col]
-			for j := 0; j < 2*n; j++ {
+			for j := range 2 * n {
 				aug[row][j] -= factor * aug[col][j]
 			}
 		}

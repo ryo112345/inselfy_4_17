@@ -6,6 +6,7 @@ import (
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 var scoutConv scoutConverter = &scoutConverterImpl{}
@@ -17,7 +18,7 @@ func ScoutMessageResponse(m *scout.ScoutMessageWithNames) any {
 
 // ScoutUnreadCountResponse builds the unread-count API response.
 func ScoutUnreadCountResponse(count int) any {
-	return &openapi.ModelsUnreadCountResponse{Count: int32(count)}
+	return &openapi.ModelsUnreadCountResponse{Count: cast.Int32(count)}
 }
 
 // ScoutMessagesResponse builds the paginated scout-message list API response.
@@ -26,7 +27,7 @@ func ScoutMessagesResponse(msgs []*scout.ScoutMessageWithNames, total int) any {
 	for i, m := range msgs {
 		items[i] = *scoutConv.ToScoutMessageResponse(m)
 	}
-	return &openapi.ModelsScoutListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsScoutListResponse{Items: items, Total: cast.Int32(total)}
 }
 
 // ScoutDetailResponse builds the scout-detail API response.

@@ -23,6 +23,7 @@ func (s *companyProfileRepoStub) RemoveGalleryURL(context.Context, string, strin
 func (s *companyProfileRepoStub) SetImageURL(context.Context, string, company.ImageKind, string) error {
 	return nil
 }
+
 func (s *companyProfileRepoStub) ClearImageURL(context.Context, string, company.ImageKind) error {
 	return nil
 }

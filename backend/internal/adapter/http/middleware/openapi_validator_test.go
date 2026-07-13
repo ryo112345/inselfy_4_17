@@ -25,8 +25,9 @@ func newValidatedEcho(t *testing.T) *echo.Echo {
 	return e
 }
 
-func postJSON(e *echo.Echo, path, body string) *httptest.ResponseRecorder {
-	req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
+func postJSON(t *testing.T, e *echo.Echo, path, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, path, strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	e.ServeHTTP(rec, req)
@@ -35,7 +36,7 @@ func postJSON(e *echo.Echo, path, body string) *httptest.ResponseRecorder {
 
 func TestOpenAPIRequestValidator_ValidBodyPasses(t *testing.T) {
 	e := newValidatedEcho(t)
-	rec := postJSON(e, "/api/posts", `{"content":"hello"}`)
+	rec := postJSON(t, e, "/api/posts", `{"content":"hello"}`)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
 	}
@@ -44,7 +45,7 @@ func TestOpenAPIRequestValidator_ValidBodyPasses(t *testing.T) {
 func TestOpenAPIRequestValidator_MaxLengthViolationRejected(t *testing.T) {
 	e := newValidatedEcho(t)
 	long := strings.Repeat("a", 281)
-	rec := postJSON(e, "/api/posts", `{"content":"`+long+`"}`)
+	rec := postJSON(t, e, "/api/posts", `{"content":"`+long+`"}`)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())
 	}
@@ -55,7 +56,7 @@ func TestOpenAPIRequestValidator_MaxLengthViolationRejected(t *testing.T) {
 
 func TestOpenAPIRequestValidator_MissingRequiredFieldRejected(t *testing.T) {
 	e := newValidatedEcho(t)
-	rec := postJSON(e, "/api/posts", `{}`)
+	rec := postJSON(t, e, "/api/posts", `{}`)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())
 	}
@@ -63,7 +64,7 @@ func TestOpenAPIRequestValidator_MissingRequiredFieldRejected(t *testing.T) {
 
 func TestOpenAPIRequestValidator_UnknownPathPassesThrough(t *testing.T) {
 	e := newValidatedEcho(t)
-	rec := postJSON(e, "/api/not-in-spec", `{"whatever": true}`)
+	rec := postJSON(t, e, "/api/not-in-spec", `{"whatever": true}`)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 for path outside spec, got %d: %s", rec.Code, rec.Body.String())
 	}

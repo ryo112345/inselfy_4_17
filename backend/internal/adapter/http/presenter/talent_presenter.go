@@ -3,6 +3,7 @@ package presenter
 import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // TalentCardResponse converts the talent-search read model into the shared
@@ -13,20 +14,20 @@ func TalentCardResponse(c talentsearch.Card) openapi.ModelsTalentCard {
 		exps[i] = openapi.ModelsTalentExperience{CompanyName: e.CompanyName, Title: e.Title}
 	}
 	return openapi.ModelsTalentCard{
-		UserId:              c.UserID,
-		Username:            c.Username,
-		Name:                c.Name,
-		Headline:            c.Headline,
-		AvatarUrl:           c.AvatarURL,
-		ProfileColor:        c.ProfileColor,
-		JobSeekingStatus:    c.JobSeekingStatus,
-		Skills:              c.Skills,
-		Experiences:         exps,
-		TopWvLabels:         c.TopWVLabels,
-		TopCiLabels:         c.TopCILabels,
-		Similarity:          c.Similarity,
-		WvSimilarity:        c.WVSimilarity,
-		CiSimilarity:        c.CISimilarity,
+		UserId:               c.UserID,
+		Username:             c.Username,
+		Name:                 c.Name,
+		Headline:             c.Headline,
+		AvatarUrl:            c.AvatarURL,
+		ProfileColor:         c.ProfileColor,
+		JobSeekingStatus:     c.JobSeekingStatus,
+		Skills:               c.Skills,
+		Experiences:          exps,
+		TopWvLabels:          c.TopWVLabels,
+		TopCiLabels:          c.TopCILabels,
+		Similarity:           c.Similarity,
+		WvSimilarity:         c.WVSimilarity,
+		CiSimilarity:         c.CISimilarity,
 		IntegratedSimilarity: c.IntSimilarity,
 	}
 }
@@ -37,5 +38,5 @@ func TalentListResponse(cards []talentsearch.Card, total int) *openapi.ModelsTal
 	for i, c := range cards {
 		users[i] = TalentCardResponse(c)
 	}
-	return &openapi.ModelsTalentListResponse{Items: users, Total: int32(total)}
+	return &openapi.ModelsTalentListResponse{Items: users, Total: cast.Int32(total)}
 }

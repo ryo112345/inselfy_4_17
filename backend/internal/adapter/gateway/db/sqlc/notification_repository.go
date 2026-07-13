@@ -8,6 +8,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/notification"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -45,8 +46,8 @@ func (r *NotificationRepository) ListByUserID(ctx context.Context, userID string
 	}
 	rows, err := q.ListNotificationsByUserID(ctx, &generated.ListNotificationsByUserIDParams{
 		UserID: pgUserID,
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		Limit:  cast.Int32(limit),
+		Offset: cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -70,8 +71,8 @@ func (r *NotificationRepository) ListByCompanyID(ctx context.Context, companyID 
 	}
 	rows, err := q.ListNotificationsByCompanyID(ctx, &generated.ListNotificationsByCompanyIDParams{
 		CompanyID: pgCompanyID,
-		Limit:     int32(limit),
-		Offset:    int32(offset),
+		Limit:     cast.Int32(limit),
+		Offset:    cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err

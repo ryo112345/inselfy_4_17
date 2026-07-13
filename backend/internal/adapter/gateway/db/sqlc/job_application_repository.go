@@ -12,6 +12,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -134,8 +135,8 @@ func (r *JobApplicationRepository) ListByCompanyID(ctx context.Context, companyI
 
 	rows, err := q.ListJobApplicationsByCompanyID(ctx, &generated.ListJobApplicationsByCompanyIDParams{
 		CompanyID:    pgCompanyID,
-		Limit:        int32(limit),
-		Offset:       int32(filter.Offset),
+		Limit:        cast.Int32(limit),
+		Offset:       cast.Int32(filter.Offset),
 		Status:       statusFilter,
 		JobPostingID: jobPostingFilter,
 		Keyword:      keywordFilter,

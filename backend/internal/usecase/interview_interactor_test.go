@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/interview"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -414,7 +415,8 @@ func TestInterviewInteractor_SelectSlot_MissingConversationStillSucceeds(t *test
 
 	proposalRepo, slotRepo, ivRepo, convRepo := selectSlotFixture(proposal, slot)
 	convRepo.getByCompanyAndCandidateFn = func(_ context.Context, _, _ string) (*messaging.Conversation, error) {
-		return nil, errors.New("no rows")
+		// 実リポジトリの契約に合わせる（会話なし = domainerr.ErrNotFound）
+		return nil, domainerr.ErrNotFound
 	}
 	msgRepo := &messageRepoStub{
 		createFn: func(_ context.Context, _ *messaging.Message) (*messaging.Message, error) {

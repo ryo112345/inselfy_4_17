@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerateInitialPairs(t *testing.T) {
-	rng := rand.New(rand.NewPCG(42, 0))
+	rng := rand.New(rand.NewPCG(42, 0)) //nolint:gosec // G404: テスト用の固定シード
 	pairs := GenerateInitialPairs(rng)
 
 	if len(pairs) != N {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"math"
 
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
@@ -117,7 +116,7 @@ func (i *CompanyTeamInteractor) AddMember(ctx context.Context, companyID, teamID
 
 	// Each member gets a backing users record so diagnosis sessions can
 	// reference a user id; the tm_ prefix marks it for cleanup on removal.
-	username := fmt.Sprintf("tm_%s", randomHexString(12))
+	username := "tm_" + randomHexString(12)
 	userID, err := i.repo.CreateMemberUser(ctx, username, name)
 	if err != nil {
 		return nil, err

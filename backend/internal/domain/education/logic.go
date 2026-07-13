@@ -43,7 +43,7 @@ func validateCore(school string, degree *string, startYear, endYear *int16) erro
 	if degree != nil && runeLen(*degree) > MaxDegreeLength {
 		return ErrDegreeTooLong
 	}
-	maxYear := int16(time.Now().Year() + 1)
+	maxYear := int16(time.Now().Year() + 1) //nolint:gosec // G115: 西暦+1 は int16 に収まる
 	if startYear != nil && (*startYear < MinYear || *startYear > maxYear) {
 		return ErrYearOutOfRange
 	}

@@ -3,6 +3,7 @@ package presenter
 import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobapplication"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 )
 
 // jobApplicationConv is the goverter-generated read-model→response mapper.
@@ -20,7 +21,7 @@ func JobApplicationsListResponse(apps []*jobapplication.JobApplicationWithDetail
 	for _, r := range jobApplicationConv.ToResponses(apps) {
 		items = append(items, *r)
 	}
-	return &openapi.ModelsJobApplicationListResponse{Items: items, Total: int32(total)}
+	return &openapi.ModelsJobApplicationListResponse{Items: items, Total: cast.Int32(total)}
 }
 
 // JobApplicationAppliedResponse builds the applied-check API response.

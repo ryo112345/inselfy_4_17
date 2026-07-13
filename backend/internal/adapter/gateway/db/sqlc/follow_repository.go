@@ -8,6 +8,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/follow"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -99,8 +100,8 @@ func (r *FollowRepository) ListFollowers(ctx context.Context, userID string, lim
 	}
 	rows, err := q.ListFollowers(ctx, &generated.ListFollowersParams{
 		FollowingID: pgID,
-		Limit:       int32(limit),
-		Offset:      int32(offset),
+		Limit:       cast.Int32(limit),
+		Offset:      cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -120,8 +121,8 @@ func (r *FollowRepository) ListFollowing(ctx context.Context, userID string, lim
 	}
 	rows, err := q.ListFollowing(ctx, &generated.ListFollowingParams{
 		FollowerID: pgID,
-		Limit:      int32(limit),
-		Offset:     int32(offset),
+		Limit:      cast.Int32(limit),
+		Offset:     cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err

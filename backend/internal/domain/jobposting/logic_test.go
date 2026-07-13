@@ -6,15 +6,15 @@ import (
 )
 
 func validPosting() *JobPosting {
-	min := int32(400)
-	max := int32(800)
+	salaryMin := int32(400)
+	salaryMax := int32(800)
 	return &JobPosting{
 		Title:          "バックエンドエンジニア",
 		Description:    "Go による API 開発",
 		EmploymentType: "正社員",
 		Status:         "open",
-		SalaryMin:      &min,
-		SalaryMax:      &max,
+		SalaryMin:      &salaryMin,
+		SalaryMax:      &salaryMax,
 		Tags:           []string{"Go", "PostgreSQL"},
 		TeamMembers:    []TeamMember{{Name: "田中"}},
 	}

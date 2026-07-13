@@ -13,6 +13,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -52,7 +53,7 @@ func (c *AdminUserController) List(ctx echo.Context) error {
 		perPage = 20
 	}
 	search := ctx.QueryParam("q")
-	offset := int32((page - 1) * perPage)
+	offset := cast.Int32((page - 1) * perPage)
 
 	var total int64
 	var err error
@@ -65,7 +66,7 @@ func (c *AdminUserController) List(ctx echo.Context) error {
 		}
 		rows, err := c.queries.SearchUsers(ctx.Request().Context(), &generated.SearchUsersParams{
 			Column1: searchText,
-			Limit:   int32(perPage),
+			Limit:   cast.Int32(perPage),
 			Offset:  offset,
 		})
 		if err != nil {
@@ -79,7 +80,7 @@ func (c *AdminUserController) List(ctx echo.Context) error {
 		return internalError(ctx, err.Error())
 	}
 	rows, err := c.queries.ListUsers(ctx.Request().Context(), &generated.ListUsersParams{
-		Limit:  int32(perPage),
+		Limit:  cast.Int32(perPage),
 		Offset: offset,
 	})
 	if err != nil {

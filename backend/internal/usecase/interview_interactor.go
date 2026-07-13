@@ -283,7 +283,10 @@ func (i *InterviewInteractor) SelectSlot(ctx context.Context, input interview.Se
 		// without failing the transaction.
 		conv, err := i.convRepo.GetByCompanyAndCandidate(txCtx, proposal.CompanyID, input.CandidateID)
 		if err != nil {
-			return nil
+			if isNotFound(err) {
+				return nil
+			}
+			return err
 		}
 		metadata := map[string]interface{}{
 			"interview_id": iv.ID,
@@ -406,7 +409,10 @@ func (i *InterviewInteractor) CancelInterview(ctx context.Context, interviewID, 
 		// Missing conversation skips the notification without failing.
 		conv, err := i.convRepo.GetByCompanyAndCandidate(txCtx, iv.CompanyID, iv.CandidateID)
 		if err != nil {
-			return nil
+			if isNotFound(err) {
+				return nil
+			}
+			return err
 		}
 
 		senderType := "company"

@@ -10,6 +10,7 @@ import (
 
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -57,7 +58,7 @@ func (r *WorkValuesResultRepository) Create(ctx context.Context, result *workval
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		 RETURNING id, created_at`,
 		sessionID, userID, responsesJSON, muJSON, seJSON,
-		cc, result.ConsistencyLevel, int16(result.QuestionCount),
+		cc, result.ConsistencyLevel, cast.Int16(result.QuestionCount),
 	).Scan(&result.ID, &result.CreatedAt)
 	if err != nil {
 		return nil, err

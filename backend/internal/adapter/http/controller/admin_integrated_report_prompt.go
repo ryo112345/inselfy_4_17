@@ -3,10 +3,12 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -42,7 +44,7 @@ func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, request
 
 	req, err := ctrl.queries.GetIntegratedReportRequestByID(reqCtx, pgReqID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "request not found")
 		}
 		return internalError(ctx, err.Error())
@@ -60,7 +62,7 @@ func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, request
 		if err != nil {
 			return internalError(ctx, fmt.Sprintf("failed to read topic %d: %s", topicNum, err.Error()))
 		}
-		chapterBlocks[i] = strings.ReplaceAll(string(content), "{{CHAPTER_NUM}}", fmt.Sprintf("%d", i+1))
+		chapterBlocks[i] = strings.ReplaceAll(string(content), "{{CHAPTER_NUM}}", strconv.Itoa(i+1))
 	}
 
 	freeTextBlock := fmt.Sprintf(`### 第4章: ユーザーからのリクエスト
@@ -193,7 +195,7 @@ func (ctrl *AdminIntegratedReportController) buildCIDiagnosis(ctx context.Contex
 
 	if len(typeScores) >= 3 {
 		hollandCode := typeScores[0].TypeID + typeScores[1].TypeID + typeScores[2].TypeID
-		sb.WriteString(fmt.Sprintf("ホランドコード: %s\n\n", hollandCode))
+		fmt.Fprintf(&sb, "ホランドコード: %s\n\n", hollandCode)
 	}
 
 	basicScoreMap := make(map[string]float32, len(basicScores))
@@ -227,9 +229,9 @@ func buildExperiencesMarkdown(experiences []*generated.Experience) string {
 		} else if exp.EndYear.Valid && exp.EndMonth.Valid {
 			period += fmt.Sprintf("〜%d年%d月", exp.EndYear.Int16, exp.EndMonth.Int16)
 		}
-		sb.WriteString(fmt.Sprintf("- **%s** / %s（%s）\n", exp.CompanyName, exp.Title, period))
+		fmt.Fprintf(&sb, "- **%s** / %s（%s）\n", exp.CompanyName, exp.Title, period)
 		if exp.Description != "" {
-			sb.WriteString(fmt.Sprintf("  業務内容: %s\n", exp.Description))
+			fmt.Fprintf(&sb, "  業務内容: %s\n", exp.Description)
 		}
 	}
 	return sb.String()
@@ -241,9 +243,9 @@ func buildEducationsMarkdown(educations []*generated.Education) string {
 	}
 	var sb strings.Builder
 	for _, edu := range educations {
-		line := fmt.Sprintf("- %s", edu.School)
+		line := "- " + edu.School
 		if edu.Degree.Valid && edu.Degree.String != "" {
-			line += fmt.Sprintf(" / %s", edu.Degree.String)
+			line += " / " + edu.Degree.String
 		}
 		sb.WriteString(line + "\n")
 	}
@@ -268,12 +270,12 @@ func readIntegratedBaseTemplate() ([]byte, error) {
 		"../../prompts/integrated-report-base.md",
 	}
 	for _, p := range candidates {
-		data, err := os.ReadFile(p)
+		data, err := os.ReadFile(p) //nolint:gosec // G304: 候補パスは固定リテラルのみ
 		if err == nil {
 			return data, nil
 		}
 	}
-	return nil, fmt.Errorf("integrated base template not found")
+	return nil, errors.New("integrated base template not found")
 }
 
 func readIntegratedTopicFile(topicNum int16) ([]byte, error) {
@@ -287,7 +289,7 @@ func readIntegratedTopicFile(topicNum int16) ([]byte, error) {
 		"../../prompts/integrated-report-topics/" + filename,
 	}
 	for _, p := range candidates {
-		data, err := os.ReadFile(p)
+		data, err := os.ReadFile(p) //nolint:gosec // G304: 候補パスは固定リテラルのみ
 		if err == nil {
 			return data, nil
 		}

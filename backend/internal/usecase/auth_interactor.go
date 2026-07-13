@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -52,7 +51,7 @@ func (a *AuthInteractor) GoogleLogin(ctx context.Context, idToken string) (*auth
 	}
 
 	if u == nil {
-		username := fmt.Sprintf("user_%s", uuid.New().String()[:8])
+		username := "user_" + uuid.New().String()[:8]
 		name := claims.Name
 		if name == "" {
 			name = "User"

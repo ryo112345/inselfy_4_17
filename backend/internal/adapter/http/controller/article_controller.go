@@ -216,16 +216,11 @@ func (c *ArticleController) UploadImage(ctx echo.Context) error {
 	if err != nil {
 		return internalError(ctx, "failed to read file")
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 	key := fmt.Sprintf("article-images/%s%s", uuid.New().String(), ext)
 	url, err := c.storage.Save(ctx.Request().Context(), key, src)
 	if err != nil {
 		return internalError(ctx, "failed to save file")
 	}
 	return ctx.JSON(http.StatusOK, openapi.ModelsUploadUrlResponse{Url: url})
-}
-
-var unauthorizedResponse = map[string]string{
-	"code":    "UNAUTHORIZED",
-	"message": "unauthorized",
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/jobposting"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -229,8 +230,8 @@ func (r *JobPostingRepository) SearchPublic(ctx context.Context, params jobposti
 		EmploymentType: filterParams.EmploymentType,
 		RemotePolicy:   filterParams.RemotePolicy,
 		SortBySalary:   params.SortBySalary,
-		LimitVal:       int32(params.Limit),
-		OffsetVal:      int32(params.Offset),
+		LimitVal:       cast.Int32(params.Limit),
+		OffsetVal:      cast.Int32(params.Offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -333,7 +334,7 @@ WHERE jp.status = 'open'
 }
 
 func (r *JobPostingRepository) buildValuesQualifyingCTE(filters []jobposting.ValueFilter, arg func(any) string) string {
-	var conditions []string
+	conditions := make([]string, 0, len(filters))
 	for _, f := range filters {
 		conditions = append(conditions, fmt.Sprintf("(value_id = %s AND avg_score >= %s)", arg(f.ID), arg(f.MinScore)))
 	}
@@ -369,7 +370,7 @@ qualifying_teams AS (
 }
 
 func (r *JobPostingRepository) buildNeedsQualifyingCTE(filters []jobposting.ValueFilter, arg func(any) string) string {
-	var conditions []string
+	conditions := make([]string, 0, len(filters))
 	for _, f := range filters {
 		conditions = append(conditions, fmt.Sprintf("(need_id = %s AND avg_score >= %s)", arg(f.ID), arg(f.MinScore)))
 	}
@@ -417,13 +418,13 @@ func buildTextFilters(params jobposting.SearchPublicParams, arg func(any) string
 			`AND (jp.title ILIKE %[1]s OR jp.description ILIKE %[1]s OR ca.company_name ILIKE %[1]s OR EXISTS(SELECT 1 FROM unnest(jp.tags) t WHERE t ILIKE %[1]s))`, p))
 	}
 	if params.JobCategory != nil {
-		clauses = append(clauses, fmt.Sprintf("AND jp.job_category = %s", arg(*params.JobCategory)))
+		clauses = append(clauses, "AND jp.job_category = "+arg(*params.JobCategory))
 	}
 	if params.EmploymentType != nil {
-		clauses = append(clauses, fmt.Sprintf("AND jp.employment_type = %s", arg(*params.EmploymentType)))
+		clauses = append(clauses, "AND jp.employment_type = "+arg(*params.EmploymentType))
 	}
 	if params.RemotePolicy != nil {
-		clauses = append(clauses, fmt.Sprintf("AND jp.remote_policy = %s", arg(*params.RemotePolicy)))
+		clauses = append(clauses, "AND jp.remote_policy = "+arg(*params.RemotePolicy))
 	}
 	return strings.Join(clauses, "\n  ")
 }

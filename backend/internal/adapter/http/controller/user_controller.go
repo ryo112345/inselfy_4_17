@@ -185,7 +185,7 @@ func (c *UserController) UploadImage(ctx echo.Context, username string) error {
 	if err != nil {
 		return internalError(ctx, "failed to open file")
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	key := fmt.Sprintf("user-images/%s_%s%s", uuid.New().String()[:8], imageType, ext)
 

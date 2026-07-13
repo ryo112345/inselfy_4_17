@@ -10,6 +10,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/scout"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -83,8 +84,8 @@ func (r *ScoutMessageRepository) ListByCompanyID(ctx context.Context, companyID 
 	rows, err := q.ListScoutMessagesByCompanyID(ctx, &generated.ListScoutMessagesByCompanyIDParams{
 		CompanyID: pgCompanyID,
 		Status:    statusFilter,
-		LimitVal:  int32(limit),
-		OffsetVal: int32(offset),
+		LimitVal:  cast.Int32(limit),
+		OffsetVal: cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -111,8 +112,8 @@ func (r *ScoutMessageRepository) ListByCandidateID(ctx context.Context, candidat
 	}
 	rows, err := q.ListScoutMessagesByCandidateID(ctx, &generated.ListScoutMessagesByCandidateIDParams{
 		CandidateID: pgCandidateID,
-		Limit:       int32(limit),
-		Offset:      int32(offset),
+		Limit:       cast.Int32(limit),
+		Offset:      cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -251,7 +252,7 @@ func (r *ScoutMessageRepository) CountSentLastNDays(ctx context.Context, company
 	}
 	count, err := q.CountScoutsSentLastNDays(ctx, &generated.CountScoutsSentLastNDaysParams{
 		CompanyID: pgCompanyID,
-		Days:      int32(days),
+		Days:      cast.Int32(days),
 	})
 	if err != nil {
 		return 0, err
@@ -267,7 +268,7 @@ func (r *ScoutMessageRepository) CountRepliedLastNDays(ctx context.Context, comp
 	}
 	count, err := q.CountScoutsRepliedLastNDays(ctx, &generated.CountScoutsRepliedLastNDaysParams{
 		CompanyID: pgCompanyID,
-		Days:      int32(days),
+		Days:      cast.Int32(days),
 	})
 	if err != nil {
 		return 0, err

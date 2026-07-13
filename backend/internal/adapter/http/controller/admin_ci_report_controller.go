@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -71,7 +72,7 @@ func (c *AdminCIReportController) SaveReport(ctx echo.Context, sessionID string)
 
 	session, err := c.queries.GetCISessionByID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "session not found")
 		}
 		return internalError(ctx, err.Error())
@@ -103,7 +104,7 @@ func (c *AdminCIReportController) GetReport(ctx echo.Context, sessionID string) 
 	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
 	report, err := c.queries.GetCIAIReportBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "report not found")
 		}
 		return internalError(ctx, err.Error())
@@ -189,7 +190,7 @@ func (c *AdminCIReportController) GetPrompt(ctx echo.Context, sessionID string) 
 
 	result, err := c.queries.GetCIResultBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "result not found")
 		}
 		return internalError(ctx, err.Error())

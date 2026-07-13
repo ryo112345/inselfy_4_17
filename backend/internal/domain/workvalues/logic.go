@@ -23,7 +23,7 @@ func GenerateInitialPairs(rng *rand.Rand) []Pair {
 	})
 
 	pairs := make([]Pair, N)
-	for i := 0; i < N; i++ {
+	for i := range N {
 		a := indices[i]
 		b := indices[(i+1)%N]
 		pairs[i] = Pair{NeedA: NeedIDs[a], NeedB: NeedIDs[b]}
@@ -159,7 +159,7 @@ func computeConsistency(wins [N][N]int, responses []Response) (*float64, *string
 	totalTriads := 0
 	circularTriads := 0
 
-	for i := 0; i < N; i++ {
+	for i := range N {
 		for j := i + 1; j < N; j++ {
 			for k := j + 1; k < N; k++ {
 				ij := pairKey(NeedIDs[i], NeedIDs[j])
@@ -173,8 +173,8 @@ func computeConsistency(wins [N][N]int, responses []Response) (*float64, *string
 				// Check for circular triad: each item wins exactly once
 				winsCount := [3]int{}
 				indices := [3]int{i, j, k}
-				for a := 0; a < 3; a++ {
-					for b := 0; b < 3; b++ {
+				for a := range 3 {
+					for b := range 3 {
 						if a == b {
 							continue
 						}

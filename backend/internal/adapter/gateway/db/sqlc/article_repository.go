@@ -11,6 +11,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -33,7 +34,7 @@ func (r *ArticleRepository) Create(ctx context.Context, a *article.Article) (*ar
 		Title:           a.Title,
 		Body:            a.Body,
 		IsPaid:          a.IsPaid,
-		PriceYen:        int32(a.PriceYen),
+		PriceYen:        cast.Int32(a.PriceYen),
 		CoverImageUrl:   pgText(a.CoverImageURL),
 		Tags:            nonNilTags(a.Tags),
 	})
@@ -66,8 +67,8 @@ func (r *ArticleRepository) GetByID(ctx context.Context, id string) (*article.Ar
 func (r *ArticleRepository) List(ctx context.Context, limit, offset int) ([]*article.ArticleWithAuthor, int, error) {
 	q := queriesForContext(ctx, r.queries)
 	rows, err := q.ListPublishedArticles(ctx, &generated.ListPublishedArticlesParams{
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		Limit:  cast.Int32(limit),
+		Offset: cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -97,8 +98,8 @@ func (r *ArticleRepository) ListByAuthor(ctx context.Context, authorType article
 	if authorType == article.AuthorTypeUser {
 		rows, err := q.ListArticlesByUserAuthor(ctx, &generated.ListArticlesByUserAuthorParams{
 			AuthorUserID: pgID,
-			Limit:        int32(limit),
-			Offset:       int32(offset),
+			Limit:        cast.Int32(limit),
+			Offset:       cast.Int32(offset),
 		})
 		if err != nil {
 			return nil, 0, err
@@ -120,8 +121,8 @@ func (r *ArticleRepository) ListByAuthor(ctx context.Context, authorType article
 
 	rows, err := q.ListArticlesByCompanyAuthor(ctx, &generated.ListArticlesByCompanyAuthorParams{
 		AuthorCompanyID: pgID,
-		Limit:           int32(limit),
-		Offset:          int32(offset),
+		Limit:           cast.Int32(limit),
+		Offset:          cast.Int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -167,7 +168,7 @@ func (r *ArticleRepository) Update(ctx context.Context, a *article.Article) (*ar
 		Title:         a.Title,
 		Body:          a.Body,
 		IsPaid:        a.IsPaid,
-		PriceYen:      int32(a.PriceYen),
+		PriceYen:      cast.Int32(a.PriceYen),
 		CoverImageUrl: pgText(a.CoverImageURL),
 		Tags:          nonNilTags(a.Tags),
 	})

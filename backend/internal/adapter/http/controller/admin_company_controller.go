@@ -13,6 +13,7 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -52,7 +53,7 @@ func (c *AdminCompanyController) List(ctx echo.Context) error {
 	if perPage < 1 || perPage > 100 {
 		perPage = 20
 	}
-	offset := int32((page - 1) * perPage)
+	offset := cast.Int32((page - 1) * perPage)
 	status := ctx.QueryParam("status")
 
 	var total int64
@@ -66,7 +67,7 @@ func (c *AdminCompanyController) List(ctx echo.Context) error {
 		}
 		rows, err := c.queries.ListCompanyAccountsByStatus(ctx.Request().Context(), &generated.ListCompanyAccountsByStatusParams{
 			Status: cs,
-			Limit:  int32(perPage),
+			Limit:  cast.Int32(perPage),
 			Offset: offset,
 		})
 		if err != nil {
@@ -80,7 +81,7 @@ func (c *AdminCompanyController) List(ctx echo.Context) error {
 		return internalError(ctx, err.Error())
 	}
 	rows, err := c.queries.ListAllCompanyAccounts(ctx.Request().Context(), &generated.ListAllCompanyAccountsParams{
-		Limit:  int32(perPage),
+		Limit:  cast.Int32(perPage),
 		Offset: offset,
 	})
 	if err != nil {

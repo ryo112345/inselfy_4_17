@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
@@ -34,7 +36,7 @@ func buildCIReportPrompt(
 		"A1", "A2", "A3", "S1", "S2", "S3", "S4",
 		"E1", "E2", "E3", "C1", "C2", "C3",
 	}
-	var scoreParts []string
+	scoreParts := make([]string, 0, len(basicIDs))
 	for _, id := range basicIDs {
 		scoreParts = append(scoreParts, fmt.Sprintf("%s=%.2f", id, basicScoreMap[id]))
 	}
@@ -64,7 +66,7 @@ func buildCIReportPrompt(
 	for _, id := range basicIDs {
 		items := biItems[id]
 		if items == nil {
-			answerParts = append(answerParts, fmt.Sprintf("%s: //", id))
+			answerParts = append(answerParts, id+": //")
 			continue
 		}
 		var scores []string
@@ -72,7 +74,7 @@ func buildCIReportPrompt(
 			if code == "" {
 				scores = append(scores, "")
 			} else if v, ok := responseMap[code]; ok {
-				scores = append(scores, fmt.Sprintf("%d", v))
+				scores = append(scores, strconv.Itoa(v))
 			} else {
 				scores = append(scores, "")
 			}
@@ -102,10 +104,10 @@ func readCIPromptTemplate() ([]byte, error) {
 		"../../prompts/career-interest-report-prompt.md",
 	}
 	for _, p := range candidates {
-		data, err := os.ReadFile(p)
+		data, err := os.ReadFile(p) //nolint:gosec // G304: 候補パスは上記の固定リテラルのみ
 		if err == nil {
 			return data, nil
 		}
 	}
-	return nil, fmt.Errorf("CI prompt template not found in any candidate path")
+	return nil, errors.New("CI prompt template not found in any candidate path")
 }

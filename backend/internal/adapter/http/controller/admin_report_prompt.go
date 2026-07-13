@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -27,7 +28,7 @@ func (c *AdminReportController) GetPrompt(ctx echo.Context, sessionID string) er
 	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
 	row, err := c.queries.GetWVNeedsScoresBySessionID(ctx.Request().Context(), pgSessionID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "scores not found")
 		}
 		return internalError(ctx, err.Error())
@@ -112,10 +113,10 @@ func readPromptTemplate() ([]byte, error) {
 		"../../prompts/work-values-report-prompt.md",
 	}
 	for _, p := range candidates {
-		data, err := os.ReadFile(p)
+		data, err := os.ReadFile(p) //nolint:gosec // G304: 候補パスは固定リテラルのみ
 		if err == nil {
 			return data, nil
 		}
 	}
-	return nil, fmt.Errorf("prompt template not found in any candidate path")
+	return nil, errors.New("prompt template not found in any candidate path")
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/akiyama/inselfy/backend/internal/domain/careerinterest"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -49,7 +50,7 @@ func (r *CareerInterestResultRepository) Create(ctx context.Context, result *car
 		 VALUES ($1, $2, $3, $4, $5, $6)
 		 RETURNING id, created_at`,
 		sessionID, userID, responsesJSON,
-		int16(result.QuestionCount), sd, result.DifferentiationLevel,
+		cast.Int16(result.QuestionCount), sd, result.DifferentiationLevel,
 	).Scan(&result.ID, &result.CreatedAt)
 	if err != nil {
 		return nil, err

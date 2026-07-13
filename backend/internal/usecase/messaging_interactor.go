@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/messaging"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -288,15 +287,4 @@ func (i *MessagingInteractor) CountUnreadByCompany(ctx context.Context, companyI
 		return 0, err
 	}
 	return count, nil
-}
-
-func (i *MessagingInteractor) findConversationForParticipant(ctx context.Context, conversationID, participantType, participantID string) error {
-	_, err := i.participantRepo.GetByConversationAndParticipant(ctx, conversationID, participantType, participantID)
-	if err != nil {
-		if isNotFound(err) {
-			return domainerr.ErrNotFound
-		}
-		return err
-	}
-	return nil
 }

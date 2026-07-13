@@ -8,6 +8,7 @@ import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
+	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -70,8 +71,8 @@ func toCreateExperienceInput(body openapi.ModelsCreateExperienceRequest) experie
 	return experience.CreateInput{
 		CompanyName: body.CompanyName,
 		Title:       body.Title,
-		StartYear:   int16(body.StartYear),
-		StartMonth:  int16(body.StartMonth),
+		StartYear:   cast.Int16From32(body.StartYear),
+		StartMonth:  cast.Int16From32(body.StartMonth),
 		EndYear:     int32PtrToInt16Ptr(body.EndYear),
 		EndMonth:    int32PtrToInt16Ptr(body.EndMonth),
 		IsCurrent:   body.IsCurrent,
@@ -83,8 +84,8 @@ func toUpdateExperienceInput(body openapi.ModelsUpdateExperienceRequest) experie
 	return experience.UpdateInput{
 		CompanyName: body.CompanyName,
 		Title:       body.Title,
-		StartYear:   int16(body.StartYear),
-		StartMonth:  int16(body.StartMonth),
+		StartYear:   cast.Int16From32(body.StartYear),
+		StartMonth:  cast.Int16From32(body.StartMonth),
 		EndYear:     int32PtrToInt16Ptr(body.EndYear),
 		EndMonth:    int32PtrToInt16Ptr(body.EndMonth),
 		IsCurrent:   body.IsCurrent,
@@ -92,11 +93,13 @@ func toUpdateExperienceInput(body openapi.ModelsUpdateExperienceRequest) experie
 	}
 }
 
+// 範囲外の値は cast で clamp され、その後の domain バリデーション
+// （年・月の範囲チェック）で弾かれる。
 func int32PtrToInt16Ptr(v *int32) *int16 {
 	if v == nil {
 		return nil
 	}
-	n := int16(*v)
+	n := cast.Int16From32(*v)
 	return &n
 }
 

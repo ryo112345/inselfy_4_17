@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -113,7 +114,7 @@ func (ctrl *AdminIntegratedReportController) SaveReport(ctx echo.Context, reques
 
 	req, err := ctrl.queries.GetIntegratedReportRequestByID(ctx.Request().Context(), pgReqID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "request not found")
 		}
 		return internalError(ctx, err.Error())
@@ -145,7 +146,7 @@ func (ctrl *AdminIntegratedReportController) GetReport(ctx echo.Context, request
 	pgReqID := pgtype.UUID{Bytes: parsedReqID, Valid: true}
 	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), pgReqID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "report not found")
 		}
 		return internalError(ctx, err.Error())
@@ -177,7 +178,7 @@ func (ctrl *AdminIntegratedReportController) GetReportByUser(ctx echo.Context) e
 
 	report, err := ctrl.queries.GetLatestIntegratedReportByUserID(ctx.Request().Context(), pgUserID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "report not found")
 		}
 		return internalError(ctx, err.Error())
@@ -208,7 +209,7 @@ func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) 
 
 	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx.Request().Context(), pgUserID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportStatusResponse{
 				Status: openapi.ModelsIntegratedReportStatusResponseStatusNone,
 			})
@@ -218,7 +219,7 @@ func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) 
 
 	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), req.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			requestID := pgUUIDToString(req.ID)
 			return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportStatusResponse{
 				Status:    openapi.ModelsIntegratedReportStatusResponseStatusPending,
@@ -287,7 +288,7 @@ func (ctrl *AdminIntegratedReportController) GetLatestRequest(ctx echo.Context, 
 
 	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx.Request().Context(), pgUserID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return notFoundError(ctx, "not found")
 		}
 		return internalError(ctx, err.Error())
