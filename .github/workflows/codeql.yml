@@ -31,14 +31,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # build-mode: none はビルド無しでソースを解析する（Go は CodeQL 2.16+ で対応）。
-          # CI 時間を節約でき、ビルド失敗と解析失敗が混ざらない
+          # Go は none 非対応（コンパイル情報が必要）のため autobuild でビルドして解析する。
+          # JS/TS はビルド不要でソースをそのまま解析できる
           - language: go
-            build-mode: none
+            build-mode: autobuild
           - language: javascript-typescript
             build-mode: none
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      # autobuild が runner 既定の古い Go を掴まないよう go.mod のバージョンを入れる
+      - if: matrix.language == 'go'
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
 
       - uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
         with:
