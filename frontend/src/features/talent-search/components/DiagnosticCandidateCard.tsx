@@ -185,7 +185,7 @@ export function DiagnosticCandidateCard({
             {initials}
           </div>
         )}
-        <div className="flex-1 min-w-0">
+        <div className={`flex-1 min-w-0 ${onToggleSave ? "pr-8" : ""}`}>
           <p
             className={`text-[17px] font-semibold truncate ${isSelected ? "text-gray-900" : "text-gray-800"}`}
           >
@@ -193,7 +193,6 @@ export function DiagnosticCandidateCard({
           </p>
           {u.headline && <p className="text-[15px] text-gray-500 truncate mt-0.5">{u.headline}</p>}
         </div>
-        {onToggleSave && <SaveBookmark saved={!!isSaved} onToggle={onToggleSave} size={16} />}
       </div>
 
       {/* Row 2: Match badges */}
@@ -269,8 +268,10 @@ export function DiagnosticCandidateCard({
     </div>
   );
 
+  // 保存ボタンはカードの Link / button の外に置く（button 内 button は HTML 違反で
+  // hydration エラーになる）。absolute でアバター行の右端に重ねる
   return (
-    <>
+    <div className="relative">
       <Link href={`/profile/${u.username}`} className="lg:hidden block">
         {inner}
       </Link>
@@ -281,6 +282,11 @@ export function DiagnosticCandidateCard({
       >
         {inner}
       </button>
-    </>
+      {onToggleSave && (
+        <div className="absolute right-2.5 top-2.5">
+          <SaveBookmark saved={!!isSaved} onToggle={onToggleSave} size={16} />
+        </div>
+      )}
+    </div>
   );
 }
