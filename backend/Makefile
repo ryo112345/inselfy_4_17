@@ -103,3 +103,11 @@ lint:
 # バックエンド変更後の一発検証（CLAUDE.md 参照）。CI と同じ build/lint/test を回す
 .PHONY: check
 check: build lint test
+
+# 生成元（TypeSpec / SQL / converter 定義）を触ったらこれ一発で全再生成する。
+# 個別コマンドの打ち忘れ（＝生成物ドリフト）を防ぐ入口。検査だけしたい場合は
+# scripts/check-generated-drift.sh（CI と同じ）を使う
+.PHONY: generate-all
+generate-all:
+	cd ../api-schema && npm run generate
+	$(MAKE) oapi sqlc goverter

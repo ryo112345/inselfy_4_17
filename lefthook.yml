@@ -19,3 +19,16 @@ pre-push:
   commands:
     gitleaks:
       run: export PATH="$PATH:$HOME/go/bin"; gitleaks git --no-banner --log-opts "origin/main..HEAD" || gitleaks git --no-banner
+    # 生成コードのドリフト検査（CI の generated-code-drift の手元版）。
+    # 全再生成は十数秒かかるため、生成元（TypeSpec / SQL / converter 定義 / codegen 設定）を
+    # 触った push のときだけ実行する。origin/main が取れない場合は安全側に倒して必ず実行
+    generated-drift:
+      run: |
+        if CHANGED=$(git diff --name-only origin/main..HEAD -- \
+            api-schema/typespec api-schema/scripts \
+            backend/internal/adapter/gateway/db/sqlc/queries \
+            backend/sqlc.yaml backend/oapi-codegen.yaml \
+            ':(glob)backend/**/*_converter.go' 2>/dev/null); then
+          [ -z "$CHANGED" ] && exit 0
+        fi
+        scripts/check-generated-drift.sh
