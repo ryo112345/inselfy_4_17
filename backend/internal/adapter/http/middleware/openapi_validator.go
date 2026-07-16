@@ -32,7 +32,11 @@ import (
 // untouched.
 // pool and adminStaticKey back the AdminAuth scheme (personal tokens stored
 // hashed in the admins table, plus the ADMIN_API_KEY bootstrap key).
-func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService, pool *pgxpool.Pool, adminStaticKey string) (func(http.Handler) http.Handler, error) {
+// validateResponses additionally buffers each spec route's response and logs
+// contract violations (undeclared status, Content-Type, body schema) at
+// ERROR without altering the response — dev/test only (OPENAPI_VALIDATE_RESPONSES),
+// off in production for latency/memory (docs/strict-server-migration.md Phase 5).
+func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService, pool *pgxpool.Pool, adminStaticKey string, validateResponses bool) (func(http.Handler) http.Handler, error) {
 	loader := openapi3.NewLoader()
 	doc, err := loader.LoadFromData(specYAML)
 	if err != nil {
@@ -101,7 +105,14 @@ func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService, pool *
 				annotateAuditLogger(ctx, claims.adminAuthMethod, claims.adminID)
 			}
 
-			next.ServeHTTP(w, r)
+			if !validateResponses {
+				next.ServeHTTP(w, r)
+				return
+			}
+			capture := &responseCapture{ResponseWriter: w}
+			next.ServeHTTP(capture, r)
+			validateCapturedResponse(ctx, input, capture, r)
+			capture.flush()
 		})
 	}, nil
 }

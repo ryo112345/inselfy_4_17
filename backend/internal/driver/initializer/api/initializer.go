@@ -92,7 +92,7 @@ func BuildServer(ctx context.Context) (http.Handler, *config.Config, func(), err
 	// Validate requests against the API contract (body schema, params, enums)
 	// and enforce the spec's security requirements (spec-driven auth,
 	// including AdminAuth); see docs/strict-server-migration.md Phase 1-2.
-	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML, jwtService, pool, cfg.AdminAPIKey)
+	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML, jwtService, pool, cfg.AdminAPIKey, cfg.ValidateResponses)
 	if err != nil {
 		cleanup()
 		return nil, nil, func() {}, err

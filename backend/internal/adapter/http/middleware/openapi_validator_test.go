@@ -51,7 +51,7 @@ func newValidatedHandler(t *testing.T) http.Handler {
 		t.Fatalf("failed to create lazy pool: %v", err)
 	}
 	t.Cleanup(pool.Close)
-	mw, err := OpenAPIRequestValidator(openapi.SpecYAML, stubJWTService{}, pool, testAdminStaticKey)
+	mw, err := OpenAPIRequestValidator(openapi.SpecYAML, stubJWTService{}, pool, testAdminStaticKey, false)
 	if err != nil {
 		t.Fatalf("failed to build validator: %v", err)
 	}
