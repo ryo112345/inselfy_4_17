@@ -3804,6 +3804,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - ScoutTemplates
       requestBody:
@@ -3872,6 +3878,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3911,6 +3923,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3952,6 +3970,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3999,6 +4023,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - CompanyScouts
       requestBody:
@@ -4177,6 +4207,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -4213,6 +4249,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6517,6 +6559,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CandidateScouts
       requestBody:
@@ -6548,6 +6602,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CandidateScouts
       requestBody:
@@ -6617,6 +6683,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6653,6 +6725,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6699,6 +6777,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:

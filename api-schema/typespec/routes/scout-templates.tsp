@@ -20,7 +20,7 @@ interface ScoutTemplates {
   ): {
     @statusCode statusCode: 201;
     @body template: ScoutTemplateResponse;
-  } | AuthedErrors;
+  } | ConflictError | AuthedErrors;
 
   /** スカウトテンプレート一覧（企業認証） */
   @get
@@ -33,7 +33,7 @@ interface ScoutTemplates {
   @summary("Get a scout template")
   getScoutTemplate(
     @path templateId: Uuid,
-  ): ScoutTemplateResponse | AuthedNotFoundErrors;
+  ): ScoutTemplateResponse | AuthedForbiddenErrors;
 
   /** スカウトテンプレート更新（企業認証） */
   @put
@@ -42,7 +42,7 @@ interface ScoutTemplates {
   updateScoutTemplate(
     @path templateId: Uuid,
     @body request: UpdateScoutTemplateRequest,
-  ): ScoutTemplateResponse | AuthedNotFoundErrors;
+  ): ScoutTemplateResponse | AuthedForbiddenErrors;
 
   /** スカウトテンプレート削除（企業認証） */
   @delete
@@ -52,5 +52,5 @@ interface ScoutTemplates {
     @path templateId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | AuthedNotFoundErrors;
+  } | AuthedForbiddenErrors;
 }

@@ -20,7 +20,7 @@ interface CompanyScouts {
   ): {
     @statusCode statusCode: 201;
     @body scout: ScoutMessageResponse;
-  } | AuthedForbiddenErrors;
+  } | AuthedForbiddenConflictErrors;
 
   /** 送信済みスカウト一覧（企業認証） */
   @get
@@ -60,7 +60,7 @@ interface CompanyScouts {
   @summary("Get scout detail with replies")
   getCompanyScoutDetail(
     @path scoutId: Uuid,
-  ): ScoutDetailResponse | AuthedNotFoundErrors;
+  ): ScoutDetailResponse | AuthedForbiddenErrors;
 
   /** スカウトへ返信（企業認証） */
   @post
@@ -71,5 +71,5 @@ interface CompanyScouts {
     @body request: CompanyScoutReplyRequest,
   ): {
     @statusCode statusCode: 201;
-  } | AuthedNotFoundErrors;
+  } | AuthedForbiddenErrors;
 }

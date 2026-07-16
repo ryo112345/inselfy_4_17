@@ -43,6 +43,11 @@ type StrictServer struct {
 	companyTeam    *CompanyTeamController
 	talentSearch   *TalentSearchController
 	savedCandidate *SavedCandidateController
+
+	scout          *ScoutController
+	candidateScout *CandidateScoutController
+	scoutSettings  *ScoutSettingsController
+	scoutTemplate  *ScoutTemplateController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -114,6 +119,20 @@ func (s *StrictServer) WireCompanyGroup(
 	s.companyTeam = companyTeam
 	s.talentSearch = talentSearch
 	s.savedCandidate = savedCandidate
+}
+
+// WireScoutGroup installs the wire_scout controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ7)。
+func (s *StrictServer) WireScoutGroup(
+	scout *ScoutController,
+	candidateScout *CandidateScoutController,
+	scoutSettings *ScoutSettingsController,
+	scoutTemplate *ScoutTemplateController,
+) {
+	s.scout = scout
+	s.candidateScout = candidateScout
+	s.scoutSettings = scoutSettings
+	s.scoutTemplate = scoutTemplate
 }
 
 // --- Users ---
@@ -558,4 +577,96 @@ func (s *StrictServer) SavedCandidatesUnsaveCandidate(ctx context.Context, req o
 
 func (s *StrictServer) SavedCandidatesIsCandidateSaved(ctx context.Context, req openapi.SavedCandidatesIsCandidateSavedRequestObject) (openapi.SavedCandidatesIsCandidateSavedResponseObject, error) {
 	return s.savedCandidate.IsSaved(ctx, req)
+}
+
+// --- Company Scouts ---
+
+func (s *StrictServer) CompanyScoutsSendScout(ctx context.Context, req openapi.CompanyScoutsSendScoutRequestObject) (openapi.CompanyScoutsSendScoutResponseObject, error) {
+	return s.scout.Send(ctx, req)
+}
+
+func (s *StrictServer) CompanyScoutsListCompanyScouts(ctx context.Context, req openapi.CompanyScoutsListCompanyScoutsRequestObject) (openapi.CompanyScoutsListCompanyScoutsResponseObject, error) {
+	return s.scout.List(ctx, req)
+}
+
+func (s *StrictServer) CompanyScoutsGetScoutCredits(ctx context.Context, req openapi.CompanyScoutsGetScoutCreditsRequestObject) (openapi.CompanyScoutsGetScoutCreditsResponseObject, error) {
+	return s.scout.GetCredits(ctx, req)
+}
+
+func (s *StrictServer) CompanyScoutsGetScoutQuality(ctx context.Context, req openapi.CompanyScoutsGetScoutQualityRequestObject) (openapi.CompanyScoutsGetScoutQualityResponseObject, error) {
+	return s.scout.GetQualityScore(ctx, req)
+}
+
+func (s *StrictServer) CompanyScoutsGetScoutDashboard(ctx context.Context, req openapi.CompanyScoutsGetScoutDashboardRequestObject) (openapi.CompanyScoutsGetScoutDashboardResponseObject, error) {
+	return s.scout.GetDashboard(ctx, req)
+}
+
+func (s *StrictServer) CompanyScoutsGetCompanyScoutDetail(ctx context.Context, req openapi.CompanyScoutsGetCompanyScoutDetailRequestObject) (openapi.CompanyScoutsGetCompanyScoutDetailResponseObject, error) {
+	return s.scout.GetDetail(ctx, req)
+}
+
+func (s *StrictServer) CompanyScoutsCompanyScoutReply(ctx context.Context, req openapi.CompanyScoutsCompanyScoutReplyRequestObject) (openapi.CompanyScoutsCompanyScoutReplyResponseObject, error) {
+	return s.scout.Reply(ctx, req)
+}
+
+// --- Candidate Scouts ---
+
+func (s *StrictServer) CandidateScoutsListCandidateScouts(ctx context.Context, req openapi.CandidateScoutsListCandidateScoutsRequestObject) (openapi.CandidateScoutsListCandidateScoutsResponseObject, error) {
+	return s.candidateScout.List(ctx, req)
+}
+
+func (s *StrictServer) CandidateScoutsCountCandidateUnreadScouts(ctx context.Context, req openapi.CandidateScoutsCountCandidateUnreadScoutsRequestObject) (openapi.CandidateScoutsCountCandidateUnreadScoutsResponseObject, error) {
+	return s.candidateScout.CountUnread(ctx, req)
+}
+
+func (s *StrictServer) CandidateScoutsGetCandidateScoutDetail(ctx context.Context, req openapi.CandidateScoutsGetCandidateScoutDetailRequestObject) (openapi.CandidateScoutsGetCandidateScoutDetailResponseObject, error) {
+	return s.candidateScout.GetDetail(ctx, req)
+}
+
+func (s *StrictServer) CandidateScoutsRespondToScout(ctx context.Context, req openapi.CandidateScoutsRespondToScoutRequestObject) (openapi.CandidateScoutsRespondToScoutResponseObject, error) {
+	return s.candidateScout.Respond(ctx, req)
+}
+
+func (s *StrictServer) CandidateScoutsCandidateScoutReply(ctx context.Context, req openapi.CandidateScoutsCandidateScoutReplyRequestObject) (openapi.CandidateScoutsCandidateScoutReplyResponseObject, error) {
+	return s.candidateScout.Reply(ctx, req)
+}
+
+func (s *StrictServer) CandidateScoutsBulkDeclineScouts(ctx context.Context, req openapi.CandidateScoutsBulkDeclineScoutsRequestObject) (openapi.CandidateScoutsBulkDeclineScoutsResponseObject, error) {
+	return s.candidateScout.BulkDecline(ctx, req)
+}
+
+func (s *StrictServer) CandidateScoutsBulkRespondScouts(ctx context.Context, req openapi.CandidateScoutsBulkRespondScoutsRequestObject) (openapi.CandidateScoutsBulkRespondScoutsResponseObject, error) {
+	return s.candidateScout.BulkRespond(ctx, req)
+}
+
+// --- Scout Settings ---
+
+func (s *StrictServer) ScoutSettingsGetScoutSettings(ctx context.Context, req openapi.ScoutSettingsGetScoutSettingsRequestObject) (openapi.ScoutSettingsGetScoutSettingsResponseObject, error) {
+	return s.scoutSettings.Get(ctx, req)
+}
+
+func (s *StrictServer) ScoutSettingsUpdateScoutSettings(ctx context.Context, req openapi.ScoutSettingsUpdateScoutSettingsRequestObject) (openapi.ScoutSettingsUpdateScoutSettingsResponseObject, error) {
+	return s.scoutSettings.Update(ctx, req)
+}
+
+// --- Scout Templates ---
+
+func (s *StrictServer) ScoutTemplatesCreateScoutTemplate(ctx context.Context, req openapi.ScoutTemplatesCreateScoutTemplateRequestObject) (openapi.ScoutTemplatesCreateScoutTemplateResponseObject, error) {
+	return s.scoutTemplate.Create(ctx, req)
+}
+
+func (s *StrictServer) ScoutTemplatesListScoutTemplates(ctx context.Context, req openapi.ScoutTemplatesListScoutTemplatesRequestObject) (openapi.ScoutTemplatesListScoutTemplatesResponseObject, error) {
+	return s.scoutTemplate.List(ctx, req)
+}
+
+func (s *StrictServer) ScoutTemplatesGetScoutTemplate(ctx context.Context, req openapi.ScoutTemplatesGetScoutTemplateRequestObject) (openapi.ScoutTemplatesGetScoutTemplateResponseObject, error) {
+	return s.scoutTemplate.Get(ctx, req)
+}
+
+func (s *StrictServer) ScoutTemplatesUpdateScoutTemplate(ctx context.Context, req openapi.ScoutTemplatesUpdateScoutTemplateRequestObject) (openapi.ScoutTemplatesUpdateScoutTemplateResponseObject, error) {
+	return s.scoutTemplate.Update(ctx, req)
+}
+
+func (s *StrictServer) ScoutTemplatesDeleteScoutTemplate(ctx context.Context, req openapi.ScoutTemplatesDeleteScoutTemplateRequestObject) (openapi.ScoutTemplatesDeleteScoutTemplateResponseObject, error) {
+	return s.scoutTemplate.Delete(ctx, req)
 }

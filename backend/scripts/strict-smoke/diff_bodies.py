@@ -15,6 +15,8 @@ import sys
 
 # 実行ごとに値が変わる（＝差分として意味がない）フィールド
 VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "publishedAt", "userId", "postId", "sessionId", "inviteToken", "companyId"}
+# scout グループ: スカウト・返信・クレジットの時刻／実行ごとに作られる ID
+VOLATILE |= {"sentAt", "expiresAt", "openedAt", "repliedAt", "conversationId", "lastReplenishedAt", "templateId", "senderId"}
 # 同点スコアの並びが呼び出しごとに揺れる配列（タレント検索の top ラベル）は
 # ソートして比較する（順位のタイブレークは実装が非決定的・移行と無関係）
 SORT_BEFORE_DIFF = {"topWvLabels", "topCiLabels"}
@@ -55,7 +57,10 @@ def load(path):
     if not raw.strip():
         return ""
     try:
-        return norm(json.loads(raw))
+        v = json.loads(raw)
+        # echo の ctx.JSON(201, nil) は "null" を書くが、strict のボディ無し 201 は空。
+        # JSON null とボディ無しは同義として比較する（scout グループの意図的微差）。
+        return "" if v is None else norm(v)
     except json.JSONDecodeError:
         return raw
 

@@ -1,16 +1,16 @@
 package initializer
 
 import (
-	"github.com/labstack/echo/v4"
-
 	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
+	openapigen "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/usecase"
 )
 
-// wireScout registers scout routes for both sides: company sending/templates
-// and candidate inbox/settings.
-func wireScout(e *echo.Echo, d *deps) {
+// wireScout registers scout routes on the strict mux for both sides: company
+// sending/templates and candidate inbox/settings — this group is migrated to
+// strict-server handlers (docs/strict-server-migration.md Phase 3-1 グループ7).
+func wireScout(sr *strictRouter, wrapper *openapigen.ServerInterfaceWrapper, ss *httpcontroller.StrictServer, d *deps) {
 	scoutItr := usecase.NewScoutInteractor(
 		d.scoutMsgRepo,
 		sqlcgw.NewScoutCreditRepository(d.pool),
@@ -22,58 +22,44 @@ func wireScout(e *echo.Echo, d *deps) {
 		d.convRepo, d.msgRepo, d.participantRepo,
 		d.tx,
 	)
-	scoutCtrl := httpcontroller.NewScoutController(scoutItr)
-	candidateScoutCtrl := httpcontroller.NewCandidateScoutController(scoutItr, d.scoutMsgRepo, d.convRepo)
-	scoutSettingsCtrl := httpcontroller.NewScoutSettingsController(scoutItr)
-	scoutTemplateCtrl := httpcontroller.NewScoutTemplateController(
-		usecase.NewScoutTemplateInteractor(sqlcgw.NewScoutTemplateRepository(d.pool)),
+	ss.WireScoutGroup(
+		httpcontroller.NewScoutController(scoutItr),
+		httpcontroller.NewCandidateScoutController(scoutItr, d.scoutMsgRepo, d.convRepo),
+		httpcontroller.NewScoutSettingsController(scoutItr),
+		httpcontroller.NewScoutTemplateController(
+			usecase.NewScoutTemplateInteractor(sqlcgw.NewScoutTemplateRepository(d.pool)),
+		),
 	)
 
 	// --- Company Scouts ---
-	scoutGroup := e.Group("/api/company/scouts")
-	scoutGroup.POST("", scoutCtrl.Send)
-	scoutGroup.GET("", scoutCtrl.List)
-	scoutGroup.GET("/credits", scoutCtrl.GetCredits)
-	scoutGroup.GET("/quality", scoutCtrl.GetQualityScore)
-	scoutGroup.GET("/dashboard", scoutCtrl.GetDashboard)
-	scoutGroup.GET("/:scoutId", func(c echo.Context) error {
-		return scoutCtrl.GetDetail(c, c.Param("scoutId"))
-	})
-	scoutGroup.POST("/:scoutId/reply", func(c echo.Context) error {
-		return scoutCtrl.Reply(c, c.Param("scoutId"))
-	})
+	// credits / quality / dashboard は {scoutId} の strict subset なので
+	// ServeMux の静的優先で解決できる（priority mux 不要）。
+	sr.handle("POST /api/company/scouts", wrapper.CompanyScoutsSendScout)
+	sr.handle("GET /api/company/scouts", wrapper.CompanyScoutsListCompanyScouts)
+	sr.handle("GET /api/company/scouts/credits", wrapper.CompanyScoutsGetScoutCredits)
+	sr.handle("GET /api/company/scouts/quality", wrapper.CompanyScoutsGetScoutQuality)
+	sr.handle("GET /api/company/scouts/dashboard", wrapper.CompanyScoutsGetScoutDashboard)
+	sr.handle("GET /api/company/scouts/{scoutId}", wrapper.CompanyScoutsGetCompanyScoutDetail)
+	sr.handle("POST /api/company/scouts/{scoutId}/reply", wrapper.CompanyScoutsCompanyScoutReply)
 
 	// --- Company Scout Templates ---
-	templateGroup := e.Group("/api/company/scout-templates")
-	templateGroup.POST("", scoutTemplateCtrl.Create)
-	templateGroup.GET("", scoutTemplateCtrl.List)
-	templateGroup.GET("/:templateId", func(c echo.Context) error {
-		return scoutTemplateCtrl.Get(c, c.Param("templateId"))
-	})
-	templateGroup.PUT("/:templateId", func(c echo.Context) error {
-		return scoutTemplateCtrl.Update(c, c.Param("templateId"))
-	})
-	templateGroup.DELETE("/:templateId", func(c echo.Context) error {
-		return scoutTemplateCtrl.Delete(c, c.Param("templateId"))
-	})
+	sr.handle("POST /api/company/scout-templates", wrapper.ScoutTemplatesCreateScoutTemplate)
+	sr.handle("GET /api/company/scout-templates", wrapper.ScoutTemplatesListScoutTemplates)
+	sr.handle("GET /api/company/scout-templates/{templateId}", wrapper.ScoutTemplatesGetScoutTemplate)
+	sr.handle("PUT /api/company/scout-templates/{templateId}", wrapper.ScoutTemplatesUpdateScoutTemplate)
+	sr.handle("DELETE /api/company/scout-templates/{templateId}", wrapper.ScoutTemplatesDeleteScoutTemplate)
 
 	// --- Candidate Scouts ---
-	candidateScoutGroup := e.Group("/api/scouts")
-	candidateScoutGroup.GET("", candidateScoutCtrl.List)
-	candidateScoutGroup.GET("/unread-count", candidateScoutCtrl.CountUnread)
-	candidateScoutGroup.GET("/:scoutId", func(c echo.Context) error {
-		return candidateScoutCtrl.GetDetail(c, c.Param("scoutId"))
-	})
-	candidateScoutGroup.POST("/:scoutId/respond", func(c echo.Context) error {
-		return candidateScoutCtrl.Respond(c, c.Param("scoutId"))
-	})
-	candidateScoutGroup.POST("/:scoutId/reply", func(c echo.Context) error {
-		return candidateScoutCtrl.Reply(c, c.Param("scoutId"))
-	})
-	candidateScoutGroup.POST("/bulk-decline", candidateScoutCtrl.BulkDecline)
-	candidateScoutGroup.POST("/bulk-respond", candidateScoutCtrl.BulkRespond)
+	// bulk-decline / bulk-respond は {scoutId}/... とセグメント数が異なり衝突しない。
+	sr.handle("GET /api/scouts", wrapper.CandidateScoutsListCandidateScouts)
+	sr.handle("GET /api/scouts/unread-count", wrapper.CandidateScoutsCountCandidateUnreadScouts)
+	sr.handle("GET /api/scouts/{scoutId}", wrapper.CandidateScoutsGetCandidateScoutDetail)
+	sr.handle("POST /api/scouts/{scoutId}/respond", wrapper.CandidateScoutsRespondToScout)
+	sr.handle("POST /api/scouts/{scoutId}/reply", wrapper.CandidateScoutsCandidateScoutReply)
+	sr.handle("POST /api/scouts/bulk-decline", wrapper.CandidateScoutsBulkDeclineScouts)
+	sr.handle("POST /api/scouts/bulk-respond", wrapper.CandidateScoutsBulkRespondScouts)
 
 	// --- Scout Settings ---
-	e.GET("/api/scout-settings", scoutSettingsCtrl.Get)
-	e.PUT("/api/scout-settings", scoutSettingsCtrl.Update)
+	sr.handle("GET /api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
+	sr.handle("PUT /api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
 }

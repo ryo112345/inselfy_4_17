@@ -8264,6 +8264,10 @@ export type ScoutTemplatesCreateScoutTemplateErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type ScoutTemplatesCreateScoutTemplateError = ScoutTemplatesCreateScoutTemplateErrors[keyof ScoutTemplatesCreateScoutTemplateErrors];
@@ -8295,6 +8299,10 @@ export type ScoutTemplatesDeleteScoutTemplateErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
@@ -8331,6 +8339,10 @@ export type ScoutTemplatesGetScoutTemplateErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -8365,6 +8377,10 @@ export type ScoutTemplatesUpdateScoutTemplateErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
@@ -8448,6 +8464,10 @@ export type CompanyScoutsSendScoutErrors = {
      * Not Found エラー
      */
     404: ModelsNotFoundError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type CompanyScoutsSendScoutError = CompanyScoutsSendScoutErrors[keyof CompanyScoutsSendScoutErrors];
@@ -8567,6 +8587,10 @@ export type CompanyScoutsGetCompanyScoutDetailErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -8601,6 +8625,10 @@ export type CompanyScoutsCompanyScoutReplyErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
@@ -10445,6 +10473,14 @@ export type CandidateScoutsBulkDeclineScoutsErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateScoutsBulkDeclineScoutsError = CandidateScoutsBulkDeclineScoutsErrors[keyof CandidateScoutsBulkDeclineScoutsErrors];
@@ -10474,6 +10510,14 @@ export type CandidateScoutsBulkRespondScoutsErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type CandidateScoutsBulkRespondScoutsError = CandidateScoutsBulkRespondScoutsErrors[keyof CandidateScoutsBulkRespondScoutsErrors];
@@ -10535,6 +10579,10 @@ export type CandidateScoutsGetCandidateScoutDetailErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -10570,6 +10618,10 @@ export type CandidateScoutsCandidateScoutReplyErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -10602,6 +10654,10 @@ export type CandidateScoutsRespondToScoutErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */

@@ -15986,6 +15986,15 @@ func (response ScoutTemplatesCreateScoutTemplate401JSONResponse) VisitScoutTempl
 	return json.NewEncoder(w).Encode(response)
 }
 
+type ScoutTemplatesCreateScoutTemplate409JSONResponse ModelsConflictError
+
+func (response ScoutTemplatesCreateScoutTemplate409JSONResponse) VisitScoutTemplatesCreateScoutTemplateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type ScoutTemplatesDeleteScoutTemplateRequestObject struct {
 	TemplateId ModelsUuid `json:"templateId"`
 }
@@ -16016,6 +16025,15 @@ type ScoutTemplatesDeleteScoutTemplate401JSONResponse ModelsUnauthorizedError
 func (response ScoutTemplatesDeleteScoutTemplate401JSONResponse) VisitScoutTemplatesDeleteScoutTemplateResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ScoutTemplatesDeleteScoutTemplate403JSONResponse ModelsForbiddenError
+
+func (response ScoutTemplatesDeleteScoutTemplate403JSONResponse) VisitScoutTemplatesDeleteScoutTemplateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -16064,6 +16082,15 @@ func (response ScoutTemplatesGetScoutTemplate401JSONResponse) VisitScoutTemplate
 	return json.NewEncoder(w).Encode(response)
 }
 
+type ScoutTemplatesGetScoutTemplate403JSONResponse ModelsForbiddenError
+
+func (response ScoutTemplatesGetScoutTemplate403JSONResponse) VisitScoutTemplatesGetScoutTemplateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type ScoutTemplatesGetScoutTemplate404JSONResponse ModelsNotFoundError
 
 func (response ScoutTemplatesGetScoutTemplate404JSONResponse) VisitScoutTemplatesGetScoutTemplateResponse(w http.ResponseWriter) error {
@@ -16105,6 +16132,15 @@ type ScoutTemplatesUpdateScoutTemplate401JSONResponse ModelsUnauthorizedError
 func (response ScoutTemplatesUpdateScoutTemplate401JSONResponse) VisitScoutTemplatesUpdateScoutTemplateResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ScoutTemplatesUpdateScoutTemplate403JSONResponse ModelsForbiddenError
+
+func (response ScoutTemplatesUpdateScoutTemplate403JSONResponse) VisitScoutTemplatesUpdateScoutTemplateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -16202,6 +16238,15 @@ type CompanyScoutsSendScout404JSONResponse ModelsNotFoundError
 func (response CompanyScoutsSendScout404JSONResponse) VisitCompanyScoutsSendScoutResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CompanyScoutsSendScout409JSONResponse ModelsConflictError
+
+func (response CompanyScoutsSendScout409JSONResponse) VisitCompanyScoutsSendScoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -16343,6 +16388,15 @@ func (response CompanyScoutsGetCompanyScoutDetail401JSONResponse) VisitCompanySc
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CompanyScoutsGetCompanyScoutDetail403JSONResponse ModelsForbiddenError
+
+func (response CompanyScoutsGetCompanyScoutDetail403JSONResponse) VisitCompanyScoutsGetCompanyScoutDetailResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CompanyScoutsGetCompanyScoutDetail404JSONResponse ModelsNotFoundError
 
 func (response CompanyScoutsGetCompanyScoutDetail404JSONResponse) VisitCompanyScoutsGetCompanyScoutDetailResponse(w http.ResponseWriter) error {
@@ -16383,6 +16437,15 @@ type CompanyScoutsCompanyScoutReply401JSONResponse ModelsUnauthorizedError
 func (response CompanyScoutsCompanyScoutReply401JSONResponse) VisitCompanyScoutsCompanyScoutReplyResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CompanyScoutsCompanyScoutReply403JSONResponse ModelsForbiddenError
+
+func (response CompanyScoutsCompanyScoutReply403JSONResponse) VisitCompanyScoutsCompanyScoutReplyResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -18490,6 +18553,24 @@ func (response CandidateScoutsBulkDeclineScouts401JSONResponse) VisitCandidateSc
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CandidateScoutsBulkDeclineScouts403JSONResponse ModelsForbiddenError
+
+func (response CandidateScoutsBulkDeclineScouts403JSONResponse) VisitCandidateScoutsBulkDeclineScoutsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CandidateScoutsBulkDeclineScouts404JSONResponse ModelsNotFoundError
+
+func (response CandidateScoutsBulkDeclineScouts404JSONResponse) VisitCandidateScoutsBulkDeclineScoutsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CandidateScoutsBulkRespondScoutsRequestObject struct {
 	Body *CandidateScoutsBulkRespondScoutsJSONRequestBody
 }
@@ -18520,6 +18601,24 @@ type CandidateScoutsBulkRespondScouts401JSONResponse ModelsUnauthorizedError
 func (response CandidateScoutsBulkRespondScouts401JSONResponse) VisitCandidateScoutsBulkRespondScoutsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CandidateScoutsBulkRespondScouts403JSONResponse ModelsForbiddenError
+
+func (response CandidateScoutsBulkRespondScouts403JSONResponse) VisitCandidateScoutsBulkRespondScoutsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CandidateScoutsBulkRespondScouts404JSONResponse ModelsNotFoundError
+
+func (response CandidateScoutsBulkRespondScouts404JSONResponse) VisitCandidateScoutsBulkRespondScoutsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -18593,6 +18692,15 @@ func (response CandidateScoutsGetCandidateScoutDetail401JSONResponse) VisitCandi
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CandidateScoutsGetCandidateScoutDetail403JSONResponse ModelsForbiddenError
+
+func (response CandidateScoutsGetCandidateScoutDetail403JSONResponse) VisitCandidateScoutsGetCandidateScoutDetailResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CandidateScoutsGetCandidateScoutDetail404JSONResponse ModelsNotFoundError
 
 func (response CandidateScoutsGetCandidateScoutDetail404JSONResponse) VisitCandidateScoutsGetCandidateScoutDetailResponse(w http.ResponseWriter) error {
@@ -18633,6 +18741,15 @@ type CandidateScoutsCandidateScoutReply401JSONResponse ModelsUnauthorizedError
 func (response CandidateScoutsCandidateScoutReply401JSONResponse) VisitCandidateScoutsCandidateScoutReplyResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CandidateScoutsCandidateScoutReply403JSONResponse ModelsForbiddenError
+
+func (response CandidateScoutsCandidateScoutReply403JSONResponse) VisitCandidateScoutsCandidateScoutReplyResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -18678,6 +18795,15 @@ type CandidateScoutsRespondToScout401JSONResponse ModelsUnauthorizedError
 func (response CandidateScoutsRespondToScout401JSONResponse) VisitCandidateScoutsRespondToScoutResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CandidateScoutsRespondToScout403JSONResponse ModelsForbiddenError
+
+func (response CandidateScoutsRespondToScout403JSONResponse) VisitCandidateScoutsRespondToScoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }

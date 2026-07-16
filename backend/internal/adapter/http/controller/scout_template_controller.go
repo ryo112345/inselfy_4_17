@@ -1,9 +1,8 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -25,74 +24,103 @@ func NewScoutTemplateController(
 }
 
 // Create handles POST /api/company/scout-templates.
-func (c *ScoutTemplateController) Create(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
-
-	var body openapi.ModelsCreateScoutTemplateRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+func (c *ScoutTemplateController) Create(ctx context.Context, req openapi.ScoutTemplatesCreateScoutTemplateRequestObject) (openapi.ScoutTemplatesCreateScoutTemplateResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.ScoutTemplatesCreateScoutTemplate400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	t, err := c.input.Create(ctx.Request().Context(), scout.CreateTemplateInput{
+	t, err := c.input.Create(ctx, scout.CreateTemplateInput{
 		CompanyID: companyID,
-		Name:      body.Name,
-		Subject:   body.Subject,
-		Body:      body.Body,
+		Name:      req.Body.Name,
+		Subject:   req.Body.Subject,
+		Body:      req.Body.Body,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusConflict:
+			return openapi.ScoutTemplatesCreateScoutTemplate409JSONResponse(conflictBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ScoutTemplatesCreateScoutTemplate400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusCreated, presenter.ScoutTemplateResponse(t))
+	return openapi.ScoutTemplatesCreateScoutTemplate201JSONResponse(*presenter.ScoutTemplateResponse(t)), nil
 }
 
 // List handles GET /api/company/scout-templates.
-func (c *ScoutTemplateController) List(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+func (c *ScoutTemplateController) List(ctx context.Context, _ openapi.ScoutTemplatesListScoutTemplatesRequestObject) (openapi.ScoutTemplatesListScoutTemplatesResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	ts, err := c.input.List(ctx.Request().Context(), companyID)
+	ts, err := c.input.List(ctx, companyID)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.ScoutTemplatesListScoutTemplates400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.ScoutTemplatesResponse(ts))
+	return openapi.ScoutTemplatesListScoutTemplates200JSONResponse(*presenter.ScoutTemplatesResponse(ts)), nil
 }
 
-// Get handles GET /api/company/scout-templates/:templateID.
-func (c *ScoutTemplateController) Get(ctx echo.Context, templateID string) error {
-	companyID := authmw.CompanyID(ctx)
+// Get handles GET /api/company/scout-templates/{templateId}.
+func (c *ScoutTemplateController) Get(ctx context.Context, req openapi.ScoutTemplatesGetScoutTemplateRequestObject) (openapi.ScoutTemplatesGetScoutTemplateResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	t, err := c.input.Get(ctx.Request().Context(), companyID, templateID)
+	t, err := c.input.Get(ctx, companyID, req.TemplateId)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.ScoutTemplatesGetScoutTemplate403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.ScoutTemplatesGetScoutTemplate404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ScoutTemplatesGetScoutTemplate400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.ScoutTemplateResponse(t))
+	return openapi.ScoutTemplatesGetScoutTemplate200JSONResponse(*presenter.ScoutTemplateResponse(t)), nil
 }
 
-// Update handles PUT /api/company/scout-templates/:templateID.
-func (c *ScoutTemplateController) Update(ctx echo.Context, templateID string) error {
-	companyID := authmw.CompanyID(ctx)
-
-	var body openapi.ModelsUpdateScoutTemplateRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+// Update handles PUT /api/company/scout-templates/{templateId}.
+func (c *ScoutTemplateController) Update(ctx context.Context, req openapi.ScoutTemplatesUpdateScoutTemplateRequestObject) (openapi.ScoutTemplatesUpdateScoutTemplateResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.ScoutTemplatesUpdateScoutTemplate400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	t, err := c.input.Update(ctx.Request().Context(), companyID, templateID, scout.UpdateTemplateInput{
-		Name:    body.Name,
-		Subject: body.Subject,
-		Body:    body.Body,
+	t, err := c.input.Update(ctx, companyID, req.TemplateId, scout.UpdateTemplateInput{
+		Name:    req.Body.Name,
+		Subject: req.Body.Subject,
+		Body:    req.Body.Body,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.ScoutTemplatesUpdateScoutTemplate403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.ScoutTemplatesUpdateScoutTemplate404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ScoutTemplatesUpdateScoutTemplate400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.ScoutTemplateResponse(t))
+	return openapi.ScoutTemplatesUpdateScoutTemplate200JSONResponse(*presenter.ScoutTemplateResponse(t)), nil
 }
 
-// Delete handles DELETE /api/company/scout-templates/:templateID.
-func (c *ScoutTemplateController) Delete(ctx echo.Context, templateID string) error {
-	companyID := authmw.CompanyID(ctx)
+// Delete handles DELETE /api/company/scout-templates/{templateId}.
+func (c *ScoutTemplateController) Delete(ctx context.Context, req openapi.ScoutTemplatesDeleteScoutTemplateRequestObject) (openapi.ScoutTemplatesDeleteScoutTemplateResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	if err := c.input.Delete(ctx.Request().Context(), companyID, templateID); err != nil {
-		return handleError(ctx, err)
+	if err := c.input.Delete(ctx, companyID, req.TemplateId); err != nil {
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.ScoutTemplatesDeleteScoutTemplate403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.ScoutTemplatesDeleteScoutTemplate404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ScoutTemplatesDeleteScoutTemplate400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.ScoutTemplatesDeleteScoutTemplate204Response{}, nil
 }
