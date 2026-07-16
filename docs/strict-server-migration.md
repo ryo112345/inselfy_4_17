@@ -58,7 +58,7 @@ strict-server ＋ RegisterHandlers ＋スペック駆動認可に移行し、最
 | 2 | [x] | admin API の TypeSpec 契約化 | 検証・認可・codegen が全ルートに効く |
 | 3 | [x] | strict-server ＋ std-http 化（3-1 全11グループ＋ 3-4 Echo 除去 完了） | 契約遵守のコンパイル時強制・Echo 依存の消滅 |
 | 4 | [x] | RegisterHandlers 化と後始末 | 手動ルート表の廃止・登録漏れのコンパイル時検出 |
-| 5 | [ ] | レスポンス検証の有効化（test/dev） | レスポンス側の契約違反検出 |
+| 5 | [x] | レスポンス検証の有効化（test/dev） | レスポンス側の契約違反検出 |
 
 ---
 
@@ -621,6 +621,31 @@ Phase 3 のフォールバック構成で実質完了しているが、仕上げ
 3. 検証: `make check` ＋ E2E（response validation on の状態で全通し）。
 
 **コミット例:** `test(backend): dev/test でのレスポンス契約検証を追加`
+
+**実施メモ（2026-07-16 完了 — 全フェーズ完了）:**
+
+- 別ミドルウェアではなく **OpenAPIRequestValidator に `validateResponses` フラグを追加**
+  （FindRoute とバリデーション input を再利用できるため）。有効時はスペックルートの
+  レスポンスを `responseCapture` でバッファ → `ValidateResponse` → ERROR ログ →
+  無改変で送出。**検証は観測のみ**（違反でも 500 化しない。dev と本番で挙動差を作らない）。
+  ヘッダーは実 writer へ素通し、status/body だけ保留する。
+- スイッチは `OPENAPI_VALIDATE_RESPONSES`（default off）。ルートの `.env` / `.env.example` で
+  dev は on、本番は deploy.yml に設定しない＝off。
+- `IncludeResponseStatus: true` を採用: スペックに無いステータス（strict の `nil, err` → 500 含む）
+  も違反として記録される。500 はそれ自体が要調査なので違反ログ扱いで問題ないと判断。
+- **E2E の代わりに全11グループスモーク 482 ケースを検証 on で全通し**（E2E がデモデータ依存で
+  使えないのは Phase 1 から同じ）。violation は3クラス10件のみ:
+  1. 会話系3 operation の `companyId`/`candidateId` が candidate_candidate 会話で空文字
+     （Uuid pattern 違反）→ スペックを `string` に緩和（実装が正。Uuid は生成側で
+     `type ModelsUuid = string` エイリアスのため Go/TS の型は不変）。
+  2. 面接キャンセル2 operation が `StatusOkResponse`（enum "ok"）宣言なのに実装は
+     `"cancelled"` を返していた → 専用 `CancelInterviewResponse`（"cancelled"）を新設
+     （実装が正。フロントはキャンセルのボディを読んでいない・tsc クリーン）。
+  3. admin `updateCompanyStatus` が存在しない companyId で 500 INTERNAL（pgx.ErrNoRows が
+     `nil, err` に落ちる既存バグ）→ 他の admin 系と同じ ErrNoRows→404 に修正しスペックにも
+     404 を宣言。**本フェーズ唯一の挙動変更**（管理画面は既存企業しか叩かないため影響なし）。
+- 修正後の再検証: 482 ケースで violation 0 件。修正前スモークとの diff は意図した
+  500→404 の1ケースのみ、他は 0 diffs。`make check`・フロント tsc クリーン。
 
 ## リスクと対処
 
