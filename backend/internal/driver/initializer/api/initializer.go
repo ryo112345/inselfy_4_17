@@ -96,7 +96,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// and enforce the spec's security requirements (spec-driven auth). The
 	// per-route auth middlewares below stay wired during the migration
 	// (dual-run); see docs/strict-server-migration.md Phase 1.
-	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML, jwtService)
+	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML, jwtService, pool, cfg.AdminAPIKey)
 	if err != nil {
 		cleanup()
 		return nil, nil, func() {}, err

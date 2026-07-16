@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
@@ -41,9 +42,19 @@ func claimsHandler(c echo.Context) error {
 			UserIDFromContext(c.Request().Context())+"|"+CompanyIDFromContext(c.Request().Context()))
 }
 
+// testAdminStaticKey is the ADMIN_API_KEY equivalent for tests. The personal
+// token path needs a live DB, so the pool below points at an unreachable
+// host: any non-static key deterministically fails the lookup (→ 401).
+const testAdminStaticKey = "test-admin-static-key"
+
 func newValidatedEcho(t *testing.T) *echo.Echo {
 	t.Helper()
-	mw, err := OpenAPIRequestValidator(openapi.SpecYAML, stubJWTService{})
+	pool, err := pgxpool.New(t.Context(), "postgres://validator:test@invalid-host.invalid:5432/validator-test")
+	if err != nil {
+		t.Fatalf("failed to create lazy pool: %v", err)
+	}
+	t.Cleanup(pool.Close)
+	mw, err := OpenAPIRequestValidator(openapi.SpecYAML, stubJWTService{}, pool, testAdminStaticKey)
 	if err != nil {
 		t.Fatalf("failed to build validator: %v", err)
 	}
@@ -56,6 +67,8 @@ func newValidatedEcho(t *testing.T) *echo.Echo {
 	e.GET("/api/articles/:articleId", claimsHandler)
 	// OR auth in the spec: security: [{CandidateAuth}, {CompanyAuth}].
 	e.GET("/api/career-interest/sessions/:sessionId/ai-report", claimsHandler)
+	// AdminAuth (X-Admin-Key) required in the spec.
+	e.GET("/api/admin/reports/pending", ok)
 	e.POST("/api/not-in-spec", ok)
 	return e
 }
@@ -213,5 +226,53 @@ func TestOpenAPIRequestValidator_OrAuthRejectsWithoutAnyToken(t *testing.T) {
 	rec := getPath(t, e, "/api/career-interest/sessions/00000000-0000-0000-0000-000000000000/ai-report")
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401 on OR route without token, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func adminGet(t *testing.T, e *echo.Echo, key string) *httptest.ResponseRecorder {
+	t.Helper()
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/admin/reports/pending", nil)
+	if key != "" {
+		req.Header.Set("X-Admin-Key", key)
+	}
+	return doRequest(t, e, req)
+}
+
+func TestOpenAPIRequestValidator_AdminStaticKeyPasses(t *testing.T) {
+	e := newValidatedEcho(t)
+	rec := adminGet(t, e, testAdminStaticKey)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 with static admin key, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestOpenAPIRequestValidator_AdminMissingKeyRejected(t *testing.T) {
+	e := newValidatedEcho(t)
+	rec := adminGet(t, e, "")
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 without X-Admin-Key, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "UNAUTHORIZED") {
+		t.Fatalf("expected unified 401 body, got %s", rec.Body.String())
+	}
+}
+
+func TestOpenAPIRequestValidator_AdminWrongKeyRejected(t *testing.T) {
+	e := newValidatedEcho(t)
+	rec := adminGet(t, e, "wrong-key")
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 with wrong admin key, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestOpenAPIRequestValidator_AdminBearerFallbackNotAccepted(t *testing.T) {
+	// X-Admin-Key は header スキームなので Authorization: Bearer では代替できない
+	// （旧 AdminAuth ミドルウェアと同じ挙動）。
+	e := newValidatedEcho(t)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/admin/reports/pending", nil)
+	req.Header.Set("Authorization", "Bearer "+testAdminStaticKey)
+	rec := doRequest(t, e, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 for bearer-only admin request, got %d: %s", rec.Code, rec.Body.String())
 	}
 }

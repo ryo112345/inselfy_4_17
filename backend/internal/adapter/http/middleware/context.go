@@ -36,6 +36,11 @@ type authClaimsKey struct{}
 type authClaims struct {
 	userID    string
 	companyID string
+
+	// adminAuthMethod is "static_key" or "personal_token" when AdminAuth
+	// passed; adminID is set only for personal tokens.
+	adminID         string
+	adminAuthMethod string
 }
 
 // withAuthClaims returns a child context carrying an empty claims holder,
@@ -61,6 +66,16 @@ func UserIDFromContext(ctx context.Context) string {
 func CompanyIDFromContext(ctx context.Context) string {
 	if claims, ok := ctx.Value(authClaimsKey{}).(*authClaims); ok {
 		return claims.companyID
+	}
+	return ""
+}
+
+// AdminIDFromContext returns the admin ID validated by the spec-driven
+// authenticator, or "" when the static bootstrap key was used (it carries no
+// identity) or the request is unauthenticated.
+func AdminIDFromContext(ctx context.Context) string {
+	if claims, ok := ctx.Value(authClaimsKey{}).(*authClaims); ok {
+		return claims.adminID
 	}
 	return ""
 }

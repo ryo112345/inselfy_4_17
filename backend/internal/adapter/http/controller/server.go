@@ -41,6 +41,11 @@ type Server struct {
 	adminReport    *AdminReportController
 	adminCIReport  *AdminCIReportController
 
+	// Admin console (/api/admin, AdminAuth-guarded; pool直結 by design).
+	adminAdmin   *AdminAdminController
+	adminUser    *AdminUserController
+	adminCompany *AdminCompanyController
+
 	// Job image uploads are standalone echo.HandlerFuncs built with
 	// HandleImageUpload(storage, subdir); wired here for interface conformance.
 	uploadTeamMemberPhoto echo.HandlerFunc
@@ -82,6 +87,9 @@ func NewServer(
 	adminIntReport *AdminIntegratedReportController,
 	adminReport *AdminReportController,
 	adminCIReport *AdminCIReportController,
+	adminAdmin *AdminAdminController,
+	adminUser *AdminUserController,
+	adminCompany *AdminCompanyController,
 	uploadTeamMemberPhoto echo.HandlerFunc,
 	uploadGalleryImage echo.HandlerFunc,
 	uploadJobCoverImage echo.HandlerFunc,
@@ -118,6 +126,10 @@ func NewServer(
 		adminIntReport: adminIntReport,
 		adminReport:    adminReport,
 		adminCIReport:  adminCIReport,
+
+		adminAdmin:   adminAdmin,
+		adminUser:    adminUser,
+		adminCompany: adminCompany,
 
 		uploadTeamMemberPhoto: uploadTeamMemberPhoto,
 		uploadGalleryImage:    uploadGalleryImage,
@@ -875,4 +887,118 @@ func (s *Server) WorkValuesWvGetAiReport(ctx echo.Context, sessionID string) err
 
 func (s *Server) CareerInterestCiGetAiReport(ctx echo.Context, sessionID string) error {
 	return s.adminCIReport.GetReport(ctx, sessionID)
+}
+
+// --- Admin console (/api/admin) ---
+
+func (s *Server) AdminListAdmins(ctx echo.Context) error { return s.adminAdmin.List(ctx) }
+
+func (s *Server) AdminCreateAdmin(ctx echo.Context) error { return s.adminAdmin.Create(ctx) }
+
+func (s *Server) AdminIssueAdminApiKey(ctx echo.Context, adminID string) error {
+	return s.adminAdmin.IssueKey(ctx, adminID)
+}
+
+func (s *Server) AdminDeleteAdmin(ctx echo.Context, adminID string) error {
+	return s.adminAdmin.Delete(ctx, adminID)
+}
+
+func (s *Server) AdminListUsers(ctx echo.Context, _ openapi.AdminListUsersParams) error {
+	return s.adminUser.List(ctx)
+}
+
+func (s *Server) AdminDeleteUser(ctx echo.Context, userID string) error {
+	return s.adminUser.Delete(ctx, userID)
+}
+
+func (s *Server) AdminBypassLoginAsUser(ctx echo.Context, userID string) error {
+	return s.adminUser.BypassLogin(ctx, userID)
+}
+
+func (s *Server) AdminListCompanies(ctx echo.Context, _ openapi.AdminListCompaniesParams) error {
+	return s.adminCompany.List(ctx)
+}
+
+func (s *Server) AdminUpdateCompanyStatus(ctx echo.Context, companyID string) error {
+	return s.adminCompany.UpdateStatus(ctx, companyID)
+}
+
+func (s *Server) AdminBypassLoginAsCompany(ctx echo.Context, companyID string) error {
+	return s.adminCompany.BypassLogin(ctx, companyID)
+}
+
+func (s *Server) AdminListPendingWvSessions(ctx echo.Context) error {
+	return s.adminReport.ListPending(ctx)
+}
+
+func (s *Server) AdminListWvReports(ctx echo.Context) error {
+	return s.adminReport.ListReports(ctx)
+}
+
+func (s *Server) AdminResetWvReportViewed(ctx echo.Context, sessionID string) error {
+	return s.adminReport.ResetViewed(ctx, sessionID)
+}
+
+func (s *Server) AdminSaveWvReport(ctx echo.Context, sessionID string) error {
+	return s.adminReport.SaveReport(ctx, sessionID)
+}
+
+func (s *Server) AdminGetWvReport(ctx echo.Context, sessionID string) error {
+	return s.adminReport.GetReport(ctx, sessionID)
+}
+
+func (s *Server) AdminGetWvSessionScores(ctx echo.Context, sessionID string) error {
+	return s.adminReport.GetSessionScores(ctx, sessionID)
+}
+
+func (s *Server) AdminGetWvPrompt(ctx echo.Context, sessionID string) error {
+	return s.adminReport.GetPrompt(ctx, sessionID)
+}
+
+func (s *Server) AdminListPendingCiSessions(ctx echo.Context) error {
+	return s.adminCIReport.ListPending(ctx)
+}
+
+func (s *Server) AdminListCiReports(ctx echo.Context) error {
+	return s.adminCIReport.ListReports(ctx)
+}
+
+func (s *Server) AdminResetCiReportViewed(ctx echo.Context, sessionID string) error {
+	return s.adminCIReport.ResetViewed(ctx, sessionID)
+}
+
+func (s *Server) AdminSaveCiReport(ctx echo.Context, sessionID string) error {
+	return s.adminCIReport.SaveReport(ctx, sessionID)
+}
+
+func (s *Server) AdminGetCiReport(ctx echo.Context, sessionID string) error {
+	return s.adminCIReport.GetReport(ctx, sessionID)
+}
+
+func (s *Server) AdminGetCiPrompt(ctx echo.Context, sessionID string) error {
+	return s.adminCIReport.GetPrompt(ctx, sessionID)
+}
+
+func (s *Server) AdminListPendingIntegratedRequests(ctx echo.Context) error {
+	return s.adminIntReport.ListPending(ctx)
+}
+
+func (s *Server) AdminListIntegratedReports(ctx echo.Context) error {
+	return s.adminIntReport.ListReports(ctx)
+}
+
+func (s *Server) AdminResetIntegratedReportViewed(ctx echo.Context, requestID string) error {
+	return s.adminIntReport.ResetViewed(ctx, requestID)
+}
+
+func (s *Server) AdminSaveIntegratedReport(ctx echo.Context, requestID string) error {
+	return s.adminIntReport.SaveReport(ctx, requestID)
+}
+
+func (s *Server) AdminGetIntegratedReportAsAdmin(ctx echo.Context, requestID string) error {
+	return s.adminIntReport.GetReport(ctx, requestID)
+}
+
+func (s *Server) AdminGetIntegratedPrompt(ctx echo.Context, requestID string) error {
+	return s.adminIntReport.GetPrompt(ctx, requestID)
 }

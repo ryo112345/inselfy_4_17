@@ -19,6 +19,500 @@ export type ModelsAddTeamMemberRequest = {
 };
 
 /**
+ * 生成済みAIレポート一覧アイテム（Work Values / Career Interest 共通）
+ */
+export type ModelsAdminAiReportListItem = {
+    /**
+     * レポートID
+     */
+    id: ModelsUuid;
+    /**
+     * セッションID
+     */
+    session_id: ModelsUuid;
+    /**
+     * ユーザーID
+     */
+    user_id: ModelsUuid;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+    /**
+     * ユーザーの閲覧日時（未閲覧なら null）
+     */
+    viewed_at: string | null;
+};
+
+/**
+ * 生成済みAIレポート一覧レスポンス
+ */
+export type ModelsAdminAiReportListResponse = {
+    /**
+     * レポート一覧
+     */
+    reports: Array<ModelsAdminAiReportListItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 企業成り代わりログイン結果（cookie はレスポンスで焼かれる）
+ */
+export type ModelsAdminCompanyBypassLoginResponse = {
+    /**
+     * 固定で "ok"
+     */
+    message: string;
+    /**
+     * ログインした企業の企業名
+     */
+    companyName: string;
+};
+
+/**
+ * 管理画面の企業一覧アイテム
+ */
+export type ModelsAdminCompanyItem = {
+    /**
+     * 企業アカウントID
+     */
+    id: ModelsUuid;
+    /**
+     * メールアドレス
+     */
+    email: string;
+    /**
+     * 企業名
+     */
+    companyName: string;
+    /**
+     * 担当者名
+     */
+    contactPersonName: string;
+    /**
+     * 電話番号
+     */
+    phoneNumber: string;
+    /**
+     * 承認ステータス
+     */
+    status: ModelsCompanyStatus;
+    /**
+     * 作成日時
+     */
+    createdAt: string;
+};
+
+/**
+ * 管理画面の企業一覧レスポンス
+ */
+export type ModelsAdminCompanyListResponse = {
+    /**
+     * 企業一覧
+     */
+    companies: Array<ModelsAdminCompanyItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+    /**
+     * 現在ページ（1始まり）
+     */
+    page: number;
+    /**
+     * 1ページあたり件数
+     */
+    per_page: number;
+    /**
+     * 総ページ数
+     */
+    total_pages: number;
+};
+
+/**
+ * 生成済み統合レポート一覧アイテム
+ */
+export type ModelsAdminIntegratedReportListItem = {
+    /**
+     * レポートID
+     */
+    id: ModelsUuid;
+    /**
+     * リクエストID
+     */
+    request_id: ModelsUuid;
+    /**
+     * ユーザーID
+     */
+    user_id: ModelsUuid;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+    /**
+     * ユーザーの閲覧日時（未閲覧なら null）
+     */
+    viewed_at: string | null;
+};
+
+/**
+ * 生成済み統合レポート一覧レスポンス
+ */
+export type ModelsAdminIntegratedReportListResponse = {
+    /**
+     * レポート一覧
+     */
+    reports: Array<ModelsAdminIntegratedReportListItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * 個人APIトークン発行レスポンス（トークンはこの一度だけ返る）
+ */
+export type ModelsAdminIssueKeyResponse = {
+    /**
+     * 更新後の管理者
+     */
+    admin: ModelsAdminItem;
+    /**
+     * 発行された個人APIトークン（`admin_` プレフィックス）
+     */
+    api_key: string;
+};
+
+/**
+ * 管理者
+ */
+export type ModelsAdminItem = {
+    /**
+     * 管理者ID
+     */
+    id: ModelsUuid;
+    /**
+     * メールアドレス
+     */
+    email: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * 個人APIトークンのプレフィックス（未発行なら null）
+     */
+    api_key_prefix: string | null;
+    /**
+     * 個人APIトークンの最終使用日時（未使用なら null）
+     */
+    last_used_at: string | null;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+};
+
+/**
+ * 管理者一覧レスポンス
+ */
+export type ModelsAdminListResponse = {
+    /**
+     * 管理者一覧
+     */
+    admins: Array<ModelsAdminItem>;
+};
+
+/**
+ * 処理結果メッセージ
+ */
+export type ModelsAdminMessageResponse = {
+    /**
+     * 固定で "ok"
+     */
+    message: string;
+};
+
+/**
+ * 統合レポート未生成リクエスト
+ */
+export type ModelsAdminPendingIntegratedRequestItem = {
+    /**
+     * リクエストID
+     */
+    request_id: ModelsUuid;
+    /**
+     * ユーザーID
+     */
+    user_id: ModelsUuid;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * トピック1
+     */
+    topic1: number;
+    /**
+     * トピック2
+     */
+    topic2: number;
+    /**
+     * トピック3
+     */
+    topic3: number;
+    /**
+     * 自由記述
+     */
+    free_text: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+};
+
+/**
+ * 統合レポート未生成リクエスト一覧レスポンス
+ */
+export type ModelsAdminPendingIntegratedRequestsResponse = {
+    /**
+     * リクエスト一覧
+     */
+    requests: Array<ModelsAdminPendingIntegratedRequestItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * AIレポート未生成の診断セッション（Work Values / Career Interest 共通）
+ */
+export type ModelsAdminPendingSessionItem = {
+    /**
+     * セッションID
+     */
+    session_id: ModelsUuid;
+    /**
+     * ユーザーID
+     */
+    user_id: ModelsUuid;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * 診断完了日時
+     */
+    completed_at: string | null;
+    /**
+     * レポート生成リクエスト日時
+     */
+    report_requested_at: string | null;
+};
+
+/**
+ * AIレポート未生成セッション一覧レスポンス
+ */
+export type ModelsAdminPendingSessionsResponse = {
+    /**
+     * セッション一覧
+     */
+    sessions: Array<ModelsAdminPendingSessionItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+};
+
+/**
+ * レポート生成用プロンプト
+ */
+export type ModelsAdminPromptResponse = {
+    /**
+     * データ埋め込み済みのプロンプト全文
+     */
+    prompt: string;
+};
+
+/**
+ * AIレポート保存リクエスト
+ */
+export type ModelsAdminSaveReportRequest = {
+    /**
+     * レポート本文（Markdown）
+     */
+    content: string;
+};
+
+/**
+ * 保存済みAIレポート（Work Values / Career Interest 共通）
+ */
+export type ModelsAdminSavedAiReportResponse = {
+    /**
+     * レポートID
+     */
+    id: ModelsUuid;
+    /**
+     * セッションID
+     */
+    session_id: ModelsUuid;
+    /**
+     * レポート本文（Markdown）
+     */
+    content: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+};
+
+/**
+ * 保存済み統合レポート
+ */
+export type ModelsAdminSavedIntegratedReportResponse = {
+    /**
+     * レポートID
+     */
+    id: ModelsUuid;
+    /**
+     * リクエストID
+     */
+    request_id: ModelsUuid;
+    /**
+     * レポート本文（Markdown）
+     */
+    content: string;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+};
+
+/**
+ * Work Values セッションのスコア（レポート生成用の生データ）
+ */
+export type ModelsAdminSessionScoresResponse = {
+    /**
+     * ニーズ別 BT 強度 μ
+     */
+    mu: {
+        [key: string]: number;
+    };
+    /**
+     * ニーズ別標準誤差 SE
+     */
+    se: {
+        [key: string]: number;
+    };
+    /**
+     * 整合性係数 ζ（未計算なら省略）
+     */
+    consistency_coefficient?: number;
+    /**
+     * 整合性レベル（未計算なら省略）
+     */
+    consistency_level?: string;
+};
+
+/**
+ * ユーザー成り代わりログイン結果（cookie はレスポンスで焼かれる）
+ */
+export type ModelsAdminUserBypassLoginResponse = {
+    /**
+     * 固定で "ok"
+     */
+    message: string;
+    /**
+     * ログインしたユーザーのユーザー名
+     */
+    username: string;
+};
+
+/**
+ * 管理画面のユーザー一覧アイテム
+ */
+export type ModelsAdminUserItem = {
+    /**
+     * ユーザーID
+     */
+    id: ModelsUuid;
+    /**
+     * ユーザー名
+     */
+    username: string;
+    /**
+     * 表示名
+     */
+    name: string;
+    /**
+     * メールアドレス
+     */
+    email: string | null;
+    /**
+     * アバターURL
+     */
+    avatar_url: string | null;
+    /**
+     * 作成日時
+     */
+    created_at: string;
+};
+
+/**
+ * 管理画面のユーザー一覧レスポンス
+ */
+export type ModelsAdminUserListResponse = {
+    /**
+     * ユーザー一覧
+     */
+    users: Array<ModelsAdminUserItem>;
+    /**
+     * 総件数
+     */
+    total: number;
+    /**
+     * 現在ページ（1始まり）
+     */
+    page: number;
+    /**
+     * 1ページあたり件数
+     */
+    per_page: number;
+    /**
+     * 総ページ数
+     */
+    total_pages: number;
+};
+
+/**
  * 診断AIレポート（Work Values / Career Interest 共通）
  */
 export type ModelsAiReportResponse = {
@@ -884,6 +1378,20 @@ export type ModelsConversationResponse = {
      * 作成日時
      */
     createdAt: string;
+};
+
+/**
+ * 管理者作成リクエスト
+ */
+export type ModelsCreateAdminRequest = {
+    /**
+     * メールアドレス
+     */
+    email: string;
+    /**
+     * 表示名
+     */
+    name?: string;
 };
 
 /**
@@ -3953,6 +4461,16 @@ export type ModelsUpdateCompanyProfileRequest = {
 };
 
 /**
+ * 企業ステータス更新リクエスト
+ */
+export type ModelsUpdateCompanyStatusRequest = {
+    /**
+     * 更新後ステータス
+     */
+    status: 'approved' | 'rejected';
+};
+
+/**
  * チーム診断ステータス更新リクエスト（指定したキーのみ更新）
  */
 export type ModelsUpdateDiagnoseStatusRequest = {
@@ -4400,6 +4918,963 @@ export type ModelsWvValueScoreResponse = {
      */
     rank: number;
 };
+
+export type AdminListAdminsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/admins';
+};
+
+export type AdminListAdminsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListAdminsError = AdminListAdminsErrors[keyof AdminListAdminsErrors];
+
+export type AdminListAdminsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminListResponse;
+};
+
+export type AdminListAdminsResponse = AdminListAdminsResponses[keyof AdminListAdminsResponses];
+
+export type AdminCreateAdminData = {
+    body: ModelsCreateAdminRequest;
+    path?: never;
+    query?: never;
+    url: '/api/admin/admins';
+};
+
+export type AdminCreateAdminErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminCreateAdminError = AdminCreateAdminErrors[keyof AdminCreateAdminErrors];
+
+export type AdminCreateAdminResponses = {
+    /**
+     * The request has succeeded and a new resource has been created as a result.
+     */
+    201: ModelsAdminItem;
+};
+
+export type AdminCreateAdminResponse = AdminCreateAdminResponses[keyof AdminCreateAdminResponses];
+
+export type AdminDeleteAdminData = {
+    body?: never;
+    path: {
+        adminId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/admins/{adminId}';
+};
+
+export type AdminDeleteAdminErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminDeleteAdminError = AdminDeleteAdminErrors[keyof AdminDeleteAdminErrors];
+
+export type AdminDeleteAdminResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type AdminDeleteAdminResponse = AdminDeleteAdminResponses[keyof AdminDeleteAdminResponses];
+
+export type AdminIssueAdminApiKeyData = {
+    body?: never;
+    path: {
+        adminId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/admins/{adminId}/api-key';
+};
+
+export type AdminIssueAdminApiKeyErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminIssueAdminApiKeyError = AdminIssueAdminApiKeyErrors[keyof AdminIssueAdminApiKeyErrors];
+
+export type AdminIssueAdminApiKeyResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminIssueKeyResponse;
+};
+
+export type AdminIssueAdminApiKeyResponse = AdminIssueAdminApiKeyResponses[keyof AdminIssueAdminApiKeyResponses];
+
+export type AdminListCiReportsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/ci-reports/list';
+};
+
+export type AdminListCiReportsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListCiReportsError = AdminListCiReportsErrors[keyof AdminListCiReportsErrors];
+
+export type AdminListCiReportsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminAiReportListResponse;
+};
+
+export type AdminListCiReportsResponse = AdminListCiReportsResponses[keyof AdminListCiReportsResponses];
+
+export type AdminListPendingCiSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/ci-reports/pending';
+};
+
+export type AdminListPendingCiSessionsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListPendingCiSessionsError = AdminListPendingCiSessionsErrors[keyof AdminListPendingCiSessionsErrors];
+
+export type AdminListPendingCiSessionsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminPendingSessionsResponse;
+};
+
+export type AdminListPendingCiSessionsResponse = AdminListPendingCiSessionsResponses[keyof AdminListPendingCiSessionsResponses];
+
+export type AdminGetCiReportData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/ci-sessions/{sessionId}/ai-report';
+};
+
+export type AdminGetCiReportErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminGetCiReportError = AdminGetCiReportErrors[keyof AdminGetCiReportErrors];
+
+export type AdminGetCiReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAiReportResponse;
+};
+
+export type AdminGetCiReportResponse = AdminGetCiReportResponses[keyof AdminGetCiReportResponses];
+
+export type AdminSaveCiReportData = {
+    body: ModelsAdminSaveReportRequest;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/ci-sessions/{sessionId}/ai-report';
+};
+
+export type AdminSaveCiReportErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminSaveCiReportError = AdminSaveCiReportErrors[keyof AdminSaveCiReportErrors];
+
+export type AdminSaveCiReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminSavedAiReportResponse;
+};
+
+export type AdminSaveCiReportResponse = AdminSaveCiReportResponses[keyof AdminSaveCiReportResponses];
+
+export type AdminGetCiPromptData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/ci-sessions/{sessionId}/prompt';
+};
+
+export type AdminGetCiPromptErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminGetCiPromptError = AdminGetCiPromptErrors[keyof AdminGetCiPromptErrors];
+
+export type AdminGetCiPromptResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminPromptResponse;
+};
+
+export type AdminGetCiPromptResponse = AdminGetCiPromptResponses[keyof AdminGetCiPromptResponses];
+
+export type AdminResetCiReportViewedData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/ci-sessions/{sessionId}/reset-viewed';
+};
+
+export type AdminResetCiReportViewedErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminResetCiReportViewedError = AdminResetCiReportViewedErrors[keyof AdminResetCiReportViewedErrors];
+
+export type AdminResetCiReportViewedResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminMessageResponse;
+};
+
+export type AdminResetCiReportViewedResponse = AdminResetCiReportViewedResponses[keyof AdminResetCiReportViewedResponses];
+
+export type AdminListCompaniesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * ページ番号（1始まり、デフォルト1）
+         */
+        page?: number;
+        /**
+         * 1ページあたり件数（1〜100、デフォルト20）
+         */
+        per_page?: number;
+        /**
+         * 承認ステータスでの絞り込み
+         */
+        status?: ModelsCompanyStatus;
+    };
+    url: '/api/admin/companies';
+};
+
+export type AdminListCompaniesErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListCompaniesError = AdminListCompaniesErrors[keyof AdminListCompaniesErrors];
+
+export type AdminListCompaniesResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminCompanyListResponse;
+};
+
+export type AdminListCompaniesResponse = AdminListCompaniesResponses[keyof AdminListCompaniesResponses];
+
+export type AdminBypassLoginAsCompanyData = {
+    body?: never;
+    path: {
+        companyId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/companies/{companyId}/bypass-login';
+};
+
+export type AdminBypassLoginAsCompanyErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminBypassLoginAsCompanyError = AdminBypassLoginAsCompanyErrors[keyof AdminBypassLoginAsCompanyErrors];
+
+export type AdminBypassLoginAsCompanyResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminCompanyBypassLoginResponse;
+};
+
+export type AdminBypassLoginAsCompanyResponse = AdminBypassLoginAsCompanyResponses[keyof AdminBypassLoginAsCompanyResponses];
+
+export type AdminUpdateCompanyStatusData = {
+    body: ModelsUpdateCompanyStatusRequest;
+    path: {
+        companyId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/companies/{companyId}/status';
+};
+
+export type AdminUpdateCompanyStatusErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminUpdateCompanyStatusError = AdminUpdateCompanyStatusErrors[keyof AdminUpdateCompanyStatusErrors];
+
+export type AdminUpdateCompanyStatusResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminCompanyItem;
+};
+
+export type AdminUpdateCompanyStatusResponse = AdminUpdateCompanyStatusResponses[keyof AdminUpdateCompanyStatusResponses];
+
+export type AdminListIntegratedReportsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/integrated-reports/list';
+};
+
+export type AdminListIntegratedReportsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListIntegratedReportsError = AdminListIntegratedReportsErrors[keyof AdminListIntegratedReportsErrors];
+
+export type AdminListIntegratedReportsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminIntegratedReportListResponse;
+};
+
+export type AdminListIntegratedReportsResponse = AdminListIntegratedReportsResponses[keyof AdminListIntegratedReportsResponses];
+
+export type AdminListPendingIntegratedRequestsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/integrated-reports/pending';
+};
+
+export type AdminListPendingIntegratedRequestsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListPendingIntegratedRequestsError = AdminListPendingIntegratedRequestsErrors[keyof AdminListPendingIntegratedRequestsErrors];
+
+export type AdminListPendingIntegratedRequestsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminPendingIntegratedRequestsResponse;
+};
+
+export type AdminListPendingIntegratedRequestsResponse = AdminListPendingIntegratedRequestsResponses[keyof AdminListPendingIntegratedRequestsResponses];
+
+export type AdminGetIntegratedReportAsAdminData = {
+    body?: never;
+    path: {
+        requestId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/integrated-requests/{requestId}/ai-report';
+};
+
+export type AdminGetIntegratedReportAsAdminErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminGetIntegratedReportAsAdminError = AdminGetIntegratedReportAsAdminErrors[keyof AdminGetIntegratedReportAsAdminErrors];
+
+export type AdminGetIntegratedReportAsAdminResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsIntegratedReportResponse;
+};
+
+export type AdminGetIntegratedReportAsAdminResponse = AdminGetIntegratedReportAsAdminResponses[keyof AdminGetIntegratedReportAsAdminResponses];
+
+export type AdminSaveIntegratedReportData = {
+    body: ModelsAdminSaveReportRequest;
+    path: {
+        requestId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/integrated-requests/{requestId}/ai-report';
+};
+
+export type AdminSaveIntegratedReportErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminSaveIntegratedReportError = AdminSaveIntegratedReportErrors[keyof AdminSaveIntegratedReportErrors];
+
+export type AdminSaveIntegratedReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminSavedIntegratedReportResponse;
+};
+
+export type AdminSaveIntegratedReportResponse = AdminSaveIntegratedReportResponses[keyof AdminSaveIntegratedReportResponses];
+
+export type AdminGetIntegratedPromptData = {
+    body?: never;
+    path: {
+        requestId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/integrated-requests/{requestId}/prompt';
+};
+
+export type AdminGetIntegratedPromptErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminGetIntegratedPromptError = AdminGetIntegratedPromptErrors[keyof AdminGetIntegratedPromptErrors];
+
+export type AdminGetIntegratedPromptResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminPromptResponse;
+};
+
+export type AdminGetIntegratedPromptResponse = AdminGetIntegratedPromptResponses[keyof AdminGetIntegratedPromptResponses];
+
+export type AdminResetIntegratedReportViewedData = {
+    body?: never;
+    path: {
+        requestId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/integrated-requests/{requestId}/reset-viewed';
+};
+
+export type AdminResetIntegratedReportViewedErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminResetIntegratedReportViewedError = AdminResetIntegratedReportViewedErrors[keyof AdminResetIntegratedReportViewedErrors];
+
+export type AdminResetIntegratedReportViewedResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminMessageResponse;
+};
+
+export type AdminResetIntegratedReportViewedResponse = AdminResetIntegratedReportViewedResponses[keyof AdminResetIntegratedReportViewedResponses];
+
+export type AdminListWvReportsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/reports/list';
+};
+
+export type AdminListWvReportsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListWvReportsError = AdminListWvReportsErrors[keyof AdminListWvReportsErrors];
+
+export type AdminListWvReportsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminAiReportListResponse;
+};
+
+export type AdminListWvReportsResponse = AdminListWvReportsResponses[keyof AdminListWvReportsResponses];
+
+export type AdminListPendingWvSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/admin/reports/pending';
+};
+
+export type AdminListPendingWvSessionsErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListPendingWvSessionsError = AdminListPendingWvSessionsErrors[keyof AdminListPendingWvSessionsErrors];
+
+export type AdminListPendingWvSessionsResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminPendingSessionsResponse;
+};
+
+export type AdminListPendingWvSessionsResponse = AdminListPendingWvSessionsResponses[keyof AdminListPendingWvSessionsResponses];
+
+export type AdminGetWvReportData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/sessions/{sessionId}/ai-report';
+};
+
+export type AdminGetWvReportErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminGetWvReportError = AdminGetWvReportErrors[keyof AdminGetWvReportErrors];
+
+export type AdminGetWvReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAiReportResponse;
+};
+
+export type AdminGetWvReportResponse = AdminGetWvReportResponses[keyof AdminGetWvReportResponses];
+
+export type AdminSaveWvReportData = {
+    body: ModelsAdminSaveReportRequest;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/sessions/{sessionId}/ai-report';
+};
+
+export type AdminSaveWvReportErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminSaveWvReportError = AdminSaveWvReportErrors[keyof AdminSaveWvReportErrors];
+
+export type AdminSaveWvReportResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminSavedAiReportResponse;
+};
+
+export type AdminSaveWvReportResponse = AdminSaveWvReportResponses[keyof AdminSaveWvReportResponses];
+
+export type AdminGetWvPromptData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/sessions/{sessionId}/prompt';
+};
+
+export type AdminGetWvPromptErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminGetWvPromptError = AdminGetWvPromptErrors[keyof AdminGetWvPromptErrors];
+
+export type AdminGetWvPromptResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminPromptResponse;
+};
+
+export type AdminGetWvPromptResponse = AdminGetWvPromptResponses[keyof AdminGetWvPromptResponses];
+
+export type AdminResetWvReportViewedData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/sessions/{sessionId}/reset-viewed';
+};
+
+export type AdminResetWvReportViewedErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminResetWvReportViewedError = AdminResetWvReportViewedErrors[keyof AdminResetWvReportViewedErrors];
+
+export type AdminResetWvReportViewedResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminMessageResponse;
+};
+
+export type AdminResetWvReportViewedResponse = AdminResetWvReportViewedResponses[keyof AdminResetWvReportViewedResponses];
+
+export type AdminGetWvSessionScoresData = {
+    body?: never;
+    path: {
+        sessionId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/sessions/{sessionId}/scores';
+};
+
+export type AdminGetWvSessionScoresErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminGetWvSessionScoresError = AdminGetWvSessionScoresErrors[keyof AdminGetWvSessionScoresErrors];
+
+export type AdminGetWvSessionScoresResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminSessionScoresResponse;
+};
+
+export type AdminGetWvSessionScoresResponse = AdminGetWvSessionScoresResponses[keyof AdminGetWvSessionScoresResponses];
+
+export type AdminListUsersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * ページ番号（1始まり、デフォルト1）
+         */
+        page?: number;
+        /**
+         * 1ページあたり件数（1〜100、デフォルト20）
+         */
+        per_page?: number;
+        /**
+         * ユーザー名・表示名・メールの部分一致検索
+         */
+        q?: string;
+    };
+    url: '/api/admin/users';
+};
+
+export type AdminListUsersErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminListUsersError = AdminListUsersErrors[keyof AdminListUsersErrors];
+
+export type AdminListUsersResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminUserListResponse;
+};
+
+export type AdminListUsersResponse = AdminListUsersResponses[keyof AdminListUsersResponses];
+
+export type AdminDeleteUserData = {
+    body?: never;
+    path: {
+        userId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/users/{userId}';
+};
+
+export type AdminDeleteUserErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+};
+
+export type AdminDeleteUserError = AdminDeleteUserErrors[keyof AdminDeleteUserErrors];
+
+export type AdminDeleteUserResponses = {
+    /**
+     * There is no content to send for this request, but the headers may be useful.
+     */
+    204: void;
+};
+
+export type AdminDeleteUserResponse = AdminDeleteUserResponses[keyof AdminDeleteUserResponses];
+
+export type AdminBypassLoginAsUserData = {
+    body?: never;
+    path: {
+        userId: ModelsUuid;
+    };
+    query?: never;
+    url: '/api/admin/users/{userId}/bypass-login';
+};
+
+export type AdminBypassLoginAsUserErrors = {
+    /**
+     * Bad Request エラー
+     */
+    400: ModelsBadRequestError;
+    /**
+     * Unauthorized エラー
+     */
+    401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
+};
+
+export type AdminBypassLoginAsUserError = AdminBypassLoginAsUserErrors[keyof AdminBypassLoginAsUserErrors];
+
+export type AdminBypassLoginAsUserResponses = {
+    /**
+     * The request has succeeded.
+     */
+    200: ModelsAdminUserBypassLoginResponse;
+};
+
+export type AdminBypassLoginAsUserResponse = AdminBypassLoginAsUserResponses[keyof AdminBypassLoginAsUserResponses];
 
 export type CandidateApplicationsListCandidateApplicationsData = {
     body?: never;

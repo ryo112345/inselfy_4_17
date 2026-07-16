@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	AdminAuthScopes     = "AdminAuth.Scopes"
 	CandidateAuthScopes = "CandidateAuth.Scopes"
 	CompanyAuthScopes   = "CompanyAuth.Scopes"
 )
@@ -489,6 +490,24 @@ func (e ModelsUnauthorizedErrorCode) Valid() bool {
 	}
 }
 
+// Defines values for ModelsUpdateCompanyStatusRequestStatus.
+const (
+	ModelsUpdateCompanyStatusRequestStatusApproved ModelsUpdateCompanyStatusRequestStatus = "approved"
+	ModelsUpdateCompanyStatusRequestStatusRejected ModelsUpdateCompanyStatusRequestStatus = "rejected"
+)
+
+// Valid indicates whether the value is a known member of the ModelsUpdateCompanyStatusRequestStatus enum.
+func (e ModelsUpdateCompanyStatusRequestStatus) Valid() bool {
+	switch e {
+	case ModelsUpdateCompanyStatusRequestStatusApproved:
+		return true
+	case ModelsUpdateCompanyStatusRequestStatusRejected:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for UsersUploadUserImageParamsType.
 const (
 	UsersUploadUserImageParamsTypeAvatar UsersUploadUserImageParamsType = "avatar"
@@ -514,6 +533,339 @@ type ModelsAddTeamMemberRequest struct {
 
 	// Name メンバー名
 	Name string `json:"name"`
+}
+
+// ModelsAdminAiReportListItem 生成済みAIレポート一覧アイテム（Work Values / Career Interest 共通）
+type ModelsAdminAiReportListItem struct {
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// Id レポートID
+	Id ModelsUuid `json:"id"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// SessionId セッションID
+	SessionId ModelsUuid `json:"session_id"`
+
+	// UserId ユーザーID
+	UserId ModelsUuid `json:"user_id"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+
+	// ViewedAt ユーザーの閲覧日時（未閲覧なら null）
+	ViewedAt *time.Time `json:"viewed_at"`
+}
+
+// ModelsAdminAiReportListResponse 生成済みAIレポート一覧レスポンス
+type ModelsAdminAiReportListResponse struct {
+	// Reports レポート一覧
+	Reports []ModelsAdminAiReportListItem `json:"reports"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsAdminCompanyBypassLoginResponse 企業成り代わりログイン結果（cookie はレスポンスで焼かれる）
+type ModelsAdminCompanyBypassLoginResponse struct {
+	// CompanyName ログインした企業の企業名
+	CompanyName string `json:"companyName"`
+
+	// Message 固定で "ok"
+	Message string `json:"message"`
+}
+
+// ModelsAdminCompanyItem 管理画面の企業一覧アイテム
+type ModelsAdminCompanyItem struct {
+	// CompanyName 企業名
+	CompanyName string `json:"companyName"`
+
+	// ContactPersonName 担当者名
+	ContactPersonName string `json:"contactPersonName"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Email メールアドレス
+	Email string `json:"email"`
+
+	// Id 企業アカウントID
+	Id ModelsUuid `json:"id"`
+
+	// PhoneNumber 電話番号
+	PhoneNumber string `json:"phoneNumber"`
+
+	// Status 承認ステータス
+	Status ModelsCompanyStatus `json:"status"`
+}
+
+// ModelsAdminCompanyListResponse 管理画面の企業一覧レスポンス
+type ModelsAdminCompanyListResponse struct {
+	// Companies 企業一覧
+	Companies []ModelsAdminCompanyItem `json:"companies"`
+
+	// Page 現在ページ（1始まり）
+	Page int32 `json:"page"`
+
+	// PerPage 1ページあたり件数
+	PerPage int32 `json:"per_page"`
+
+	// Total 総件数
+	Total int64 `json:"total"`
+
+	// TotalPages 総ページ数
+	TotalPages int32 `json:"total_pages"`
+}
+
+// ModelsAdminIntegratedReportListItem 生成済み統合レポート一覧アイテム
+type ModelsAdminIntegratedReportListItem struct {
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// Id レポートID
+	Id ModelsUuid `json:"id"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// RequestId リクエストID
+	RequestId ModelsUuid `json:"request_id"`
+
+	// UserId ユーザーID
+	UserId ModelsUuid `json:"user_id"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+
+	// ViewedAt ユーザーの閲覧日時（未閲覧なら null）
+	ViewedAt *time.Time `json:"viewed_at"`
+}
+
+// ModelsAdminIntegratedReportListResponse 生成済み統合レポート一覧レスポンス
+type ModelsAdminIntegratedReportListResponse struct {
+	// Reports レポート一覧
+	Reports []ModelsAdminIntegratedReportListItem `json:"reports"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsAdminIssueKeyResponse 個人APIトークン発行レスポンス（トークンはこの一度だけ返る）
+type ModelsAdminIssueKeyResponse struct {
+	// Admin 更新後の管理者
+	Admin ModelsAdminItem `json:"admin"`
+
+	// ApiKey 発行された個人APIトークン（`admin_` プレフィックス）
+	ApiKey string `json:"api_key"`
+}
+
+// ModelsAdminItem 管理者
+type ModelsAdminItem struct {
+	// ApiKeyPrefix 個人APIトークンのプレフィックス（未発行なら null）
+	ApiKeyPrefix *string `json:"api_key_prefix"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// Email メールアドレス
+	Email string `json:"email"`
+
+	// Id 管理者ID
+	Id ModelsUuid `json:"id"`
+
+	// LastUsedAt 個人APIトークンの最終使用日時（未使用なら null）
+	LastUsedAt *time.Time `json:"last_used_at"`
+
+	// Name 表示名
+	Name string `json:"name"`
+}
+
+// ModelsAdminListResponse 管理者一覧レスポンス
+type ModelsAdminListResponse struct {
+	// Admins 管理者一覧
+	Admins []ModelsAdminItem `json:"admins"`
+}
+
+// ModelsAdminMessageResponse 処理結果メッセージ
+type ModelsAdminMessageResponse struct {
+	// Message 固定で "ok"
+	Message string `json:"message"`
+}
+
+// ModelsAdminPendingIntegratedRequestItem 統合レポート未生成リクエスト
+type ModelsAdminPendingIntegratedRequestItem struct {
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// FreeText 自由記述
+	FreeText string `json:"free_text"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// RequestId リクエストID
+	RequestId ModelsUuid `json:"request_id"`
+
+	// Topic1 トピック1
+	Topic1 int16 `json:"topic1"`
+
+	// Topic2 トピック2
+	Topic2 int16 `json:"topic2"`
+
+	// Topic3 トピック3
+	Topic3 int16 `json:"topic3"`
+
+	// UserId ユーザーID
+	UserId ModelsUuid `json:"user_id"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsAdminPendingIntegratedRequestsResponse 統合レポート未生成リクエスト一覧レスポンス
+type ModelsAdminPendingIntegratedRequestsResponse struct {
+	// Requests リクエスト一覧
+	Requests []ModelsAdminPendingIntegratedRequestItem `json:"requests"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsAdminPendingSessionItem AIレポート未生成の診断セッション（Work Values / Career Interest 共通）
+type ModelsAdminPendingSessionItem struct {
+	// CompletedAt 診断完了日時
+	CompletedAt *time.Time `json:"completed_at"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// ReportRequestedAt レポート生成リクエスト日時
+	ReportRequestedAt *time.Time `json:"report_requested_at"`
+
+	// SessionId セッションID
+	SessionId ModelsUuid `json:"session_id"`
+
+	// UserId ユーザーID
+	UserId ModelsUuid `json:"user_id"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsAdminPendingSessionsResponse AIレポート未生成セッション一覧レスポンス
+type ModelsAdminPendingSessionsResponse struct {
+	// Sessions セッション一覧
+	Sessions []ModelsAdminPendingSessionItem `json:"sessions"`
+
+	// Total 総件数
+	Total int32 `json:"total"`
+}
+
+// ModelsAdminPromptResponse レポート生成用プロンプト
+type ModelsAdminPromptResponse struct {
+	// Prompt データ埋め込み済みのプロンプト全文
+	Prompt string `json:"prompt"`
+}
+
+// ModelsAdminSaveReportRequest AIレポート保存リクエスト
+type ModelsAdminSaveReportRequest struct {
+	// Content レポート本文（Markdown）
+	Content string `json:"content"`
+}
+
+// ModelsAdminSavedAiReportResponse 保存済みAIレポート（Work Values / Career Interest 共通）
+type ModelsAdminSavedAiReportResponse struct {
+	// Content レポート本文（Markdown）
+	Content string `json:"content"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// Id レポートID
+	Id ModelsUuid `json:"id"`
+
+	// SessionId セッションID
+	SessionId ModelsUuid `json:"session_id"`
+}
+
+// ModelsAdminSavedIntegratedReportResponse 保存済み統合レポート
+type ModelsAdminSavedIntegratedReportResponse struct {
+	// Content レポート本文（Markdown）
+	Content string `json:"content"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// Id レポートID
+	Id ModelsUuid `json:"id"`
+
+	// RequestId リクエストID
+	RequestId ModelsUuid `json:"request_id"`
+}
+
+// ModelsAdminSessionScoresResponse Work Values セッションのスコア（レポート生成用の生データ）
+type ModelsAdminSessionScoresResponse struct {
+	// ConsistencyCoefficient 整合性係数 ζ（未計算なら省略）
+	ConsistencyCoefficient *float32 `json:"consistency_coefficient,omitempty"`
+
+	// ConsistencyLevel 整合性レベル（未計算なら省略）
+	ConsistencyLevel *string `json:"consistency_level,omitempty"`
+
+	// Mu ニーズ別 BT 強度 μ
+	Mu map[string]float64 `json:"mu"`
+
+	// Se ニーズ別標準誤差 SE
+	Se map[string]float64 `json:"se"`
+}
+
+// ModelsAdminUserBypassLoginResponse ユーザー成り代わりログイン結果（cookie はレスポンスで焼かれる）
+type ModelsAdminUserBypassLoginResponse struct {
+	// Message 固定で "ok"
+	Message string `json:"message"`
+
+	// Username ログインしたユーザーのユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsAdminUserItem 管理画面のユーザー一覧アイテム
+type ModelsAdminUserItem struct {
+	// AvatarUrl アバターURL
+	AvatarUrl *string `json:"avatar_url"`
+
+	// CreatedAt 作成日時
+	CreatedAt time.Time `json:"created_at"`
+
+	// Email メールアドレス
+	Email *string `json:"email"`
+
+	// Id ユーザーID
+	Id ModelsUuid `json:"id"`
+
+	// Name 表示名
+	Name string `json:"name"`
+
+	// Username ユーザー名
+	Username string `json:"username"`
+}
+
+// ModelsAdminUserListResponse 管理画面のユーザー一覧レスポンス
+type ModelsAdminUserListResponse struct {
+	// Page 現在ページ（1始まり）
+	Page int32 `json:"page"`
+
+	// PerPage 1ページあたり件数
+	PerPage int32 `json:"per_page"`
+
+	// Total 総件数
+	Total int64 `json:"total"`
+
+	// TotalPages 総ページ数
+	TotalPages int32 `json:"total_pages"`
+
+	// Users ユーザー一覧
+	Users []ModelsAdminUserItem `json:"users"`
 }
 
 // ModelsAiReportResponse 診断AIレポート（Work Values / Career Interest 共通）
@@ -1118,6 +1470,15 @@ type ModelsConversationResponse struct {
 
 	// UnreadCount 未読数
 	UnreadCount int `json:"unreadCount"`
+}
+
+// ModelsCreateAdminRequest 管理者作成リクエスト
+type ModelsCreateAdminRequest struct {
+	// Email メールアドレス
+	Email string `json:"email"`
+
+	// Name 表示名
+	Name *string `json:"name,omitempty"`
 }
 
 // ModelsCreateArticleRequest 記事作成リクエスト
@@ -3268,6 +3629,15 @@ type ModelsUpdateCompanyProfileRequest struct {
 	WebsiteUrl string `json:"websiteUrl"`
 }
 
+// ModelsUpdateCompanyStatusRequest 企業ステータス更新リクエスト
+type ModelsUpdateCompanyStatusRequest struct {
+	// Status 更新後ステータス
+	Status ModelsUpdateCompanyStatusRequestStatus `json:"status"`
+}
+
+// ModelsUpdateCompanyStatusRequestStatus 更新後ステータス
+type ModelsUpdateCompanyStatusRequestStatus string
+
 // ModelsUpdateDiagnoseStatusRequest チーム診断ステータス更新リクエスト（指定したキーのみ更新）
 type ModelsUpdateDiagnoseStatusRequest struct {
 	// CiStatus Career Interest 診断ステータス
@@ -3572,6 +3942,30 @@ type ModelsWVValueScoreResponse struct {
 
 	// ValueId Value ID
 	ValueId string `json:"valueId"`
+}
+
+// AdminListCompaniesParams defines parameters for AdminListCompanies.
+type AdminListCompaniesParams struct {
+	// Page ページ番号（1始まり、デフォルト1）
+	Page *int32 `form:"page,omitempty" json:"page,omitempty"`
+
+	// PerPage 1ページあたり件数（1〜100、デフォルト20）
+	PerPage *int32 `form:"per_page,omitempty" json:"per_page,omitempty"`
+
+	// Status 承認ステータスでの絞り込み
+	Status *ModelsCompanyStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// AdminListUsersParams defines parameters for AdminListUsers.
+type AdminListUsersParams struct {
+	// Page ページ番号（1始まり、デフォルト1）
+	Page *int32 `form:"page,omitempty" json:"page,omitempty"`
+
+	// PerPage 1ページあたり件数（1〜100、デフォルト20）
+	PerPage *int32 `form:"per_page,omitempty" json:"per_page,omitempty"`
+
+	// Q ユーザー名・表示名・メールの部分一致検索
+	Q *string `form:"q,omitempty" json:"q,omitempty"`
 }
 
 // CandidateApplicationsCheckAppliedParams defines parameters for CandidateApplicationsCheckApplied.
@@ -3976,6 +4370,21 @@ type UsersUploadUserImageParams struct {
 // UsersUploadUserImageParamsType defines parameters for UsersUploadUserImage.
 type UsersUploadUserImageParamsType string
 
+// AdminCreateAdminJSONRequestBody defines body for AdminCreateAdmin for application/json ContentType.
+type AdminCreateAdminJSONRequestBody = ModelsCreateAdminRequest
+
+// AdminSaveCiReportJSONRequestBody defines body for AdminSaveCiReport for application/json ContentType.
+type AdminSaveCiReportJSONRequestBody = ModelsAdminSaveReportRequest
+
+// AdminUpdateCompanyStatusJSONRequestBody defines body for AdminUpdateCompanyStatus for application/json ContentType.
+type AdminUpdateCompanyStatusJSONRequestBody = ModelsUpdateCompanyStatusRequest
+
+// AdminSaveIntegratedReportJSONRequestBody defines body for AdminSaveIntegratedReport for application/json ContentType.
+type AdminSaveIntegratedReportJSONRequestBody = ModelsAdminSaveReportRequest
+
+// AdminSaveWvReportJSONRequestBody defines body for AdminSaveWvReport for application/json ContentType.
+type AdminSaveWvReportJSONRequestBody = ModelsAdminSaveReportRequest
+
 // CandidateApplicationsApplyToJobJSONRequestBody defines body for CandidateApplicationsApplyToJob for application/json ContentType.
 type CandidateApplicationsApplyToJobJSONRequestBody = ModelsApplyJobRequest
 
@@ -4134,6 +4543,93 @@ type WorkValuesWvSubmitResultJSONRequestBody = ModelsWVSubmitResultRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// List admins
+	// (GET /api/admin/admins)
+	AdminListAdmins(ctx echo.Context) error
+	// Create an admin
+	// (POST /api/admin/admins)
+	AdminCreateAdmin(ctx echo.Context) error
+	// Delete an admin
+	// (DELETE /api/admin/admins/{adminId})
+	AdminDeleteAdmin(ctx echo.Context, adminId ModelsUuid) error
+	// Issue a personal API token for an admin
+	// (POST /api/admin/admins/{adminId}/api-key)
+	AdminIssueAdminApiKey(ctx echo.Context, adminId ModelsUuid) error
+	// List generated Career Interest AI reports
+	// (GET /api/admin/ci-reports/list)
+	AdminListCiReports(ctx echo.Context) error
+	// List Career Interest sessions without an AI report
+	// (GET /api/admin/ci-reports/pending)
+	AdminListPendingCiSessions(ctx echo.Context) error
+	// Get a Career Interest AI report
+	// (GET /api/admin/ci-sessions/{sessionId}/ai-report)
+	AdminGetCiReport(ctx echo.Context, sessionId ModelsUuid) error
+	// Save a Career Interest AI report
+	// (PUT /api/admin/ci-sessions/{sessionId}/ai-report)
+	AdminSaveCiReport(ctx echo.Context, sessionId ModelsUuid) error
+	// Get the report-generation prompt for a Career Interest session
+	// (GET /api/admin/ci-sessions/{sessionId}/prompt)
+	AdminGetCiPrompt(ctx echo.Context, sessionId ModelsUuid) error
+	// Reset the viewed flag of a Career Interest AI report
+	// (POST /api/admin/ci-sessions/{sessionId}/reset-viewed)
+	AdminResetCiReportViewed(ctx echo.Context, sessionId ModelsUuid) error
+	// List company accounts for the admin console
+	// (GET /api/admin/companies)
+	AdminListCompanies(ctx echo.Context, params AdminListCompaniesParams) error
+	// Log in as a company (bypass)
+	// (POST /api/admin/companies/{companyId}/bypass-login)
+	AdminBypassLoginAsCompany(ctx echo.Context, companyId ModelsUuid) error
+	// Update a company's approval status
+	// (PATCH /api/admin/companies/{companyId}/status)
+	AdminUpdateCompanyStatus(ctx echo.Context, companyId ModelsUuid) error
+	// List generated integrated reports
+	// (GET /api/admin/integrated-reports/list)
+	AdminListIntegratedReports(ctx echo.Context) error
+	// List integrated report requests without a report
+	// (GET /api/admin/integrated-reports/pending)
+	AdminListPendingIntegratedRequests(ctx echo.Context) error
+	// Get an integrated report
+	// (GET /api/admin/integrated-requests/{requestId}/ai-report)
+	AdminGetIntegratedReportAsAdmin(ctx echo.Context, requestId ModelsUuid) error
+	// Save an integrated report
+	// (PUT /api/admin/integrated-requests/{requestId}/ai-report)
+	AdminSaveIntegratedReport(ctx echo.Context, requestId ModelsUuid) error
+	// Get the report-generation prompt for an integrated report request
+	// (GET /api/admin/integrated-requests/{requestId}/prompt)
+	AdminGetIntegratedPrompt(ctx echo.Context, requestId ModelsUuid) error
+	// Reset the viewed flag of an integrated report
+	// (POST /api/admin/integrated-requests/{requestId}/reset-viewed)
+	AdminResetIntegratedReportViewed(ctx echo.Context, requestId ModelsUuid) error
+	// List generated Work Values AI reports
+	// (GET /api/admin/reports/list)
+	AdminListWvReports(ctx echo.Context) error
+	// List Work Values sessions without an AI report
+	// (GET /api/admin/reports/pending)
+	AdminListPendingWvSessions(ctx echo.Context) error
+	// Get a Work Values AI report
+	// (GET /api/admin/sessions/{sessionId}/ai-report)
+	AdminGetWvReport(ctx echo.Context, sessionId ModelsUuid) error
+	// Save a Work Values AI report
+	// (PUT /api/admin/sessions/{sessionId}/ai-report)
+	AdminSaveWvReport(ctx echo.Context, sessionId ModelsUuid) error
+	// Get the report-generation prompt for a Work Values session
+	// (GET /api/admin/sessions/{sessionId}/prompt)
+	AdminGetWvPrompt(ctx echo.Context, sessionId ModelsUuid) error
+	// Reset the viewed flag of a Work Values AI report
+	// (POST /api/admin/sessions/{sessionId}/reset-viewed)
+	AdminResetWvReportViewed(ctx echo.Context, sessionId ModelsUuid) error
+	// Get the raw scores of a Work Values session
+	// (GET /api/admin/sessions/{sessionId}/scores)
+	AdminGetWvSessionScores(ctx echo.Context, sessionId ModelsUuid) error
+	// List users for the admin console
+	// (GET /api/admin/users)
+	AdminListUsers(ctx echo.Context, params AdminListUsersParams) error
+	// Delete a user
+	// (DELETE /api/admin/users/{userId})
+	AdminDeleteUser(ctx echo.Context, userId ModelsUuid) error
+	// Log in as a user (bypass)
+	// (POST /api/admin/users/{userId}/bypass-login)
+	AdminBypassLoginAsUser(ctx echo.Context, userId ModelsUuid) error
 	// List applications by the candidate
 	// (GET /api/applications)
 	CandidateApplicationsListCandidateApplications(ctx echo.Context) error
@@ -4670,6 +5166,504 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// AdminListAdmins converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListAdmins(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListAdmins(ctx)
+	return err
+}
+
+// AdminCreateAdmin converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminCreateAdmin(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminCreateAdmin(ctx)
+	return err
+}
+
+// AdminDeleteAdmin converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminDeleteAdmin(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "adminId" -------------
+	var adminId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "adminId", ctx.Param("adminId"), &adminId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter adminId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminDeleteAdmin(ctx, adminId)
+	return err
+}
+
+// AdminIssueAdminApiKey converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminIssueAdminApiKey(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "adminId" -------------
+	var adminId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "adminId", ctx.Param("adminId"), &adminId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter adminId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminIssueAdminApiKey(ctx, adminId)
+	return err
+}
+
+// AdminListCiReports converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListCiReports(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListCiReports(ctx)
+	return err
+}
+
+// AdminListPendingCiSessions converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListPendingCiSessions(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListPendingCiSessions(ctx)
+	return err
+}
+
+// AdminGetCiReport converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminGetCiReport(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminGetCiReport(ctx, sessionId)
+	return err
+}
+
+// AdminSaveCiReport converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminSaveCiReport(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminSaveCiReport(ctx, sessionId)
+	return err
+}
+
+// AdminGetCiPrompt converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminGetCiPrompt(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminGetCiPrompt(ctx, sessionId)
+	return err
+}
+
+// AdminResetCiReportViewed converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminResetCiReportViewed(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminResetCiReportViewed(ctx, sessionId)
+	return err
+}
+
+// AdminListCompanies converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListCompanies(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AdminListCompaniesParams
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "page", ctx.QueryParams(), &params.Page, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "per_page" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "per_page", ctx.QueryParams(), &params.PerPage, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter per_page: %s", err))
+	}
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "status", ctx.QueryParams(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter status: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListCompanies(ctx, params)
+	return err
+}
+
+// AdminBypassLoginAsCompany converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminBypassLoginAsCompany(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "companyId" -------------
+	var companyId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "companyId", ctx.Param("companyId"), &companyId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter companyId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminBypassLoginAsCompany(ctx, companyId)
+	return err
+}
+
+// AdminUpdateCompanyStatus converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminUpdateCompanyStatus(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "companyId" -------------
+	var companyId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "companyId", ctx.Param("companyId"), &companyId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter companyId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminUpdateCompanyStatus(ctx, companyId)
+	return err
+}
+
+// AdminListIntegratedReports converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListIntegratedReports(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListIntegratedReports(ctx)
+	return err
+}
+
+// AdminListPendingIntegratedRequests converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListPendingIntegratedRequests(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListPendingIntegratedRequests(ctx)
+	return err
+}
+
+// AdminGetIntegratedReportAsAdmin converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminGetIntegratedReportAsAdmin(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "requestId" -------------
+	var requestId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", ctx.Param("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter requestId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminGetIntegratedReportAsAdmin(ctx, requestId)
+	return err
+}
+
+// AdminSaveIntegratedReport converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminSaveIntegratedReport(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "requestId" -------------
+	var requestId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", ctx.Param("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter requestId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminSaveIntegratedReport(ctx, requestId)
+	return err
+}
+
+// AdminGetIntegratedPrompt converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminGetIntegratedPrompt(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "requestId" -------------
+	var requestId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", ctx.Param("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter requestId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminGetIntegratedPrompt(ctx, requestId)
+	return err
+}
+
+// AdminResetIntegratedReportViewed converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminResetIntegratedReportViewed(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "requestId" -------------
+	var requestId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "requestId", ctx.Param("requestId"), &requestId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter requestId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminResetIntegratedReportViewed(ctx, requestId)
+	return err
+}
+
+// AdminListWvReports converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListWvReports(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListWvReports(ctx)
+	return err
+}
+
+// AdminListPendingWvSessions converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListPendingWvSessions(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListPendingWvSessions(ctx)
+	return err
+}
+
+// AdminGetWvReport converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminGetWvReport(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminGetWvReport(ctx, sessionId)
+	return err
+}
+
+// AdminSaveWvReport converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminSaveWvReport(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminSaveWvReport(ctx, sessionId)
+	return err
+}
+
+// AdminGetWvPrompt converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminGetWvPrompt(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminGetWvPrompt(ctx, sessionId)
+	return err
+}
+
+// AdminResetWvReportViewed converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminResetWvReportViewed(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminResetWvReportViewed(ctx, sessionId)
+	return err
+}
+
+// AdminGetWvSessionScores converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminGetWvSessionScores(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "sessionId" -------------
+	var sessionId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "sessionId", ctx.Param("sessionId"), &sessionId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter sessionId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminGetWvSessionScores(ctx, sessionId)
+	return err
+}
+
+// AdminListUsers converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminListUsers(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AdminListUsersParams
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "page", ctx.QueryParams(), &params.Page, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "per_page" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "per_page", ctx.QueryParams(), &params.PerPage, runtime.BindQueryParameterOptions{Type: "integer", Format: "int32"})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter per_page: %s", err))
+	}
+
+	// ------------- Optional query parameter "q" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "q", ctx.QueryParams(), &params.Q, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter q: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminListUsers(ctx, params)
+	return err
+}
+
+// AdminDeleteUser converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminDeleteUser(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminDeleteUser(ctx, userId)
+	return err
+}
+
+// AdminBypassLoginAsUser converts echo context to params.
+func (w *ServerInterfaceWrapper) AdminBypassLoginAsUser(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "userId" -------------
+	var userId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "userId", ctx.Param("userId"), &userId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter userId: %s", err))
+	}
+
+	ctx.Set(AdminAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AdminBypassLoginAsUser(ctx, userId)
+	return err
 }
 
 // CandidateApplicationsListCandidateApplications converts echo context to params.
@@ -8231,6 +9225,35 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/api/admin/admins", wrapper.AdminListAdmins)
+	router.POST(baseURL+"/api/admin/admins", wrapper.AdminCreateAdmin)
+	router.DELETE(baseURL+"/api/admin/admins/:adminId", wrapper.AdminDeleteAdmin)
+	router.POST(baseURL+"/api/admin/admins/:adminId/api-key", wrapper.AdminIssueAdminApiKey)
+	router.GET(baseURL+"/api/admin/ci-reports/list", wrapper.AdminListCiReports)
+	router.GET(baseURL+"/api/admin/ci-reports/pending", wrapper.AdminListPendingCiSessions)
+	router.GET(baseURL+"/api/admin/ci-sessions/:sessionId/ai-report", wrapper.AdminGetCiReport)
+	router.PUT(baseURL+"/api/admin/ci-sessions/:sessionId/ai-report", wrapper.AdminSaveCiReport)
+	router.GET(baseURL+"/api/admin/ci-sessions/:sessionId/prompt", wrapper.AdminGetCiPrompt)
+	router.POST(baseURL+"/api/admin/ci-sessions/:sessionId/reset-viewed", wrapper.AdminResetCiReportViewed)
+	router.GET(baseURL+"/api/admin/companies", wrapper.AdminListCompanies)
+	router.POST(baseURL+"/api/admin/companies/:companyId/bypass-login", wrapper.AdminBypassLoginAsCompany)
+	router.PATCH(baseURL+"/api/admin/companies/:companyId/status", wrapper.AdminUpdateCompanyStatus)
+	router.GET(baseURL+"/api/admin/integrated-reports/list", wrapper.AdminListIntegratedReports)
+	router.GET(baseURL+"/api/admin/integrated-reports/pending", wrapper.AdminListPendingIntegratedRequests)
+	router.GET(baseURL+"/api/admin/integrated-requests/:requestId/ai-report", wrapper.AdminGetIntegratedReportAsAdmin)
+	router.PUT(baseURL+"/api/admin/integrated-requests/:requestId/ai-report", wrapper.AdminSaveIntegratedReport)
+	router.GET(baseURL+"/api/admin/integrated-requests/:requestId/prompt", wrapper.AdminGetIntegratedPrompt)
+	router.POST(baseURL+"/api/admin/integrated-requests/:requestId/reset-viewed", wrapper.AdminResetIntegratedReportViewed)
+	router.GET(baseURL+"/api/admin/reports/list", wrapper.AdminListWvReports)
+	router.GET(baseURL+"/api/admin/reports/pending", wrapper.AdminListPendingWvSessions)
+	router.GET(baseURL+"/api/admin/sessions/:sessionId/ai-report", wrapper.AdminGetWvReport)
+	router.PUT(baseURL+"/api/admin/sessions/:sessionId/ai-report", wrapper.AdminSaveWvReport)
+	router.GET(baseURL+"/api/admin/sessions/:sessionId/prompt", wrapper.AdminGetWvPrompt)
+	router.POST(baseURL+"/api/admin/sessions/:sessionId/reset-viewed", wrapper.AdminResetWvReportViewed)
+	router.GET(baseURL+"/api/admin/sessions/:sessionId/scores", wrapper.AdminGetWvSessionScores)
+	router.GET(baseURL+"/api/admin/users", wrapper.AdminListUsers)
+	router.DELETE(baseURL+"/api/admin/users/:userId", wrapper.AdminDeleteUser)
+	router.POST(baseURL+"/api/admin/users/:userId/bypass-login", wrapper.AdminBypassLoginAsUser)
 	router.GET(baseURL+"/api/applications", wrapper.CandidateApplicationsListCandidateApplications)
 	router.POST(baseURL+"/api/applications", wrapper.CandidateApplicationsApplyToJob)
 	router.GET(baseURL+"/api/applications/check", wrapper.CandidateApplicationsCheckApplied)

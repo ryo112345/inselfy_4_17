@@ -2,6 +2,9 @@ package middleware
 
 import (
 	"context"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,8 +14,11 @@ import (
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/getkin/kin-openapi/routers"
 	"github.com/getkin/kin-openapi/routers/gorillamux"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 
+	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -20,12 +26,14 @@ import (
 // OpenAPIRequestValidator validates incoming requests against the embedded
 // OpenAPI spec: body schema (maxLength, enum, required, ...), path and query
 // parameters, and the spec's security requirements (spec-driven auth). Routes
-// declaring `security` get JWT validation automatically; validated IDs are
-// published both to the echo context (UserIDKey / CompanyIDKey) and to the
-// request context (UserIDFromContext / CompanyIDFromContext). Paths not
-// present in the spec (uploads static files, admin routes, ...) pass through
-// untouched and keep their own auth middlewares.
-func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService) (echo.MiddlewareFunc, error) {
+// declaring `security` get JWT / X-Admin-Key validation automatically;
+// validated IDs are published both to the echo context (UserIDKey /
+// CompanyIDKey / AdminIDKey) and to the request context (UserIDFromContext /
+// CompanyIDFromContext / AdminIDFromContext). Paths not present in the spec
+// (uploads static files, websocket, ...) pass through untouched.
+// pool and adminStaticKey back the AdminAuth scheme (personal tokens stored
+// hashed in the admins table, plus the ADMIN_API_KEY bootstrap key).
+func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService, pool *pgxpool.Pool, adminStaticKey string) (echo.MiddlewareFunc, error) {
 	loader := openapi3.NewLoader()
 	doc, err := loader.LoadFromData(specYAML)
 	if err != nil {
@@ -42,7 +50,7 @@ func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService) (echo.
 		return nil, err
 	}
 
-	authFunc := newAuthenticationFunc(jwtService)
+	authFunc := newAuthenticationFunc(jwtService, generated.New(pool), adminStaticKey)
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -100,6 +108,12 @@ func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService) (echo.
 			if claims.companyID != "" {
 				c.Set(CompanyIDKey, claims.companyID)
 			}
+			if claims.adminAuthMethod != "" {
+				if claims.adminID != "" {
+					c.Set(AdminIDKey, claims.adminID)
+				}
+				annotateAuditLogger(c, claims.adminAuthMethod, claims.adminID)
+			}
 
 			return next(c)
 		}
@@ -107,12 +121,12 @@ func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService) (echo.
 }
 
 // newAuthenticationFunc validates the security schemes declared in the spec
-// (CandidateAuth / CompanyAuth) and publishes the validated IDs into the
-// claims holder carried by ctx. kin-openapi evaluates the OR alternatives of
-// a `security` list sequentially in declaration order and stops at the first
-// scheme that passes; an empty requirement `{}` always passes, which is how
-// optional auth is expressed.
-func newAuthenticationFunc(jwtService port.JWTService) openapi3filter.AuthenticationFunc {
+// (CandidateAuth / CompanyAuth / AdminAuth) and publishes the validated IDs
+// into the claims holder carried by ctx. kin-openapi evaluates the OR
+// alternatives of a `security` list sequentially in declaration order and
+// stops at the first scheme that passes; an empty requirement `{}` always
+// passes, which is how optional auth is expressed.
+func newAuthenticationFunc(jwtService port.JWTService, queries *generated.Queries, adminStaticKey string) openapi3filter.AuthenticationFunc {
 	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
 		req := input.RequestValidationInput.Request
 
@@ -140,6 +154,28 @@ func newAuthenticationFunc(jwtService port.JWTService) openapi3filter.Authentica
 			if claims != nil {
 				claims.companyID = companyID
 			}
+		case "AdminAuth":
+			// Static bootstrap key (ADMIN_API_KEY): valid but carries no
+			// identity. Fail-closed: with no key configured and no admins
+			// registered, every request is rejected.
+			if adminStaticKey != "" && subtle.ConstantTimeCompare([]byte(token), []byte(adminStaticKey)) == 1 {
+				if claims != nil {
+					claims.adminAuthMethod = "static_key"
+				}
+				return nil
+			}
+			// Personal token issued at /admin/admins, stored as SHA-256.
+			sum := sha256.Sum256([]byte(token))
+			hash := pgtype.Text{String: hex.EncodeToString(sum[:]), Valid: true}
+			admin, err := queries.GetAdminByAPIKeyHash(ctx, hash)
+			if err != nil {
+				return fmt.Errorf("security scheme %q: invalid key", input.SecuritySchemeName)
+			}
+			_ = queries.TouchAdminLastUsed(ctx, admin.ID)
+			if claims != nil {
+				claims.adminID = admin.ID.String()
+				claims.adminAuthMethod = "personal_token"
+			}
 		default:
 			return fmt.Errorf("security scheme %q is not supported", input.SecuritySchemeName)
 		}
@@ -147,13 +183,19 @@ func newAuthenticationFunc(jwtService port.JWTService) openapi3filter.Authentica
 	}
 }
 
-// schemeToken extracts the credential for an apiKey-in-cookie scheme: the
-// cookie named by the spec, with `Authorization: Bearer` as the documented
+// schemeToken extracts the credential for an apiKey scheme. Header schemes
+// (X-Admin-Key) read exactly the named header. Cookie schemes read the cookie
+// named by the spec, with `Authorization: Bearer` as the documented
 // development fallback (mirrors the legacy per-route middlewares).
 func schemeToken(req *http.Request, scheme *openapi3.SecurityScheme) string {
-	if scheme != nil && scheme.Type == "apiKey" && scheme.In == "cookie" {
-		if cookie, err := req.Cookie(scheme.Name); err == nil && cookie.Value != "" {
-			return cookie.Value
+	if scheme != nil && scheme.Type == "apiKey" {
+		switch scheme.In {
+		case "header":
+			return req.Header.Get(scheme.Name)
+		case "cookie":
+			if cookie, err := req.Cookie(scheme.Name); err == nil && cookie.Value != "" {
+				return cookie.Value
+			}
 		}
 	}
 	header := req.Header.Get("Authorization")
