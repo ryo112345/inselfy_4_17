@@ -19,7 +19,7 @@ import (
 type stubInput struct {
 	createFn func(ctx context.Context, in user.CreateUserInput) (*user.User, error)
 	getFn    func(ctx context.Context, username string) (*user.User, error)
-	updateFn func(ctx context.Context, username string, in user.UpdateProfileInput) (*user.User, error)
+	updateFn func(ctx context.Context, authUserID, username string, in user.UpdateProfileInput) (*user.User, error)
 }
 
 func (s *stubInput) Create(ctx context.Context, in user.CreateUserInput) (*user.User, error) {
@@ -30,8 +30,8 @@ func (s *stubInput) GetByUsername(ctx context.Context, u string) (*user.User, er
 	return s.getFn(ctx, u)
 }
 func (s *stubInput) GetByID(_ context.Context, _ string) (*user.User, error) { return nil, nil }
-func (s *stubInput) UpdateProfile(ctx context.Context, u string, in user.UpdateProfileInput) (*user.User, error) {
-	return s.updateFn(ctx, u, in)
+func (s *stubInput) UpdateProfile(ctx context.Context, authUserID, u string, in user.UpdateProfileInput) (*user.User, error) {
+	return s.updateFn(ctx, authUserID, u, in)
 }
 
 // controllerWith builds a UserController bound to the provided stub input.
@@ -45,7 +45,7 @@ func controllerWith(stub *stubInput) *controller.UserController {
 func TestUpdateProfile_DistinguishesAbsentFromNull(t *testing.T) {
 	received := make(chan user.UpdateProfileInput, 1)
 	stub := &stubInput{
-		updateFn: func(_ context.Context, _ string, in user.UpdateProfileInput) (*user.User, error) {
+		updateFn: func(_ context.Context, _, _ string, in user.UpdateProfileInput) (*user.User, error) {
 			received <- in
 			return &user.User{
 				ID: "uid-1", Username: mustParseUsername(t, "alice"), Name: "Alice", CreatedAt: time.Now(), UpdatedAt: time.Now(),
@@ -86,7 +86,7 @@ func TestUpdateProfile_DistinguishesAbsentFromNull(t *testing.T) {
 
 func TestUpdateProfile_RejectsNullName(t *testing.T) {
 	stub := &stubInput{
-		updateFn: func(_ context.Context, _ string, _ user.UpdateProfileInput) (*user.User, error) {
+		updateFn: func(_ context.Context, _, _ string, _ user.UpdateProfileInput) (*user.User, error) {
 			t.Fatal("usecase should not be called when name is null")
 			return nil, nil
 		},

@@ -34,8 +34,8 @@ func NewSkillInteractor(
 // Attach adds a skill by name to the user. Idempotent at the DB layer (ON
 // CONFLICT DO NOTHING) but surfaces a conflict to the caller so the frontend
 // can distinguish "already attached" from "newly attached".
-func (i *SkillInteractor) Attach(ctx context.Context, rawUsername, rawName string) (*skill.UserSkill, error) {
-	u, err := i.resolveUser(ctx, rawUsername)
+func (i *SkillInteractor) Attach(ctx context.Context, authUserID, rawUsername, rawName string) (*skill.UserSkill, error) {
+	u, err := i.resolveOwnedUser(ctx, authUserID, rawUsername)
 	if err != nil {
 		return nil, err
 	}
@@ -87,8 +87,8 @@ func (i *SkillInteractor) Attach(ctx context.Context, rawUsername, rawName strin
 }
 
 // DetachByName removes the user's attachment to a skill by skill name.
-func (i *SkillInteractor) DetachByName(ctx context.Context, rawUsername, rawName string) error {
-	u, err := i.resolveUser(ctx, rawUsername)
+func (i *SkillInteractor) DetachByName(ctx context.Context, authUserID, rawUsername, rawName string) error {
+	u, err := i.resolveOwnedUser(ctx, authUserID, rawUsername)
 	if err != nil {
 		return err
 	}
@@ -114,4 +114,17 @@ func (i *SkillInteractor) resolveUser(ctx context.Context, raw string) (*user.Us
 		return nil, err
 	}
 	return i.userRepo.GetByUsername(ctx, username)
+}
+
+// resolveOwnedUser resolves the path user and verifies the authenticated
+// caller IS that user (see ExperienceInteractor.resolveOwnedUser).
+func (i *SkillInteractor) resolveOwnedUser(ctx context.Context, authUserID, raw string) (*user.User, error) {
+	u, err := i.resolveUser(ctx, raw)
+	if err != nil {
+		return nil, err
+	}
+	if u.ID != authUserID {
+		return nil, port.ErrForbidden
+	}
+	return u, nil
 }

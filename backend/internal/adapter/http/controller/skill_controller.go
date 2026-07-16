@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -37,7 +38,7 @@ func (c *SkillController) Attach(ctx echo.Context, username string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	s, err := c.input.Attach(ctx.Request().Context(), username, body.Name)
+	s, err := c.input.Attach(ctx.Request().Context(), authmw.UserID(ctx), username, body.Name)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -46,7 +47,7 @@ func (c *SkillController) Attach(ctx echo.Context, username string) error {
 
 // Detach handles DELETE /api/users/:username/skills/:name.
 func (c *SkillController) Detach(ctx echo.Context, username, name string) error {
-	if err := c.input.DetachByName(ctx.Request().Context(), username, name); err != nil {
+	if err := c.input.DetachByName(ctx.Request().Context(), authmw.UserID(ctx), username, name); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)

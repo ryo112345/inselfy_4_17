@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -77,7 +78,7 @@ func (c *UserController) UpdateProfile(ctx echo.Context, username string) error 
 	if err != nil {
 		return badRequest(ctx, err.Error())
 	}
-	usr, err := c.input.UpdateProfile(ctx.Request().Context(), username, input)
+	usr, err := c.input.UpdateProfile(ctx.Request().Context(), authmw.UserID(ctx), username, input)
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -167,6 +168,16 @@ func (c *UserController) UploadImage(ctx echo.Context, username string) error {
 		return badRequest(ctx, "type must be 'avatar' or 'cover'")
 	}
 
+	// Verify ownership before doing any upload work, so a foreign caller can't
+	// leave an orphaned file in storage (UpdateProfile below re-checks too).
+	target, err := c.input.GetByUsername(ctx.Request().Context(), username)
+	if err != nil {
+		return handleError(ctx, err)
+	}
+	if target.ID != authmw.UserID(ctx) {
+		return handleError(ctx, port.ErrForbidden)
+	}
+
 	file, err := ctx.FormFile("file")
 	if err != nil {
 		return badRequest(ctx, "file is required")
@@ -201,7 +212,7 @@ func (c *UserController) UploadImage(ctx echo.Context, username string) error {
 		updateInput.CoverPhotoURL = ptrPtr(imageURL)
 	}
 
-	usr, err := c.input.UpdateProfile(ctx.Request().Context(), username, updateInput)
+	usr, err := c.input.UpdateProfile(ctx.Request().Context(), target.ID, username, updateInput)
 	if err != nil {
 		return handleError(ctx, err)
 	}

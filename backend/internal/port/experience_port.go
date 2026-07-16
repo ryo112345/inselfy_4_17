@@ -8,9 +8,9 @@ import (
 
 // ExperienceInputPort defines experience use case input methods.
 type ExperienceInputPort interface {
-	Create(ctx context.Context, username string, input experience.CreateInput) (*experience.Experience, error)
-	Update(ctx context.Context, username, experienceID string, input experience.UpdateInput) (*experience.Experience, error)
-	Delete(ctx context.Context, username, experienceID string) error
+	Create(ctx context.Context, authUserID, username string, input experience.CreateInput) (*experience.Experience, error)
+	Update(ctx context.Context, authUserID, username, experienceID string, input experience.UpdateInput) (*experience.Experience, error)
+	Delete(ctx context.Context, authUserID, username, experienceID string) error
 	List(ctx context.Context, username string) ([]*experience.Experience, error)
 }
 

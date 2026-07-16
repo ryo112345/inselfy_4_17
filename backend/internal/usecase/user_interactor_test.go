@@ -7,6 +7,7 @@ import (
 
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
+	"github.com/akiyama/inselfy/backend/internal/port"
 	"github.com/akiyama/inselfy/backend/internal/usecase"
 )
 
@@ -70,7 +71,7 @@ func TestUserInteractor_UpdateProfile(t *testing.T) {
 
 		hl := "Backend Engineer"
 		input := user.UpdateProfileInput{Headline: ptrPtrString(&hl)}
-		if _, err := it.UpdateProfile(ctx, "alice", input); err != nil {
+		if _, err := it.UpdateProfile(ctx, "uid-1", "alice", input); err != nil {
 			t.Fatalf("unexpected err: %v", err)
 		}
 		if received.Name != nil {
@@ -86,9 +87,29 @@ func TestUserInteractor_UpdateProfile(t *testing.T) {
 			getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return nil, domainerr.ErrNotFound },
 		}
 		it := usecase.NewUserInteractor(repo)
-		_, err := it.UpdateProfile(ctx, "ghost", user.UpdateProfileInput{})
+		_, err := it.UpdateProfile(ctx, "uid-1", "ghost", user.UpdateProfileInput{})
 		if !errors.Is(err, domainerr.ErrNotFound) {
 			t.Fatalf("expected ErrNotFound, got %v", err)
+		}
+	})
+
+	t.Run("rejects caller who is not the profile owner", func(t *testing.T) {
+		updated := false
+		repo := &userRepoStub{
+			getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return existing, nil },
+			updateProfile: func(_ context.Context, _ string, _ user.UpdateProfileInput) (*user.User, error) {
+				updated = true
+				return existing, nil
+			},
+		}
+		it := usecase.NewUserInteractor(repo)
+		hl := "hijacked"
+		_, err := it.UpdateProfile(ctx, "attacker-uid", "alice", user.UpdateProfileInput{Headline: ptrPtrString(&hl)})
+		if !errors.Is(err, port.ErrForbidden) {
+			t.Fatalf("expected ErrForbidden, got %v", err)
+		}
+		if updated {
+			t.Fatal("profile must not be updated by a non-owner")
 		}
 	})
 
@@ -102,7 +123,7 @@ func TestUserInteractor_UpdateProfile(t *testing.T) {
 		}
 		it := usecase.NewUserInteractor(repo)
 		bad := "not-a-color"
-		_, err := it.UpdateProfile(ctx, "alice", user.UpdateProfileInput{ProfileColor: ptrPtrString(&bad)})
+		_, err := it.UpdateProfile(ctx, "uid-1", "alice", user.UpdateProfileInput{ProfileColor: ptrPtrString(&bad)})
 		if !errors.Is(err, user.ErrInvalidProfileColor) {
 			t.Fatalf("expected ErrInvalidProfileColor, got %v", err)
 		}

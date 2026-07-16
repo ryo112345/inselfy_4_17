@@ -12,7 +12,7 @@ type UserInputPort interface {
 	Create(ctx context.Context, input user.CreateUserInput) (*user.User, error)
 	GetByUsername(ctx context.Context, username string) (*user.User, error)
 	GetByID(ctx context.Context, id string) (*user.User, error)
-	UpdateProfile(ctx context.Context, username string, input user.UpdateProfileInput) (*user.User, error)
+	UpdateProfile(ctx context.Context, authUserID, username string, input user.UpdateProfileInput) (*user.User, error)
 }
 
 // UserRepository abstracts user persistence.

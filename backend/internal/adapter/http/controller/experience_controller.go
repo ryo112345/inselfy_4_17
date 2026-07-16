@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/experience"
 	"github.com/akiyama/inselfy/backend/internal/pkg/cast"
@@ -39,7 +40,7 @@ func (c *ExperienceController) Create(ctx echo.Context, username string) error {
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	e, err := c.input.Create(ctx.Request().Context(), username, toCreateExperienceInput(body))
+	e, err := c.input.Create(ctx.Request().Context(), authmw.UserID(ctx), username, toCreateExperienceInput(body))
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -52,7 +53,7 @@ func (c *ExperienceController) Update(ctx echo.Context, username, experienceID s
 	if err := ctx.Bind(&body); err != nil {
 		return badRequest(ctx, "invalid body")
 	}
-	e, err := c.input.Update(ctx.Request().Context(), username, experienceID, toUpdateExperienceInput(body))
+	e, err := c.input.Update(ctx.Request().Context(), authmw.UserID(ctx), username, experienceID, toUpdateExperienceInput(body))
 	if err != nil {
 		return handleError(ctx, err)
 	}
@@ -61,7 +62,7 @@ func (c *ExperienceController) Update(ctx echo.Context, username, experienceID s
 
 // Delete handles DELETE /api/users/:username/experiences/:experienceId.
 func (c *ExperienceController) Delete(ctx echo.Context, username, experienceID string) error {
-	if err := c.input.Delete(ctx.Request().Context(), username, experienceID); err != nil {
+	if err := c.input.Delete(ctx.Request().Context(), authmw.UserID(ctx), username, experienceID); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)

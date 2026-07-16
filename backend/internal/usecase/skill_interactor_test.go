@@ -31,7 +31,7 @@ func TestSkillInteractor_Attach_HappyPath(t *testing.T) {
 	}
 	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{})
 
-	attached, err := it.Attach(ctx, "alice", "Go")
+	attached, err := it.Attach(ctx, "uid-1", "alice", "Go")
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
 	}
@@ -54,7 +54,7 @@ func TestSkillInteractor_Attach_AlreadyAttached(t *testing.T) {
 	}
 	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{})
 
-	_, err := it.Attach(ctx, "alice", "Go")
+	_, err := it.Attach(ctx, "uid-1", "alice", "Go")
 	if !errors.Is(err, domainerr.ErrConflict) {
 		t.Fatalf("expected ErrConflict, got %v", err)
 	}
@@ -74,7 +74,7 @@ func TestSkillInteractor_Attach_RejectsOverLimit(t *testing.T) {
 	}
 	it := usecase.NewSkillInteractor(repo, userRepo, inlineTxManager{})
 
-	_, err := it.Attach(ctx, "alice", "Go")
+	_, err := it.Attach(ctx, "uid-1", "alice", "Go")
 	if !errors.Is(err, skill.ErrTooManyEntries) {
 		t.Fatalf("expected ErrTooManyEntries, got %v", err)
 	}
