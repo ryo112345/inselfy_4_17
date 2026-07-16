@@ -2637,7 +2637,7 @@ paths:
     post:
       operationId: CompanyInterviews_cancelCompanyInterview
       summary: Cancel an interview as the company
-      description: 面接キャンセル（企業認証）
+      description: 面接キャンセル（企業認証）。他社の面接は 403
       parameters:
         - name: interviewId
           in: path
@@ -2663,6 +2663,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -5298,6 +5304,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -5364,7 +5376,7 @@ paths:
     post:
       operationId: CandidateInterviews_cancelCandidateInterview
       summary: Cancel an interview as the candidate
-      description: 面接キャンセル（要ログイン）
+      description: 面接キャンセル（要ログイン）。他人の面接は 403
       parameters:
         - name: interviewId
           in: path
@@ -5390,6 +5402,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:

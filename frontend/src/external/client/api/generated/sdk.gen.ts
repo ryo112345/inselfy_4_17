@@ -950,7 +950,7 @@ export const companyInterviewsProposeInterview = <ThrowOnError extends boolean =
 /**
  * Cancel an interview as the company
  *
- * 面接キャンセル（企業認証）
+ * 面接キャンセル（企業認証）。他社の面接は 403
  */
 export const companyInterviewsCancelCompanyInterview = <ThrowOnError extends boolean = false>(options: Options<CompanyInterviewsCancelCompanyInterviewData, ThrowOnError>): RequestResult<CompanyInterviewsCancelCompanyInterviewResponses, CompanyInterviewsCancelCompanyInterviewErrors, ThrowOnError> => (options.client ?? client).post<CompanyInterviewsCancelCompanyInterviewResponses, CompanyInterviewsCancelCompanyInterviewErrors, ThrowOnError>({
     security: [{
@@ -1974,7 +1974,7 @@ export const candidateInterviewsGetProposalSlots = <ThrowOnError extends boolean
 /**
  * Cancel an interview as the candidate
  *
- * 面接キャンセル（要ログイン）
+ * 面接キャンセル（要ログイン）。他人の面接は 403
  */
 export const candidateInterviewsCancelCandidateInterview = <ThrowOnError extends boolean = false>(options: Options<CandidateInterviewsCancelCandidateInterviewData, ThrowOnError>): RequestResult<CandidateInterviewsCancelCandidateInterviewResponses, CandidateInterviewsCancelCandidateInterviewErrors, ThrowOnError> => (options.client ?? client).post<CandidateInterviewsCancelCandidateInterviewResponses, CandidateInterviewsCancelCandidateInterviewErrors, ThrowOnError>({
     security: [{

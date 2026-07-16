@@ -25,27 +25,9 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
-func handleError(ctx echo.Context, err error) error {
-	switch errorStatus(err) {
-	case http.StatusNotFound:
-		return ctx.JSON(http.StatusNotFound, notFoundBody(err))
-	case http.StatusConflict:
-		return ctx.JSON(http.StatusConflict, conflictBody(err))
-	case http.StatusForbidden:
-		return ctx.JSON(http.StatusForbidden, forbiddenBody(err))
-	case http.StatusBadRequest:
-		return ctx.JSON(http.StatusBadRequest, badRequestBody(err.Error()))
-	default:
-		return ctx.JSON(http.StatusInternalServerError, openapi.ModelsErrorResponse{
-			Code:    "INTERNAL",
-			Message: err.Error(),
-		})
-	}
-}
-
-// errorStatus maps a domain/port error to its HTTP status. Shared by the echo
-// handleError above and the strict-server handlers, which pick the matching
-// typed response per operation.
+// errorStatus maps a domain/port error to its HTTP status. Shared by the
+// strict-server handlers, which pick the matching typed response per
+// operation（echo 版 handleError は全グループ移行完了で撤去済み）.
 func errorStatus(err error) int {
 	switch {
 	case errors.Is(err, domainerr.ErrNotFound),

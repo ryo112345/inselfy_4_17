@@ -14784,6 +14784,15 @@ func (response CompanyInterviewsCancelCompanyInterview401JSONResponse) VisitComp
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CompanyInterviewsCancelCompanyInterview403JSONResponse ModelsForbiddenError
+
+func (response CompanyInterviewsCancelCompanyInterview403JSONResponse) VisitCompanyInterviewsCancelCompanyInterviewResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CompanyInterviewsCancelCompanyInterview404JSONResponse ModelsNotFoundError
 
 func (response CompanyInterviewsCancelCompanyInterview404JSONResponse) VisitCompanyInterviewsCancelCompanyInterviewResponse(w http.ResponseWriter) error {
@@ -17352,6 +17361,15 @@ func (response CandidateInterviewsSelectInterviewSlot401JSONResponse) VisitCandi
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CandidateInterviewsSelectInterviewSlot403JSONResponse ModelsForbiddenError
+
+func (response CandidateInterviewsSelectInterviewSlot403JSONResponse) VisitCandidateInterviewsSelectInterviewSlotResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CandidateInterviewsSelectInterviewSlot404JSONResponse ModelsNotFoundError
 
 func (response CandidateInterviewsSelectInterviewSlot404JSONResponse) VisitCandidateInterviewsSelectInterviewSlotResponse(w http.ResponseWriter) error {
@@ -17445,6 +17463,15 @@ type CandidateInterviewsCancelCandidateInterview401JSONResponse ModelsUnauthoriz
 func (response CandidateInterviewsCancelCandidateInterview401JSONResponse) VisitCandidateInterviewsCancelCandidateInterviewResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CandidateInterviewsCancelCandidateInterview403JSONResponse ModelsForbiddenError
+
+func (response CandidateInterviewsCancelCandidateInterview403JSONResponse) VisitCandidateInterviewsCancelCandidateInterviewResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }

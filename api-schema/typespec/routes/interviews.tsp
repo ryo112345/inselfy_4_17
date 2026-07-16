@@ -43,13 +43,13 @@ interface CompanyInterviews {
     @query to?: string,
   ): CompanyInterviewListResponse | AuthedErrors;
 
-  /** 面接キャンセル（企業認証） */
+  /** 面接キャンセル（企業認証）。他社の面接は 403 */
   @post
   @route("/{interviewId}/cancel")
   @summary("Cancel an interview as the company")
   cancelCompanyInterview(
     @path interviewId: Uuid,
-  ): StatusOkResponse | AuthedNotFoundErrors;
+  ): StatusOkResponse | AuthedForbiddenErrors;
 }
 
 @route("/api/interviews")
@@ -68,7 +68,7 @@ interface CandidateInterviews {
   selectInterviewSlot(
     @path proposalId: Uuid,
     @body request: SelectSlotRequest,
-  ): SelectSlotResponse | AuthedConflictErrors;
+  ): SelectSlotResponse | AuthedForbiddenConflictErrors;
 
   /** 提案のスロット一覧取得（要ログイン） */
   @get
@@ -78,11 +78,11 @@ interface CandidateInterviews {
     @path proposalId: Uuid,
   ): ProposalSlotsResponse | AuthedNotFoundErrors;
 
-  /** 面接キャンセル（要ログイン） */
+  /** 面接キャンセル（要ログイン）。他人の面接は 403 */
   @post
   @route("/{interviewId}/cancel")
   @summary("Cancel an interview as the candidate")
   cancelCandidateInterview(
     @path interviewId: Uuid,
-  ): StatusOkResponse | AuthedNotFoundErrors;
+  ): StatusOkResponse | AuthedForbiddenErrors;
 }

@@ -54,6 +54,8 @@ type StrictServer struct {
 
 	messaging    *MessagingController
 	notification *NotificationController
+
+	interview *InterviewController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -159,6 +161,13 @@ func (s *StrictServer) WireMessagingGroup(
 ) {
 	s.messaging = messaging
 	s.notification = notification
+}
+
+// WireInterviewGroup installs the wire_interview controller
+// (docs/strict-server-migration.md Phase 3-1 グループ10)。
+// WebSocket（/api/ws）はスペック外のため対象外（SetWS 連携は BuildServer が行う）。
+func (s *StrictServer) WireInterviewGroup(interview *InterviewController) {
+	s.interview = interview
 }
 
 // --- Users ---
@@ -867,4 +876,40 @@ func (s *StrictServer) CompanyNotificationsMarkCompanyNotificationRead(ctx conte
 
 func (s *StrictServer) CompanyNotificationsMarkAllCompanyNotificationsRead(ctx context.Context, req openapi.CompanyNotificationsMarkAllCompanyNotificationsReadRequestObject) (openapi.CompanyNotificationsMarkAllCompanyNotificationsReadResponseObject, error) {
 	return s.notification.MarkAllAsReadByCompany(ctx, req)
+}
+
+// --- Interviews（企業） ---
+
+func (s *StrictServer) CompanyInterviewsProposeInterview(ctx context.Context, req openapi.CompanyInterviewsProposeInterviewRequestObject) (openapi.CompanyInterviewsProposeInterviewResponseObject, error) {
+	return s.interview.Propose(ctx, req)
+}
+
+func (s *StrictServer) CompanyInterviewsGetPendingProposal(ctx context.Context, req openapi.CompanyInterviewsGetPendingProposalRequestObject) (openapi.CompanyInterviewsGetPendingProposalResponseObject, error) {
+	return s.interview.GetPendingProposal(ctx, req)
+}
+
+func (s *StrictServer) CompanyInterviewsListCompanyInterviews(ctx context.Context, req openapi.CompanyInterviewsListCompanyInterviewsRequestObject) (openapi.CompanyInterviewsListCompanyInterviewsResponseObject, error) {
+	return s.interview.ListByCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyInterviewsCancelCompanyInterview(ctx context.Context, req openapi.CompanyInterviewsCancelCompanyInterviewRequestObject) (openapi.CompanyInterviewsCancelCompanyInterviewResponseObject, error) {
+	return s.interview.CancelAsCompany(ctx, req)
+}
+
+// --- Interviews（候補者） ---
+
+func (s *StrictServer) CandidateInterviewsListCandidateInterviews(ctx context.Context, req openapi.CandidateInterviewsListCandidateInterviewsRequestObject) (openapi.CandidateInterviewsListCandidateInterviewsResponseObject, error) {
+	return s.interview.ListByCandidate(ctx, req)
+}
+
+func (s *StrictServer) CandidateInterviewsSelectInterviewSlot(ctx context.Context, req openapi.CandidateInterviewsSelectInterviewSlotRequestObject) (openapi.CandidateInterviewsSelectInterviewSlotResponseObject, error) {
+	return s.interview.SelectSlot(ctx, req)
+}
+
+func (s *StrictServer) CandidateInterviewsGetProposalSlots(ctx context.Context, req openapi.CandidateInterviewsGetProposalSlotsRequestObject) (openapi.CandidateInterviewsGetProposalSlotsResponseObject, error) {
+	return s.interview.GetProposalSlots(ctx, req)
+}
+
+func (s *StrictServer) CandidateInterviewsCancelCandidateInterview(ctx context.Context, req openapi.CandidateInterviewsCancelCandidateInterviewRequestObject) (openapi.CandidateInterviewsCancelCandidateInterviewResponseObject, error) {
+	return s.interview.CancelAsCandidate(ctx, req)
 }

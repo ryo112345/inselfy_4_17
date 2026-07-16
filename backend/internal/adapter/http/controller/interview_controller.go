@@ -1,12 +1,11 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -32,48 +31,53 @@ func (ctrl *InterviewController) SetWS(ws WSNotifier) {
 	ctrl.ws = ws
 }
 
-func (ctrl *InterviewController) Propose(c echo.Context) error {
-	companyID := authmw.CompanyID(c)
-
-	var req openapi.ModelsProposeInterviewRequest
-	if err := c.Bind(&req); err != nil {
-		return badRequest(c, "invalid request")
+// Propose handles POST /api/company/interviews/propose.
+func (ctrl *InterviewController) Propose(ctx context.Context, req openapi.CompanyInterviewsProposeInterviewRequestObject) (openapi.CompanyInterviewsProposeInterviewResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CompanyInterviewsProposeInterview400JSONResponse(badRequestBody("invalid request")), nil
 	}
 
-	if len(req.Slots) == 0 {
-		return badRequest(c, "at least one slot is required")
+	if len(req.Body.Slots) == 0 {
+		return openapi.CompanyInterviewsProposeInterview400JSONResponse(badRequestBody("at least one slot is required")), nil
 	}
-	if len(req.Slots) > 10 {
-		return badRequest(c, "maximum 10 slots")
+	if len(req.Body.Slots) > 10 {
+		return openapi.CompanyInterviewsProposeInterview400JSONResponse(badRequestBody("maximum 10 slots")), nil
 	}
 
-	slots := make([]interview.SlotInput, len(req.Slots))
-	for i, s := range req.Slots {
+	slots := make([]interview.SlotInput, len(req.Body.Slots))
+	for i, s := range req.Body.Slots {
 		start, err := time.Parse(time.RFC3339, s.StartTime)
-		if err != nil {
-			return badRequest(c, "invalid start time")
+		if err != nil { //nolint:nilerr // 従来どおり固定メッセージの 400 を返す
+			return openapi.CompanyInterviewsProposeInterview400JSONResponse(badRequestBody("invalid start time")), nil
 		}
 		end, err := time.Parse(time.RFC3339, s.EndTime)
-		if err != nil {
-			return badRequest(c, "invalid end time")
+		if err != nil { //nolint:nilerr // 従来どおり固定メッセージの 400 を返す
+			return openapi.CompanyInterviewsProposeInterview400JSONResponse(badRequestBody("invalid end time")), nil
 		}
 		if !end.After(start) {
-			return badRequest(c, "end time must be after start time")
+			return openapi.CompanyInterviewsProposeInterview400JSONResponse(badRequestBody("end time must be after start time")), nil
 		}
 		slots[i] = interview.SlotInput{StartTime: start, EndTime: end}
 	}
 
-	out, err := ctrl.input.Propose(c.Request().Context(), interview.ProposeInput{
-		ApplicationID:   req.ApplicationId,
+	out, err := ctrl.input.Propose(ctx, interview.ProposeInput{
+		ApplicationID:   req.Body.ApplicationId,
 		CompanyID:       companyID,
-		Message:         req.Message,
-		Location:        req.Location,
-		DurationMinutes: req.DurationMinutes,
+		Message:         req.Body.Message,
+		Location:        req.Body.Location,
+		DurationMinutes: req.Body.DurationMinutes,
 		Slots:           slots,
-		ExpiresInDays:   req.ExpiresInDays,
+		ExpiresInDays:   req.Body.ExpiresInDays,
 	})
 	if err != nil {
-		return handleError(c, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CompanyInterviewsProposeInterview404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyInterviewsProposeInterview400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
 
 	// Notify candidate via WebSocket about cancelled proposals
@@ -89,117 +93,166 @@ func (ctrl *InterviewController) Propose(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusCreated, presenter.ProposeInterviewResponse(out.Proposal.ID, out.Slots))
+	return openapi.CompanyInterviewsProposeInterview201JSONResponse(*presenter.ProposeInterviewResponse(out.Proposal.ID, out.Slots)), nil
 }
 
-func (ctrl *InterviewController) SelectSlot(c echo.Context) error {
-	userID := authmw.UserID(c)
-
-	proposalID := c.Param("proposalId")
-	var req openapi.ModelsSelectSlotRequest
-	if err := c.Bind(&req); err != nil {
-		return badRequest(c, "invalid request")
+// SelectSlot handles POST /api/interviews/proposals/{proposalId}/select.
+func (ctrl *InterviewController) SelectSlot(ctx context.Context, req openapi.CandidateInterviewsSelectInterviewSlotRequestObject) (openapi.CandidateInterviewsSelectInterviewSlotResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CandidateInterviewsSelectInterviewSlot400JSONResponse(badRequestBody("invalid request")), nil
 	}
 
 	input := interview.SelectSlotInput{
-		ProposalID:  proposalID,
-		SlotID:      req.SlotId,
+		ProposalID:  req.ProposalId,
+		SlotID:      req.Body.SlotId,
 		CandidateID: userID,
 	}
-	if req.StartTime != "" && req.EndTime != "" {
-		st, err := time.Parse(time.RFC3339, req.StartTime)
-		if err != nil {
-			return badRequest(c, "invalid startTime")
+	if req.Body.StartTime != "" && req.Body.EndTime != "" {
+		st, err := time.Parse(time.RFC3339, req.Body.StartTime)
+		if err != nil { //nolint:nilerr // 従来どおり固定メッセージの 400 を返す
+			return openapi.CandidateInterviewsSelectInterviewSlot400JSONResponse(badRequestBody("invalid startTime")), nil
 		}
-		et, err := time.Parse(time.RFC3339, req.EndTime)
-		if err != nil {
-			return badRequest(c, "invalid endTime")
+		et, err := time.Parse(time.RFC3339, req.Body.EndTime)
+		if err != nil { //nolint:nilerr // 従来どおり固定メッセージの 400 を返す
+			return openapi.CandidateInterviewsSelectInterviewSlot400JSONResponse(badRequestBody("invalid endTime")), nil
 		}
 		input.StartTime = &st
 		input.EndTime = &et
 	}
 
-	iv, err := ctrl.input.SelectSlot(c.Request().Context(), input)
+	iv, err := ctrl.input.SelectSlot(ctx, input)
 	if err != nil {
-		return handleError(c, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CandidateInterviewsSelectInterviewSlot403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CandidateInterviewsSelectInterviewSlot404JSONResponse(notFoundBody(err)), nil
+		case http.StatusConflict:
+			return openapi.CandidateInterviewsSelectInterviewSlot409JSONResponse(conflictBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateInterviewsSelectInterviewSlot400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
 
-	return c.JSON(http.StatusOK, presenter.SelectSlotResponse(iv))
+	return openapi.CandidateInterviewsSelectInterviewSlot200JSONResponse(*presenter.SelectSlotResponse(iv)), nil
 }
 
-func (ctrl *InterviewController) ListByCompany(c echo.Context) error {
-	companyID := authmw.CompanyID(c)
+// ListByCompany handles GET /api/company/interviews.
+// from/to の不正・欠落はデフォルト窓（今日〜+7日）へ丸める（echo 時代から同じ）。
+func (ctrl *InterviewController) ListByCompany(ctx context.Context, req openapi.CompanyInterviewsListCompanyInterviewsRequestObject) (openapi.CompanyInterviewsListCompanyInterviewsResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	fromStr := c.QueryParam("from")
-	toStr := c.QueryParam("to")
-	from, err := time.Parse("2006-01-02", fromStr)
+	from, err := time.Parse("2006-01-02", derefString(req.Params.From))
 	if err != nil {
 		from = time.Now().Truncate(24 * time.Hour)
 	}
-	to, err := time.Parse("2006-01-02", toStr)
+	to, err := time.Parse("2006-01-02", derefString(req.Params.To))
 	if err != nil {
 		to = from.Add(7 * 24 * time.Hour)
 	}
 
-	interviews, err := ctrl.input.ListByCompany(c.Request().Context(), companyID, from, to)
+	interviews, err := ctrl.input.ListByCompany(ctx, companyID, from, to)
 	if err != nil {
-		return internalError(c, err.Error())
+		return nil, err
 	}
 
-	return c.JSON(http.StatusOK, presenter.CompanyInterviewsResponse(interviews))
+	return openapi.CompanyInterviewsListCompanyInterviews200JSONResponse(*presenter.CompanyInterviewsResponse(interviews)), nil
 }
 
-func (ctrl *InterviewController) ListByCandidate(c echo.Context) error {
-	userID := authmw.UserID(c)
+// ListByCandidate handles GET /api/interviews.
+func (ctrl *InterviewController) ListByCandidate(ctx context.Context, _ openapi.CandidateInterviewsListCandidateInterviewsRequestObject) (openapi.CandidateInterviewsListCandidateInterviewsResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	interviews, proposals, err := ctrl.input.ListByCandidate(c.Request().Context(), userID)
+	interviews, proposals, err := ctrl.input.ListByCandidate(ctx, userID)
 	if err != nil {
-		return internalError(c, err.Error())
+		return nil, err
 	}
 
-	return c.JSON(http.StatusOK, presenter.CandidateInterviewsResponse(interviews, proposals))
+	return openapi.CandidateInterviewsListCandidateInterviews200JSONResponse(*presenter.CandidateInterviewsResponse(interviews, proposals)), nil
 }
 
-func (ctrl *InterviewController) CancelInterview(c echo.Context) error {
-	interviewID := c.Param("interviewId")
-
-	companyID, _ := c.Get(authmw.CompanyIDKey).(string)
-	userID, _ := c.Get(authmw.UserIDKey).(string)
-
-	err := ctrl.input.CancelInterview(c.Request().Context(), interviewID, companyID, userID)
-	if err != nil {
-		if errors.Is(err, interview.ErrCancelUnauthorized) {
-			return unauthorized(c, "unauthorized")
-		}
-		return handleError(c, err)
+// cancelInterview is the shared body of the company/candidate cancel handlers.
+// Returns (status, err); status 0 means success.
+func (ctrl *InterviewController) cancelInterview(ctx context.Context, interviewID, companyID, userID string) (int, error) {
+	err := ctrl.input.CancelInterview(ctx, interviewID, companyID, userID)
+	if err == nil {
+		return 0, nil
 	}
-
-	return c.JSON(http.StatusOK, openapi.ModelsStatusOkResponse{Status: "cancelled"})
+	if errors.Is(err, interview.ErrCancelUnauthorized) {
+		return http.StatusUnauthorized, err
+	}
+	return errorStatus(err), err
 }
 
-func (ctrl *InterviewController) GetPendingProposal(c echo.Context) error {
-	// Auth is enforced by companyJwtMW; this handler does not scope by company.
-	applicationID := c.Param("applicationId")
+// CancelAsCompany handles POST /api/company/interviews/{interviewId}/cancel.
+func (ctrl *InterviewController) CancelAsCompany(ctx context.Context, req openapi.CompanyInterviewsCancelCompanyInterviewRequestObject) (openapi.CompanyInterviewsCancelCompanyInterviewResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	pending, err := ctrl.input.GetPendingProposal(c.Request().Context(), applicationID)
-	if err != nil {
-		return c.JSON(http.StatusOK, openapi.ModelsPendingProposalCheckResponse{HasPending: false})
+	status, err := ctrl.cancelInterview(ctx, req.InterviewId, companyID, "")
+	switch status {
+	case 0:
+		return openapi.CompanyInterviewsCancelCompanyInterview200JSONResponse(openapi.ModelsStatusOkResponse{Status: "cancelled"}), nil
+	case http.StatusUnauthorized:
+		return openapi.CompanyInterviewsCancelCompanyInterview401JSONResponse(unauthorizedBody("unauthorized")), nil
+	case http.StatusForbidden:
+		return openapi.CompanyInterviewsCancelCompanyInterview403JSONResponse(forbiddenBody(err)), nil
+	case http.StatusNotFound:
+		return openapi.CompanyInterviewsCancelCompanyInterview404JSONResponse(notFoundBody(err)), nil
+	case http.StatusBadRequest:
+		return openapi.CompanyInterviewsCancelCompanyInterview400JSONResponse(badRequestBody(err.Error())), nil
+	}
+	return nil, err
+}
+
+// CancelAsCandidate handles POST /api/interviews/{interviewId}/cancel.
+func (ctrl *InterviewController) CancelAsCandidate(ctx context.Context, req openapi.CandidateInterviewsCancelCandidateInterviewRequestObject) (openapi.CandidateInterviewsCancelCandidateInterviewResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+
+	status, err := ctrl.cancelInterview(ctx, req.InterviewId, "", userID)
+	switch status {
+	case 0:
+		return openapi.CandidateInterviewsCancelCandidateInterview200JSONResponse(openapi.ModelsStatusOkResponse{Status: "cancelled"}), nil
+	case http.StatusUnauthorized:
+		return openapi.CandidateInterviewsCancelCandidateInterview401JSONResponse(unauthorizedBody("unauthorized")), nil
+	case http.StatusForbidden:
+		return openapi.CandidateInterviewsCancelCandidateInterview403JSONResponse(forbiddenBody(err)), nil
+	case http.StatusNotFound:
+		return openapi.CandidateInterviewsCancelCandidateInterview404JSONResponse(notFoundBody(err)), nil
+	case http.StatusBadRequest:
+		return openapi.CandidateInterviewsCancelCandidateInterview400JSONResponse(badRequestBody(err.Error())), nil
+	}
+	return nil, err
+}
+
+// GetPendingProposal handles GET /api/company/interviews/pending/{applicationId}.
+// エラーは種別を問わず hasPending: false の 200 に丸める（echo 時代から同じ）。
+func (ctrl *InterviewController) GetPendingProposal(ctx context.Context, req openapi.CompanyInterviewsGetPendingProposalRequestObject) (openapi.CompanyInterviewsGetPendingProposalResponseObject, error) {
+	pending, err := ctrl.input.GetPendingProposal(ctx, req.ApplicationId)
+	if err != nil { //nolint:nilerr // pending なし＝エラーの実装のため、従来どおり 200 hasPending:false に丸める
+		return openapi.CompanyInterviewsGetPendingProposal200JSONResponse(openapi.ModelsPendingProposalCheckResponse{HasPending: false}), nil
 	}
 
-	return c.JSON(http.StatusOK, openapi.ModelsPendingProposalCheckResponse{
+	return openapi.CompanyInterviewsGetPendingProposal200JSONResponse(openapi.ModelsPendingProposalCheckResponse{
 		HasPending: true,
 		ProposalId: &pending.ProposalID,
 		CreatedAt:  &pending.CreatedAt,
-	})
+	}), nil
 }
 
-func (ctrl *InterviewController) GetProposalSlots(c echo.Context) error {
-	proposalID := c.Param("proposalId")
-
-	proposal, slots, err := ctrl.input.GetProposalSlots(c.Request().Context(), proposalID)
+// GetProposalSlots handles GET /api/interviews/proposals/{proposalId}/slots.
+func (ctrl *InterviewController) GetProposalSlots(ctx context.Context, req openapi.CandidateInterviewsGetProposalSlotsRequestObject) (openapi.CandidateInterviewsGetProposalSlotsResponseObject, error) {
+	proposal, slots, err := ctrl.input.GetProposalSlots(ctx, req.ProposalId)
 	if err != nil {
-		return handleError(c, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CandidateInterviewsGetProposalSlots404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateInterviewsGetProposalSlots400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
 
-	return c.JSON(http.StatusOK, presenter.ProposalSlotsResponse(proposal, slots))
+	return openapi.CandidateInterviewsGetProposalSlots200JSONResponse(*presenter.ProposalSlotsResponse(proposal, slots)), nil
 }

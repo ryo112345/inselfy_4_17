@@ -1,16 +1,18 @@
 package initializer
 
 import (
-	"github.com/labstack/echo/v4"
-
 	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
+	openapigen "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/usecase"
 )
 
-// wireInterview registers interview scheduling routes and returns the
-// controller so BuildServer can attach the WebSocket hub afterwards.
-func wireInterview(e *echo.Echo, d *deps) *httpcontroller.InterviewController {
+// wireInterview registers interview scheduling routes on the strict mux and
+// returns the controller so BuildServer can attach the WebSocket hub
+// afterwards — this group is migrated to strict-server handlers
+// (docs/strict-server-migration.md Phase 3-1 グループ10)。WS（/api/ws）は
+// スペック外のまま。
+func wireInterview(sr *strictRouter, wrapper *openapigen.ServerInterfaceWrapper, ss *httpcontroller.StrictServer, d *deps) *httpcontroller.InterviewController {
 	interviewCtrl := httpcontroller.NewInterviewController(usecase.NewInterviewInteractor(
 		sqlcgw.NewInterviewProposalRepository(d.pool),
 		sqlcgw.NewInterviewSlotRepository(d.pool),
@@ -19,28 +21,21 @@ func wireInterview(e *echo.Echo, d *deps) *httpcontroller.InterviewController {
 		sqlcgw.NewInterviewQueryService(d.pool),
 		d.tx,
 	))
+	ss.WireInterviewGroup(interviewCtrl)
 
 	// --- Company Interviews ---
-	companyInterviewGroup := e.Group("/api/company/interviews")
-	companyInterviewGroup.POST("/propose", interviewCtrl.Propose)
-	companyInterviewGroup.GET("/pending/:applicationId", interviewCtrl.GetPendingProposal)
-	companyInterviewGroup.GET("", interviewCtrl.ListByCompany)
-	companyInterviewGroup.POST("/:interviewId/cancel", func(c echo.Context) error {
-		return interviewCtrl.CancelInterview(c)
-	})
+	// propose（1セグメント）と {interviewId}/cancel（2セグメント）はセグメント数が
+	// 異なり曖昧にならない（pending/{applicationId} も同様）。
+	sr.handle("POST /api/company/interviews/propose", wrapper.CompanyInterviewsProposeInterview)
+	sr.handle("GET /api/company/interviews/pending/{applicationId}", wrapper.CompanyInterviewsGetPendingProposal)
+	sr.handle("GET /api/company/interviews", wrapper.CompanyInterviewsListCompanyInterviews)
+	sr.handle("POST /api/company/interviews/{interviewId}/cancel", wrapper.CompanyInterviewsCancelCompanyInterview)
 
 	// --- Candidate Interviews ---
-	candidateInterviewGroup := e.Group("/api/interviews")
-	candidateInterviewGroup.GET("", interviewCtrl.ListByCandidate)
-	candidateInterviewGroup.POST("/proposals/:proposalId/select", func(c echo.Context) error {
-		return interviewCtrl.SelectSlot(c)
-	})
-	candidateInterviewGroup.GET("/proposals/:proposalId/slots", func(c echo.Context) error {
-		return interviewCtrl.GetProposalSlots(c)
-	})
-	candidateInterviewGroup.POST("/:interviewId/cancel", func(c echo.Context) error {
-		return interviewCtrl.CancelInterview(c)
-	})
+	sr.handle("GET /api/interviews", wrapper.CandidateInterviewsListCandidateInterviews)
+	sr.handle("POST /api/interviews/proposals/{proposalId}/select", wrapper.CandidateInterviewsSelectInterviewSlot)
+	sr.handle("GET /api/interviews/proposals/{proposalId}/slots", wrapper.CandidateInterviewsGetProposalSlots)
+	sr.handle("POST /api/interviews/{interviewId}/cancel", wrapper.CandidateInterviewsCancelCandidateInterview)
 
 	return interviewCtrl
 }

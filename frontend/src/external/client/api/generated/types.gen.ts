@@ -7242,6 +7242,10 @@ export type CompanyInterviewsCancelCompanyInterviewErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -9410,6 +9414,10 @@ export type CandidateInterviewsSelectInterviewSlotErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -9483,6 +9491,10 @@ export type CandidateInterviewsCancelCandidateInterviewErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
