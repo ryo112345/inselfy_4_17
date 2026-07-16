@@ -208,7 +208,7 @@ func (c *UserController) UploadImage(ctx context.Context, req openapi.UsersUploa
 		return openapi.UsersUploadUserImage403JSONResponse(forbiddenBody(port.ErrForbidden)), nil
 	}
 
-	data, filename, _, err := readFilePart(req.Body, "file", 5*1024*1024)
+	data, filename, _, err := readFilePart(req.Body)
 	switch {
 	case errors.Is(err, errFilePartMissing):
 		return openapi.UsersUploadUserImage400JSONResponse(badRequestBody("file is required")), nil

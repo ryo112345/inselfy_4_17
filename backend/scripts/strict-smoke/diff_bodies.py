@@ -17,6 +17,8 @@ import sys
 VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "publishedAt", "userId", "postId", "sessionId", "inviteToken", "companyId"}
 # scout グループ: スカウト・返信・クレジットの時刻／実行ごとに作られる ID
 VOLATILE |= {"sentAt", "expiresAt", "openedAt", "repliedAt", "conversationId", "lastReplenishedAt", "templateId", "senderId"}
+# jobs グループ: 実行ごとに作られるスモーク求人の ID
+VOLATILE |= {"jobPostingId"}
 # 同点スコアの並びが呼び出しごとに揺れる配列（タレント検索の top ラベル）は
 # ソートして比較する（順位のタイブレークは実装が非決定的・移行と無関係）
 SORT_BEFORE_DIFF = {"topWvLabels", "topCiLabels"}
@@ -30,6 +32,8 @@ VOLATILE |= {"initialPairs"}
 RANDOM_FILE = re.compile(
     r"(user-images|job-images|article-images|company-images)/(?:[0-9a-f]{8}_|[0-9a-f-]{36})"
 )
+# 求人画像アップロードのランダムファイル名（<subdir>/<8hex>.<ext>）
+RANDOM_JOB_UPLOAD = re.compile(r"(team-member-photos|gallery-images|cover-images)/[0-9a-f]{8}")
 # 企業ギャラリー画像のランダムサフィックス（<companyId>_gallery_<8hex>.<ext>）
 RANDOM_GALLERY = re.compile(r"_gallery_[0-9a-f]{8}")
 
@@ -48,6 +52,7 @@ def norm(v):
     if isinstance(v, list):
         return [norm(x) for x in v]
     if isinstance(v, str):
+        v = RANDOM_JOB_UPLOAD.sub(r"\1/XXXXXXXX", v)
         return RANDOM_GALLERY.sub("_gallery_XXXXXXXX", RANDOM_FILE.sub(r"\1/XXXXXXXX_", v))
     return v
 

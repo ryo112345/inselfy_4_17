@@ -264,7 +264,7 @@ func (c *ArticleController) CreateCheckout(ctx context.Context, req openapi.Arti
 
 // UploadImage handles POST /api/articles/upload-image.
 func (c *ArticleController) UploadImage(ctx context.Context, req openapi.ArticlesUploadArticleImageRequestObject) (openapi.ArticlesUploadArticleImageResponseObject, error) {
-	data, filename, ct, err := readFilePart(req.Body, "file", 5*1024*1024)
+	data, filename, ct, err := readFilePart(req.Body)
 	switch {
 	case errors.Is(err, errFilePartMissing):
 		return openapi.ArticlesUploadArticleImage400JSONResponse(badRequestBody("file is required")), nil

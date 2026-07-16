@@ -66,7 +66,7 @@ interface CompanyJobPostings {
   @summary("Get a job posting")
   getCompanyJobPosting(
     @path jobId: Uuid,
-  ): JobPostingResponse | AuthedNotFoundErrors;
+  ): JobPostingResponse | AuthedForbiddenErrors;
 
   /** 求人更新（企業認証） */
   @put
@@ -75,7 +75,7 @@ interface CompanyJobPostings {
   updateJobPosting(
     @path jobId: Uuid,
     @body request: JobPostingRequest,
-  ): JobPostingResponse | AuthedNotFoundErrors;
+  ): JobPostingResponse | AuthedForbiddenErrors;
 
   /** 求人削除（企業認証） */
   @delete
@@ -85,7 +85,7 @@ interface CompanyJobPostings {
     @path jobId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | AuthedNotFoundErrors;
+  } | AuthedForbiddenErrors;
 }
 
 @route("/api/jobs")

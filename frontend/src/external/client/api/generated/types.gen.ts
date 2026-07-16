@@ -7428,6 +7428,10 @@ export type CompanyJobPostingsDeleteJobPostingErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -7463,6 +7467,10 @@ export type CompanyJobPostingsGetCompanyJobPostingErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -7497,6 +7505,10 @@ export type CompanyJobPostingsUpdateJobPostingErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */

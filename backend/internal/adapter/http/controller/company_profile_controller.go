@@ -105,7 +105,7 @@ func (c *CompanyProfileController) UploadImage(ctx context.Context, req openapi.
 		return openapi.CompanyProfilesUploadCompanyProfileImage400JSONResponse(badRequestBody("type must be 'logo', 'cover', or 'gallery'")), nil
 	}
 
-	data, filename, _, err := readFilePart(req.Body, "file", 5*1024*1024)
+	data, filename, _, err := readFilePart(req.Body)
 	if err != nil {
 		if errors.Is(err, errFilePartTooLarge) {
 			return openapi.CompanyProfilesUploadCompanyProfileImage400JSONResponse(badRequestBody("ファイルサイズは5MB以下にしてください")), nil

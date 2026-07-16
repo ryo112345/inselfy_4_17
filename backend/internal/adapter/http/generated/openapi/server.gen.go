@@ -15001,6 +15001,15 @@ func (response CompanyJobPostingsDeleteJobPosting401JSONResponse) VisitCompanyJo
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CompanyJobPostingsDeleteJobPosting403JSONResponse ModelsForbiddenError
+
+func (response CompanyJobPostingsDeleteJobPosting403JSONResponse) VisitCompanyJobPostingsDeleteJobPostingResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CompanyJobPostingsDeleteJobPosting404JSONResponse ModelsNotFoundError
 
 func (response CompanyJobPostingsDeleteJobPosting404JSONResponse) VisitCompanyJobPostingsDeleteJobPostingResponse(w http.ResponseWriter) error {
@@ -15041,6 +15050,15 @@ type CompanyJobPostingsGetCompanyJobPosting401JSONResponse ModelsUnauthorizedErr
 func (response CompanyJobPostingsGetCompanyJobPosting401JSONResponse) VisitCompanyJobPostingsGetCompanyJobPostingResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CompanyJobPostingsGetCompanyJobPosting403JSONResponse ModelsForbiddenError
+
+func (response CompanyJobPostingsGetCompanyJobPosting403JSONResponse) VisitCompanyJobPostingsGetCompanyJobPostingResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -15086,6 +15104,15 @@ type CompanyJobPostingsUpdateJobPosting401JSONResponse ModelsUnauthorizedError
 func (response CompanyJobPostingsUpdateJobPosting401JSONResponse) VisitCompanyJobPostingsUpdateJobPostingResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CompanyJobPostingsUpdateJobPosting403JSONResponse ModelsForbiddenError
+
+func (response CompanyJobPostingsUpdateJobPosting403JSONResponse) VisitCompanyJobPostingsUpdateJobPostingResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }

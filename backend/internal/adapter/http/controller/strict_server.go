@@ -48,6 +48,9 @@ type StrictServer struct {
 	candidateScout *CandidateScoutController
 	scoutSettings  *ScoutSettingsController
 	scoutTemplate  *ScoutTemplateController
+
+	jobPosting     *JobPostingController
+	jobApplication *JobApplicationController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -133,6 +136,16 @@ func (s *StrictServer) WireScoutGroup(
 	s.candidateScout = candidateScout
 	s.scoutSettings = scoutSettings
 	s.scoutTemplate = scoutTemplate
+}
+
+// WireJobsGroup installs the wire_jobs controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ8)。
+func (s *StrictServer) WireJobsGroup(
+	jobPosting *JobPostingController,
+	jobApplication *JobApplicationController,
+) {
+	s.jobPosting = jobPosting
+	s.jobApplication = jobApplication
 }
 
 // --- Users ---
@@ -669,4 +682,80 @@ func (s *StrictServer) ScoutTemplatesUpdateScoutTemplate(ctx context.Context, re
 
 func (s *StrictServer) ScoutTemplatesDeleteScoutTemplate(ctx context.Context, req openapi.ScoutTemplatesDeleteScoutTemplateRequestObject) (openapi.ScoutTemplatesDeleteScoutTemplateResponseObject, error) {
 	return s.scoutTemplate.Delete(ctx, req)
+}
+
+// --- Job Postings（企業） ---
+
+func (s *StrictServer) CompanyJobPostingsCreateJobPosting(ctx context.Context, req openapi.CompanyJobPostingsCreateJobPostingRequestObject) (openapi.CompanyJobPostingsCreateJobPostingResponseObject, error) {
+	return s.jobPosting.Create(ctx, req)
+}
+
+func (s *StrictServer) CompanyJobPostingsListCompanyJobPostings(ctx context.Context, req openapi.CompanyJobPostingsListCompanyJobPostingsRequestObject) (openapi.CompanyJobPostingsListCompanyJobPostingsResponseObject, error) {
+	return s.jobPosting.List(ctx, req)
+}
+
+func (s *StrictServer) CompanyJobPostingsGetCompanyJobPosting(ctx context.Context, req openapi.CompanyJobPostingsGetCompanyJobPostingRequestObject) (openapi.CompanyJobPostingsGetCompanyJobPostingResponseObject, error) {
+	return s.jobPosting.Get(ctx, req)
+}
+
+func (s *StrictServer) CompanyJobPostingsUpdateJobPosting(ctx context.Context, req openapi.CompanyJobPostingsUpdateJobPostingRequestObject) (openapi.CompanyJobPostingsUpdateJobPostingResponseObject, error) {
+	return s.jobPosting.Update(ctx, req)
+}
+
+func (s *StrictServer) CompanyJobPostingsDeleteJobPosting(ctx context.Context, req openapi.CompanyJobPostingsDeleteJobPostingRequestObject) (openapi.CompanyJobPostingsDeleteJobPostingResponseObject, error) {
+	return s.jobPosting.Delete(ctx, req)
+}
+
+func (s *StrictServer) CompanyJobPostingsUploadTeamMemberPhoto(ctx context.Context, req openapi.CompanyJobPostingsUploadTeamMemberPhotoRequestObject) (openapi.CompanyJobPostingsUploadTeamMemberPhotoResponseObject, error) {
+	return s.jobPosting.UploadTeamMemberPhoto(ctx, req)
+}
+
+func (s *StrictServer) CompanyJobPostingsUploadGalleryImage(ctx context.Context, req openapi.CompanyJobPostingsUploadGalleryImageRequestObject) (openapi.CompanyJobPostingsUploadGalleryImageResponseObject, error) {
+	return s.jobPosting.UploadGalleryImage(ctx, req)
+}
+
+func (s *StrictServer) CompanyJobPostingsUploadJobCoverImage(ctx context.Context, req openapi.CompanyJobPostingsUploadJobCoverImageRequestObject) (openapi.CompanyJobPostingsUploadJobCoverImageResponseObject, error) {
+	return s.jobPosting.UploadCoverImage(ctx, req)
+}
+
+// --- Job Postings（公開） ---
+
+func (s *StrictServer) PublicJobPostingsListPublicJobPostings(ctx context.Context, req openapi.PublicJobPostingsListPublicJobPostingsRequestObject) (openapi.PublicJobPostingsListPublicJobPostingsResponseObject, error) {
+	return s.jobPosting.ListPublic(ctx, req)
+}
+
+func (s *StrictServer) PublicJobPostingsGetPublicJobPosting(ctx context.Context, req openapi.PublicJobPostingsGetPublicJobPostingRequestObject) (openapi.PublicJobPostingsGetPublicJobPostingResponseObject, error) {
+	return s.jobPosting.GetPublic(ctx, req)
+}
+
+// --- Job Applications（候補者） ---
+
+func (s *StrictServer) CandidateApplicationsApplyToJob(ctx context.Context, req openapi.CandidateApplicationsApplyToJobRequestObject) (openapi.CandidateApplicationsApplyToJobResponseObject, error) {
+	return s.jobApplication.Apply(ctx, req)
+}
+
+func (s *StrictServer) CandidateApplicationsListCandidateApplications(ctx context.Context, req openapi.CandidateApplicationsListCandidateApplicationsRequestObject) (openapi.CandidateApplicationsListCandidateApplicationsResponseObject, error) {
+	return s.jobApplication.ListByCandidate(ctx, req)
+}
+
+func (s *StrictServer) CandidateApplicationsCheckApplied(ctx context.Context, req openapi.CandidateApplicationsCheckAppliedRequestObject) (openapi.CandidateApplicationsCheckAppliedResponseObject, error) {
+	return s.jobApplication.CheckApplied(ctx, req)
+}
+
+func (s *StrictServer) CandidateApplicationsWithdrawApplication(ctx context.Context, req openapi.CandidateApplicationsWithdrawApplicationRequestObject) (openapi.CandidateApplicationsWithdrawApplicationResponseObject, error) {
+	return s.jobApplication.Withdraw(ctx, req)
+}
+
+// --- Job Applications（企業） ---
+
+func (s *StrictServer) CompanyApplicationsListCompanyApplications(ctx context.Context, req openapi.CompanyApplicationsListCompanyApplicationsRequestObject) (openapi.CompanyApplicationsListCompanyApplicationsResponseObject, error) {
+	return s.jobApplication.ListByCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyApplicationsGetApplication(ctx context.Context, req openapi.CompanyApplicationsGetApplicationRequestObject) (openapi.CompanyApplicationsGetApplicationResponseObject, error) {
+	return s.jobApplication.GetByID(ctx, req)
+}
+
+func (s *StrictServer) CompanyApplicationsUpdateApplicationStatus(ctx context.Context, req openapi.CompanyApplicationsUpdateApplicationStatusRequestObject) (openapi.CompanyApplicationsUpdateApplicationStatusResponseObject, error) {
+	return s.jobApplication.UpdateStatus(ctx, req)
 }
