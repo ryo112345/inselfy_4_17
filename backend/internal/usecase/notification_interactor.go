@@ -47,8 +47,17 @@ func (i *NotificationInteractor) CountUnreadByCompany(ctx context.Context, compa
 	return i.repo.CountUnreadByCompanyID(ctx, companyID)
 }
 
-func (i *NotificationInteractor) MarkAsRead(ctx context.Context, id string) error {
-	return i.repo.MarkAsRead(ctx, id)
+// MarkAsReadByUser marks a single notification read, scoped to its owner: the
+// repository only touches the row when it belongs to userID, and returns
+// ErrNotFound otherwise. Without the owner scope any logged-in user could mark
+// anyone's notification read by passing its ID (IDOR).
+func (i *NotificationInteractor) MarkAsReadByUser(ctx context.Context, userID, id string) error {
+	return i.repo.MarkAsReadByUserID(ctx, userID, id)
+}
+
+// MarkAsReadByCompany is the company-scoped counterpart of MarkAsReadByUser.
+func (i *NotificationInteractor) MarkAsReadByCompany(ctx context.Context, companyID, id string) error {
+	return i.repo.MarkAsReadByCompanyID(ctx, companyID, id)
 }
 
 func (i *NotificationInteractor) MarkAllAsReadByUser(ctx context.Context, userID string) error {

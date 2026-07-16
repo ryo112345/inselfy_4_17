@@ -270,7 +270,7 @@ func (s *Server) UserNotificationsCountUserUnreadNotifications(ctx echo.Context)
 }
 
 func (s *Server) UserNotificationsMarkUserNotificationRead(ctx echo.Context, id string) error {
-	return s.notification.MarkAsRead(ctx, id)
+	return s.notification.MarkAsReadByUser(ctx, id)
 }
 
 func (s *Server) UserNotificationsMarkAllUserNotificationsRead(ctx echo.Context) error {
@@ -286,7 +286,7 @@ func (s *Server) CompanyNotificationsCountCompanyUnreadNotifications(ctx echo.Co
 }
 
 func (s *Server) CompanyNotificationsMarkCompanyNotificationRead(ctx echo.Context, id string) error {
-	return s.notification.MarkAsRead(ctx, id)
+	return s.notification.MarkAsReadByCompany(ctx, id)
 }
 
 func (s *Server) CompanyNotificationsMarkAllCompanyNotificationsRead(ctx echo.Context) error {

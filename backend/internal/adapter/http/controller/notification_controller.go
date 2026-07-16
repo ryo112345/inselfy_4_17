@@ -73,9 +73,19 @@ func (c *NotificationController) CountUnreadByCompany(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, presenter.NotificationUnreadCountResponse(count))
 }
 
-// MarkAsRead handles PUT /api/notifications/:id/read.
-func (c *NotificationController) MarkAsRead(ctx echo.Context, id string) error {
-	if err := c.input.MarkAsRead(ctx.Request().Context(), id); err != nil {
+// MarkAsReadByUser handles POST /api/notifications/:id/read.
+func (c *NotificationController) MarkAsReadByUser(ctx echo.Context, id string) error {
+	userID := authmw.UserID(ctx)
+	if err := c.input.MarkAsReadByUser(ctx.Request().Context(), userID, id); err != nil {
+		return handleError(ctx, err)
+	}
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+// MarkAsReadByCompany handles POST /api/company/notifications/:id/read.
+func (c *NotificationController) MarkAsReadByCompany(ctx echo.Context, id string) error {
+	companyID := authmw.CompanyID(ctx)
+	if err := c.input.MarkAsReadByCompany(ctx.Request().Context(), companyID, id); err != nil {
 		return handleError(ctx, err)
 	}
 	return ctx.NoContent(http.StatusNoContent)

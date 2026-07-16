@@ -20,7 +20,7 @@ func wireMessaging(e *echo.Echo, d *deps) {
 	companyNotifGroup.GET("", notifCtrl.ListByCompany)
 	companyNotifGroup.GET("/unread-count", notifCtrl.CountUnreadByCompany)
 	companyNotifGroup.POST("/:id/read", func(c echo.Context) error {
-		return notifCtrl.MarkAsRead(c, c.Param("id"))
+		return notifCtrl.MarkAsReadByCompany(c, c.Param("id"))
 	})
 	companyNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByCompany)
 
@@ -29,7 +29,7 @@ func wireMessaging(e *echo.Echo, d *deps) {
 	userNotifGroup.GET("", notifCtrl.ListByUser)
 	userNotifGroup.GET("/unread-count", notifCtrl.CountUnreadByUser)
 	userNotifGroup.POST("/:id/read", func(c echo.Context) error {
-		return notifCtrl.MarkAsRead(c, c.Param("id"))
+		return notifCtrl.MarkAsReadByUser(c, c.Param("id"))
 	})
 	userNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByUser)
 

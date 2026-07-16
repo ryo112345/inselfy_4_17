@@ -21,8 +21,11 @@ LIMIT $2 OFFSET $3;
 -- name: CountNotificationsByCompanyID :one
 SELECT count(*) FROM notifications WHERE company_id = $1;
 
--- name: MarkNotificationAsRead :exec
-UPDATE notifications SET is_read = true WHERE id = $1;
+-- name: MarkNotificationAsReadByUserID :execrows
+UPDATE notifications SET is_read = true WHERE id = $1 AND user_id = $2;
+
+-- name: MarkNotificationAsReadByCompanyID :execrows
+UPDATE notifications SET is_read = true WHERE id = $1 AND company_id = $2;
 
 -- name: MarkAllNotificationsAsReadByUserID :exec
 UPDATE notifications SET is_read = true WHERE user_id = $1 AND is_read = false;

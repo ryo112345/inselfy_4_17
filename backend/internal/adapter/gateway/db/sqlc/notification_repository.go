@@ -88,13 +88,44 @@ func (r *NotificationRepository) ListByCompanyID(ctx context.Context, companyID 
 	return ns, int(count), nil
 }
 
-func (r *NotificationRepository) MarkAsRead(ctx context.Context, id string) error {
+func (r *NotificationRepository) MarkAsReadByUserID(ctx context.Context, userID, id string) error {
 	q := queriesForContext(ctx, r.queries)
 	pgID, err := parseUUID(id)
 	if err != nil {
 		return domainerr.ErrBadRequest
 	}
-	return q.MarkNotificationAsRead(ctx, pgID)
+	pgUserID, err := parseUUID(userID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	rows, err := q.MarkNotificationAsReadByUserID(ctx, &generated.MarkNotificationAsReadByUserIDParams{ID: pgID, UserID: pgUserID})
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domainerr.ErrNotFound
+	}
+	return nil
+}
+
+func (r *NotificationRepository) MarkAsReadByCompanyID(ctx context.Context, companyID, id string) error {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(id)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	pgCompanyID, err := parseUUID(companyID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	rows, err := q.MarkNotificationAsReadByCompanyID(ctx, &generated.MarkNotificationAsReadByCompanyIDParams{ID: pgID, CompanyID: pgCompanyID})
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domainerr.ErrNotFound
+	}
+	return nil
 }
 
 func (r *NotificationRepository) MarkAllAsReadByUserID(ctx context.Context, userID string) error {
