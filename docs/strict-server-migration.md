@@ -55,7 +55,7 @@ strict-server ＋ RegisterHandlers ＋スペック駆動認可に移行し、最
 |-------|------|------|-----------|
 | 0 | [x] | 足場: 未pushコミットの整理・作業ブランチ | — |
 | 1 | [x] | 認可のスペック駆動化（AuthenticationFunc 実装） | 認証付け忘れバグクラスの消滅 |
-| 2 | [ ] | admin API の TypeSpec 契約化 | 検証・認可・codegen が全ルートに効く |
+| 2 | [x] | admin API の TypeSpec 契約化 | 検証・認可・codegen が全ルートに効く |
 | 3 | [ ] | strict-server ＋ std-http 化（機能グループ単位で刻む） | 契約遵守のコンパイル時強制・Echo 依存の消滅 |
 | 4 | [ ] | RegisterHandlers 化と後始末 | 手動ルート表の廃止・登録漏れのコンパイル時検出 |
 | 5 | [ ] | レスポンス検証の有効化（test/dev） | レスポンス側の契約違反検出 |
@@ -120,6 +120,23 @@ strict-server ＋ RegisterHandlers ＋スペック駆動認可に移行し、最
 6. 検証: `make check`、ドリフトテスト、admin 管理画面の手動スモーク（一覧・承認以外の操作）。
 
 **コミット例:** `feat(api): admin API を TypeSpec 契約に追加`（spec）＋ `refactor(backend): admin 認可をスペック駆動へ移行`
+
+**実施メモ（2026-07-16 完了、コミット be06490 / cab9319）:**
+- admin ルートは全29本（`models/admin.tsp` / `routes/admin.tsp`）。レスポンス形は実装準拠で
+  snake_case 混在（`api_key_prefix` 等）・企業系のみ camelCase という現物の不揃いをそのまま契約化した。
+  公開 API の camel 統一命名には**寄せていない**（互換優先。揃えるならフロント管理画面と同時変更）。
+- `@useAuth(Models.AdminAuth)` は interface レベル1箇所で全 operation に効く（生成 YAML で29本全てに
+  `security: [{AdminAuth: []}]` が付くことを確認済み）。
+- スペック追加と同時に生成 `ServerInterface` が29メソッド増え `server.go` の適合が壊れるため、
+  委譲メソッド追加＋validator の AdminAuth 分岐は**同一コミットに含めた**（スペックだけ先行させると
+  AuthenticationFunc が未知スキームで全 admin ルートを 401 にする）。
+- AdminAuth 分岐は旧MWと同挙動: X-Admin-Key ヘッダーのみ（Bearer 代替なし・ユニットテストで固定）、
+  静的キー→個人トークン(SHA-256) の順、fail-closed、TouchAdminLastUsed と監査ログ注釈
+  （`admin_auth=static_key|personal_token`、アクセスログで確認済み）も validator 側へ移植。
+- 副次的な改善: admin のクエリ/パス/ボディも契約検証されるようになった
+  （例: `per_page=abc` は従来デフォルト値で握り潰し→現在は 400）。
+- フロント SDK は admin operation を「混ぜる」を採用（tsc クリーン確認済み）。
+- 手動スモーク: 未認証/不正キー 401・静的キー 200・個人トークン 200（発行→使用→last_used_at 更新→削除）。
 
 ## Phase 3: strict-server ＋ std-http 化（最大の山）
 
