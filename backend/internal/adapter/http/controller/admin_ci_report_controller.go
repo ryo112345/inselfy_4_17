@@ -1,15 +1,12 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
-	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
@@ -23,192 +20,212 @@ func NewAdminCIReportController(pool *pgxpool.Pool) *AdminCIReportController {
 	return &AdminCIReportController{queries: generated.New(pool)}
 }
 
-func (c *AdminCIReportController) ListPending(ctx echo.Context) error {
-	rows, err := c.queries.ListCISessionsWithoutReport(ctx.Request().Context())
+// ListPending handles GET /api/admin/ci-reports/pending.
+func (c *AdminCIReportController) ListPending(ctx context.Context, _ openapi.AdminListPendingCiSessionsRequestObject) (openapi.AdminListPendingCiSessionsResponseObject, error) {
+	rows, err := c.queries.ListCISessionsWithoutReport(ctx)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	items := make([]pendingSessionItem, 0, len(rows))
+	items := make([]openapi.ModelsAdminPendingSessionItem, 0, len(rows))
 	for _, r := range rows {
-		item := pendingSessionItem{
-			SessionID: pgUUIDToString(r.SessionID),
-			UserID:    pgUUIDToString(r.UserID),
+		item := openapi.ModelsAdminPendingSessionItem{
+			SessionId: pgUUIDToString(r.SessionID),
+			UserId:    pgUUIDToString(r.UserID),
 			Username:  r.Username,
 			Name:      r.Name,
 		}
 		if r.CompletedAt.Valid {
-			t := r.CompletedAt.Time.Format("2006-01-02T15:04:05Z")
+			t := r.CompletedAt.Time
 			item.CompletedAt = &t
 		}
 		if r.ReportRequestedAt.Valid {
-			t := r.ReportRequestedAt.Time.UTC().Format("2006-01-02T15:04:05Z")
-			item.RequestedAt = &t
+			t := r.ReportRequestedAt.Time
+			item.ReportRequestedAt = &t
 		}
 		items = append(items, item)
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"sessions": items,
-		"total":    len(items),
-	})
+	return openapi.AdminListPendingCiSessions200JSONResponse(openapi.ModelsAdminPendingSessionsResponse{
+		Sessions: items,
+		Total:    int32(len(items)), //nolint:gosec // 件数が int32 を超えることはない
+	}), nil
 }
 
-func (c *AdminCIReportController) SaveReport(ctx echo.Context, sessionID string) error {
-	parsedSession, err := uuid.Parse(sessionID)
-	if err != nil {
-		return badRequest(ctx, "invalid session_id")
+// SaveReport handles PUT /api/admin/ci-sessions/{sessionId}/ai-report.
+func (c *AdminCIReportController) SaveReport(ctx context.Context, req openapi.AdminSaveCiReportRequestObject) (openapi.AdminSaveCiReportResponseObject, error) {
+	if req.Body == nil {
+		return openapi.AdminSaveCiReport400JSONResponse(badRequestBody("invalid body")), nil
+	}
+	if req.Body.Content == "" {
+		return openapi.AdminSaveCiReport400JSONResponse(badRequestBody("content is required")), nil
 	}
 
-	var body saveReportRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	if body.Content == "" {
-		return badRequest(ctx, "content is required")
-	}
+	pgSessionID := pgUUID(req.SessionId)
 
-	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
-
-	session, err := c.queries.GetCISessionByID(ctx.Request().Context(), pgSessionID)
+	session, err := c.queries.GetCISessionByID(ctx, pgSessionID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "session not found")
+			return openapi.AdminSaveCiReport404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "session not found",
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	report, err := c.queries.UpsertCIAIReport(ctx.Request().Context(), &generated.UpsertCIAIReportParams{
+	report, err := c.queries.UpsertCIAIReport(ctx, &generated.UpsertCIAIReportParams{
 		SessionID: pgSessionID,
 		UserID:    session.UserID,
-		Content:   body.Content,
+		Content:   req.Body.Content,
 	})
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"id":         pgUUIDToString(report.ID),
-		"session_id": pgUUIDToString(report.SessionID),
-		"content":    report.Content,
-		"created_at": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-	})
+	return openapi.AdminSaveCiReport200JSONResponse(openapi.ModelsAdminSavedAiReportResponse{
+		Id:        pgUUIDToString(report.ID),
+		SessionId: pgUUIDToString(report.SessionID),
+		Content:   report.Content,
+		CreatedAt: report.CreatedAt.Time,
+	}), nil
 }
 
-func (c *AdminCIReportController) GetReport(ctx echo.Context, sessionID string) error {
-	parsedSession, err := uuid.Parse(sessionID)
-	if err != nil {
-		return badRequest(ctx, "invalid session_id")
-	}
-
-	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
-	report, err := c.queries.GetCIAIReportBySessionID(ctx.Request().Context(), pgSessionID)
+// getCIReport is the shared body of the admin and user-facing CI report GETs.
+func (c *AdminCIReportController) getCIReport(ctx context.Context, sessionID string) (*openapi.ModelsAiReportResponse, bool, error) {
+	pgSessionID := pgUUID(sessionID)
+	report, err := c.queries.GetCIAIReportBySessionID(ctx, pgSessionID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "report not found")
+			return nil, false, nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, false, err
 	}
 
 	firstView := !report.ViewedAt.Valid
 	if firstView {
-		_ = c.queries.MarkCIAIReportViewed(ctx.Request().Context(), pgSessionID)
+		_ = c.queries.MarkCIAIReportViewed(ctx, pgSessionID)
 	}
 
-	return ctx.JSON(http.StatusOK, openapi.ModelsAiReportResponse{
+	return &openapi.ModelsAiReportResponse{
 		Id:        pgUUIDToString(report.ID),
 		SessionId: pgUUIDToString(report.SessionID),
 		Content:   report.Content,
 		CreatedAt: report.CreatedAt.Time,
 		FirstView: firstView,
-	})
+	}, true, nil
 }
 
-func (c *AdminCIReportController) ListReports(ctx echo.Context) error {
-	rows, err := c.queries.ListCIAIReports(ctx.Request().Context())
+// GetReport handles GET /api/admin/ci-sessions/{sessionId}/ai-report.
+func (c *AdminCIReportController) GetReport(ctx context.Context, req openapi.AdminGetCiReportRequestObject) (openapi.AdminGetCiReportResponseObject, error) {
+	resp, found, err := c.getCIReport(ctx, req.SessionId)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
+	}
+	if !found {
+		return openapi.AdminGetCiReport404JSONResponse(openapi.ModelsNotFoundError{
+			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+			Message: "report not found",
+		}), nil
+	}
+	return openapi.AdminGetCiReport200JSONResponse(*resp), nil
+}
+
+// GetReportAsUser handles GET /api/career-interest/sessions/{sessionId}/ai-report.
+func (c *AdminCIReportController) GetReportAsUser(ctx context.Context, req openapi.CareerInterestCiGetAiReportRequestObject) (openapi.CareerInterestCiGetAiReportResponseObject, error) {
+	resp, found, err := c.getCIReport(ctx, req.SessionId)
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return openapi.CareerInterestCiGetAiReport404JSONResponse(openapi.ModelsNotFoundError{
+			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+			Message: "report not found",
+		}), nil
+	}
+	return openapi.CareerInterestCiGetAiReport200JSONResponse(*resp), nil
+}
+
+// ListReports handles GET /api/admin/ci-reports/list.
+func (c *AdminCIReportController) ListReports(ctx context.Context, _ openapi.AdminListCiReportsRequestObject) (openapi.AdminListCiReportsResponseObject, error) {
+	rows, err := c.queries.ListCIAIReports(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	items := make([]map[string]any, 0, len(rows))
+	items := make([]openapi.ModelsAdminAiReportListItem, 0, len(rows))
 	for _, r := range rows {
-		item := map[string]any{
-			"id":         pgUUIDToString(r.ID),
-			"session_id": pgUUIDToString(r.SessionID),
-			"user_id":    pgUUIDToString(r.UserID),
-			"username":   r.Username,
-			"created_at": r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-			"viewed_at":  nil,
+		item := openapi.ModelsAdminAiReportListItem{
+			Id:        pgUUIDToString(r.ID),
+			SessionId: pgUUIDToString(r.SessionID),
+			UserId:    pgUUIDToString(r.UserID),
+			Username:  r.Username,
+			Name:      r.Name,
+			CreatedAt: r.CreatedAt.Time,
 		}
-		item["name"] = r.Name
 		if r.ViewedAt.Valid {
-			item["viewed_at"] = r.ViewedAt.Time.Format("2006-01-02T15:04:05Z")
+			t := r.ViewedAt.Time
+			item.ViewedAt = &t
 		}
 		items = append(items, item)
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"reports": items,
-		"total":   len(items),
-	})
+	return openapi.AdminListCiReports200JSONResponse(openapi.ModelsAdminAiReportListResponse{
+		Reports: items,
+		Total:   int32(len(items)), //nolint:gosec // 件数が int32 を超えることはない
+	}), nil
 }
 
-func (c *AdminCIReportController) ResetViewed(ctx echo.Context, sessionID string) error {
-	parsedSession, err := uuid.Parse(sessionID)
-	if err != nil {
-		return badRequest(ctx, "invalid session_id")
+// ResetViewed handles POST /api/admin/ci-sessions/{sessionId}/reset-viewed.
+func (c *AdminCIReportController) ResetViewed(ctx context.Context, req openapi.AdminResetCiReportViewedRequestObject) (openapi.AdminResetCiReportViewedResponseObject, error) {
+	if err := c.queries.ResetCIAIReportViewed(ctx, pgUUID(req.SessionId)); err != nil {
+		return nil, err
 	}
-
-	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
-	if err := c.queries.ResetCIAIReportViewed(ctx.Request().Context(), pgSessionID); err != nil {
-		return internalError(ctx, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, map[string]string{"message": "ok"})
+	return openapi.AdminResetCiReportViewed200JSONResponse(openapi.ModelsAdminMessageResponse{Message: "ok"}), nil
 }
 
-func (c *AdminCIReportController) GetPrompt(ctx echo.Context, sessionID string) error {
-	parsedSession, err := uuid.Parse(sessionID)
-	if err != nil {
-		return badRequest(ctx, "invalid session_id")
-	}
+// GetPrompt handles GET /api/admin/ci-sessions/{sessionId}/prompt.
+func (c *AdminCIReportController) GetPrompt(ctx context.Context, req openapi.AdminGetCiPromptRequestObject) (openapi.AdminGetCiPromptResponseObject, error) {
+	pgSessionID := pgUUID(req.SessionId)
 
-	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
-
-	basicScores, err := c.queries.GetCIBasicScoresBySessionID(ctx.Request().Context(), pgSessionID)
+	basicScores, err := c.queries.GetCIBasicScoresBySessionID(ctx, pgSessionID)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 	if len(basicScores) == 0 {
-		return notFoundError(ctx, "scores not found")
+		return openapi.AdminGetCiPrompt404JSONResponse(openapi.ModelsNotFoundError{
+			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+			Message: "scores not found",
+		}), nil
 	}
 
-	typeScores, err := c.queries.GetCITypeScoresBySessionID(ctx.Request().Context(), pgSessionID)
+	typeScores, err := c.queries.GetCITypeScoresBySessionID(ctx, pgSessionID)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	result, err := c.queries.GetCIResultBySessionID(ctx.Request().Context(), pgSessionID)
+	result, err := c.queries.GetCIResultBySessionID(ctx, pgSessionID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "result not found")
+			return openapi.AdminGetCiPrompt404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "result not found",
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
 	var responses []ciResponse
 	if err := json.Unmarshal(result.Responses, &responses); err != nil {
-		return internalError(ctx, "failed to parse responses")
+		return nil, err
 	}
 
 	template, err := readCIPromptTemplate()
 	if err != nil {
-		return internalError(ctx, "failed to read prompt template: "+err.Error())
+		return nil, err
 	}
 
 	prompt := buildCIReportPrompt(string(template), typeScores, basicScores, responses)
 
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"prompt": prompt,
-	})
+	return openapi.AdminGetCiPrompt200JSONResponse(openapi.ModelsAdminPromptResponse{Prompt: prompt}), nil
 }

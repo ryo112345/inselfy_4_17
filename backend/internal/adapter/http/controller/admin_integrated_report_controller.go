@@ -1,14 +1,11 @@
 package controller
 
 import (
+	"context"
 	"errors"
-	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
@@ -23,287 +20,291 @@ func NewAdminIntegratedReportController(pool *pgxpool.Pool) *AdminIntegratedRepo
 	return &AdminIntegratedReportController{queries: generated.New(pool)}
 }
 
-func (ctrl *AdminIntegratedReportController) CreateRequest(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
-
-	var body openapi.ModelsCreateIntegratedReportRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
+// CreateRequest handles POST /api/integrated-report/requests.
+func (ctrl *AdminIntegratedReportController) CreateRequest(ctx context.Context, reqObj openapi.IntegratedReportCreateIntegratedReportRequestRequestObject) (openapi.IntegratedReportCreateIntegratedReportRequestResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+	if reqObj.Body == nil {
+		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("invalid body")), nil
 	}
+	body := reqObj.Body
 
 	if body.Topic1 < 1 || body.Topic1 > 10 || body.Topic2 < 1 || body.Topic2 > 10 || body.Topic3 < 1 || body.Topic3 > 10 {
-		return badRequest(ctx, "topics must be between 1 and 10")
+		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("topics must be between 1 and 10")), nil
 	}
 	if body.Topic1 == body.Topic2 || body.Topic1 == body.Topic3 || body.Topic2 == body.Topic3 {
-		return badRequest(ctx, "topics must be distinct")
+		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("topics must be distinct")), nil
 	}
 	if len([]rune(body.FreeText)) > 200 {
-		return badRequest(ctx, "freeText must be 200 characters or less")
+		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("freeText must be 200 characters or less")), nil
 	}
 
-	parsedUserID, err := uuid.Parse(userID)
-	if err != nil {
-		return badRequest(ctx, "invalid user_id")
-	}
-	pgUserID := pgtype.UUID{Bytes: parsedUserID, Valid: true}
-
-	req, err := ctrl.queries.CreateIntegratedReportRequest(ctx.Request().Context(), &generated.CreateIntegratedReportRequestParams{
-		UserID:   pgUserID,
+	req, err := ctrl.queries.CreateIntegratedReportRequest(ctx, &generated.CreateIntegratedReportRequestParams{
+		UserID:   pgUUID(userID),
 		Topic1:   body.Topic1,
 		Topic2:   body.Topic2,
 		Topic3:   body.Topic3,
 		FreeText: body.FreeText,
 	})
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	return ctx.JSON(http.StatusCreated, openapi.ModelsIntegratedReportRequestResponse{
+	return openapi.IntegratedReportCreateIntegratedReportRequest201JSONResponse(openapi.ModelsIntegratedReportRequestResponse{
 		Id:        pgUUIDToString(req.ID),
 		Topic1:    req.Topic1,
 		Topic2:    req.Topic2,
 		Topic3:    req.Topic3,
 		FreeText:  req.FreeText,
 		CreatedAt: req.CreatedAt.Time,
-	})
+	}), nil
 }
 
-func (ctrl *AdminIntegratedReportController) ListPending(ctx echo.Context) error {
-	rows, err := ctrl.queries.ListIntegratedRequestsWithoutReport(ctx.Request().Context())
+// ListPending handles GET /api/admin/integrated-reports/pending.
+func (ctrl *AdminIntegratedReportController) ListPending(ctx context.Context, _ openapi.AdminListPendingIntegratedRequestsRequestObject) (openapi.AdminListPendingIntegratedRequestsResponseObject, error) {
+	rows, err := ctrl.queries.ListIntegratedRequestsWithoutReport(ctx)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	items := make([]map[string]any, 0, len(rows))
+	items := make([]openapi.ModelsAdminPendingIntegratedRequestItem, 0, len(rows))
 	for _, r := range rows {
-		item := map[string]any{
-			"request_id": pgUUIDToString(r.RequestID),
-			"user_id":    pgUUIDToString(r.UserID),
-			"username":   r.Username,
-			"topic1":     r.Topic1,
-			"topic2":     r.Topic2,
-			"topic3":     r.Topic3,
-			"free_text":  r.FreeText,
-			"created_at": r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-		}
-		item["name"] = r.Name
-		items = append(items, item)
+		items = append(items, openapi.ModelsAdminPendingIntegratedRequestItem{
+			RequestId: pgUUIDToString(r.RequestID),
+			UserId:    pgUUIDToString(r.UserID),
+			Username:  r.Username,
+			Name:      r.Name,
+			Topic1:    r.Topic1,
+			Topic2:    r.Topic2,
+			Topic3:    r.Topic3,
+			FreeText:  r.FreeText,
+			CreatedAt: r.CreatedAt.Time,
+		})
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"requests": items,
-		"total":    len(items),
-	})
+	return openapi.AdminListPendingIntegratedRequests200JSONResponse(openapi.ModelsAdminPendingIntegratedRequestsResponse{
+		Requests: items,
+		Total:    int32(len(items)), //nolint:gosec // 件数が int32 を超えることはない
+	}), nil
 }
 
-func (ctrl *AdminIntegratedReportController) SaveReport(ctx echo.Context, requestID string) error {
-	parsedReqID, err := uuid.Parse(requestID)
-	if err != nil {
-		return badRequest(ctx, "invalid request_id")
+// SaveReport handles PUT /api/admin/integrated-requests/{requestId}/ai-report.
+func (ctrl *AdminIntegratedReportController) SaveReport(ctx context.Context, reqObj openapi.AdminSaveIntegratedReportRequestObject) (openapi.AdminSaveIntegratedReportResponseObject, error) {
+	if reqObj.Body == nil {
+		return openapi.AdminSaveIntegratedReport400JSONResponse(badRequestBody("invalid body")), nil
+	}
+	if reqObj.Body.Content == "" {
+		return openapi.AdminSaveIntegratedReport400JSONResponse(badRequestBody("content is required")), nil
 	}
 
-	var body saveReportRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	if body.Content == "" {
-		return badRequest(ctx, "content is required")
-	}
+	pgReqID := pgUUID(reqObj.RequestId)
 
-	pgReqID := pgtype.UUID{Bytes: parsedReqID, Valid: true}
-
-	req, err := ctrl.queries.GetIntegratedReportRequestByID(ctx.Request().Context(), pgReqID)
+	req, err := ctrl.queries.GetIntegratedReportRequestByID(ctx, pgReqID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "request not found")
+			return openapi.AdminSaveIntegratedReport404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "request not found",
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	report, err := ctrl.queries.UpsertIntegratedReport(ctx.Request().Context(), &generated.UpsertIntegratedReportParams{
+	report, err := ctrl.queries.UpsertIntegratedReport(ctx, &generated.UpsertIntegratedReportParams{
 		RequestID: pgReqID,
 		UserID:    req.UserID,
-		Content:   body.Content,
+		Content:   reqObj.Body.Content,
 	})
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"id":         pgUUIDToString(report.ID),
-		"request_id": pgUUIDToString(report.RequestID),
-		"content":    report.Content,
-		"created_at": report.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-	})
+	return openapi.AdminSaveIntegratedReport200JSONResponse(openapi.ModelsAdminSavedIntegratedReportResponse{
+		Id:        pgUUIDToString(report.ID),
+		RequestId: pgUUIDToString(report.RequestID),
+		Content:   report.Content,
+		CreatedAt: report.CreatedAt.Time,
+	}), nil
 }
 
-func (ctrl *AdminIntegratedReportController) GetReport(ctx echo.Context, requestID string) error {
-	parsedReqID, err := uuid.Parse(requestID)
-	if err != nil {
-		return badRequest(ctx, "invalid request_id")
-	}
-
-	pgReqID := pgtype.UUID{Bytes: parsedReqID, Valid: true}
-	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), pgReqID)
+// getIntegratedReport is the shared body of the admin and user-facing report GETs.
+func (ctrl *AdminIntegratedReportController) getIntegratedReport(ctx context.Context, requestID string) (*openapi.ModelsIntegratedReportResponse, bool, error) {
+	pgReqID := pgUUID(requestID)
+	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx, pgReqID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "report not found")
+			return nil, false, nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, false, err
 	}
 
 	firstView := !report.ViewedAt.Valid
 	if firstView {
-		_ = ctrl.queries.MarkIntegratedReportViewed(ctx.Request().Context(), pgReqID)
+		_ = ctrl.queries.MarkIntegratedReportViewed(ctx, pgReqID)
 	}
 
-	return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportResponse{
+	return &openapi.ModelsIntegratedReportResponse{
 		Id:        pgUUIDToString(report.ID),
 		RequestId: pgUUIDToString(report.RequestID),
 		UserId:    pgUUIDToString(report.UserID),
 		Content:   report.Content,
 		CreatedAt: report.CreatedAt.Time,
 		FirstView: firstView,
-	})
+	}, true, nil
 }
 
-func (ctrl *AdminIntegratedReportController) GetReportByUser(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
-
-	parsedUserID, err := uuid.Parse(userID)
+// GetReportAsAdmin handles GET /api/admin/integrated-requests/{requestId}/ai-report.
+func (ctrl *AdminIntegratedReportController) GetReportAsAdmin(ctx context.Context, reqObj openapi.AdminGetIntegratedReportAsAdminRequestObject) (openapi.AdminGetIntegratedReportAsAdminResponseObject, error) {
+	resp, found, err := ctrl.getIntegratedReport(ctx, reqObj.RequestId)
 	if err != nil {
-		return badRequest(ctx, "invalid user_id")
+		return nil, err
 	}
-	pgUserID := pgtype.UUID{Bytes: parsedUserID, Valid: true}
+	if !found {
+		return openapi.AdminGetIntegratedReportAsAdmin404JSONResponse(openapi.ModelsNotFoundError{
+			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+			Message: "report not found",
+		}), nil
+	}
+	return openapi.AdminGetIntegratedReportAsAdmin200JSONResponse(*resp), nil
+}
 
-	report, err := ctrl.queries.GetLatestIntegratedReportByUserID(ctx.Request().Context(), pgUserID)
+// GetReportAsUser handles GET /api/integrated-report/requests/{requestId}/report.
+func (ctrl *AdminIntegratedReportController) GetReportAsUser(ctx context.Context, reqObj openapi.IntegratedReportGetIntegratedReportRequestObject) (openapi.IntegratedReportGetIntegratedReportResponseObject, error) {
+	resp, found, err := ctrl.getIntegratedReport(ctx, reqObj.RequestId)
+	if err != nil {
+		return nil, err
+	}
+	if !found {
+		return openapi.IntegratedReportGetIntegratedReport404JSONResponse(openapi.ModelsNotFoundError{
+			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+			Message: "report not found",
+		}), nil
+	}
+	return openapi.IntegratedReportGetIntegratedReport200JSONResponse(*resp), nil
+}
+
+// GetReportByUser handles GET /api/integrated-report/me.
+func (ctrl *AdminIntegratedReportController) GetReportByUser(ctx context.Context, _ openapi.IntegratedReportGetMyIntegratedReportRequestObject) (openapi.IntegratedReportGetMyIntegratedReportResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+
+	report, err := ctrl.queries.GetLatestIntegratedReportByUserID(ctx, pgUUID(userID))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "report not found")
+			return openapi.IntegratedReportGetMyIntegratedReport404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "report not found",
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
 	firstView := !report.ViewedAt.Valid
 	if firstView {
-		_ = ctrl.queries.MarkIntegratedReportViewed(ctx.Request().Context(), report.RequestID)
+		_ = ctrl.queries.MarkIntegratedReportViewed(ctx, report.RequestID)
 	}
 
-	return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportMineResponse{
+	return openapi.IntegratedReportGetMyIntegratedReport200JSONResponse(openapi.ModelsIntegratedReportMineResponse{
 		Id:        pgUUIDToString(report.ID),
 		RequestId: pgUUIDToString(report.RequestID),
 		Content:   report.Content,
 		CreatedAt: report.CreatedAt.Time,
 		FirstView: firstView,
-	})
+	}), nil
 }
 
-func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+// GetRequestStatus handles GET /api/integrated-report/status.
+func (ctrl *AdminIntegratedReportController) GetRequestStatus(ctx context.Context, _ openapi.IntegratedReportGetIntegratedReportStatusRequestObject) (openapi.IntegratedReportGetIntegratedReportStatusResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	parsedUserID, err := uuid.Parse(userID)
-	if err != nil {
-		return badRequest(ctx, "invalid user_id")
-	}
-	pgUserID := pgtype.UUID{Bytes: parsedUserID, Valid: true}
-
-	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx.Request().Context(), pgUserID)
+	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx, pgUUID(userID))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportStatusResponse{
+			return openapi.IntegratedReportGetIntegratedReportStatus200JSONResponse(openapi.ModelsIntegratedReportStatusResponse{
 				Status: openapi.ModelsIntegratedReportStatusResponseStatusNone,
-			})
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), req.ID)
+	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx, req.ID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			requestID := pgUUIDToString(req.ID)
-			return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportStatusResponse{
+			return openapi.IntegratedReportGetIntegratedReportStatus200JSONResponse(openapi.ModelsIntegratedReportStatusResponse{
 				Status:    openapi.ModelsIntegratedReportStatusResponseStatusPending,
 				RequestId: &requestID,
-			})
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
 	requestID := pgUUIDToString(report.RequestID)
-	return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportStatusResponse{
+	return openapi.IntegratedReportGetIntegratedReportStatus200JSONResponse(openapi.ModelsIntegratedReportStatusResponse{
 		Status:    openapi.ModelsIntegratedReportStatusResponseStatusReady,
 		RequestId: &requestID,
-	})
+	}), nil
 }
 
-func (ctrl *AdminIntegratedReportController) ListReports(ctx echo.Context) error {
-	rows, err := ctrl.queries.ListIntegratedReports(ctx.Request().Context())
+// ListReports handles GET /api/admin/integrated-reports/list.
+func (ctrl *AdminIntegratedReportController) ListReports(ctx context.Context, _ openapi.AdminListIntegratedReportsRequestObject) (openapi.AdminListIntegratedReportsResponseObject, error) {
+	rows, err := ctrl.queries.ListIntegratedReports(ctx)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	items := make([]map[string]any, 0, len(rows))
+	items := make([]openapi.ModelsAdminIntegratedReportListItem, 0, len(rows))
 	for _, r := range rows {
-		item := map[string]any{
-			"id":         pgUUIDToString(r.ID),
-			"request_id": pgUUIDToString(r.RequestID),
-			"user_id":    pgUUIDToString(r.UserID),
-			"username":   r.Username,
-			"created_at": r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-			"viewed_at":  nil,
+		item := openapi.ModelsAdminIntegratedReportListItem{
+			Id:        pgUUIDToString(r.ID),
+			RequestId: pgUUIDToString(r.RequestID),
+			UserId:    pgUUIDToString(r.UserID),
+			Username:  r.Username,
+			Name:      r.Name,
+			CreatedAt: r.CreatedAt.Time,
 		}
-		item["name"] = r.Name
 		if r.ViewedAt.Valid {
-			item["viewed_at"] = r.ViewedAt.Time.Format("2006-01-02T15:04:05Z")
+			t := r.ViewedAt.Time
+			item.ViewedAt = &t
 		}
 		items = append(items, item)
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"reports": items,
-		"total":   len(items),
-	})
+	return openapi.AdminListIntegratedReports200JSONResponse(openapi.ModelsAdminIntegratedReportListResponse{
+		Reports: items,
+		Total:   int32(len(items)), //nolint:gosec // 件数が int32 を超えることはない
+	}), nil
 }
 
-func (ctrl *AdminIntegratedReportController) ResetViewed(ctx echo.Context, requestID string) error {
-	parsedReqID, err := uuid.Parse(requestID)
-	if err != nil {
-		return badRequest(ctx, "invalid request_id")
+// ResetViewed handles POST /api/admin/integrated-requests/{requestId}/reset-viewed.
+func (ctrl *AdminIntegratedReportController) ResetViewed(ctx context.Context, reqObj openapi.AdminResetIntegratedReportViewedRequestObject) (openapi.AdminResetIntegratedReportViewedResponseObject, error) {
+	if err := ctrl.queries.ResetIntegratedReportViewed(ctx, pgUUID(reqObj.RequestId)); err != nil {
+		return nil, err
 	}
-
-	pgReqID := pgtype.UUID{Bytes: parsedReqID, Valid: true}
-	if err := ctrl.queries.ResetIntegratedReportViewed(ctx.Request().Context(), pgReqID); err != nil {
-		return internalError(ctx, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, map[string]string{"message": "ok"})
+	return openapi.AdminResetIntegratedReportViewed200JSONResponse(openapi.ModelsAdminMessageResponse{Message: "ok"}), nil
 }
 
-func (ctrl *AdminIntegratedReportController) GetLatestRequest(ctx echo.Context, userID string) error {
-	parsedUserID, err := uuid.Parse(userID)
-	if err != nil {
-		return badRequest(ctx, "invalid user_id")
-	}
-	pgUserID := pgtype.UUID{Bytes: parsedUserID, Valid: true}
-
-	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx.Request().Context(), pgUserID)
+// GetLatestRequest handles GET /api/integrated-report/users/{userId}/latest-request.
+func (ctrl *AdminIntegratedReportController) GetLatestRequest(ctx context.Context, reqObj openapi.IntegratedReportGetLatestIntegratedRequestRequestObject) (openapi.IntegratedReportGetLatestIntegratedRequestResponseObject, error) {
+	req, err := ctrl.queries.GetLatestIntegratedReportRequestByUserID(ctx, pgUUID(reqObj.UserId))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "not found")
+			return openapi.IntegratedReportGetLatestIntegratedRequest404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "not found",
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
 	hasReport := false
-	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx.Request().Context(), req.ID)
+	report, err := ctrl.queries.GetIntegratedReportByRequestID(ctx, req.ID)
 	if err == nil && report != nil {
 		hasReport = true
 	}
 
-	return ctx.JSON(http.StatusOK, openapi.ModelsIntegratedReportLatestRequestResponse{
+	return openapi.IntegratedReportGetLatestIntegratedRequest200JSONResponse(openapi.ModelsIntegratedReportLatestRequestResponse{
 		RequestId: pgUUIDToString(req.ID),
 		UserId:    pgUUIDToString(req.UserID),
 		HasReport: hasReport,
 		CreatedAt: req.CreatedAt.Time,
-	})
+	}), nil
 }

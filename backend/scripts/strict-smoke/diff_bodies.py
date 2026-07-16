@@ -23,9 +23,17 @@ VOLATILE |= {"jobPostingId"}
 VOLATILE |= {"lastMessageAt", "participant1Id", "participant2Id"}
 # interview グループ: 実行ごとに作られる提案・スロット・応募の ID
 VOLATILE |= {"proposalId", "slotId", "applicationId"}
+# admin グループ: snake_case の日時（echo の手書きフォーマットと生成モデル time.Time の
+# 直列化が異なる意図的微差）・実行ごとに変わるトークン/ID
+VOLATILE |= {
+    "created_at", "viewed_at", "completed_at", "report_requested_at", "last_used_at",
+    "api_key", "api_key_prefix", "request_id", "requestId",
+}
 # 同点スコアの並びが呼び出しごとに揺れる配列（タレント検索の top ラベル）は
-# ソートして比較する（順位のタイブレークは実装が非決定的・移行と無関係）
-SORT_BEFORE_DIFF = {"topWvLabels", "topCiLabels"}
+# ソートして比較する（順位のタイブレークは実装が非決定的・移行と無関係）。
+# admin のレポート一覧（reports）も created_at 同値タイの順序が heap 依存で不安定
+# （スモークの snapshot-restore で行が入れ替わる）ためソート比較。
+SORT_BEFORE_DIFF = {"topWvLabels", "topCiLabels", "reports"}
 # 診断セッション開始のたびに時刻シード RNG でシャッフル・抽選される配列。
 # WV の initialPairs は常に揮発。CI セッションの items も揮発だが、"items" は
 # ページングリスト（{items, total}）の共通キーなので、"total" を伴わない
@@ -49,7 +57,11 @@ def norm(v):
             k: (
                 "<VOL>"
                 if k in volatile
-                else sorted(norm(x)) if k in SORT_BEFORE_DIFF and isinstance(x, list) else norm(x)
+                else (
+                    sorted(norm(x), key=lambda e: json.dumps(e, sort_keys=True, ensure_ascii=False))
+                    if k in SORT_BEFORE_DIFF and isinstance(x, list)
+                    else norm(x)
+                )
             )
             for k, x in sorted(v.items())
         }

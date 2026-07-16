@@ -2,24 +2,19 @@ package controller
 
 import (
 	"context"
+	"errors"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 )
 
-// StrictServer implements the generated StrictServerInterface incrementally
-// during the strict-server migration (docs/strict-server-migration.md Phase 3).
-// The embedded interface satisfies the operations whose feature group has not
-// migrated yet; those are still served by the echo router and never dispatched
-// here, so the nil embed is unreachable. Once every group has migrated, the
-// embed is removed and conformance becomes a compile-time check again.
+// StrictServer implements the generated StrictServerInterface（全11グループの
+// 移行完了により embed は撤去済み・コンパイル時適合が有効）。
 //
 // Controllers are installed by the wire_*.go of each migrated group through
 // that group's Wire*Group setter before the server starts serving; the
 // per-group setters keep "wire に代入し忘れた controller" a compile error
 // instead of a nil dereference at request time.
 type StrictServer struct {
-	openapi.StrictServerInterface
-
 	user         *UserController
 	experience   *ExperienceController
 	education    *EducationController
@@ -56,7 +51,17 @@ type StrictServer struct {
 	notification *NotificationController
 
 	interview *InterviewController
+
+	adminAdmin     *AdminAdminController
+	adminUser      *AdminUserController
+	adminCompany   *AdminCompanyController
+	adminReport    *AdminReportController
+	adminCIReport  *AdminCIReportController
+	adminIntReport *AdminIntegratedReportController
 }
+
+// 契約遵守のコンパイル時強制（手順書 3-0: 全グループ移行完了で embed を外して復活）。
+var _ openapi.StrictServerInterface = (*StrictServer)(nil)
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
 // Feature groups add their controllers here as they migrate off echo.
@@ -170,9 +175,34 @@ func (s *StrictServer) WireInterviewGroup(interview *InterviewController) {
 	s.interview = interview
 }
 
+// WireAdminGroup installs the wire_admin controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ11)。admin コントローラは
+// 設計上 pool 直結のまま（CLAUDE.md の例外規定）。共有コントローラが
+// user-facing のレポート7 operation も提供する。
+func (s *StrictServer) WireAdminGroup(
+	adminAdmin *AdminAdminController,
+	adminUser *AdminUserController,
+	adminCompany *AdminCompanyController,
+	adminReport *AdminReportController,
+	adminCIReport *AdminCIReportController,
+	adminIntReport *AdminIntegratedReportController,
+) {
+	s.adminAdmin = adminAdmin
+	s.adminUser = adminUser
+	s.adminCompany = adminCompany
+	s.adminReport = adminReport
+	s.adminCIReport = adminCIReport
+	s.adminIntReport = adminIntReport
+}
+
 // --- Users ---
 // PATCH /api/users/{username} は raw JSON デコードのため strict を経由しない
 // （UserController.UpdateProfileHTTP を wire_user.go が直接 mux に登録する）。
+// UsersUpdateUserProfile はインターフェース適合のためのスタブで、ルートは
+// 手書きハンドラに登録されるため到達しない。
+func (s *StrictServer) UsersUpdateUserProfile(context.Context, openapi.UsersUpdateUserProfileRequestObject) (openapi.UsersUpdateUserProfileResponseObject, error) {
+	return nil, errors.New("unreachable: PATCH /api/users/{username} is served by UpdateProfileHTTP")
+}
 
 func (s *StrictServer) UsersCreateUser(ctx context.Context, req openapi.UsersCreateUserRequestObject) (openapi.UsersCreateUserResponseObject, error) {
 	return s.user.Create(ctx, req)
@@ -912,4 +942,162 @@ func (s *StrictServer) CandidateInterviewsGetProposalSlots(ctx context.Context, 
 
 func (s *StrictServer) CandidateInterviewsCancelCandidateInterview(ctx context.Context, req openapi.CandidateInterviewsCancelCandidateInterviewRequestObject) (openapi.CandidateInterviewsCancelCandidateInterviewResponseObject, error) {
 	return s.interview.CancelAsCandidate(ctx, req)
+}
+
+// --- Admin: 管理者 ---
+
+func (s *StrictServer) AdminListAdmins(ctx context.Context, req openapi.AdminListAdminsRequestObject) (openapi.AdminListAdminsResponseObject, error) {
+	return s.adminAdmin.List(ctx, req)
+}
+
+func (s *StrictServer) AdminCreateAdmin(ctx context.Context, req openapi.AdminCreateAdminRequestObject) (openapi.AdminCreateAdminResponseObject, error) {
+	return s.adminAdmin.Create(ctx, req)
+}
+
+func (s *StrictServer) AdminIssueAdminApiKey(ctx context.Context, req openapi.AdminIssueAdminApiKeyRequestObject) (openapi.AdminIssueAdminApiKeyResponseObject, error) {
+	return s.adminAdmin.IssueKey(ctx, req)
+}
+
+func (s *StrictServer) AdminDeleteAdmin(ctx context.Context, req openapi.AdminDeleteAdminRequestObject) (openapi.AdminDeleteAdminResponseObject, error) {
+	return s.adminAdmin.Delete(ctx, req)
+}
+
+// --- Admin: ユーザー ---
+
+func (s *StrictServer) AdminListUsers(ctx context.Context, req openapi.AdminListUsersRequestObject) (openapi.AdminListUsersResponseObject, error) {
+	return s.adminUser.List(ctx, req)
+}
+
+func (s *StrictServer) AdminDeleteUser(ctx context.Context, req openapi.AdminDeleteUserRequestObject) (openapi.AdminDeleteUserResponseObject, error) {
+	return s.adminUser.Delete(ctx, req)
+}
+
+func (s *StrictServer) AdminBypassLoginAsUser(ctx context.Context, req openapi.AdminBypassLoginAsUserRequestObject) (openapi.AdminBypassLoginAsUserResponseObject, error) {
+	return s.adminUser.BypassLogin(ctx, req)
+}
+
+// --- Admin: 企業 ---
+
+func (s *StrictServer) AdminListCompanies(ctx context.Context, req openapi.AdminListCompaniesRequestObject) (openapi.AdminListCompaniesResponseObject, error) {
+	return s.adminCompany.List(ctx, req)
+}
+
+func (s *StrictServer) AdminUpdateCompanyStatus(ctx context.Context, req openapi.AdminUpdateCompanyStatusRequestObject) (openapi.AdminUpdateCompanyStatusResponseObject, error) {
+	return s.adminCompany.UpdateStatus(ctx, req)
+}
+
+func (s *StrictServer) AdminBypassLoginAsCompany(ctx context.Context, req openapi.AdminBypassLoginAsCompanyRequestObject) (openapi.AdminBypassLoginAsCompanyResponseObject, error) {
+	return s.adminCompany.BypassLogin(ctx, req)
+}
+
+// --- Admin: WV レポート ---
+
+func (s *StrictServer) AdminListPendingWvSessions(ctx context.Context, req openapi.AdminListPendingWvSessionsRequestObject) (openapi.AdminListPendingWvSessionsResponseObject, error) {
+	return s.adminReport.ListPending(ctx, req)
+}
+
+func (s *StrictServer) AdminListWvReports(ctx context.Context, req openapi.AdminListWvReportsRequestObject) (openapi.AdminListWvReportsResponseObject, error) {
+	return s.adminReport.ListReports(ctx, req)
+}
+
+func (s *StrictServer) AdminSaveWvReport(ctx context.Context, req openapi.AdminSaveWvReportRequestObject) (openapi.AdminSaveWvReportResponseObject, error) {
+	return s.adminReport.SaveReport(ctx, req)
+}
+
+func (s *StrictServer) AdminGetWvReport(ctx context.Context, req openapi.AdminGetWvReportRequestObject) (openapi.AdminGetWvReportResponseObject, error) {
+	return s.adminReport.GetReport(ctx, req)
+}
+
+func (s *StrictServer) AdminGetWvSessionScores(ctx context.Context, req openapi.AdminGetWvSessionScoresRequestObject) (openapi.AdminGetWvSessionScoresResponseObject, error) {
+	return s.adminReport.GetSessionScores(ctx, req)
+}
+
+func (s *StrictServer) AdminGetWvPrompt(ctx context.Context, req openapi.AdminGetWvPromptRequestObject) (openapi.AdminGetWvPromptResponseObject, error) {
+	return s.adminReport.GetPrompt(ctx, req)
+}
+
+func (s *StrictServer) AdminResetWvReportViewed(ctx context.Context, req openapi.AdminResetWvReportViewedRequestObject) (openapi.AdminResetWvReportViewedResponseObject, error) {
+	return s.adminReport.ResetViewed(ctx, req)
+}
+
+func (s *StrictServer) WorkValuesWvGetAiReport(ctx context.Context, req openapi.WorkValuesWvGetAiReportRequestObject) (openapi.WorkValuesWvGetAiReportResponseObject, error) {
+	return s.adminReport.GetReportAsUser(ctx, req)
+}
+
+// --- Admin: CI レポート ---
+
+func (s *StrictServer) AdminListPendingCiSessions(ctx context.Context, req openapi.AdminListPendingCiSessionsRequestObject) (openapi.AdminListPendingCiSessionsResponseObject, error) {
+	return s.adminCIReport.ListPending(ctx, req)
+}
+
+func (s *StrictServer) AdminListCiReports(ctx context.Context, req openapi.AdminListCiReportsRequestObject) (openapi.AdminListCiReportsResponseObject, error) {
+	return s.adminCIReport.ListReports(ctx, req)
+}
+
+func (s *StrictServer) AdminSaveCiReport(ctx context.Context, req openapi.AdminSaveCiReportRequestObject) (openapi.AdminSaveCiReportResponseObject, error) {
+	return s.adminCIReport.SaveReport(ctx, req)
+}
+
+func (s *StrictServer) AdminGetCiReport(ctx context.Context, req openapi.AdminGetCiReportRequestObject) (openapi.AdminGetCiReportResponseObject, error) {
+	return s.adminCIReport.GetReport(ctx, req)
+}
+
+func (s *StrictServer) AdminGetCiPrompt(ctx context.Context, req openapi.AdminGetCiPromptRequestObject) (openapi.AdminGetCiPromptResponseObject, error) {
+	return s.adminCIReport.GetPrompt(ctx, req)
+}
+
+func (s *StrictServer) AdminResetCiReportViewed(ctx context.Context, req openapi.AdminResetCiReportViewedRequestObject) (openapi.AdminResetCiReportViewedResponseObject, error) {
+	return s.adminCIReport.ResetViewed(ctx, req)
+}
+
+func (s *StrictServer) CareerInterestCiGetAiReport(ctx context.Context, req openapi.CareerInterestCiGetAiReportRequestObject) (openapi.CareerInterestCiGetAiReportResponseObject, error) {
+	return s.adminCIReport.GetReportAsUser(ctx, req)
+}
+
+// --- Admin: 統合レポート ---
+
+func (s *StrictServer) AdminListPendingIntegratedRequests(ctx context.Context, req openapi.AdminListPendingIntegratedRequestsRequestObject) (openapi.AdminListPendingIntegratedRequestsResponseObject, error) {
+	return s.adminIntReport.ListPending(ctx, req)
+}
+
+func (s *StrictServer) AdminListIntegratedReports(ctx context.Context, req openapi.AdminListIntegratedReportsRequestObject) (openapi.AdminListIntegratedReportsResponseObject, error) {
+	return s.adminIntReport.ListReports(ctx, req)
+}
+
+func (s *StrictServer) AdminSaveIntegratedReport(ctx context.Context, req openapi.AdminSaveIntegratedReportRequestObject) (openapi.AdminSaveIntegratedReportResponseObject, error) {
+	return s.adminIntReport.SaveReport(ctx, req)
+}
+
+func (s *StrictServer) AdminGetIntegratedReportAsAdmin(ctx context.Context, req openapi.AdminGetIntegratedReportAsAdminRequestObject) (openapi.AdminGetIntegratedReportAsAdminResponseObject, error) {
+	return s.adminIntReport.GetReportAsAdmin(ctx, req)
+}
+
+func (s *StrictServer) AdminGetIntegratedPrompt(ctx context.Context, req openapi.AdminGetIntegratedPromptRequestObject) (openapi.AdminGetIntegratedPromptResponseObject, error) {
+	return s.adminIntReport.GetPrompt(ctx, req)
+}
+
+func (s *StrictServer) AdminResetIntegratedReportViewed(ctx context.Context, req openapi.AdminResetIntegratedReportViewedRequestObject) (openapi.AdminResetIntegratedReportViewedResponseObject, error) {
+	return s.adminIntReport.ResetViewed(ctx, req)
+}
+
+// --- 統合レポート（user-facing） ---
+
+func (s *StrictServer) IntegratedReportCreateIntegratedReportRequest(ctx context.Context, req openapi.IntegratedReportCreateIntegratedReportRequestRequestObject) (openapi.IntegratedReportCreateIntegratedReportRequestResponseObject, error) {
+	return s.adminIntReport.CreateRequest(ctx, req)
+}
+
+func (s *StrictServer) IntegratedReportGetMyIntegratedReport(ctx context.Context, req openapi.IntegratedReportGetMyIntegratedReportRequestObject) (openapi.IntegratedReportGetMyIntegratedReportResponseObject, error) {
+	return s.adminIntReport.GetReportByUser(ctx, req)
+}
+
+func (s *StrictServer) IntegratedReportGetIntegratedReportStatus(ctx context.Context, req openapi.IntegratedReportGetIntegratedReportStatusRequestObject) (openapi.IntegratedReportGetIntegratedReportStatusResponseObject, error) {
+	return s.adminIntReport.GetRequestStatus(ctx, req)
+}
+
+func (s *StrictServer) IntegratedReportGetIntegratedReport(ctx context.Context, req openapi.IntegratedReportGetIntegratedReportRequestObject) (openapi.IntegratedReportGetIntegratedReportResponseObject, error) {
+	return s.adminIntReport.GetReportAsUser(ctx, req)
+}
+
+func (s *StrictServer) IntegratedReportGetLatestIntegratedRequest(ctx context.Context, req openapi.IntegratedReportGetLatestIntegratedRequestRequestObject) (openapi.IntegratedReportGetLatestIntegratedRequestResponseObject, error) {
+	return s.adminIntReport.GetLatestRequest(ctx, req)
 }
