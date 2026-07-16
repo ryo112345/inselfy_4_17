@@ -28,7 +28,7 @@ interface Experiences {
   ): {
     @statusCode statusCode: 201;
     @body experience: ExperienceResponse;
-  } | AuthedConflictErrors;
+  } | AuthedForbiddenConflictErrors;
 
   /** 職歴更新 */
   @put

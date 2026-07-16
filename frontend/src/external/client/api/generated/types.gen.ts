@@ -11117,6 +11117,10 @@ export type UsersUpdateUserProfileErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -11182,6 +11186,10 @@ export type EducationsCreateEducationErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
@@ -11332,6 +11340,10 @@ export type ExperiencesCreateExperienceErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
@@ -11672,6 +11684,10 @@ export type SkillsAttachSkillErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -11712,6 +11728,10 @@ export type SkillsDetachSkillErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -11750,6 +11770,10 @@ export type UsersUploadUserImageErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */

@@ -28,7 +28,7 @@ interface Educations {
   ): {
     @statusCode statusCode: 201;
     @body education: EducationResponse;
-  } | AuthedConflictErrors;
+  } | AuthedForbiddenConflictErrors;
 
   /** 学歴更新 */
   @put

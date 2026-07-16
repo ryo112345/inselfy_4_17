@@ -37,7 +37,7 @@ interface Users {
   updateUserProfile(
     @path username: string,
     @body request: UpdateUserProfileRequest,
-  ): UserResponse | AuthedNotFoundErrors;
+  ): UserResponse | AuthedForbiddenErrors;
 
   /** ユーザーIDでユーザー取得 */
   @get
@@ -59,5 +59,5 @@ interface Users {
     @multipartBody body: {
       file: HttpPart<bytes>;
     },
-  ): UserImageUploadResponse | AuthedNotFoundErrors;
+  ): UserImageUploadResponse | AuthedForbiddenErrors;
 }

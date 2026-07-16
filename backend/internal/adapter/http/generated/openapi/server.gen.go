@@ -19171,6 +19171,15 @@ func (response UsersUpdateUserProfile401JSONResponse) VisitUsersUpdateUserProfil
 	return json.NewEncoder(w).Encode(response)
 }
 
+type UsersUpdateUserProfile403JSONResponse ModelsForbiddenError
+
+func (response UsersUpdateUserProfile403JSONResponse) VisitUsersUpdateUserProfileResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type UsersUpdateUserProfile404JSONResponse ModelsNotFoundError
 
 func (response UsersUpdateUserProfile404JSONResponse) VisitUsersUpdateUserProfileResponse(w http.ResponseWriter) error {
@@ -19247,6 +19256,15 @@ type EducationsCreateEducation401JSONResponse ModelsUnauthorizedError
 func (response EducationsCreateEducation401JSONResponse) VisitEducationsCreateEducationResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type EducationsCreateEducation403JSONResponse ModelsForbiddenError
+
+func (response EducationsCreateEducation403JSONResponse) VisitEducationsCreateEducationResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -19444,6 +19462,15 @@ type ExperiencesCreateExperience401JSONResponse ModelsUnauthorizedError
 func (response ExperiencesCreateExperience401JSONResponse) VisitExperiencesCreateExperienceResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ExperiencesCreateExperience403JSONResponse ModelsForbiddenError
+
+func (response ExperiencesCreateExperience403JSONResponse) VisitExperiencesCreateExperienceResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -19856,6 +19883,15 @@ func (response SkillsAttachSkill401JSONResponse) VisitSkillsAttachSkillResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
+type SkillsAttachSkill403JSONResponse ModelsForbiddenError
+
+func (response SkillsAttachSkill403JSONResponse) VisitSkillsAttachSkillResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type SkillsAttachSkill404JSONResponse ModelsNotFoundError
 
 func (response SkillsAttachSkill404JSONResponse) VisitSkillsAttachSkillResponse(w http.ResponseWriter) error {
@@ -19909,6 +19945,15 @@ func (response SkillsDetachSkill401JSONResponse) VisitSkillsDetachSkillResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
+type SkillsDetachSkill403JSONResponse ModelsForbiddenError
+
+func (response SkillsDetachSkill403JSONResponse) VisitSkillsDetachSkillResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type SkillsDetachSkill404JSONResponse ModelsNotFoundError
 
 func (response SkillsDetachSkill404JSONResponse) VisitSkillsDetachSkillResponse(w http.ResponseWriter) error {
@@ -19951,6 +19996,15 @@ type UsersUploadUserImage401JSONResponse ModelsUnauthorizedError
 func (response UsersUploadUserImage401JSONResponse) VisitUsersUploadUserImageResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UsersUploadUserImage403JSONResponse ModelsForbiddenError
+
+func (response UsersUploadUserImage403JSONResponse) VisitUsersUploadUserImageResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }

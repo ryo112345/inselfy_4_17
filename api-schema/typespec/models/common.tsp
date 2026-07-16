@@ -116,6 +116,9 @@ alias AuthedForbiddenErrors = ForbiddenError | AuthedNotFoundErrors;
 /** 重複・競合が起こりうる操作のエラー（400/401/404/409） */
 alias AuthedConflictErrors = ConflictError | AuthedNotFoundErrors;
 
+/** 認可チェックと重複・競合の両方を伴う操作のエラー（400/401/403/404/409） */
+alias AuthedForbiddenConflictErrors = ForbiddenError | AuthedConflictErrors;
+
 /** 認証エラーを含まないリソース参照系のエラー（400/404） */
 alias NotFoundErrors = NotFoundError | BadRequestError;
 

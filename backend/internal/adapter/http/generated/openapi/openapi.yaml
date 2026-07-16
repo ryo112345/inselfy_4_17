@@ -7320,6 +7320,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -7397,6 +7403,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -7583,6 +7595,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -7982,6 +8000,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -8035,6 +8059,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -8084,6 +8114,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
