@@ -37,9 +37,6 @@ var unspeccedRoutes = map[string]string{
 	"GET /api/ws":              "websocket upgrade",
 	"GET /api/ws/ticket":       "websocket auth ticket",
 	"POST /api/stripe/webhook": "contract is Stripe's, verified by signature not by schema",
-	// admin API は X-Admin-Key 運用の内部向けで、公開契約（TypeSpec）の外。
-	// スペックに載せるなら別タスク（backlog 参照）。
-	"* /api/admin/*": "admin API is outside the public contract",
 }
 
 func TestSpecAndRouterDoNotDrift(t *testing.T) {

@@ -3,8 +3,8 @@ package initializer
 // DI wiring is split by feature across sibling wire_*.go files. This file
 // keeps the server skeleton: config/pool setup, middleware order, and the
 // calls into each feature's wiring function. Auth is spec-driven: the OpenAPI
-// validator middleware enforces the spec's security requirements, so wire
-// functions register plain routes (only /api/admin keeps its own AdminAuth).
+// validator middleware enforces the spec's security requirements (including
+// AdminAuth for /api/admin), so wire functions register plain routes.
 
 import (
 	"context"
@@ -93,9 +93,8 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	e.Use(authmw.RequestLogging(cfg.GoogleCloudProject))
 
 	// Validate requests against the API contract (body schema, params, enums)
-	// and enforce the spec's security requirements (spec-driven auth). The
-	// per-route auth middlewares below stay wired during the migration
-	// (dual-run); see docs/strict-server-migration.md Phase 1.
+	// and enforce the spec's security requirements (spec-driven auth,
+	// including AdminAuth); see docs/strict-server-migration.md Phase 1-2.
 	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML, jwtService, pool, cfg.AdminAPIKey)
 	if err != nil {
 		cleanup()
@@ -136,8 +135,8 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 // background goroutines (see spec_drift_test.go).
 func registerRoutes(ctx context.Context, e *echo.Echo, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
 	// 認可はスペック駆動: openapi.yaml の security 定義を OpenAPIRequestValidator
-	// が検証する（middleware/openapi_validator.go）。per-route の認証MWは無い。
-	// スペック外の /api/admin だけが wire_admin.go で AdminAuth を付ける。
+	// が検証する（middleware/openapi_validator.go）。/api/admin の AdminAuth も
+	// 含め、per-route の認証MWは無い。
 
 	// --- Static uploads ---
 	e.Static("/api/uploads", "./uploads")

@@ -20,8 +20,13 @@ import (
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	"github.com/akiyama/inselfy/backend/internal/driver/logging"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
+
+// AdminIDKey holds the authenticated admin's ID when a personal token was
+// used. It is unset when the static bootstrap key was used.
+const AdminIDKey = "adminID"
 
 // OpenAPIRequestValidator validates incoming requests against the embedded
 // OpenAPI spec: body schema (maxLength, enum, required, ...), path and query
@@ -204,6 +209,19 @@ func schemeToken(req *http.Request, scheme *openapi3.SecurityScheme) string {
 		return ""
 	}
 	return token
+}
+
+// annotateAuditLogger enriches the request-scoped logger with the admin's
+// identity, so the access log (and any handler logs) of admin operations
+// records who performed them. RequestLogging re-reads the logger from the
+// request context after the handler chain, so this propagates upstream.
+func annotateAuditLogger(c echo.Context, authMethod, adminID string) {
+	ctx := c.Request().Context()
+	logger := logging.FromContext(ctx).With("admin_auth", authMethod)
+	if adminID != "" {
+		logger = logger.With("admin_id", adminID)
+	}
+	c.SetRequest(c.Request().WithContext(logging.WithLogger(ctx, logger)))
 }
 
 // compactValidationError flattens kin-openapi's multiline error (which embeds

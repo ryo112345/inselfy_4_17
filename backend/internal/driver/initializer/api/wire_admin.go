@@ -7,17 +7,16 @@ import (
 
 	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
-	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 )
 
 // wireAdmin registers the /api/admin routes plus the user-facing report
 // routes that share the report controllers (AI reports on diagnosis paths and
 // the integrated report). Admin controllers stay pool-backed by design (see
-// CLAUDE.md); the user-facing report routes are guarded by the spec-driven
-// auth in the OpenAPI validator.
+// CLAUDE.md). All routes here are guarded by the spec-driven auth in the
+// OpenAPI validator: /api/admin via AdminAuth (X-Admin-Key: static bootstrap
+// key or a personal token issued at /admin/admins, fail-closed), the
+// user-facing report routes via their spec security.
 func wireAdmin(ctx context.Context, e *echo.Echo, d *deps) error {
-	// Authenticated via X-Admin-Key: static bootstrap key (ADMIN_API_KEY) or a
-	// personal token issued at /admin/admins. Fail-closed when neither is set.
 	if d.cfg.InitialAdminEmail != "" {
 		if err := sqlcgw.SeedAdmin(ctx, d.pool, d.cfg.InitialAdminEmail); err != nil {
 			return err
@@ -27,7 +26,9 @@ func wireAdmin(ctx context.Context, e *echo.Echo, d *deps) error {
 	adminReportCtrl := httpcontroller.NewAdminReportController(d.pool)
 	adminCompanyCtrl := httpcontroller.NewAdminCompanyController(d.pool, d.jwtService)
 	adminAdminCtrl := httpcontroller.NewAdminAdminController(d.pool)
-	adminGroup := e.Group("/api/admin", authmw.AdminAuth(d.pool, d.cfg.AdminAPIKey))
+	// X-Admin-Key の検証はスペック駆動認可（openapi_validator.go の AdminAuth
+	// 分岐）が行うため、per-route の認証MWは無い。
+	adminGroup := e.Group("/api/admin")
 	adminGroup.GET("/admins", adminAdminCtrl.List)
 	adminGroup.POST("/admins", adminAdminCtrl.Create)
 	adminGroup.POST("/admins/:id/api-key", func(c echo.Context) error {
