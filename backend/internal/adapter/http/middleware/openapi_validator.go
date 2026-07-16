@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -12,14 +14,18 @@ import (
 	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
+	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
 // OpenAPIRequestValidator validates incoming requests against the embedded
 // OpenAPI spec: body schema (maxLength, enum, required, ...), path and query
-// parameters. Paths not present in the spec (uploads static files, admin
-// routes, ...) pass through untouched, and auth stays with the JWT/admin-key
-// middlewares — the spec's security requirements are not re-checked here.
-func OpenAPIRequestValidator(specYAML []byte) (echo.MiddlewareFunc, error) {
+// parameters, and the spec's security requirements (spec-driven auth). Routes
+// declaring `security` get JWT validation automatically; validated IDs are
+// published both to the echo context (UserIDKey / CompanyIDKey) and to the
+// request context (UserIDFromContext / CompanyIDFromContext). Paths not
+// present in the spec (uploads static files, admin routes, ...) pass through
+// untouched and keep their own auth middlewares.
+func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService) (echo.MiddlewareFunc, error) {
 	loader := openapi3.NewLoader()
 	doc, err := loader.LoadFromData(specYAML)
 	if err != nil {
@@ -36,6 +42,8 @@ func OpenAPIRequestValidator(specYAML []byte) (echo.MiddlewareFunc, error) {
 		return nil, err
 	}
 
+	authFunc := newAuthenticationFunc(jwtService)
+
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			req := c.Request()
@@ -48,8 +56,15 @@ func OpenAPIRequestValidator(specYAML []byte) (echo.MiddlewareFunc, error) {
 				return next(c)
 			}
 
+			// Carry a claims holder in the request context so the
+			// AuthenticationFunc can publish validated IDs, and so
+			// handlers can read them via *FromContext helpers.
+			ctx, claims := withAuthClaims(req.Context())
+			req = req.WithContext(ctx)
+			c.SetRequest(req)
+
 			opts := &openapi3filter.Options{
-				AuthenticationFunc: openapi3filter.NoopAuthenticationFunc,
+				AuthenticationFunc: authFunc,
 			}
 			// File uploads are size/extension-checked in the controllers;
 			// buffering multipart bodies here would be wasted work.
@@ -63,16 +78,90 @@ func OpenAPIRequestValidator(specYAML []byte) (echo.MiddlewareFunc, error) {
 				Route:      route,
 				Options:    opts,
 			}
-			if err := openapi3filter.ValidateRequest(req.Context(), input); err != nil {
+			if err := openapi3filter.ValidateRequest(ctx, input); err != nil {
+				var secErr *openapi3filter.SecurityRequirementsError
+				if errors.As(err, &secErr) {
+					return c.JSON(http.StatusUnauthorized, openapi.ModelsUnauthorizedError{
+						Code:    openapi.ModelsUnauthorizedErrorCodeUNAUTHORIZED,
+						Message: "unauthorized",
+					})
+				}
 				return c.JSON(http.StatusBadRequest, openapi.ModelsBadRequestError{
 					Code:    openapi.ModelsBadRequestErrorCodeBADREQUEST,
 					Message: compactValidationError(err),
 				})
 			}
 
+			// Mirror validated claims into the echo context so existing
+			// handlers keep reading c.Get(UserIDKey/CompanyIDKey) unchanged.
+			if claims.userID != "" {
+				c.Set(UserIDKey, claims.userID)
+			}
+			if claims.companyID != "" {
+				c.Set(CompanyIDKey, claims.companyID)
+			}
+
 			return next(c)
 		}
 	}, nil
+}
+
+// newAuthenticationFunc validates the security schemes declared in the spec
+// (CandidateAuth / CompanyAuth) and publishes the validated IDs into the
+// claims holder carried by ctx. kin-openapi evaluates the OR alternatives of
+// a `security` list sequentially in declaration order and stops at the first
+// scheme that passes; an empty requirement `{}` always passes, which is how
+// optional auth is expressed.
+func newAuthenticationFunc(jwtService port.JWTService) openapi3filter.AuthenticationFunc {
+	return func(ctx context.Context, input *openapi3filter.AuthenticationInput) error {
+		req := input.RequestValidationInput.Request
+
+		token := schemeToken(req, input.SecurityScheme)
+		if token == "" {
+			return fmt.Errorf("security scheme %q: missing credentials", input.SecuritySchemeName)
+		}
+
+		claims, _ := ctx.Value(authClaimsKey{}).(*authClaims)
+
+		switch input.SecuritySchemeName {
+		case "CandidateAuth":
+			userID, err := jwtService.ValidateAccessToken(token)
+			if err != nil {
+				return fmt.Errorf("security scheme %q: invalid token", input.SecuritySchemeName)
+			}
+			if claims != nil {
+				claims.userID = userID
+			}
+		case "CompanyAuth":
+			companyID, err := jwtService.ValidateCompanyAccessToken(token)
+			if err != nil {
+				return fmt.Errorf("security scheme %q: invalid token", input.SecuritySchemeName)
+			}
+			if claims != nil {
+				claims.companyID = companyID
+			}
+		default:
+			return fmt.Errorf("security scheme %q is not supported", input.SecuritySchemeName)
+		}
+		return nil
+	}
+}
+
+// schemeToken extracts the credential for an apiKey-in-cookie scheme: the
+// cookie named by the spec, with `Authorization: Bearer` as the documented
+// development fallback (mirrors the legacy per-route middlewares).
+func schemeToken(req *http.Request, scheme *openapi3.SecurityScheme) string {
+	if scheme != nil && scheme.Type == "apiKey" && scheme.In == "cookie" {
+		if cookie, err := req.Cookie(scheme.Name); err == nil && cookie.Value != "" {
+			return cookie.Value
+		}
+	}
+	header := req.Header.Get("Authorization")
+	token := strings.TrimPrefix(header, "Bearer ")
+	if token == header {
+		return ""
+	}
+	return token
 }
 
 // compactValidationError flattens kin-openapi's multiline error (which embeds

@@ -94,9 +94,11 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	// correlation (see adapter/http/middleware/logging_middleware.go).
 	e.Use(authmw.RequestLogging(cfg.GoogleCloudProject))
 
-	// Validate requests against the API contract (body schema, params, enums).
-	// Routes outside the spec pass through; auth stays with the middlewares below.
-	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML)
+	// Validate requests against the API contract (body schema, params, enums)
+	// and enforce the spec's security requirements (spec-driven auth). The
+	// per-route auth middlewares below stay wired during the migration
+	// (dual-run); see docs/strict-server-migration.md Phase 1.
+	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML, jwtService)
 	if err != nil {
 		cleanup()
 		return nil, nil, func() {}, err
