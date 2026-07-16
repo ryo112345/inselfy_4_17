@@ -630,7 +630,8 @@ Phase 3 のフォールバック構成で実質完了しているが、仕上げ
   無改変で送出。**検証は観測のみ**（違反でも 500 化しない。dev と本番で挙動差を作らない）。
   ヘッダーは実 writer へ素通し、status/body だけ保留する。
 - スイッチは `OPENAPI_VALIDATE_RESPONSES`（default off）。ルートの `.env` / `.env.example` で
-  dev は on、本番は deploy.yml に設定しない＝off。
+  dev は on、本番は deploy.yml に設定しない＝off。**CI の e2e スモークも on**:
+  compose の app に設定し、e2e-smoke.sh が末尾で app ログの違反を検査して fail させる。
 - `IncludeResponseStatus: true` を採用: スペックに無いステータス（strict の `nil, err` → 500 含む）
   も違反として記録される。500 はそれ自体が要調査なので違反ログ扱いで問題ないと判断。
 - **E2E の代わりに全11グループスモーク 482 ケースを検証 on で全通し**（E2E がデモデータ依存で
