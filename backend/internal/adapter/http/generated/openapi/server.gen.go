@@ -78,6 +78,21 @@ func (e ModelsCISkillLevel) Valid() bool {
 	}
 }
 
+// Defines values for ModelsCancelInterviewResponseStatus.
+const (
+	ModelsCancelInterviewResponseStatusCancelled ModelsCancelInterviewResponseStatus = "cancelled"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCancelInterviewResponseStatus enum.
+func (e ModelsCancelInterviewResponseStatus) Valid() bool {
+	switch e {
+	case ModelsCancelInterviewResponseStatusCancelled:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ModelsCompanyAccountStatusErrorCode.
 const (
 	ModelsCompanyAccountStatusErrorCodeACCOUNTPENDING  ModelsCompanyAccountStatusErrorCode = "ACCOUNT_PENDING"
@@ -1168,6 +1183,15 @@ type ModelsCITypeScoreResponse struct {
 	TypeId string `json:"typeId"`
 }
 
+// ModelsCancelInterviewResponse 面接キャンセル結果
+type ModelsCancelInterviewResponse struct {
+	// Status 処理結果（"cancelled"）
+	Status ModelsCancelInterviewResponseStatus `json:"status"`
+}
+
+// ModelsCancelInterviewResponseStatus 処理結果（"cancelled"）
+type ModelsCancelInterviewResponseStatus string
+
 // ModelsCandidateInterviewItem 面接（候補者向け・企業情報付き）
 type ModelsCandidateInterviewItem struct {
 	// ApplicationId 応募ID
@@ -1466,14 +1490,14 @@ type ModelsConversationListResponse struct {
 
 // ModelsConversationResponse 会話（プレビュー付き）
 type ModelsConversationResponse struct {
-	// CandidateId 候補者ユーザーID
-	CandidateId ModelsUuid `json:"candidateId"`
+	// CandidateId 候補者ユーザーID（company_candidate のみ。ユーザー間会話では空文字）
+	CandidateId string `json:"candidateId"`
 
 	// CandidateName 候補者名
 	CandidateName string `json:"candidateName"`
 
-	// CompanyId 企業ID
-	CompanyId ModelsUuid `json:"companyId"`
+	// CompanyId 企業ID（company_candidate のみ。ユーザー間会話では空文字）
+	CompanyId string `json:"companyId"`
 
 	// CompanyName 企業名
 	CompanyName string `json:"companyName"`
@@ -12540,6 +12564,15 @@ func (response AdminUpdateCompanyStatus401JSONResponse) VisitAdminUpdateCompanyS
 	return json.NewEncoder(w).Encode(response)
 }
 
+type AdminUpdateCompanyStatus404JSONResponse ModelsNotFoundError
+
+func (response AdminUpdateCompanyStatus404JSONResponse) VisitAdminUpdateCompanyStatusResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type AdminListIntegratedReportsRequestObject struct {
 }
 
@@ -14757,7 +14790,7 @@ type CompanyInterviewsCancelCompanyInterviewResponseObject interface {
 	VisitCompanyInterviewsCancelCompanyInterviewResponse(w http.ResponseWriter) error
 }
 
-type CompanyInterviewsCancelCompanyInterview200JSONResponse ModelsStatusOkResponse
+type CompanyInterviewsCancelCompanyInterview200JSONResponse ModelsCancelInterviewResponse
 
 func (response CompanyInterviewsCancelCompanyInterview200JSONResponse) VisitCompanyInterviewsCancelCompanyInterviewResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -17440,7 +17473,7 @@ type CandidateInterviewsCancelCandidateInterviewResponseObject interface {
 	VisitCandidateInterviewsCancelCandidateInterviewResponse(w http.ResponseWriter) error
 }
 
-type CandidateInterviewsCancelCandidateInterview200JSONResponse ModelsStatusOkResponse
+type CandidateInterviewsCancelCandidateInterview200JSONResponse ModelsCancelInterviewResponse
 
 func (response CandidateInterviewsCancelCandidateInterview200JSONResponse) VisitCandidateInterviewsCancelCandidateInterviewResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")

@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -72,6 +74,12 @@ func (c *AdminCompanyController) UpdateStatus(ctx context.Context, req openapi.A
 		Status: generated.CompanyStatus(req.Body.Status),
 	})
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return openapi.AdminUpdateCompanyStatus404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "company not found",
+			}), nil
+		}
 		return nil, err
 	}
 

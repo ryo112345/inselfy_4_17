@@ -49,7 +49,7 @@ interface CompanyInterviews {
   @summary("Cancel an interview as the company")
   cancelCompanyInterview(
     @path interviewId: Uuid,
-  ): StatusOkResponse | AuthedForbiddenErrors;
+  ): CancelInterviewResponse | AuthedForbiddenErrors;
 }
 
 @route("/api/interviews")
@@ -84,5 +84,5 @@ interface CandidateInterviews {
   @summary("Cancel an interview as the candidate")
   cancelCandidateInterview(
     @path interviewId: Uuid,
-  ): StatusOkResponse | AuthedForbiddenErrors;
+  ): CancelInterviewResponse | AuthedForbiddenErrors;
 }

@@ -918,6 +918,16 @@ export type ModelsCiTypeScoreResponse = {
 };
 
 /**
+ * 面接キャンセル結果
+ */
+export type ModelsCancelInterviewResponse = {
+    /**
+     * 処理結果（"cancelled"）
+     */
+    status: 'cancelled';
+};
+
+/**
  * 面接（候補者向け・企業情報付き）
  */
 export type ModelsCandidateInterviewItem = {
@@ -1347,13 +1357,13 @@ export type ModelsConversationResponse = {
      */
     conversationType: string;
     /**
-     * 企業ID
+     * 企業ID（company_candidate のみ。ユーザー間会話では空文字）
      */
-    companyId: ModelsUuid;
+    companyId: string;
     /**
-     * 候補者ユーザーID
+     * 候補者ユーザーID（company_candidate のみ。ユーザー間会話では空文字）
      */
-    candidateId: ModelsUuid;
+    candidateId: string;
     /**
      * 企業名
      */
@@ -5348,6 +5358,10 @@ export type AdminUpdateCompanyStatusErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Not Found エラー
+     */
+    404: ModelsNotFoundError;
 };
 
 export type AdminUpdateCompanyStatusError = AdminUpdateCompanyStatusErrors[keyof AdminUpdateCompanyStatusErrors];
@@ -7257,7 +7271,7 @@ export type CompanyInterviewsCancelCompanyInterviewResponses = {
     /**
      * The request has succeeded.
      */
-    200: ModelsStatusOkResponse;
+    200: ModelsCancelInterviewResponse;
 };
 
 export type CompanyInterviewsCancelCompanyInterviewResponse = CompanyInterviewsCancelCompanyInterviewResponses[keyof CompanyInterviewsCancelCompanyInterviewResponses];
@@ -9507,7 +9521,7 @@ export type CandidateInterviewsCancelCandidateInterviewResponses = {
     /**
      * The request has succeeded.
      */
-    200: ModelsStatusOkResponse;
+    200: ModelsCancelInterviewResponse;
 };
 
 export type CandidateInterviewsCancelCandidateInterviewResponse = CandidateInterviewsCancelCandidateInterviewResponses[keyof CandidateInterviewsCancelCandidateInterviewResponses];

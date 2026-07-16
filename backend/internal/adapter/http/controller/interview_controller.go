@@ -193,7 +193,7 @@ func (ctrl *InterviewController) CancelAsCompany(ctx context.Context, req openap
 	status, err := ctrl.cancelInterview(ctx, req.InterviewId, companyID, "")
 	switch status {
 	case 0:
-		return openapi.CompanyInterviewsCancelCompanyInterview200JSONResponse(openapi.ModelsStatusOkResponse{Status: "cancelled"}), nil
+		return openapi.CompanyInterviewsCancelCompanyInterview200JSONResponse(openapi.ModelsCancelInterviewResponse{Status: "cancelled"}), nil
 	case http.StatusUnauthorized:
 		return openapi.CompanyInterviewsCancelCompanyInterview401JSONResponse(unauthorizedBody("unauthorized")), nil
 	case http.StatusForbidden:
@@ -213,7 +213,7 @@ func (ctrl *InterviewController) CancelAsCandidate(ctx context.Context, req open
 	status, err := ctrl.cancelInterview(ctx, req.InterviewId, "", userID)
 	switch status {
 	case 0:
-		return openapi.CandidateInterviewsCancelCandidateInterview200JSONResponse(openapi.ModelsStatusOkResponse{Status: "cancelled"}), nil
+		return openapi.CandidateInterviewsCancelCandidateInterview200JSONResponse(openapi.ModelsCancelInterviewResponse{Status: "cancelled"}), nil
 	case http.StatusUnauthorized:
 		return openapi.CandidateInterviewsCancelCandidateInterview401JSONResponse(unauthorizedBody("unauthorized")), nil
 	case http.StatusForbidden:

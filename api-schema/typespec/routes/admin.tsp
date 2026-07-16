@@ -98,7 +98,7 @@ interface Admin {
   updateCompanyStatus(
     @path companyId: Uuid,
     @body request: UpdateCompanyStatusRequest,
-  ): AdminCompanyItem | AuthedErrors;
+  ): AdminCompanyItem | AuthedNotFoundErrors;
 
   /** 企業として成り代わりログイン（cookie を焼く） */
   @post

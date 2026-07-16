@@ -505,6 +505,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - Admin
       requestBody:
@@ -2650,7 +2656,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Models.StatusOkResponse'
+                $ref: '#/components/schemas/Models.CancelInterviewResponse'
         '400':
           description: Bad Request エラー
           content:
@@ -5389,7 +5395,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Models.StatusOkResponse'
+                $ref: '#/components/schemas/Models.CancelInterviewResponse'
         '400':
           description: Bad Request エラー
           content:
@@ -9558,6 +9564,17 @@ components:
           format: int32
           description: 順位
       description: RIASEC タイプスコア
+    Models.CancelInterviewResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - cancelled
+          description: 処理結果（"cancelled"）
+      description: 面接キャンセル結果
     Models.CandidateInterviewItem:
       type: object
       required:
@@ -10038,13 +10055,11 @@ components:
           type: string
           description: 会話種別
         companyId:
-          allOf:
-            - $ref: '#/components/schemas/Models.Uuid'
-          description: 企業ID
+          type: string
+          description: 企業ID（company_candidate のみ。ユーザー間会話では空文字）
         candidateId:
-          allOf:
-            - $ref: '#/components/schemas/Models.Uuid'
-          description: 候補者ユーザーID
+          type: string
+          description: 候補者ユーザーID（company_candidate のみ。ユーザー間会話では空文字）
         companyName:
           type: string
           description: 企業名
