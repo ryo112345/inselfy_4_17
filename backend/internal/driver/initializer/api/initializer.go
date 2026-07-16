@@ -157,7 +157,7 @@ func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps
 	wireHealth(e, d.pool)
 	wireAuth(e, d)
 	wireUser(sr, strictWrapper, strictSrv, d)
-	wireContent(e, d)
+	wireContent(e, sr, strictWrapper, strictSrv, d)
 	wireSearch(e, d)
 	wireDiagnosis(e, d)
 	wireCompany(e, d)

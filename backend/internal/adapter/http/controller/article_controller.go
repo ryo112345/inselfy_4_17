@@ -1,14 +1,15 @@
 package controller
 
 import (
+	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -29,177 +30,253 @@ func NewArticleController(
 	return &ArticleController{input: input, storage: storage}
 }
 
-func (c *ArticleController) CreateAsUser(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
-	var body openapi.ModelsCreateArticleRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	a, purchased, isAuthor, err := c.input.Create(ctx.Request().Context(), article.CreateArticleInput{
+// CreateAsUser handles POST /api/articles.
+func (c *ArticleController) CreateAsUser(ctx context.Context, req openapi.ArticlesCreateArticleRequestObject) (openapi.ArticlesCreateArticleResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+	a, purchased, isAuthor, err := c.input.Create(ctx, article.CreateArticleInput{
 		AuthorType:    article.AuthorTypeUser,
 		AuthorUserID:  &userID,
-		Title:         body.Title,
-		Body:          body.Body,
-		IsPaid:        body.IsPaid,
-		PriceYen:      body.PriceYen,
-		CoverImageURL: body.CoverImageUrl,
-		Tags:          body.Tags,
+		Title:         req.Body.Title,
+		Body:          req.Body.Body,
+		IsPaid:        req.Body.IsPaid,
+		PriceYen:      req.Body.PriceYen,
+		CoverImageURL: req.Body.CoverImageUrl,
+		Tags:          req.Body.Tags,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusBadRequest:
+			return openapi.ArticlesCreateArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.ArticleSingleResponse(a, purchased, isAuthor))
+	return openapi.ArticlesCreateArticle201JSONResponse(presenter.ArticleSingleResponse(a, purchased, isAuthor)), nil
 }
 
-func (c *ArticleController) CreateAsCompany(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
-	var body openapi.ModelsCreateArticleRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	a, purchased, isAuthor, err := c.input.Create(ctx.Request().Context(), article.CreateArticleInput{
+// CreateAsCompany handles POST /api/company/articles.
+func (c *ArticleController) CreateAsCompany(ctx context.Context, req openapi.CompanyArticlesCreateCompanyArticleRequestObject) (openapi.CompanyArticlesCreateCompanyArticleResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	a, purchased, isAuthor, err := c.input.Create(ctx, article.CreateArticleInput{
 		AuthorType:      article.AuthorTypeCompany,
 		AuthorCompanyID: &companyID,
-		Title:           body.Title,
-		Body:            body.Body,
-		IsPaid:          body.IsPaid,
-		PriceYen:        body.PriceYen,
+		Title:           req.Body.Title,
+		Body:            req.Body.Body,
+		IsPaid:          req.Body.IsPaid,
+		PriceYen:        req.Body.PriceYen,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusBadRequest:
+			return openapi.CompanyArticlesCreateCompanyArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.ArticleSingleResponse(a, purchased, isAuthor))
+	return openapi.CompanyArticlesCreateCompanyArticle201JSONResponse(presenter.ArticleSingleResponse(a, purchased, isAuthor)), nil
 }
 
-func (c *ArticleController) GetByID(ctx echo.Context, id string) error {
+// GetByID handles GET /api/articles/{articleId}. 認証は optional
+// （security: [{CandidateAuth}, {}]）: 未認証でも 200 を返し、認証済みなら
+// isAuthor / purchased の判定に viewer を使う。
+func (c *ArticleController) GetByID(ctx context.Context, req openapi.ArticlesGetArticleRequestObject) (openapi.ArticlesGetArticleResponseObject, error) {
 	var viewerUserID *string
-	if uid, ok := ctx.Get(authmw.UserIDKey).(string); ok && uid != "" {
+	if uid := authmw.UserIDFromContext(ctx); uid != "" {
 		viewerUserID = &uid
 	}
-	a, purchased, isAuthor, err := c.input.GetByID(ctx.Request().Context(), id, viewerUserID)
+	a, purchased, isAuthor, err := c.input.GetByID(ctx, req.ArticleId, viewerUserID)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ArticlesGetArticle404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ArticlesGetArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
+	return openapi.ArticlesGetArticle200JSONResponse(presenter.ArticleSingleResponse(a, purchased, isAuthor)), nil
 }
 
-func (c *ArticleController) List(ctx echo.Context) error {
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	articles, total, err := c.input.List(ctx.Request().Context(), limit, offset)
+// List handles GET /api/articles.
+func (c *ArticleController) List(ctx context.Context, req openapi.ArticlesListArticlesRequestObject) (openapi.ArticlesListArticlesResponseObject, error) {
+	articles, total, err := c.input.List(ctx, derefInt32(req.Params.Limit), derefInt32(req.Params.Offset))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusBadRequest:
+			return openapi.ArticlesListArticles400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ArticlesListResponse(articles, total))
+	return openapi.ArticlesListArticles200JSONResponse(presenter.ArticlesListResponse(articles, total)), nil
 }
 
-func (c *ArticleController) ListMine(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	articles, total, err := c.input.ListByAuthor(ctx.Request().Context(), article.AuthorTypeUser, userID, limit, offset)
+// ListMine handles GET /api/articles/mine.
+func (c *ArticleController) ListMine(ctx context.Context, req openapi.ArticlesListMyArticlesRequestObject) (openapi.ArticlesListMyArticlesResponseObject, error) {
+	articles, total, err := c.input.ListByAuthor(ctx, article.AuthorTypeUser, authmw.UserIDFromContext(ctx), derefInt32(req.Params.Limit), derefInt32(req.Params.Offset))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusBadRequest:
+			return openapi.ArticlesListMyArticles400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ArticlesListResponse(articles, total))
+	return openapi.ArticlesListMyArticles200JSONResponse(presenter.ArticlesListResponse(articles, total)), nil
 }
 
-func (c *ArticleController) UpdateAsUser(ctx echo.Context, id string) error {
-	userID := authmw.UserID(ctx)
-	var body openapi.ModelsUpdateArticleRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	a, purchased, isAuthor, err := c.input.Update(ctx.Request().Context(), id, article.UpdateArticleInput{
-		Title:         body.Title,
-		Body:          body.Body,
-		IsPaid:        body.IsPaid,
-		PriceYen:      body.PriceYen,
-		CoverImageURL: body.CoverImageUrl,
-		Tags:          body.Tags,
-	}, article.AuthorTypeUser, userID)
+// UpdateAsUser handles PUT /api/articles/{articleId}.
+func (c *ArticleController) UpdateAsUser(ctx context.Context, req openapi.ArticlesUpdateArticleRequestObject) (openapi.ArticlesUpdateArticleResponseObject, error) {
+	a, purchased, isAuthor, err := c.input.Update(ctx, req.ArticleId, article.UpdateArticleInput{
+		Title:         req.Body.Title,
+		Body:          req.Body.Body,
+		IsPaid:        req.Body.IsPaid,
+		PriceYen:      req.Body.PriceYen,
+		CoverImageURL: req.Body.CoverImageUrl,
+		Tags:          req.Body.Tags,
+	}, article.AuthorTypeUser, authmw.UserIDFromContext(ctx))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ArticlesUpdateArticle404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.ArticlesUpdateArticle403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ArticlesUpdateArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
+	return openapi.ArticlesUpdateArticle200JSONResponse(presenter.ArticleSingleResponse(a, purchased, isAuthor)), nil
 }
 
-func (c *ArticleController) UpdateAsCompany(ctx echo.Context, id string) error {
-	companyID := authmw.CompanyID(ctx)
-	var body openapi.ModelsUpdateArticleRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	a, purchased, isAuthor, err := c.input.Update(ctx.Request().Context(), id, article.UpdateArticleInput{
-		Title:         body.Title,
-		Body:          body.Body,
-		IsPaid:        body.IsPaid,
-		PriceYen:      body.PriceYen,
-		CoverImageURL: body.CoverImageUrl,
-		Tags:          body.Tags,
-	}, article.AuthorTypeCompany, companyID)
+// UpdateAsCompany handles PUT /api/company/articles/{articleId}.
+func (c *ArticleController) UpdateAsCompany(ctx context.Context, req openapi.CompanyArticlesUpdateCompanyArticleRequestObject) (openapi.CompanyArticlesUpdateCompanyArticleResponseObject, error) {
+	a, purchased, isAuthor, err := c.input.Update(ctx, req.ArticleId, article.UpdateArticleInput{
+		Title:         req.Body.Title,
+		Body:          req.Body.Body,
+		IsPaid:        req.Body.IsPaid,
+		PriceYen:      req.Body.PriceYen,
+		CoverImageURL: req.Body.CoverImageUrl,
+		Tags:          req.Body.Tags,
+	}, article.AuthorTypeCompany, authmw.CompanyIDFromContext(ctx))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CompanyArticlesUpdateCompanyArticle404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.CompanyArticlesUpdateCompanyArticle403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyArticlesUpdateCompanyArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
+	return openapi.CompanyArticlesUpdateCompanyArticle200JSONResponse(presenter.ArticleSingleResponse(a, purchased, isAuthor)), nil
 }
 
-func (c *ArticleController) DeleteAsUser(ctx echo.Context, id string) error {
-	userID := authmw.UserID(ctx)
-	if err := c.input.Delete(ctx.Request().Context(), id, article.AuthorTypeUser, userID); err != nil {
-		return handleError(ctx, err)
+// DeleteAsUser handles DELETE /api/articles/{articleId}.
+func (c *ArticleController) DeleteAsUser(ctx context.Context, req openapi.ArticlesDeleteArticleRequestObject) (openapi.ArticlesDeleteArticleResponseObject, error) {
+	if err := c.input.Delete(ctx, req.ArticleId, article.AuthorTypeUser, authmw.UserIDFromContext(ctx)); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ArticlesDeleteArticle404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.ArticlesDeleteArticle403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ArticlesDeleteArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.ArticlesDeleteArticle204Response{}, nil
 }
 
-func (c *ArticleController) DeleteAsCompany(ctx echo.Context, id string) error {
-	companyID := authmw.CompanyID(ctx)
-	if err := c.input.Delete(ctx.Request().Context(), id, article.AuthorTypeCompany, companyID); err != nil {
-		return handleError(ctx, err)
+// DeleteAsCompany handles DELETE /api/company/articles/{articleId}.
+func (c *ArticleController) DeleteAsCompany(ctx context.Context, req openapi.CompanyArticlesDeleteCompanyArticleRequestObject) (openapi.CompanyArticlesDeleteCompanyArticleResponseObject, error) {
+	if err := c.input.Delete(ctx, req.ArticleId, article.AuthorTypeCompany, authmw.CompanyIDFromContext(ctx)); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CompanyArticlesDeleteCompanyArticle404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.CompanyArticlesDeleteCompanyArticle403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyArticlesDeleteCompanyArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.CompanyArticlesDeleteCompanyArticle204Response{}, nil
 }
 
-func (c *ArticleController) PublishAsUser(ctx echo.Context, id string) error {
-	userID := authmw.UserID(ctx)
-	a, purchased, isAuthor, err := c.input.Publish(ctx.Request().Context(), id, article.AuthorTypeUser, userID)
+// PublishAsUser handles POST /api/articles/{articleId}/publish.
+func (c *ArticleController) PublishAsUser(ctx context.Context, req openapi.ArticlesPublishArticleRequestObject) (openapi.ArticlesPublishArticleResponseObject, error) {
+	a, purchased, isAuthor, err := c.input.Publish(ctx, req.ArticleId, article.AuthorTypeUser, authmw.UserIDFromContext(ctx))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ArticlesPublishArticle404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.ArticlesPublishArticle403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ArticlesPublishArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
+	return openapi.ArticlesPublishArticle200JSONResponse(presenter.ArticleSingleResponse(a, purchased, isAuthor)), nil
 }
 
-func (c *ArticleController) PublishAsCompany(ctx echo.Context, id string) error {
-	companyID := authmw.CompanyID(ctx)
-	a, purchased, isAuthor, err := c.input.Publish(ctx.Request().Context(), id, article.AuthorTypeCompany, companyID)
+// PublishAsCompany handles POST /api/company/articles/{articleId}/publish.
+func (c *ArticleController) PublishAsCompany(ctx context.Context, req openapi.CompanyArticlesPublishCompanyArticleRequestObject) (openapi.CompanyArticlesPublishCompanyArticleResponseObject, error) {
+	a, purchased, isAuthor, err := c.input.Publish(ctx, req.ArticleId, article.AuthorTypeCompany, authmw.CompanyIDFromContext(ctx))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CompanyArticlesPublishCompanyArticle404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.CompanyArticlesPublishCompanyArticle403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyArticlesPublishCompanyArticle400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ArticleSingleResponse(a, purchased, isAuthor))
+	return openapi.CompanyArticlesPublishCompanyArticle200JSONResponse(presenter.ArticleSingleResponse(a, purchased, isAuthor)), nil
 }
 
-func (c *ArticleController) CreateCheckout(ctx echo.Context, id string) error {
-	userID := authmw.UserID(ctx)
-	sessionURL, err := c.input.CreateCheckoutSession(ctx.Request().Context(), id, userID)
+// CreateCheckout handles POST /api/articles/{articleId}/checkout.
+func (c *ArticleController) CreateCheckout(ctx context.Context, req openapi.ArticlesCreateArticleCheckoutRequestObject) (openapi.ArticlesCreateArticleCheckoutResponseObject, error) {
+	sessionURL, err := c.input.CreateCheckoutSession(ctx, req.ArticleId, authmw.UserIDFromContext(ctx))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ArticlesCreateArticleCheckout404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ArticlesCreateArticleCheckout400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ArticleCheckoutResponse(sessionURL))
+	return openapi.ArticlesCreateArticleCheckout200JSONResponse(presenter.ArticleCheckoutResponse(sessionURL)), nil
 }
 
-func (c *ArticleController) UploadImage(ctx echo.Context) error {
-	file, err := ctx.FormFile("file")
-	if err != nil {
-		return badRequest(ctx, "file is required")
+// UploadImage handles POST /api/articles/upload-image.
+func (c *ArticleController) UploadImage(ctx context.Context, req openapi.ArticlesUploadArticleImageRequestObject) (openapi.ArticlesUploadArticleImageResponseObject, error) {
+	data, filename, ct, err := readFilePart(req.Body, "file", 5*1024*1024)
+	switch {
+	case errors.Is(err, errFilePartMissing):
+		return openapi.ArticlesUploadArticleImage400JSONResponse(badRequestBody("file is required")), nil
+	case errors.Is(err, errFilePartTooLarge):
+		return openapi.ArticlesUploadArticleImage400JSONResponse(badRequestBody("file too large (max 5MB)")), nil
+	case err != nil:
+		return nil, err
 	}
-	if file.Size > 5*1024*1024 {
-		return badRequest(ctx, "file too large (max 5MB)")
-	}
-	ct := file.Header.Get("Content-Type")
 	if !strings.HasPrefix(ct, "image/") {
-		return badRequest(ctx, "only image files are allowed")
+		return openapi.ArticlesUploadArticleImage400JSONResponse(badRequestBody("only image files are allowed")), nil
 	}
-	ext := filepath.Ext(file.Filename)
+	ext := filepath.Ext(filename)
 	if ext == "" {
 		switch ct {
 		case "image/jpeg":
@@ -212,15 +289,10 @@ func (c *ArticleController) UploadImage(ctx echo.Context) error {
 			ext = ".jpg"
 		}
 	}
-	src, err := file.Open()
-	if err != nil {
-		return internalError(ctx, "failed to read file")
-	}
-	defer func() { _ = src.Close() }()
 	key := fmt.Sprintf("article-images/%s%s", uuid.New().String(), ext)
-	url, err := c.storage.Save(ctx.Request().Context(), key, src)
+	url, err := c.storage.Save(ctx, key, bytes.NewReader(data))
 	if err != nil {
-		return internalError(ctx, "failed to save file")
+		return nil, errors.New("failed to save file")
 	}
-	return ctx.JSON(http.StatusOK, openapi.ModelsUploadUrlResponse{Url: url})
+	return openapi.ArticlesUploadArticleImage200JSONResponse(openapi.ModelsUploadUrlResponse{Url: url}), nil
 }

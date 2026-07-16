@@ -7,10 +7,10 @@ import (
 )
 
 // ArticleSingleResponse converts a single article to its API response.
-func ArticleSingleResponse(a *article.ArticleWithAuthor, purchased, isAuthor bool) any {
+func ArticleSingleResponse(a *article.ArticleWithAuthor, purchased, isAuthor bool) openapi.ModelsArticleResponse {
 	freePreview, _ := article.SplitBody(a.Article.Body)
 
-	resp := &openapi.ModelsArticleResponse{
+	resp := openapi.ModelsArticleResponse{
 		Id:             a.Article.ID,
 		AuthorType:     string(a.Article.AuthorType),
 		AuthorName:     a.AuthorName,
@@ -39,7 +39,7 @@ func ArticleSingleResponse(a *article.ArticleWithAuthor, purchased, isAuthor boo
 }
 
 // ArticlesListResponse converts a paginated list of articles to its API response.
-func ArticlesListResponse(articles []*article.ArticleWithAuthor, total int) any {
+func ArticlesListResponse(articles []*article.ArticleWithAuthor, total int) openapi.ModelsArticleListResponse {
 	items := make([]openapi.ModelsArticleResponse, len(articles))
 	for i, a := range articles {
 		freePreview, _ := article.SplitBody(a.Article.Body)
@@ -60,10 +60,10 @@ func ArticlesListResponse(articles []*article.ArticleWithAuthor, total int) any 
 			PublishedAt:    a.Article.PublishedAt,
 		}
 	}
-	return &openapi.ModelsArticleListResponse{Items: items, Total: cast.Int32(total)}
+	return openapi.ModelsArticleListResponse{Items: items, Total: cast.Int32(total)}
 }
 
 // ArticleCheckoutResponse builds the Stripe checkout-session API response.
-func ArticleCheckoutResponse(sessionURL string) any {
-	return &openapi.ModelsCheckoutSessionResponse{Url: sessionURL}
+func ArticleCheckoutResponse(sessionURL string) openapi.ModelsCheckoutSessionResponse {
+	return openapi.ModelsCheckoutSessionResponse{Url: sessionURL}
 }

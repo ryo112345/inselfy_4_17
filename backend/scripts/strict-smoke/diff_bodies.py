@@ -14,9 +14,12 @@ import re
 import sys
 
 # 実行ごとに値が変わる（＝差分として意味がない）フィールド
-VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "userId"}
-# アップロードで生成されるファイル名のランダム部
-RANDOM_FILE = re.compile(r"(user-images|job-images|article-images|company-images)/[0-9a-f]{8}_")
+VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "publishedAt", "userId", "postId"}
+# アップロードで生成されるファイル名のランダム部（8hex_ プレフィックス形式と
+# フル UUID 形式＝article-images の両方）
+RANDOM_FILE = re.compile(
+    r"(user-images|job-images|article-images|company-images)/(?:[0-9a-f]{8}_|[0-9a-f-]{36})"
+)
 
 
 def norm(v):

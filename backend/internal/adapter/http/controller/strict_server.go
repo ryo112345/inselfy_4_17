@@ -26,6 +26,9 @@ type StrictServer struct {
 	skill        *SkillController
 	follow       *FollowController
 	similarUsers *SimilarUsersController
+
+	post    *PostController
+	article *ArticleController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -50,6 +53,14 @@ func (s *StrictServer) WireUserGroup(
 	s.skill = skill
 	s.follow = follow
 	s.similarUsers = similarUsers
+}
+
+// WireContentGroup installs the wire_content controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ2)。
+// Stripe webhook はスペック外のため対象外（wire_content.go が echo に登録し続ける）。
+func (s *StrictServer) WireContentGroup(post *PostController, article *ArticleController) {
+	s.post = post
+	s.article = article
 }
 
 // --- Users ---
@@ -148,4 +159,106 @@ func (s *StrictServer) FollowsListFollowers(ctx context.Context, req openapi.Fol
 
 func (s *StrictServer) FollowsListFollowing(ctx context.Context, req openapi.FollowsListFollowingRequestObject) (openapi.FollowsListFollowingResponseObject, error) {
 	return s.follow.GetFollowing(ctx, req)
+}
+
+// --- Posts ---
+
+func (s *StrictServer) PostsCreatePost(ctx context.Context, req openapi.PostsCreatePostRequestObject) (openapi.PostsCreatePostResponseObject, error) {
+	return s.post.Create(ctx, req)
+}
+
+func (s *StrictServer) PostsGetPost(ctx context.Context, req openapi.PostsGetPostRequestObject) (openapi.PostsGetPostResponseObject, error) {
+	return s.post.GetByID(ctx, req)
+}
+
+func (s *StrictServer) PostsListTimelinePosts(ctx context.Context, req openapi.PostsListTimelinePostsRequestObject) (openapi.PostsListTimelinePostsResponseObject, error) {
+	return s.post.ListTimeline(ctx, req)
+}
+
+func (s *StrictServer) PostsListPostsByUser(ctx context.Context, req openapi.PostsListPostsByUserRequestObject) (openapi.PostsListPostsByUserResponseObject, error) {
+	return s.post.ListByUserID(ctx, req)
+}
+
+func (s *StrictServer) PostsListLikedPostsByUser(ctx context.Context, req openapi.PostsListLikedPostsByUserRequestObject) (openapi.PostsListLikedPostsByUserResponseObject, error) {
+	return s.post.ListLikedByUserID(ctx, req)
+}
+
+func (s *StrictServer) PostsDeletePost(ctx context.Context, req openapi.PostsDeletePostRequestObject) (openapi.PostsDeletePostResponseObject, error) {
+	return s.post.Delete(ctx, req)
+}
+
+func (s *StrictServer) PostsTogglePostLike(ctx context.Context, req openapi.PostsTogglePostLikeRequestObject) (openapi.PostsTogglePostLikeResponseObject, error) {
+	return s.post.ToggleLike(ctx, req)
+}
+
+func (s *StrictServer) PostsTogglePostRepost(ctx context.Context, req openapi.PostsTogglePostRepostRequestObject) (openapi.PostsTogglePostRepostResponseObject, error) {
+	return s.post.ToggleRepost(ctx, req)
+}
+
+func (s *StrictServer) PostsCreatePostComment(ctx context.Context, req openapi.PostsCreatePostCommentRequestObject) (openapi.PostsCreatePostCommentResponseObject, error) {
+	return s.post.CreateComment(ctx, req)
+}
+
+func (s *StrictServer) PostsListPostComments(ctx context.Context, req openapi.PostsListPostCommentsRequestObject) (openapi.PostsListPostCommentsResponseObject, error) {
+	return s.post.ListComments(ctx, req)
+}
+
+func (s *StrictServer) PostsDeletePostComment(ctx context.Context, req openapi.PostsDeletePostCommentRequestObject) (openapi.PostsDeletePostCommentResponseObject, error) {
+	return s.post.DeleteComment(ctx, req)
+}
+
+// --- Articles（ユーザー著者） ---
+
+func (s *StrictServer) ArticlesListArticles(ctx context.Context, req openapi.ArticlesListArticlesRequestObject) (openapi.ArticlesListArticlesResponseObject, error) {
+	return s.article.List(ctx, req)
+}
+
+func (s *StrictServer) ArticlesGetArticle(ctx context.Context, req openapi.ArticlesGetArticleRequestObject) (openapi.ArticlesGetArticleResponseObject, error) {
+	return s.article.GetByID(ctx, req)
+}
+
+func (s *StrictServer) ArticlesListMyArticles(ctx context.Context, req openapi.ArticlesListMyArticlesRequestObject) (openapi.ArticlesListMyArticlesResponseObject, error) {
+	return s.article.ListMine(ctx, req)
+}
+
+func (s *StrictServer) ArticlesCreateArticle(ctx context.Context, req openapi.ArticlesCreateArticleRequestObject) (openapi.ArticlesCreateArticleResponseObject, error) {
+	return s.article.CreateAsUser(ctx, req)
+}
+
+func (s *StrictServer) ArticlesUpdateArticle(ctx context.Context, req openapi.ArticlesUpdateArticleRequestObject) (openapi.ArticlesUpdateArticleResponseObject, error) {
+	return s.article.UpdateAsUser(ctx, req)
+}
+
+func (s *StrictServer) ArticlesDeleteArticle(ctx context.Context, req openapi.ArticlesDeleteArticleRequestObject) (openapi.ArticlesDeleteArticleResponseObject, error) {
+	return s.article.DeleteAsUser(ctx, req)
+}
+
+func (s *StrictServer) ArticlesPublishArticle(ctx context.Context, req openapi.ArticlesPublishArticleRequestObject) (openapi.ArticlesPublishArticleResponseObject, error) {
+	return s.article.PublishAsUser(ctx, req)
+}
+
+func (s *StrictServer) ArticlesCreateArticleCheckout(ctx context.Context, req openapi.ArticlesCreateArticleCheckoutRequestObject) (openapi.ArticlesCreateArticleCheckoutResponseObject, error) {
+	return s.article.CreateCheckout(ctx, req)
+}
+
+func (s *StrictServer) ArticlesUploadArticleImage(ctx context.Context, req openapi.ArticlesUploadArticleImageRequestObject) (openapi.ArticlesUploadArticleImageResponseObject, error) {
+	return s.article.UploadImage(ctx, req)
+}
+
+// --- Articles（企業著者） ---
+
+func (s *StrictServer) CompanyArticlesCreateCompanyArticle(ctx context.Context, req openapi.CompanyArticlesCreateCompanyArticleRequestObject) (openapi.CompanyArticlesCreateCompanyArticleResponseObject, error) {
+	return s.article.CreateAsCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyArticlesUpdateCompanyArticle(ctx context.Context, req openapi.CompanyArticlesUpdateCompanyArticleRequestObject) (openapi.CompanyArticlesUpdateCompanyArticleResponseObject, error) {
+	return s.article.UpdateAsCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyArticlesDeleteCompanyArticle(ctx context.Context, req openapi.CompanyArticlesDeleteCompanyArticleRequestObject) (openapi.CompanyArticlesDeleteCompanyArticleResponseObject, error) {
+	return s.article.DeleteAsCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyArticlesPublishCompanyArticle(ctx context.Context, req openapi.CompanyArticlesPublishCompanyArticleRequestObject) (openapi.CompanyArticlesPublishCompanyArticleResponseObject, error) {
+	return s.article.PublishAsCompany(ctx, req)
 }
