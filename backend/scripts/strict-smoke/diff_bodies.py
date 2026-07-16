@@ -73,6 +73,16 @@ def main():
             print(f"  before: {json.dumps(bj, ensure_ascii=False)[:400]}")
             print(f"  after : {json.dumps(aj, ensure_ascii=False)[:400]}")
             diffs += 1
+        # auth グループ: Set-Cookie の名前・属性（値はマスク済み）の比較
+        bc, ac = (os.path.join(d, name + ".cookies") for d in (before, after))
+        if os.path.exists(bc) or os.path.exists(ac):
+            bt = open(bc).read() if os.path.exists(bc) else "<missing>"
+            at = open(ac).read() if os.path.exists(ac) else "<missing>"
+            if bt != at:
+                print(f"COOKIE DIFF {name}:")
+                print(f"  before: {bt!r}")
+                print(f"  after : {at!r}")
+                diffs += 1
     print(f"--- {cases} cases, {diffs} diffs")
     sys.exit(1 if diffs else 0)
 

@@ -2404,6 +2404,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: |-
+            未承認アカウントでのログイン拒否エラー。
+            認証情報は正しいが、アカウントが承認待ち（ACCOUNT_PENDING）または
+            却下済み（ACCOUNT_REJECTED）のためログインできない。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyAccountStatusError'
       tags:
         - CompanyAuth
       requestBody:
@@ -9533,6 +9542,25 @@ components:
           format: date-time
           description: 作成日時
       description: コメント
+    Models.CompanyAccountStatusError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - ACCOUNT_PENDING
+            - ACCOUNT_REJECTED
+          description: エラーコード
+        message:
+          type: string
+          description: エラーメッセージ
+      description: |-
+        未承認アカウントでのログイン拒否エラー。
+        認証情報は正しいが、アカウントが承認待ち（ACCOUNT_PENDING）または
+        却下済み（ACCOUNT_REJECTED）のためログインできない。
     Models.CompanyInterviewItem:
       type: object
       required:

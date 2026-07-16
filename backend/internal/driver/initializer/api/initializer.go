@@ -144,10 +144,14 @@ func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps
 
 	strictSrv := httpcontroller.NewStrictServer()
 	strictWrapper := &openapigen.ServerInterfaceWrapper{
-		Handler: openapigen.NewStrictHandlerWithOptions(strictSrv, nil, openapigen.StrictHTTPServerOptions{
-			RequestErrorHandlerFunc:  httpcontroller.WriteRequestError,
-			ResponseErrorHandlerFunc: httpcontroller.WriteResponseError,
-		}),
+		// RequestIntoContext: auth 系 handler が cookie 読取り・Secure 判定に
+		// 使う *http.Request を context 経由で渡す（strict 署名には現れない）。
+		Handler: openapigen.NewStrictHandlerWithOptions(strictSrv,
+			[]openapigen.StrictMiddlewareFunc{httpcontroller.RequestIntoContext},
+			openapigen.StrictHTTPServerOptions{
+				RequestErrorHandlerFunc:  httpcontroller.WriteRequestError,
+				ResponseErrorHandlerFunc: httpcontroller.WriteResponseError,
+			}),
 		ErrorHandlerFunc: httpcontroller.WriteRequestError,
 	}
 
@@ -155,7 +159,7 @@ func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps
 	e.Static("/api/uploads", "./uploads")
 
 	wireHealth(e, d.pool)
-	wireAuth(e, d)
+	wireAuth(sr, strictWrapper, strictSrv, d)
 	wireUser(sr, strictWrapper, strictSrv, d)
 	wireContent(e, sr, strictWrapper, strictSrv, d)
 	wireSearch(sr, strictWrapper, strictSrv, d)

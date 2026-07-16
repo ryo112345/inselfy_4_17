@@ -1,17 +1,15 @@
 package controller
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
 	"time"
 
-	"github.com/labstack/echo/v4"
-
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
-	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -26,112 +24,191 @@ func NewCompanyAuthController(
 	return &CompanyAuthController{input: input}
 }
 
-func (c *CompanyAuthController) Register(ctx echo.Context) error {
-	var body openapi.ModelsCompanyRegisterRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request")
+// Register handles POST /api/company/auth/register.
+func (c *CompanyAuthController) Register(ctx context.Context, req openapi.CompanyAuthCompanyRegisterRequestObject) (openapi.CompanyAuthCompanyRegisterResponseObject, error) {
+	if req.Body == nil {
+		return openapi.CompanyAuthCompanyRegister400JSONResponse(badRequestBody("invalid request")), nil
 	}
 
-	account, err := c.input.Register(ctx.Request().Context(), company.RegisterInput{
-		Email:             body.Email,
-		Password:          body.Password,
-		CompanyName:       body.CompanyName,
-		ContactPersonName: body.ContactPersonName,
-		PhoneNumber:       body.PhoneNumber,
+	account, err := c.input.Register(ctx, company.RegisterInput{
+		Email:             req.Body.Email,
+		Password:          req.Body.Password,
+		CompanyName:       req.Body.CompanyName,
+		ContactPersonName: req.Body.ContactPersonName,
+		PhoneNumber:       req.Body.PhoneNumber,
 	})
 	if err != nil {
-		return handleCompanyAuthError(ctx, err)
+		switch {
+		case errors.Is(err, company.ErrEmailAlreadyRegistered):
+			return openapi.CompanyAuthCompanyRegister409JSONResponse(conflictBody(err)), nil
+		case isCompanyBadRequest(err):
+			return openapi.CompanyAuthCompanyRegister400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusCreated, presenter.CompanyRegisteredResponse(account))
+	resp := presenter.CompanyRegisteredResponse(account).(*openapi.ModelsCompanyResponse)
+	return openapi.CompanyAuthCompanyRegister201JSONResponse(*resp), nil
 }
 
-func (c *CompanyAuthController) Login(ctx echo.Context) error {
-	var body openapi.ModelsCompanyLoginRequest
-	if err := ctx.Bind(&body); err != nil || body.Email == "" || body.Password == "" {
-		return badRequest(ctx, "invalid request")
+// Login handles POST /api/company/auth/login.
+func (c *CompanyAuthController) Login(ctx context.Context, req openapi.CompanyAuthCompanyLoginRequestObject) (openapi.CompanyAuthCompanyLoginResponseObject, error) {
+	if req.Body == nil || req.Body.Email == "" || req.Body.Password == "" {
+		return openapi.CompanyAuthCompanyLogin400JSONResponse(badRequestBody("invalid request")), nil
 	}
 
-	pair, account, err := c.input.Login(ctx.Request().Context(), body.Email, body.Password)
+	pair, account, err := c.input.Login(ctx, req.Body.Email, req.Body.Password)
 	if err != nil {
-		return handleCompanyAuthError(ctx, err)
+		switch {
+		case errors.Is(err, company.ErrInvalidCredentials):
+			return openapi.CompanyAuthCompanyLogin401JSONResponse(unauthorizedBody("invalid email or password")), nil
+		case errors.Is(err, company.ErrAccountPending):
+			return openapi.CompanyAuthCompanyLogin403JSONResponse(openapi.ModelsCompanyAccountStatusError{
+				Code:    openapi.ModelsCompanyAccountStatusErrorCodeACCOUNTPENDING,
+				Message: "your account is awaiting admin approval",
+			}), nil
+		case errors.Is(err, company.ErrAccountRejected):
+			return openapi.CompanyAuthCompanyLogin403JSONResponse(openapi.ModelsCompanyAccountStatusError{
+				Code:    openapi.ModelsCompanyAccountStatusErrorCodeACCOUNTREJECTED,
+				Message: "your account registration has been rejected",
+			}), nil
+		}
+		return nil, err
 	}
 	tokenResp := presenter.CompanyTokenResponse(pair, account).(*presenter.CompanyAuthTokenResponse)
-	setCompanyAuthCookies(ctx, tokenResp)
-	return ctx.JSON(http.StatusOK, tokenResp.Company)
+	return companyLoginWithCookies{
+		inner:   openapi.CompanyAuthCompanyLogin200JSONResponse(*tokenResp.Company),
+		cookies: companyAuthCookies(isSecureRequest(ctx), tokenResp),
+	}, nil
 }
 
-func (c *CompanyAuthController) Refresh(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("company_refresh_token")
-	if err != nil || cookie.Value == "" {
-		return handleCompanyAuthError(ctx, nil)
+// Refresh handles POST /api/company/auth/refresh. company_refresh_token cookie
+// は RequestObject に現れないため、context 経由の *http.Request から読む。
+func (c *CompanyAuthController) Refresh(ctx context.Context, _ openapi.CompanyAuthCompanyRefreshTokenRequestObject) (openapi.CompanyAuthCompanyRefreshTokenResponseObject, error) {
+	secure := isSecureRequest(ctx)
+	value, ok := cookieValue(ctx, "company_refresh_token")
+	if !ok {
+		return openapi.CompanyAuthCompanyRefreshToken401JSONResponse(unauthorizedBody("unauthorized")), nil
 	}
 
-	pair, account, err := c.input.RefreshToken(ctx.Request().Context(), cookie.Value)
+	pair, account, err := c.input.RefreshToken(ctx, value)
 	if err != nil {
-		clearCompanyAuthCookies(ctx)
-		return handleCompanyAuthError(ctx, err)
+		if isUnauthorizedAuthError(err) {
+			return companyRefreshWithCookies{
+				inner:   openapi.CompanyAuthCompanyRefreshToken401JSONResponse(unauthorizedBody("unauthorized")),
+				cookies: clearedCompanyAuthCookies(secure),
+			}, nil
+		}
+		return nil, err
 	}
 	tokenResp := presenter.CompanyTokenResponse(pair, account).(*presenter.CompanyAuthTokenResponse)
-	setCompanyAuthCookies(ctx, tokenResp)
-	return ctx.JSON(http.StatusOK, tokenResp.Company)
+	return companyRefreshWithCookies{
+		inner:   openapi.CompanyAuthCompanyRefreshToken200JSONResponse(*tokenResp.Company),
+		cookies: companyAuthCookies(secure, tokenResp),
+	}, nil
 }
 
-func (c *CompanyAuthController) GetMe(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+// GetMe handles GET /api/company/auth/me.
+func (c *CompanyAuthController) GetMe(ctx context.Context, _ openapi.CompanyAuthCompanyGetMeRequestObject) (openapi.CompanyAuthCompanyGetMeResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	account, err := c.input.GetCurrentCompany(ctx.Request().Context(), companyID)
+	account, err := c.input.GetCurrentCompany(ctx, companyID)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusNotFound {
+			return openapi.CompanyAuthCompanyGetMe404JSONResponse(notFoundBody(err)), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.CompanyMeResponse(account))
+	resp := presenter.CompanyMeResponse(account).(*openapi.ModelsCompanyResponse)
+	return openapi.CompanyAuthCompanyGetMe200JSONResponse(*resp), nil
 }
 
-func (c *CompanyAuthController) Logout(ctx echo.Context) error {
-	clearCompanyAuthCookies(ctx)
-	return ctx.NoContent(http.StatusNoContent)
+// Logout handles POST /api/company/auth/logout.
+func (c *CompanyAuthController) Logout(ctx context.Context, _ openapi.CompanyAuthCompanyLogoutRequestObject) (openapi.CompanyAuthCompanyLogoutResponseObject, error) {
+	return companyLogoutWithCookies{
+		inner:   openapi.CompanyAuthCompanyLogout204Response{},
+		cookies: clearedCompanyAuthCookies(isSecureRequest(ctx)),
+	}, nil
 }
 
-func setCompanyAuthCookies(ctx echo.Context, resp *presenter.CompanyAuthTokenResponse) {
-	secure := ctx.Scheme() == "https"
+// --- cookie 焼き込み用 Visitor ラッパー（docs/strict-server-migration.md 3-3） ---
+
+type companyLoginWithCookies struct {
+	inner   openapi.CompanyAuthCompanyLoginResponseObject
+	cookies []*http.Cookie
+}
+
+func (r companyLoginWithCookies) VisitCompanyAuthCompanyLoginResponse(w http.ResponseWriter) error {
+	setCookies(w, r.cookies)
+	return r.inner.VisitCompanyAuthCompanyLoginResponse(w)
+}
+
+type companyRefreshWithCookies struct {
+	inner   openapi.CompanyAuthCompanyRefreshTokenResponseObject
+	cookies []*http.Cookie
+}
+
+func (r companyRefreshWithCookies) VisitCompanyAuthCompanyRefreshTokenResponse(w http.ResponseWriter) error {
+	setCookies(w, r.cookies)
+	return r.inner.VisitCompanyAuthCompanyRefreshTokenResponse(w)
+}
+
+type companyLogoutWithCookies struct {
+	inner   openapi.CompanyAuthCompanyLogoutResponseObject
+	cookies []*http.Cookie
+}
+
+func (r companyLogoutWithCookies) VisitCompanyAuthCompanyLogoutResponse(w http.ResponseWriter) error {
+	setCookies(w, r.cookies)
+	return r.inner.VisitCompanyAuthCompanyLogoutResponse(w)
+}
+
+// --- 企業 auth cookie の構築 ---
+
+func companyAuthCookies(secure bool, resp *presenter.CompanyAuthTokenResponse) []*http.Cookie {
 	// ローカル開発は http のため Secure は scheme で切り替える（本番は常に https）
-	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は上記の通り動的に設定
-		Name:     "company_token",
-		Value:    resp.AccessToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   secure,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   86400,
-	})
-	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定
-		Name:     "company_refresh_token",
-		Value:    resp.RefreshToken,
-		Path:     "/api/company/auth",
-		HttpOnly: true,
-		Secure:   secure,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   604800,
-	})
-	setCookie := func(name, value string) {
-		// companyId/companyName はフロントの JS から参照するため HttpOnly を付けない
-		ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: JS 参照用のため HttpOnly なし・Secure は動的
+	cookies := make([]*http.Cookie, 0, 4)
+	cookies = append(cookies,
+		&http.Cookie{ //nolint:gosec // G124: Secure は上記の通り動的に設定
+			Name:     "company_token",
+			Value:    resp.AccessToken,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   secure,
+			SameSite: http.SameSiteLaxMode,
+			MaxAge:   86400,
+		},
+		&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定
+			Name:     "company_refresh_token",
+			Value:    resp.RefreshToken,
+			Path:     "/api/company/auth",
+			HttpOnly: true,
+			Secure:   secure,
+			SameSite: http.SameSiteLaxMode,
+			MaxAge:   604800,
+		},
+	)
+	// companyId/companyName はフロントの JS から参照するため HttpOnly を付けない
+	cookie := func(name, value string) *http.Cookie {
+		return &http.Cookie{ //nolint:gosec // G124: JS 参照用のため HttpOnly なし・Secure は動的
 			Name:     name,
 			Value:    url.QueryEscape(value),
 			Path:     "/",
 			Secure:   secure,
 			SameSite: http.SameSiteLaxMode,
 			MaxAge:   604800,
-		})
+		}
 	}
-	setCookie("companyId", resp.Company.Id)
-	setCookie("companyName", resp.Company.CompanyName)
+	return append(cookies,
+		cookie("companyId", resp.Company.Id),
+		cookie("companyName", resp.Company.CompanyName),
+	)
 }
 
-func clearCompanyAuthCookies(ctx echo.Context) {
-	secure := ctx.Scheme() == "https"
+func clearedCompanyAuthCookies(secure bool) []*http.Cookie {
 	expired := time.Unix(0, 0)
+	cookies := make([]*http.Cookie, 0, 4)
 	for _, name := range []string{"company_token", "companyId", "companyName"} {
-		ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的・JS 参照用 cookie は HttpOnly なし
+		cookies = append(cookies, &http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的・JS 参照用 cookie は HttpOnly なし
 			Name:     name,
 			Value:    "",
 			Path:     "/",
@@ -142,7 +219,7 @@ func clearCompanyAuthCookies(ctx echo.Context) {
 			Expires:  expired,
 		})
 	}
-	ctx.SetCookie(&http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定（ローカルは http）
+	return append(cookies, &http.Cookie{ //nolint:gosec // G124: Secure は scheme で動的に設定（ローカルは http）
 		Name:     "company_refresh_token",
 		Value:    "",
 		Path:     "/api/company/auth",
@@ -152,31 +229,6 @@ func clearCompanyAuthCookies(ctx echo.Context) {
 		MaxAge:   -1,
 		Expires:  expired,
 	})
-}
-
-func handleCompanyAuthError(ctx echo.Context, err error) error {
-	if err == nil {
-		return unauthorized(ctx, "unauthorized")
-	}
-	switch {
-	case errors.Is(err, company.ErrInvalidCredentials):
-		return unauthorized(ctx, "invalid email or password")
-	case errors.Is(err, auth.ErrRefreshTokenRevoked),
-		errors.Is(err, auth.ErrTokenExpired),
-		errors.Is(err, auth.ErrUnauthorized):
-		// 失効 refresh cookie は正常系のエラー。候補者側（handleAuthError）と
-		// 同じく 401 にする（以前は分類漏れで 500 INTERNAL になっていた）。
-		return unauthorized(ctx, "unauthorized")
-	case errors.Is(err, company.ErrAccountPending):
-		return errorResponse(ctx, http.StatusForbidden, "ACCOUNT_PENDING", "your account is awaiting admin approval")
-	case errors.Is(err, company.ErrAccountRejected):
-		return errorResponse(ctx, http.StatusForbidden, "ACCOUNT_REJECTED", "your account registration has been rejected")
-	case errors.Is(err, company.ErrEmailAlreadyRegistered):
-		return errorResponse(ctx, http.StatusConflict, "CONFLICT", err.Error())
-	case isCompanyBadRequest(err):
-		return badRequest(ctx, err.Error())
-	}
-	return handleError(ctx, err)
 }
 
 func isCompanyBadRequest(err error) bool {

@@ -10,7 +10,6 @@ import (
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
-	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
@@ -275,17 +274,6 @@ func notFoundError(ctx echo.Context, message string) error {
 
 func internalError(ctx echo.Context, message string) error {
 	return errorResponse(ctx, http.StatusInternalServerError, "INTERNAL", message)
-}
-
-func handleAuthError(ctx echo.Context, err error) error {
-	if err == nil ||
-		errors.Is(err, auth.ErrInvalidGoogleToken) ||
-		errors.Is(err, auth.ErrUnauthorized) ||
-		errors.Is(err, auth.ErrTokenExpired) ||
-		errors.Is(err, auth.ErrRefreshTokenRevoked) {
-		return unauthorized(ctx, "unauthorized")
-	}
-	return handleError(ctx, err)
 }
 
 func invalidField(name string) error {

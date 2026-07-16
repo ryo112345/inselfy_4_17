@@ -213,11 +213,13 @@ func (c *AdminUserController) BypassLogin(ctx echo.Context, id string) error {
 		userResp.Email = &u.Email.String
 	}
 
-	setAuthCookies(ctx, &presenter.AuthTokenResponse{
+	for _, ck := range authCookies(ctx.Scheme() == "https", &presenter.AuthTokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: rawRefresh,
 		User:         userResp,
-	})
+	}) {
+		ctx.SetCookie(ck)
+	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"message":  "ok",

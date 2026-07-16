@@ -35,6 +35,9 @@ type StrictServer struct {
 	workValues     *WorkValuesController
 	careerInterest *CareerInterestController
 	teamDiagnose   *TeamDiagnoseController
+
+	auth        *AuthController
+	companyAuth *CompanyAuthController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -85,6 +88,13 @@ func (s *StrictServer) WireDiagnosisGroup(
 	s.workValues = workValues
 	s.careerInterest = careerInterest
 	s.teamDiagnose = teamDiagnose
+}
+
+// WireAuthGroup installs the wire_auth controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ5)。
+func (s *StrictServer) WireAuthGroup(auth *AuthController, companyAuth *CompanyAuthController) {
+	s.auth = auth
+	s.companyAuth = companyAuth
 }
 
 // --- Users ---
@@ -377,4 +387,44 @@ func (s *StrictServer) TeamDiagnoseStartDiagnoseCiSession(ctx context.Context, r
 
 func (s *StrictServer) TeamDiagnoseSubmitDiagnoseCiResult(ctx context.Context, req openapi.TeamDiagnoseSubmitDiagnoseCiResultRequestObject) (openapi.TeamDiagnoseSubmitDiagnoseCiResultResponseObject, error) {
 	return s.teamDiagnose.SubmitCIResult(ctx, req)
+}
+
+// --- Auth（候補者） ---
+
+func (s *StrictServer) AuthGoogleLogin(ctx context.Context, req openapi.AuthGoogleLoginRequestObject) (openapi.AuthGoogleLoginResponseObject, error) {
+	return s.auth.GoogleLogin(ctx, req)
+}
+
+func (s *StrictServer) AuthRefreshToken(ctx context.Context, req openapi.AuthRefreshTokenRequestObject) (openapi.AuthRefreshTokenResponseObject, error) {
+	return s.auth.Refresh(ctx, req)
+}
+
+func (s *StrictServer) AuthGetMe(ctx context.Context, req openapi.AuthGetMeRequestObject) (openapi.AuthGetMeResponseObject, error) {
+	return s.auth.GetMe(ctx, req)
+}
+
+func (s *StrictServer) AuthLogout(ctx context.Context, req openapi.AuthLogoutRequestObject) (openapi.AuthLogoutResponseObject, error) {
+	return s.auth.Logout(ctx, req)
+}
+
+// --- CompanyAuth（企業） ---
+
+func (s *StrictServer) CompanyAuthCompanyRegister(ctx context.Context, req openapi.CompanyAuthCompanyRegisterRequestObject) (openapi.CompanyAuthCompanyRegisterResponseObject, error) {
+	return s.companyAuth.Register(ctx, req)
+}
+
+func (s *StrictServer) CompanyAuthCompanyLogin(ctx context.Context, req openapi.CompanyAuthCompanyLoginRequestObject) (openapi.CompanyAuthCompanyLoginResponseObject, error) {
+	return s.companyAuth.Login(ctx, req)
+}
+
+func (s *StrictServer) CompanyAuthCompanyRefreshToken(ctx context.Context, req openapi.CompanyAuthCompanyRefreshTokenRequestObject) (openapi.CompanyAuthCompanyRefreshTokenResponseObject, error) {
+	return s.companyAuth.Refresh(ctx, req)
+}
+
+func (s *StrictServer) CompanyAuthCompanyGetMe(ctx context.Context, req openapi.CompanyAuthCompanyGetMeRequestObject) (openapi.CompanyAuthCompanyGetMeResponseObject, error) {
+	return s.companyAuth.GetMe(ctx, req)
+}
+
+func (s *StrictServer) CompanyAuthCompanyLogout(ctx context.Context, req openapi.CompanyAuthCompanyLogoutRequestObject) (openapi.CompanyAuthCompanyLogoutResponseObject, error) {
+	return s.companyAuth.Logout(ctx, req)
 }

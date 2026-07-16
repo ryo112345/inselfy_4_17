@@ -78,6 +78,24 @@ func (e ModelsCISkillLevel) Valid() bool {
 	}
 }
 
+// Defines values for ModelsCompanyAccountStatusErrorCode.
+const (
+	ModelsCompanyAccountStatusErrorCodeACCOUNTPENDING  ModelsCompanyAccountStatusErrorCode = "ACCOUNT_PENDING"
+	ModelsCompanyAccountStatusErrorCodeACCOUNTREJECTED ModelsCompanyAccountStatusErrorCode = "ACCOUNT_REJECTED"
+)
+
+// Valid indicates whether the value is a known member of the ModelsCompanyAccountStatusErrorCode enum.
+func (e ModelsCompanyAccountStatusErrorCode) Valid() bool {
+	switch e {
+	case ModelsCompanyAccountStatusErrorCodeACCOUNTPENDING:
+		return true
+	case ModelsCompanyAccountStatusErrorCodeACCOUNTREJECTED:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ModelsCompanyStatus.
 const (
 	ModelsCompanyStatusApproved ModelsCompanyStatus = "approved"
@@ -1236,6 +1254,20 @@ type ModelsCommentResponse struct {
 	// Username ユーザー名
 	Username string `json:"username"`
 }
+
+// ModelsCompanyAccountStatusError 未承認アカウントでのログイン拒否エラー。
+// 認証情報は正しいが、アカウントが承認待ち（ACCOUNT_PENDING）または
+// 却下済み（ACCOUNT_REJECTED）のためログインできない。
+type ModelsCompanyAccountStatusError struct {
+	// Code エラーコード
+	Code ModelsCompanyAccountStatusErrorCode `json:"code"`
+
+	// Message エラーメッセージ
+	Message string `json:"message"`
+}
+
+// ModelsCompanyAccountStatusErrorCode エラーコード
+type ModelsCompanyAccountStatusErrorCode string
 
 // ModelsCompanyInterviewItem 面接（企業向け・候補者情報付き）
 type ModelsCompanyInterviewItem struct {
@@ -14481,6 +14513,15 @@ type CompanyAuthCompanyLogin401JSONResponse ModelsUnauthorizedError
 func (response CompanyAuthCompanyLogin401JSONResponse) VisitCompanyAuthCompanyLoginResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CompanyAuthCompanyLogin403JSONResponse ModelsCompanyAccountStatusError
+
+func (response CompanyAuthCompanyLogin403JSONResponse) VisitCompanyAuthCompanyLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }

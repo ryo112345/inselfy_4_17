@@ -191,7 +191,7 @@ func (c *AdminCompanyController) BypassLogin(ctx echo.Context, id string) error 
 		return internalError(ctx, "failed to store refresh token")
 	}
 
-	setCompanyAuthCookies(ctx, &presenter.CompanyAuthTokenResponse{
+	for _, ck := range companyAuthCookies(ctx.Scheme() == "https", &presenter.CompanyAuthTokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: rawRefresh,
 		Company: &openapi.ModelsCompanyResponse{
@@ -203,7 +203,9 @@ func (c *AdminCompanyController) BypassLogin(ctx echo.Context, id string) error 
 			Status:            openapi.ModelsCompanyStatus(ca.Status),
 			CreatedAt:         ca.CreatedAt.Time,
 		},
-	})
+	}) {
+		ctx.SetCookie(ck)
+	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{
 		"message":     "ok",

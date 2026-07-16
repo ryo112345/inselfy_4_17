@@ -1046,6 +1046,22 @@ export type ModelsCommentResponse = {
 };
 
 /**
+ * 未承認アカウントでのログイン拒否エラー。
+ * 認証情報は正しいが、アカウントが承認待ち（ACCOUNT_PENDING）または
+ * 却下済み（ACCOUNT_REJECTED）のためログインできない。
+ */
+export type ModelsCompanyAccountStatusError = {
+    /**
+     * エラーコード
+     */
+    code: 'ACCOUNT_PENDING' | 'ACCOUNT_REJECTED';
+    /**
+     * エラーメッセージ
+     */
+    message: string;
+};
+
+/**
  * 面接（企業向け・候補者情報付き）
  */
 export type ModelsCompanyInterviewItem = {
@@ -6987,6 +7003,12 @@ export type CompanyAuthCompanyLoginErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * 未承認アカウントでのログイン拒否エラー。
+     * 認証情報は正しいが、アカウントが承認待ち（ACCOUNT_PENDING）または
+     * 却下済み（ACCOUNT_REJECTED）のためログインできない。
+     */
+    403: ModelsCompanyAccountStatusError;
 };
 
 export type CompanyAuthCompanyLoginError = CompanyAuthCompanyLoginErrors[keyof CompanyAuthCompanyLoginErrors];
