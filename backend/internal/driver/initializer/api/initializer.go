@@ -109,7 +109,7 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		AllowCredentials: true,
 	}))
 
-	interviewCtrl, wsHub, err := registerRoutes(ctx, e, d)
+	interviewCtrl, wsHub, err := registerRoutes(ctx, e, newStrictRouter(), d)
 	if err != nil {
 		cleanup()
 		return nil, nil, func() {}, err
@@ -133,10 +133,14 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 // registerRoutes wires every route the server exposes onto e. Split out from
 // BuildServer so tests can build the full route table without a live DB or
 // background goroutines (see spec_drift_test.go).
-func registerRoutes(ctx context.Context, e *echo.Echo, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
+func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
 	// 認可はスペック駆動: openapi.yaml の security 定義を OpenAPIRequestValidator
 	// が検証する（middleware/openapi_validator.go）。/api/admin の AdminAuth も
 	// 含め、per-route の認証MWは無い。
+
+	// strict-server 移行済みグループは sr（std-http mux）側に登録され、この
+	// ミドルウェアが横取りする。未移行グループは従来どおり echo のルート表へ。
+	e.Use(dispatchToStrict(sr))
 
 	// --- Static uploads ---
 	e.Static("/api/uploads", "./uploads")

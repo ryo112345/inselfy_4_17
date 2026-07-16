@@ -41,7 +41,7 @@ var unspeccedRoutes = map[string]string{
 
 func TestSpecAndRouterDoNotDrift(t *testing.T) {
 	specRoutes := loadSpecRoutes(t)
-	echoRoutes := loadEchoRoutes(t)
+	echoRoutes := loadRegisteredRoutes(t)
 
 	var missing []string
 	for key := range specRoutes {
@@ -91,10 +91,11 @@ func loadSpecRoutes(t *testing.T) map[string]struct{} {
 	return routes
 }
 
-// loadEchoRoutes builds the real route table via registerRoutes and returns
-// normalized "METHOD path" keys. The pool is created lazily and no handler
-// runs, so no DB is needed.
-func loadEchoRoutes(t *testing.T) map[string]struct{} {
+// loadRegisteredRoutes builds the real route table via registerRoutes —
+// echo routes plus the strict-server mux patterns — and returns normalized
+// "METHOD path" keys. The pool is created lazily and no handler runs, so no
+// DB is needed.
+func loadRegisteredRoutes(t *testing.T) map[string]struct{} {
 	t.Helper()
 	ctx := context.Background()
 	pool, err := pgxpool.New(ctx, "postgres://drift:test@localhost:5432/drift-test")
@@ -121,7 +122,8 @@ func loadEchoRoutes(t *testing.T) map[string]struct{} {
 	}
 
 	e := echo.New()
-	if _, _, err := registerRoutes(ctx, e, d); err != nil {
+	sr := newStrictRouter()
+	if _, _, err := registerRoutes(ctx, e, sr, d); err != nil {
 		t.Fatalf("registerRoutes: %v", err)
 	}
 
@@ -133,6 +135,13 @@ func loadEchoRoutes(t *testing.T) map[string]struct{} {
 			continue
 		}
 		routes[routeKey(r.Method, r.Path)] = struct{}{}
+	}
+	for _, pattern := range sr.patterns {
+		method, path, ok := strings.Cut(pattern, " ")
+		if !ok {
+			t.Fatalf("strict mux pattern %q lacks a method; register with %q form", pattern, "METHOD /path")
+		}
+		routes[routeKey(method, path)] = struct{}{}
 	}
 	return routes
 }
