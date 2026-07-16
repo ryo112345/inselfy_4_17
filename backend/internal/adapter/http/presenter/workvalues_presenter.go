@@ -10,7 +10,7 @@ import (
 )
 
 // WorkValuesSessionResponse converts a session entity to its API response.
-func WorkValuesSessionResponse(s *workvalues.Session) any {
+func WorkValuesSessionResponse(s *workvalues.Session) openapi.ModelsWVSessionResponse {
 	pairs := make([]openapi.ModelsWVPairResponse, len(s.InitialPairs))
 	for i, pair := range s.InitialPairs {
 		pairs[i] = openapi.ModelsWVPairResponse{NeedA: pair.NeedA, NeedB: pair.NeedB}
@@ -19,7 +19,7 @@ func WorkValuesSessionResponse(s *workvalues.Session) any {
 	for i, d := range workvalues.NeedDefs {
 		needs[i] = openapi.ModelsWVNeedDefResponse{Id: d.ID, Label: d.Label, DescriptionJa: d.DescriptionJa}
 	}
-	return &openapi.ModelsWVSessionResponse{
+	return openapi.ModelsWVSessionResponse{
 		Id:           s.ID,
 		Status:       openapi.ModelsDiagnosisSessionStatus(s.Status),
 		InitialPairs: pairs,
@@ -28,7 +28,7 @@ func WorkValuesSessionResponse(s *workvalues.Session) any {
 }
 
 // WorkValuesResultResponse converts a result entity to its API response.
-func WorkValuesResultResponse(r *workvalues.Result) any {
+func WorkValuesResultResponse(r *workvalues.Result) openapi.ModelsWVResultResponse {
 	needs := make([]openapi.ModelsWVNeedScore, 0, len(r.Mu))
 	for key, mu := range r.Mu {
 		ds := 100.0 / (1.0 + math.Exp(-mu))
@@ -58,7 +58,7 @@ func WorkValuesResultResponse(r *workvalues.Result) any {
 		}
 	}
 
-	return &openapi.ModelsWVResultResponse{
+	return openapi.ModelsWVResultResponse{
 		Id:              r.ID,
 		SessionId:       r.SessionID,
 		UserId:          r.UserID,

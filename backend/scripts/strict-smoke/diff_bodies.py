@@ -14,7 +14,12 @@ import re
 import sys
 
 # 実行ごとに値が変わる（＝差分として意味がない）フィールド
-VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "publishedAt", "userId", "postId"}
+VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "publishedAt", "userId", "postId", "sessionId"}
+# 診断セッション開始のたびに時刻シード RNG でシャッフル・抽選される配列。
+# WV の initialPairs は常に揮発。CI セッションの items も揮発だが、"items" は
+# ページングリスト（{items, total}）の共通キーなので、"total" を伴わない
+# 場合（= CI セッション形）だけ揮発として扱う。
+VOLATILE |= {"initialPairs"}
 # アップロードで生成されるファイル名のランダム部（8hex_ プレフィックス形式と
 # フル UUID 形式＝article-images の両方）
 RANDOM_FILE = re.compile(
@@ -24,7 +29,8 @@ RANDOM_FILE = re.compile(
 
 def norm(v):
     if isinstance(v, dict):
-        return {k: ("<VOL>" if k in VOLATILE else norm(x)) for k, x in sorted(v.items())}
+        volatile = VOLATILE | ({"items"} if "items" in v and "total" not in v else set())
+        return {k: ("<VOL>" if k in volatile else norm(x)) for k, x in sorted(v.items())}
     if isinstance(v, list):
         return [norm(x) for x in v]
     if isinstance(v, str):

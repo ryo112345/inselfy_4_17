@@ -1,9 +1,8 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -22,25 +21,38 @@ func NewWorkValuesController(
 	return &WorkValuesController{input: input}
 }
 
-func (c *WorkValuesController) StartSession(ctx echo.Context) error {
-	s, err := c.input.StartSession(ctx.Request().Context(), authmw.UserID(ctx))
+// StartSession handles POST /api/work-values/sessions.
+func (c *WorkValuesController) StartSession(ctx context.Context, _ openapi.WorkValuesWvStartSessionRequestObject) (openapi.WorkValuesWvStartSessionResponseObject, error) {
+	s, err := c.input.StartSession(ctx, authmw.UserIDFromContext(ctx))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.WorkValuesWvStartSession404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.WorkValuesWvStartSession400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.WorkValuesSessionResponse(s))
+	return openapi.WorkValuesWvStartSession201JSONResponse(presenter.WorkValuesSessionResponse(s)), nil
 }
 
-func (c *WorkValuesController) SubmitResult(ctx echo.Context, sessionID string) error {
-	var body openapi.ModelsWVSubmitResultRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-
-	r, err := c.input.SubmitResult(ctx.Request().Context(), sessionID, authmw.UserID(ctx), wvSubmitInputFromBody(body))
+// SubmitResult handles POST /api/work-values/sessions/{sessionId}/results.
+func (c *WorkValuesController) SubmitResult(ctx context.Context, req openapi.WorkValuesWvSubmitResultRequestObject) (openapi.WorkValuesWvSubmitResultResponseObject, error) {
+	r, err := c.input.SubmitResult(ctx, req.SessionId, authmw.UserIDFromContext(ctx), wvSubmitInputFromBody(*req.Body))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.WorkValuesWvSubmitResult404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.WorkValuesWvSubmitResult403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.WorkValuesWvSubmitResult400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.WorkValuesResultResponse(r))
+	return openapi.WorkValuesWvSubmitResult201JSONResponse(presenter.WorkValuesResultResponse(r)), nil
 }
 
 func wvSubmitInputFromBody(body openapi.ModelsWVSubmitResultRequest) workvalues.SubmitInput {
@@ -60,25 +72,51 @@ func wvSubmitInputFromBody(body openapi.ModelsWVSubmitResultRequest) workvalues.
 	}
 }
 
-func (c *WorkValuesController) GetLatestResult(ctx echo.Context, userID string) error {
-	r, err := c.input.GetLatestResult(ctx.Request().Context(), userID)
+// GetLatestResult handles GET /api/work-values/users/{userId}/results/latest.
+func (c *WorkValuesController) GetLatestResult(ctx context.Context, req openapi.WorkValuesWvGetLatestResultRequestObject) (openapi.WorkValuesWvGetLatestResultResponseObject, error) {
+	r, err := c.input.GetLatestResult(ctx, req.UserId)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.WorkValuesWvGetLatestResult404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.WorkValuesWvGetLatestResult400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.WorkValuesResultResponse(r))
+	return openapi.WorkValuesWvGetLatestResult200JSONResponse(presenter.WorkValuesResultResponse(r)), nil
 }
 
-func (c *WorkValuesController) GetResultBySessionID(ctx echo.Context, sessionID string) error {
-	r, err := c.input.GetResultBySessionID(ctx.Request().Context(), sessionID)
+// GetResultBySessionID handles GET /api/work-values/sessions/{sessionId}/results.
+func (c *WorkValuesController) GetResultBySessionID(ctx context.Context, req openapi.WorkValuesWvGetResultBySessionRequestObject) (openapi.WorkValuesWvGetResultBySessionResponseObject, error) {
+	r, err := c.input.GetResultBySessionID(ctx, req.SessionId)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.WorkValuesWvGetResultBySession404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.WorkValuesWvGetResultBySession400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.WorkValuesResultResponse(r))
+	return openapi.WorkValuesWvGetResultBySession200JSONResponse(presenter.WorkValuesResultResponse(r)), nil
 }
 
-func (c *WorkValuesController) RequestAiReport(ctx echo.Context, sessionID string) error {
-	if err := c.input.RequestAiReport(ctx.Request().Context(), sessionID, authmw.UserID(ctx)); err != nil {
-		return handleError(ctx, err)
+// RequestAiReport handles POST /api/work-values/sessions/{sessionId}/ai-report/request.
+func (c *WorkValuesController) RequestAiReport(ctx context.Context, req openapi.WorkValuesWvRequestAiReportRequestObject) (openapi.WorkValuesWvRequestAiReportResponseObject, error) {
+	if err := c.input.RequestAiReport(ctx, req.SessionId, authmw.UserIDFromContext(ctx)); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.WorkValuesWvRequestAiReport404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.WorkValuesWvRequestAiReport403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.WorkValuesWvRequestAiReport400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.WorkValuesWvRequestAiReport204Response{}, nil
 }

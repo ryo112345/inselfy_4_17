@@ -31,6 +31,10 @@ type StrictServer struct {
 	article *ArticleController
 
 	search *SearchController
+
+	workValues     *WorkValuesController
+	careerInterest *CareerInterestController
+	teamDiagnose   *TeamDiagnoseController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -69,6 +73,18 @@ func (s *StrictServer) WireContentGroup(post *PostController, article *ArticleCo
 // (docs/strict-server-migration.md Phase 3-1 グループ3)。
 func (s *StrictServer) WireSearchGroup(search *SearchController) {
 	s.search = search
+}
+
+// WireDiagnosisGroup installs the wire_diagnosis controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ4)。
+func (s *StrictServer) WireDiagnosisGroup(
+	workValues *WorkValuesController,
+	careerInterest *CareerInterestController,
+	teamDiagnose *TeamDiagnoseController,
+) {
+	s.workValues = workValues
+	s.careerInterest = careerInterest
+	s.teamDiagnose = teamDiagnose
 }
 
 // --- Users ---
@@ -291,4 +307,74 @@ func (s *StrictServer) SearchSearchPosts(ctx context.Context, req openapi.Search
 
 func (s *StrictServer) SearchSearchJobs(ctx context.Context, req openapi.SearchSearchJobsRequestObject) (openapi.SearchSearchJobsResponseObject, error) {
 	return s.search.SearchJobs(ctx, req)
+}
+
+// --- Work Values ---
+
+func (s *StrictServer) WorkValuesWvStartSession(ctx context.Context, req openapi.WorkValuesWvStartSessionRequestObject) (openapi.WorkValuesWvStartSessionResponseObject, error) {
+	return s.workValues.StartSession(ctx, req)
+}
+
+func (s *StrictServer) WorkValuesWvSubmitResult(ctx context.Context, req openapi.WorkValuesWvSubmitResultRequestObject) (openapi.WorkValuesWvSubmitResultResponseObject, error) {
+	return s.workValues.SubmitResult(ctx, req)
+}
+
+func (s *StrictServer) WorkValuesWvGetLatestResult(ctx context.Context, req openapi.WorkValuesWvGetLatestResultRequestObject) (openapi.WorkValuesWvGetLatestResultResponseObject, error) {
+	return s.workValues.GetLatestResult(ctx, req)
+}
+
+func (s *StrictServer) WorkValuesWvGetResultBySession(ctx context.Context, req openapi.WorkValuesWvGetResultBySessionRequestObject) (openapi.WorkValuesWvGetResultBySessionResponseObject, error) {
+	return s.workValues.GetResultBySessionID(ctx, req)
+}
+
+func (s *StrictServer) WorkValuesWvRequestAiReport(ctx context.Context, req openapi.WorkValuesWvRequestAiReportRequestObject) (openapi.WorkValuesWvRequestAiReportResponseObject, error) {
+	return s.workValues.RequestAiReport(ctx, req)
+}
+
+// --- Career Interest ---
+
+func (s *StrictServer) CareerInterestCiStartSession(ctx context.Context, req openapi.CareerInterestCiStartSessionRequestObject) (openapi.CareerInterestCiStartSessionResponseObject, error) {
+	return s.careerInterest.StartSession(ctx, req)
+}
+
+func (s *StrictServer) CareerInterestCiSubmitResult(ctx context.Context, req openapi.CareerInterestCiSubmitResultRequestObject) (openapi.CareerInterestCiSubmitResultResponseObject, error) {
+	return s.careerInterest.SubmitResult(ctx, req)
+}
+
+func (s *StrictServer) CareerInterestCiGetLatestResult(ctx context.Context, req openapi.CareerInterestCiGetLatestResultRequestObject) (openapi.CareerInterestCiGetLatestResultResponseObject, error) {
+	return s.careerInterest.GetLatestResult(ctx, req)
+}
+
+func (s *StrictServer) CareerInterestCiGetResultBySession(ctx context.Context, req openapi.CareerInterestCiGetResultBySessionRequestObject) (openapi.CareerInterestCiGetResultBySessionResponseObject, error) {
+	return s.careerInterest.GetResultBySessionID(ctx, req)
+}
+
+func (s *StrictServer) CareerInterestCiRequestAiReport(ctx context.Context, req openapi.CareerInterestCiRequestAiReportRequestObject) (openapi.CareerInterestCiRequestAiReportResponseObject, error) {
+	return s.careerInterest.RequestAiReport(ctx, req)
+}
+
+// --- Team Diagnose ---
+
+func (s *StrictServer) TeamDiagnoseGetDiagnoseByToken(ctx context.Context, req openapi.TeamDiagnoseGetDiagnoseByTokenRequestObject) (openapi.TeamDiagnoseGetDiagnoseByTokenResponseObject, error) {
+	return s.teamDiagnose.GetByToken(ctx, req)
+}
+
+func (s *StrictServer) TeamDiagnoseUpdateDiagnoseStatus(ctx context.Context, req openapi.TeamDiagnoseUpdateDiagnoseStatusRequestObject) (openapi.TeamDiagnoseUpdateDiagnoseStatusResponseObject, error) {
+	return s.teamDiagnose.UpdateStatus(ctx, req)
+}
+
+func (s *StrictServer) TeamDiagnoseStartDiagnoseWvSession(ctx context.Context, req openapi.TeamDiagnoseStartDiagnoseWvSessionRequestObject) (openapi.TeamDiagnoseStartDiagnoseWvSessionResponseObject, error) {
+	return s.teamDiagnose.StartWVSession(ctx, req)
+}
+
+func (s *StrictServer) TeamDiagnoseSubmitDiagnoseWvResult(ctx context.Context, req openapi.TeamDiagnoseSubmitDiagnoseWvResultRequestObject) (openapi.TeamDiagnoseSubmitDiagnoseWvResultResponseObject, error) {
+	return s.teamDiagnose.SubmitWVResult(ctx, req)
+}
+
+func (s *StrictServer) TeamDiagnoseStartDiagnoseCiSession(ctx context.Context, req openapi.TeamDiagnoseStartDiagnoseCiSessionRequestObject) (openapi.TeamDiagnoseStartDiagnoseCiSessionResponseObject, error) {
+	return s.teamDiagnose.StartCISession(ctx, req)
+}
+
+func (s *StrictServer) TeamDiagnoseSubmitDiagnoseCiResult(ctx context.Context, req openapi.TeamDiagnoseSubmitDiagnoseCiResultRequestObject) (openapi.TeamDiagnoseSubmitDiagnoseCiResultResponseObject, error) {
+	return s.teamDiagnose.SubmitCIResult(ctx, req)
 }
