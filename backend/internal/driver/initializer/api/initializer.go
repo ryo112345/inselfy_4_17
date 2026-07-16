@@ -126,26 +126,19 @@ func BuildServer(ctx context.Context) (http.Handler, *config.Config, func(), err
 	return handler, cfg, cleanup, nil
 }
 
-// registerRoutes wires every route the server exposes onto sr. Split out from
-// BuildServer so tests can build the full route table without a live DB or
-// background goroutines (see spec_drift_test.go).
+// registerRoutes wires every route the server exposes onto sr: DI assembly
+// via the wire_*.go files, then the generated HandlerWithOptions registers
+// all spec routes (spec→router coverage is guaranteed by codegen), and the
+// spec-external routes (uploads, health, WS; the Stripe webhook lives in
+// wireContent) are added by hand. Split out from BuildServer so tests can
+// build the full route table without a live DB or background goroutines
+// (see spec_drift_test.go).
 func registerRoutes(ctx context.Context, sr *strictRouter, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
 	// 認可はスペック駆動: openapi.yaml の security 定義を OpenAPIRequestValidator
 	// が検証する（middleware/openapi_validator.go）。/api/admin の AdminAuth も
 	// 含め、per-route の認証MWは無い。
 
 	strictSrv := httpcontroller.NewStrictServer()
-	strictWrapper := &openapigen.ServerInterfaceWrapper{
-		// RequestIntoContext: auth 系 handler が cookie 読取り・Secure 判定に
-		// 使う *http.Request を context 経由で渡す（strict 署名には現れない）。
-		Handler: openapigen.NewStrictHandlerWithOptions(strictSrv,
-			[]openapigen.StrictMiddlewareFunc{httpcontroller.RequestIntoContext},
-			openapigen.StrictHTTPServerOptions{
-				RequestErrorHandlerFunc:  httpcontroller.WriteRequestError,
-				ResponseErrorHandlerFunc: httpcontroller.WriteResponseError,
-			}),
-		ErrorHandlerFunc: httpcontroller.WriteRequestError,
-	}
 
 	// --- Static uploads（スペック外・echo e.Static 相当）---
 	// http.Dir が path traversal を遮断し、ディレクトリは echo と同じく 404。
@@ -166,19 +159,33 @@ func registerRoutes(ctx context.Context, sr *strictRouter, d *deps) (*httpcontro
 	})
 
 	wireHealth(sr, d.pool)
-	wireAuth(sr, strictWrapper, strictSrv, d)
-	wireUser(sr, strictWrapper, strictSrv, d)
-	wireContent(sr, strictWrapper, strictSrv, d)
-	wireSearch(sr, strictWrapper, strictSrv, d)
-	wireDiagnosis(sr, strictWrapper, strictSrv, d)
-	wireCompany(sr, strictWrapper, strictSrv, d)
-	wireScout(sr, strictWrapper, strictSrv, d)
-	wireJobs(sr, strictWrapper, strictSrv, d)
-	wireMessaging(sr, strictWrapper, strictSrv, d)
-	interviewCtrl := wireInterview(sr, strictWrapper, strictSrv, d)
-	if err := wireAdmin(ctx, sr, strictWrapper, strictSrv, d); err != nil {
+	wireAuth(strictSrv, d)
+	wireUser(sr, strictSrv, d)
+	wireContent(sr, strictSrv, d)
+	wireSearch(strictSrv, d)
+	wireDiagnosis(strictSrv, d)
+	wireCompany(strictSrv, d)
+	wireScout(strictSrv, d)
+	wireJobs(strictSrv, d)
+	wireMessaging(strictSrv, d)
+	interviewCtrl := wireInterview(strictSrv, d)
+	if err := wireAdmin(ctx, strictSrv, d); err != nil {
 		return nil, nil, err
 	}
+
+	// 全スペックルートを生成コードに登録させる（sr が BaseRouter）。
+	// RequestIntoContext: auth 系 handler が cookie 読取り・Secure 判定に使う
+	// *http.Request を context 経由で渡す（strict 署名には現れない）。
+	strictHandler := openapigen.NewStrictHandlerWithOptions(strictSrv,
+		[]openapigen.StrictMiddlewareFunc{httpcontroller.RequestIntoContext},
+		openapigen.StrictHTTPServerOptions{
+			RequestErrorHandlerFunc:  httpcontroller.WriteRequestError,
+			ResponseErrorHandlerFunc: httpcontroller.WriteResponseError,
+		})
+	openapigen.HandlerWithOptions(strictHandler, openapigen.StdHTTPServerOptions{
+		BaseRouter:       sr,
+		ErrorHandlerFunc: httpcontroller.WriteRequestError,
+	})
 
 	// --- WebSocket（スペック外）---
 	wsHub := ws.NewHub()

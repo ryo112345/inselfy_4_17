@@ -7,8 +7,11 @@ import (
 
 // strictRouter is the server's router: a Go 1.22 ServeMux serving the
 // strict-server handlers plus the spec-external routes (WS, uploads, stripe
-// webhook, health). Registered patterns are recorded so spec_drift_test.go
-// can enumerate them (ServeMux has no public API for that).
+// webhook, health). It implements the generated openapi.ServeMux interface,
+// so it is passed as StdHTTPServerOptions.BaseRouter and the generated
+// HandlerWithOptions registers every spec route through HandleFunc below.
+// Registered patterns are recorded so spec_drift_test.go can enumerate them
+// (ServeMux has no public API for that).
 //
 // It is two-tiered: ServeMux has no "static segment beats wildcard" rule and
 // panics on patterns like GET /api/users/id/{id} vs
@@ -20,10 +23,44 @@ type strictRouter struct {
 	priority *http.ServeMux
 	mux      *http.ServeMux
 	patterns []string
+	// overrides are spec patterns served by a hand-written handler instead of
+	// the strict wrapper; HandleFunc ignores the generated registration for
+	// them (see handleOverride).
+	overrides map[string]struct{}
 }
 
 func newStrictRouter() *strictRouter {
-	return &strictRouter{priority: http.NewServeMux(), mux: http.NewServeMux()}
+	return &strictRouter{
+		priority:  http.NewServeMux(),
+		mux:       http.NewServeMux(),
+		overrides: make(map[string]struct{}),
+	}
+}
+
+// priorityPatterns are the spec routes that must go onto the priority mux: a
+// plain ServeMux rejects each of them as ambiguous against a wildcard sibling
+// ({username}/{postId} routes matching the same request). A stale or
+// misspelled entry here cannot fail silently — the route then registers on
+// the main mux and the ambiguity panics at registration, which
+// spec_drift_test.go exercises.
+var priorityPatterns = map[string]struct{}{
+	"GET /api/users/id/{id}":             {},
+	"GET /api/users/id/{userId}/similar": {},
+	"GET /api/posts/users/{userId}":      {},
+}
+
+// HandleFunc implements the generated openapi.ServeMux interface: the
+// generated route registration lands here and is dispatched to the right
+// tier. Patterns claimed by handleOverride keep their hand-written handler.
+func (sr *strictRouter) HandleFunc(pattern string, h func(http.ResponseWriter, *http.Request)) {
+	if _, ok := sr.overrides[pattern]; ok {
+		return
+	}
+	if _, ok := priorityPatterns[pattern]; ok {
+		sr.handleFirst(pattern, h)
+		return
+	}
+	sr.handle(pattern, h)
 }
 
 // handle registers a "METHOD /path/{param}" pattern on the main mux.
@@ -38,6 +75,15 @@ func (sr *strictRouter) handle(pattern string, h http.HandlerFunc) {
 func (sr *strictRouter) handleFirst(pattern string, h http.HandlerFunc) {
 	sr.priority.HandleFunc(pattern, h)
 	sr.patterns = append(sr.patterns, pattern)
+}
+
+// handleOverride registers a hand-written handler for a pattern that exists
+// in the spec but must not go through the strict wrapper (e.g. the raw-JSON
+// PATCH profile handler). The later generated registration for the same
+// pattern is dropped in HandleFunc. Call before HandlerWithOptions runs.
+func (sr *strictRouter) handleOverride(pattern string, h http.HandlerFunc) {
+	sr.handle(pattern, h)
+	sr.overrides[pattern] = struct{}{}
 }
 
 // ServeHTTP consults the priority mux first, then the main mux. Requests

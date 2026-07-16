@@ -1,10 +1,13 @@
 package initializer
 
-// Detects drift between the OpenAPI spec and the manually wired routes.
-// Route registration lives in wire_*.go by hand (RegisterHandlers from
-// oapi-codegen is intentionally unused), so nothing at compile time guarantees
-// that a path added to the spec actually gets registered — this test does.
-// See docs/backend-refactor-backlog.md #8.
+// Detects spec-external routes that nobody accounted for. The spec→router
+// direction needs no test since Phase 4: the generated HandlerWithOptions
+// registers every spec operation (and StrictServerInterface conformance is
+// compile-checked), so only the reverse remains — a route registered by hand
+// must either be in the spec or in the unspeccedRoutes allowlist with a
+// reason. This test also exercises registerRoutes itself, which panics if a
+// pattern is ambiguous on the main mux (see priorityPatterns) or registered
+// twice. See docs/strict-server-migration.md Phase 4.
 
 import (
 	"context"
@@ -38,20 +41,9 @@ var unspeccedRoutes = map[string]string{
 	"POST /api/stripe/webhook": "contract is Stripe's, verified by signature not by schema",
 }
 
-func TestSpecAndRouterDoNotDrift(t *testing.T) {
+func TestRouterHasNoUnaccountedRoutes(t *testing.T) {
 	specRoutes := loadSpecRoutes(t)
 	registered := loadRegisteredRoutes(t)
-
-	var missing []string
-	for key := range specRoutes {
-		if _, ok := registered[key]; !ok {
-			missing = append(missing, key)
-		}
-	}
-	sort.Strings(missing)
-	for _, key := range missing {
-		t.Errorf("in spec but not registered on the router (add it to the matching wire_*.go): %s", key)
-	}
 
 	var extra []string
 	for key := range registered {
@@ -67,6 +59,38 @@ func TestSpecAndRouterDoNotDrift(t *testing.T) {
 	for _, key := range extra {
 		t.Errorf("registered on the router but not in the spec (add it to the TypeSpec contract, or to unspeccedRoutes with a reason): %s", key)
 	}
+
+	// Guards the allowlist itself: an entry whose route disappeared should be
+	// deleted, not kept as dead documentation.
+	for pattern, reason := range unspeccedRoutes {
+		if !anyRegisteredMatches(registered, pattern) {
+			t.Errorf("unspeccedRoutes entry %q (%s) matches no registered route; remove it", pattern, reason)
+		}
+	}
+}
+
+func anyRegisteredMatches(registered map[string]struct{}, pattern string) bool {
+	for key := range registered {
+		method, path, ok := strings.Cut(key, " ")
+		if !ok {
+			continue
+		}
+		pMethod, pPath, ok := strings.Cut(pattern, " ")
+		if !ok {
+			continue
+		}
+		if pMethod != "*" && pMethod != method {
+			continue
+		}
+		if strings.HasSuffix(pPath, "*") {
+			if strings.HasPrefix(path, strings.TrimSuffix(pPath, "*")) {
+				return true
+			}
+		} else if path == pPath {
+			return true
+		}
+	}
+	return false
 }
 
 // loadSpecRoutes parses the embedded openapi.yaml into normalized
