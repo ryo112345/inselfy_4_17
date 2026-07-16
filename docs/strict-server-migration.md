@@ -53,8 +53,8 @@ strict-server ＋ RegisterHandlers ＋スペック駆動認可に移行し、最
 
 | Phase | 状態 | 内容 | 単体の価値 |
 |-------|------|------|-----------|
-| 0 | [ ] | 足場: 未pushコミットの整理・作業ブランチ | — |
-| 1 | [ ] | 認可のスペック駆動化（AuthenticationFunc 実装） | 認証付け忘れバグクラスの消滅 |
+| 0 | [x] | 足場: 未pushコミットの整理・作業ブランチ | — |
+| 1 | [x] | 認可のスペック駆動化（AuthenticationFunc 実装） | 認証付け忘れバグクラスの消滅 |
 | 2 | [ ] | admin API の TypeSpec 契約化 | 検証・認可・codegen が全ルートに効く |
 | 3 | [ ] | strict-server ＋ std-http 化（機能グループ単位で刻む） | 契約遵守のコンパイル時強制・Echo 依存の消滅 |
 | 4 | [ ] | RegisterHandlers 化と後始末 | 手動ルート表の廃止・登録漏れのコンパイル時検出 |
@@ -84,6 +84,18 @@ strict-server ＋ RegisterHandlers ＋スペック駆動認可に移行し、最
 **コミット例:** `feat(backend): OpenAPI security 定義による スペック駆動認可を導入`
 
 **注意:** admin ルートはまだスペック外なので、`adminAuthMW` はこのフェーズでは現状維持。
+
+**実施メモ（2026-07-16 完了、コミット b2bdacf / dddf4c7）:**
+- kin-openapi v0.140.0 は security の OR を**宣言順に逐次評価**し最初に通った要件で成功。
+  空要件 `{}` は無条件成功 → optional 認証は `security: [{CandidateAuth}, {}]` で表現できることを
+  ユニットテスト・curl 両方で確認済み（PoC 懸念は解消）。
+- 一致確認は E2E ではなく **wire MW × spec security の静的突き合わせスクリプト**で実施し、
+  143 operation 全一致・スペック外は healthz/readyz/stripe webhook/ws/uploads/admin のみと確認。
+  （既存 Playwright E2E 12/13 件はデモデータ依存で移行前から失敗しており判定に使えない）
+- 検証済みクレームは echo context（`c.Set`、既存 controller 互換）と request context
+  （`UserIDFromContext` / `CompanyIDFromContext`、Phase 3 の strict handler 用）の両方に publish。
+- ⚠️ 別件発見: `PATCH /api/users/:username` 等 wire_user 系は認証のみで**本人一致チェックが無い**
+  （IDOR、移行前から存在）。Phase 1 のスコープ外として未修正。
 
 ## Phase 2: admin API の TypeSpec 契約化
 
