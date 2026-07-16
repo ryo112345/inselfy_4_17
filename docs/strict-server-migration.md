@@ -57,7 +57,7 @@ strict-server ＋ RegisterHandlers ＋スペック駆動認可に移行し、最
 | 1 | [x] | 認可のスペック駆動化（AuthenticationFunc 実装） | 認証付け忘れバグクラスの消滅 |
 | 2 | [x] | admin API の TypeSpec 契約化 | 検証・認可・codegen が全ルートに効く |
 | 3 | [x] | strict-server ＋ std-http 化（3-1 全11グループ＋ 3-4 Echo 除去 完了） | 契約遵守のコンパイル時強制・Echo 依存の消滅 |
-| 4 | [ ] | RegisterHandlers 化と後始末 | 手動ルート表の廃止・登録漏れのコンパイル時検出 |
+| 4 | [x] | RegisterHandlers 化と後始末 | 手動ルート表の廃止・登録漏れのコンパイル時検出 |
 | 5 | [ ] | レスポンス検証の有効化（test/dev） | レスポンス側の契約違反検出 |
 
 ---
@@ -583,6 +583,34 @@ Phase 3 のフォールバック構成で実質完了しているが、仕上げ
    （「RegisterHandlers は意図的に未使用」の記述を撤回し、本手順書へのリンクに置き換え）。
 
 **コミット例:** `refactor(backend): RegisterHandlers へ一本化しドリフト検査を縮小`
+
+**実施メモ（2026-07-16 完了）:**
+
+- **std-http 生成物に `RegisterHandlers` という名前の関数は無い**（echo 生成物の名前）。相当物は
+  `HandlerWithOptions(si, StdHTTPServerOptions{BaseRouter: ...})` で、BaseRouter は
+  `HandleFunc + ServeHTTP` だけの `openapi.ServeMux` インターフェース。**strictRouter にこの
+  インターフェースを実装させてそのまま BaseRouter に渡した**ので、2段 mux（3-0 メモの
+  ⚠️ 懸念だった曖昧パターンの登録時 panic）は独自ルーターを別途書かずに解決:
+  - `HandleFunc` が `priorityPatterns`（曖昧3パターン: /api/users/id/{id}・
+    /api/users/id/{userId}/similar・/api/posts/users/{userId}）を priority mux へ振り分ける。
+    エントリが陳腐化・タイポしても main mux 側の登録時 panic で発覚する（テストが検出）。
+  - PATCH /api/users/{username}（raw JSON の手書きハンドラ例外）は `handleOverride` で先に登録し、
+    生成側の同一パターン登録（StrictServer 上の到達しないスタブ行き）を HandleFunc が skip。
+    パターン文字列が生成側とズレれば ServeMux の重複登録 panic で発覚する（これもテストが検出）。
+- wire_*.go は「controller 構築＋`ss.WireXxxGroup(...)`」だけに縮小（手動登録 205本を削除、
+  ▲約320行）。sr を受け取るのはスペック外/例外を登録する wire_user（PATCH override）・
+  wire_content（Stripe webhook）・wireHealth のみ。
+- spec_drift_test は「スペック→ルーター」方向を削除し
+  `TestRouterHasNoUnaccountedRoutes`（ルーター→スペック＝allowlist 検査）のみに。
+  ついでに allowlist の陳腐化検査（どのルートにもマッチしない unspeccedRoutes エントリを fail）
+  を追加。テストが registerRoutes を呼ぶこと自体が曖昧パターン/重複登録 panic の検出になる。
+- lefthook の pre-push ドリフト検査は生成物 vs 生成元の突き合わせで登録方式と独立。
+  `scripts/check-generated-drift.sh` を実行し drift なしを確認。CLAUDE.md に旧構成
+  （手動 wire）への言及は無く更新不要。backlog #8 には Phase 4 で上書きされた旨を追記。
+- 検証: `make check` ＋ **移行前後のルート表突き合わせ（正規化キーで 214/214 完全一致）** ＋
+  全11グループのスモーク再実行 **482 ケース 0 diffs** ＋ エッジケース前後比較
+  （404/405 JSON ボディ・Allow 値・`//` 301 の Location・曖昧パス2種の解決・ws ticket・
+  webhook 署名エラー・uploads 404・PATCH 未認証 401）全一致。
 
 ## Phase 5: レスポンス検証の有効化
 

@@ -585,9 +585,15 @@ OIDC は「長期クレデンシャルをどこにも保存しない」設計と
 
 ## #8 ルート登録の二重管理解消
 
-**2026-07-10 完了（案b採用・ユーザー確認済み）:** 手動 wire に一本化し、ドリフト検査テスト
-`internal/driver/initializer/api/spec_drift_test.go` を追加。server.go / ServerInterface 実装は
-「実装漏れ検知」用として現状維持。
+**2026-07-16 更新（strict-server 移行 Phase 4 で案a相当に移行）:** 下記の案b（手動 wire＋双方向
+ドリフト検査）は strict-server 移行で上書きされた。現構成は生成 `HandlerWithOptions`
+（std-http 版の RegisterHandlers 相当）が全スペックルートを登録し、スペック→ルーターの
+登録漏れは構造的に起きない。ドリフト検査は「ルーター→スペック」（スペック外ルートの
+allowlist 検査）のみ存続。経緯と実装の詳細は `docs/strict-server-migration.md` Phase 4 を参照。
+
+**2026-07-10 完了（案b採用・ユーザー確認済み・のちに Phase 4 で上書き）:** 手動 wire に一本化し、
+ドリフト検査テスト `internal/driver/initializer/api/spec_drift_test.go` を追加。
+server.go / ServerInterface 実装は「実装漏れ検知」用として現状維持。
 
 - **準備リファクタ:** `BuildServer` からルート登録部を `registerRoutes(ctx, e, d)` に純粋抽出
   （認証MW構築・全 wire 呼び出し・ws ルート登録まで。goroutine 起動＝wsHub.Run / relay /
