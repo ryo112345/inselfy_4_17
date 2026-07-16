@@ -1,12 +1,10 @@
 package controller
 
 import (
+	"context"
 	"errors"
-	"net/http"
-	"strconv"
 
-	"github.com/labstack/echo/v4"
-
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -20,19 +18,25 @@ func NewSimilarUsersController(input port.SimilarUsersInputPort) *SimilarUsersCo
 	return &SimilarUsersController{input: input}
 }
 
-func (c *SimilarUsersController) GetSimilarUsers(ctx echo.Context, userID string) error {
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
+func (c *SimilarUsersController) GetSimilarUsers(ctx context.Context, req openapi.SimilarUsersGetSimilarUsersRequestObject) (openapi.SimilarUsersGetSimilarUsersResponseObject, error) {
+	limit := 0
+	if req.Params.Limit != nil {
+		limit = int(*req.Params.Limit)
+	}
 	if limit < 1 || limit > 50 {
 		limit = 10
 	}
 
-	users, err := c.input.GetSimilarUsers(ctx.Request().Context(), userID, limit)
+	users, err := c.input.GetSimilarUsers(ctx, req.UserId, limit)
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return notFoundError(ctx, "user has no work values result")
+			return openapi.SimilarUsersGetSimilarUsers404JSONResponse{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "user has no work values result",
+			}, nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	return ctx.JSON(http.StatusOK, presenter.SimilarUsersResponse(users))
+	return openapi.SimilarUsersGetSimilarUsers200JSONResponse(presenter.SimilarUsersResponse(users)), nil
 }

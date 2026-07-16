@@ -9,8 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
-
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
 	"github.com/akiyama/inselfy/backend/internal/domain/user"
 )
@@ -42,6 +40,18 @@ func controllerWith(stub *stubInput) *controller.UserController {
 	)
 }
 
+// patchProfile drives UpdateProfileHTTP the way the strict mux does:
+// a PATCH request whose {username} path value is set on the request.
+func patchProfile(t *testing.T, c *controller.UserController, username, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodPatch, "/api/users/"+username, strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.SetPathValue("username", username)
+	rec := httptest.NewRecorder()
+	c.UpdateProfileHTTP(rec, req)
+	return rec
+}
+
 func TestUpdateProfile_DistinguishesAbsentFromNull(t *testing.T) {
 	received := make(chan user.UpdateProfileInput, 1)
 	stub := &stubInput{
@@ -53,19 +63,8 @@ func TestUpdateProfile_DistinguishesAbsentFromNull(t *testing.T) {
 		},
 	}
 
-	c := controllerWith(stub)
-	e := echo.New()
-
 	// Body: headline present with value, about explicitly null, location absent.
-	body := `{"headline":"Backend","about":null}`
-	req := httptest.NewRequestWithContext(t.Context(), http.MethodPatch, "/api/users/alice", strings.NewReader(body))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	ectx := e.NewContext(req, rec)
-
-	if err := c.UpdateProfile(ectx, "alice"); err != nil {
-		t.Fatalf("handler err: %v", err)
-	}
+	rec := patchProfile(t, controllerWith(stub), "alice", `{"headline":"Backend","about":null}`)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status: got %d, body=%s", rec.Code, rec.Body.String())
 	}
@@ -91,18 +90,8 @@ func TestUpdateProfile_RejectsNullName(t *testing.T) {
 			return nil, nil
 		},
 	}
-	c := controllerWith(stub)
-	e := echo.New()
 
-	body := `{"name": null}`
-	req := httptest.NewRequestWithContext(t.Context(), http.MethodPatch, "/api/users/alice", strings.NewReader(body))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	ectx := e.NewContext(req, rec)
-
-	if err := c.UpdateProfile(ectx, "alice"); err != nil {
-		t.Fatalf("handler err: %v", err)
-	}
+	rec := patchProfile(t, controllerWith(stub), "alice", `{"name": null}`)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("status: got %d, body=%s", rec.Code, rec.Body.String())
 	}

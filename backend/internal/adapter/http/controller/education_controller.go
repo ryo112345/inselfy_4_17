@@ -1,9 +1,8 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -24,47 +23,75 @@ func NewEducationController(
 	return &EducationController{input: input}
 }
 
-// List handles GET /api/users/:username/educations.
-func (c *EducationController) List(ctx echo.Context, username string) error {
-	es, err := c.input.List(ctx.Request().Context(), username)
+// List handles GET /api/users/{username}/educations.
+func (c *EducationController) List(ctx context.Context, req openapi.EducationsListEducationsRequestObject) (openapi.EducationsListEducationsResponseObject, error) {
+	es, err := c.input.List(ctx, req.Username)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.EducationsListEducations404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.EducationsListEducations400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.EducationsResponse(es))
+	return openapi.EducationsListEducations200JSONResponse(presenter.EducationsResponse(es)), nil
 }
 
-// Create handles POST /api/users/:username/educations.
-func (c *EducationController) Create(ctx echo.Context, username string) error {
-	var body openapi.ModelsCreateEducationRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	e, err := c.input.Create(ctx.Request().Context(), authmw.UserID(ctx), username, toCreateEducationInput(body))
+// Create handles POST /api/users/{username}/educations.
+func (c *EducationController) Create(ctx context.Context, req openapi.EducationsCreateEducationRequestObject) (openapi.EducationsCreateEducationResponseObject, error) {
+	e, err := c.input.Create(ctx, authmw.UserIDFromContext(ctx), req.Username, toCreateEducationInput(*req.Body))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.EducationsCreateEducation404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.EducationsCreateEducation403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusConflict:
+			return openapi.EducationsCreateEducation409JSONResponse(conflictBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.EducationsCreateEducation400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.EducationResponse(e))
+	return openapi.EducationsCreateEducation201JSONResponse(presenter.EducationResponse(e)), nil
 }
 
-// Update handles PUT /api/users/:username/educations/:educationId.
-func (c *EducationController) Update(ctx echo.Context, username, educationID string) error {
-	var body openapi.ModelsUpdateEducationRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	e, err := c.input.Update(ctx.Request().Context(), authmw.UserID(ctx), username, educationID, toUpdateEducationInput(body))
+// Update handles PUT /api/users/{username}/educations/{educationId}.
+func (c *EducationController) Update(ctx context.Context, req openapi.EducationsUpdateEducationRequestObject) (openapi.EducationsUpdateEducationResponseObject, error) {
+	e, err := c.input.Update(ctx, authmw.UserIDFromContext(ctx), req.Username, req.EducationId, toUpdateEducationInput(*req.Body))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.EducationsUpdateEducation404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.EducationsUpdateEducation403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.EducationsUpdateEducation400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.EducationResponse(e))
+	return openapi.EducationsUpdateEducation200JSONResponse(presenter.EducationResponse(e)), nil
 }
 
-// Delete handles DELETE /api/users/:username/educations/:educationId.
-func (c *EducationController) Delete(ctx echo.Context, username, educationID string) error {
-	if err := c.input.Delete(ctx.Request().Context(), authmw.UserID(ctx), username, educationID); err != nil {
-		return handleError(ctx, err)
+// Delete handles DELETE /api/users/{username}/educations/{educationId}.
+func (c *EducationController) Delete(ctx context.Context, req openapi.EducationsDeleteEducationRequestObject) (openapi.EducationsDeleteEducationResponseObject, error) {
+	if err := c.input.Delete(ctx, authmw.UserIDFromContext(ctx), req.Username, req.EducationId); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.EducationsDeleteEducation404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.EducationsDeleteEducation403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.EducationsDeleteEducation400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.EducationsDeleteEducation204Response{}, nil
 }
 
 func toCreateEducationInput(body openapi.ModelsCreateEducationRequest) education.CreateInput {

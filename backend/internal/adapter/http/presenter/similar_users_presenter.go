@@ -7,12 +7,12 @@ import (
 )
 
 // SimilarUsersResponse builds the similar-users API response.
-func SimilarUsersResponse(users []workvalues.SimilarUser) *openapi.ModelsSimilarUsersResponse {
+func SimilarUsersResponse(users []workvalues.SimilarUser) openapi.ModelsSimilarUsersResponse {
 	items := make([]openapi.ModelsSimilarUserItem, 0, len(users))
 	for _, u := range users {
 		items = append(items, toSimilarUserItem(u))
 	}
-	return &openapi.ModelsSimilarUsersResponse{
+	return openapi.ModelsSimilarUsersResponse{
 		Items: &items,
 		Total: cast.Int32(len(items)),
 	}

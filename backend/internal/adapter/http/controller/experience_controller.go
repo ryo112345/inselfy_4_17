@@ -1,9 +1,8 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -25,47 +24,75 @@ func NewExperienceController(
 	return &ExperienceController{input: input}
 }
 
-// List handles GET /api/users/:username/experiences.
-func (c *ExperienceController) List(ctx echo.Context, username string) error {
-	list, err := c.input.List(ctx.Request().Context(), username)
+// List handles GET /api/users/{username}/experiences.
+func (c *ExperienceController) List(ctx context.Context, req openapi.ExperiencesListExperiencesRequestObject) (openapi.ExperiencesListExperiencesResponseObject, error) {
+	list, err := c.input.List(ctx, req.Username)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ExperiencesListExperiences404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ExperiencesListExperiences400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ExperiencesResponse(list))
+	return openapi.ExperiencesListExperiences200JSONResponse(presenter.ExperiencesResponse(list)), nil
 }
 
-// Create handles POST /api/users/:username/experiences.
-func (c *ExperienceController) Create(ctx echo.Context, username string) error {
-	var body openapi.ModelsCreateExperienceRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	e, err := c.input.Create(ctx.Request().Context(), authmw.UserID(ctx), username, toCreateExperienceInput(body))
+// Create handles POST /api/users/{username}/experiences.
+func (c *ExperienceController) Create(ctx context.Context, req openapi.ExperiencesCreateExperienceRequestObject) (openapi.ExperiencesCreateExperienceResponseObject, error) {
+	e, err := c.input.Create(ctx, authmw.UserIDFromContext(ctx), req.Username, toCreateExperienceInput(*req.Body))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ExperiencesCreateExperience404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.ExperiencesCreateExperience403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusConflict:
+			return openapi.ExperiencesCreateExperience409JSONResponse(conflictBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ExperiencesCreateExperience400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.ExperienceResponse(e))
+	return openapi.ExperiencesCreateExperience201JSONResponse(presenter.ExperienceResponse(e)), nil
 }
 
-// Update handles PUT /api/users/:username/experiences/:experienceId.
-func (c *ExperienceController) Update(ctx echo.Context, username, experienceID string) error {
-	var body openapi.ModelsUpdateExperienceRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	e, err := c.input.Update(ctx.Request().Context(), authmw.UserID(ctx), username, experienceID, toUpdateExperienceInput(body))
+// Update handles PUT /api/users/{username}/experiences/{experienceId}.
+func (c *ExperienceController) Update(ctx context.Context, req openapi.ExperiencesUpdateExperienceRequestObject) (openapi.ExperiencesUpdateExperienceResponseObject, error) {
+	e, err := c.input.Update(ctx, authmw.UserIDFromContext(ctx), req.Username, req.ExperienceId, toUpdateExperienceInput(*req.Body))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ExperiencesUpdateExperience404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.ExperiencesUpdateExperience403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ExperiencesUpdateExperience400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.ExperienceResponse(e))
+	return openapi.ExperiencesUpdateExperience200JSONResponse(presenter.ExperienceResponse(e)), nil
 }
 
-// Delete handles DELETE /api/users/:username/experiences/:experienceId.
-func (c *ExperienceController) Delete(ctx echo.Context, username, experienceID string) error {
-	if err := c.input.Delete(ctx.Request().Context(), authmw.UserID(ctx), username, experienceID); err != nil {
-		return handleError(ctx, err)
+// Delete handles DELETE /api/users/{username}/experiences/{experienceId}.
+func (c *ExperienceController) Delete(ctx context.Context, req openapi.ExperiencesDeleteExperienceRequestObject) (openapi.ExperiencesDeleteExperienceResponseObject, error) {
+	if err := c.input.Delete(ctx, authmw.UserIDFromContext(ctx), req.Username, req.ExperienceId); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ExperiencesDeleteExperience404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.ExperiencesDeleteExperience403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ExperiencesDeleteExperience400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.ExperiencesDeleteExperience204Response{}, nil
 }
 
 func toCreateExperienceInput(body openapi.ModelsCreateExperienceRequest) experience.CreateInput {

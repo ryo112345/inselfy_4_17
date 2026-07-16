@@ -142,12 +142,21 @@ func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps
 	// ミドルウェアが横取りする。未移行グループは従来どおり echo のルート表へ。
 	e.Use(dispatchToStrict(sr))
 
+	strictSrv := httpcontroller.NewStrictServer()
+	strictWrapper := &openapigen.ServerInterfaceWrapper{
+		Handler: openapigen.NewStrictHandlerWithOptions(strictSrv, nil, openapigen.StrictHTTPServerOptions{
+			RequestErrorHandlerFunc:  httpcontroller.WriteRequestError,
+			ResponseErrorHandlerFunc: httpcontroller.WriteResponseError,
+		}),
+		ErrorHandlerFunc: httpcontroller.WriteRequestError,
+	}
+
 	// --- Static uploads ---
 	e.Static("/api/uploads", "./uploads")
 
 	wireHealth(e, d.pool)
 	wireAuth(e, d)
-	wireUser(e, d)
+	wireUser(sr, strictWrapper, strictSrv, d)
 	wireContent(e, d)
 	wireSearch(e, d)
 	wireDiagnosis(e, d)

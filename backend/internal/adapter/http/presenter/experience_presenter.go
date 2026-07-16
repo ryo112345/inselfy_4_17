@@ -6,15 +6,17 @@ import (
 )
 
 // ExperienceResponse converts a single experience to its API response.
-func ExperienceResponse(e *experience.Experience) any { return toExperienceResponse(e) }
+func ExperienceResponse(e *experience.Experience) openapi.ModelsExperienceResponse {
+	return *toExperienceResponse(e)
+}
 
 // ExperiencesResponse converts a list of experiences to its API response.
-func ExperiencesResponse(es []*experience.Experience) any {
+func ExperiencesResponse(es []*experience.Experience) openapi.ModelsExperienceListResponse {
 	items := make([]openapi.ModelsExperienceResponse, 0, len(es))
 	for _, e := range es {
 		items = append(items, *toExperienceResponse(e))
 	}
-	return &openapi.ModelsExperienceListResponse{Items: items}
+	return openapi.ModelsExperienceListResponse{Items: items}
 }
 
 func toExperienceResponse(e *experience.Experience) *openapi.ModelsExperienceResponse {

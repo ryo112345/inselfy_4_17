@@ -2,14 +2,16 @@
 package controller
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -30,59 +32,85 @@ func NewUserController(input port.UserInputPort, storage port.FileStorage) *User
 }
 
 // Create handles POST /api/users.
-func (c *UserController) Create(ctx echo.Context) error {
-	var body openapi.ModelsCreateUserRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	usr, err := c.input.Create(ctx.Request().Context(), user.CreateUserInput{
-		Name:     body.Name,
-		Username: body.Username,
+func (c *UserController) Create(ctx context.Context, req openapi.UsersCreateUserRequestObject) (openapi.UsersCreateUserResponseObject, error) {
+	usr, err := c.input.Create(ctx, user.CreateUserInput{
+		Name:     req.Body.Name,
+		Username: req.Body.Username,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusConflict:
+			return openapi.UsersCreateUser409JSONResponse(conflictBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.UsersCreateUser400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.UserResponse(usr))
+	return openapi.UsersCreateUser201JSONResponse(presenter.UserResponse(usr)), nil
 }
 
-// GetByUsername handles GET /api/users/:username.
-func (c *UserController) GetByUsername(ctx echo.Context, username string) error {
-	usr, err := c.input.GetByUsername(ctx.Request().Context(), username)
+// GetByUsername handles GET /api/users/{username}.
+func (c *UserController) GetByUsername(ctx context.Context, req openapi.UsersGetUserByUsernameRequestObject) (openapi.UsersGetUserByUsernameResponseObject, error) {
+	usr, err := c.input.GetByUsername(ctx, req.Username)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.UsersGetUserByUsername404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.UsersGetUserByUsername400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.UserResponse(usr))
+	return openapi.UsersGetUserByUsername200JSONResponse(presenter.UserResponse(usr)), nil
 }
 
-// GetByID handles GET /api/users/id/:id.
-func (c *UserController) GetByID(ctx echo.Context, id string) error {
-	usr, err := c.input.GetByID(ctx.Request().Context(), id)
+// GetByID handles GET /api/users/id/{id}.
+func (c *UserController) GetByID(ctx context.Context, req openapi.UsersGetUserByIdRequestObject) (openapi.UsersGetUserByIdResponseObject, error) {
+	usr, err := c.input.GetByID(ctx, req.Id)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.UsersGetUserById404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.UsersGetUserById400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.UserResponse(usr))
+	return openapi.UsersGetUserById200JSONResponse(presenter.UserResponse(usr)), nil
 }
 
-// UpdateProfile handles PATCH /api/users/:username.
+// UpdateProfileHTTP handles PATCH /api/users/{username}.
+//
+// 例外的に strict wrapper を経由しない手書き net/http ハンドラ
+// （docs/strict-server-migration.md Phase 3 実施メモ）。この operation は
+// 「フィールド不在（触らない）」と「明示的な null（クリアする）」を区別する
+// 必要があり、strict の事前デコード済みボディ（*string）では表現できない。
+// リクエストの契約検証は上流の OpenAPI validator が行っている。
 //
 // We read the request body into map[string]json.RawMessage so we can
 // distinguish "field absent" from "field explicitly null". Absent keys become
 // nil pointers (do not touch), while explicit null becomes **string with *
 // nil (clear to null).
-func (c *UserController) UpdateProfile(ctx echo.Context, username string) error {
+func (c *UserController) UpdateProfileHTTP(w http.ResponseWriter, r *http.Request) {
 	raw := map[string]json.RawMessage{}
-	if err := json.NewDecoder(ctx.Request().Body).Decode(&raw); err != nil {
-		return badRequest(ctx, "invalid body")
+	if err := json.NewDecoder(r.Body).Decode(&raw); err != nil {
+		writeJSON(w, http.StatusBadRequest, badRequestBody("invalid body"))
+		return
 	}
 	input, err := decodeUpdateProfile(raw)
 	if err != nil {
-		return badRequest(ctx, err.Error())
+		writeJSON(w, http.StatusBadRequest, badRequestBody(err.Error()))
+		return
 	}
-	usr, err := c.input.UpdateProfile(ctx.Request().Context(), authmw.UserID(ctx), username, input)
+	usr, err := c.input.UpdateProfile(r.Context(), authmw.UserIDFromContext(r.Context()), r.PathValue("username"), input)
 	if err != nil {
-		return handleError(ctx, err)
+		writeError(w, err)
+		return
 	}
-	return ctx.JSON(http.StatusOK, presenter.UserResponse(usr))
+	writeJSON(w, http.StatusOK, presenter.UserResponse(usr))
 }
 
 func decodeUpdateProfile(raw map[string]json.RawMessage) (user.UpdateProfileInput, error) {
@@ -161,62 +189,71 @@ func decodeNullableString(raw map[string]json.RawMessage, key string, dst ***str
 	return nil
 }
 
-// UploadImage handles POST /api/users/:username/upload-image?type={avatar|cover}.
-func (c *UserController) UploadImage(ctx echo.Context, username string) error {
-	imageType := ctx.QueryParam("type")
-	if imageType != "avatar" && imageType != "cover" {
-		return badRequest(ctx, "type must be 'avatar' or 'cover'")
-	}
-
+// UploadImage handles POST /api/users/{username}/upload-image?type={avatar|cover}.
+func (c *UserController) UploadImage(ctx context.Context, req openapi.UsersUploadUserImageRequestObject) (openapi.UsersUploadUserImageResponseObject, error) {
 	// Verify ownership before doing any upload work, so a foreign caller can't
 	// leave an orphaned file in storage (UpdateProfile below re-checks too).
-	target, err := c.input.GetByUsername(ctx.Request().Context(), username)
+	target, err := c.input.GetByUsername(ctx, req.Username)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.UsersUploadUserImage404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.UsersUploadUserImage400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	if target.ID != authmw.UserID(ctx) {
-		return handleError(ctx, port.ErrForbidden)
-	}
-
-	file, err := ctx.FormFile("file")
-	if err != nil {
-		return badRequest(ctx, "file is required")
-	}
-
-	if file.Size > 5*1024*1024 {
-		return badRequest(ctx, "ファイルサイズは5MB以下にしてください")
+	if target.ID != authmw.UserIDFromContext(ctx) {
+		return openapi.UsersUploadUserImage403JSONResponse(forbiddenBody(port.ErrForbidden)), nil
 	}
 
-	ext := strings.ToLower(filepath.Ext(file.Filename))
+	data, filename, err := readFilePart(req.Body, "file", 5*1024*1024)
+	switch {
+	case errors.Is(err, errFilePartMissing):
+		return openapi.UsersUploadUserImage400JSONResponse(badRequestBody("file is required")), nil
+	case errors.Is(err, errFilePartTooLarge):
+		return openapi.UsersUploadUserImage400JSONResponse(badRequestBody("ファイルサイズは5MB以下にしてください")), nil
+	case err != nil:
+		return nil, err
+	}
+
+	ext := strings.ToLower(filepath.Ext(filename))
 	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
-		return badRequest(ctx, "JPG、PNG、WebP形式のみ対応しています")
+		return openapi.UsersUploadUserImage400JSONResponse(badRequestBody("JPG、PNG、WebP形式のみ対応しています")), nil
 	}
 
-	src, err := file.Open()
-	if err != nil {
-		return internalError(ctx, "failed to open file")
-	}
-	defer func() { _ = src.Close() }()
+	key := fmt.Sprintf("user-images/%s_%s%s", uuid.New().String()[:8], req.Params.Type, ext)
 
-	key := fmt.Sprintf("user-images/%s_%s%s", uuid.New().String()[:8], imageType, ext)
-
-	imageURL, err := c.storage.Save(ctx.Request().Context(), key, src)
+	imageURL, err := c.storage.Save(ctx, key, bytes.NewReader(data))
 	if err != nil {
-		return internalError(ctx, "failed to save file")
+		return nil, errors.New("failed to save file")
 	}
 
 	var updateInput user.UpdateProfileInput
-	if imageType == "avatar" {
+	if req.Params.Type == openapi.UsersUploadUserImageParamsTypeAvatar {
 		updateInput.AvatarURL = ptrPtr(imageURL)
 	} else {
 		updateInput.CoverPhotoURL = ptrPtr(imageURL)
 	}
 
-	usr, err := c.input.UpdateProfile(ctx.Request().Context(), target.ID, username, updateInput)
+	usr, err := c.input.UpdateProfile(ctx, target.ID, req.Username, updateInput)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.UsersUploadUserImage404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.UsersUploadUserImage403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.UsersUploadUserImage400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, map[string]any{"url": imageURL, "user": presenter.UserResponse(usr)})
+	return openapi.UsersUploadUserImage200JSONResponse(openapi.ModelsUserImageUploadResponse{
+		Url:  imageURL,
+		User: presenter.UserResponse(usr),
+	}), nil
 }
 
 func ptrPtr(s string) **string {
