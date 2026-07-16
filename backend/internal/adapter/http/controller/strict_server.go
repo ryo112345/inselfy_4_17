@@ -29,6 +29,8 @@ type StrictServer struct {
 
 	post    *PostController
 	article *ArticleController
+
+	search *SearchController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -61,6 +63,12 @@ func (s *StrictServer) WireUserGroup(
 func (s *StrictServer) WireContentGroup(post *PostController, article *ArticleController) {
 	s.post = post
 	s.article = article
+}
+
+// WireSearchGroup installs the wire_search controller
+// (docs/strict-server-migration.md Phase 3-1 グループ3)。
+func (s *StrictServer) WireSearchGroup(search *SearchController) {
+	s.search = search
 }
 
 // --- Users ---
@@ -261,4 +269,26 @@ func (s *StrictServer) CompanyArticlesDeleteCompanyArticle(ctx context.Context, 
 
 func (s *StrictServer) CompanyArticlesPublishCompanyArticle(ctx context.Context, req openapi.CompanyArticlesPublishCompanyArticleRequestObject) (openapi.CompanyArticlesPublishCompanyArticleResponseObject, error) {
 	return s.article.PublishAsCompany(ctx, req)
+}
+
+// --- Search ---
+
+func (s *StrictServer) SearchSearchAll(ctx context.Context, req openapi.SearchSearchAllRequestObject) (openapi.SearchSearchAllResponseObject, error) {
+	return s.search.SearchAll(ctx, req)
+}
+
+func (s *StrictServer) SearchSearchUsers(ctx context.Context, req openapi.SearchSearchUsersRequestObject) (openapi.SearchSearchUsersResponseObject, error) {
+	return s.search.SearchUsers(ctx, req)
+}
+
+func (s *StrictServer) SearchSearchArticles(ctx context.Context, req openapi.SearchSearchArticlesRequestObject) (openapi.SearchSearchArticlesResponseObject, error) {
+	return s.search.SearchArticles(ctx, req)
+}
+
+func (s *StrictServer) SearchSearchPosts(ctx context.Context, req openapi.SearchSearchPostsRequestObject) (openapi.SearchSearchPostsResponseObject, error) {
+	return s.search.SearchPosts(ctx, req)
+}
+
+func (s *StrictServer) SearchSearchJobs(ctx context.Context, req openapi.SearchSearchJobsRequestObject) (openapi.SearchSearchJobsResponseObject, error) {
+	return s.search.SearchJobs(ctx, req)
 }
