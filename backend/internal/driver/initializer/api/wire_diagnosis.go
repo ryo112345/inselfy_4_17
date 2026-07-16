@@ -11,7 +11,7 @@ import (
 // wireDiagnosis registers the Work Values / Career Interest diagnosis routes
 // and the invite-token based team diagnose routes that reuse the same
 // interactors.
-func wireDiagnosis(e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.MiddlewareFunc) {
+func wireDiagnosis(e *echo.Echo, d *deps) {
 	wvInput := usecase.NewWorkValuesInteractor(
 		sqlcgw.NewWorkValuesSessionRepository(d.pool),
 		sqlcgw.NewWorkValuesResultRepository(d.pool),
@@ -31,35 +31,35 @@ func wireDiagnosis(e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.MiddlewareFunc) {
 	// --- Work Values ---
 	// 書き込みは本人（候補者JWT）のみ、読み取りはログイン済みの候補者/企業どちらでも可
 	wvGroup := e.Group("/api/work-values")
-	wvGroup.POST("/sessions", wvCtrl.StartSession, jwtMW)
+	wvGroup.POST("/sessions", wvCtrl.StartSession)
 	wvGroup.POST("/sessions/:sessionId/results", func(c echo.Context) error {
 		return wvCtrl.SubmitResult(c, c.Param("sessionId"))
-	}, jwtMW)
+	})
 	wvGroup.GET("/users/:userId/results/latest", func(c echo.Context) error {
 		return wvCtrl.GetLatestResult(c, c.Param("userId"))
-	}, anyJwtMW)
+	})
 	wvGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
 		return wvCtrl.GetResultBySessionID(c, c.Param("sessionId"))
-	}, anyJwtMW)
+	})
 	wvGroup.POST("/sessions/:sessionId/ai-report/request", func(c echo.Context) error {
 		return wvCtrl.RequestAiReport(c, c.Param("sessionId"))
-	}, jwtMW)
+	})
 
 	// --- Career Interest ---
 	ciGroup := e.Group("/api/career-interest")
-	ciGroup.POST("/sessions", ciCtrl.StartSession, jwtMW)
+	ciGroup.POST("/sessions", ciCtrl.StartSession)
 	ciGroup.POST("/sessions/:sessionId/results", func(c echo.Context) error {
 		return ciCtrl.SubmitResult(c, c.Param("sessionId"))
-	}, jwtMW)
+	})
 	ciGroup.GET("/users/:userId/results/latest", func(c echo.Context) error {
 		return ciCtrl.GetLatestResult(c, c.Param("userId"))
-	}, anyJwtMW)
+	})
 	ciGroup.GET("/sessions/:sessionId/results", func(c echo.Context) error {
 		return ciCtrl.GetResultBySessionID(c, c.Param("sessionId"))
-	}, anyJwtMW)
+	})
 	ciGroup.POST("/sessions/:sessionId/ai-report/request", func(c echo.Context) error {
 		return ciCtrl.RequestAiReport(c, c.Param("sessionId"))
-	}, jwtMW)
+	})
 
 	// --- Team Diagnose (invite-token authorized) ---
 	diagCtrl := httpcontroller.NewTeamDiagnoseController(

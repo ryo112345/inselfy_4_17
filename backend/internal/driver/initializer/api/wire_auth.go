@@ -12,7 +12,7 @@ import (
 
 // wireAuth registers candidate (Google OAuth) and company (email/password)
 // authentication routes.
-func wireAuth(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
+func wireAuth(e *echo.Echo, d *deps) {
 	authCtrl := httpcontroller.NewAuthController(usecase.NewAuthInteractor(
 		d.userRepo, sqlcgw.NewRefreshTokenRepository(d.pool), googlegw.NewTokenVerifier(), d.jwtService, d.cfg.GoogleClientID,
 	))
@@ -29,12 +29,12 @@ func wireAuth(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	companyAuthGroup.POST("/login", companyAuthCtrl.Login)
 	companyAuthGroup.POST("/refresh", companyAuthCtrl.Refresh)
 	companyAuthGroup.POST("/logout", companyAuthCtrl.Logout)
-	companyAuthGroup.GET("/me", companyAuthCtrl.GetMe, companyJwtMW)
+	companyAuthGroup.GET("/me", companyAuthCtrl.GetMe)
 
 	// --- Auth (public) ---
 	authGroup := e.Group("/api/auth")
 	authGroup.POST("/google", authCtrl.GoogleLogin)
 	authGroup.POST("/refresh", authCtrl.Refresh)
 	authGroup.POST("/logout", authCtrl.Logout)
-	authGroup.GET("/me", authCtrl.GetMe, jwtMW)
+	authGroup.GET("/me", authCtrl.GetMe)
 }

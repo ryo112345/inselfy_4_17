@@ -2,9 +2,9 @@ package initializer
 
 // DI wiring is split by feature across sibling wire_*.go files. This file
 // keeps the server skeleton: config/pool setup, middleware order, and the
-// calls into each feature's wiring function. Each wire function receives the
-// shared deps plus, explicitly in its signature, the auth middlewares its
-// routes need.
+// calls into each feature's wiring function. Auth is spec-driven: the OpenAPI
+// validator middleware enforces the spec's security requirements, so wire
+// functions register plain routes (only /api/admin keeps its own AdminAuth).
 
 import (
 	"context"
@@ -27,8 +27,6 @@ import (
 )
 
 // deps bundles the dependencies shared across feature wiring files.
-// Auth middlewares are intentionally NOT part of deps: each wire function
-// declares the ones it uses in its signature.
 type deps struct {
 	cfg  *config.Config
 	pool *pgxpool.Pool
@@ -137,27 +135,25 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 // BuildServer so tests can build the full route table without a live DB or
 // background goroutines (see spec_drift_test.go).
 func registerRoutes(ctx context.Context, e *echo.Echo, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
-	jwtMW := authmw.JWTAuth(d.jwtService)
-	optionalJwtMW := authmw.OptionalJWTAuth(d.jwtService)
-	companyJwtMW := authmw.CompanyJWTAuth(d.jwtService)
-	// 書き込みは本人（候補者JWT）のみ、読み取りはログイン済みの候補者/企業どちらでも可
-	anyJwtMW := authmw.AnyJWTAuth(d.jwtService)
+	// 認可はスペック駆動: openapi.yaml の security 定義を OpenAPIRequestValidator
+	// が検証する（middleware/openapi_validator.go）。per-route の認証MWは無い。
+	// スペック外の /api/admin だけが wire_admin.go で AdminAuth を付ける。
 
 	// --- Static uploads ---
 	e.Static("/api/uploads", "./uploads")
 
 	wireHealth(e, d.pool)
-	wireAuth(e, d, jwtMW, companyJwtMW)
-	wireUser(e, d, jwtMW)
-	wireContent(e, d, jwtMW, optionalJwtMW, companyJwtMW)
-	wireSearch(e, d, jwtMW)
-	wireDiagnosis(e, d, jwtMW, anyJwtMW)
-	wireCompany(e, d, companyJwtMW)
-	wireScout(e, d, jwtMW, companyJwtMW)
-	wireJobs(e, d, jwtMW, companyJwtMW)
-	wireMessaging(e, d, jwtMW, companyJwtMW)
-	interviewCtrl := wireInterview(e, d, jwtMW, companyJwtMW)
-	if err := wireAdmin(ctx, e, d, jwtMW, anyJwtMW); err != nil {
+	wireAuth(e, d)
+	wireUser(e, d)
+	wireContent(e, d)
+	wireSearch(e, d)
+	wireDiagnosis(e, d)
+	wireCompany(e, d)
+	wireScout(e, d)
+	wireJobs(e, d)
+	wireMessaging(e, d)
+	interviewCtrl := wireInterview(e, d)
+	if err := wireAdmin(ctx, e, d); err != nil {
 		return nil, nil, err
 	}
 

@@ -13,8 +13,9 @@ import (
 // wireAdmin registers the /api/admin routes plus the user-facing report
 // routes that share the report controllers (AI reports on diagnosis paths and
 // the integrated report). Admin controllers stay pool-backed by design (see
-// CLAUDE.md); jwtMW/anyJwtMW guard only the user-facing report routes.
-func wireAdmin(ctx context.Context, e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.MiddlewareFunc) error {
+// CLAUDE.md); the user-facing report routes are guarded by the spec-driven
+// auth in the OpenAPI validator.
+func wireAdmin(ctx context.Context, e *echo.Echo, d *deps) error {
 	// Authenticated via X-Admin-Key: static bootstrap key (ADMIN_API_KEY) or a
 	// personal token issued at /admin/admins. Fail-closed when neither is set.
 	if d.cfg.InitialAdminEmail != "" {
@@ -87,10 +88,10 @@ func wireAdmin(ctx context.Context, e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.
 	// --- AI Report (user-facing) ---
 	e.GET("/api/work-values/sessions/:sessionId/ai-report", func(c echo.Context) error {
 		return adminReportCtrl.GetReport(c, c.Param("sessionId"))
-	}, anyJwtMW)
+	})
 	e.GET("/api/career-interest/sessions/:sessionId/ai-report", func(c echo.Context) error {
 		return adminCIReportCtrl.GetReport(c, c.Param("sessionId"))
-	}, anyJwtMW)
+	})
 
 	// --- Admin Integrated Reports ---
 	adminIntReportCtrl := httpcontroller.NewAdminIntegratedReportController(d.pool)
@@ -111,9 +112,9 @@ func wireAdmin(ctx context.Context, e *echo.Echo, d *deps, jwtMW, anyJwtMW echo.
 
 	// --- Integrated Report (user-facing) ---
 	intGroup := e.Group("/api/integrated-report")
-	intGroup.POST("/requests", adminIntReportCtrl.CreateRequest, jwtMW)
-	intGroup.GET("/me", adminIntReportCtrl.GetReportByUser, jwtMW)
-	intGroup.GET("/status", adminIntReportCtrl.GetRequestStatus, jwtMW)
+	intGroup.POST("/requests", adminIntReportCtrl.CreateRequest)
+	intGroup.GET("/me", adminIntReportCtrl.GetReportByUser)
+	intGroup.GET("/status", adminIntReportCtrl.GetRequestStatus)
 	intGroup.GET("/requests/:requestId/report", func(c echo.Context) error {
 		return adminIntReportCtrl.GetReport(c, c.Param("requestId"))
 	})

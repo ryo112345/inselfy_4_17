@@ -9,12 +9,12 @@ import (
 )
 
 // wireSearch registers the cross-content search routes (users/articles/posts/jobs).
-func wireSearch(e *echo.Echo, d *deps, jwtMW echo.MiddlewareFunc) {
+func wireSearch(e *echo.Echo, d *deps) {
 	searchCtrl := httpcontroller.NewSearchController(
 		usecase.NewSearchInteractor(sqlcgw.NewSearchQueryService(d.pool)),
 	)
 
-	searchGroup := e.Group("/api/search", jwtMW)
+	searchGroup := e.Group("/api/search")
 	searchGroup.GET("", searchCtrl.SearchAll)
 	searchGroup.GET("/users", searchCtrl.SearchUsers)
 	searchGroup.GET("/articles", searchCtrl.SearchArticles)

@@ -10,7 +10,7 @@ import (
 
 // wireScout registers scout routes for both sides: company sending/templates
 // and candidate inbox/settings.
-func wireScout(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
+func wireScout(e *echo.Echo, d *deps) {
 	scoutItr := usecase.NewScoutInteractor(
 		d.scoutMsgRepo,
 		sqlcgw.NewScoutCreditRepository(d.pool),
@@ -30,7 +30,7 @@ func wireScout(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	)
 
 	// --- Company Scouts ---
-	scoutGroup := e.Group("/api/company/scouts", companyJwtMW)
+	scoutGroup := e.Group("/api/company/scouts")
 	scoutGroup.POST("", scoutCtrl.Send)
 	scoutGroup.GET("", scoutCtrl.List)
 	scoutGroup.GET("/credits", scoutCtrl.GetCredits)
@@ -44,7 +44,7 @@ func wireScout(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	})
 
 	// --- Company Scout Templates ---
-	templateGroup := e.Group("/api/company/scout-templates", companyJwtMW)
+	templateGroup := e.Group("/api/company/scout-templates")
 	templateGroup.POST("", scoutTemplateCtrl.Create)
 	templateGroup.GET("", scoutTemplateCtrl.List)
 	templateGroup.GET("/:templateId", func(c echo.Context) error {
@@ -58,7 +58,7 @@ func wireScout(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	})
 
 	// --- Candidate Scouts ---
-	candidateScoutGroup := e.Group("/api/scouts", jwtMW)
+	candidateScoutGroup := e.Group("/api/scouts")
 	candidateScoutGroup.GET("", candidateScoutCtrl.List)
 	candidateScoutGroup.GET("/unread-count", candidateScoutCtrl.CountUnread)
 	candidateScoutGroup.GET("/:scoutId", func(c echo.Context) error {
@@ -74,6 +74,6 @@ func wireScout(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	candidateScoutGroup.POST("/bulk-respond", candidateScoutCtrl.BulkRespond)
 
 	// --- Scout Settings ---
-	e.GET("/api/scout-settings", scoutSettingsCtrl.Get, jwtMW)
-	e.PUT("/api/scout-settings", scoutSettingsCtrl.Update, jwtMW)
+	e.GET("/api/scout-settings", scoutSettingsCtrl.Get)
+	e.PUT("/api/scout-settings", scoutSettingsCtrl.Update)
 }

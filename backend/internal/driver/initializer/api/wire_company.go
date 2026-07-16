@@ -10,7 +10,7 @@ import (
 
 // wireCompany registers company-side routes: profile (public + authenticated),
 // teams (public scores + management), talent search, and saved candidates.
-func wireCompany(e *echo.Echo, d *deps, companyJwtMW echo.MiddlewareFunc) {
+func wireCompany(e *echo.Echo, d *deps) {
 	companyProfileGw := sqlcgw.NewCompanyProfileGateway(d.pool)
 	companyProfileCtrl := httpcontroller.NewCompanyProfileController(
 		usecase.NewCompanyProfileInteractor(companyProfileGw, companyProfileGw),
@@ -35,14 +35,14 @@ func wireCompany(e *echo.Echo, d *deps, companyJwtMW echo.MiddlewareFunc) {
 	})
 
 	// --- Company Profile (authenticated) ---
-	companyProfileGroup := e.Group("/api/company/profile", companyJwtMW)
+	companyProfileGroup := e.Group("/api/company/profile")
 	companyProfileGroup.GET("", companyProfileCtrl.GetProfile)
 	companyProfileGroup.PUT("", companyProfileCtrl.UpdateProfile)
 	companyProfileGroup.POST("/image", companyProfileCtrl.UploadImage)
 	companyProfileGroup.DELETE("/image", companyProfileCtrl.DeleteImage)
 
 	// --- Company Teams ---
-	teamGroup := e.Group("/api/company/teams", companyJwtMW)
+	teamGroup := e.Group("/api/company/teams")
 	teamGroup.GET("", teamCtrl.ListTeams)
 	teamGroup.POST("", teamCtrl.CreateTeam)
 	teamGroup.GET("/:teamId", func(c echo.Context) error {
@@ -74,7 +74,7 @@ func wireCompany(e *echo.Echo, d *deps, companyJwtMW echo.MiddlewareFunc) {
 	talentCtrl := httpcontroller.NewTalentSearchController(
 		usecase.NewTalentSearchInteractor(sqlcgw.NewTalentSearchQueryService(d.pool)),
 	)
-	talentGroup := e.Group("/api/company/talents", companyJwtMW)
+	talentGroup := e.Group("/api/company/talents")
 	talentGroup.GET("/search", talentCtrl.Search)
 	talentGroup.GET("/search/diagnostic", talentCtrl.DiagnosticSearch)
 	talentGroup.GET("/search/diagnostic/ci", talentCtrl.CIDiagnosticSearch)
@@ -84,7 +84,7 @@ func wireCompany(e *echo.Echo, d *deps, companyJwtMW echo.MiddlewareFunc) {
 	savedCandCtrl := httpcontroller.NewSavedCandidateController(
 		usecase.NewSavedCandidateInteractor(sqlcgw.NewSavedCandidateRepository(d.pool), sqlcgw.NewSavedCandidateQueryService(d.pool)),
 	)
-	savedCandGroup := e.Group("/api/company/saved-candidates", companyJwtMW)
+	savedCandGroup := e.Group("/api/company/saved-candidates")
 	savedCandGroup.GET("", savedCandCtrl.List)
 	savedCandGroup.GET("/count", savedCandCtrl.Count)
 	savedCandGroup.POST("/bulk-check", savedCandCtrl.BulkCheck)

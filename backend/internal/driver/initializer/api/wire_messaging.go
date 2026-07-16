@@ -9,14 +9,14 @@ import (
 
 // wireMessaging registers notification and direct-message routes for both
 // candidates and companies.
-func wireMessaging(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
+func wireMessaging(e *echo.Echo, d *deps) {
 	notifCtrl := httpcontroller.NewNotificationController(usecase.NewNotificationInteractor(d.notificationRepo))
 	messagingCtrl := httpcontroller.NewMessagingController(usecase.NewMessagingInteractor(
 		d.convRepo, d.msgRepo, d.participantRepo, d.tx,
 	))
 
 	// --- Company Notifications ---
-	companyNotifGroup := e.Group("/api/company/notifications", companyJwtMW)
+	companyNotifGroup := e.Group("/api/company/notifications")
 	companyNotifGroup.GET("", notifCtrl.ListByCompany)
 	companyNotifGroup.GET("/unread-count", notifCtrl.CountUnreadByCompany)
 	companyNotifGroup.POST("/:id/read", func(c echo.Context) error {
@@ -25,7 +25,7 @@ func wireMessaging(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFun
 	companyNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByCompany)
 
 	// --- User Notifications ---
-	userNotifGroup := e.Group("/api/notifications", jwtMW)
+	userNotifGroup := e.Group("/api/notifications")
 	userNotifGroup.GET("", notifCtrl.ListByUser)
 	userNotifGroup.GET("/unread-count", notifCtrl.CountUnreadByUser)
 	userNotifGroup.POST("/:id/read", func(c echo.Context) error {
@@ -34,7 +34,7 @@ func wireMessaging(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFun
 	userNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByUser)
 
 	// --- Candidate Messages ---
-	candidateMsgGroup := e.Group("/api/messages", jwtMW)
+	candidateMsgGroup := e.Group("/api/messages")
 	candidateMsgGroup.POST("/conversations", messagingCtrl.StartCandidateConversation)
 	candidateMsgGroup.GET("/conversations", messagingCtrl.ListConversationsByCandidate)
 	candidateMsgGroup.GET("/conversations/:conversationId", func(c echo.Context) error {
@@ -52,7 +52,7 @@ func wireMessaging(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFun
 	candidateMsgGroup.GET("/unread-count", messagingCtrl.CountUnreadByCandidate)
 
 	// --- Company Messages ---
-	companyMsgGroup := e.Group("/api/company/messages", companyJwtMW)
+	companyMsgGroup := e.Group("/api/company/messages")
 	companyMsgGroup.POST("/conversations", messagingCtrl.StartConversation)
 	companyMsgGroup.GET("/conversations", messagingCtrl.ListConversationsByCompany)
 	companyMsgGroup.GET("/conversations/:conversationId", func(c echo.Context) error {

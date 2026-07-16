@@ -10,7 +10,7 @@ import (
 
 // wireJobs registers job posting routes (company management + public listing)
 // and job application routes for both sides.
-func wireJobs(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
+func wireJobs(e *echo.Echo, d *deps) {
 	jobPostingCtrl := httpcontroller.NewJobPostingController(usecase.NewJobPostingInteractor(d.jobPostingRepo))
 	jobApplicationCtrl := httpcontroller.NewJobApplicationController(
 		usecase.NewJobApplicationInteractor(
@@ -21,7 +21,7 @@ func wireJobs(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	)
 
 	// --- Company Jobs ---
-	jobGroup := e.Group("/api/company/jobs", companyJwtMW)
+	jobGroup := e.Group("/api/company/jobs")
 	jobGroup.POST("/team-member-photo", httpcontroller.HandleImageUpload(d.fileStorage, "team-member-photos"))
 	jobGroup.POST("/gallery-image", httpcontroller.HandleImageUpload(d.fileStorage, "gallery-images"))
 	jobGroup.POST("/cover-image", httpcontroller.HandleImageUpload(d.fileStorage, "cover-images"))
@@ -44,7 +44,7 @@ func wireJobs(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	})
 
 	// --- Candidate Job Applications ---
-	candidateAppGroup := e.Group("/api/applications", jwtMW)
+	candidateAppGroup := e.Group("/api/applications")
 	candidateAppGroup.POST("", jobApplicationCtrl.Apply)
 	candidateAppGroup.GET("", jobApplicationCtrl.ListByCandidate)
 	candidateAppGroup.GET("/check", jobApplicationCtrl.CheckApplied)
@@ -53,7 +53,7 @@ func wireJobs(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) {
 	})
 
 	// --- Company Job Applications ---
-	companyAppGroup := e.Group("/api/company/applications", companyJwtMW)
+	companyAppGroup := e.Group("/api/company/applications")
 	companyAppGroup.GET("", jobApplicationCtrl.ListByCompany)
 	companyAppGroup.GET("/:applicationId", func(c echo.Context) error {
 		return jobApplicationCtrl.GetByID(c, c.Param("applicationId"))

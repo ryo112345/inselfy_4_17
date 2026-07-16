@@ -11,7 +11,7 @@ import (
 
 // wireContent registers content routes: articles (user- and company-authored),
 // the Stripe purchase webhook, and posts (timeline).
-func wireContent(e *echo.Echo, d *deps, jwtMW, optionalJwtMW, companyJwtMW echo.MiddlewareFunc) {
+func wireContent(e *echo.Echo, d *deps) {
 	stripeService := stripegw.NewService(d.cfg.StripeSecretKey, d.cfg.AppURL)
 	articleCtrl := httpcontroller.NewArticleController(
 		usecase.NewArticleInteractor(
@@ -26,27 +26,27 @@ func wireContent(e *echo.Echo, d *deps, jwtMW, optionalJwtMW, companyJwtMW echo.
 	articleGroup.GET("", articleCtrl.List)
 	articleGroup.GET("/:articleId", func(c echo.Context) error {
 		return articleCtrl.GetByID(c, c.Param("articleId"))
-	}, optionalJwtMW)
+	})
 
 	// --- Articles (user-authored) ---
-	articleGroup.GET("/mine", articleCtrl.ListMine, jwtMW)
-	articleGroup.POST("/upload-image", articleCtrl.UploadImage, jwtMW)
-	articleGroup.POST("", articleCtrl.CreateAsUser, jwtMW)
+	articleGroup.GET("/mine", articleCtrl.ListMine)
+	articleGroup.POST("/upload-image", articleCtrl.UploadImage)
+	articleGroup.POST("", articleCtrl.CreateAsUser)
 	articleGroup.PUT("/:articleId", func(c echo.Context) error {
 		return articleCtrl.UpdateAsUser(c, c.Param("articleId"))
-	}, jwtMW)
+	})
 	articleGroup.DELETE("/:articleId", func(c echo.Context) error {
 		return articleCtrl.DeleteAsUser(c, c.Param("articleId"))
-	}, jwtMW)
+	})
 	articleGroup.POST("/:articleId/publish", func(c echo.Context) error {
 		return articleCtrl.PublishAsUser(c, c.Param("articleId"))
-	}, jwtMW)
+	})
 	articleGroup.POST("/:articleId/checkout", func(c echo.Context) error {
 		return articleCtrl.CreateCheckout(c, c.Param("articleId"))
-	}, jwtMW)
+	})
 
 	// --- Articles (company-authored) ---
-	companyArticleGroup := e.Group("/api/company/articles", companyJwtMW)
+	companyArticleGroup := e.Group("/api/company/articles")
 	companyArticleGroup.POST("", articleCtrl.CreateAsCompany)
 	companyArticleGroup.PUT("/:articleId", func(c echo.Context) error {
 		return articleCtrl.UpdateAsCompany(c, c.Param("articleId"))
@@ -67,7 +67,7 @@ func wireContent(e *echo.Echo, d *deps, jwtMW, optionalJwtMW, companyJwtMW echo.
 
 	// --- Posts ---
 	postGroup := e.Group("/api/posts")
-	postGroup.POST("", postCtrl.Create, jwtMW)
+	postGroup.POST("", postCtrl.Create)
 	postGroup.GET("", postCtrl.ListTimeline)
 	postGroup.GET("/users/:userId", func(c echo.Context) error {
 		return postCtrl.ListByUserID(c, c.Param("userId"))
@@ -80,20 +80,20 @@ func wireContent(e *echo.Echo, d *deps, jwtMW, optionalJwtMW, companyJwtMW echo.
 	})
 	postGroup.DELETE("/:postId", func(c echo.Context) error {
 		return postCtrl.Delete(c, c.Param("postId"))
-	}, jwtMW)
+	})
 	postGroup.POST("/:postId/like", func(c echo.Context) error {
 		return postCtrl.ToggleLike(c, c.Param("postId"))
-	}, jwtMW)
+	})
 	postGroup.POST("/:postId/repost", func(c echo.Context) error {
 		return postCtrl.ToggleRepost(c, c.Param("postId"))
-	}, jwtMW)
+	})
 	postGroup.GET("/:postId/comments", func(c echo.Context) error {
 		return postCtrl.ListComments(c, c.Param("postId"))
 	})
 	postGroup.POST("/:postId/comments", func(c echo.Context) error {
 		return postCtrl.CreateComment(c, c.Param("postId"))
-	}, jwtMW)
+	})
 	postGroup.DELETE("/comments/:commentId", func(c echo.Context) error {
 		return postCtrl.DeleteComment(c, c.Param("commentId"))
-	}, jwtMW)
+	})
 }

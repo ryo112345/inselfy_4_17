@@ -10,7 +10,7 @@ import (
 
 // wireInterview registers interview scheduling routes and returns the
 // controller so BuildServer can attach the WebSocket hub afterwards.
-func wireInterview(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFunc) *httpcontroller.InterviewController {
+func wireInterview(e *echo.Echo, d *deps) *httpcontroller.InterviewController {
 	interviewCtrl := httpcontroller.NewInterviewController(usecase.NewInterviewInteractor(
 		sqlcgw.NewInterviewProposalRepository(d.pool),
 		sqlcgw.NewInterviewSlotRepository(d.pool),
@@ -21,7 +21,7 @@ func wireInterview(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFun
 	))
 
 	// --- Company Interviews ---
-	companyInterviewGroup := e.Group("/api/company/interviews", companyJwtMW)
+	companyInterviewGroup := e.Group("/api/company/interviews")
 	companyInterviewGroup.POST("/propose", interviewCtrl.Propose)
 	companyInterviewGroup.GET("/pending/:applicationId", interviewCtrl.GetPendingProposal)
 	companyInterviewGroup.GET("", interviewCtrl.ListByCompany)
@@ -30,7 +30,7 @@ func wireInterview(e *echo.Echo, d *deps, jwtMW, companyJwtMW echo.MiddlewareFun
 	})
 
 	// --- Candidate Interviews ---
-	candidateInterviewGroup := e.Group("/api/interviews", jwtMW)
+	candidateInterviewGroup := e.Group("/api/interviews")
 	candidateInterviewGroup.GET("", interviewCtrl.ListByCandidate)
 	candidateInterviewGroup.POST("/proposals/:proposalId/select", func(c echo.Context) error {
 		return interviewCtrl.SelectSlot(c)
