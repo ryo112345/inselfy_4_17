@@ -11,6 +11,7 @@ import (
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
+	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -160,6 +161,12 @@ func handleCompanyAuthError(ctx echo.Context, err error) error {
 	switch {
 	case errors.Is(err, company.ErrInvalidCredentials):
 		return unauthorized(ctx, "invalid email or password")
+	case errors.Is(err, auth.ErrRefreshTokenRevoked),
+		errors.Is(err, auth.ErrTokenExpired),
+		errors.Is(err, auth.ErrUnauthorized):
+		// 失効 refresh cookie は正常系のエラー。候補者側（handleAuthError）と
+		// 同じく 401 にする（以前は分類漏れで 500 INTERNAL になっていた）。
+		return unauthorized(ctx, "unauthorized")
 	case errors.Is(err, company.ErrAccountPending):
 		return errorResponse(ctx, http.StatusForbidden, "ACCOUNT_PENDING", "your account is awaiting admin approval")
 	case errors.Is(err, company.ErrAccountRejected):
