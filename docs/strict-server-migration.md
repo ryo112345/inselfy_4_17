@@ -94,8 +94,15 @@ strict-server ＋ RegisterHandlers ＋スペック駆動認可に移行し、最
   （既存 Playwright E2E 12/13 件はデモデータ依存で移行前から失敗しており判定に使えない）
 - 検証済みクレームは echo context（`c.Set`、既存 controller 互換）と request context
   （`UserIDFromContext` / `CompanyIDFromContext`、Phase 3 の strict handler 用）の両方に publish。
-- ⚠️ 別件発見: `PATCH /api/users/:username` 等 wire_user 系は認証のみで**本人一致チェックが無い**
-  （IDOR、移行前から存在）。Phase 1 のスコープ外として未修正。
+- ⚠️→✅ 別件で IDOR を発見・修正済み（コミット 8a7e0de）: `PATCH /api/users/:username` 等
+  wire_user 系（user/experience/education/skill の書き込み）は認証のみで本人一致チェックが無く、
+  有効な候補者トークンで他人の username をパスに入れれば他人のプロフィール等を改ざん/削除できた。
+  experience/education の既存所有者チェックは対象を**パスの username** で解決していたため実質無効だった。
+  修正: 認証済み userID を interactor へ渡し、パス解決ユーザーの ID と不一致なら 403。
+  company 側は `:companyId` パスを取らず常に認証済み companyID で照合するため影響なし。
+  さらに全書き込み系を横断監査し、通知の既読化 `MarkAsRead(id)` に同種の穴を発見・修正
+  （コミット 047988f、SQL を owner スコープ化）。他（messaging/article/job_application/
+  scout/saved_candidate/follow/scout_settings）は認証済み principal と照合済みで安全と確認。
 
 ## Phase 2: admin API の TypeSpec 契約化
 
