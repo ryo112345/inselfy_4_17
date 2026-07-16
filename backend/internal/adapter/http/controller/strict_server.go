@@ -13,17 +13,19 @@ import (
 // here, so the nil embed is unreachable. Once every group has migrated, the
 // embed is removed and conformance becomes a compile-time check again.
 //
-// Controller fields are populated by the wire_*.go of each migrated group
-// before the server starts serving.
+// Controllers are installed by the wire_*.go of each migrated group through
+// that group's Wire*Group setter before the server starts serving; the
+// per-group setters keep "wire に代入し忘れた controller" a compile error
+// instead of a nil dereference at request time.
 type StrictServer struct {
 	openapi.StrictServerInterface
 
-	User         *UserController
-	Experience   *ExperienceController
-	Education    *EducationController
-	Skill        *SkillController
-	Follow       *FollowController
-	SimilarUsers *SimilarUsersController
+	user         *UserController
+	experience   *ExperienceController
+	education    *EducationController
+	skill        *SkillController
+	follow       *FollowController
+	similarUsers *SimilarUsersController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -32,100 +34,118 @@ func NewStrictServer() *StrictServer {
 	return &StrictServer{}
 }
 
+// WireUserGroup installs the wire_user controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ1).
+func (s *StrictServer) WireUserGroup(
+	user *UserController,
+	experience *ExperienceController,
+	education *EducationController,
+	skill *SkillController,
+	follow *FollowController,
+	similarUsers *SimilarUsersController,
+) {
+	s.user = user
+	s.experience = experience
+	s.education = education
+	s.skill = skill
+	s.follow = follow
+	s.similarUsers = similarUsers
+}
+
 // --- Users ---
 // PATCH /api/users/{username} は raw JSON デコードのため strict を経由しない
 // （UserController.UpdateProfileHTTP を wire_user.go が直接 mux に登録する）。
 
 func (s *StrictServer) UsersCreateUser(ctx context.Context, req openapi.UsersCreateUserRequestObject) (openapi.UsersCreateUserResponseObject, error) {
-	return s.User.Create(ctx, req)
+	return s.user.Create(ctx, req)
 }
 
 func (s *StrictServer) UsersGetUserByUsername(ctx context.Context, req openapi.UsersGetUserByUsernameRequestObject) (openapi.UsersGetUserByUsernameResponseObject, error) {
-	return s.User.GetByUsername(ctx, req)
+	return s.user.GetByUsername(ctx, req)
 }
 
 func (s *StrictServer) UsersGetUserById(ctx context.Context, req openapi.UsersGetUserByIdRequestObject) (openapi.UsersGetUserByIdResponseObject, error) {
-	return s.User.GetByID(ctx, req)
+	return s.user.GetByID(ctx, req)
 }
 
 func (s *StrictServer) UsersUploadUserImage(ctx context.Context, req openapi.UsersUploadUserImageRequestObject) (openapi.UsersUploadUserImageResponseObject, error) {
-	return s.User.UploadImage(ctx, req)
+	return s.user.UploadImage(ctx, req)
 }
 
 // --- SimilarUsers ---
 
 func (s *StrictServer) SimilarUsersGetSimilarUsers(ctx context.Context, req openapi.SimilarUsersGetSimilarUsersRequestObject) (openapi.SimilarUsersGetSimilarUsersResponseObject, error) {
-	return s.SimilarUsers.GetSimilarUsers(ctx, req)
+	return s.similarUsers.GetSimilarUsers(ctx, req)
 }
 
 // --- Experiences ---
 
 func (s *StrictServer) ExperiencesListExperiences(ctx context.Context, req openapi.ExperiencesListExperiencesRequestObject) (openapi.ExperiencesListExperiencesResponseObject, error) {
-	return s.Experience.List(ctx, req)
+	return s.experience.List(ctx, req)
 }
 
 func (s *StrictServer) ExperiencesCreateExperience(ctx context.Context, req openapi.ExperiencesCreateExperienceRequestObject) (openapi.ExperiencesCreateExperienceResponseObject, error) {
-	return s.Experience.Create(ctx, req)
+	return s.experience.Create(ctx, req)
 }
 
 func (s *StrictServer) ExperiencesUpdateExperience(ctx context.Context, req openapi.ExperiencesUpdateExperienceRequestObject) (openapi.ExperiencesUpdateExperienceResponseObject, error) {
-	return s.Experience.Update(ctx, req)
+	return s.experience.Update(ctx, req)
 }
 
 func (s *StrictServer) ExperiencesDeleteExperience(ctx context.Context, req openapi.ExperiencesDeleteExperienceRequestObject) (openapi.ExperiencesDeleteExperienceResponseObject, error) {
-	return s.Experience.Delete(ctx, req)
+	return s.experience.Delete(ctx, req)
 }
 
 // --- Educations ---
 
 func (s *StrictServer) EducationsListEducations(ctx context.Context, req openapi.EducationsListEducationsRequestObject) (openapi.EducationsListEducationsResponseObject, error) {
-	return s.Education.List(ctx, req)
+	return s.education.List(ctx, req)
 }
 
 func (s *StrictServer) EducationsCreateEducation(ctx context.Context, req openapi.EducationsCreateEducationRequestObject) (openapi.EducationsCreateEducationResponseObject, error) {
-	return s.Education.Create(ctx, req)
+	return s.education.Create(ctx, req)
 }
 
 func (s *StrictServer) EducationsUpdateEducation(ctx context.Context, req openapi.EducationsUpdateEducationRequestObject) (openapi.EducationsUpdateEducationResponseObject, error) {
-	return s.Education.Update(ctx, req)
+	return s.education.Update(ctx, req)
 }
 
 func (s *StrictServer) EducationsDeleteEducation(ctx context.Context, req openapi.EducationsDeleteEducationRequestObject) (openapi.EducationsDeleteEducationResponseObject, error) {
-	return s.Education.Delete(ctx, req)
+	return s.education.Delete(ctx, req)
 }
 
 // --- Skills ---
 
 func (s *StrictServer) SkillsListSkills(ctx context.Context, req openapi.SkillsListSkillsRequestObject) (openapi.SkillsListSkillsResponseObject, error) {
-	return s.Skill.List(ctx, req)
+	return s.skill.List(ctx, req)
 }
 
 func (s *StrictServer) SkillsAttachSkill(ctx context.Context, req openapi.SkillsAttachSkillRequestObject) (openapi.SkillsAttachSkillResponseObject, error) {
-	return s.Skill.Attach(ctx, req)
+	return s.skill.Attach(ctx, req)
 }
 
 func (s *StrictServer) SkillsDetachSkill(ctx context.Context, req openapi.SkillsDetachSkillRequestObject) (openapi.SkillsDetachSkillResponseObject, error) {
-	return s.Skill.Detach(ctx, req)
+	return s.skill.Detach(ctx, req)
 }
 
 // --- Follows ---
 
 func (s *StrictServer) FollowsFollowUser(ctx context.Context, req openapi.FollowsFollowUserRequestObject) (openapi.FollowsFollowUserResponseObject, error) {
-	return s.Follow.Follow(ctx, req)
+	return s.follow.Follow(ctx, req)
 }
 
 func (s *StrictServer) FollowsUnfollowUser(ctx context.Context, req openapi.FollowsUnfollowUserRequestObject) (openapi.FollowsUnfollowUserResponseObject, error) {
-	return s.Follow.Unfollow(ctx, req)
+	return s.follow.Unfollow(ctx, req)
 }
 
 func (s *StrictServer) FollowsGetFollowStatus(ctx context.Context, req openapi.FollowsGetFollowStatusRequestObject) (openapi.FollowsGetFollowStatusResponseObject, error) {
-	return s.Follow.GetFollowStatus(ctx, req)
+	return s.follow.GetFollowStatus(ctx, req)
 }
 
 func (s *StrictServer) FollowsListFollowers(ctx context.Context, req openapi.FollowsListFollowersRequestObject) (openapi.FollowsListFollowersResponseObject, error) {
-	return s.Follow.GetFollowers(ctx, req)
+	return s.follow.GetFollowers(ctx, req)
 }
 
 func (s *StrictServer) FollowsListFollowing(ctx context.Context, req openapi.FollowsListFollowingRequestObject) (openapi.FollowsListFollowingResponseObject, error) {
-	return s.Follow.GetFollowing(ctx, req)
+	return s.follow.GetFollowing(ctx, req)
 }

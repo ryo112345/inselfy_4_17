@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""strict-server 移行スモークの前後比較。
+
+使い方: diff_bodies.py <before_dir> <after_dir>
+
+各ケースのステータスと、揮発フィールド（id・タイムスタンプ・生成ファイル名）を
+正規化したボディを比較し、差分があれば表示して非ゼロ終了する。
+"""
+
+import glob
+import json
+import os
+import re
+import sys
+
+# 実行ごとに値が変わる（＝差分として意味がない）フィールド
+VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "userId"}
+# アップロードで生成されるファイル名のランダム部
+RANDOM_FILE = re.compile(r"(user-images|job-images|article-images|company-images)/[0-9a-f]{8}_")
+
+
+def norm(v):
+    if isinstance(v, dict):
+        return {k: ("<VOL>" if k in VOLATILE else norm(x)) for k, x in sorted(v.items())}
+    if isinstance(v, list):
+        return [norm(x) for x in v]
+    if isinstance(v, str):
+        return RANDOM_FILE.sub(r"\1/XXXXXXXX_", v)
+    return v
+
+
+def load(path):
+    raw = open(path).read()
+    if not raw.strip():
+        return ""
+    try:
+        return norm(json.loads(raw))
+    except json.JSONDecodeError:
+        return raw
+
+
+def main():
+    if len(sys.argv) != 3:
+        sys.exit(__doc__)
+    before, after = sys.argv[1], sys.argv[2]
+    diffs = 0
+    cases = 0
+    for bf in sorted(glob.glob(os.path.join(before, "*.status"))):
+        name = os.path.basename(bf)[: -len(".status")]
+        af = os.path.join(after, name + ".status")
+        if not os.path.exists(af):
+            print(f"MISSING in after: {name}")
+            diffs += 1
+            continue
+        cases += 1
+        bs, as_ = open(bf).read(), open(af).read()
+        if bs != as_:
+            print(f"STATUS DIFF {name}: {bs} -> {as_}")
+            diffs += 1
+        bj = load(os.path.join(before, name + ".body"))
+        aj = load(os.path.join(after, name + ".body"))
+        if bj != aj:
+            print(f"BODY DIFF {name}:")
+            print(f"  before: {json.dumps(bj, ensure_ascii=False)[:400]}")
+            print(f"  after : {json.dumps(aj, ensure_ascii=False)[:400]}")
+            diffs += 1
+    print(f"--- {cases} cases, {diffs} diffs")
+    sys.exit(1 if diffs else 0)
+
+
+if __name__ == "__main__":
+    main()

@@ -13,21 +13,23 @@ import (
 // (docs/strict-server-migration.md Phase 3-1 グループ1).
 func wireUser(sr *strictRouter, wrapper *openapigen.ServerInterfaceWrapper, ss *httpcontroller.StrictServer, d *deps) {
 	userCtrl := httpcontroller.NewUserController(usecase.NewUserInteractor(d.userRepo), d.fileStorage)
-	ss.User = userCtrl
-	ss.Experience = httpcontroller.NewExperienceController(usecase.NewExperienceInteractor(
-		sqlcgw.NewExperienceRepository(d.pool), d.userRepo,
-	))
-	ss.Education = httpcontroller.NewEducationController(usecase.NewEducationInteractor(
-		sqlcgw.NewEducationRepository(d.pool), d.userRepo,
-	))
-	ss.Skill = httpcontroller.NewSkillController(usecase.NewSkillInteractor(
-		sqlcgw.NewSkillRepository(d.pool), d.userRepo, d.tx,
-	))
-	ss.Follow = httpcontroller.NewFollowController(usecase.NewFollowInteractor(
-		sqlcgw.NewFollowRepository(d.pool), d.userRepo,
-	))
-	ss.SimilarUsers = httpcontroller.NewSimilarUsersController(
-		usecase.NewSimilarUsersInteractor(sqlcgw.NewSimilarUsersQueryService(d.pool)),
+	ss.WireUserGroup(
+		userCtrl,
+		httpcontroller.NewExperienceController(usecase.NewExperienceInteractor(
+			sqlcgw.NewExperienceRepository(d.pool), d.userRepo,
+		)),
+		httpcontroller.NewEducationController(usecase.NewEducationInteractor(
+			sqlcgw.NewEducationRepository(d.pool), d.userRepo,
+		)),
+		httpcontroller.NewSkillController(usecase.NewSkillInteractor(
+			sqlcgw.NewSkillRepository(d.pool), d.userRepo, d.tx,
+		)),
+		httpcontroller.NewFollowController(usecase.NewFollowInteractor(
+			sqlcgw.NewFollowRepository(d.pool), d.userRepo,
+		)),
+		httpcontroller.NewSimilarUsersController(
+			usecase.NewSimilarUsersInteractor(sqlcgw.NewSimilarUsersQueryService(d.pool)),
+		),
 	)
 
 	// --- Users ---
