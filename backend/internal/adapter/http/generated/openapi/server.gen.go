@@ -15205,6 +15205,15 @@ func (response CompanyMessagingStartCompanyConversation404JSONResponse) VisitCom
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CompanyMessagingStartCompanyConversation409JSONResponse ModelsConflictError
+
+func (response CompanyMessagingStartCompanyConversation409JSONResponse) VisitCompanyMessagingStartCompanyConversationResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CompanyMessagingGetCompanyConversationRequestObject struct {
 	ConversationId ModelsUuid `json:"conversationId"`
 }

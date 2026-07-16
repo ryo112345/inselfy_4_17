@@ -51,6 +51,9 @@ type StrictServer struct {
 
 	jobPosting     *JobPostingController
 	jobApplication *JobApplicationController
+
+	messaging    *MessagingController
+	notification *NotificationController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -146,6 +149,16 @@ func (s *StrictServer) WireJobsGroup(
 ) {
 	s.jobPosting = jobPosting
 	s.jobApplication = jobApplication
+}
+
+// WireMessagingGroup installs the wire_messaging controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ9)。
+func (s *StrictServer) WireMessagingGroup(
+	messaging *MessagingController,
+	notification *NotificationController,
+) {
+	s.messaging = messaging
+	s.notification = notification
 }
 
 // --- Users ---
@@ -758,4 +771,100 @@ func (s *StrictServer) CompanyApplicationsGetApplication(ctx context.Context, re
 
 func (s *StrictServer) CompanyApplicationsUpdateApplicationStatus(ctx context.Context, req openapi.CompanyApplicationsUpdateApplicationStatusRequestObject) (openapi.CompanyApplicationsUpdateApplicationStatusResponseObject, error) {
 	return s.jobApplication.UpdateStatus(ctx, req)
+}
+
+// --- Messaging（候補者） ---
+
+func (s *StrictServer) CandidateMessagingStartCandidateConversation(ctx context.Context, req openapi.CandidateMessagingStartCandidateConversationRequestObject) (openapi.CandidateMessagingStartCandidateConversationResponseObject, error) {
+	return s.messaging.StartCandidateConversation(ctx, req)
+}
+
+func (s *StrictServer) CandidateMessagingListCandidateConversations(ctx context.Context, req openapi.CandidateMessagingListCandidateConversationsRequestObject) (openapi.CandidateMessagingListCandidateConversationsResponseObject, error) {
+	return s.messaging.ListConversationsByCandidate(ctx, req)
+}
+
+func (s *StrictServer) CandidateMessagingGetCandidateConversation(ctx context.Context, req openapi.CandidateMessagingGetCandidateConversationRequestObject) (openapi.CandidateMessagingGetCandidateConversationResponseObject, error) {
+	return s.messaging.GetConversationAsCandidate(ctx, req)
+}
+
+func (s *StrictServer) CandidateMessagingListCandidateMessages(ctx context.Context, req openapi.CandidateMessagingListCandidateMessagesRequestObject) (openapi.CandidateMessagingListCandidateMessagesResponseObject, error) {
+	return s.messaging.ListMessagesAsCandidate(ctx, req)
+}
+
+func (s *StrictServer) CandidateMessagingSendCandidateMessage(ctx context.Context, req openapi.CandidateMessagingSendCandidateMessageRequestObject) (openapi.CandidateMessagingSendCandidateMessageResponseObject, error) {
+	return s.messaging.SendMessageAsCandidate(ctx, req)
+}
+
+func (s *StrictServer) CandidateMessagingMarkCandidateConversationRead(ctx context.Context, req openapi.CandidateMessagingMarkCandidateConversationReadRequestObject) (openapi.CandidateMessagingMarkCandidateConversationReadResponseObject, error) {
+	return s.messaging.MarkReadAsCandidate(ctx, req)
+}
+
+func (s *StrictServer) CandidateMessagingCountCandidateUnreadMessages(ctx context.Context, req openapi.CandidateMessagingCountCandidateUnreadMessagesRequestObject) (openapi.CandidateMessagingCountCandidateUnreadMessagesResponseObject, error) {
+	return s.messaging.CountUnreadByCandidate(ctx, req)
+}
+
+// --- Messaging（企業） ---
+
+func (s *StrictServer) CompanyMessagingStartCompanyConversation(ctx context.Context, req openapi.CompanyMessagingStartCompanyConversationRequestObject) (openapi.CompanyMessagingStartCompanyConversationResponseObject, error) {
+	return s.messaging.StartConversation(ctx, req)
+}
+
+func (s *StrictServer) CompanyMessagingListCompanyConversations(ctx context.Context, req openapi.CompanyMessagingListCompanyConversationsRequestObject) (openapi.CompanyMessagingListCompanyConversationsResponseObject, error) {
+	return s.messaging.ListConversationsByCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyMessagingGetCompanyConversation(ctx context.Context, req openapi.CompanyMessagingGetCompanyConversationRequestObject) (openapi.CompanyMessagingGetCompanyConversationResponseObject, error) {
+	return s.messaging.GetConversationAsCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyMessagingListCompanyMessages(ctx context.Context, req openapi.CompanyMessagingListCompanyMessagesRequestObject) (openapi.CompanyMessagingListCompanyMessagesResponseObject, error) {
+	return s.messaging.ListMessagesAsCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyMessagingSendCompanyMessage(ctx context.Context, req openapi.CompanyMessagingSendCompanyMessageRequestObject) (openapi.CompanyMessagingSendCompanyMessageResponseObject, error) {
+	return s.messaging.SendMessageAsCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyMessagingMarkCompanyConversationRead(ctx context.Context, req openapi.CompanyMessagingMarkCompanyConversationReadRequestObject) (openapi.CompanyMessagingMarkCompanyConversationReadResponseObject, error) {
+	return s.messaging.MarkReadAsCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyMessagingCountCompanyUnreadMessages(ctx context.Context, req openapi.CompanyMessagingCountCompanyUnreadMessagesRequestObject) (openapi.CompanyMessagingCountCompanyUnreadMessagesResponseObject, error) {
+	return s.messaging.CountUnreadByCompany(ctx, req)
+}
+
+// --- Notifications（ユーザー） ---
+
+func (s *StrictServer) UserNotificationsListUserNotifications(ctx context.Context, req openapi.UserNotificationsListUserNotificationsRequestObject) (openapi.UserNotificationsListUserNotificationsResponseObject, error) {
+	return s.notification.ListByUser(ctx, req)
+}
+
+func (s *StrictServer) UserNotificationsCountUserUnreadNotifications(ctx context.Context, req openapi.UserNotificationsCountUserUnreadNotificationsRequestObject) (openapi.UserNotificationsCountUserUnreadNotificationsResponseObject, error) {
+	return s.notification.CountUnreadByUser(ctx, req)
+}
+
+func (s *StrictServer) UserNotificationsMarkUserNotificationRead(ctx context.Context, req openapi.UserNotificationsMarkUserNotificationReadRequestObject) (openapi.UserNotificationsMarkUserNotificationReadResponseObject, error) {
+	return s.notification.MarkAsReadByUser(ctx, req)
+}
+
+func (s *StrictServer) UserNotificationsMarkAllUserNotificationsRead(ctx context.Context, req openapi.UserNotificationsMarkAllUserNotificationsReadRequestObject) (openapi.UserNotificationsMarkAllUserNotificationsReadResponseObject, error) {
+	return s.notification.MarkAllAsReadByUser(ctx, req)
+}
+
+// --- Notifications（企業） ---
+
+func (s *StrictServer) CompanyNotificationsListCompanyNotifications(ctx context.Context, req openapi.CompanyNotificationsListCompanyNotificationsRequestObject) (openapi.CompanyNotificationsListCompanyNotificationsResponseObject, error) {
+	return s.notification.ListByCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyNotificationsCountCompanyUnreadNotifications(ctx context.Context, req openapi.CompanyNotificationsCountCompanyUnreadNotificationsRequestObject) (openapi.CompanyNotificationsCountCompanyUnreadNotificationsResponseObject, error) {
+	return s.notification.CountUnreadByCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyNotificationsMarkCompanyNotificationRead(ctx context.Context, req openapi.CompanyNotificationsMarkCompanyNotificationReadRequestObject) (openapi.CompanyNotificationsMarkCompanyNotificationReadResponseObject, error) {
+	return s.notification.MarkAsReadByCompany(ctx, req)
+}
+
+func (s *StrictServer) CompanyNotificationsMarkAllCompanyNotificationsRead(ctx context.Context, req openapi.CompanyNotificationsMarkAllCompanyNotificationsReadRequestObject) (openapi.CompanyNotificationsMarkAllCompanyNotificationsReadResponseObject, error) {
+	return s.notification.MarkAllAsReadByCompany(ctx, req)
 }

@@ -1123,7 +1123,7 @@ export const companyMessagingListCompanyConversations = <ThrowOnError extends bo
 /**
  * Start a conversation as the company
  *
- * 会話開始（企業認証）
+ * 会話開始（企業認証）。既に会話が存在する場合は 409
  */
 export const companyMessagingStartCompanyConversation = <ThrowOnError extends boolean = false>(options: Options<CompanyMessagingStartCompanyConversationData, ThrowOnError>): RequestResult<CompanyMessagingStartCompanyConversationResponses, CompanyMessagingStartCompanyConversationErrors, ThrowOnError> => (options.client ?? client).post<CompanyMessagingStartCompanyConversationResponses, CompanyMessagingStartCompanyConversationErrors, ThrowOnError>({
     security: [{

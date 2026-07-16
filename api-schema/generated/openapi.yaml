@@ -3001,7 +3001,7 @@ paths:
     post:
       operationId: CompanyMessaging_startCompanyConversation
       summary: Start a conversation as the company
-      description: 会話開始（企業認証）
+      description: 会話開始（企業認証）。既に会話が存在する場合は 409
       parameters: []
       responses:
         '201':
@@ -3028,6 +3028,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Messaging
       requestBody:

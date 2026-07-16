@@ -1,71 +1,52 @@
 package initializer
 
 import (
-	"github.com/labstack/echo/v4"
-
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
+	openapigen "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/usecase"
 )
 
 // wireMessaging registers notification and direct-message routes for both
-// candidates and companies.
-func wireMessaging(e *echo.Echo, d *deps) {
-	notifCtrl := httpcontroller.NewNotificationController(usecase.NewNotificationInteractor(d.notificationRepo))
-	messagingCtrl := httpcontroller.NewMessagingController(usecase.NewMessagingInteractor(
-		d.convRepo, d.msgRepo, d.participantRepo, d.tx,
-	))
-
-	// --- Company Notifications ---
-	companyNotifGroup := e.Group("/api/company/notifications")
-	companyNotifGroup.GET("", notifCtrl.ListByCompany)
-	companyNotifGroup.GET("/unread-count", notifCtrl.CountUnreadByCompany)
-	companyNotifGroup.POST("/:id/read", func(c echo.Context) error {
-		return notifCtrl.MarkAsReadByCompany(c, c.Param("id"))
-	})
-	companyNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByCompany)
-
-	// --- User Notifications ---
-	userNotifGroup := e.Group("/api/notifications")
-	userNotifGroup.GET("", notifCtrl.ListByUser)
-	userNotifGroup.GET("/unread-count", notifCtrl.CountUnreadByUser)
-	userNotifGroup.POST("/:id/read", func(c echo.Context) error {
-		return notifCtrl.MarkAsReadByUser(c, c.Param("id"))
-	})
-	userNotifGroup.POST("/read-all", notifCtrl.MarkAllAsReadByUser)
+// candidates and companies — this group is migrated to strict-server handlers
+// (docs/strict-server-migration.md Phase 3-1 グループ9).
+func wireMessaging(sr *strictRouter, wrapper *openapigen.ServerInterfaceWrapper, ss *httpcontroller.StrictServer, d *deps) {
+	ss.WireMessagingGroup(
+		httpcontroller.NewMessagingController(usecase.NewMessagingInteractor(
+			d.convRepo, d.msgRepo, d.participantRepo, d.tx,
+		)),
+		httpcontroller.NewNotificationController(usecase.NewNotificationInteractor(d.notificationRepo)),
+	)
 
 	// --- Candidate Messages ---
-	candidateMsgGroup := e.Group("/api/messages")
-	candidateMsgGroup.POST("/conversations", messagingCtrl.StartCandidateConversation)
-	candidateMsgGroup.GET("/conversations", messagingCtrl.ListConversationsByCandidate)
-	candidateMsgGroup.GET("/conversations/:conversationId", func(c echo.Context) error {
-		return messagingCtrl.GetConversationAsCandidate(c, c.Param("conversationId"))
-	})
-	candidateMsgGroup.GET("/conversations/:conversationId/messages", func(c echo.Context) error {
-		return messagingCtrl.ListMessagesAsCandidate(c, c.Param("conversationId"))
-	})
-	candidateMsgGroup.POST("/conversations/:conversationId/messages", func(c echo.Context) error {
-		return messagingCtrl.SendMessageAsCandidate(c, c.Param("conversationId"))
-	})
-	candidateMsgGroup.POST("/conversations/:conversationId/read", func(c echo.Context) error {
-		return messagingCtrl.MarkReadAsCandidate(c, c.Param("conversationId"))
-	})
-	candidateMsgGroup.GET("/unread-count", messagingCtrl.CountUnreadByCandidate)
+	// unread-count は conversations と別リテラルセグメント、read-all 相当も無く
+	// {conversationId} と衝突する静的兄弟が無いため priority mux 不要。
+	sr.handle("POST /api/messages/conversations", wrapper.CandidateMessagingStartCandidateConversation)
+	sr.handle("GET /api/messages/conversations", wrapper.CandidateMessagingListCandidateConversations)
+	sr.handle("GET /api/messages/conversations/{conversationId}", wrapper.CandidateMessagingGetCandidateConversation)
+	sr.handle("GET /api/messages/conversations/{conversationId}/messages", wrapper.CandidateMessagingListCandidateMessages)
+	sr.handle("POST /api/messages/conversations/{conversationId}/messages", wrapper.CandidateMessagingSendCandidateMessage)
+	sr.handle("POST /api/messages/conversations/{conversationId}/read", wrapper.CandidateMessagingMarkCandidateConversationRead)
+	sr.handle("GET /api/messages/unread-count", wrapper.CandidateMessagingCountCandidateUnreadMessages)
 
 	// --- Company Messages ---
-	companyMsgGroup := e.Group("/api/company/messages")
-	companyMsgGroup.POST("/conversations", messagingCtrl.StartConversation)
-	companyMsgGroup.GET("/conversations", messagingCtrl.ListConversationsByCompany)
-	companyMsgGroup.GET("/conversations/:conversationId", func(c echo.Context) error {
-		return messagingCtrl.GetConversationAsCompany(c, c.Param("conversationId"))
-	})
-	companyMsgGroup.GET("/conversations/:conversationId/messages", func(c echo.Context) error {
-		return messagingCtrl.ListMessagesAsCompany(c, c.Param("conversationId"))
-	})
-	companyMsgGroup.POST("/conversations/:conversationId/messages", func(c echo.Context) error {
-		return messagingCtrl.SendMessageAsCompany(c, c.Param("conversationId"))
-	})
-	companyMsgGroup.POST("/conversations/:conversationId/read", func(c echo.Context) error {
-		return messagingCtrl.MarkReadAsCompany(c, c.Param("conversationId"))
-	})
-	companyMsgGroup.GET("/unread-count", messagingCtrl.CountUnreadByCompany)
+	sr.handle("POST /api/company/messages/conversations", wrapper.CompanyMessagingStartCompanyConversation)
+	sr.handle("GET /api/company/messages/conversations", wrapper.CompanyMessagingListCompanyConversations)
+	sr.handle("GET /api/company/messages/conversations/{conversationId}", wrapper.CompanyMessagingGetCompanyConversation)
+	sr.handle("GET /api/company/messages/conversations/{conversationId}/messages", wrapper.CompanyMessagingListCompanyMessages)
+	sr.handle("POST /api/company/messages/conversations/{conversationId}/messages", wrapper.CompanyMessagingSendCompanyMessage)
+	sr.handle("POST /api/company/messages/conversations/{conversationId}/read", wrapper.CompanyMessagingMarkCompanyConversationRead)
+	sr.handle("GET /api/company/messages/unread-count", wrapper.CompanyMessagingCountCompanyUnreadMessages)
+
+	// --- User Notifications ---
+	// read-all（1セグメント）と {id}/read（2セグメント）はセグメント数が違い衝突しない。
+	sr.handle("GET /api/notifications", wrapper.UserNotificationsListUserNotifications)
+	sr.handle("GET /api/notifications/unread-count", wrapper.UserNotificationsCountUserUnreadNotifications)
+	sr.handle("POST /api/notifications/{id}/read", wrapper.UserNotificationsMarkUserNotificationRead)
+	sr.handle("POST /api/notifications/read-all", wrapper.UserNotificationsMarkAllUserNotificationsRead)
+
+	// --- Company Notifications ---
+	sr.handle("GET /api/company/notifications", wrapper.CompanyNotificationsListCompanyNotifications)
+	sr.handle("GET /api/company/notifications/unread-count", wrapper.CompanyNotificationsCountCompanyUnreadNotifications)
+	sr.handle("POST /api/company/notifications/{id}/read", wrapper.CompanyNotificationsMarkCompanyNotificationRead)
+	sr.handle("POST /api/company/notifications/read-all", wrapper.CompanyNotificationsMarkAllCompanyNotificationsRead)
 }

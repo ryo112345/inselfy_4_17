@@ -86,7 +86,7 @@ interface CandidateMessaging {
 @tag("Messaging")
 @useAuth(Models.CompanyAuth)
 interface CompanyMessaging {
-  /** 会話開始（企業認証） */
+  /** 会話開始（企業認証）。既に会話が存在する場合は 409 */
   @post
   @route("/conversations")
   @summary("Start a conversation as the company")
@@ -95,7 +95,7 @@ interface CompanyMessaging {
   ): {
     @statusCode statusCode: 201;
     @body conversation: ConversationResponse;
-  } | AuthedNotFoundErrors;
+  } | AuthedConflictErrors;
 
   /** 会話一覧（企業認証） */
   @get

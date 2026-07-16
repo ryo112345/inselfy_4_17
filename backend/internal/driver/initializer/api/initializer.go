@@ -167,7 +167,7 @@ func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps
 	wireCompany(sr, strictWrapper, strictSrv, d)
 	wireScout(sr, strictWrapper, strictSrv, d)
 	wireJobs(sr, strictWrapper, strictSrv, d)
-	wireMessaging(e, d)
+	wireMessaging(sr, strictWrapper, strictSrv, d)
 	interviewCtrl := wireInterview(e, d)
 	if err := wireAdmin(ctx, e, d); err != nil {
 		return nil, nil, err

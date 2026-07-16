@@ -19,6 +19,8 @@ VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "publishedAt", "userId
 VOLATILE |= {"sentAt", "expiresAt", "openedAt", "repliedAt", "conversationId", "lastReplenishedAt", "templateId", "senderId"}
 # jobs グループ: 実行ごとに作られるスモーク求人の ID
 VOLATILE |= {"jobPostingId"}
+# messaging グループ: 最新メッセージ時刻・参加者 ID（実行ごとに変わる）
+VOLATILE |= {"lastMessageAt", "participant1Id", "participant2Id"}
 # 同点スコアの並びが呼び出しごとに揺れる配列（タレント検索の top ラベル）は
 # ソートして比較する（順位のタイブレークは実装が非決定的・移行と無関係）
 SORT_BEFORE_DIFF = {"topWvLabels", "topCiLabels"}

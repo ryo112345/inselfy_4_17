@@ -1,10 +1,8 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-	"strconv"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -23,196 +21,290 @@ func NewMessagingController(
 	return &MessagingController{input: input}
 }
 
-func (c *MessagingController) StartConversation(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+// messagingPagination replicates the echo-era parsePagination: absent or
+// out-of-range values fall back to the defaults (limit 50 within 1-100,
+// offset 0) instead of erroring.
+func messagingPagination(limit, offset *int32) (int, int) {
+	l, o := 50, 0
+	if limit != nil && *limit > 0 && *limit <= 100 {
+		l = int(*limit)
+	}
+	if offset != nil && *offset >= 0 {
+		o = int(*offset)
+	}
+	return l, o
+}
 
-	var body openapi.ModelsStartConversationRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+// StartConversation handles POST /api/company/messages/conversations.
+func (c *MessagingController) StartConversation(ctx context.Context, req openapi.CompanyMessagingStartCompanyConversationRequestObject) (openapi.CompanyMessagingStartCompanyConversationResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CompanyMessagingStartCompanyConversation400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	conv, err := c.input.StartConversation(ctx.Request().Context(), messaging.StartConversationInput{
+	conv, err := c.input.StartConversation(ctx, messaging.StartConversationInput{
 		CompanyID:   companyID,
-		CandidateID: body.CandidateId,
+		CandidateID: req.Body.CandidateId,
 		SenderType:  "company",
 		SenderID:    companyID,
-		Body:        body.Body,
+		Body:        req.Body.Body,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusConflict:
+			return openapi.CompanyMessagingStartCompanyConversation409JSONResponse(conflictBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CompanyMessagingStartCompanyConversation404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyMessagingStartCompanyConversation400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusCreated, presenter.MessagingConversationResponse(conv))
+	return openapi.CompanyMessagingStartCompanyConversation201JSONResponse(*presenter.MessagingConversationResponse(conv)), nil
 }
 
-func (c *MessagingController) ListConversationsByCompany(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+// ListConversationsByCompany handles GET /api/company/messages/conversations.
+func (c *MessagingController) ListConversationsByCompany(ctx context.Context, req openapi.CompanyMessagingListCompanyConversationsRequestObject) (openapi.CompanyMessagingListCompanyConversationsResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	limit, offset := parsePagination(ctx)
-	convs, total, err := c.input.ListConversationsByCompany(ctx.Request().Context(), companyID, limit, offset)
+	limit, offset := messagingPagination(req.Params.Limit, req.Params.Offset)
+	convs, total, err := c.input.ListConversationsByCompany(ctx, companyID, limit, offset)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CompanyMessagingListCompanyConversations400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingConversationsResponse(convs, total))
+	return openapi.CompanyMessagingListCompanyConversations200JSONResponse(*presenter.MessagingConversationsResponse(convs, total)), nil
 }
 
-func (c *MessagingController) GetConversationAsCompany(ctx echo.Context, conversationID string) error {
-	companyID := authmw.CompanyID(ctx)
+// GetConversationAsCompany handles GET /api/company/messages/conversations/{conversationId}.
+func (c *MessagingController) GetConversationAsCompany(ctx context.Context, req openapi.CompanyMessagingGetCompanyConversationRequestObject) (openapi.CompanyMessagingGetCompanyConversationResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	conv, err := c.input.GetConversation(ctx.Request().Context(), conversationID, "company", companyID)
+	conv, err := c.input.GetConversation(ctx, req.ConversationId, "company", companyID)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CompanyMessagingGetCompanyConversation403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CompanyMessagingGetCompanyConversation404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyMessagingGetCompanyConversation400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingConversationResponse(conv))
+	return openapi.CompanyMessagingGetCompanyConversation200JSONResponse(*presenter.MessagingConversationResponse(conv)), nil
 }
 
-func (c *MessagingController) ListMessagesAsCompany(ctx echo.Context, conversationID string) error {
-	companyID := authmw.CompanyID(ctx)
+// ListMessagesAsCompany handles GET /api/company/messages/conversations/{conversationId}/messages.
+func (c *MessagingController) ListMessagesAsCompany(ctx context.Context, req openapi.CompanyMessagingListCompanyMessagesRequestObject) (openapi.CompanyMessagingListCompanyMessagesResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	limit, offset := parsePagination(ctx)
-	msgs, total, err := c.input.ListMessages(ctx.Request().Context(), conversationID, "company", companyID, limit, offset)
+	limit, offset := messagingPagination(req.Params.Limit, req.Params.Offset)
+	msgs, total, err := c.input.ListMessages(ctx, req.ConversationId, "company", companyID, limit, offset)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CompanyMessagingListCompanyMessages403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CompanyMessagingListCompanyMessages404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyMessagingListCompanyMessages400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingMessagesResponse(msgs, total))
+	return openapi.CompanyMessagingListCompanyMessages200JSONResponse(*presenter.MessagingMessagesResponse(msgs, total)), nil
 }
 
-func (c *MessagingController) SendMessageAsCompany(ctx echo.Context, conversationID string) error {
-	companyID := authmw.CompanyID(ctx)
-
-	var body openapi.ModelsSendMessageRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+// SendMessageAsCompany handles POST /api/company/messages/conversations/{conversationId}/messages.
+func (c *MessagingController) SendMessageAsCompany(ctx context.Context, req openapi.CompanyMessagingSendCompanyMessageRequestObject) (openapi.CompanyMessagingSendCompanyMessageResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CompanyMessagingSendCompanyMessage400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	msg, err := c.input.SendMessage(ctx.Request().Context(), messaging.SendMessageInput{
-		ConversationID: conversationID,
+	msg, err := c.input.SendMessage(ctx, messaging.SendMessageInput{
+		ConversationID: req.ConversationId,
 		SenderType:     "company",
 		SenderID:       companyID,
-		Body:           body.Body,
+		Body:           req.Body.Body,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CompanyMessagingSendCompanyMessage403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CompanyMessagingSendCompanyMessage404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyMessagingSendCompanyMessage400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusCreated, presenter.MessagingMessageResponse(msg))
+	return openapi.CompanyMessagingSendCompanyMessage201JSONResponse(*presenter.MessagingMessageResponse(msg)), nil
 }
 
-func (c *MessagingController) MarkReadAsCompany(ctx echo.Context, conversationID string) error {
-	companyID := authmw.CompanyID(ctx)
+// MarkReadAsCompany handles POST /api/company/messages/conversations/{conversationId}/read.
+func (c *MessagingController) MarkReadAsCompany(ctx context.Context, req openapi.CompanyMessagingMarkCompanyConversationReadRequestObject) (openapi.CompanyMessagingMarkCompanyConversationReadResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	if err := c.input.MarkRead(ctx.Request().Context(), conversationID, "company", companyID); err != nil {
-		return handleError(ctx, err)
+	if err := c.input.MarkRead(ctx, req.ConversationId, "company", companyID); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CompanyMessagingMarkCompanyConversationRead404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyMessagingMarkCompanyConversationRead400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingOKResponse())
+	return openapi.CompanyMessagingMarkCompanyConversationRead200JSONResponse(*presenter.MessagingOKResponse()), nil
 }
 
-func (c *MessagingController) CountUnreadByCompany(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+// CountUnreadByCompany handles GET /api/company/messages/unread-count.
+func (c *MessagingController) CountUnreadByCompany(ctx context.Context, _ openapi.CompanyMessagingCountCompanyUnreadMessagesRequestObject) (openapi.CompanyMessagingCountCompanyUnreadMessagesResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	count, err := c.input.CountUnreadByCompany(ctx.Request().Context(), companyID)
+	count, err := c.input.CountUnreadByCompany(ctx, companyID)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CompanyMessagingCountCompanyUnreadMessages400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingUnreadCountResponse(count))
+	return openapi.CompanyMessagingCountCompanyUnreadMessages200JSONResponse(*presenter.MessagingUnreadCountResponse(count)), nil
 }
 
-func (c *MessagingController) StartCandidateConversation(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
-
-	var body openapi.ModelsStartCandidateConversationRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+// StartCandidateConversation handles POST /api/messages/conversations.
+func (c *MessagingController) StartCandidateConversation(ctx context.Context, req openapi.CandidateMessagingStartCandidateConversationRequestObject) (openapi.CandidateMessagingStartCandidateConversationResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CandidateMessagingStartCandidateConversation400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	conv, err := c.input.StartCandidateConversation(ctx.Request().Context(), messaging.StartCandidateConversationInput{
+	conv, err := c.input.StartCandidateConversation(ctx, messaging.StartCandidateConversationInput{
 		SenderID:    userID,
-		RecipientID: body.RecipientId,
-		Body:        body.Body,
+		RecipientID: req.Body.RecipientId,
+		Body:        req.Body.Body,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CandidateMessagingStartCandidateConversation404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateMessagingStartCandidateConversation400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusCreated, presenter.MessagingConversationResponse(conv))
+	return openapi.CandidateMessagingStartCandidateConversation201JSONResponse(*presenter.MessagingConversationResponse(conv)), nil
 }
 
-func (c *MessagingController) ListConversationsByCandidate(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+// ListConversationsByCandidate handles GET /api/messages/conversations.
+func (c *MessagingController) ListConversationsByCandidate(ctx context.Context, req openapi.CandidateMessagingListCandidateConversationsRequestObject) (openapi.CandidateMessagingListCandidateConversationsResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	limit, offset := parsePagination(ctx)
-	convs, total, err := c.input.ListConversationsByCandidate(ctx.Request().Context(), userID, limit, offset)
+	limit, offset := messagingPagination(req.Params.Limit, req.Params.Offset)
+	convs, total, err := c.input.ListConversationsByCandidate(ctx, userID, limit, offset)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CandidateMessagingListCandidateConversations400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingConversationsResponse(convs, total))
+	return openapi.CandidateMessagingListCandidateConversations200JSONResponse(*presenter.MessagingConversationsResponse(convs, total)), nil
 }
 
-func (c *MessagingController) GetConversationAsCandidate(ctx echo.Context, conversationID string) error {
-	userID := authmw.UserID(ctx)
+// GetConversationAsCandidate handles GET /api/messages/conversations/{conversationId}.
+func (c *MessagingController) GetConversationAsCandidate(ctx context.Context, req openapi.CandidateMessagingGetCandidateConversationRequestObject) (openapi.CandidateMessagingGetCandidateConversationResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	conv, err := c.input.GetConversation(ctx.Request().Context(), conversationID, "candidate", userID)
+	conv, err := c.input.GetConversation(ctx, req.ConversationId, "candidate", userID)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CandidateMessagingGetCandidateConversation403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CandidateMessagingGetCandidateConversation404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateMessagingGetCandidateConversation400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingConversationResponse(conv))
+	return openapi.CandidateMessagingGetCandidateConversation200JSONResponse(*presenter.MessagingConversationResponse(conv)), nil
 }
 
-func (c *MessagingController) ListMessagesAsCandidate(ctx echo.Context, conversationID string) error {
-	userID := authmw.UserID(ctx)
+// ListMessagesAsCandidate handles GET /api/messages/conversations/{conversationId}/messages.
+func (c *MessagingController) ListMessagesAsCandidate(ctx context.Context, req openapi.CandidateMessagingListCandidateMessagesRequestObject) (openapi.CandidateMessagingListCandidateMessagesResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	limit, offset := parsePagination(ctx)
-	msgs, total, err := c.input.ListMessages(ctx.Request().Context(), conversationID, "candidate", userID, limit, offset)
+	limit, offset := messagingPagination(req.Params.Limit, req.Params.Offset)
+	msgs, total, err := c.input.ListMessages(ctx, req.ConversationId, "candidate", userID, limit, offset)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CandidateMessagingListCandidateMessages403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CandidateMessagingListCandidateMessages404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateMessagingListCandidateMessages400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingMessagesResponse(msgs, total))
+	return openapi.CandidateMessagingListCandidateMessages200JSONResponse(*presenter.MessagingMessagesResponse(msgs, total)), nil
 }
 
-func (c *MessagingController) SendMessageAsCandidate(ctx echo.Context, conversationID string) error {
-	userID := authmw.UserID(ctx)
-
-	var body openapi.ModelsSendMessageRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+// SendMessageAsCandidate handles POST /api/messages/conversations/{conversationId}/messages.
+func (c *MessagingController) SendMessageAsCandidate(ctx context.Context, req openapi.CandidateMessagingSendCandidateMessageRequestObject) (openapi.CandidateMessagingSendCandidateMessageResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CandidateMessagingSendCandidateMessage400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	msg, err := c.input.SendMessage(ctx.Request().Context(), messaging.SendMessageInput{
-		ConversationID: conversationID,
+	msg, err := c.input.SendMessage(ctx, messaging.SendMessageInput{
+		ConversationID: req.ConversationId,
 		SenderType:     "candidate",
 		SenderID:       userID,
-		Body:           body.Body,
+		Body:           req.Body.Body,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CandidateMessagingSendCandidateMessage403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CandidateMessagingSendCandidateMessage404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateMessagingSendCandidateMessage400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusCreated, presenter.MessagingMessageResponse(msg))
+	return openapi.CandidateMessagingSendCandidateMessage201JSONResponse(*presenter.MessagingMessageResponse(msg)), nil
 }
 
-func (c *MessagingController) MarkReadAsCandidate(ctx echo.Context, conversationID string) error {
-	userID := authmw.UserID(ctx)
+// MarkReadAsCandidate handles POST /api/messages/conversations/{conversationId}/read.
+func (c *MessagingController) MarkReadAsCandidate(ctx context.Context, req openapi.CandidateMessagingMarkCandidateConversationReadRequestObject) (openapi.CandidateMessagingMarkCandidateConversationReadResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	if err := c.input.MarkRead(ctx.Request().Context(), conversationID, "candidate", userID); err != nil {
-		return handleError(ctx, err)
+	if err := c.input.MarkRead(ctx, req.ConversationId, "candidate", userID); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CandidateMessagingMarkCandidateConversationRead404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateMessagingMarkCandidateConversationRead400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingOKResponse())
+	return openapi.CandidateMessagingMarkCandidateConversationRead200JSONResponse(*presenter.MessagingOKResponse()), nil
 }
 
-func (c *MessagingController) CountUnreadByCandidate(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+// CountUnreadByCandidate handles GET /api/messages/unread-count.
+func (c *MessagingController) CountUnreadByCandidate(ctx context.Context, _ openapi.CandidateMessagingCountCandidateUnreadMessagesRequestObject) (openapi.CandidateMessagingCountCandidateUnreadMessagesResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	count, err := c.input.CountUnreadByCandidate(ctx.Request().Context(), userID)
+	count, err := c.input.CountUnreadByCandidate(ctx, userID)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CandidateMessagingCountCandidateUnreadMessages400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.MessagingUnreadCountResponse(count))
-}
-
-func parsePagination(ctx echo.Context) (int, int) {
-	limit := 50
-	offset := 0
-	if l, err := strconv.Atoi(ctx.QueryParam("limit")); err == nil && l > 0 && l <= 100 {
-		limit = l
-	}
-	if o, err := strconv.Atoi(ctx.QueryParam("offset")); err == nil && o >= 0 {
-		offset = o
-	}
-	return limit, offset
+	return openapi.CandidateMessagingCountCandidateUnreadMessages200JSONResponse(*presenter.MessagingUnreadCountResponse(count)), nil
 }

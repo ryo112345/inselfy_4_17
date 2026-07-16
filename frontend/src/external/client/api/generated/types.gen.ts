@@ -7578,6 +7578,10 @@ export type CompanyMessagingStartCompanyConversationErrors = {
      * Not Found エラー
      */
     404: ModelsNotFoundError;
+    /**
+     * Conflict エラー
+     */
+    409: ModelsConflictError;
 };
 
 export type CompanyMessagingStartCompanyConversationError = CompanyMessagingStartCompanyConversationErrors[keyof CompanyMessagingStartCompanyConversationErrors];
