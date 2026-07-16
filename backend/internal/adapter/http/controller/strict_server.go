@@ -38,6 +38,11 @@ type StrictServer struct {
 
 	auth        *AuthController
 	companyAuth *CompanyAuthController
+
+	companyProfile *CompanyProfileController
+	companyTeam    *CompanyTeamController
+	talentSearch   *TalentSearchController
+	savedCandidate *SavedCandidateController
 }
 
 // NewStrictServer wires controllers into the generated StrictServerInterface.
@@ -95,6 +100,20 @@ func (s *StrictServer) WireDiagnosisGroup(
 func (s *StrictServer) WireAuthGroup(auth *AuthController, companyAuth *CompanyAuthController) {
 	s.auth = auth
 	s.companyAuth = companyAuth
+}
+
+// WireCompanyGroup installs the wire_company controllers
+// (docs/strict-server-migration.md Phase 3-1 グループ6)。
+func (s *StrictServer) WireCompanyGroup(
+	companyProfile *CompanyProfileController,
+	companyTeam *CompanyTeamController,
+	talentSearch *TalentSearchController,
+	savedCandidate *SavedCandidateController,
+) {
+	s.companyProfile = companyProfile
+	s.companyTeam = companyTeam
+	s.talentSearch = talentSearch
+	s.savedCandidate = savedCandidate
 }
 
 // --- Users ---
@@ -427,4 +446,116 @@ func (s *StrictServer) CompanyAuthCompanyGetMe(ctx context.Context, req openapi.
 
 func (s *StrictServer) CompanyAuthCompanyLogout(ctx context.Context, req openapi.CompanyAuthCompanyLogoutRequestObject) (openapi.CompanyAuthCompanyLogoutResponseObject, error) {
 	return s.companyAuth.Logout(ctx, req)
+}
+
+// --- Company Profile ---
+
+func (s *StrictServer) PublicCompanyProfilesGetPublicCompanyProfile(ctx context.Context, req openapi.PublicCompanyProfilesGetPublicCompanyProfileRequestObject) (openapi.PublicCompanyProfilesGetPublicCompanyProfileResponseObject, error) {
+	return s.companyProfile.GetPublicProfile(ctx, req)
+}
+
+func (s *StrictServer) CompanyProfilesGetCompanyProfile(ctx context.Context, req openapi.CompanyProfilesGetCompanyProfileRequestObject) (openapi.CompanyProfilesGetCompanyProfileResponseObject, error) {
+	return s.companyProfile.GetProfile(ctx, req)
+}
+
+func (s *StrictServer) CompanyProfilesUpdateCompanyProfile(ctx context.Context, req openapi.CompanyProfilesUpdateCompanyProfileRequestObject) (openapi.CompanyProfilesUpdateCompanyProfileResponseObject, error) {
+	return s.companyProfile.UpdateProfile(ctx, req)
+}
+
+func (s *StrictServer) CompanyProfilesUploadCompanyProfileImage(ctx context.Context, req openapi.CompanyProfilesUploadCompanyProfileImageRequestObject) (openapi.CompanyProfilesUploadCompanyProfileImageResponseObject, error) {
+	return s.companyProfile.UploadImage(ctx, req)
+}
+
+func (s *StrictServer) CompanyProfilesDeleteCompanyProfileImage(ctx context.Context, req openapi.CompanyProfilesDeleteCompanyProfileImageRequestObject) (openapi.CompanyProfilesDeleteCompanyProfileImageResponseObject, error) {
+	return s.companyProfile.DeleteImage(ctx, req)
+}
+
+// --- Company Teams ---
+
+func (s *StrictServer) PublicTeamScoresGetPublicTeamScores(ctx context.Context, req openapi.PublicTeamScoresGetPublicTeamScoresRequestObject) (openapi.PublicTeamScoresGetPublicTeamScoresResponseObject, error) {
+	return s.companyTeam.GetPublicTeamScores(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsListTeams(ctx context.Context, req openapi.CompanyTeamsListTeamsRequestObject) (openapi.CompanyTeamsListTeamsResponseObject, error) {
+	return s.companyTeam.ListTeams(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsCreateTeam(ctx context.Context, req openapi.CompanyTeamsCreateTeamRequestObject) (openapi.CompanyTeamsCreateTeamResponseObject, error) {
+	return s.companyTeam.CreateTeam(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsGetTeam(ctx context.Context, req openapi.CompanyTeamsGetTeamRequestObject) (openapi.CompanyTeamsGetTeamResponseObject, error) {
+	return s.companyTeam.GetTeam(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsUpdateTeam(ctx context.Context, req openapi.CompanyTeamsUpdateTeamRequestObject) (openapi.CompanyTeamsUpdateTeamResponseObject, error) {
+	return s.companyTeam.UpdateTeam(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsDeleteTeam(ctx context.Context, req openapi.CompanyTeamsDeleteTeamRequestObject) (openapi.CompanyTeamsDeleteTeamResponseObject, error) {
+	return s.companyTeam.DeleteTeam(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsAddTeamMember(ctx context.Context, req openapi.CompanyTeamsAddTeamMemberRequestObject) (openapi.CompanyTeamsAddTeamMemberResponseObject, error) {
+	return s.companyTeam.AddMember(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsRemoveTeamMember(ctx context.Context, req openapi.CompanyTeamsRemoveTeamMemberRequestObject) (openapi.CompanyTeamsRemoveTeamMemberResponseObject, error) {
+	return s.companyTeam.RemoveMember(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsGetTeamScores(ctx context.Context, req openapi.CompanyTeamsGetTeamScoresRequestObject) (openapi.CompanyTeamsGetTeamScoresResponseObject, error) {
+	return s.companyTeam.GetTeamScores(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsSetAceMember(ctx context.Context, req openapi.CompanyTeamsSetAceMemberRequestObject) (openapi.CompanyTeamsSetAceMemberResponseObject, error) {
+	return s.companyTeam.SetAceMember(ctx, req)
+}
+
+func (s *StrictServer) CompanyTeamsUnsetAceMember(ctx context.Context, req openapi.CompanyTeamsUnsetAceMemberRequestObject) (openapi.CompanyTeamsUnsetAceMemberResponseObject, error) {
+	return s.companyTeam.UnsetAceMember(ctx, req)
+}
+
+// --- Talent Search ---
+
+func (s *StrictServer) TalentSearchSearchTalents(ctx context.Context, req openapi.TalentSearchSearchTalentsRequestObject) (openapi.TalentSearchSearchTalentsResponseObject, error) {
+	return s.talentSearch.Search(ctx, req)
+}
+
+func (s *StrictServer) TalentSearchDiagnosticSearchTalents(ctx context.Context, req openapi.TalentSearchDiagnosticSearchTalentsRequestObject) (openapi.TalentSearchDiagnosticSearchTalentsResponseObject, error) {
+	return s.talentSearch.DiagnosticSearch(ctx, req)
+}
+
+func (s *StrictServer) TalentSearchCiDiagnosticSearchTalents(ctx context.Context, req openapi.TalentSearchCiDiagnosticSearchTalentsRequestObject) (openapi.TalentSearchCiDiagnosticSearchTalentsResponseObject, error) {
+	return s.talentSearch.CIDiagnosticSearch(ctx, req)
+}
+
+func (s *StrictServer) TalentSearchIntegratedDiagnosticSearchTalents(ctx context.Context, req openapi.TalentSearchIntegratedDiagnosticSearchTalentsRequestObject) (openapi.TalentSearchIntegratedDiagnosticSearchTalentsResponseObject, error) {
+	return s.talentSearch.IntegratedDiagnosticSearch(ctx, req)
+}
+
+// --- Saved Candidates ---
+
+func (s *StrictServer) SavedCandidatesListSavedCandidates(ctx context.Context, req openapi.SavedCandidatesListSavedCandidatesRequestObject) (openapi.SavedCandidatesListSavedCandidatesResponseObject, error) {
+	return s.savedCandidate.List(ctx, req)
+}
+
+func (s *StrictServer) SavedCandidatesCountSavedCandidates(ctx context.Context, req openapi.SavedCandidatesCountSavedCandidatesRequestObject) (openapi.SavedCandidatesCountSavedCandidatesResponseObject, error) {
+	return s.savedCandidate.Count(ctx, req)
+}
+
+func (s *StrictServer) SavedCandidatesBulkCheckSaved(ctx context.Context, req openapi.SavedCandidatesBulkCheckSavedRequestObject) (openapi.SavedCandidatesBulkCheckSavedResponseObject, error) {
+	return s.savedCandidate.BulkCheck(ctx, req)
+}
+
+func (s *StrictServer) SavedCandidatesSaveCandidate(ctx context.Context, req openapi.SavedCandidatesSaveCandidateRequestObject) (openapi.SavedCandidatesSaveCandidateResponseObject, error) {
+	return s.savedCandidate.Save(ctx, req)
+}
+
+func (s *StrictServer) SavedCandidatesUnsaveCandidate(ctx context.Context, req openapi.SavedCandidatesUnsaveCandidateRequestObject) (openapi.SavedCandidatesUnsaveCandidateResponseObject, error) {
+	return s.savedCandidate.Unsave(ctx, req)
+}
+
+func (s *StrictServer) SavedCandidatesIsCandidateSaved(ctx context.Context, req openapi.SavedCandidatesIsCandidateSavedRequestObject) (openapi.SavedCandidatesIsCandidateSavedResponseObject, error) {
+	return s.savedCandidate.IsSaved(ctx, req)
 }

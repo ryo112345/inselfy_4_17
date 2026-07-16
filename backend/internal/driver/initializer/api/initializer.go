@@ -164,7 +164,7 @@ func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps
 	wireContent(e, sr, strictWrapper, strictSrv, d)
 	wireSearch(sr, strictWrapper, strictSrv, d)
 	wireDiagnosis(sr, strictWrapper, strictSrv, d)
-	wireCompany(e, d)
+	wireCompany(sr, strictWrapper, strictSrv, d)
 	wireScout(e, d)
 	wireJobs(e, d)
 	wireMessaging(e, d)

@@ -8987,6 +8987,10 @@ export type CompanyTeamsUnsetAceMemberErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -9023,6 +9027,10 @@ export type CompanyTeamsSetAceMemberErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -9057,6 +9065,10 @@ export type CompanyTeamsAddTeamMemberErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */
@@ -9094,6 +9106,10 @@ export type CompanyTeamsRemoveTeamMemberErrors = {
      */
     401: ModelsUnauthorizedError;
     /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
+    /**
      * Not Found エラー
      */
     404: ModelsNotFoundError;
@@ -9128,6 +9144,10 @@ export type CompanyTeamsGetTeamScoresErrors = {
      * Unauthorized エラー
      */
     401: ModelsUnauthorizedError;
+    /**
+     * Forbidden エラー
+     */
+    403: ModelsForbiddenError;
     /**
      * Not Found エラー
      */

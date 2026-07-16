@@ -16770,6 +16770,15 @@ func (response CompanyTeamsUnsetAceMember401JSONResponse) VisitCompanyTeamsUnset
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CompanyTeamsUnsetAceMember403JSONResponse ModelsForbiddenError
+
+func (response CompanyTeamsUnsetAceMember403JSONResponse) VisitCompanyTeamsUnsetAceMemberResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CompanyTeamsUnsetAceMember404JSONResponse ModelsNotFoundError
 
 func (response CompanyTeamsUnsetAceMember404JSONResponse) VisitCompanyTeamsUnsetAceMemberResponse(w http.ResponseWriter) error {
@@ -16810,6 +16819,15 @@ type CompanyTeamsSetAceMember401JSONResponse ModelsUnauthorizedError
 func (response CompanyTeamsSetAceMember401JSONResponse) VisitCompanyTeamsSetAceMemberResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CompanyTeamsSetAceMember403JSONResponse ModelsForbiddenError
+
+func (response CompanyTeamsSetAceMember403JSONResponse) VisitCompanyTeamsSetAceMemberResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -16859,6 +16877,15 @@ func (response CompanyTeamsAddTeamMember401JSONResponse) VisitCompanyTeamsAddTea
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CompanyTeamsAddTeamMember403JSONResponse ModelsForbiddenError
+
+func (response CompanyTeamsAddTeamMember403JSONResponse) VisitCompanyTeamsAddTeamMemberResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CompanyTeamsAddTeamMember404JSONResponse ModelsNotFoundError
 
 func (response CompanyTeamsAddTeamMember404JSONResponse) VisitCompanyTeamsAddTeamMemberResponse(w http.ResponseWriter) error {
@@ -16903,6 +16930,15 @@ func (response CompanyTeamsRemoveTeamMember401JSONResponse) VisitCompanyTeamsRem
 	return json.NewEncoder(w).Encode(response)
 }
 
+type CompanyTeamsRemoveTeamMember403JSONResponse ModelsForbiddenError
+
+func (response CompanyTeamsRemoveTeamMember403JSONResponse) VisitCompanyTeamsRemoveTeamMemberResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type CompanyTeamsRemoveTeamMember404JSONResponse ModelsNotFoundError
 
 func (response CompanyTeamsRemoveTeamMember404JSONResponse) VisitCompanyTeamsRemoveTeamMemberResponse(w http.ResponseWriter) error {
@@ -16943,6 +16979,15 @@ type CompanyTeamsGetTeamScores401JSONResponse ModelsUnauthorizedError
 func (response CompanyTeamsGetTeamScores401JSONResponse) VisitCompanyTeamsGetTeamScoresResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CompanyTeamsGetTeamScores403JSONResponse ModelsForbiddenError
+
+func (response CompanyTeamsGetTeamScores403JSONResponse) VisitCompanyTeamsGetTeamScoresResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }

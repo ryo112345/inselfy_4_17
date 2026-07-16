@@ -14,7 +14,10 @@ import re
 import sys
 
 # 実行ごとに値が変わる（＝差分として意味がない）フィールド
-VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "publishedAt", "userId", "postId", "sessionId"}
+VOLATILE = {"id", "createdAt", "updatedAt", "attachedAt", "publishedAt", "userId", "postId", "sessionId", "inviteToken", "companyId"}
+# 同点スコアの並びが呼び出しごとに揺れる配列（タレント検索の top ラベル）は
+# ソートして比較する（順位のタイブレークは実装が非決定的・移行と無関係）
+SORT_BEFORE_DIFF = {"topWvLabels", "topCiLabels"}
 # 診断セッション開始のたびに時刻シード RNG でシャッフル・抽選される配列。
 # WV の initialPairs は常に揮発。CI セッションの items も揮発だが、"items" は
 # ページングリスト（{items, total}）の共通キーなので、"total" を伴わない
@@ -25,16 +28,25 @@ VOLATILE |= {"initialPairs"}
 RANDOM_FILE = re.compile(
     r"(user-images|job-images|article-images|company-images)/(?:[0-9a-f]{8}_|[0-9a-f-]{36})"
 )
+# 企業ギャラリー画像のランダムサフィックス（<companyId>_gallery_<8hex>.<ext>）
+RANDOM_GALLERY = re.compile(r"_gallery_[0-9a-f]{8}")
 
 
 def norm(v):
     if isinstance(v, dict):
         volatile = VOLATILE | ({"items"} if "items" in v and "total" not in v else set())
-        return {k: ("<VOL>" if k in volatile else norm(x)) for k, x in sorted(v.items())}
+        return {
+            k: (
+                "<VOL>"
+                if k in volatile
+                else sorted(norm(x)) if k in SORT_BEFORE_DIFF and isinstance(x, list) else norm(x)
+            )
+            for k, x in sorted(v.items())
+        }
     if isinstance(v, list):
         return [norm(x) for x in v]
     if isinstance(v, str):
-        return RANDOM_FILE.sub(r"\1/XXXXXXXX_", v)
+        return RANDOM_GALLERY.sub("_gallery_XXXXXXXX", RANDOM_FILE.sub(r"\1/XXXXXXXX_", v))
     return v
 
 

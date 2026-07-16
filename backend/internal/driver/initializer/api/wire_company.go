@@ -1,100 +1,73 @@
 package initializer
 
 import (
-	"github.com/labstack/echo/v4"
-
 	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	httpcontroller "github.com/akiyama/inselfy/backend/internal/adapter/http/controller"
+	openapigen "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/usecase"
 )
 
-// wireCompany registers company-side routes: profile (public + authenticated),
-// teams (public scores + management), talent search, and saved candidates.
-func wireCompany(e *echo.Echo, d *deps) {
+// wireCompany registers company-side routes on the strict mux: profile
+// (public + authenticated), teams (public scores + management), talent search,
+// and saved candidates — this group is migrated to strict-server handlers
+// (docs/strict-server-migration.md Phase 3-1 グループ6).
+func wireCompany(sr *strictRouter, wrapper *openapigen.ServerInterfaceWrapper, ss *httpcontroller.StrictServer, d *deps) {
 	companyProfileGw := sqlcgw.NewCompanyProfileGateway(d.pool)
-	companyProfileCtrl := httpcontroller.NewCompanyProfileController(
-		usecase.NewCompanyProfileInteractor(companyProfileGw, companyProfileGw),
-		d.fileStorage,
-	)
-	teamCtrl := httpcontroller.NewCompanyTeamController(
-		usecase.NewCompanyTeamInteractor(
-			sqlcgw.NewCompanyTeamRepository(d.pool),
-			sqlcgw.NewCompanyTeamQueryService(d.pool),
-			d.tx,
+	ss.WireCompanyGroup(
+		httpcontroller.NewCompanyProfileController(
+			usecase.NewCompanyProfileInteractor(companyProfileGw, companyProfileGw),
+			d.fileStorage,
+		),
+		httpcontroller.NewCompanyTeamController(
+			usecase.NewCompanyTeamInteractor(
+				sqlcgw.NewCompanyTeamRepository(d.pool),
+				sqlcgw.NewCompanyTeamQueryService(d.pool),
+				d.tx,
+			),
+		),
+		httpcontroller.NewTalentSearchController(
+			usecase.NewTalentSearchInteractor(sqlcgw.NewTalentSearchQueryService(d.pool)),
+		),
+		httpcontroller.NewSavedCandidateController(
+			usecase.NewSavedCandidateInteractor(sqlcgw.NewSavedCandidateRepository(d.pool), sqlcgw.NewSavedCandidateQueryService(d.pool)),
 		),
 	)
 
 	// --- Company Profile (public) ---
-	e.GET("/api/companies/:id", func(c echo.Context) error {
-		return companyProfileCtrl.GetPublicProfile(c)
-	})
-
-	// --- Company Teams (public) ---
-	e.GET("/api/companies/:id/teams/scores", func(c echo.Context) error {
-		return teamCtrl.GetPublicTeamScores(c, c.Param("id"))
-	})
+	sr.handle("GET /api/companies/{id}", wrapper.PublicCompanyProfilesGetPublicCompanyProfile)
+	sr.handle("GET /api/companies/{id}/teams/scores", wrapper.PublicTeamScoresGetPublicTeamScores)
 
 	// --- Company Profile (authenticated) ---
-	companyProfileGroup := e.Group("/api/company/profile")
-	companyProfileGroup.GET("", companyProfileCtrl.GetProfile)
-	companyProfileGroup.PUT("", companyProfileCtrl.UpdateProfile)
-	companyProfileGroup.POST("/image", companyProfileCtrl.UploadImage)
-	companyProfileGroup.DELETE("/image", companyProfileCtrl.DeleteImage)
+	sr.handle("GET /api/company/profile", wrapper.CompanyProfilesGetCompanyProfile)
+	sr.handle("PUT /api/company/profile", wrapper.CompanyProfilesUpdateCompanyProfile)
+	sr.handle("POST /api/company/profile/image", wrapper.CompanyProfilesUploadCompanyProfileImage)
+	sr.handle("DELETE /api/company/profile/image", wrapper.CompanyProfilesDeleteCompanyProfileImage)
 
 	// --- Company Teams ---
-	teamGroup := e.Group("/api/company/teams")
-	teamGroup.GET("", teamCtrl.ListTeams)
-	teamGroup.POST("", teamCtrl.CreateTeam)
-	teamGroup.GET("/:teamId", func(c echo.Context) error {
-		return teamCtrl.GetTeam(c, c.Param("teamId"))
-	})
-	teamGroup.PUT("/:teamId", func(c echo.Context) error {
-		return teamCtrl.UpdateTeam(c, c.Param("teamId"))
-	})
-	teamGroup.DELETE("/:teamId", func(c echo.Context) error {
-		return teamCtrl.DeleteTeam(c, c.Param("teamId"))
-	})
-	teamGroup.POST("/:teamId/members", func(c echo.Context) error {
-		return teamCtrl.AddMember(c, c.Param("teamId"))
-	})
-	teamGroup.DELETE("/:teamId/members/:memberId", func(c echo.Context) error {
-		return teamCtrl.RemoveMember(c, c.Param("teamId"), c.Param("memberId"))
-	})
-	teamGroup.GET("/:teamId/scores", func(c echo.Context) error {
-		return teamCtrl.GetTeamScores(c, c.Param("teamId"))
-	})
-	teamGroup.PUT("/:teamId/ace/:memberId", func(c echo.Context) error {
-		return teamCtrl.SetAceMember(c, c.Param("teamId"), c.Param("memberId"))
-	})
-	teamGroup.DELETE("/:teamId/ace", func(c echo.Context) error {
-		return teamCtrl.UnsetAceMember(c, c.Param("teamId"))
-	})
+	sr.handle("GET /api/company/teams", wrapper.CompanyTeamsListTeams)
+	sr.handle("POST /api/company/teams", wrapper.CompanyTeamsCreateTeam)
+	sr.handle("GET /api/company/teams/{teamId}", wrapper.CompanyTeamsGetTeam)
+	sr.handle("PUT /api/company/teams/{teamId}", wrapper.CompanyTeamsUpdateTeam)
+	sr.handle("DELETE /api/company/teams/{teamId}", wrapper.CompanyTeamsDeleteTeam)
+	sr.handle("POST /api/company/teams/{teamId}/members", wrapper.CompanyTeamsAddTeamMember)
+	sr.handle("DELETE /api/company/teams/{teamId}/members/{memberId}", wrapper.CompanyTeamsRemoveTeamMember)
+	sr.handle("GET /api/company/teams/{teamId}/scores", wrapper.CompanyTeamsGetTeamScores)
+	sr.handle("PUT /api/company/teams/{teamId}/ace/{memberId}", wrapper.CompanyTeamsSetAceMember)
+	sr.handle("DELETE /api/company/teams/{teamId}/ace", wrapper.CompanyTeamsUnsetAceMember)
 
 	// --- Talent Search ---
-	talentCtrl := httpcontroller.NewTalentSearchController(
-		usecase.NewTalentSearchInteractor(sqlcgw.NewTalentSearchQueryService(d.pool)),
-	)
-	talentGroup := e.Group("/api/company/talents")
-	talentGroup.GET("/search", talentCtrl.Search)
-	talentGroup.GET("/search/diagnostic", talentCtrl.DiagnosticSearch)
-	talentGroup.GET("/search/diagnostic/ci", talentCtrl.CIDiagnosticSearch)
-	talentGroup.GET("/search/diagnostic/integrated", talentCtrl.IntegratedDiagnosticSearch)
+	sr.handle("GET /api/company/talents/search", wrapper.TalentSearchSearchTalents)
+	sr.handle("GET /api/company/talents/search/diagnostic", wrapper.TalentSearchDiagnosticSearchTalents)
+	sr.handle("GET /api/company/talents/search/diagnostic/ci", wrapper.TalentSearchCiDiagnosticSearchTalents)
+	sr.handle("GET /api/company/talents/search/diagnostic/integrated", wrapper.TalentSearchIntegratedDiagnosticSearchTalents)
 
 	// --- Saved Candidates ---
-	savedCandCtrl := httpcontroller.NewSavedCandidateController(
-		usecase.NewSavedCandidateInteractor(sqlcgw.NewSavedCandidateRepository(d.pool), sqlcgw.NewSavedCandidateQueryService(d.pool)),
-	)
-	savedCandGroup := e.Group("/api/company/saved-candidates")
-	savedCandGroup.GET("", savedCandCtrl.List)
-	savedCandGroup.GET("/count", savedCandCtrl.Count)
-	savedCandGroup.POST("/bulk-check", savedCandCtrl.BulkCheck)
-	savedCandGroup.POST("/:userId", func(c echo.Context) error {
-		return savedCandCtrl.Save(c)
-	})
-	savedCandGroup.DELETE("/:userId", func(c echo.Context) error {
-		return savedCandCtrl.Unsave(c)
-	})
-	savedCandGroup.GET("/:userId", func(c echo.Context) error {
-		return savedCandCtrl.IsSaved(c)
-	})
+	// count / bulk-check は {userId} の strict subset なので ServeMux の
+	// 静的優先で解決できる（priority mux 不要）。
+	sr.handle("GET /api/company/saved-candidates", wrapper.SavedCandidatesListSavedCandidates)
+	sr.handle("GET /api/company/saved-candidates/count", wrapper.SavedCandidatesCountSavedCandidates)
+	sr.handle("POST /api/company/saved-candidates/bulk-check", wrapper.SavedCandidatesBulkCheckSaved)
+	sr.handle("POST /api/company/saved-candidates/{userId}", wrapper.SavedCandidatesSaveCandidate)
+	sr.handle("DELETE /api/company/saved-candidates/{userId}", wrapper.SavedCandidatesUnsaveCandidate)
+	sr.handle("GET /api/company/saved-candidates/{userId}", wrapper.SavedCandidatesIsCandidateSaved)
 }
