@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
@@ -62,8 +60,9 @@ func errorStatus(err error) int {
 }
 
 // notFoundBody / conflictBody / forbiddenBody / badRequestBody build the
-// canonical error bodies shared by the echo helpers and the strict handlers'
-// typed responses (e.g. openapi.UsersCreateUser409JSONResponse(conflictBody(err))).
+// canonical error bodies for the strict handlers' typed responses
+// (e.g. openapi.UsersCreateUser409JSONResponse(conflictBody(err))) and the
+// hand-written net/http handlers.
 
 func notFoundBody(err error) openapi.ModelsNotFoundError {
 	return openapi.ModelsNotFoundError{
@@ -231,27 +230,6 @@ func isBadRequest(err error) bool {
 		return true
 	}
 	return false
-}
-
-func badRequest(ctx echo.Context, message string) error {
-	return ctx.JSON(http.StatusBadRequest, openapi.ModelsBadRequestError{
-		Code:    openapi.ModelsBadRequestErrorCodeBADREQUEST,
-		Message: message,
-	})
-}
-
-// errorResponse renders the canonical {code, message} error body used across the
-// API. The helpers below wrap it per status so handlers never hand-roll error maps.
-func errorResponse(ctx echo.Context, status int, code, message string) error {
-	return ctx.JSON(status, openapi.ModelsErrorResponse{Code: code, Message: message})
-}
-
-func unauthorized(ctx echo.Context, message string) error {
-	return errorResponse(ctx, http.StatusUnauthorized, "UNAUTHORIZED", message)
-}
-
-func internalError(ctx echo.Context, message string) error {
-	return errorResponse(ctx, http.StatusInternalServerError, "INTERNAL", message)
 }
 
 func invalidField(name string) error {

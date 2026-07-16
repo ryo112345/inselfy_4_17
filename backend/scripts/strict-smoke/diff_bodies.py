@@ -33,7 +33,9 @@ VOLATILE |= {
 # ソートして比較する（順位のタイブレークは実装が非決定的・移行と無関係）。
 # admin のレポート一覧（reports）も created_at 同値タイの順序が heap 依存で不安定
 # （スモークの snapshot-restore で行が入れ替わる）ためソート比較。
-SORT_BEFORE_DIFF = {"topWvLabels", "topCiLabels", "reports"}
+# admin のユーザー一覧（users）も同様: seed 一括投入で created_at が同値のユーザーは
+# ORDER BY created_at DESC のタイとなり、スモークの行 UPDATE で heap 順が変わる。
+SORT_BEFORE_DIFF = {"topWvLabels", "topCiLabels", "reports", "users"}
 # 診断セッション開始のたびに時刻シード RNG でシャッフル・抽選される配列。
 # WV の initialPairs は常に揮発。CI セッションの items も揮発だが、"items" は
 # ページングリスト（{items, total}）の共通キーなので、"total" を伴わない
@@ -50,21 +52,38 @@ RANDOM_JOB_UPLOAD = re.compile(r"(team-member-photos|gallery-images|cover-images
 RANDOM_GALLERY = re.compile(r"_gallery_[0-9a-f]{8}")
 
 
+def norm_wv_needs(lst):
+    """WV 結果の needs 配列を決定的な順序に正規化する。
+
+    presenter が map（イテレーション順ランダム）を不安定ソートするため、
+    同点 displayScore のタイ順序と rank の割り当てがリクエストごとに揺れる
+    既存の非決定性（移行と無関係）。displayScore 降順→needId でソートし直し、
+    rank を位置から振り直して比較する。
+    """
+    entries = sorted(
+        (norm(x) for x in lst),
+        key=lambda e: (-e.get("displayScore", 0), e.get("needId", "")),
+    )
+    for i, e in enumerate(entries):
+        if "rank" in e:
+            e["rank"] = i + 1
+    return entries
+
+
 def norm(v):
     if isinstance(v, dict):
         volatile = VOLATILE | ({"items"} if "items" in v and "total" not in v else set())
-        return {
-            k: (
-                "<VOL>"
-                if k in volatile
-                else (
-                    sorted(norm(x), key=lambda e: json.dumps(e, sort_keys=True, ensure_ascii=False))
-                    if k in SORT_BEFORE_DIFF and isinstance(x, list)
-                    else norm(x)
-                )
-            )
-            for k, x in sorted(v.items())
-        }
+        out = {}
+        for k, x in sorted(v.items()):
+            if k in volatile:
+                out[k] = "<VOL>"
+            elif k in SORT_BEFORE_DIFF and isinstance(x, list):
+                out[k] = sorted(norm(x), key=lambda e: json.dumps(e, sort_keys=True, ensure_ascii=False))
+            elif k == "needs" and isinstance(x, list) and x and all(isinstance(e, dict) and "displayScore" in e for e in x):
+                out[k] = norm_wv_needs(x)
+            else:
+                out[k] = norm(x)
+        return out
     if isinstance(v, list):
         return [norm(x) for x in v]
     if isinstance(v, str):

@@ -8,10 +8,9 @@ package initializer
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
-	echomw "github.com/labstack/echo/v4/middleware"
 
 	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	jwtgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/jwt"
@@ -45,7 +44,7 @@ type deps struct {
 	participantRepo  port.ConversationParticipantRepository
 }
 
-func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error) {
+func BuildServer(ctx context.Context) (http.Handler, *config.Config, func(), error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return nil, nil, func() {}, err
@@ -83,14 +82,12 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		participantRepo:  sqlcgw.NewConversationParticipantRepository(pool),
 	}
 
-	e := echo.New()
-	// 構造化ログに混ざる非JSON出力（バナー・起動行）を抑制する
-	e.HideBanner = true
-	e.HidePort = true
-	e.Use(echomw.Recover())
-	// Structured access log + request-scoped logger with Cloud Trace
-	// correlation (see adapter/http/middleware/logging_middleware.go).
-	e.Use(authmw.RequestLogging(cfg.GoogleCloudProject))
+	sr := newStrictRouter()
+	interviewCtrl, wsHub, err := registerRoutes(ctx, sr, d)
+	if err != nil {
+		cleanup()
+		return nil, nil, func() {}, err
+	}
 
 	// Validate requests against the API contract (body schema, params, enums)
 	// and enforce the spec's security requirements (spec-driven auth,
@@ -100,20 +97,19 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		cleanup()
 		return nil, nil, func() {}, err
 	}
-	e.Use(oapiValidator)
 
-	e.Use(echomw.CORSWithConfig(echomw.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000"},
-		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.OPTIONS},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowCredentials: true,
-	}))
-
-	interviewCtrl, wsHub, err := registerRoutes(ctx, e, newStrictRouter(), d)
-	if err != nil {
-		cleanup()
-		return nil, nil, func() {}, err
-	}
+	// Middleware chain, outermost first — the same order as the echo chain
+	// this replaced: Recover → RequestLogging (structured access log + Cloud
+	// Trace correlation) → OpenAPI validation/auth → CORS → router.
+	var handler http.Handler = sr
+	handler = authmw.CORS(authmw.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000", "http://127.0.0.1:3000"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch, http.MethodOptions},
+		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
+	})(handler)
+	handler = oapiValidator(handler)
+	handler = authmw.RequestLogging(cfg.GoogleCloudProject)(handler)
+	handler = authmw.Recover()(handler)
 
 	// --- Background goroutines (not needed for route registration) ---
 	go wsHub.Run()
@@ -127,20 +123,16 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	sched := scheduler.New(d.scoutMsgRepo, sqlcgw.NewScoutCreditRepository(pool))
 	sched.Start(ctx)
 
-	return e, cfg, cleanup, nil
+	return handler, cfg, cleanup, nil
 }
 
-// registerRoutes wires every route the server exposes onto e. Split out from
+// registerRoutes wires every route the server exposes onto sr. Split out from
 // BuildServer so tests can build the full route table without a live DB or
 // background goroutines (see spec_drift_test.go).
-func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
+func registerRoutes(ctx context.Context, sr *strictRouter, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
 	// 認可はスペック駆動: openapi.yaml の security 定義を OpenAPIRequestValidator
 	// が検証する（middleware/openapi_validator.go）。/api/admin の AdminAuth も
 	// 含め、per-route の認証MWは無い。
-
-	// strict-server 移行済みグループは sr（std-http mux）側に登録され、この
-	// ミドルウェアが横取りする。未移行グループは従来どおり echo のルート表へ。
-	e.Use(dispatchToStrict(sr))
 
 	strictSrv := httpcontroller.NewStrictServer()
 	strictWrapper := &openapigen.ServerInterfaceWrapper{
@@ -155,13 +147,28 @@ func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps
 		ErrorHandlerFunc: httpcontroller.WriteRequestError,
 	}
 
-	// --- Static uploads ---
-	e.Static("/api/uploads", "./uploads")
+	// --- Static uploads（スペック外・echo e.Static 相当）---
+	// http.Dir が path traversal を遮断し、ディレクトリは echo と同じく 404。
+	uploadsRoot := http.Dir("./uploads")
+	sr.handle("GET /api/uploads/{path...}", func(w http.ResponseWriter, r *http.Request) {
+		f, err := uploadsRoot.Open(r.PathValue("path"))
+		if err != nil {
+			writeJSON(w, http.StatusNotFound, map[string]string{"message": http.StatusText(http.StatusNotFound)})
+			return
+		}
+		defer func() { _ = f.Close() }()
+		st, err := f.Stat()
+		if err != nil || st.IsDir() {
+			writeJSON(w, http.StatusNotFound, map[string]string{"message": http.StatusText(http.StatusNotFound)})
+			return
+		}
+		http.ServeContent(w, r, st.Name(), st.ModTime(), f)
+	})
 
-	wireHealth(e, d.pool)
+	wireHealth(sr, d.pool)
 	wireAuth(sr, strictWrapper, strictSrv, d)
 	wireUser(sr, strictWrapper, strictSrv, d)
-	wireContent(e, sr, strictWrapper, strictSrv, d)
+	wireContent(sr, strictWrapper, strictSrv, d)
 	wireSearch(sr, strictWrapper, strictSrv, d)
 	wireDiagnosis(sr, strictWrapper, strictSrv, d)
 	wireCompany(sr, strictWrapper, strictSrv, d)
@@ -173,12 +180,12 @@ func registerRoutes(ctx context.Context, e *echo.Echo, sr *strictRouter, d *deps
 		return nil, nil, err
 	}
 
-	// --- WebSocket ---
+	// --- WebSocket（スペック外）---
 	wsHub := ws.NewHub()
 	wsTickets := ws.NewTicketStore()
 	wsCtrl := httpcontroller.NewWSController(wsHub, d.jwtService, wsTickets)
-	e.GET("/api/ws/ticket", wsCtrl.IssueTicket)
-	e.GET("/api/ws", wsCtrl.HandleWS)
+	sr.handle("GET /api/ws/ticket", wsCtrl.IssueTicket)
+	sr.handle("GET /api/ws", wsCtrl.HandleWS)
 
 	return interviewCtrl, wsHub, nil
 }

@@ -92,6 +92,15 @@ linters:
             - pkg: "github.com/jackc/pgx"
               desc: "usecase は DB ドライバに依存しない（gateway に閉じ込める）"
 
+        # Echo は Phase 3-4（strict-server 移行）で除去済み。再導入を lint で遮断する
+        no-echo:
+          list-mode: lax
+          files:
+            - "**/*.go"
+          deny:
+            - pkg: "github.com/labstack/echo"
+              desc: "Echo は除去済み（net/http 一本化）。docs/strict-server-migration.md 3-4 参照"
+
         controller-no-pgx:
           list-mode: lax
           files:

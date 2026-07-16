@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 )
 
 // wireHealth registers infra-level health endpoints. These carry no business
@@ -20,20 +19,21 @@ import (
 // Cloud Run の probe は port 8080（Next.js）にしか届かないため、
 // front の catch-all proxy（/api/* → 8081 へフルパス転送）を通る
 // /api/ プレフィックス版も登録する（C10 の startup/liveness probe が使う）。
-func wireHealth(e *echo.Echo, pool *pgxpool.Pool) {
-	livez := func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
+func wireHealth(sr *strictRouter, pool *pgxpool.Pool) {
+	livez := func(w http.ResponseWriter, _ *http.Request) {
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	}
-	readyz := func(c echo.Context) error {
-		ctx, cancel := context.WithTimeout(c.Request().Context(), 2*time.Second)
+	readyz := func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 		defer cancel()
 		if err := pool.Ping(ctx); err != nil {
-			return c.JSON(http.StatusServiceUnavailable, map[string]string{"status": "unavailable", "reason": "db ping failed"})
+			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "unavailable", "reason": "db ping failed"})
+			return
 		}
-		return c.JSON(http.StatusOK, map[string]string{"status": "ok"})
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	}
-	e.GET("/healthz", livez)
-	e.GET("/readyz", readyz)
-	e.GET("/api/healthz", livez)
-	e.GET("/api/readyz", readyz)
+	sr.handle("GET /healthz", livez)
+	sr.handle("GET /readyz", readyz)
+	sr.handle("GET /api/healthz", livez)
+	sr.handle("GET /api/readyz", readyz)
 }

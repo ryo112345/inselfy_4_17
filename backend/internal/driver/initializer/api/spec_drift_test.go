@@ -1,6 +1,6 @@
 package initializer
 
-// Detects drift between the OpenAPI spec and the manually wired echo routes.
+// Detects drift between the OpenAPI spec and the manually wired routes.
 // Route registration lives in wire_*.go by hand (RegisterHandlers from
 // oapi-codegen is intentionally unused), so nothing at compile time guarantees
 // that a path added to the spec actually gets registered — this test does.
@@ -15,7 +15,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 
 	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	jwtgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/jwt"
@@ -41,11 +40,11 @@ var unspeccedRoutes = map[string]string{
 
 func TestSpecAndRouterDoNotDrift(t *testing.T) {
 	specRoutes := loadSpecRoutes(t)
-	echoRoutes := loadRegisteredRoutes(t)
+	registered := loadRegisteredRoutes(t)
 
 	var missing []string
 	for key := range specRoutes {
-		if _, ok := echoRoutes[key]; !ok {
+		if _, ok := registered[key]; !ok {
 			missing = append(missing, key)
 		}
 	}
@@ -55,7 +54,7 @@ func TestSpecAndRouterDoNotDrift(t *testing.T) {
 	}
 
 	var extra []string
-	for key := range echoRoutes {
+	for key := range registered {
 		if _, ok := specRoutes[key]; ok {
 			continue
 		}
@@ -91,10 +90,9 @@ func loadSpecRoutes(t *testing.T) map[string]struct{} {
 	return routes
 }
 
-// loadRegisteredRoutes builds the real route table via registerRoutes —
-// echo routes plus the strict-server mux patterns — and returns normalized
-// "METHOD path" keys. The pool is created lazily and no handler runs, so no
-// DB is needed.
+// loadRegisteredRoutes builds the real route table via registerRoutes — the
+// strict-server mux patterns — and returns normalized "METHOD path" keys.
+// The pool is created lazily and no handler runs, so no DB is needed.
 func loadRegisteredRoutes(t *testing.T) map[string]struct{} {
 	t.Helper()
 	ctx := context.Background()
@@ -121,21 +119,12 @@ func loadRegisteredRoutes(t *testing.T) map[string]struct{} {
 		participantRepo:  sqlcgw.NewConversationParticipantRepository(pool),
 	}
 
-	e := echo.New()
 	sr := newStrictRouter()
-	if _, _, err := registerRoutes(ctx, e, sr, d); err != nil {
+	if _, _, err := registerRoutes(ctx, sr, d); err != nil {
 		t.Fatalf("registerRoutes: %v", err)
 	}
 
 	routes := make(map[string]struct{})
-	for _, r := range e.Routes() {
-		// Group.Use registers catch-all pseudo-routes so group middleware
-		// runs on 404s; they are not real endpoints.
-		if r.Method == echo.RouteNotFound {
-			continue
-		}
-		routes[routeKey(r.Method, r.Path)] = struct{}{}
-	}
 	for _, pattern := range sr.patterns {
 		method, path, ok := strings.Cut(pattern, " ")
 		if !ok {

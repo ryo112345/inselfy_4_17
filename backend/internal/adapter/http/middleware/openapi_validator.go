@@ -12,11 +12,9 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/getkin/kin-openapi/routers"
 	"github.com/getkin/kin-openapi/routers/gorillamux"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
@@ -24,21 +22,17 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
-// AdminIDKey holds the authenticated admin's ID when a personal token was
-// used. It is unset when the static bootstrap key was used.
-const AdminIDKey = "adminID"
-
 // OpenAPIRequestValidator validates incoming requests against the embedded
 // OpenAPI spec: body schema (maxLength, enum, required, ...), path and query
 // parameters, and the spec's security requirements (spec-driven auth). Routes
 // declaring `security` get JWT / X-Admin-Key validation automatically;
-// validated IDs are published both to the echo context (UserIDKey /
-// CompanyIDKey / AdminIDKey) and to the request context (UserIDFromContext /
+// validated IDs are published to the request context (UserIDFromContext /
 // CompanyIDFromContext / AdminIDFromContext). Paths not present in the spec
-// (uploads static files, websocket, ...) pass through untouched.
+// (uploads static files, websocket, stripe webhook, health) pass through
+// untouched.
 // pool and adminStaticKey back the AdminAuth scheme (personal tokens stored
 // hashed in the admins table, plus the ADMIN_API_KEY bootstrap key).
-func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService, pool *pgxpool.Pool, adminStaticKey string) (echo.MiddlewareFunc, error) {
+func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService, pool *pgxpool.Pool, adminStaticKey string) (func(http.Handler) http.Handler, error) {
 	loader := openapi3.NewLoader()
 	doc, err := loader.LoadFromData(specYAML)
 	if err != nil {
@@ -57,36 +51,32 @@ func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService, pool *
 
 	authFunc := newAuthenticationFunc(jwtService, generated.New(pool), adminStaticKey)
 
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			req := c.Request()
-
-			route, pathParams, err := router.FindRoute(req)
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			route, pathParams, err := router.FindRoute(r)
 			if err != nil {
-				if errors.Is(err, routers.ErrPathNotFound) || errors.Is(err, routers.ErrMethodNotAllowed) {
-					return next(c)
-				}
-				return next(c)
+				// スペック外パス（uploads/ws/webhook/health）は素通し
+				next.ServeHTTP(w, r)
+				return
 			}
 
 			// Carry a claims holder in the request context so the
 			// AuthenticationFunc can publish validated IDs, and so
 			// handlers can read them via *FromContext helpers.
-			ctx, claims := withAuthClaims(req.Context())
-			req = req.WithContext(ctx)
-			c.SetRequest(req)
+			ctx, claims := withAuthClaims(r.Context())
+			r = r.WithContext(ctx)
 
 			opts := &openapi3filter.Options{
 				AuthenticationFunc: authFunc,
 			}
 			// File uploads are size/extension-checked in the controllers;
 			// buffering multipart bodies here would be wasted work.
-			if strings.HasPrefix(req.Header.Get(echo.HeaderContentType), echo.MIMEMultipartForm) {
+			if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
 				opts.ExcludeRequestBody = true
 			}
 
 			input := &openapi3filter.RequestValidationInput{
-				Request:    req,
+				Request:    r,
 				PathParams: pathParams,
 				Route:      route,
 				Options:    opts,
@@ -94,34 +84,25 @@ func OpenAPIRequestValidator(specYAML []byte, jwtService port.JWTService, pool *
 			if err := openapi3filter.ValidateRequest(ctx, input); err != nil {
 				var secErr *openapi3filter.SecurityRequirementsError
 				if errors.As(err, &secErr) {
-					return c.JSON(http.StatusUnauthorized, openapi.ModelsUnauthorizedError{
+					writeJSONError(w, http.StatusUnauthorized, openapi.ModelsUnauthorizedError{
 						Code:    openapi.ModelsUnauthorizedErrorCodeUNAUTHORIZED,
 						Message: "unauthorized",
 					})
+					return
 				}
-				return c.JSON(http.StatusBadRequest, openapi.ModelsBadRequestError{
+				writeJSONError(w, http.StatusBadRequest, openapi.ModelsBadRequestError{
 					Code:    openapi.ModelsBadRequestErrorCodeBADREQUEST,
 					Message: compactValidationError(err),
 				})
+				return
 			}
 
-			// Mirror validated claims into the echo context so existing
-			// handlers keep reading c.Get(UserIDKey/CompanyIDKey) unchanged.
-			if claims.userID != "" {
-				c.Set(UserIDKey, claims.userID)
-			}
-			if claims.companyID != "" {
-				c.Set(CompanyIDKey, claims.companyID)
-			}
 			if claims.adminAuthMethod != "" {
-				if claims.adminID != "" {
-					c.Set(AdminIDKey, claims.adminID)
-				}
-				annotateAuditLogger(c, claims.adminAuthMethod, claims.adminID)
+				annotateAuditLogger(ctx, claims.adminAuthMethod, claims.adminID)
 			}
 
-			return next(c)
-		}
+			next.ServeHTTP(w, r)
+		})
 	}, nil
 }
 
@@ -213,15 +194,14 @@ func schemeToken(req *http.Request, scheme *openapi3.SecurityScheme) string {
 
 // annotateAuditLogger enriches the request-scoped logger with the admin's
 // identity, so the access log (and any handler logs) of admin operations
-// records who performed them. RequestLogging re-reads the logger from the
-// request context after the handler chain, so this propagates upstream.
-func annotateAuditLogger(c echo.Context, authMethod, adminID string) {
-	ctx := c.Request().Context()
+// records who performed them. The logger holder is mutated in place, so the
+// upstream RequestLogging middleware sees the enrichment too.
+func annotateAuditLogger(ctx context.Context, authMethod, adminID string) {
 	logger := logging.FromContext(ctx).With("admin_auth", authMethod)
 	if adminID != "" {
 		logger = logger.With("admin_id", adminID)
 	}
-	c.SetRequest(c.Request().WithContext(logging.WithLogger(ctx, logger)))
+	logging.SetLogger(ctx, logger)
 }
 
 // compactValidationError flattens kin-openapi's multiline error (which embeds

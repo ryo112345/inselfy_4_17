@@ -2,27 +2,7 @@ package middleware
 
 import (
 	"context"
-
-	"github.com/labstack/echo/v4"
 )
-
-// CompanyID returns the authenticated company ID from the request context.
-// Routes that call this MUST be registered behind CompanyJWTAuth, which rejects
-// unauthenticated requests with 401 and always sets a non-empty CompanyIDKey
-// before the handler runs. The presence check is therefore unnecessary here.
-func CompanyID(c echo.Context) string {
-	id, _ := c.Get(CompanyIDKey).(string)
-	return id
-}
-
-// UserID returns the authenticated user ID from the request context.
-// Routes that call this MUST be registered behind JWTAuth (required auth).
-// For routes behind OptionalJWTAuth, read the key directly and branch on
-// presence instead — the value may be empty there.
-func UserID(c echo.Context) string {
-	id, _ := c.Get(UserIDKey).(string)
-	return id
-}
 
 // authClaimsKey is the context key under which the spec-driven authenticator
 // publishes validated claims.
@@ -52,7 +32,7 @@ func withAuthClaims(ctx context.Context) (context.Context, *authClaims) {
 
 // UserIDFromContext returns the candidate user ID validated by the
 // spec-driven authenticator, or "" for unauthenticated requests (public or
-// optional-auth routes). context.Context counterpart of UserID.
+// optional-auth routes).
 func UserIDFromContext(ctx context.Context) string {
 	if claims, ok := ctx.Value(authClaimsKey{}).(*authClaims); ok {
 		return claims.userID
@@ -61,8 +41,7 @@ func UserIDFromContext(ctx context.Context) string {
 }
 
 // CompanyIDFromContext returns the company ID validated by the spec-driven
-// authenticator, or "" for unauthenticated requests. context.Context
-// counterpart of CompanyID.
+// authenticator, or "" for unauthenticated requests.
 func CompanyIDFromContext(ctx context.Context) string {
 	if claims, ok := ctx.Value(authClaimsKey{}).(*authClaims); ok {
 		return claims.companyID

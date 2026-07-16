@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 )
@@ -35,11 +34,9 @@ func (stubJWTService) ValidateCompanyAccessToken(token string) (string, error) {
 	return "", errors.New("invalid token")
 }
 
-// claims echoes back what the auth layer published, for assertions.
-func claimsHandler(c echo.Context) error {
-	return c.String(http.StatusOK,
-		UserID(c)+"|"+CompanyID(c)+"|"+
-			UserIDFromContext(c.Request().Context())+"|"+CompanyIDFromContext(c.Request().Context()))
+// claimsHandler echoes back what the auth layer published, for assertions.
+func claimsHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(UserIDFromContext(r.Context()) + "|" + CompanyIDFromContext(r.Context())))
 }
 
 // testAdminStaticKey is the ADMIN_API_KEY equivalent for tests. The personal
@@ -47,7 +44,7 @@ func claimsHandler(c echo.Context) error {
 // host: any non-static key deterministically fails the lookup (→ 401).
 const testAdminStaticKey = "test-admin-static-key"
 
-func newValidatedEcho(t *testing.T) *echo.Echo {
+func newValidatedHandler(t *testing.T) http.Handler {
 	t.Helper()
 	pool, err := pgxpool.New(t.Context(), "postgres://validator:test@invalid-host.invalid:5432/validator-test")
 	if err != nil {
@@ -58,45 +55,44 @@ func newValidatedEcho(t *testing.T) *echo.Echo {
 	if err != nil {
 		t.Fatalf("failed to build validator: %v", err)
 	}
-	e := echo.New()
-	e.Use(mw)
-	ok := func(c echo.Context) error { return c.NoContent(http.StatusOK) }
+	mux := http.NewServeMux()
+	ok := func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) }
 	// CandidateAuth required in the spec.
-	e.POST("/api/posts", claimsHandler)
+	mux.HandleFunc("POST /api/posts", claimsHandler)
 	// Optional auth in the spec: security: [{CandidateAuth}, {}].
-	e.GET("/api/articles/:articleId", claimsHandler)
+	mux.HandleFunc("GET /api/articles/{articleId}", claimsHandler)
 	// OR auth in the spec: security: [{CandidateAuth}, {CompanyAuth}].
-	e.GET("/api/career-interest/sessions/:sessionId/ai-report", claimsHandler)
+	mux.HandleFunc("GET /api/career-interest/sessions/{sessionId}/ai-report", claimsHandler)
 	// AdminAuth (X-Admin-Key) required in the spec.
-	e.GET("/api/admin/reports/pending", ok)
-	e.POST("/api/not-in-spec", ok)
-	return e
+	mux.HandleFunc("GET /api/admin/reports/pending", ok)
+	mux.HandleFunc("POST /api/not-in-spec", ok)
+	return mw(mux)
 }
 
-func doRequest(t *testing.T, e *echo.Echo, req *http.Request) *httptest.ResponseRecorder {
+func doRequest(t *testing.T, h http.Handler, req *http.Request) *httptest.ResponseRecorder {
 	t.Helper()
 	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, req)
+	h.ServeHTTP(rec, req)
 	return rec
 }
 
-func postJSON(t *testing.T, e *echo.Echo, path, body string, cookies ...*http.Cookie) *httptest.ResponseRecorder {
+func postJSON(t *testing.T, h http.Handler, path, body string, cookies ...*http.Cookie) *httptest.ResponseRecorder {
 	t.Helper()
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, path, strings.NewReader(body))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set("Content-Type", "application/json")
 	for _, cookie := range cookies {
 		req.AddCookie(cookie)
 	}
-	return doRequest(t, e, req)
+	return doRequest(t, h, req)
 }
 
-func getPath(t *testing.T, e *echo.Echo, path string, cookies ...*http.Cookie) *httptest.ResponseRecorder {
+func getPath(t *testing.T, h http.Handler, path string, cookies ...*http.Cookie) *httptest.ResponseRecorder {
 	t.Helper()
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil)
 	for _, cookie := range cookies {
 		req.AddCookie(cookie)
 	}
-	return doRequest(t, e, req)
+	return doRequest(t, h, req)
 }
 
 func candidateCookie(value string) *http.Cookie {
@@ -108,20 +104,20 @@ func companyCookie(value string) *http.Cookie {
 }
 
 func TestOpenAPIRequestValidator_ValidBodyPasses(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := postJSON(t, e, "/api/posts", `{"content":"hello"}`, candidateCookie("valid-user-token"))
+	h := newValidatedHandler(t)
+	rec := postJSON(t, h, "/api/posts", `{"content":"hello"}`, candidateCookie("valid-user-token"))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
 	}
-	if got := rec.Body.String(); got != "user-1||user-1|" {
-		t.Fatalf("expected candidate claims in both contexts, got %q", got)
+	if got := rec.Body.String(); got != "user-1|" {
+		t.Fatalf("expected candidate claims in request context, got %q", got)
 	}
 }
 
 func TestOpenAPIRequestValidator_MaxLengthViolationRejected(t *testing.T) {
-	e := newValidatedEcho(t)
+	h := newValidatedHandler(t)
 	long := strings.Repeat("a", 281)
-	rec := postJSON(t, e, "/api/posts", `{"content":"`+long+`"}`, candidateCookie("valid-user-token"))
+	rec := postJSON(t, h, "/api/posts", `{"content":"`+long+`"}`, candidateCookie("valid-user-token"))
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())
 	}
@@ -131,24 +127,24 @@ func TestOpenAPIRequestValidator_MaxLengthViolationRejected(t *testing.T) {
 }
 
 func TestOpenAPIRequestValidator_MissingRequiredFieldRejected(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := postJSON(t, e, "/api/posts", `{}`, candidateCookie("valid-user-token"))
+	h := newValidatedHandler(t)
+	rec := postJSON(t, h, "/api/posts", `{}`, candidateCookie("valid-user-token"))
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d: %s", rec.Code, rec.Body.String())
 	}
 }
 
 func TestOpenAPIRequestValidator_UnknownPathPassesThrough(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := postJSON(t, e, "/api/not-in-spec", `{"whatever": true}`)
+	h := newValidatedHandler(t)
+	rec := postJSON(t, h, "/api/not-in-spec", `{"whatever": true}`)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 for path outside spec, got %d: %s", rec.Code, rec.Body.String())
 	}
 }
 
 func TestOpenAPIRequestValidator_MissingTokenRejected(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := postJSON(t, e, "/api/posts", `{"content":"hello"}`)
+	h := newValidatedHandler(t)
+	rec := postJSON(t, h, "/api/posts", `{"content":"hello"}`)
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401, got %d: %s", rec.Code, rec.Body.String())
 	}
@@ -158,97 +154,97 @@ func TestOpenAPIRequestValidator_MissingTokenRejected(t *testing.T) {
 }
 
 func TestOpenAPIRequestValidator_InvalidTokenRejected(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := postJSON(t, e, "/api/posts", `{"content":"hello"}`, candidateCookie("bogus"))
+	h := newValidatedHandler(t)
+	rec := postJSON(t, h, "/api/posts", `{"content":"hello"}`, candidateCookie("bogus"))
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401, got %d: %s", rec.Code, rec.Body.String())
 	}
 }
 
 func TestOpenAPIRequestValidator_BearerHeaderFallback(t *testing.T) {
-	e := newValidatedEcho(t)
+	h := newValidatedHandler(t)
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodPost, "/api/posts", strings.NewReader(`{"content":"hello"}`))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer valid-user-token")
-	rec := doRequest(t, e, req)
+	rec := doRequest(t, h, req)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 via bearer fallback, got %d: %s", rec.Code, rec.Body.String())
 	}
 }
 
 func TestOpenAPIRequestValidator_OptionalAuthWithoutToken(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := getPath(t, e, "/api/articles/00000000-0000-0000-0000-000000000000")
+	h := newValidatedHandler(t)
+	rec := getPath(t, h, "/api/articles/00000000-0000-0000-0000-000000000000")
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 on optional-auth route without token, got %d: %s", rec.Code, rec.Body.String())
 	}
-	if got := rec.Body.String(); got != "|||" {
+	if got := rec.Body.String(); got != "|" {
 		t.Fatalf("expected empty claims, got %q", got)
 	}
 }
 
 func TestOpenAPIRequestValidator_OptionalAuthWithToken(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := getPath(t, e, "/api/articles/00000000-0000-0000-0000-000000000000", candidateCookie("valid-user-token"))
+	h := newValidatedHandler(t)
+	rec := getPath(t, h, "/api/articles/00000000-0000-0000-0000-000000000000", candidateCookie("valid-user-token"))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
 	}
-	if got := rec.Body.String(); got != "user-1||user-1|" {
+	if got := rec.Body.String(); got != "user-1|" {
 		t.Fatalf("expected candidate claims, got %q", got)
 	}
 }
 
 func TestOpenAPIRequestValidator_OptionalAuthWithInvalidTokenFallsBackToAnonymous(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := getPath(t, e, "/api/articles/00000000-0000-0000-0000-000000000000", candidateCookie("bogus"))
+	h := newValidatedHandler(t)
+	rec := getPath(t, h, "/api/articles/00000000-0000-0000-0000-000000000000", candidateCookie("bogus"))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 (empty requirement absorbs the failure), got %d: %s", rec.Code, rec.Body.String())
 	}
-	if got := rec.Body.String(); got != "|||" {
+	if got := rec.Body.String(); got != "|" {
 		t.Fatalf("expected empty claims, got %q", got)
 	}
 }
 
 func TestOpenAPIRequestValidator_OrAuthAcceptsCompanyToken(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := getPath(t, e, "/api/career-interest/sessions/00000000-0000-0000-0000-000000000000/ai-report",
+	h := newValidatedHandler(t)
+	rec := getPath(t, h, "/api/career-interest/sessions/00000000-0000-0000-0000-000000000000/ai-report",
 		companyCookie("valid-company-token"))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 for company token on OR route, got %d: %s", rec.Code, rec.Body.String())
 	}
-	if got := rec.Body.String(); got != "|company-1||company-1" {
+	if got := rec.Body.String(); got != "|company-1" {
 		t.Fatalf("expected company claims, got %q", got)
 	}
 }
 
 func TestOpenAPIRequestValidator_OrAuthRejectsWithoutAnyToken(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := getPath(t, e, "/api/career-interest/sessions/00000000-0000-0000-0000-000000000000/ai-report")
+	h := newValidatedHandler(t)
+	rec := getPath(t, h, "/api/career-interest/sessions/00000000-0000-0000-0000-000000000000/ai-report")
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401 on OR route without token, got %d: %s", rec.Code, rec.Body.String())
 	}
 }
 
-func adminGet(t *testing.T, e *echo.Echo, key string) *httptest.ResponseRecorder {
+func adminGet(t *testing.T, h http.Handler, key string) *httptest.ResponseRecorder {
 	t.Helper()
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/admin/reports/pending", nil)
 	if key != "" {
 		req.Header.Set("X-Admin-Key", key)
 	}
-	return doRequest(t, e, req)
+	return doRequest(t, h, req)
 }
 
 func TestOpenAPIRequestValidator_AdminStaticKeyPasses(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := adminGet(t, e, testAdminStaticKey)
+	h := newValidatedHandler(t)
+	rec := adminGet(t, h, testAdminStaticKey)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 with static admin key, got %d: %s", rec.Code, rec.Body.String())
 	}
 }
 
 func TestOpenAPIRequestValidator_AdminMissingKeyRejected(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := adminGet(t, e, "")
+	h := newValidatedHandler(t)
+	rec := adminGet(t, h, "")
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401 without X-Admin-Key, got %d: %s", rec.Code, rec.Body.String())
 	}
@@ -258,8 +254,8 @@ func TestOpenAPIRequestValidator_AdminMissingKeyRejected(t *testing.T) {
 }
 
 func TestOpenAPIRequestValidator_AdminWrongKeyRejected(t *testing.T) {
-	e := newValidatedEcho(t)
-	rec := adminGet(t, e, "wrong-key")
+	h := newValidatedHandler(t)
+	rec := adminGet(t, h, "wrong-key")
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401 with wrong admin key, got %d: %s", rec.Code, rec.Body.String())
 	}
@@ -268,10 +264,10 @@ func TestOpenAPIRequestValidator_AdminWrongKeyRejected(t *testing.T) {
 func TestOpenAPIRequestValidator_AdminBearerFallbackNotAccepted(t *testing.T) {
 	// X-Admin-Key は header スキームなので Authorization: Bearer では代替できない
 	// （旧 AdminAuth ミドルウェアと同じ挙動）。
-	e := newValidatedEcho(t)
+	h := newValidatedHandler(t)
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/api/admin/reports/pending", nil)
 	req.Header.Set("Authorization", "Bearer "+testAdminStaticKey)
-	rec := doRequest(t, e, req)
+	rec := doRequest(t, h, req)
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401 for bearer-only admin request, got %d: %s", rec.Code, rec.Body.String())
 	}
