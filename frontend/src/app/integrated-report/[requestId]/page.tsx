@@ -6,7 +6,9 @@ import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContex
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
 import { ACCENT } from "@/constants/theme";
 // SSR の SDK 呼び出しに認証 Cookie を自動転送する interceptor を登録する
+// （hey-api 経由の fetchPanelData と orval 経由の integrated-report api が混在するため両方）
 import "@/external/client/api/server";
+import "@/external/client/api/orval/server";
 import { getCurrentUsername, getUsernameFromCookie } from "@/features/auth/viewer";
 import { getIntegratedReport } from "@/features/integrated-report/api";
 import { fetchInitialFollowing, fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";

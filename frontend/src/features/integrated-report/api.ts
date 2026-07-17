@@ -1,49 +1,57 @@
-import { skipAuthRedirect } from "@/external/client/api/client";
+// 統合レポートの薄いラッパー層。ベストエフォート取得（null 返し）の加工があるため
+// 手書きを維持し、内部だけ orval 生成の平関数に置き換えている。
+// 非2xx は mutator が ApiError を throw する。
+import { skipAuthRedirect } from "@/external/client/api/orval/custom-fetch";
 import {
   integratedReportCreateIntegratedReportRequest,
   integratedReportGetIntegratedReport,
   integratedReportGetIntegratedReportStatus,
   integratedReportGetLatestIntegratedRequest,
-  type ModelsCreateIntegratedReportRequest,
-  type ModelsIntegratedReportLatestRequestResponse,
-  type ModelsIntegratedReportResponse,
-  type ModelsIntegratedReportStatusResponse,
-} from "@/external/client/api/generated";
-import { run } from "@/lib/api-result";
+} from "@/external/client/api/orval/generated/endpoints/integrated-report/integrated-report";
+import type {
+  ModelsCreateIntegratedReportRequest,
+  ModelsIntegratedReportLatestRequestResponse,
+  ModelsIntegratedReportResponse,
+  ModelsIntegratedReportStatusResponse,
+} from "@/external/client/api/orval/generated/models";
 
 export type IntegratedReportStatus = ModelsIntegratedReportStatusResponse["status"];
 
 // リクエスト状況取得（要ログイン）。ベストエフォート取得のため
 // 未ログインの 401 では /login に飛ばさず null を返す。
 export async function getIntegratedReportStatus(): Promise<ModelsIntegratedReportStatusResponse | null> {
-  const { data, error } = await integratedReportGetIntegratedReportStatus({
-    ...skipAuthRedirect,
-  });
-  if (error || !data) return null;
-  return data;
+  try {
+    return await integratedReportGetIntegratedReportStatus(skipAuthRedirect);
+  } catch {
+    return null;
+  }
 }
 
 // レポート生成リクエスト作成（要ログイン）。失敗時はサーバのエラーメッセージで throw。
 export async function createIntegratedReportRequest(
   body: ModelsCreateIntegratedReportRequest,
 ): Promise<void> {
-  await run(integratedReportCreateIntegratedReportRequest({ body }), "リクエストに失敗しました");
+  await integratedReportCreateIntegratedReportRequest(body);
 }
 
 // リクエストIDでレポート取得（公開）。未生成（404）等のエラーは null を返す。
 export async function getIntegratedReport(
   requestId: string,
 ): Promise<ModelsIntegratedReportResponse | null> {
-  const { data, error } = await integratedReportGetIntegratedReport({ path: { requestId } });
-  if (error || !data) return null;
-  return data;
+  try {
+    return await integratedReportGetIntegratedReport(requestId);
+  } catch {
+    return null;
+  }
 }
 
 // ユーザーの最新リクエスト取得（公開）。リクエストが無ければ null。
 export async function getLatestIntegratedRequest(
   userId: string,
 ): Promise<ModelsIntegratedReportLatestRequestResponse | null> {
-  const { data, error } = await integratedReportGetLatestIntegratedRequest({ path: { userId } });
-  if (error || !data) return null;
-  return data;
+  try {
+    return await integratedReportGetLatestIntegratedRequest(userId);
+  } catch {
+    return null;
+  }
 }
