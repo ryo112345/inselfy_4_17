@@ -13,7 +13,7 @@ import {
 import { CareerInterestResultContent } from "@/app/career_interest/[sessionId]/CareerInterestContent";
 import { IntegratedReportContent } from "@/app/integrated-report/[requestId]/IntegratedReportContent";
 import { WorkValuesResultContent } from "@/app/work_values/[sessionId]/WorkValuesContent";
-import type { ModelsSimilarUserItem } from "@/external/client/api/generated";
+import type { ModelsSimilarUserItem } from "@/external/client/api/orval/generated/models";
 import { useAuth } from "@/features/auth/auth-context";
 import type { ResultDTO as CiResultDTO } from "@/features/career-interest/api";
 import type { ResultDTO as WvResultDTO } from "@/features/work-values/api";

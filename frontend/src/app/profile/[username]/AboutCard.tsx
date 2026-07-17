@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { PencilIcon } from "@/components/icons";
 import { Field, PrimaryButton, SecondaryButton } from "@/components/ui";
-import type { ModelsUserResponse } from "@/external/client/api/generated";
+import type { ModelsUserResponse } from "@/external/client/api/orval/generated/models";
 import { type ApiError, updateProfile } from "./api";
 import { useProfileColor } from "./ProfileColorContext";
 

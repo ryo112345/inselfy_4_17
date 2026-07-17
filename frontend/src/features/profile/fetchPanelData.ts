@@ -1,19 +1,21 @@
-import { formatDateCompact } from "@/lib/date";
-import "@/external/client/api/client";
+import { educationsListEducations } from "@/external/client/api/orval/generated/endpoints/educations/educations";
+import { experiencesListExperiences } from "@/external/client/api/orval/generated/endpoints/experiences/experiences";
 import {
-  educationsListEducations,
-  experiencesListExperiences,
   followsGetFollowStatus,
   followsListFollowers,
   followsListFollowing,
-  type ModelsEducationResponse,
-  type ModelsExperienceResponse,
-  type ModelsSkillResponse,
-  type ModelsUserResponse,
-  skillsListSkills,
+} from "@/external/client/api/orval/generated/endpoints/follows/follows";
+import { skillsListSkills } from "@/external/client/api/orval/generated/endpoints/skills/skills";
+import {
   usersGetUserById,
   usersGetUserByUsername,
-} from "@/external/client/api/generated";
+} from "@/external/client/api/orval/generated/endpoints/users/users";
+import type {
+  ModelsEducationResponse,
+  ModelsExperienceResponse,
+  ModelsSkillResponse,
+  ModelsUserResponse,
+} from "@/external/client/api/orval/generated/models";
 import {
   type ResultDTO as CiResultDTO,
   getLatestResult as getLatestCiResult,
@@ -25,6 +27,7 @@ import {
   type ResultDTO as WvResultDTO,
 } from "@/features/work-values/api";
 import { VALUE_LABELS, type ValueId } from "@/features/work-values/lib/needs";
+import { formatDateCompact } from "@/lib/date";
 
 export type DiagnosticSummary = {
   label: string;
@@ -57,26 +60,29 @@ export type PanelData = {
 };
 
 // サーバコンポーネントから呼ぶ場合の認証Cookie転送（診断結果系APIは認証必須）は
-// @/external/client/api/server の interceptor が担う。呼び出し元 page で import しておくこと。
+// @/external/client/api/orval/server の provider が担う。呼び出し元 page で import しておくこと。
 export async function fetchPanelDataByUsername(username: string): Promise<PanelData | null> {
-  const userRes = await usersGetUserByUsername({ path: { username } });
-  if (userRes.error || !userRes.data) return null;
-  return fetchRest(userRes.data, username);
+  try {
+    const user = await usersGetUserByUsername(username);
+    return await fetchRest(user, username);
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchPanelDataByUserId(userId: string): Promise<PanelData | null> {
-  const userRes = await usersGetUserById({ path: { id: userId } });
-  if (userRes.error || !userRes.data) return null;
-  return fetchRest(userRes.data, userRes.data.username);
+  try {
+    const user = await usersGetUserById(userId);
+    return await fetchRest(user, user.username);
+  } catch {
+    return null;
+  }
 }
 
 // フォロー状態。未ログイン（401）・エラー時は null（FollowButton はスペーサー表示）
 export async function fetchInitialFollowing(username: string): Promise<boolean | null> {
   try {
-    const { data, error } = await followsGetFollowStatus({
-      path: { username },
-    });
-    if (error || !data) return null;
+    const data = await followsGetFollowStatus(username);
     return data.following;
   } catch {
     return null;
@@ -113,34 +119,40 @@ async function fetchLatestIntegratedRequest(
 
 async function fetchFollowCounts(username: string): Promise<FollowCounts> {
   try {
-    const [followersRes, followingRes] = await Promise.all([
-      followsListFollowers({ path: { username }, query: { limit: 1 } }),
-      followsListFollowing({ path: { username }, query: { limit: 1 } }),
+    const [followers, following] = await Promise.all([
+      followsListFollowers(username, { limit: 1 }),
+      followsListFollowing(username, { limit: 1 }),
     ]);
     return {
-      followersCount: followersRes.data?.total ?? 0,
-      followingCount: followingRes.data?.total ?? 0,
+      followersCount: followers.total ?? 0,
+      followingCount: following.total ?? 0,
     };
   } catch {
     return { followersCount: 0, followingCount: 0 };
   }
 }
 
+// 各セクションの取得失敗は空表示に落とす（部分失敗でパネル全体を落とさない）
 async function fetchRest(user: ModelsUserResponse, username: string): Promise<PanelData> {
-  const [experiencesRes, educationsRes, skillsRes, wvResult, ciResult, intRequest, followCounts] =
+  const [experiences, educations, skills, wvResult, ciResult, intRequest, followCounts] =
     await Promise.all([
-      experiencesListExperiences({ path: { username } }),
-      educationsListEducations({ path: { username } }),
-      skillsListSkills({ path: { username } }),
+      experiencesListExperiences(username).then(
+        (r) => r.items ?? [],
+        () => [] as ModelsExperienceResponse[],
+      ),
+      educationsListEducations(username).then(
+        (r) => r.items ?? [],
+        () => [] as ModelsEducationResponse[],
+      ),
+      skillsListSkills(username).then(
+        (r) => r.items ?? [],
+        () => [] as ModelsSkillResponse[],
+      ),
       getLatestWvResult(user.id).catch(() => null),
       getLatestCiResult(user.id).catch(() => null),
       fetchLatestIntegratedRequest(user.id),
       fetchFollowCounts(username),
     ]);
-
-  const experiences: ModelsExperienceResponse[] = experiencesRes.data?.items ?? [];
-  const educations: ModelsEducationResponse[] = educationsRes.data?.items ?? [];
-  const skills: ModelsSkillResponse[] = skillsRes.data?.items ?? [];
 
   const diagnostics: DiagnosticSummary[] = [];
   if (wvResult) {

@@ -3,7 +3,7 @@ import type {
   ModelsExperienceResponse,
   ModelsSkillResponse,
   ModelsUserResponse,
-} from "@/external/client/api/generated";
+} from "@/external/client/api/orval/generated/models";
 import type { PostItem } from "@/features/timeline/api";
 
 import { AboutCard } from "./AboutCard";

@@ -4,12 +4,10 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { Sidebar } from "@/app/components/Sidebar";
 import { ACCENT } from "@/constants/theme";
-// SSR の SDK 呼び出しに認証 Cookie を自動転送する interceptor を登録する
-import "@/external/client/api/server";
-import {
-  type ModelsSimilarUserItem,
-  similarUsersGetSimilarUsers,
-} from "@/external/client/api/generated";
+// SSR の SDK 呼び出しに認証 Cookie を自動転送する provider を登録する
+import "@/external/client/api/orval/server";
+import { similarUsersGetSimilarUsers } from "@/external/client/api/orval/generated/endpoints/similar-users/similar-users";
+import type { ModelsSimilarUserItem } from "@/external/client/api/orval/generated/models";
 import { getCurrentUsername, getUsernameFromCookie } from "@/features/auth/viewer";
 import { fetchInitialFollowing, fetchPanelDataByUsername } from "@/features/profile/fetchPanelData";
 import { fetchUserPosts } from "@/features/timeline/api";
@@ -23,11 +21,7 @@ export const dynamic = "force-dynamic";
 // 類似ユーザー。エラー時は null（カード側でエラー＋再読み込みを表示）
 async function fetchSimilarUsers(userId: string): Promise<ModelsSimilarUserItem[] | null> {
   try {
-    const { data, error } = await similarUsersGetSimilarUsers({
-      path: { userId },
-      query: { limit: 20 },
-    });
-    if (error || !data) return null;
+    const data = await similarUsersGetSimilarUsers(userId, { limit: 20 });
     return data.items ?? [];
   } catch {
     return null;
