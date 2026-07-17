@@ -1,12 +1,7 @@
-import "@/external/client/api/client";
+// タイムライン（投稿・コメント・いいね・リポスト）の薄いラッパー層。
+// 楽観更新やページング手回しの命令的フローから呼ばれるためシグネチャを維持し、
+// 内部だけ orval 生成の平関数に置き換えている。非2xx は mutator が ApiError を throw する。
 import {
-  type ModelsCommentListResponse,
-  type ModelsCommentResponse,
-  type ModelsCreatePostRequest,
-  type ModelsLikeToggleResponse,
-  type ModelsPostListResponse,
-  type ModelsPostResponse,
-  type ModelsRepostToggleResponse,
   postsCreatePost,
   postsCreatePostComment,
   postsDeletePost,
@@ -17,8 +12,16 @@ import {
   postsListTimelinePosts,
   postsTogglePostLike,
   postsTogglePostRepost,
-} from "@/external/client/api/generated";
-import { run } from "@/lib/api-result";
+} from "@/external/client/api/orval/generated/endpoints/posts/posts";
+import type {
+  ModelsCommentListResponse,
+  ModelsCommentResponse,
+  ModelsCreatePostRequest,
+  ModelsLikeToggleResponse,
+  ModelsPostListResponse,
+  ModelsPostResponse,
+  ModelsRepostToggleResponse,
+} from "@/external/client/api/orval/generated/models";
 
 export type PostItem = ModelsPostResponse;
 export type PostListResponse = ModelsPostListResponse;
@@ -28,13 +31,7 @@ export type LikeToggleResponse = ModelsLikeToggleResponse;
 export type RepostToggleResponse = ModelsRepostToggleResponse;
 
 export async function fetchPost(postId: string, viewerId = ""): Promise<PostItem> {
-  return run(
-    postsGetPost({
-      path: { postId },
-      query: viewerId ? { viewerId } : undefined,
-    }),
-    "Failed to fetch post",
-  );
+  return postsGetPost(postId, viewerId ? { viewerId } : undefined);
 }
 
 export async function fetchTimeline(
@@ -44,7 +41,7 @@ export async function fetchTimeline(
 ): Promise<PostListResponse> {
   const query: { limit: number; offset: number; viewerId?: string } = { limit, offset };
   if (viewerId) query.viewerId = viewerId;
-  return run(postsListTimelinePosts({ query }), "Failed to fetch timeline");
+  return postsListTimelinePosts(query);
 }
 
 // userId は認証セッションからサーバ側で解決されるため送信しない（旧実装の送信分は無視されていた）
@@ -55,11 +52,11 @@ export async function createPost(
 ): Promise<PostItem> {
   const body: ModelsCreatePostRequest = { content };
   if (quotePostId) body.quotePostId = quotePostId;
-  return run(postsCreatePost({ body }), "Failed to create post");
+  return postsCreatePost(body);
 }
 
 export async function toggleRepost(postId: string): Promise<RepostToggleResponse> {
-  return run(postsTogglePostRepost({ path: { postId } }), "Failed to toggle repost");
+  return postsTogglePostRepost(postId);
 }
 
 export async function fetchUserPosts(
@@ -67,13 +64,7 @@ export async function fetchUserPosts(
   limit = 20,
   offset = 0,
 ): Promise<PostListResponse> {
-  return run(
-    postsListPostsByUser({
-      path: { userId },
-      query: { limit, offset },
-    }),
-    "Failed to fetch user posts",
-  );
+  return postsListPostsByUser(userId, { limit, offset });
 }
 
 export async function fetchLikedPosts(
@@ -81,21 +72,15 @@ export async function fetchLikedPosts(
   limit = 20,
   offset = 0,
 ): Promise<PostListResponse> {
-  return run(
-    postsListLikedPostsByUser({
-      path: { userId },
-      query: { limit, offset },
-    }),
-    "Failed to fetch liked posts",
-  );
+  return postsListLikedPostsByUser(userId, { limit, offset });
 }
 
 export async function deletePost(postId: string, _userId: string): Promise<void> {
-  await run(postsDeletePost({ path: { postId } }), "Failed to delete post");
+  await postsDeletePost(postId);
 }
 
 export async function toggleLike(postId: string): Promise<LikeToggleResponse> {
-  return run(postsTogglePostLike({ path: { postId } }), "Failed to toggle like");
+  return postsTogglePostLike(postId);
 }
 
 export async function fetchComments(
@@ -103,21 +88,9 @@ export async function fetchComments(
   limit = 20,
   offset = 0,
 ): Promise<CommentListResponse> {
-  return run(
-    postsListPostComments({
-      path: { postId },
-      query: { limit, offset },
-    }),
-    "Failed to fetch comments",
-  );
+  return postsListPostComments(postId, { limit, offset });
 }
 
 export async function createComment(postId: string, content: string): Promise<CommentItem> {
-  return run(
-    postsCreatePostComment({
-      path: { postId },
-      body: { content },
-    }),
-    "Failed to create comment",
-  );
+  return postsCreatePostComment(postId, { content });
 }
