@@ -2,7 +2,12 @@
 
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { refreshToken } from "@/external/client/api/refresh";
+import { skipAuthRedirect } from "@/external/client/api/orval/custom-fetch";
+import {
+  authGetMe,
+  authGoogleLogin,
+  authLogout,
+} from "@/external/client/api/orval/generated/endpoints/auth/auth";
 
 export type AuthUser = {
   id: string;
@@ -39,21 +44,13 @@ export function AuthProvider({
   const [isLoading, setIsLoading] = useState(!initialUser);
 
   const logout = useCallback(async () => {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    await authLogout(skipAuthRedirect).catch(() => {});
     setUser(null);
   }, []);
 
   const login = useCallback(async (idToken: string): Promise<AuthUser> => {
-    const res = await fetch("/api/auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ idToken }),
-    });
-    if (!res.ok) {
-      throw new Error("Login failed");
-    }
-    const data: AuthUser = await res.json();
+    // 認証失敗（401）はログイン試行の正常系なので /login へは飛ばさない
+    const data = await authGoogleLogin({ idToken }, skipAuthRedirect);
     setUser(data);
     return data;
   }, []);
@@ -62,22 +59,13 @@ export function AuthProvider({
     setUser(updated);
   }, []);
 
+  // 401 → refresh → リトライは mutator（custom-fetch.ts）が共有 refresh.ts 経由で行う。
+  // 未ログイン閲覧者も通る呼び出しなので skipAuthRedirect で /login 送りを抑止する。
   useEffect(() => {
     if (initialUser) return;
-    fetch("/api/auth/me", { credentials: "include" })
-      .then(async (res) => {
-        if (res.ok) {
-          setUser(await res.json());
-          return;
-        }
-        // refresh は共有の単一飛行を必ず経由する（refresh.ts 参照）。
-        // 独自に fetch すると SDK インターセプタ側の refresh とローテーションが衝突し、
-        // 負けた側の 401 応答（clearedAuthCookies）が新トークンを消してしまう。
-        if (await refreshToken("user")) {
-          const meRes = await fetch("/api/auth/me", { credentials: "include" });
-          if (meRes.ok) setUser(await meRes.json());
-        }
-      })
+    authGetMe(skipAuthRedirect)
+      .then((me) => setUser(me))
+      .catch(() => {})
       .finally(() => setIsLoading(false));
   }, [initialUser]);
 

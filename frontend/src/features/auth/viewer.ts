@@ -1,26 +1,21 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { authGetMe } from "@/external/client/api/orval/generated/endpoints/auth/auth";
 import { buildCookieHeader } from "@/lib/cookie-header";
 import type { AuthUser } from "./auth-context";
 
-const BACKEND = process.env.INTERNAL_API_URL ?? "http://localhost:8081";
-
 // サーバコンポーネントから閲覧者（ログイン中ユーザー）を解決する。未ログイン・失敗時は null。
 //
-// 注意: ここで refresh は行わない。バックエンドの refresh はローテーション方式
-// （旧トークン全失効 → 新ペア発行）で、Server Component は Set-Cookie を返せないため、
-// サーバー側で refresh するとブラウザに残った refresh_token だけが失効し、次のクライアント側
-// refresh が必ず失敗してログアウトに至る。access token 失効時は null を返し、
-// クライアント側（auth-context / SDK の 401 interceptor 経由の /api/auth/refresh）に任せる。
+// 注意: ここで refresh は行わない。mutator（custom-fetch.ts）の 401→refresh はブラウザ限定で、
+// Server Component は Set-Cookie を返せないため、サーバー側で refresh するとブラウザに残った
+// refresh_token だけが失効し、次のクライアント側 refresh が必ず失敗してログアウトに至る。
+// access token 失効時は null を返し、クライアント側（auth-context / mutator）に任せる。
+// Cookie は明示的に渡す（orval/server の provider に依存せず、Cookie 無しの無駄打ちも避ける）。
 export async function getViewer(): Promise<AuthUser | null> {
   try {
     const cookieHeader = buildCookieHeader(await cookies());
     if (!cookieHeader) return null;
-    const res = await fetch(`${BACKEND}/api/auth/me`, {
-      headers: { Cookie: cookieHeader },
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as AuthUser;
+    return await authGetMe({ headers: { Cookie: cookieHeader } });
   } catch {
     return null;
   }

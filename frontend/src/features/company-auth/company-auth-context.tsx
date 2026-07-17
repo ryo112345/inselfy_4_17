@@ -2,8 +2,12 @@
 
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { refreshToken } from "@/external/client/api/refresh";
-import { ApiError } from "@/lib/api-result";
+import { skipAuthRedirect } from "@/external/client/api/orval/custom-fetch";
+import {
+  companyAuthCompanyGetMe,
+  companyAuthCompanyLogin,
+  companyAuthCompanyLogout,
+} from "@/external/client/api/orval/generated/endpoints/company-auth/company-auth";
 
 type CompanyUser = {
   id: string;
@@ -21,7 +25,6 @@ type CompanyAuthContextValue = {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<CompanyUser>;
   logout: () => void;
-  companyFetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 };
 
 const CompanyAuthContext = createContext<CompanyAuthContextValue | null>(null);
@@ -31,68 +34,25 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const logout = useCallback(async () => {
-    await fetch("/api/company/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+    await companyAuthCompanyLogout(skipAuthRedirect).catch(() => {});
     setCompany(null);
   }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<CompanyUser> => {
-    const res = await fetch("/api/company/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new ApiError(data.code ?? "UNKNOWN", data.message || "Login failed");
-    }
-    const data: CompanyUser = await res.json();
+    // 認証失敗（401）はログイン試行の正常系なので /company/login へは飛ばさない
+    const data = await companyAuthCompanyLogin({ email, password }, skipAuthRedirect);
     setCompany(data);
     return data;
   }, []);
 
-  // refresh は共有の単一飛行を必ず経由する（refresh.ts 参照）。独自に fetch すると
-  // SDK インターセプタ側の refresh とローテーションが衝突し、負けた側の 401 応答
-  // （clearedAuthCookies）が新トークンを消してしまう。共有 refresh は応答 body を
-  // 返さないため、成功後に /me を取り直して company を更新する。
-  const refreshSession = useCallback(async (): Promise<boolean> => {
-    const refreshed = await refreshToken("company");
-    if (refreshed) {
-      const res = await fetch("/api/company/auth/me", { credentials: "include" });
-      if (res.ok) setCompany(await res.json());
-    }
-    return refreshed;
-  }, []);
-
-  const companyFetch = useCallback(
-    async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
-      const opts = { ...init, credentials: "include" as RequestCredentials };
-      let res = await fetch(input, opts);
-      if (res.status === 401) {
-        const refreshed = await refreshSession();
-        if (refreshed) {
-          res = await fetch(input, opts);
-        }
-      }
-      return res;
-    },
-    [refreshSession],
-  );
-
+  // 401 → 企業 refresh → リトライは mutator（custom-fetch.ts）が共有 refresh.ts 経由で行う。
+  // ここで独自に refresh すると rotation と衝突するため、生成クライアント以外で呼ばないこと。
   useEffect(() => {
-    fetch("/api/company/auth/me", { credentials: "include" })
-      .then(async (res) => {
-        if (res.ok) {
-          setCompany(await res.json());
-          return;
-        }
-        await refreshSession();
-      })
+    companyAuthCompanyGetMe(skipAuthRedirect)
+      .then((me) => setCompany(me))
+      .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [refreshSession]);
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -101,9 +61,8 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       logout,
-      companyFetch,
     }),
-    [company, isLoading, login, logout, companyFetch],
+    [company, isLoading, login, logout],
   );
 
   return <CompanyAuthContext value={value}>{children}</CompanyAuthContext>;
