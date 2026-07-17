@@ -6808,10 +6808,11 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 -- 6. 企業アカウント
 -- ============================================================
+-- 全企業アカウントの password_hash は開発用パスワード「password123」の bcrypt 値
 -- ---- 企業1: inselfy ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('afd20f1c-b6a8-4809-bc8f-b3f41263b511', 'admin@inselfy.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'inselfy', '秋山椋', '000-0000-0000', 'approved')
+  ('afd20f1c-b6a8-4809-bc8f-b3f41263b511', 'admin@inselfy.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'inselfy', '秋山椋', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -6838,7 +6839,7 @@ WHERE id = 'afd20f1c-b6a8-4809-bc8f-b3f41263b511';
 -- ---- 企業2: クラウドソル株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000001', 'tanaka@cloudsol.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'クラウドソル株式会社', '田中裕子', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000001', 'tanaka@cloudsol.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'クラウドソル株式会社', '田中裕子', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -6865,7 +6866,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000001';
 -- ---- 企業3: 株式会社グリーンフィールド ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000002', 'suzuki@greenfield.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社グリーンフィールド', '鈴木健太', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000002', 'suzuki@greenfield.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社グリーンフィールド', '鈴木健太', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -6892,7 +6893,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000002';
 -- ---- 企業4: メディカルブリッジ株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000003', 'yamamoto@medbridge.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'メディカルブリッジ株式会社', '山本彩花', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000003', 'yamamoto@medbridge.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'メディカルブリッジ株式会社', '山本彩花', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -6919,7 +6920,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000003';
 -- ---- 企業5: 株式会社ノヴァクリエイティブ ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000004', 'watanabe@novacreative.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社ノヴァクリエイティブ', '渡辺美咲', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000004', 'watanabe@novacreative.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社ノヴァクリエイティブ', '渡辺美咲', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -6946,7 +6947,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000004';
 -- ---- 企業6: フィンクロス株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000005', 'sato@fincross.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'フィンクロス株式会社', '佐藤一樹', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000005', 'sato@fincross.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'フィンクロス株式会社', '佐藤一樹', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -6973,7 +6974,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000005';
 -- ---- 企業7: 構造計画テクノロジーズ株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000006', 'tanaka.y@kozotec.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '構造計画テクノロジーズ株式会社', '田中雄一', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000006', 'tanaka.y@kozotec.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '構造計画テクノロジーズ株式会社', '田中雄一', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7000,7 +7001,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000006';
 -- ---- 企業8: 株式会社マナビコネクト ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000007', 'ogawa@manabiconnect.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社マナビコネクト', '小川美咲', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000007', 'ogawa@manabiconnect.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社マナビコネクト', '小川美咲', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7027,7 +7028,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000007';
 -- ---- 企業9: ハコブロジテック株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000008', 'yamamoto.k@hacobu-logitech.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'ハコブロジテック株式会社', '山本健太郎', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000008', 'yamamoto.k@hacobu-logitech.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'ハコブロジテック株式会社', '山本健太郎', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7054,7 +7055,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000008';
 -- ---- 企業10: 株式会社グリーンフラックス ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000009', 'harada@greenflux.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社グリーンフラックス', '原田沙織', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000009', 'harada@greenflux.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社グリーンフラックス', '原田沙織', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7081,7 +7082,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000009';
 -- ---- 企業11: 株式会社タレントブリッジ ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000000a', 'suzuki.d@talentbridge.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社タレントブリッジ', '鈴木大輔', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000000a', 'suzuki.d@talentbridge.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社タレントブリッジ', '鈴木大輔', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7108,7 +7109,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000000a';
 -- ---- 企業12: 株式会社コマースクラフト ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000000b', 'nakamura.a@commercecraft.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社コマースクラフト', '中村彩花', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000000b', 'nakamura.a@commercecraft.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社コマースクラフト', '中村彩花', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7135,7 +7136,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000000b';
 -- ---- 企業13: 株式会社プレイグラウンドワークス ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000000c', 'ito.s@playgroundworks.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社プレイグラウンドワークス', '伊藤翔太', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000000c', 'ito.s@playgroundworks.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社プレイグラウンドワークス', '伊藤翔太', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7162,7 +7163,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000000c';
 -- ---- 企業14: 東和精機ソリューションズ株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000000d', 'watanabe.m@towa-seiki.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '東和精機ソリューションズ株式会社', '渡辺正樹', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000000d', 'watanabe.m@towa-seiki.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '東和精機ソリューションズ株式会社', '渡辺正樹', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7189,7 +7190,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000000d';
 -- ---- 企業15: トラベルネクスト株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000000e', 'tanaka.y2@travelnext.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'トラベルネクスト株式会社', '田中陽介', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000000e', 'tanaka.y2@travelnext.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'トラベルネクスト株式会社', '田中陽介', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7216,7 +7217,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000000e';
 -- ---- 企業16: サイバーフォートレス株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000000f', 'morimoto@cyberfortress.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'サイバーフォートレス株式会社', '森本健一', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000000f', 'morimoto@cyberfortress.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'サイバーフォートレス株式会社', '森本健一', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7243,7 +7244,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000000f';
 -- ---- 企業17: 株式会社フードクラフト ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000010', 'harada.m@foodcraft.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社フードクラフト', '原田美咲', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000010', 'harada.m@foodcraft.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社フードクラフト', '原田美咲', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7270,7 +7271,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000010';
 -- ---- 企業18: 株式会社モビリティワークス ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000011', 'suzuki.d2@mobilityworks.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社モビリティワークス', '鈴木大輔', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000011', 'suzuki.d2@mobilityworks.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社モビリティワークス', '鈴木大輔', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7297,7 +7298,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000011';
 -- ---- 企業19: 株式会社メディアブリッジ ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000012', 'nakamura.a2@mediabridge.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社メディアブリッジ', '中村彩香', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000012', 'nakamura.a2@mediabridge.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社メディアブリッジ', '中村彩香', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7324,7 +7325,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000012';
 -- ---- 企業20: 株式会社ヴィタリス ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000013', 'ogawa.s@vitalis.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社ヴィタリス', '小川翔太', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000013', 'ogawa.s@vitalis.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社ヴィタリス', '小川翔太', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7351,7 +7352,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000013';
 -- ---- 企業21: リーガルスクエア株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000014', 'ito.m@legalsquare.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'リーガルスクエア株式会社', '伊藤真理', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000014', 'ito.m@legalsquare.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'リーガルスクエア株式会社', '伊藤真理', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7378,7 +7379,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000014';
 -- ---- 企業22: 株式会社スタイルシンク ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000015', 'yamamoto.e@stylesync.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社スタイルシンク', '山本絵里奈', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000015', 'yamamoto.e@stylesync.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社スタイルシンク', '山本絵里奈', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7405,7 +7406,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000015';
 -- ---- 企業23: シールドインシュア株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000016', 'tanaka.h@shield-insure.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'シールドインシュア株式会社', '田中裕也', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000016', 'tanaka.h@shield-insure.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'シールドインシュア株式会社', '田中裕也', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7432,7 +7433,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000016';
 -- ---- 企業24: 株式会社ソラノミライ ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000017', 'miyamoto@soranomirai.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社ソラノミライ', '宮本航太', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000017', 'miyamoto@soranomirai.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社ソラノミライ', '宮本航太', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7459,7 +7460,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000017';
 -- ---- 企業25: 株式会社パウズコネクト ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000018', 'suzuki.m@paws-connect.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社パウズコネクト', '鈴木真帆', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000018', 'suzuki.m@paws-connect.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社パウズコネクト', '鈴木真帆', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7486,7 +7487,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000018';
 -- ---- 企業26: ケアブリッジ株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-000000000019', 'ito.k@carebridge.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'ケアブリッジ株式会社', '伊藤健太郎', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-000000000019', 'ito.k@carebridge.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'ケアブリッジ株式会社', '伊藤健太郎', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7513,7 +7514,7 @@ WHERE id = 'b0000000-0000-0000-0000-000000000019';
 -- ---- 企業27: 株式会社オトノバ ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000001a', 'nakamura.h@otonova.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社オトノバ', '中村響', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000001a', 'nakamura.h@otonova.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社オトノバ', '中村響', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7540,7 +7541,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000001a';
 -- ---- 企業28: グリーンファクトリー株式会社 ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000001b', 'sato.t@greenfactory.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', 'グリーンファクトリー株式会社', '佐藤拓海', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000001b', 'sato.t@greenfactory.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', 'グリーンファクトリー株式会社', '佐藤拓海', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7567,7 +7568,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000001b';
 -- ---- 企業29: 株式会社レジリア ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000001c', 'yamamoto.n@resilia.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社レジリア', '山本奈々', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000001c', 'yamamoto.n@resilia.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社レジリア', '山本奈々', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
@@ -7594,7 +7595,7 @@ WHERE id = 'b0000000-0000-0000-0000-00000000001c';
 -- ---- 企業30: 株式会社まちしるべ ----
 INSERT INTO company_accounts (id, email, password_hash, company_name, contact_person_name, phone_number, status)
 VALUES
-  ('b0000000-0000-0000-0000-00000000001d', 'hashimoto@machishirube.example.com', '$2a$10$SeedHashForDevOnly.0000000000000000000000000000000000', '株式会社まちしるべ', '橋本陽介', '000-0000-0000', 'approved')
+  ('b0000000-0000-0000-0000-00000000001d', 'hashimoto@machishirube.example.com', '$2a$10$22z7IIQjiLL5oayDTNPvrOAyLdakMByYTXqn8S20C/ya7FtDUwXrC', '株式会社まちしるべ', '橋本陽介', '000-0000-0000', 'approved')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   company_name = EXCLUDED.company_name;
