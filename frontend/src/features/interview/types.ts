@@ -1,7 +1,7 @@
 import type {
   ModelsInterviewSlotStatus,
   ModelsInterviewStatus,
-} from "@/external/client/api/generated";
+} from "@/external/client/api/orval/generated/models";
 
 export interface InterviewSlot {
   id: string;
