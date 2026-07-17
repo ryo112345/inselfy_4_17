@@ -9,7 +9,6 @@
       "!test-results",
       "!playwright-report",
       "!next-env.d.ts",
-      "!src/external/client/api/generated",
       "!src/external/client/api/orval/generated"
     ]
   },
