@@ -3,15 +3,14 @@
 import { Inter, Playfair_Display } from "next/font/google";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import {
+  teamDiagnoseGetDiagnoseByToken,
+  teamDiagnoseUpdateDiagnoseStatus,
+} from "@/external/client/api/orval/generated/endpoints/team-diagnose/team-diagnose";
+import type { ModelsDiagnoseInfoResponse } from "@/external/client/api/orval/generated/models";
 import type { ItemDTO } from "@/features/career-interest/api";
 import { useCareerInterestQuiz } from "@/features/career-interest/useCareerInterestQuiz";
 import { useWorkValuesQuiz } from "@/features/work-values/useWorkValuesQuiz";
-import "@/external/client/api/client";
-import {
-  type ModelsDiagnoseInfoResponse,
-  teamDiagnoseGetDiagnoseByToken,
-  teamDiagnoseUpdateDiagnoseStatus,
-} from "@/external/client/api/generated";
 
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"], display: "swap" });
 const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600"], display: "swap" });
@@ -36,9 +35,8 @@ export default function DiagnosePage() {
   const [phase, setPhase] = useState<PagePhase>("loading");
 
   useEffect(() => {
-    teamDiagnoseGetDiagnoseByToken({ path: { token } })
-      .then(({ data, error }) => {
-        if (error || !data) throw new Error();
+    teamDiagnoseGetDiagnoseByToken(token)
+      .then((data) => {
         setMemberInfo(data);
         if (data.wvStatus === "completed" && data.ciStatus === "completed") {
           setPhase("done");
@@ -53,10 +51,10 @@ export default function DiagnosePage() {
 
   const updateStatus = useCallback(
     async (field: "wvStatus" | "ciStatus") => {
-      await teamDiagnoseUpdateDiagnoseStatus({
-        path: { token },
-        body: field === "wvStatus" ? { wvStatus: "completed" } : { ciStatus: "completed" },
-      });
+      await teamDiagnoseUpdateDiagnoseStatus(
+        token,
+        field === "wvStatus" ? { wvStatus: "completed" } : { ciStatus: "completed" },
+      );
     },
     [token],
   );

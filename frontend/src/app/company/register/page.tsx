@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import "@/external/client/api/client";
-import { companyAuthCompanyRegister } from "@/external/client/api/generated";
+import { companyAuthCompanyRegister } from "@/external/client/api/orval/generated/endpoints/company-auth/company-auth";
+import { ApiError } from "@/lib/api-result";
 
 export default function CompanyRegisterPage() {
   const [form, setForm] = useState({
@@ -37,28 +37,20 @@ export default function CompanyRegisterPage() {
 
     setIsSubmitting(true);
     try {
-      const { error: apiError } = await companyAuthCompanyRegister({
-        body: {
-          email: form.email,
-          password: form.password,
-          companyName: form.companyName,
-          contactPersonName: form.contactPersonName,
-          phoneNumber: form.phoneNumber,
-        },
+      await companyAuthCompanyRegister({
+        email: form.email,
+        password: form.password,
+        companyName: form.companyName,
+        contactPersonName: form.contactPersonName,
+        phoneNumber: form.phoneNumber,
       });
-
-      if (apiError) {
-        if (apiError.code === "CONFLICT") {
-          setError("このメールアドレスは既に登録されています。");
-        } else {
-          setError(apiError.message || "登録に失敗しました。");
-        }
-        return;
-      }
-
       setIsRegistered(true);
-    } catch {
-      setError("登録に失敗しました。");
+    } catch (err) {
+      if (err instanceof ApiError && err.code === "CONFLICT") {
+        setError("このメールアドレスは既に登録されています。");
+      } else {
+        setError((err instanceof ApiError && err.message) || "登録に失敗しました。");
+      }
     } finally {
       setIsSubmitting(false);
     }

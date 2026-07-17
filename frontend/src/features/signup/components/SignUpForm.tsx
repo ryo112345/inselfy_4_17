@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import "@/external/client/api/client";
-import { usersCreateUser } from "@/external/client/api/generated";
+import { usersCreateUser } from "@/external/client/api/orval/generated/endpoints/users/users";
+import { ApiError } from "@/lib/api-result";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -29,21 +29,15 @@ export function SignUpForm() {
     }
 
     setSubmitting(true);
-    const { data, error: apiError } = await usersCreateUser({
-      body: { name: trimmedName, username: trimmedUsername },
-    });
-
-    if (apiError) {
-      if (apiError.code === "CONFLICT") {
+    let data: Awaited<ReturnType<typeof usersCreateUser>>;
+    try {
+      data = await usersCreateUser({ name: trimmedName, username: trimmedUsername });
+    } catch (err) {
+      if (err instanceof ApiError && err.code === "CONFLICT") {
         setError("このユーザー名はすでに使われています");
       } else {
-        setError(apiError.message || "登録に失敗しました");
+        setError((err instanceof ApiError && err.message) || "登録に失敗しました");
       }
-      setSubmitting(false);
-      return;
-    }
-    if (!data) {
-      setError("登録に失敗しました");
       setSubmitting(false);
       return;
     }
