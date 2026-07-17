@@ -60,11 +60,11 @@ func (r *RefreshTokenRepository) GetByTokenHash(ctx context.Context, tokenHash s
 	return rt, nil
 }
 
-func (r *RefreshTokenRepository) RevokeByUserID(ctx context.Context, userID string) error {
+func (r *RefreshTokenRepository) RevokeByID(ctx context.Context, id string) error {
 	q := queriesForContext(ctx, r.queries)
-	pgID, err := parseUUID(userID)
+	pgID, err := parseUUID(id)
 	if err != nil {
 		return domainerr.ErrBadRequest
 	}
-	return q.RevokeRefreshTokensByUserID(ctx, pgID)
+	return q.RevokeRefreshTokenByID(ctx, pgID)
 }

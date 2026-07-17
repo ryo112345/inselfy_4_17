@@ -1,5 +1,5 @@
 import { client } from "./generated/client.gen";
-import { refreshToken } from "./refresh";
+import { isLoginPath, LOGIN_PATH, realmForApiPath, refreshToken } from "./refresh";
 
 const baseUrl =
   typeof window === "undefined" ? (process.env.INTERNAL_API_URL ?? "http://localhost:8081") : "";
@@ -30,13 +30,15 @@ client.setConfig({
 
 client.interceptors.response.use(async (response, request) => {
   if (response.status === 401 && typeof window !== "undefined") {
-    const refreshed = await refreshToken();
+    // 候補者/企業は別セッションなので、リクエストパスで refresh 先とログイン画面を切り替える
+    const realm = realmForApiPath(new URL(request.url).pathname);
+    const refreshed = await refreshToken(realm);
     if (refreshed) {
       return fetch(stripSkipHeader(request));
     }
-    // /login 自身で発生した 401 でリダイレクトすると無限リロードになるため常に除外する
-    if (!request.headers.has(SKIP_AUTH_REDIRECT_HEADER) && window.location.pathname !== "/login") {
-      window.location.href = "/login";
+    // ログインページ自身で発生した 401 でリダイレクトすると無限リロードになるため常に除外する
+    if (!request.headers.has(SKIP_AUTH_REDIRECT_HEADER) && !isLoginPath(window.location.pathname)) {
+      window.location.href = LOGIN_PATH[realm];
     }
   }
   return response;

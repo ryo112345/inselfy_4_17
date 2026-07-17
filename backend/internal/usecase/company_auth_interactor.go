@@ -102,7 +102,8 @@ func (i *CompanyAuthInteractor) RefreshToken(ctx context.Context, refreshToken s
 		return nil, nil, err
 	}
 
-	if err := i.refreshRepo.RevokeByCompanyID(ctx, rt.CompanyID); err != nil {
+	// per-token rotation: 使った1本だけ失効させ、他の担当者のセッションは生かす
+	if err := i.refreshRepo.RevokeByID(ctx, rt.ID); err != nil {
 		return nil, nil, err
 	}
 

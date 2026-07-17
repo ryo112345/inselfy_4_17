@@ -16,7 +16,7 @@ type AuthInputPort interface {
 type RefreshTokenRepository interface {
 	Create(ctx context.Context, rt *auth.RefreshToken) error
 	GetByTokenHash(ctx context.Context, tokenHash string) (*auth.RefreshToken, error)
-	RevokeByUserID(ctx context.Context, userID string) error
+	RevokeByID(ctx context.Context, id string) error
 }
 
 type GoogleTokenVerifier interface {

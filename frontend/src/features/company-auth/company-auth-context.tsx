@@ -1,15 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { refreshToken } from "@/external/client/api/refresh";
 import { ApiError } from "@/lib/api-result";
 
 type CompanyUser = {
@@ -61,26 +54,17 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
     return data;
   }, []);
 
-  const refreshPromiseRef = useRef<Promise<boolean> | null>(null);
-
-  const refreshToken = useCallback((): Promise<boolean> => {
-    if (refreshPromiseRef.current) return refreshPromiseRef.current;
-    const p = fetch("/api/company/auth/refresh", {
-      method: "POST",
-      credentials: "include",
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          setCompany(await res.json());
-          return true;
-        }
-        return false;
-      })
-      .finally(() => {
-        refreshPromiseRef.current = null;
-      });
-    refreshPromiseRef.current = p;
-    return p;
+  // refresh は共有の単一飛行を必ず経由する（refresh.ts 参照）。独自に fetch すると
+  // SDK インターセプタ側の refresh とローテーションが衝突し、負けた側の 401 応答
+  // （clearedAuthCookies）が新トークンを消してしまう。共有 refresh は応答 body を
+  // 返さないため、成功後に /me を取り直して company を更新する。
+  const refreshSession = useCallback(async (): Promise<boolean> => {
+    const refreshed = await refreshToken("company");
+    if (refreshed) {
+      const res = await fetch("/api/company/auth/me", { credentials: "include" });
+      if (res.ok) setCompany(await res.json());
+    }
+    return refreshed;
   }, []);
 
   const companyFetch = useCallback(
@@ -88,14 +72,14 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       const opts = { ...init, credentials: "include" as RequestCredentials };
       let res = await fetch(input, opts);
       if (res.status === 401) {
-        const refreshed = await refreshToken();
+        const refreshed = await refreshSession();
         if (refreshed) {
           res = await fetch(input, opts);
         }
       }
       return res;
     },
-    [refreshToken],
+    [refreshSession],
   );
 
   useEffect(() => {
@@ -105,10 +89,10 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
           setCompany(await res.json());
           return;
         }
-        await refreshToken();
+        await refreshSession();
       })
       .finally(() => setIsLoading(false));
-  }, [refreshToken]);
+  }, [refreshSession]);
 
   const value = useMemo(
     () => ({

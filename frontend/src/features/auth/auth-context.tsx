@@ -73,7 +73,7 @@ export function AuthProvider({
         // refresh は共有の単一飛行を必ず経由する（refresh.ts 参照）。
         // 独自に fetch すると SDK インターセプタ側の refresh とローテーションが衝突し、
         // 負けた側の 401 応答（clearedAuthCookies）が新トークンを消してしまう。
-        if (await refreshToken()) {
+        if (await refreshToken("user")) {
           const meRes = await fetch("/api/auth/me", { credentials: "include" });
           if (meRes.ok) setUser(await meRes.json());
         }

@@ -3,7 +3,7 @@
 // + server.ts（SSR Cookie 転送）+ run()（非2xx → ApiError throw）を1関数に統合したもの。
 // 生成コード（generated/）はすべての HTTP 呼び出しでこの customFetch を経由する。
 import { unwrap } from "../../../../lib/api-result";
-import { refreshToken } from "../refresh";
+import { isLoginPath, LOGIN_PATH, realmForApiPath, refreshToken } from "../refresh";
 
 const baseUrl =
   typeof window === "undefined" ? (process.env.INTERNAL_API_URL ?? "http://localhost:8081") : "";
@@ -58,12 +58,14 @@ export const customFetch = async <T>(url: string, options: RequestInit): Promise
   let response = await doFetch();
 
   if (response.status === 401 && typeof window !== "undefined") {
-    const refreshed = await refreshToken();
+    // 候補者/企業は別セッションなので、リクエストパスで refresh 先とログイン画面を切り替える
+    const realm = realmForApiPath(url);
+    const refreshed = await refreshToken(realm);
     if (refreshed) {
       response = await doFetch();
-    } else if (!skip && window.location.pathname !== "/login") {
-      // /login 自身で発生した 401 でリダイレクトすると無限リロードになるため常に除外する
-      window.location.href = "/login";
+    } else if (!skip && !isLoginPath(window.location.pathname)) {
+      // ログインページ自身で発生した 401 でリダイレクトすると無限リロードになるため常に除外する
+      window.location.href = LOGIN_PATH[realm];
     }
   }
 
