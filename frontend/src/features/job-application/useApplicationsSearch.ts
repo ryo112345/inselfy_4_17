@@ -1,16 +1,22 @@
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  getCompanyApplicationsListCompanyApplicationsQueryKey,
+  useCompanyApplicationsListCompanyApplications,
+  useCompanyApplicationsUpdateApplicationStatus,
+} from "@/external/client/api/orval/generated/endpoints/job-applications/job-applications";
+import type {
+  CompanyApplicationsListCompanyApplicationsParams,
+  ModelsJobApplicationListResponse,
+} from "@/external/client/api/orval/generated/models";
 import { checkPendingProposal } from "@/features/interview/api";
 import { fetchJobPosting, fetchJobPostings } from "@/features/job-posting/api";
-import {
-  type CandidateDetail,
-  fetchCandidateDetail,
-  fetchTeamScoreAverages,
-} from "@/features/talent-search/api";
-import type { JobApplication, JobApplicationStatus } from "./api";
-import { fetchCompanyApplications, updateApplicationStatus } from "./api";
+import { fetchCandidateDetail, fetchTeamScoreAverages } from "@/features/talent-search/api";
+import { candidateDetailQueryKey } from "@/features/talent-search/queryKeys";
+import type { JobApplicationStatus } from "./api";
 import { type DatePreset, datePresetToRange } from "./constants";
 
 /**
@@ -20,37 +26,23 @@ import { type DatePreset, datePresetToRange } from "./constants";
 export function useApplicationsSearch() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const initialStatus = searchParams.get("status") ?? "";
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [jobFilter, setJobFilter] = useState("");
   const [keywordInput, setKeywordInput] = useState("");
   const [keyword, setKeyword] = useState("");
   const [datePreset, setDatePreset] = useState<DatePreset>("");
-  const [jobPostings, setJobPostings] = useState<{ id: string; title: string }[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(searchParams.get("selected") ?? null);
-  const [detail, setDetail] = useState<CandidateDetail | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
 
-  const [pendingProposal, setPendingProposal] = useState<{
-    hasPending: boolean;
-    createdAt?: string;
-  } | null>(null);
-
-  const [teamWvAvg, setTeamWvAvg] = useState<{ id: string; score: number }[] | null>(null);
-  const [teamCiAvg, setTeamCiAvg] = useState<{ id: string; score: number }[] | null>(null);
-  const [teamName, setTeamName] = useState<string>("");
-
-  const selected = applications.find((a) => a.id === selectedId) ?? null;
-
-  useEffect(() => {
-    fetchJobPostings()
-      .then((jobs) => setJobPostings(jobs.map((j) => ({ id: j.id, title: j.title }))))
-      .catch(() => {});
-  }, []);
+  const jobPostingsQuery = useQuery({
+    queryKey: ["job-posting", "companyList"],
+    queryFn: fetchJobPostings,
+  });
+  const jobPostings = useMemo(
+    () => (jobPostingsQuery.data ?? []).map((j) => ({ id: j.id, title: j.title })),
+    [jobPostingsQuery.data],
+  );
 
   useEffect(() => {
     const t = setTimeout(() => setKeyword(keywordInput), 300);
@@ -59,87 +51,70 @@ export function useApplicationsSearch() {
 
   const dateRange = useMemo(() => datePresetToRange(datePreset), [datePreset]);
 
-  const load = useCallback(
-    (status: string, jobPostingId: string, kw: string, dr: { from?: string; to?: string }) => {
-      setLoading(true);
-      fetchCompanyApplications({
-        status: status || undefined,
-        jobPostingId: jobPostingId || undefined,
-        keyword: kw || undefined,
-        dateFrom: dr.from,
-        dateTo: dr.to,
-        limit: 50,
-        offset: 0,
-      })
-        .then((res) => {
-          const items = res.items ?? [];
-          setApplications(items);
-          setTotal(res.total);
-          setSelectedId((prev) => {
-            if (prev && items.some((a) => a.id === prev)) return prev;
-            return items[0]?.id ?? null;
-          });
-        })
-        .catch((e) => setError(e.message))
-        .finally(() => setLoading(false));
+  const listParams: CompanyApplicationsListCompanyApplicationsParams = {
+    status: statusFilter || undefined,
+    job_posting_id: jobFilter || undefined,
+    keyword: keyword || undefined,
+    date_from: dateRange.from,
+    date_to: dateRange.to,
+    limit: 50,
+    offset: 0,
+  };
+  // キーは生成の getXxxQueryKey() を使う（setQueryData / invalidateQueries と必ず一致する）
+  const activeListKey = getCompanyApplicationsListCompanyApplicationsQueryKey(listParams);
+
+  const listQuery = useCompanyApplicationsListCompanyApplications(listParams);
+  const applications = useMemo(() => listQuery.data?.items ?? [], [listQuery.data]);
+  const total = listQuery.data?.total ?? 0;
+  const loading = listQuery.isPending;
+  const error = listQuery.error?.message ?? null;
+
+  // 一覧の読み込み結果に合わせて選択を維持または先頭へリセット（従来の load 内処理と同一）
+  useEffect(() => {
+    const items = listQuery.data?.items;
+    if (!items) return;
+    setSelectedId((prev) => {
+      if (prev && items.some((a) => a.id === prev)) return prev;
+      return items[0]?.id ?? null;
+    });
+  }, [listQuery.data]);
+
+  const selected = applications.find((a) => a.id === selectedId) ?? null;
+
+  const pendingProposalQuery = useQuery({
+    queryKey: ["interview", "pendingProposal", selected?.id],
+    queryFn: () => checkPendingProposal(selected?.id ?? ""),
+    enabled: !!selected?.id,
+  });
+  const pendingProposal = (selected?.id ? pendingProposalQuery.data : null) ?? null;
+
+  // 求人 → チーム平均の直列合成。値が2ソースから来るため queryFn 内で合成する
+  const teamAveragesQuery = useQuery({
+    queryKey: ["job-application", "applicationTeamAverages", selected?.jobPostingId],
+    queryFn: async () => {
+      const job = await fetchJobPosting(selected?.jobPostingId ?? "");
+      if (!job.teamId) {
+        return { teamName: "", wvAvg: null, ciAvg: null };
+      }
+      const { wvAvg, ciAvg } = await fetchTeamScoreAverages(job.teamId);
+      return { teamName: "チーム", wvAvg, ciAvg };
     },
-    [],
-  );
+    enabled: !!selected?.jobPostingId,
+  });
+  const teamWvAvg = (selected?.jobPostingId ? teamAveragesQuery.data?.wvAvg : null) ?? null;
+  const teamCiAvg = (selected?.jobPostingId ? teamAveragesQuery.data?.ciAvg : null) ?? null;
+  const teamName = (selected?.jobPostingId ? teamAveragesQuery.data?.teamName : "") ?? "";
 
-  useEffect(() => {
-    load(statusFilter, jobFilter, keyword, dateRange);
-  }, [statusFilter, jobFilter, keyword, dateRange, load]);
-
-  useEffect(() => {
-    if (!selected?.id) {
-      setPendingProposal(null);
-      return;
-    }
-    checkPendingProposal(selected.id)
-      .then(setPendingProposal)
-      .catch(() => setPendingProposal(null));
-  }, [selected?.id]);
-
-  useEffect(() => {
-    if (!selected?.jobPostingId) {
-      setTeamWvAvg(null);
-      setTeamCiAvg(null);
-      setTeamName("");
-      return;
-    }
-    fetchJobPosting(selected.jobPostingId)
-      .then((job) => {
-        if (!job.teamId) {
-          setTeamWvAvg(null);
-          setTeamCiAvg(null);
-          setTeamName("");
-          return;
-        }
-        setTeamName("チーム");
-        return fetchTeamScoreAverages(job.teamId).then(({ wvAvg, ciAvg }) => {
-          setTeamWvAvg(wvAvg);
-          setTeamCiAvg(ciAvg);
-        });
-      })
-      .catch(() => {
-        setTeamWvAvg(null);
-        setTeamCiAvg(null);
-        setTeamName("");
-      });
-  }, [selected?.jobPostingId]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: 分割前と同じく応募の切替（id含む）で再取得する
-  useEffect(() => {
-    if (!selected?.candidateUsername) {
-      setDetail(null);
-      return;
-    }
-    setDetailLoading(true);
-    fetchCandidateDetail(selected.candidateUsername, selected.candidateId)
-      .then(setDetail)
-      .catch(() => setDetail(null))
-      .finally(() => setDetailLoading(false));
-  }, [selected?.candidateUsername, selected?.candidateId, selected?.id]);
+  // 候補者詳細。talent-search 側の useCandidateDetail とキーを共有し、
+  // 応募（id）単位ではなく候補者単位でキャッシュする
+  const detailQuery = useQuery({
+    queryKey: candidateDetailQueryKey(selected?.candidateUsername, selected?.candidateId ?? null),
+    queryFn: ({ signal }) =>
+      fetchCandidateDetail(selected?.candidateUsername ?? "", selected?.candidateId ?? "", signal),
+    enabled: !!selected?.candidateUsername,
+  });
+  const detail = (selected?.candidateUsername ? detailQuery.data : null) ?? null;
+  const detailLoading = detailQuery.isLoading;
 
   // Sync selectedId and statusFilter to URL for back-navigation
   useEffect(() => {
@@ -151,15 +126,36 @@ export function useApplicationsSearch() {
     router.replace(target, { scroll: false });
   }, [selectedId, statusFilter, router]);
 
-  const handleStatusChange = async (applicationId: string, newStatus: JobApplicationStatus) => {
-    try {
-      await updateApplicationStatus(applicationId, newStatus);
-      setApplications((prev) =>
-        prev.map((a) => (a.id === applicationId ? { ...a, status: newStatus } : a)),
-      );
-    } catch {
-      load(statusFilter, jobFilter, keyword, dateRange);
-    }
+  const statusMutation = useCompanyApplicationsUpdateApplicationStatus({
+    mutation: {
+      onSuccess: (_data, { applicationId, data }) => {
+        // 従来同様、表示中の一覧は再取得せず該当行だけ書き換える
+        // （現フィルタから外れた行が即座に消えるのを避ける）
+        queryClient.setQueryData<ModelsJobApplicationListResponse>(
+          activeListKey,
+          (old) =>
+            old && {
+              ...old,
+              items: old.items.map((a) =>
+                a.id === applicationId ? { ...a, status: data.status } : a,
+              ),
+            },
+        );
+        // 他フィルタのキャッシュは陳腐化しているので、次回表示時に再取得させる
+        // （パラメータなしの生成キーは URL のみのキーになり、全フィルタ分に前方一致する）
+        queryClient.invalidateQueries({
+          queryKey: getCompanyApplicationsListCompanyApplicationsQueryKey(),
+          refetchType: "none",
+        });
+      },
+      onError: () => {
+        queryClient.invalidateQueries({ queryKey: activeListKey });
+      },
+    },
+  });
+
+  const handleStatusChange = (applicationId: string, newStatus: JobApplicationStatus) => {
+    statusMutation.mutate({ applicationId, data: { status: newStatus } });
   };
 
   const statusCounts = applications.reduce(

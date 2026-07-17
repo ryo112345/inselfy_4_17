@@ -1,10 +1,14 @@
 "use client";
 
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  getCompanyTeamsListTeamsQueryKey,
+  useCompanyTeamsListTeams,
+} from "@/external/client/api/orval/generated/endpoints/company-teams/company-teams";
+import {
   bulkCheckSaved,
-  fetchCompanyTeams,
   fetchTeamScoreAverages,
   saveCandidate,
   searchTalents,
@@ -12,6 +16,11 @@ import {
   type TalentSearchKind,
   unsaveCandidate,
 } from "./api";
+import {
+  savedCandidatesQueryKey,
+  talentSearchQueryKey,
+  teamScoreAveragesQueryKey,
+} from "./queryKeys";
 
 export type Team = {
   id: string;
@@ -23,6 +32,15 @@ export type DiagnosticType = "wv" | "ci" | "integrated";
 
 export const TALENTS_PAGE_SIZE = 20;
 
+/** 検索ボタン押下（またはマウント時のURL復元）で確定した検索条件。null は未検索 */
+type SubmittedSearch = {
+  kind: TalentSearchKind;
+  /** limit/offset を含まない検索条件（queryKey に使う） */
+  params: Record<string, string>;
+  /** 戻る復元時は前回までの読み込み件数を1ページ目でまとめて取得する */
+  firstPageLimit: number;
+};
+
 /**
  * 人材検索ページの状態（検索条件・診断マッチング設定・結果・ページング・
  * URL同期・保存済み候補者）を内包するフック。挙動は分割前のページと同一。
@@ -30,14 +48,11 @@ export const TALENTS_PAGE_SIZE = 20;
 export function useTalentSearch() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const initialTeamId = searchParams.get("team") ?? "";
 
-  const [users, setUsers] = useState<TalentCard[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [submitted, setSubmitted] = useState<SubmittedSearch | null>(null);
 
   // Condition filters — restore from URL
   const [keyword, setKeyword] = useState(searchParams.get("q") ?? "");
@@ -61,7 +76,6 @@ export function useTalentSearch() {
     const m = searchParams.get("mode");
     return m === "custom" ? "custom" : "team";
   });
-  const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState(initialTeamId);
   const [customWeights, setCustomWeights] = useState<Record<string, number>>(() => {
     const defaults: Record<string, number> = {
@@ -92,6 +106,15 @@ export function useTalentSearch() {
     return defaults;
   });
 
+  // 素通し取得は生成フックを直接使い、.items ほどきは select で吸収する
+  const teamsQuery = useCompanyTeamsListTeams({
+    query: {
+      queryKey: getCompanyTeamsListTeamsQueryKey(),
+      select: (data) => data.items,
+    },
+  });
+  const teams: Team[] = teamsQuery.data ?? [];
+
   // Saved candidates
   const [savedSet, setSavedSet] = useState<Set<string>>(new Set());
 
@@ -106,6 +129,8 @@ export function useTalentSearch() {
       });
       try {
         await (isSaved ? unsaveCandidate(userId) : saveCandidate(userId));
+        // 保存した候補者一覧ページのキャッシュを古いまま残さない
+        queryClient.invalidateQueries({ queryKey: savedCandidatesQueryKey });
       } catch {
         setSavedSet((prev) => {
           const next = new Set(prev);
@@ -115,41 +140,21 @@ export function useTalentSearch() {
         });
       }
     },
-    [savedSet],
+    [savedSet, queryClient],
   );
 
   // Team average scores for compare overlay
-  const [teamWvAvg, setTeamWvAvg] = useState<{ id: string; score: number }[] | null>(null);
-  const [teamCiAvg, setTeamCiAvg] = useState<{ id: string; score: number }[] | null>(null);
-  const [teamName, setTeamName] = useState<string>("");
-
-  useEffect(() => {
-    fetchCompanyTeams()
-      .then(setTeams)
-      .catch(() => {});
-  }, []);
-
-  // Fetch team scores for comparison overlay
-  useEffect(() => {
-    if (!selectedTeamId || diagnosticMode !== "team") {
-      setTeamWvAvg(null);
-      setTeamCiAvg(null);
-      setTeamName("");
-      return;
-    }
-    const team = teams.find((t) => t.id === selectedTeamId);
-    setTeamName(team?.name ?? "チーム");
-
-    fetchTeamScoreAverages(selectedTeamId)
-      .then(({ wvAvg, ciAvg }) => {
-        setTeamWvAvg(wvAvg);
-        setTeamCiAvg(ciAvg);
-      })
-      .catch(() => {
-        setTeamWvAvg(null);
-        setTeamCiAvg(null);
-      });
-  }, [selectedTeamId, diagnosticMode, teams]);
+  const teamAveragesEnabled = diagnosticMode === "team" && !!selectedTeamId;
+  const teamAveragesQuery = useQuery({
+    queryKey: teamScoreAveragesQueryKey(selectedTeamId),
+    queryFn: () => fetchTeamScoreAverages(selectedTeamId),
+    enabled: teamAveragesEnabled,
+  });
+  const teamWvAvg = (teamAveragesEnabled ? teamAveragesQuery.data?.wvAvg : null) ?? null;
+  const teamCiAvg = (teamAveragesEnabled ? teamAveragesQuery.data?.ciAvg : null) ?? null;
+  const teamName = teamAveragesEnabled
+    ? (teams.find((t) => t.id === selectedTeamId)?.name ?? "チーム")
+    : "";
 
   // Effective compare scores: from team averages or custom weights
   const compareWv = useMemo(() => {
@@ -173,6 +178,47 @@ export function useTalentSearch() {
   }, [diagnosticMode, diagnosticType, teamCiAvg, customCIWeights]);
 
   const compareDisplayLabel = diagnosticMode === "team" ? teamName : "目標値";
+
+  // ── Search results（useInfiniteQuery。submitted が確定するまで実行しない）──
+  const searchQuery = useInfiniteQuery({
+    queryKey: submitted
+      ? talentSearchQueryKey(submitted.kind, submitted.params)
+      : talentSearchQueryKey("idle", {}),
+    queryFn: ({ pageParam }) => {
+      if (!submitted) return Promise.resolve({ users: [] as TalentCard[], total: 0 });
+      return searchTalents(submitted.kind, {
+        ...submitted.params,
+        limit: String(pageParam.limit),
+        offset: String(pageParam.offset),
+      });
+    },
+    initialPageParam: { offset: 0, limit: submitted?.firstPageLimit ?? TALENTS_PAGE_SIZE },
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((n, p) => n + p.users.length, 0);
+      return loaded < lastPage.total ? { offset: loaded, limit: TALENTS_PAGE_SIZE } : undefined;
+    },
+    enabled: submitted !== null,
+  });
+
+  const users = useMemo(() => {
+    const seen = new Set<string>();
+    const out: TalentCard[] = [];
+    for (const page of searchQuery.data?.pages ?? []) {
+      for (const u of page.users) {
+        if (!seen.has(u.userId)) {
+          seen.add(u.userId);
+          out.push(u);
+        }
+      }
+    }
+    return out;
+  }, [searchQuery.data]);
+  const total = searchQuery.data?.pages.at(-1)?.total ?? 0;
+
+  const searched = submitted !== null;
+  const loading = searchQuery.isLoading;
+  const loadingMore = searchQuery.isFetchingNextPage;
+  const hasMore = searchQuery.hasNextPage;
 
   // Auto-select first user when results load
   useEffect(() => {
@@ -241,97 +287,44 @@ export function useTalentSearch() {
     syncFiltersToURL();
   }, [selectedUserId]);
 
-  const buildDiagnosticParams = useCallback(
-    (offset: number, limit?: number) => {
-      const params: Record<string, string> = {};
-      if (diagnosticMode === "team" && selectedTeamId) {
-        params.teamId = selectedTeamId;
-      } else if (diagnosticMode === "custom") {
-        if (diagnosticType === "wv" || diagnosticType === "integrated") {
-          for (const [k, v] of Object.entries(customWeights)) {
-            params[`wv_${k}`] = String(v);
-          }
-        }
-        if (diagnosticType === "ci" || diagnosticType === "integrated") {
-          for (const [k, v] of Object.entries(customCIWeights)) {
-            params[`ci_${k}`] = String(v);
-          }
+  const buildDiagnosticParams = useCallback(() => {
+    const params: Record<string, string> = {};
+    if (diagnosticMode === "team" && selectedTeamId) {
+      params.teamId = selectedTeamId;
+    } else if (diagnosticMode === "custom") {
+      if (diagnosticType === "wv" || diagnosticType === "integrated") {
+        for (const [k, v] of Object.entries(customWeights)) {
+          params[`wv_${k}`] = String(v);
         }
       }
-      if (keyword) params.q = keyword;
-      if (skills.length > 0) params.skills = skills.join(",");
-      if (location) params.location = location;
-      if (industry) params.industry = industry;
-      if (seekingStatus) params.jobSeekingStatus = seekingStatus;
-      if (jobType) params.jobType = jobType;
-      if (diagnosedOnly) params.diagnosed = "1";
-      params.limit = String(limit ?? TALENTS_PAGE_SIZE);
-      params.offset = String(offset);
-      return params;
-    },
-    [
-      diagnosticMode,
-      diagnosticType,
-      selectedTeamId,
-      customWeights,
-      customCIWeights,
-      keyword,
-      skills,
-      location,
-      industry,
-      seekingStatus,
-      jobType,
-      diagnosedOnly,
-    ],
-  );
-
-  const fetchTalents = useCallback(
-    async (kind: TalentSearchKind, params: Record<string, string>, append: boolean) => {
-      if (append) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-        setSearched(true);
-      }
-      try {
-        const { users: newUsers, total } = await searchTalents(kind, params);
-        setUsers((prev) => {
-          if (!append) return newUsers;
-          const seen = new Set(prev.map((u: TalentCard) => u.userId));
-          return [...prev, ...newUsers.filter((u: TalentCard) => !seen.has(u.userId))];
-        });
-        setTotal(total);
-      } catch {
-        if (!append) {
-          setUsers([]);
-          setTotal(0);
+      if (diagnosticType === "ci" || diagnosticType === "integrated") {
+        for (const [k, v] of Object.entries(customCIWeights)) {
+          params[`ci_${k}`] = String(v);
         }
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
       }
-    },
-    [],
-  );
-
-  // Auto-search on mount: restore from URL or from team page link
-  const didRestoreRef = useRef(false);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: マウント時の復元処理のみ実行する意図
-  useEffect(() => {
-    if (didRestoreRef.current) return;
-    didRestoreRef.current = true;
-
-    const wasSearched = searchParams.get("searched") === "1";
-    const savedCount = sessionStorage.getItem("talents_loaded_count");
-    const restoreLimit = savedCount ? Number(savedCount) : undefined;
-    sessionStorage.removeItem("talents_loaded_count");
-
-    if (initialTeamId || wasSearched) {
-      if (diagnosticMode === "team" && !selectedTeamId) return;
-      syncFiltersToURL();
-      fetchTalents(diagnosticType, buildDiagnosticParams(0, restoreLimit), false);
     }
-  }, []);
+    if (keyword) params.q = keyword;
+    if (skills.length > 0) params.skills = skills.join(",");
+    if (location) params.location = location;
+    if (industry) params.industry = industry;
+    if (seekingStatus) params.jobSeekingStatus = seekingStatus;
+    if (jobType) params.jobType = jobType;
+    if (diagnosedOnly) params.diagnosed = "1";
+    return params;
+  }, [
+    diagnosticMode,
+    diagnosticType,
+    selectedTeamId,
+    customWeights,
+    customCIWeights,
+    keyword,
+    skills,
+    location,
+    industry,
+    seekingStatus,
+    jobType,
+    diagnosedOnly,
+  ]);
 
   useEffect(() => {
     if (users.length === 0) return;
@@ -358,47 +351,68 @@ export function useTalentSearch() {
     return diagnosticType;
   }, [hasDiagnosticConfig, diagnosticType]);
 
-  const buildSearchParams = useCallback(
-    (offset: number, limit?: number) => {
-      if (!hasDiagnosticConfig) {
-        const params: Record<string, string> = {};
-        if (keyword) params.q = keyword;
-        if (skills.length > 0) params.skills = skills.join(",");
-        if (location) params.location = location;
-        if (industry) params.industry = industry;
-        if (seekingStatus) params.jobSeekingStatus = seekingStatus;
-        if (jobType) params.jobType = jobType;
-        if (diagnosedOnly) params.diagnosed = "1";
-        params.limit = String(limit ?? TALENTS_PAGE_SIZE);
-        params.offset = String(offset);
-        return params;
-      }
-      return buildDiagnosticParams(offset, limit);
-    },
-    [
-      hasDiagnosticConfig,
-      buildDiagnosticParams,
-      keyword,
-      skills,
-      location,
-      industry,
-      seekingStatus,
-      jobType,
-      diagnosedOnly,
-    ],
-  );
+  const buildSearchParams = useCallback(() => {
+    if (!hasDiagnosticConfig) {
+      const params: Record<string, string> = {};
+      if (keyword) params.q = keyword;
+      if (skills.length > 0) params.skills = skills.join(",");
+      if (location) params.location = location;
+      if (industry) params.industry = industry;
+      if (seekingStatus) params.jobSeekingStatus = seekingStatus;
+      if (jobType) params.jobType = jobType;
+      if (diagnosedOnly) params.diagnosed = "1";
+      return params;
+    }
+    return buildDiagnosticParams();
+  }, [
+    hasDiagnosticConfig,
+    buildDiagnosticParams,
+    keyword,
+    skills,
+    location,
+    industry,
+    seekingStatus,
+    jobType,
+    diagnosedOnly,
+  ]);
+
+  // Auto-search on mount: restore from URL or from team page link.
+  // 検索種別は handleSearch と同じ判定（getSearchKind / buildSearchParams）を使う。
+  // かつての「mode=team かつチーム未選択なら復元しない」早期 return は、プレーン検索の
+  // URL にも常に mode=team が付くため復元を全滅させていた（プレーン検索として復元するのが正）
+  const didRestoreRef = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: マウント時の復元処理のみ実行する意図
+  useEffect(() => {
+    if (didRestoreRef.current) return;
+    didRestoreRef.current = true;
+
+    const wasSearched = searchParams.get("searched") === "1";
+    const savedCount = sessionStorage.getItem("talents_loaded_count");
+    const restoreLimit = savedCount ? Number(savedCount) : undefined;
+    sessionStorage.removeItem("talents_loaded_count");
+
+    if (initialTeamId || wasSearched) {
+      syncFiltersToURL();
+      setSubmitted({
+        kind: getSearchKind(),
+        params: buildSearchParams(),
+        firstPageLimit: restoreLimit ?? TALENTS_PAGE_SIZE,
+      });
+    }
+  }, []);
 
   const handleSearch = useCallback(() => {
     syncFiltersToURL();
-    fetchTalents(getSearchKind(), buildSearchParams(0), false);
-  }, [fetchTalents, getSearchKind, buildSearchParams, syncFiltersToURL]);
+    setSubmitted({
+      kind: getSearchKind(),
+      params: buildSearchParams(),
+      firstPageLimit: TALENTS_PAGE_SIZE,
+    });
+  }, [getSearchKind, buildSearchParams, syncFiltersToURL]);
 
   const handleLoadMore = useCallback(() => {
-    const offset = users.length;
-    fetchTalents(getSearchKind(), buildSearchParams(offset), true);
-  }, [users.length, fetchTalents, getSearchKind, buildSearchParams]);
-
-  const hasMore = users.length > 0 && users.length < total;
+    void searchQuery.fetchNextPage();
+  }, [searchQuery.fetchNextPage]);
 
   const addSkill = () => {
     const s = skillInput.trim();

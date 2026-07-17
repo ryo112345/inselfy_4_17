@@ -1,65 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { type CandidateExperience, fetchCandidateDetail, type TalentCard } from "./api";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCandidateDetail, type TalentCard } from "./api";
+import { candidateDetailQueryKey } from "./queryKeys";
 
 /**
  * 選択中候補者の詳細（WV/CIスコア・職歴・スキル・自己紹介）を取得するフック。
- * 高速切替時に古いレスポンスが上書きしないよう AbortController で中断する。
+ * React Query が queryFn に AbortSignal を渡すため、候補者の高速切替時に
+ * 古いリクエストは自動で中断される（従来の AbortController 手動管理は不要）。
  */
 export function useCandidateDetail(users: TalentCard[], selectedUserId: string | null) {
-  const [wvScores, setWvScores] = useState<{ id: string; score: number }[] | null>(null);
-  const [ciScores, setCiScores] = useState<{ id: string; score: number }[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
-  const [experiences, setExperiences] = useState<CandidateExperience[]>([]);
-  const [skills, setSkills] = useState<string[]>([]);
-  const [about, setAbout] = useState<string | null>(null);
+  const user = selectedUserId ? (users.find((u) => u.userId === selectedUserId) ?? null) : null;
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reloadKey は再読み込みトリガー
-  useEffect(() => {
-    if (!selectedUserId) {
-      setWvScores(null);
-      setCiScores(null);
-      setExperiences([]);
-      setSkills([]);
-      setAbout(null);
-      return;
-    }
-    const user = users.find((u) => u.userId === selectedUserId);
-    if (!user) return;
-    // 候補者の高速切替時に古いレスポンスが新しい選択の詳細を上書きしないよう、
-    // effect の cleanup で進行中のリクエストを中断する
-    const ac = new AbortController();
-    setLoading(true);
-    setError(false);
-    fetchCandidateDetail(user.username, selectedUserId, ac.signal)
-      .then((detail) => {
-        if (ac.signal.aborted) return;
-        setWvScores(detail.wvScores);
-        setCiScores(detail.ciScores);
-        setExperiences(detail.experiences);
-        setSkills(detail.skills);
-        setAbout(detail.about);
-      })
-      .catch(() => {
-        if (!ac.signal.aborted) setError(true);
-      })
-      .finally(() => {
-        if (!ac.signal.aborted) setLoading(false);
-      });
-    return () => ac.abort();
-  }, [selectedUserId, users, reloadKey]);
+  const query = useQuery({
+    queryKey: candidateDetailQueryKey(user?.username, selectedUserId),
+    queryFn: ({ signal }) =>
+      // enabled ガードにより user / selectedUserId は非 null が保証される
+      fetchCandidateDetail(user?.username ?? "", selectedUserId ?? "", signal),
+    enabled: !!user && !!selectedUserId,
+  });
 
   return {
-    wvScores,
-    ciScores,
-    loading,
-    error,
-    experiences,
-    skills,
-    about,
-    reload: () => setReloadKey((k) => k + 1),
+    wvScores: query.data?.wvScores ?? null,
+    ciScores: query.data?.ciScores ?? null,
+    loading: query.isLoading,
+    error: query.isError,
+    experiences: query.data?.experiences ?? [],
+    skills: query.data?.skills ?? [],
+    about: query.data?.about ?? null,
+    reload: () => {
+      void query.refetch();
+    },
   };
 }

@@ -13,6 +13,7 @@ cd "${ROOT}"
 GENERATED_PATHSPECS=(
   "api-schema/generated"
   "frontend/src/external/client/api/generated"
+  "frontend/src/external/client/api/orval/generated"
   "backend/internal/adapter/http/generated"
   "backend/internal/adapter/gateway/db/sqlc/generated"
   ":(glob)backend/**/*_converter.gen.go"

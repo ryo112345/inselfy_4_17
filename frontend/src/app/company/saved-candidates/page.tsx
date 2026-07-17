@@ -1,8 +1,14 @@
 "use client";
 
+import {
+  type InfiniteData,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CI_FULL_LABELS,
   CI_ORDER,
@@ -12,68 +18,48 @@ import {
 } from "@/app/components/SingleRadarChart";
 import { JobSeekingBadge } from "@/components/ui";
 import { SEEKING_STATUS_MAP } from "@/constants/seeking-status";
-import {
-  type TalentCard as Candidate,
-  type CandidateExperience,
-  fetchCandidateDetail,
-  fetchSavedCandidates,
-  unsaveCandidate,
-} from "@/features/talent-search/api";
+import { savedCandidatesListSavedCandidates } from "@/external/client/api/orval/generated/endpoints/saved-candidates/saved-candidates";
+import type { ModelsTalentListResponse } from "@/external/client/api/orval/generated/models";
+import { type TalentCard as Candidate, unsaveCandidate } from "@/features/talent-search/api";
+import { savedCandidatesQueryKey } from "@/features/talent-search/queryKeys";
+import { useCandidateDetail } from "@/features/talent-search/useCandidateDetail";
 
 const PAGE_SIZE = 20;
 
 export default function SavedCandidatesPage() {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
+  const queryClient = useQueryClient();
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // Detail panel
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [detailWv, setDetailWv] = useState<{ id: string; score: number }[] | null>(null);
-  const [detailCi, setDetailCi] = useState<{ id: string; score: number }[] | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [detailExperiences, setDetailExperiences] = useState<CandidateExperience[]>([]);
-  const [detailSkills, setDetailSkills] = useState<string[]>([]);
-  const [detailAbout, setDetailAbout] = useState<string | null>(null);
 
-  const fetchCandidates = useCallback(
-    async (append: boolean) => {
-      if (append) setLoadingMore(true);
-      else setLoading(true);
-      try {
-        const offset = append ? candidates.length : 0;
-        const { users: newUsers, total } = await fetchSavedCandidates(PAGE_SIZE, offset);
-        if (append) {
-          setCandidates((prev) => {
-            const seen = new Set(prev.map((u) => u.userId));
-            return [...prev, ...newUsers.filter((u) => !seen.has(u.userId))];
-          });
-        } else {
-          setCandidates(newUsers);
-        }
-        setTotal(total);
-        setHasMore(offset + newUsers.length < total);
-      } catch {
-        if (!append) {
-          setCandidates([]);
-          setTotal(0);
-        }
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
+  // 無限スクロールは生成平関数 + 手書き useInfiniteQuery で組む
+  // （orval の useInfinite 生成は TanStack v5 の pageParam 型と噛み合わないため使わない）
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useInfiniteQuery({
+    queryKey: savedCandidatesQueryKey,
+    queryFn: ({ pageParam, signal }) =>
+      savedCandidatesListSavedCandidates({ limit: PAGE_SIZE, offset: pageParam }, { signal }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((n, p) => n + p.items.length, 0);
+      return loaded < lastPage.total ? loaded : undefined;
     },
-    [candidates.length],
-  );
+  });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: マウント時のみ実行する意図
-  useEffect(() => {
-    fetchCandidates(false);
-  }, []);
+  const candidates = useMemo(() => {
+    const seen = new Set<string>();
+    const out: Candidate[] = [];
+    for (const page of data?.pages ?? []) {
+      for (const u of page.items) {
+        if (!seen.has(u.userId)) {
+          seen.add(u.userId);
+          out.push(u);
+        }
+      }
+    }
+    return out;
+  }, [data]);
+  const total = data?.pages.at(-1)?.total ?? 0;
 
   // Auto-select first
   useEffect(() => {
@@ -87,63 +73,46 @@ export default function SavedCandidatesPage() {
 
   // Infinite scroll
   useEffect(() => {
-    if (!hasMore || loadingMore) return;
+    if (!hasNextPage || isFetchingNextPage) return;
     const el = sentinelRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) fetchCandidates(true);
+        if (entry.isIntersecting) fetchNextPage();
       },
       { root: leftPanelRef.current, rootMargin: "200px" },
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [hasMore, loadingMore, fetchCandidates]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Fetch detail
-  useEffect(() => {
-    if (!selectedUserId) {
-      setDetailWv(null);
-      setDetailCi(null);
-      setDetailExperiences([]);
-      setDetailSkills([]);
-      setDetailAbout(null);
-      return;
-    }
-    const user = candidates.find((u) => u.userId === selectedUserId);
-    if (!user) return;
-    setDetailLoading(true);
-    fetchCandidateDetail(user.username, selectedUserId)
-      .then((detail) => {
-        setDetailWv(detail.wvScores);
-        setDetailCi(detail.ciScores);
-        setDetailExperiences(detail.experiences);
-        setDetailSkills(detail.skills);
-        setDetailAbout(detail.about);
-      })
-      .catch(() => {
-        setDetailWv(null);
-        setDetailCi(null);
-        setDetailExperiences([]);
-        setDetailSkills([]);
-        setDetailAbout(null);
-      })
-      .finally(() => setDetailLoading(false));
-  }, [selectedUserId, candidates]);
+  const detail = useCandidateDetail(candidates, selectedUserId);
 
   const selectedUser = useMemo(
     () => (selectedUserId ? (candidates.find((u) => u.userId === selectedUserId) ?? null) : null),
     [candidates, selectedUserId],
   );
 
-  const handleUnsave = useCallback(async (userId: string) => {
-    await unsaveCandidate(userId);
-    setCandidates((prev) => prev.filter((c) => c.userId !== userId));
-    setTotal((prev) => prev - 1);
-  }, []);
+  // 解除成功時はキャッシュから対象を除去する（全ページ再取得より軽く、従来挙動と同じ）
+  const unsave = useMutation({
+    mutationFn: unsaveCandidate,
+    onSuccess: (_data, userId) => {
+      queryClient.setQueryData<InfiniteData<ModelsTalentListResponse, number>>(
+        savedCandidatesQueryKey,
+        (old) =>
+          old && {
+            ...old,
+            pages: old.pages.map((p) => ({
+              total: p.total - 1,
+              items: p.items.filter((u) => u.userId !== userId),
+            })),
+          },
+      );
+    },
+  });
 
   // ── Loading state ──
-  if (loading && candidates.length === 0) {
+  if (isLoading) {
     return (
       <div>
         <Header total={0} />
@@ -206,14 +175,14 @@ export default function SavedCandidatesPage() {
                   user={u}
                   isSelected={selectedUserId === u.userId}
                   onSelect={() => setSelectedUserId(u.userId)}
-                  onUnsave={() => handleUnsave(u.userId)}
+                  onUnsave={() => unsave.mutate(u.userId)}
                 />
               </li>
             ))}
           </ul>
-          {hasMore && (
+          {hasNextPage && (
             <div ref={sentinelRef} className="flex justify-center py-4">
-              {loadingMore && (
+              {isFetchingNextPage && (
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-500" />
               )}
             </div>
@@ -225,13 +194,13 @@ export default function SavedCandidatesPage() {
           {selectedUser ? (
             <CandidateDetail
               user={selectedUser}
-              wvScores={detailWv}
-              ciScores={detailCi}
-              loading={detailLoading}
-              allExperiences={detailExperiences}
-              allSkills={detailSkills}
-              about={detailAbout}
-              onUnsave={() => handleUnsave(selectedUser.userId)}
+              wvScores={detail.wvScores}
+              ciScores={detail.ciScores}
+              loading={detail.loading}
+              allExperiences={detail.experiences}
+              allSkills={detail.skills}
+              about={detail.about}
+              onUnsave={() => unsave.mutate(selectedUser.userId)}
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center text-center px-6">

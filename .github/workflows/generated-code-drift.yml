@@ -8,6 +8,7 @@ on:
       - "api-schema/**"
       - "backend/**"
       - "frontend/src/external/client/api/generated/**"
+      - "frontend/src/external/client/api/orval/generated/**"
       - "scripts/check-generated-drift.sh"
       - ".github/workflows/generated-code-drift.yml"
 
