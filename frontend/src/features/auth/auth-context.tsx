@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { refreshToken } from "@/external/client/api/refresh";
 
 export type AuthUser = {
   id: string;
@@ -69,12 +70,12 @@ export function AuthProvider({
           setUser(await res.json());
           return;
         }
-        const refreshRes = await fetch("/api/auth/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
-        if (refreshRes.ok) {
-          setUser(await refreshRes.json());
+        // refresh は共有の単一飛行を必ず経由する（refresh.ts 参照）。
+        // 独自に fetch すると SDK インターセプタ側の refresh とローテーションが衝突し、
+        // 負けた側の 401 応答（clearedAuthCookies）が新トークンを消してしまう。
+        if (await refreshToken()) {
+          const meRes = await fetch("/api/auth/me", { credentials: "include" });
+          if (meRes.ok) setUser(await meRes.json());
         }
       })
       .finally(() => setIsLoading(false));

@@ -1,4 +1,5 @@
 import { client } from "./generated/client.gen";
+import { refreshToken } from "./refresh";
 
 const baseUrl =
   typeof window === "undefined" ? (process.env.INTERNAL_API_URL ?? "http://localhost:8081") : "";
@@ -26,21 +27,6 @@ client.setConfig({
   fetch: (input: RequestInfo | URL, init?: RequestInit) =>
     fetch(stripSkipHeader(new Request(input, init))),
 });
-
-let refreshPromise: Promise<boolean> | null = null;
-
-function refreshToken(): Promise<boolean> {
-  if (refreshPromise) return refreshPromise;
-  refreshPromise = fetch("/api/auth/refresh", {
-    method: "POST",
-    credentials: "include",
-  })
-    .then((res) => res.ok)
-    .finally(() => {
-      refreshPromise = null;
-    });
-  return refreshPromise;
-}
 
 client.interceptors.response.use(async (response, request) => {
   if (response.status === 401 && typeof window !== "undefined") {
