@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { fetchCompanyScouts, fetchQualityScore, fetchScoutDashboard } from "@/features/scout/api";
-import type {
-  QualityScore,
-  ScoutDashboard,
-  ScoutMessage,
-  ScoutStatus,
-} from "@/features/scout/types";
+import { useState } from "react";
+import {
+  useCompanyScoutsGetScoutDashboard,
+  useCompanyScoutsGetScoutQuality,
+  useCompanyScoutsListCompanyScouts,
+} from "@/external/client/api/orval/generated/endpoints/company-scouts/company-scouts";
+import type { ScoutStatus } from "@/features/scout/types";
 import { formatDate } from "@/lib/date";
 
 const PAGE_SIZE = 20;
@@ -55,40 +54,22 @@ function formatReplenishDate(iso: string) {
 
 export default function ScoutListPage() {
   const router = useRouter();
-  const [scouts, setScouts] = useState<ScoutMessage[]>([]);
-  const [total, setTotal] = useState(0);
-  const [dashboard, setDashboard] = useState<ScoutDashboard | null>(null);
-  const [quality, setQuality] = useState<QualityScore | null>(null);
   const [activeTab, setActiveTab] = useState<ScoutStatus | "all">("all");
   const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchScoutDashboard()
-      .then(setDashboard)
-      .catch(() => {});
-    fetchQualityScore()
-      .then(setQuality)
-      .catch(() => {});
-  }, []);
+  // ダッシュボード・品質は取得失敗を無視する（従来の catch 握り潰しと同じ挙動）
+  const dashboard = useCompanyScoutsGetScoutDashboard().data ?? null;
+  const quality = useCompanyScoutsGetScoutQuality().data ?? null;
 
-  // Fetch scouts when tab or page changes
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetchCompanyScouts({
-      status: activeTab === "all" ? undefined : activeTab,
-      limit: PAGE_SIZE,
-      offset: page * PAGE_SIZE,
-    })
-      .then((res) => {
-        setScouts(res.items);
-        setTotal(res.total);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [activeTab, page]);
+  const listQuery = useCompanyScoutsListCompanyScouts({
+    status: activeTab === "all" ? undefined : activeTab,
+    limit: PAGE_SIZE,
+    offset: page * PAGE_SIZE,
+  });
+  const scouts = listQuery.data?.items ?? [];
+  const total = listQuery.data?.total ?? 0;
+  const loading = listQuery.isPending;
+  const error = listQuery.error?.message ?? null;
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const totalCredits = dashboard ? dashboard.credits.balance + dashboard.pending.total : 0;

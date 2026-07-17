@@ -1,11 +1,16 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui";
-import { fetchScoutDetail, replyToScoutAsCompany } from "@/features/scout/api";
-import type { ScoutDetail, ScoutStatus } from "@/features/scout/types";
+import {
+  getCompanyScoutsGetCompanyScoutDetailQueryKey,
+  useCompanyScoutsCompanyScoutReply,
+  useCompanyScoutsGetCompanyScoutDetail,
+} from "@/external/client/api/orval/generated/endpoints/company-scouts/company-scouts";
+import type { ScoutStatus } from "@/features/scout/types";
 import { getErrorMessage } from "@/lib/api-result";
 import { formatDateTime } from "@/lib/date";
 
@@ -23,34 +28,28 @@ export default function ScoutDetailPage() {
   const params = useParams();
   const scoutId = params.scoutId as string;
 
-  const [detail, setDetail] = useState<ScoutDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
-  const [sending, setSending] = useState(false);
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    setLoading(true);
-    fetchScoutDetail(scoutId)
-      .then(setDetail)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [scoutId]);
+  const detailQuery = useCompanyScoutsGetCompanyScoutDetail(scoutId);
+  const detail = detailQuery.data ?? null;
+  const loading = detailQuery.isPending;
+  const error = detailQuery.error?.message ?? null;
+
+  const replyMutation = useCompanyScoutsCompanyScoutReply();
+  const sending = replyMutation.isPending;
 
   const handleReply = async () => {
     if (!replyBody.trim()) return;
-    setSending(true);
     try {
-      await replyToScoutAsCompany(scoutId, replyBody.trim());
+      await replyMutation.mutateAsync({ scoutId, data: { body: replyBody.trim() } });
       setReplyBody("");
-      // Refresh detail
-      const updated = await fetchScoutDetail(scoutId);
-      setDetail(updated);
+      await queryClient.invalidateQueries({
+        queryKey: getCompanyScoutsGetCompanyScoutDetailQueryKey(scoutId),
+      });
     } catch (e) {
       showToast(getErrorMessage(e, "返信の送信に失敗しました"), "error");
-    } finally {
-      setSending(false);
     }
   };
 

@@ -1,34 +1,31 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useConfirm, useToast } from "@/components/ui";
-import { deleteTemplate, fetchTemplates } from "@/features/scout/api";
-import type { ScoutTemplate } from "@/features/scout/types";
+import {
+  getScoutTemplatesListScoutTemplatesQueryKey,
+  useScoutTemplatesDeleteScoutTemplate,
+  useScoutTemplatesListScoutTemplates,
+} from "@/external/client/api/orval/generated/endpoints/scout-templates/scout-templates";
+import type { ModelsScoutTemplateListResponse } from "@/external/client/api/orval/generated/models";
 import { getErrorMessage } from "@/lib/api-result";
 import { formatDate } from "@/lib/date";
 
 export default function TemplateListPage() {
-  const [templates, setTemplates] = useState<ScoutTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const confirmDialog = useConfirm();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
 
-  const load = () => {
-    setLoading(true);
-    setError(null);
-    fetchTemplates()
-      .then(setTemplates)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  };
+  const listKey = getScoutTemplatesListScoutTemplatesQueryKey();
+  const listQuery = useScoutTemplatesListScoutTemplates();
+  const templates = listQuery.data?.items ?? [];
+  const loading = listQuery.isPending;
+  const error = listQuery.error?.message ?? null;
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: マウント時のみ実行する意図
-  useEffect(() => {
-    load();
-  }, []);
+  const deleteMutation = useScoutTemplatesDeleteScoutTemplate();
 
   const handleDelete = async (id: string) => {
     if (
@@ -42,8 +39,11 @@ export default function TemplateListPage() {
       return;
     setDeleting(id);
     try {
-      await deleteTemplate(id);
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
+      await deleteMutation.mutateAsync({ templateId: id });
+      // 削除行を一覧キャッシュから即時除去する（従来のローカル filter と同じ挙動）
+      queryClient.setQueryData(listKey, (prev: ModelsScoutTemplateListResponse | undefined) =>
+        prev ? { ...prev, items: prev.items.filter((t) => t.id !== id) } : prev,
+      );
     } catch (e) {
       showToast(getErrorMessage(e, "削除に失敗しました"), "error");
     } finally {

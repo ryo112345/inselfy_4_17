@@ -1,9 +1,15 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { fetchTemplate, updateTemplate } from "@/features/scout/api";
+import {
+  getScoutTemplatesGetScoutTemplateQueryKey,
+  getScoutTemplatesListScoutTemplatesQueryKey,
+  useScoutTemplatesGetScoutTemplate,
+  useScoutTemplatesUpdateScoutTemplate,
+} from "@/external/client/api/orval/generated/endpoints/scout-templates/scout-templates";
 import {
   HighlightInput,
   HighlightTextarea,
@@ -14,43 +20,54 @@ export default function TemplateEditPage() {
   const params = useParams();
   const router = useRouter();
   const templateId = params.id as string;
+  const queryClient = useQueryClient();
 
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const templateQuery = useScoutTemplatesGetScoutTemplate(templateId);
+  const loading = templateQuery.isPending;
+
+  // フォームはローカル編集状態を持つため、取得完了時に一度だけ流し込む
   useEffect(() => {
-    fetchTemplate(templateId)
-      .then((tmpl) => {
-        setName(tmpl.name);
-        setSubject(tmpl.subject);
-        setBody(tmpl.body);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [templateId]);
+    const tmpl = templateQuery.data;
+    if (!tmpl) return;
+    setName(tmpl.name);
+    setSubject(tmpl.subject);
+    setBody(tmpl.body);
+  }, [templateQuery.data]);
+
+  useEffect(() => {
+    if (templateQuery.error) setError(templateQuery.error.message);
+  }, [templateQuery.error]);
+
+  const updateMutation = useScoutTemplatesUpdateScoutTemplate();
+  const saving = updateMutation.isPending;
 
   const handleSave = async () => {
     if (!name.trim() || !subject.trim() || !body.trim()) {
       setError("全てのフィールドを入力してください");
       return;
     }
-    setSaving(true);
     setError(null);
     try {
-      await updateTemplate(templateId, {
-        name: name.trim(),
-        subject: subject.trim(),
-        body: body.trim(),
+      await updateMutation.mutateAsync({
+        templateId,
+        data: { name: name.trim(), subject: subject.trim(), body: body.trim() },
       });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: getScoutTemplatesListScoutTemplatesQueryKey(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: getScoutTemplatesGetScoutTemplateQueryKey(templateId),
+        }),
+      ]);
       router.push("/company/scout/templates");
     } catch (e) {
       setError(getErrorMessage(e, "保存に失敗しました"));
-    } finally {
-      setSaving(false);
     }
   };
 

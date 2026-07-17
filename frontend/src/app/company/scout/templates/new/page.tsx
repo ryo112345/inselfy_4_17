@@ -1,9 +1,13 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createTemplate } from "@/features/scout/api";
+import {
+  getScoutTemplatesListScoutTemplatesQueryKey,
+  useScoutTemplatesCreateScoutTemplate,
+} from "@/external/client/api/orval/generated/endpoints/scout-templates/scout-templates";
 import {
   HighlightInput,
   HighlightTextarea,
@@ -12,31 +16,32 @@ import { getErrorMessage } from "@/lib/api-result";
 
 export default function TemplateNewPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const createMutation = useScoutTemplatesCreateScoutTemplate();
+  const saving = createMutation.isPending;
 
   const handleSave = async () => {
     if (!name.trim() || !subject.trim() || !body.trim()) {
       setError("全てのフィールドを入力してください");
       return;
     }
-    setSaving(true);
     setError(null);
     try {
-      await createTemplate({
-        name: name.trim(),
-        subject: subject.trim(),
-        body: body.trim(),
+      await createMutation.mutateAsync({
+        data: { name: name.trim(), subject: subject.trim(), body: body.trim() },
+      });
+      await queryClient.invalidateQueries({
+        queryKey: getScoutTemplatesListScoutTemplatesQueryKey(),
       });
       router.push("/company/scout/templates");
     } catch (e) {
       setError(getErrorMessage(e, "保存に失敗しました"));
-    } finally {
-      setSaving(false);
     }
   };
 

@@ -1,11 +1,18 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import {
+  useCompanyScoutsGetScoutCredits,
+  useCompanyScoutsSendScout,
+} from "@/external/client/api/orval/generated/endpoints/company-scouts/company-scouts";
+import {
+  getScoutTemplatesListScoutTemplatesQueryKey,
+  useScoutTemplatesListScoutTemplates,
+} from "@/external/client/api/orval/generated/endpoints/scout-templates/scout-templates";
 import { fetchJobPostings } from "@/features/job-posting/api";
-import { fetchCredits, fetchTemplates, sendScout } from "@/features/scout/api";
-import type { JobPosting, ScoutCredits, ScoutTemplate } from "@/features/scout/types";
 import { getErrorMessage } from "@/lib/api-result";
 
 export default function ScoutSendPage() {
@@ -17,28 +24,27 @@ export default function ScoutSendPage() {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [preview, setPreview] = useState(false);
-
-  const [credits, setCredits] = useState<ScoutCredits | null>(null);
-  const [templates, setTemplates] = useState<ScoutTemplate[]>([]);
-  const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
-
-  const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingData, setLoadingData] = useState(true);
 
-  useEffect(() => {
-    Promise.all([
-      fetchCredits().catch(() => null),
-      fetchTemplates().catch(() => []),
-      fetchJobPostings().catch(() => []),
-    ]).then(([c, t, j]) => {
-      if (c) setCredits(c);
-      setTemplates(t);
-      setJobs(j);
-      setLoadingData(false);
-    });
-  }, []);
+  // 取得失敗はいずれも無視して空表示にする（従来の catch 握り潰しと同じ挙動）
+  const credits = useCompanyScoutsGetScoutCredits().data ?? null;
+  const templatesQuery = useScoutTemplatesListScoutTemplates({
+    query: {
+      queryKey: getScoutTemplatesListScoutTemplatesQueryKey(),
+      select: (data) => data.items,
+    },
+  });
+  const templates = templatesQuery.data ?? [];
+  const jobsQuery = useQuery({
+    queryKey: ["job-posting", "companyList"],
+    queryFn: fetchJobPostings,
+  });
+  const jobs = jobsQuery.data ?? [];
+  const loadingData = templatesQuery.isPending || jobsQuery.isPending;
+
+  const sendMutation = useCompanyScoutsSendScout();
+  const sending = sendMutation.isPending;
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplateId(templateId);
@@ -55,20 +61,19 @@ export default function ScoutSendPage() {
       setError("候補者ID、件名、本文は必須です");
       return;
     }
-    setSending(true);
     setError(null);
     try {
-      await sendScout({
-        candidateId: candidateId.trim(),
-        jobPostingId: jobPostingId || undefined,
-        subject: subject.trim(),
-        body: body.trim(),
+      await sendMutation.mutateAsync({
+        data: {
+          candidateId: candidateId.trim(),
+          jobPostingId: jobPostingId || undefined,
+          subject: subject.trim(),
+          body: body.trim(),
+        },
       });
       router.push("/company/scout");
     } catch (e) {
       setError(getErrorMessage(e, "送信に失敗しました"));
-    } finally {
-      setSending(false);
     }
   };
 

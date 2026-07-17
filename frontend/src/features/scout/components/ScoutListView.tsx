@@ -1,16 +1,21 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useAuth } from "@/features/auth/auth-context";
+import { useRef, useState } from "react";
 import {
-  bulkDeclineScouts,
-  bulkRespondScouts,
-  fetchReceivedScouts,
-  fetchScoutSettings,
-  updateScoutSettings,
-} from "@/features/scout/api";
-import type { ScoutMessage, ScoutSettings, ScoutStatus } from "@/features/scout/types";
+  getCandidateScoutsListCandidateScoutsQueryKey,
+  useCandidateScoutsBulkDeclineScouts,
+  useCandidateScoutsBulkRespondScouts,
+  useCandidateScoutsListCandidateScouts,
+} from "@/external/client/api/orval/generated/endpoints/candidate-scouts/candidate-scouts";
+import {
+  getScoutSettingsGetScoutSettingsQueryKey,
+  useScoutSettingsGetScoutSettings,
+  useScoutSettingsUpdateScoutSettings,
+} from "@/external/client/api/orval/generated/endpoints/scout-settings/scout-settings";
+import { useAuth } from "@/features/auth/auth-context";
+import type { ScoutStatus } from "@/features/scout/types";
 import { daysRemaining, formatDateCompact } from "@/lib/date";
 
 const PAGE_SIZE = 20;
@@ -29,63 +34,51 @@ export function ScoutListView() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
-  const [scouts, setScouts] = useState<ScoutMessage[]>([]);
-  const [total, setTotal] = useState(0);
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [settings, setSettings] = useState<ScoutSettings | null>(null);
-  const [settingsLoading, setSettingsLoading] = useState(true);
-  const [toggling, setToggling] = useState(false);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [declining, setDeclining] = useState(false);
-  const [responding, setResponding] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const loadScouts = useCallback(async (offset: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetchReceivedScouts({
-        limit: PAGE_SIZE,
-        offset,
-      });
-      setScouts(res.items);
-      setTotal(res.total);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "読み込みに失敗しました");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const authed = !authLoading && !!user;
+  const listParams = { limit: PAGE_SIZE, offset: page * PAGE_SIZE };
+  const listQuery = useCandidateScoutsListCandidateScouts(listParams, {
+    query: {
+      queryKey: getCandidateScoutsListCandidateScoutsQueryKey(listParams),
+      enabled: authed,
+    },
+  });
+  const scouts = listQuery.data?.items ?? [];
+  const total = listQuery.data?.total ?? 0;
+  const loading = listQuery.isPending;
+  const error = listQuery.error?.message ?? null;
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user) return;
-    loadScouts(page * PAGE_SIZE);
-  }, [authLoading, user, page, loadScouts]);
+  // 設定は取得失敗を無視してトグル非表示にする（従来の catch 握り潰しと同じ挙動）
+  const settingsKey = getScoutSettingsGetScoutSettingsQueryKey();
+  const settingsQuery = useScoutSettingsGetScoutSettings({
+    query: { queryKey: settingsKey, enabled: authed },
+  });
+  const settings = settingsQuery.data ?? null;
+  const settingsLoading = settingsQuery.isPending;
 
-  useEffect(() => {
-    if (authLoading || !user) return;
-    fetchScoutSettings()
-      .then(setSettings)
-      .catch(() => {})
-      .finally(() => setSettingsLoading(false));
-  }, [authLoading, user]);
+  const updateSettingsMutation = useScoutSettingsUpdateScoutSettings();
+  const toggling = updateSettingsMutation.isPending;
+
+  const bulkDeclineMutation = useCandidateScoutsBulkDeclineScouts();
+  const declining = bulkDeclineMutation.isPending;
+  const bulkRespondMutation = useCandidateScoutsBulkRespondScouts();
+  const responding = bulkRespondMutation.isPending;
 
   async function handleToggleSettings() {
     if (!settings || toggling) return;
-    setToggling(true);
     try {
-      const updated = await updateScoutSettings(!settings.acceptingScouts);
-      setSettings(updated);
+      const updated = await updateSettingsMutation.mutateAsync({
+        data: { acceptingScouts: !settings.acceptingScouts },
+      });
+      queryClient.setQueryData(settingsKey, updated);
     } catch {
       // ignore
-    } finally {
-      setToggling(false);
     }
   }
 
@@ -112,35 +105,37 @@ export function ScoutListView() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }
 
+  // 一括操作後は全ページのスカウト一覧キャッシュを無効化して再取得する
+  const invalidateScoutList = () =>
+    queryClient.invalidateQueries({
+      queryKey: getCandidateScoutsListCandidateScoutsQueryKey(),
+    });
+
   async function handleBulkDecline() {
     if (selected.size === 0 || declining) return;
     const count = selected.size;
-    setDeclining(true);
     try {
-      await bulkDeclineScouts(Array.from(selected));
+      await bulkDeclineMutation.mutateAsync({ data: { scoutIds: Array.from(selected) } });
       setSelected(new Set());
-      await loadScouts(page * PAGE_SIZE);
+      await invalidateScoutList();
       showToast(`${count}件のスカウトを辞退しました`);
     } catch {
       showToast("一括辞退に失敗しました", "error");
-    } finally {
-      setDeclining(false);
     }
   }
 
   async function handleBulkInterested() {
     if (selected.size === 0 || responding) return;
     const count = selected.size;
-    setResponding(true);
     try {
-      await bulkRespondScouts(Array.from(selected), "interested");
+      await bulkRespondMutation.mutateAsync({
+        data: { scoutIds: Array.from(selected), response: "interested" },
+      });
       setSelected(new Set());
-      await loadScouts(page * PAGE_SIZE);
+      await invalidateScoutList();
       showToast(`${count}件のスカウトに興味ありと回答しました`);
     } catch {
       showToast("一括応答に失敗しました", "error");
-    } finally {
-      setResponding(false);
     }
   }
 

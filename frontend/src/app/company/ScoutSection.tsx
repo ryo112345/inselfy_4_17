@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { fetchScoutDashboard } from "@/features/scout/api";
-import type { ScoutDashboard } from "@/features/scout/types";
+import { useState } from "react";
+import { useCompanyScoutsGetScoutDashboard } from "@/external/client/api/orval/generated/endpoints/company-scouts/company-scouts";
 
 const accent = "#2979ff";
 const num = { fontFamily: "var(--font-plus-jakarta-sans)" };
@@ -20,13 +19,8 @@ function formatReplenishDate(iso: string) {
 
 export function ScoutSection() {
   const [open, setOpen] = useState(false);
-  const [data, setData] = useState<ScoutDashboard | null>(null);
-
-  useEffect(() => {
-    fetchScoutDashboard()
-      .then(setData)
-      .catch(() => {});
-  }, []);
+  // 取得失敗時はスケルトン表示のまま（従来の catch 握り潰しと同じ挙動）
+  const data = useCompanyScoutsGetScoutDashboard().data ?? null;
 
   if (!data) {
     return (
