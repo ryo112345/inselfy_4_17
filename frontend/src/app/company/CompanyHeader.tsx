@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { savedCandidatesCountSavedCandidates } from "@/external/client/api/orval/generated/endpoints/saved-candidates/saved-candidates";
 import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
 import { useCompanyUnreadMessaging } from "@/features/messaging/company-unread-context";
 
@@ -24,7 +25,7 @@ const fullBleedPaths = ["/company/messages", "/company/calendar"];
 export function CompanyHeader({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { company, logout, companyFetch } = useCompanyAuth();
+  const { company, logout } = useCompanyAuth();
   const { unreadCount: unreadMessages } = useCompanyUnreadMessaging();
   const [expanded, setExpanded] = useState(true);
   const [savedCount, setSavedCount] = useState(0);
@@ -32,11 +33,10 @@ export function CompanyHeader({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!company) return;
-    companyFetch("/api/company/saved-candidates/count")
-      .then((r) => r.json())
-      .then((d) => setSavedCount(d.count ?? 0))
+    savedCandidatesCountSavedCandidates()
+      .then((d) => setSavedCount(d.count))
       .catch(() => {});
-  }, [company, companyFetch]);
+  }, [company]);
   const isFullBleed = useMemo(() => fullBleedPaths.some((p) => pathname.startsWith(p)), [pathname]);
 
   const handleLogout = async () => {

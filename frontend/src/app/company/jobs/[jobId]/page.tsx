@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useConfirm, useToast } from "@/components/ui";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import {
+  companyTeamsGetTeamScores,
+  companyTeamsListTeams,
+} from "@/external/client/api/orval/generated/endpoints/company-teams/company-teams";
+import { deleteJobPosting, fetchJobPosting, updateJobPosting } from "@/features/job-posting/api";
 import { JobPostingForm } from "@/features/job-posting/components/JobPostingForm";
 import {
   type TeamListItem,
@@ -19,9 +23,9 @@ import {
   useJobForm,
 } from "@/features/job-posting/useJobForm";
 import { useJobPreviewChannel } from "@/features/job-posting/useJobPreviewChannel";
+import { getErrorMessage } from "@/lib/api-result";
 
 export default function JobEditPage() {
-  const { companyFetch } = useCompanyAuth();
   const router = useRouter();
   const params = useParams();
   const jobId = params.jobId as string;
@@ -42,68 +46,56 @@ export default function JobEditPage() {
   const [teamScores, setTeamScores] = useState<TeamScores | null>(null);
 
   useEffect(() => {
-    companyFetch(`/api/company/jobs/${jobId}`)
-      .then(async (res) => {
-        if (res.ok) {
-          const d = await res.json();
-          setValues(jobFormValuesFromApi(d));
-          setStatus(d.status === "open" ? "open" : "draft");
-          setTeamId(d.teamId ?? null);
-        }
+    fetchJobPosting(jobId)
+      .then((d) => {
+        setValues(jobFormValuesFromApi(d));
+        setStatus(d.status === "open" ? "open" : "draft");
+        setTeamId(d.teamId ?? null);
       })
+      .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [companyFetch, jobId, setValues]);
+  }, [jobId, setValues]);
 
   useEffect(() => {
-    companyFetch("/api/company/teams").then(async (res) => {
-      if (res.ok) {
-        const data = await res.json();
-        setTeamsList(data.items ?? []);
-      }
-    });
-  }, [companyFetch]);
+    companyTeamsListTeams()
+      .then((data) => setTeamsList(data.items))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!teamId) {
       setTeamScores(null);
       return;
     }
-    companyFetch(`/api/company/teams/${teamId}/scores`).then(async (res) => {
-      if (!res.ok) {
-        setTeamScores(null);
-        return;
-      }
-      const data = await res.json();
-      const members: {
-        wvScores?: { id: string; displayScore: number }[];
-        ciScores?: { id: string; displayScore: number }[];
-      }[] = data.items ?? [];
-      const wvAgg = new Map<string, number[]>();
-      const ciAgg = new Map<string, number[]>();
-      for (const m of members) {
-        if (m.wvScores)
-          for (const s of m.wvScores) {
-            const vals = wvAgg.get(s.id) ?? [];
-            vals.push(s.displayScore);
-            wvAgg.set(s.id, vals);
-          }
-        if (m.ciScores)
-          for (const s of m.ciScores) {
-            const vals = ciAgg.get(s.id) ?? [];
-            vals.push(s.displayScore);
-            ciAgg.set(s.id, vals);
-          }
-      }
-      const avg = (map: Map<string, number[]>) =>
-        map.size > 0
-          ? Array.from(map.entries()).map(([id, vals]) => ({
-              id,
-              score: vals.reduce((a, b) => a + b, 0) / vals.length,
-            }))
-          : null;
-      setTeamScores({ wvScores: avg(wvAgg), ciScores: avg(ciAgg) });
-    });
-  }, [companyFetch, teamId]);
+    companyTeamsGetTeamScores(teamId)
+      .then((data) => {
+        const wvAgg = new Map<string, number[]>();
+        const ciAgg = new Map<string, number[]>();
+        for (const m of data.items) {
+          if (m.wvScores)
+            for (const s of m.wvScores) {
+              const vals = wvAgg.get(s.id) ?? [];
+              vals.push(s.displayScore);
+              wvAgg.set(s.id, vals);
+            }
+          if (m.ciScores)
+            for (const s of m.ciScores) {
+              const vals = ciAgg.get(s.id) ?? [];
+              vals.push(s.displayScore);
+              ciAgg.set(s.id, vals);
+            }
+        }
+        const avg = (map: Map<string, number[]>) =>
+          map.size > 0
+            ? Array.from(map.entries()).map(([id, vals]) => ({
+                id,
+                score: vals.reduce((a, b) => a + b, 0) / vals.length,
+              }))
+            : null;
+        setTeamScores({ wvScores: avg(wvAgg), ciScores: avg(ciAgg) });
+      })
+      .catch(() => setTeamScores(null));
+  }, [teamId]);
 
   const previewPayload = useMemo(
     () =>
@@ -136,25 +128,20 @@ export default function JobEditPage() {
       setSavingAction(isStatusChange ? (saveStatus === "open" ? "publish" : "unpublish") : "save");
       try {
         const body = buildJobPostingBody(values, effectiveStatus, teamId);
-        const res = await companyFetch(`/api/company/jobs/${jobId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          showToast(err.message ?? "保存に失敗しました", "error");
-        } else if (isStatusChange) {
+        await updateJobPosting(jobId, body);
+        if (isStatusChange) {
           setStatus(effectiveStatus);
         } else {
           setSaved(true);
           setTimeout(() => setSaved(false), 2000);
         }
+      } catch (err) {
+        showToast(getErrorMessage(err, "保存に失敗しました"), "error");
       } finally {
         setSavingAction(null);
       }
     },
-    [companyFetch, jobId, values, status, teamId, requiredOk, revealValidation, showToast],
+    [jobId, values, status, teamId, requiredOk, revealValidation, showToast],
   );
 
   const handleDelete = useCallback(async () => {
@@ -169,17 +156,14 @@ export default function JobEditPage() {
       return;
     setDeleting(true);
     try {
-      const res = await companyFetch(`/api/company/jobs/${jobId}`, { method: "DELETE" });
-      if (res.ok) {
-        router.push("/company/jobs");
-      } else {
-        const err = await res.json().catch(() => ({}));
-        showToast(err.message ?? "削除に失敗しました", "error");
-      }
+      await deleteJobPosting(jobId);
+      router.push("/company/jobs");
+    } catch (err) {
+      showToast(getErrorMessage(err, "削除に失敗しました"), "error");
     } finally {
       setDeleting(false);
     }
-  }, [companyFetch, confirmDialog, jobId, router, showToast]);
+  }, [confirmDialog, jobId, router, showToast]);
 
   const statusLabel = status === "open" ? "公開中" : "下書き";
   const statusColor =

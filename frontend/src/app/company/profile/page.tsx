@@ -2,34 +2,14 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
-
-type ProfileData = {
-  id: string;
-  companyName: string;
-  contactPersonName: string;
-  phoneNumber: string;
-  email: string;
-  headline: string;
-  description: string;
-  industry: string;
-  location: string;
-  employeeCount: string;
-  foundedYear: number | null;
-  foundedMonth: number | null;
-  websiteUrl: string;
-  logoUrl: string;
-  coverImageUrl: string;
-  representativeName: string;
-  capital: string;
-  revenue: string;
-  benefits: string[];
-  averageAge: string;
-  averageOvertimeHours: string;
-  paidLeaveRate: string;
-  smokingPolicy: string;
-  galleryUrls: string[];
-};
+import {
+  companyProfilesDeleteCompanyProfileImage,
+  companyProfilesGetCompanyProfile,
+  companyProfilesUpdateCompanyProfile,
+  companyProfilesUploadCompanyProfileImage,
+} from "@/external/client/api/orval/generated/endpoints/company-profile/company-profile";
+import type { ModelsCompanyProfileResponse as ProfileData } from "@/external/client/api/orval/generated/models";
+import { getErrorMessage } from "@/lib/api-result";
 
 type FormData = Omit<ProfileData, "id" | "email" | "logoUrl" | "coverImageUrl" | "galleryUrls">;
 
@@ -108,7 +88,6 @@ function toFormData(p: ProfileData): FormData {
 }
 
 export default function CompanyProfilePage() {
-  const { companyFetch } = useCompanyAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [form, setForm] = useState<FormData>({
     companyName: "",
@@ -175,17 +154,15 @@ export default function CompanyProfilePage() {
   }, []);
 
   useEffect(() => {
-    companyFetch("/api/company/profile")
-      .then(async (res) => {
-        if (res.ok) {
-          const data: ProfileData = await res.json();
-          if (!Array.isArray(data.benefits)) data.benefits = [];
-          setProfile(data);
-          setForm(toFormData(data));
-        }
+    companyProfilesGetCompanyProfile()
+      .then((data) => {
+        if (!Array.isArray(data.benefits)) data.benefits = [];
+        setProfile(data);
+        setForm(toFormData(data));
       })
+      .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [companyFetch]);
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -206,22 +183,12 @@ export default function CompanyProfilePage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const res = await companyFetch("/api/company/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      if (res.ok) {
-        const data: ProfileData = await res.json();
-        setProfile(data);
-        setIsDirty(false);
-        showToast("success", "プロフィールを保存しました");
-      } else {
-        const err = await res.json().catch(() => ({}));
-        showToast("error", err.message || "保存に失敗しました");
-      }
-    } catch {
-      showToast("error", "保存に失敗しました");
+      const data = await companyProfilesUpdateCompanyProfile(form);
+      setProfile(data);
+      setIsDirty(false);
+      showToast("success", "プロフィールを保存しました");
+    } catch (err) {
+      showToast("error", getErrorMessage(err, "保存に失敗しました"));
     } finally {
       setIsSaving(false);
     }
@@ -236,28 +203,17 @@ export default function CompanyProfilePage() {
           : setGalleryUploading;
     setter(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await companyFetch(`/api/company/profile/image?type=${type}`, {
-        method: "POST",
-        body: fd,
+      const data = await companyProfilesUploadCompanyProfileImage({ file }, { type });
+      setProfile((prev) => {
+        if (!prev) return prev;
+        if (type === "logo") return { ...prev, logoUrl: data.url };
+        if (type === "cover") return { ...prev, coverImageUrl: data.url };
+        return { ...prev, galleryUrls: [...prev.galleryUrls, data.url] };
       });
-      if (res.ok) {
-        const data = await res.json();
-        setProfile((prev) => {
-          if (!prev) return prev;
-          if (type === "logo") return { ...prev, logoUrl: data.url };
-          if (type === "cover") return { ...prev, coverImageUrl: data.url };
-          return { ...prev, galleryUrls: [...prev.galleryUrls, data.url] };
-        });
-        const labels = { logo: "ロゴ", cover: "カバー画像", gallery: "写真" };
-        showToast("success", `${labels[type]}を更新しました`);
-      } else {
-        const err = await res.json().catch(() => ({}));
-        showToast("error", err.message || "アップロードに失敗しました");
-      }
-    } catch {
-      showToast("error", "アップロードに失敗しました");
+      const labels = { logo: "ロゴ", cover: "カバー画像", gallery: "写真" };
+      showToast("success", `${labels[type]}を更新しました`);
+    } catch (err) {
+      showToast("error", getErrorMessage(err, "アップロードに失敗しました"));
     } finally {
       setter(false);
     }
@@ -265,18 +221,16 @@ export default function CompanyProfilePage() {
 
   const handleImageDelete = async (type: "logo" | "cover" | "gallery", url?: string) => {
     try {
-      const qs =
-        type === "gallery" ? `type=gallery&url=${encodeURIComponent(url ?? "")}` : `type=${type}`;
-      const res = await companyFetch(`/api/company/profile/image?${qs}`, { method: "DELETE" });
-      if (res.ok) {
-        setProfile((prev) => {
-          if (!prev) return prev;
-          if (type === "logo") return { ...prev, logoUrl: "" };
-          if (type === "cover") return { ...prev, coverImageUrl: "" };
-          return { ...prev, galleryUrls: prev.galleryUrls.filter((u) => u !== url) };
-        });
-        showToast("success", "画像を削除しました");
-      }
+      await companyProfilesDeleteCompanyProfileImage(
+        type === "gallery" ? { type, url: url ?? "" } : { type },
+      );
+      setProfile((prev) => {
+        if (!prev) return prev;
+        if (type === "logo") return { ...prev, logoUrl: "" };
+        if (type === "cover") return { ...prev, coverImageUrl: "" };
+        return { ...prev, galleryUrls: prev.galleryUrls.filter((u) => u !== url) };
+      });
+      showToast("success", "画像を削除しました");
     } catch {
       showToast("error", "削除に失敗しました");
     }

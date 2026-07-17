@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { TeamScoresSection } from "@/app/companies/[id]/TeamScoresSection";
 import { ACCENT } from "@/constants/theme";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { companyProfilesGetCompanyProfile } from "@/external/client/api/orval/generated/endpoints/company-profile/company-profile";
 import {
   fetchPublicTeamScores,
   type PublicTeamScore as TeamScore,
@@ -38,25 +38,21 @@ const cardClass =
   "rounded-2xl border border-gray-200/80 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.08)]";
 
 export default function CompanyProfilePreviewPage() {
-  const { companyFetch } = useCompanyAuth();
   const [company, setCompany] = useState<ProfileData | null>(null);
   const [teamScores, setTeamScores] = useState<TeamScore[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    companyFetch("/api/company/profile")
-      .then(async (res) => {
-        if (res.ok) {
-          const data = await res.json();
-          if (!Array.isArray(data.benefits)) data.benefits = [];
-          setCompany(data);
-          fetchPublicTeamScores(data.id)
-            .then(setTeamScores)
-            .catch(() => {});
-        }
+    companyProfilesGetCompanyProfile()
+      .then((data) => {
+        setCompany(data);
+        fetchPublicTeamScores(data.id)
+          .then(setTeamScores)
+          .catch(() => {});
       })
+      .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [companyFetch]);
+  }, []);
 
   useEffect(() => {
     const channel = new BroadcastChannel("company-profile-preview");

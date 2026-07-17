@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { companyTeamsCreateTeam } from "@/external/client/api/orval/generated/endpoints/company-teams/company-teams";
 import { getErrorMessage } from "@/lib/api-result";
 
 export default function NewTeamPage() {
   const router = useRouter();
-  const { companyFetch } = useCompanyAuth();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -21,19 +20,10 @@ export default function NewTeamPage() {
     setError("");
 
     try {
-      const res = await companyFetch("/api/company/teams", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim() || null,
-        }),
+      const team = await companyTeamsCreateTeam({
+        name: name.trim(),
+        description: description.trim() || null,
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "作成に失敗しました");
-      }
-      const team = await res.json();
       router.push(`/company/teams/${team.id}`);
     } catch (err) {
       setError(getErrorMessage(err, "作成に失敗しました"));
