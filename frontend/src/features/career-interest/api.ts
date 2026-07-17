@@ -1,4 +1,6 @@
-import "@/external/client/api/client";
+// Career Interest 診断の薄いラッパー層。診断フローと密結合の命令的コードのため
+// シグネチャを維持し、内部だけ orval 生成の平関数に置き換えている。
+// 非2xx は mutator が ApiError を throw する。
 import {
   careerInterestCiGetAiReport,
   careerInterestCiGetLatestResult,
@@ -6,50 +8,44 @@ import {
   careerInterestCiRequestAiReport,
   careerInterestCiStartSession,
   careerInterestCiSubmitResult,
-  type ModelsAiReportResponse,
-  type ModelsCiBasicScoreResponse,
-  type ModelsCiItemResponse,
-  type ModelsCiResponseItem,
-  type ModelsCiResultResponse,
-  type ModelsCiSessionResponse,
-  type ModelsCiTypeScoreResponse,
+} from "@/external/client/api/orval/generated/endpoints/career-interest/career-interest";
+import {
   teamDiagnoseStartDiagnoseCiSession,
   teamDiagnoseSubmitDiagnoseCiResult,
-} from "@/external/client/api/generated";
+} from "@/external/client/api/orval/generated/endpoints/team-diagnose/team-diagnose";
+import type {
+  ModelsAiReportResponse,
+  ModelsCIBasicScoreResponse,
+  ModelsCIItemResponse,
+  ModelsCIResponseItem,
+  ModelsCIResultResponse,
+  ModelsCISessionResponse,
+  ModelsCITypeScoreResponse,
+} from "@/external/client/api/orval/generated/models";
+import { ApiError } from "@/lib/api-result";
 
-export type ItemDTO = ModelsCiItemResponse;
-export type SessionDTO = ModelsCiSessionResponse;
-export type ResponseDTO = ModelsCiResponseItem;
-export type BasicScoreDTO = ModelsCiBasicScoreResponse;
-export type TypeScoreDTO = ModelsCiTypeScoreResponse;
-export type ResultDTO = ModelsCiResultResponse;
+export type ItemDTO = ModelsCIItemResponse;
+export type SessionDTO = ModelsCISessionResponse;
+export type ResponseDTO = ModelsCIResponseItem;
+export type BasicScoreDTO = ModelsCIBasicScoreResponse;
+export type TypeScoreDTO = ModelsCITypeScoreResponse;
+export type ResultDTO = ModelsCIResultResponse;
 
 // 認証Cookieのユーザー本人のセッションを開始する
 export async function startSession(): Promise<SessionDTO> {
-  const { data, error, response } = await careerInterestCiStartSession({});
-  if (error || !data) throw new Error(`Failed to start session: ${response?.status}`);
-  return data;
+  return careerInterestCiStartSession();
 }
 
 export async function submitResult(
   sessionId: string,
   responses: ResponseDTO[],
 ): Promise<ResultDTO> {
-  const { data, error, response } = await careerInterestCiSubmitResult({
-    path: { sessionId },
-    body: { responses },
-  });
-  if (error || !data) throw new Error(`Failed to submit result: ${response?.status}`);
-  return data;
+  return careerInterestCiSubmitResult(sessionId, { responses });
 }
 
 // チーム診断の招待メンバー用（未ログイン）。招待トークンが認可になる。
 export async function startSessionByDiagnoseToken(token: string): Promise<SessionDTO> {
-  const { data, error, response } = await teamDiagnoseStartDiagnoseCiSession({
-    path: { token },
-  });
-  if (error || !data) throw new Error(`Failed to start session: ${response?.status}`);
-  return data;
+  return teamDiagnoseStartDiagnoseCiSession(token);
 }
 
 export async function submitResultByDiagnoseToken(
@@ -57,48 +53,37 @@ export async function submitResultByDiagnoseToken(
   sessionId: string,
   responses: ResponseDTO[],
 ): Promise<ResultDTO> {
-  const { data, error, response } = await teamDiagnoseSubmitDiagnoseCiResult({
-    path: { token, sessionId },
-    body: { responses },
-  });
-  if (error || !data) throw new Error(`Failed to submit result: ${response?.status}`);
-  return data;
+  return teamDiagnoseSubmitDiagnoseCiResult(token, sessionId, { responses });
 }
 
-// SSR（サーバコンポーネント）からの認証Cookie転送は @/external/client/api/server の
-// interceptor が担うため、呼び出し側での cookie 手渡しは不要。
+// SSR（サーバコンポーネント）からの認証Cookie転送は orval/server.ts の
+// provider 注入が担うため、呼び出し側での cookie 手渡しは不要。
 export async function getResultBySessionId(sessionId: string): Promise<ResultDTO> {
-  const { data, error, response } = await careerInterestCiGetResultBySession({
-    path: { sessionId },
-  });
-  if (error || !data) throw new Error(`Failed to fetch result: ${response?.status}`);
-  return data;
+  return careerInterestCiGetResultBySession(sessionId);
 }
 
 export async function getLatestResult(userId: string): Promise<ResultDTO | null> {
-  const { data, error, response } = await careerInterestCiGetLatestResult({
-    path: { userId },
-  });
-  if (response?.status === 404) return null;
-  if (error || !data) throw new Error(`Failed to fetch latest result: ${response?.status}`);
-  return data;
+  try {
+    return await careerInterestCiGetLatestResult(userId);
+  } catch (err) {
+    // 未受診（404）は結果なしとして扱う
+    if (err instanceof ApiError && err.code === "NOT_FOUND") return null;
+    throw err;
+  }
 }
 
 export type AiReportDTO = ModelsAiReportResponse;
 
 // AIレポート取得。未生成（404）等のエラーは null を返す。
 export async function getAiReport(sessionId: string): Promise<AiReportDTO | null> {
-  const { data, error } = await careerInterestCiGetAiReport({
-    path: { sessionId },
-  });
-  if (error || !data) return null;
-  return data;
+  try {
+    return await careerInterestCiGetAiReport(sessionId);
+  } catch {
+    return null;
+  }
 }
 
 // AIレポートの作成依頼（セッション所有者のみ・冪等）
 export async function requestAiReport(sessionId: string): Promise<void> {
-  const { error, response } = await careerInterestCiRequestAiReport({
-    path: { sessionId },
-  });
-  if (error) throw new Error(`Failed to request AI report: ${response?.status}`);
+  await careerInterestCiRequestAiReport(sessionId);
 }
