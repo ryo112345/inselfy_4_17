@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import {
   useCompanyScoutsGetScoutCredits,
   useCompanyScoutsSendScout,
@@ -15,9 +17,7 @@ import {
 import { CompanyScoutsSendScoutBody } from "@/external/client/api/orval/generated/zod/company-scouts/company-scouts.zod";
 import { fetchJobPostings } from "@/features/job-posting/api";
 import { getErrorMessage } from "@/lib/api-result";
-import { formatFieldErrors, validateForm } from "@/lib/form-validation";
-
-const fieldLabels = { candidateId: "候補者ID", subject: "件名", body: "本文" };
+import type { FieldErrors } from "@/lib/form-validation";
 
 export default function ScoutSendPage() {
   const router = useRouter();
@@ -30,6 +30,7 @@ export default function ScoutSendPage() {
   const [preview, setPreview] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const { fieldErrors, validate, setErrors, clearField, scrollToFirstError } = useFieldErrors();
 
   // 取得失敗はいずれも無視して空表示にする（従来の catch 握り潰しと同じ挙動）
   const credits = useCompanyScoutsGetScoutCredits().data ?? null;
@@ -57,12 +58,26 @@ export default function ScoutSendPage() {
     if (tmpl) {
       setSubject(tmpl.subject);
       setBody(tmpl.body);
+      clearField("subject");
+      clearField("body");
     }
   };
 
+  // 検証エラー時はプレビューから編集画面に戻し、描画後にエラー欄へスクロールする
+  const failValidation = () => {
+    setPreview(false);
+    setTimeout(() => scrollToFirstError(), 0);
+  };
+
   const handleSend = async () => {
-    if (!candidateId.trim() || !subject.trim() || !body.trim()) {
-      setError("候補者ID、件名、本文は必須です");
+    // スキーマに min(1) が無いため必須チェックはドメインルールとして行う
+    const missing: FieldErrors = {};
+    if (!candidateId.trim()) missing.candidateId = "入力してください";
+    if (!subject.trim()) missing.subject = "入力してください";
+    if (!body.trim()) missing.body = "入力してください";
+    if (Object.keys(missing).length > 0) {
+      setErrors(missing);
+      failValidation();
       return;
     }
     const payload = {
@@ -71,9 +86,8 @@ export default function ScoutSendPage() {
       subject: subject.trim(),
       body: body.trim(),
     };
-    const fieldErrors = validateForm(CompanyScoutsSendScoutBody, payload);
-    if (fieldErrors) {
-      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
+    if (!validate(CompanyScoutsSendScoutBody, payload)) {
+      failValidation();
       return;
     }
     setError(null);
@@ -171,20 +185,21 @@ export default function ScoutSendPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
           {/* Candidate ID */}
           <div>
-            <label
-              htmlFor="scout-candidate-id"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="candidateId" className="block text-sm font-medium text-gray-700 mb-1">
               候補者ID <span className="text-red-500">*</span>
             </label>
             <input
-              id="scout-candidate-id"
+              {...fieldAriaProps("candidateId", fieldErrors.candidateId)}
               type="text"
               value={candidateId}
-              onChange={(e) => setCandidateId(e.target.value)}
+              onChange={(e) => {
+                setCandidateId(e.target.value);
+                clearField("candidateId");
+              }}
               placeholder="候補者のIDを入力"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
             />
+            <FieldError name="candidateId" error={fieldErrors.candidateId} />
           </div>
 
           {/* Job posting select */}
@@ -245,31 +260,39 @@ export default function ScoutSendPage() {
 
           {/* Subject */}
           <div>
-            <label htmlFor="scout-subject" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
               件名 <span className="text-red-500">*</span>
             </label>
             <input
-              id="scout-subject"
+              {...fieldAriaProps("subject", fieldErrors.subject)}
               type="text"
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={(e) => {
+                setSubject(e.target.value);
+                clearField("subject");
+              }}
               placeholder="スカウトの件名"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
             />
+            <FieldError name="subject" error={fieldErrors.subject} />
           </div>
 
           {/* Body */}
           <div>
-            <label htmlFor="scout-body" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="body" className="block text-sm font-medium text-gray-700 mb-1">
               本文 <span className="text-red-500">*</span>
             </label>
             <textarea
-              id="scout-body"
+              {...fieldAriaProps("body", fieldErrors.body)}
               value={body}
-              onChange={(e) => setBody(e.target.value)}
+              onChange={(e) => {
+                setBody(e.target.value);
+                clearField("body");
+              }}
               placeholder="スカウトメッセージの本文を入力..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] text-sm resize-y outline-none"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] text-sm resize-y outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
             />
+            <FieldError name="body" error={fieldErrors.body} />
           </div>
 
           {/* Template variables help */}

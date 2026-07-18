@@ -28,6 +28,13 @@ export function useFieldErrors() {
     return Object.keys(errors).length === 0;
   }, []);
 
+  // スキーマ外のドメインルール（必須チェック・パスワード照合など）を
+  // 同じインライン表示に載せるための手動セット
+  const setErrors = useCallback((errors: FieldErrors) => {
+    lastErrors.current = errors;
+    setFieldErrors(errors);
+  }, []);
+
   const clearField = useCallback((name: string) => {
     setFieldErrors((prev) => {
       if (!(name in prev)) return prev;
@@ -55,5 +62,5 @@ export function useFieldErrors() {
     el.focus({ preventScroll: true });
   }, []);
 
-  return { fieldErrors, validate, clearField, clearAll, scrollToFirstError };
+  return { fieldErrors, validate, setErrors, clearField, clearAll, scrollToFirstError };
 }

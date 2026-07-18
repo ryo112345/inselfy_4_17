@@ -4,6 +4,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import {
   getScoutTemplatesGetScoutTemplateQueryKey,
   getScoutTemplatesListScoutTemplatesQueryKey,
@@ -16,9 +18,7 @@ import {
   HighlightTextarea,
 } from "@/features/scout/components/VariableHighlightField";
 import { getErrorMessage } from "@/lib/api-result";
-import { formatFieldErrors, validateForm } from "@/lib/form-validation";
-
-const fieldLabels = { name: "テンプレート名", subject: "件名", body: "本文" };
+import type { FieldErrors } from "@/lib/form-validation";
 
 export default function TemplateEditPage() {
   const params = useParams();
@@ -49,16 +49,22 @@ export default function TemplateEditPage() {
 
   const updateMutation = useScoutTemplatesUpdateScoutTemplate();
   const saving = updateMutation.isPending;
+  const { fieldErrors, validate, setErrors, clearField, scrollToFirstError } = useFieldErrors();
 
   const handleSave = async () => {
-    if (!name.trim() || !subject.trim() || !body.trim()) {
-      setError("全てのフィールドを入力してください");
+    // スキーマに min(1) が無いため必須チェックはドメインルールとして行う
+    const missing: FieldErrors = {};
+    if (!name.trim()) missing.name = "入力してください";
+    if (!subject.trim()) missing.subject = "入力してください";
+    if (!body.trim()) missing.body = "入力してください";
+    if (Object.keys(missing).length > 0) {
+      setErrors(missing);
+      scrollToFirstError();
       return;
     }
     const payload = { name: name.trim(), subject: subject.trim(), body: body.trim() };
-    const fieldErrors = validateForm(ScoutTemplatesUpdateScoutTemplateBody, payload);
-    if (fieldErrors) {
-      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
+    if (!validate(ScoutTemplatesUpdateScoutTemplateBody, payload)) {
+      scrollToFirstError();
       return;
     }
     setError(null);
@@ -118,44 +124,53 @@ export default function TemplateEditPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
         {/* Name */}
         <div>
-          <label htmlFor="template-name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             テンプレート名 <span className="text-red-500">*</span>
           </label>
           <input
-            id="template-name"
+            {...fieldAriaProps("name", fieldErrors.name)}
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              clearField("name");
+            }}
             placeholder="例: 初回スカウト用"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
           />
+          <FieldError name="name" error={fieldErrors.name} />
         </div>
 
         {/* Subject */}
         <div>
-          <label
-            htmlFor="template-subject"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
             件名 <span className="text-red-500">*</span>
           </label>
           <HighlightInput
-            id="template-subject"
+            id="subject"
+            error={fieldErrors.subject}
             value={subject}
-            onChange={setSubject}
+            onChange={(v) => {
+              setSubject(v);
+              clearField("subject");
+            }}
             placeholder="例: {{candidate_name}}様へ {{company_name}} からのスカウト"
           />
         </div>
 
         {/* Body */}
         <div>
-          <label htmlFor="template-body" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="body" className="block text-sm font-medium text-gray-700 mb-1">
             本文 <span className="text-red-500">*</span>
           </label>
           <HighlightTextarea
-            id="template-body"
+            id="body"
+            error={fieldErrors.body}
             value={body}
-            onChange={setBody}
+            onChange={(v) => {
+              setBody(v);
+              clearField("body");
+            }}
             placeholder="スカウトメッセージのテンプレート本文..."
           />
         </div>

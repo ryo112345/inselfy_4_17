@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useRef } from "react";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
 
 const VARIABLE_SPLIT = /(\{\{[^}]+\}\})/g;
 const VARIABLE_TEST = /^\{\{[^}]+\}\}$/;
@@ -21,12 +22,14 @@ function renderHighlighted(text: string): ReactNode[] {
 
 export function HighlightInput({
   id,
+  error,
   value,
   onChange,
   placeholder,
   className = "",
 }: {
   id?: string;
+  error?: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -43,26 +46,29 @@ export function HighlightInput({
         </div>
       )}
       <input
-        id={id}
         type="text"
+        {...(id ? fieldAriaProps(id, error) : {})}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         style={value ? { color: "transparent", caretColor: "#111827" } : undefined}
-        className={`w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-transparent relative ${className}`}
+        className={`w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none bg-transparent relative aria-invalid:border-red-400 aria-invalid:bg-red-50/60 ${className}`}
       />
+      {id && <FieldError name={id} error={error} />}
     </div>
   );
 }
 
 export function HighlightTextarea({
   id,
+  error,
   value,
   onChange,
   placeholder,
   className = "",
 }: {
   id?: string;
+  error?: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -89,15 +95,16 @@ export function HighlightTextarea({
         </div>
       )}
       <textarea
-        id={id}
+        {...(id ? fieldAriaProps(id, error) : {})}
         ref={textareaRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onScroll={syncScroll}
         placeholder={placeholder}
         style={value ? { color: "transparent", caretColor: "#111827" } : undefined}
-        className={`w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] text-sm resize-y outline-none bg-transparent relative ${className}`}
+        className={`w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] text-sm resize-y outline-none bg-transparent relative aria-invalid:border-red-400 aria-invalid:bg-red-50/60 ${className}`}
       />
+      {id && <FieldError name={id} error={error} />}
     </div>
   );
 }

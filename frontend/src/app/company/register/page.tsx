@@ -2,18 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import { companyAuthCompanyRegister } from "@/external/client/api/orval/generated/endpoints/company-auth/company-auth";
 import { CompanyAuthCompanyRegisterBody } from "@/external/client/api/orval/generated/zod/company-auth/company-auth.zod";
 import { ApiError } from "@/lib/api-result";
-import { formatFieldErrors, validateForm } from "@/lib/form-validation";
 
-const fieldLabels = {
-  email: "メールアドレス",
-  password: "パスワード",
-  companyName: "企業名",
-  contactPersonName: "担当者名",
-  phoneNumber: "電話番号",
-};
+const inputClass =
+  "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60";
 
 export default function CompanyRegisterPage() {
   const [form, setForm] = useState({
@@ -27,9 +23,11 @@ export default function CompanyRegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
+  const { fieldErrors, validate, setErrors, clearField, scrollToFirstError } = useFieldErrors();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    clearField(e.target.name);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,14 +42,14 @@ export default function CompanyRegisterPage() {
       phoneNumber: form.phoneNumber,
     };
 
-    const fieldErrors = validateForm(CompanyAuthCompanyRegisterBody, body);
-    if (fieldErrors) {
-      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
+    if (!validate(CompanyAuthCompanyRegisterBody, body)) {
+      scrollToFirstError();
       return;
     }
     // passwordConfirm はクライアント専用フィールドのためスキーマ外で照合する
     if (form.password !== form.passwordConfirm) {
-      setError("パスワードが一致しません。");
+      setErrors({ passwordConfirm: "パスワードが一致しません" });
+      scrollToFirstError();
       return;
     }
 
@@ -119,14 +117,15 @@ export default function CompanyRegisterPage() {
               企業名 <span className="text-red-500">*</span>
             </label>
             <input
-              id="companyName"
+              {...fieldAriaProps("companyName", fieldErrors.companyName)}
               name="companyName"
               type="text"
               required
               value={form.companyName}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              className={inputClass}
             />
+            <FieldError name="companyName" error={fieldErrors.companyName} />
           </div>
 
           <div>
@@ -134,14 +133,15 @@ export default function CompanyRegisterPage() {
               担当者名 <span className="text-red-500">*</span>
             </label>
             <input
-              id="contactPersonName"
+              {...fieldAriaProps("contactPersonName", fieldErrors.contactPersonName)}
               name="contactPersonName"
               type="text"
               required
               value={form.contactPersonName}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              className={inputClass}
             />
+            <FieldError name="contactPersonName" error={fieldErrors.contactPersonName} />
           </div>
 
           <div>
@@ -149,14 +149,15 @@ export default function CompanyRegisterPage() {
               電話番号 <span className="text-red-500">*</span>
             </label>
             <input
-              id="phoneNumber"
+              {...fieldAriaProps("phoneNumber", fieldErrors.phoneNumber)}
               name="phoneNumber"
               type="tel"
               required
               value={form.phoneNumber}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              className={inputClass}
             />
+            <FieldError name="phoneNumber" error={fieldErrors.phoneNumber} />
           </div>
 
           <div>
@@ -164,14 +165,15 @@ export default function CompanyRegisterPage() {
               メールアドレス <span className="text-red-500">*</span>
             </label>
             <input
-              id="email"
+              {...fieldAriaProps("email", fieldErrors.email)}
               name="email"
               type="email"
               required
               value={form.email}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              className={inputClass}
             />
+            <FieldError name="email" error={fieldErrors.email} />
           </div>
 
           <div>
@@ -179,15 +181,16 @@ export default function CompanyRegisterPage() {
               パスワード <span className="text-red-500">*</span>
             </label>
             <input
-              id="password"
+              {...fieldAriaProps("password", fieldErrors.password)}
               name="password"
               type="password"
               required
               minLength={8}
               value={form.password}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              className={inputClass}
             />
+            <FieldError name="password" error={fieldErrors.password} />
             <p className="mt-1 text-xs text-gray-500">8文字以上</p>
           </div>
 
@@ -196,15 +199,16 @@ export default function CompanyRegisterPage() {
               パスワード（確認） <span className="text-red-500">*</span>
             </label>
             <input
-              id="passwordConfirm"
+              {...fieldAriaProps("passwordConfirm", fieldErrors.passwordConfirm)}
               name="passwordConfirm"
               type="password"
               required
               minLength={8}
               value={form.passwordConfirm}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              className={inputClass}
             />
+            <FieldError name="passwordConfirm" error={fieldErrors.passwordConfirm} />
           </div>
 
           {error && <p className="whitespace-pre-line text-sm text-red-600">{error}</p>}
