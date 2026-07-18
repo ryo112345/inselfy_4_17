@@ -2,6 +2,9 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ErrorSummary } from "@/components/form/ErrorSummary";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import {
   companyProfilesDeleteCompanyProfileImage,
   companyProfilesGetCompanyProfile,
@@ -9,6 +12,11 @@ import {
   companyProfilesUploadCompanyProfileImage,
 } from "@/external/client/api/orval/generated/endpoints/company-profile/company-profile";
 import type { ModelsCompanyProfileResponse as ProfileData } from "@/external/client/api/orval/generated/models";
+import {
+  CompanyProfilesUpdateCompanyProfileBody,
+  companyProfilesUpdateCompanyProfileBodyDescriptionMax,
+  companyProfilesUpdateCompanyProfileBodyHeadlineMax,
+} from "@/external/client/api/orval/generated/zod/company-profile/company-profile.zod";
 import { getErrorMessage } from "@/lib/api-result";
 
 type FormData = Omit<ProfileData, "id" | "email" | "logoUrl" | "coverImageUrl" | "galleryUrls">;
@@ -62,6 +70,29 @@ const monthOptions = [
 ];
 
 const accent = "#2979ff";
+
+// バリデーションエラー表示用（画面上の Field label と揃える）
+const fieldLabels: Record<string, string> = {
+  companyName: "企業名",
+  headline: "キャッチコピー",
+  representativeName: "代表者名",
+  industry: "業種",
+  foundedYear: "設立年",
+  foundedMonth: "設立月",
+  capital: "資本金",
+  revenue: "売上高",
+  employeeCount: "従業員規模",
+  location: "所在地",
+  websiteUrl: "Webサイト",
+  contactPersonName: "担当者名",
+  phoneNumber: "電話番号",
+  description: "事業内容・企業紹介",
+  benefits: "福利厚生",
+  averageAge: "平均年齢",
+  averageOvertimeHours: "月平均残業時間",
+  paidLeaveRate: "有給取得率",
+  smokingPolicy: "受動喫煙対策",
+};
 
 function toFormData(p: ProfileData): FormData {
   return {
@@ -121,6 +152,7 @@ export default function CompanyProfilePage() {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const { fieldErrors, validate, clearField, scrollToFirstError } = useFieldErrors();
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -153,9 +185,14 @@ export default function CompanyProfilePage() {
           : value,
     }));
     setIsDirty(true);
+    clearField(name);
   };
 
   const handleSave = async () => {
+    if (!validate(CompanyProfilesUpdateCompanyProfileBody, form)) {
+      scrollToFirstError();
+      return;
+    }
     setIsSaving(true);
     try {
       const data = await companyProfilesUpdateCompanyProfile(form);
@@ -234,6 +271,8 @@ export default function CompanyProfilePage() {
         <h1 className="text-xl font-bold text-gray-900">企業情報</h1>
         <p className="mt-1 text-sm text-gray-500">求職者に表示される企業の基本情報を編集できます</p>
       </div>
+
+      <ErrorSummary errors={fieldErrors} labels={fieldLabels} className="mb-6" />
 
       {/* ── Cover + Logo ── */}
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -347,38 +386,51 @@ export default function CompanyProfilePage() {
       <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <SectionTitle icon={<InfoIcon />}>基本情報</SectionTitle>
         <div className="mt-5 space-y-5">
-          <Field label="企業名" required>
+          <Field label="企業名" required name="companyName" error={fieldErrors.companyName}>
             <input
               name="companyName"
+              {...fieldAriaProps("companyName", fieldErrors.companyName)}
               value={form.companyName}
               onChange={handleChange}
               className="field-input"
               placeholder="例: 株式会社Inselfy"
             />
           </Field>
-          <Field label="キャッチコピー" hint={`${form.headline.length}/100`}>
+          <Field
+            label="キャッチコピー"
+            hint={`${form.headline.length}/${companyProfilesUpdateCompanyProfileBodyHeadlineMax}`}
+            name="headline"
+            error={fieldErrors.headline}
+          >
             <input
               name="headline"
+              {...fieldAriaProps("headline", fieldErrors.headline)}
               value={form.headline}
               onChange={handleChange}
-              maxLength={100}
+              maxLength={companyProfilesUpdateCompanyProfileBodyHeadlineMax}
               className="field-input"
               placeholder="例: AIで採用を変える"
             />
           </Field>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="代表者名">
+            <Field
+              label="代表者名"
+              name="representativeName"
+              error={fieldErrors.representativeName}
+            >
               <input
                 name="representativeName"
+                {...fieldAriaProps("representativeName", fieldErrors.representativeName)}
                 value={form.representativeName}
                 onChange={handleChange}
                 className="field-input"
                 placeholder="例: 山田 太郎"
               />
             </Field>
-            <Field label="業種">
+            <Field label="業種" name="industry" error={fieldErrors.industry}>
               <select
                 name="industry"
+                {...fieldAriaProps("industry", fieldErrors.industry)}
                 value={form.industry}
                 onChange={handleChange}
                 className="field-input"
@@ -392,9 +444,10 @@ export default function CompanyProfilePage() {
             </Field>
           </div>
           <div className="grid grid-cols-4 gap-4">
-            <Field label="設立年">
+            <Field label="設立年" name="foundedYear" error={fieldErrors.foundedYear}>
               <select
                 name="foundedYear"
+                {...fieldAriaProps("foundedYear", fieldErrors.foundedYear)}
                 value={form.foundedYear ?? ""}
                 onChange={handleChange}
                 className="field-input"
@@ -410,9 +463,10 @@ export default function CompanyProfilePage() {
                 ))}
               </select>
             </Field>
-            <Field label="設立月">
+            <Field label="設立月" name="foundedMonth" error={fieldErrors.foundedMonth}>
               <select
                 name="foundedMonth"
+                {...fieldAriaProps("foundedMonth", fieldErrors.foundedMonth)}
                 value={form.foundedMonth ?? ""}
                 onChange={handleChange}
                 className="field-input"
@@ -424,18 +478,20 @@ export default function CompanyProfilePage() {
                 ))}
               </select>
             </Field>
-            <Field label="資本金">
+            <Field label="資本金" name="capital" error={fieldErrors.capital}>
               <input
                 name="capital"
+                {...fieldAriaProps("capital", fieldErrors.capital)}
                 value={form.capital}
                 onChange={handleChange}
                 className="field-input"
                 placeholder="例: 1億円"
               />
             </Field>
-            <Field label="売上高">
+            <Field label="売上高" name="revenue" error={fieldErrors.revenue}>
               <input
                 name="revenue"
+                {...fieldAriaProps("revenue", fieldErrors.revenue)}
                 value={form.revenue}
                 onChange={handleChange}
                 className="field-input"
@@ -444,9 +500,10 @@ export default function CompanyProfilePage() {
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="従業員規模">
+            <Field label="従業員規模" name="employeeCount" error={fieldErrors.employeeCount}>
               <select
                 name="employeeCount"
+                {...fieldAriaProps("employeeCount", fieldErrors.employeeCount)}
                 value={form.employeeCount}
                 onChange={handleChange}
                 className="field-input"
@@ -458,9 +515,10 @@ export default function CompanyProfilePage() {
                 ))}
               </select>
             </Field>
-            <Field label="所在地">
+            <Field label="所在地" name="location" error={fieldErrors.location}>
               <input
                 name="location"
+                {...fieldAriaProps("location", fieldErrors.location)}
                 value={form.location}
                 onChange={handleChange}
                 className="field-input"
@@ -468,9 +526,10 @@ export default function CompanyProfilePage() {
               />
             </Field>
           </div>
-          <Field label="Webサイト">
+          <Field label="Webサイト" name="websiteUrl" error={fieldErrors.websiteUrl}>
             <input
               name="websiteUrl"
+              {...fieldAriaProps("websiteUrl", fieldErrors.websiteUrl)}
               value={form.websiteUrl}
               onChange={handleChange}
               type="url"
@@ -486,18 +545,20 @@ export default function CompanyProfilePage() {
         <SectionTitle icon={<ContactIcon />}>担当者・連絡先</SectionTitle>
         <div className="mt-5 space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <Field label="担当者名">
+            <Field label="担当者名" name="contactPersonName" error={fieldErrors.contactPersonName}>
               <input
                 name="contactPersonName"
+                {...fieldAriaProps("contactPersonName", fieldErrors.contactPersonName)}
                 value={form.contactPersonName}
                 onChange={handleChange}
                 className="field-input"
                 placeholder="例: 佐藤 花子"
               />
             </Field>
-            <Field label="電話番号">
+            <Field label="電話番号" name="phoneNumber" error={fieldErrors.phoneNumber}>
               <input
                 name="phoneNumber"
+                {...fieldAriaProps("phoneNumber", fieldErrors.phoneNumber)}
                 value={form.phoneNumber}
                 onChange={handleChange}
                 type="tel"
@@ -520,12 +581,18 @@ export default function CompanyProfilePage() {
       <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <SectionTitle icon={<DocIcon />}>事業内容</SectionTitle>
         <div className="mt-5">
-          <Field label="事業内容・企業紹介" hint={`${form.description.length}/2000`}>
+          <Field
+            label="事業内容・企業紹介"
+            hint={`${form.description.length}/${companyProfilesUpdateCompanyProfileBodyDescriptionMax}`}
+            name="description"
+            error={fieldErrors.description}
+          >
             <textarea
               name="description"
+              {...fieldAriaProps("description", fieldErrors.description)}
               value={form.description}
               onChange={handleChange}
-              maxLength={2000}
+              maxLength={companyProfilesUpdateCompanyProfileBodyDescriptionMax}
               rows={6}
               className="field-input resize-y"
               placeholder="企業の事業内容やミッション・ビジョンなどを記載してください"
@@ -597,12 +664,19 @@ export default function CompanyProfilePage() {
       <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <SectionTitle icon={<HeartIcon />}>福利厚生・待遇</SectionTitle>
         <div className="mt-5">
-          <Field label="福利厚生" hint={`${form.benefits.length}件`}>
+          <Field
+            label="福利厚生"
+            hint={`${form.benefits.length}件`}
+            name="benefits"
+            error={fieldErrors.benefits}
+          >
             <TagInput
+              inputId="benefits"
               tags={form.benefits}
               onChange={(tags) => {
                 setForm((prev) => ({ ...prev, benefits: tags }));
                 setIsDirty(true);
+                clearField("benefits");
               }}
               placeholder="入力してEnterで追加（例: 社会保険完備）"
             />
@@ -618,27 +692,34 @@ export default function CompanyProfilePage() {
         </p>
         <div className="space-y-5">
           <div className="grid grid-cols-3 gap-4">
-            <Field label="平均年齢">
+            <Field label="平均年齢" name="averageAge" error={fieldErrors.averageAge}>
               <input
                 name="averageAge"
+                {...fieldAriaProps("averageAge", fieldErrors.averageAge)}
                 value={form.averageAge}
                 onChange={handleChange}
                 className="field-input"
                 placeholder="例: 32.5歳"
               />
             </Field>
-            <Field label="月平均残業時間">
+            <Field
+              label="月平均残業時間"
+              name="averageOvertimeHours"
+              error={fieldErrors.averageOvertimeHours}
+            >
               <input
                 name="averageOvertimeHours"
+                {...fieldAriaProps("averageOvertimeHours", fieldErrors.averageOvertimeHours)}
                 value={form.averageOvertimeHours}
                 onChange={handleChange}
                 className="field-input"
                 placeholder="例: 15時間"
               />
             </Field>
-            <Field label="有給取得率">
+            <Field label="有給取得率" name="paidLeaveRate" error={fieldErrors.paidLeaveRate}>
               <input
                 name="paidLeaveRate"
+                {...fieldAriaProps("paidLeaveRate", fieldErrors.paidLeaveRate)}
                 value={form.paidLeaveRate}
                 onChange={handleChange}
                 className="field-input"
@@ -646,9 +727,10 @@ export default function CompanyProfilePage() {
               />
             </Field>
           </div>
-          <Field label="受動喫煙対策">
+          <Field label="受動喫煙対策" name="smokingPolicy" error={fieldErrors.smokingPolicy}>
             <select
               name="smokingPolicy"
+              {...fieldAriaProps("smokingPolicy", fieldErrors.smokingPolicy)}
               value={form.smokingPolicy}
               onChange={handleChange}
               className="field-input"
@@ -722,6 +804,10 @@ export default function CompanyProfilePage() {
           box-shadow: 0 0 0 2px ${accent}20;
         }
         .field-input::placeholder { color: #9ca3af; }
+        .field-input[aria-invalid="true"] {
+          border-color: #f87171;
+          background-color: rgb(254 242 242 / 0.6);
+        }
       `}</style>
     </div>
   );
@@ -742,11 +828,15 @@ function Field({
   label,
   required,
   hint,
+  name,
+  error,
   children,
 }: {
   label: string;
   required?: boolean;
   hint?: string;
+  name?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -759,15 +849,18 @@ function Field({
         {hint && <span className="text-xs text-gray-400">{hint}</span>}
       </div>
       {children}
+      {name && <FieldError name={name} error={error} />}
     </div>
   );
 }
 
 function TagInput({
+  inputId,
   tags,
   onChange,
   placeholder,
 }: {
+  inputId?: string;
   tags: string[];
   onChange: (tags: string[]) => void;
   placeholder?: string;
@@ -810,6 +903,7 @@ function TagInput({
       )}
       <input
         ref={inputRef}
+        id={inputId}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
