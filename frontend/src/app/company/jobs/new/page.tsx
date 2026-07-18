@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { ErrorSummary } from "@/components/form/ErrorSummary";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import { createJobPosting } from "@/features/job-posting/api";
 import { JobPostingForm } from "@/features/job-posting/components/JobPostingForm";
 import { SimpleTeamSection } from "@/features/job-posting/components/TeamSection";
@@ -10,8 +12,10 @@ import { useCompanyProfile } from "@/features/job-posting/useCompanyProfile";
 import {
   buildJobPostingBody,
   buildPreviewPayload,
+  jobPostingBodySchema,
+  jobPostingFieldLabels,
+  makeSetWithClear,
   useJobForm,
-  validateJobPostingBody,
 } from "@/features/job-posting/useJobForm";
 import { useJobPreviewChannel } from "@/features/job-posting/useJobPreviewChannel";
 
@@ -19,6 +23,8 @@ export default function JobNewPage() {
   const router = useRouter();
   const company = useCompanyProfile();
   const { values, set, requiredOk } = useJobForm();
+  const { fieldErrors, validate, clearField, scrollToFirstError } = useFieldErrors();
+  const setField = useMemo(() => makeSetWithClear(set, clearField), [set, clearField]);
 
   const [status, setStatus] = useState<"open" | "draft">("draft");
   const [saving, setSaving] = useState(false);
@@ -47,9 +53,8 @@ export default function JobNewPage() {
       description: values.description.trim(),
       location: values.workLocation.trim() || null,
     };
-    const validationErrors = validateJobPostingBody(body);
-    if (validationErrors) {
-      setSubmitError(validationErrors.join("\n"));
+    if (!validate(jobPostingBodySchema, body)) {
+      scrollToFirstError();
       return;
     }
 
@@ -158,12 +163,14 @@ export default function JobNewPage() {
       )}
 
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
+        <ErrorSummary errors={fieldErrors} labels={jobPostingFieldLabels} />
         <JobPostingForm
           values={values}
-          set={set}
+          set={setField}
           company={company}
+          errors={fieldErrors}
           titlePlaceholder="求人タイトルを入力（例：バックエンドエンジニア｜Go / PostgreSQL / AWS）"
-          teamSection={<SimpleTeamSection values={values} set={set} />}
+          teamSection={<SimpleTeamSection values={values} set={setField} />}
         />
 
         {/* Bottom save bar */}

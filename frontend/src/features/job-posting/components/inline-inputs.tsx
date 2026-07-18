@@ -1,39 +1,56 @@
 "use client";
 
 import { useState } from "react";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
 import { ACCENT } from "@/constants/theme";
 
-/* ── 求人フォーム共通のインライン編集部品 ── */
+/* ── 求人フォーム共通のインライン編集部品 ──
+   id を渡すとエラーサマリーからのアンカー対象になり、error があれば
+   aria-invalid + 赤装飾 + 直下のエラー文（FieldError）が付く */
+
+const invalidClass = "aria-invalid:border-red-400 aria-invalid:bg-red-50/60";
 
 export function InlineInput({
+  id,
+  error,
   value,
   placeholder,
   onChange,
   className = "",
 }: {
+  id?: string;
+  error?: string;
   value: string;
   placeholder?: string;
   onChange: (v: string) => void;
   className?: string;
 }) {
   return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className={`w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[${ACCENT}] transition-colors placeholder:text-gray-300 ${className}`}
-    />
+    <>
+      <input
+        type="text"
+        {...(id ? fieldAriaProps(id, error) : {})}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`w-full bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-[${ACCENT}] transition-colors placeholder:text-gray-300 ${invalidClass} ${className}`}
+      />
+      {id && <FieldError name={id} error={error} />}
+    </>
   );
 }
 
 export function InlineTextarea({
+  id,
+  error,
   value,
   placeholder,
   onChange,
   rows = 3,
   className = "",
 }: {
+  id?: string;
+  error?: string;
   value: string;
   placeholder?: string;
   onChange: (v: string) => void;
@@ -41,22 +58,30 @@ export function InlineTextarea({
   className?: string;
 }) {
   return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className={`w-full bg-transparent outline-none border border-transparent rounded-lg hover:border-gray-300 focus:border-[${ACCENT}] transition-colors resize-y placeholder:text-gray-300 ${className}`}
-    />
+    <>
+      <textarea
+        {...(id ? fieldAriaProps(id, error) : {})}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className={`w-full bg-transparent outline-none border border-transparent rounded-lg hover:border-gray-300 focus:border-[${ACCENT}] transition-colors resize-y placeholder:text-gray-300 ${invalidClass} ${className}`}
+      />
+      {id && <FieldError name={id} error={error} />}
+    </>
   );
 }
 
 export function InlineSelect({
+  id,
+  error,
   value,
   options,
   onChange,
   placeholder,
 }: {
+  id?: string;
+  error?: string;
   value: string;
   options: { value: string; label: string }[];
   onChange: (v: string) => void;
@@ -64,9 +89,10 @@ export function InlineSelect({
 }) {
   return (
     <select
+      {...(id ? fieldAriaProps(id, error) : {})}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full max-w-full truncate bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors cursor-pointer text-inherit font-inherit"
+      className={`w-full max-w-full truncate bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors cursor-pointer text-inherit font-inherit ${invalidClass}`}
     >
       {placeholder && (
         <option value="" disabled>
@@ -83,10 +109,12 @@ export function InlineSelect({
 }
 
 export function InlineTagInput({
+  inputId,
   tags,
   onAdd,
   onRemove,
 }: {
+  inputId?: string;
   tags: string[];
   onAdd: (tag: string) => void;
   onRemove: (index: number) => void;
@@ -133,6 +161,7 @@ export function InlineTagInput({
       ))}
       <input
         type="text"
+        id={inputId}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -144,10 +173,12 @@ export function InlineTagInput({
 }
 
 export function BenefitTagInput({
+  inputId,
   tags,
   onAdd,
   onRemove,
 }: {
+  inputId?: string;
   tags: string[];
   onAdd: (tag: string) => void;
   onRemove: (index: number) => void;
@@ -199,6 +230,7 @@ export function BenefitTagInput({
       ))}
       <input
         type="text"
+        id={inputId}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -211,6 +243,8 @@ export function BenefitTagInput({
 }
 
 export function EditableHighlightCard({
+  id,
+  error,
   label,
   title,
   onTitleChange,
@@ -221,6 +255,8 @@ export function EditableHighlightCard({
   tone,
   placeholder,
 }: {
+  id?: string;
+  error?: string;
   label: string;
   title: string;
   onTitleChange: (v: string) => void;
@@ -256,6 +292,8 @@ export function EditableHighlightCard({
         className="text-lg font-bold leading-snug text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
       />
       <InlineTextarea
+        id={id}
+        error={error}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
@@ -274,6 +312,8 @@ export function EditableConditionGroup({
   title: string;
   rows: {
     label: string;
+    id?: string;
+    error?: string;
     value: string;
     onChange: (v: string) => void;
     placeholder: string;
@@ -304,14 +344,21 @@ export function EditableConditionGroup({
                   {r.value || r.placeholder}
                 </span>
               ) : r.type === "select" && r.options ? (
-                <InlineSelect
-                  value={r.value}
-                  options={r.options}
-                  onChange={r.onChange}
-                  placeholder="選択"
-                />
+                <>
+                  <InlineSelect
+                    id={r.id}
+                    error={r.error}
+                    value={r.value}
+                    options={r.options}
+                    onChange={r.onChange}
+                    placeholder="選択"
+                  />
+                  {r.id && <FieldError name={r.id} error={r.error} />}
+                </>
               ) : r.type === "textarea" ? (
                 <InlineTextarea
+                  id={r.id}
+                  error={r.error}
                   value={r.value}
                   onChange={r.onChange}
                   placeholder={r.placeholder}
@@ -320,6 +367,8 @@ export function EditableConditionGroup({
                 />
               ) : (
                 <InlineInput
+                  id={r.id}
+                  error={r.error}
                   value={r.value}
                   onChange={r.onChange}
                   placeholder={r.placeholder}

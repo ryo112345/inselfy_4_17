@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ErrorSummary } from "@/components/form/ErrorSummary";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import { useConfirm, useToast } from "@/components/ui";
 import {
   companyTeamsGetTeamScores,
@@ -20,8 +22,10 @@ import {
   buildJobPostingBody,
   buildPreviewPayload,
   jobFormValuesFromApi,
+  jobPostingBodySchema,
+  jobPostingFieldLabels,
+  makeSetWithClear,
   useJobForm,
-  validateJobPostingBody,
 } from "@/features/job-posting/useJobForm";
 import { useJobPreviewChannel } from "@/features/job-posting/useJobPreviewChannel";
 import { getErrorMessage } from "@/lib/api-result";
@@ -41,6 +45,8 @@ export default function JobEditPage() {
   const validationRef = useRef<HTMLDivElement>(null);
 
   const { values, set, setValues, missingRequired, requiredOk } = useJobForm();
+  const { fieldErrors, validate, clearField, scrollToFirstError } = useFieldErrors();
+  const setField = useMemo(() => makeSetWithClear(set, clearField), [set, clearField]);
   const [status, setStatus] = useState<"open" | "draft">("draft");
   const [teamId, setTeamId] = useState<string | null>(null);
   const [teamsList, setTeamsList] = useState<TeamListItem[]>([]);
@@ -126,10 +132,8 @@ export default function JobEditPage() {
         return;
       }
       const body = buildJobPostingBody(values, effectiveStatus, teamId);
-      const validationErrors = validateJobPostingBody(body);
-      if (validationErrors) {
-        const rest = validationErrors.length > 1 ? `（他${validationErrors.length - 1}件）` : "";
-        showToast(`${validationErrors[0]}${rest}`, "error");
+      if (!validate(jobPostingBodySchema, body)) {
+        scrollToFirstError();
         return;
       }
       const isStatusChange = saveStatus != null && saveStatus !== status;
@@ -148,7 +152,17 @@ export default function JobEditPage() {
         setSavingAction(null);
       }
     },
-    [jobId, values, status, teamId, requiredOk, revealValidation, showToast],
+    [
+      jobId,
+      values,
+      status,
+      teamId,
+      requiredOk,
+      revealValidation,
+      showToast,
+      validate,
+      scrollToFirstError,
+    ],
   );
 
   const handleDelete = useCallback(async () => {
@@ -330,16 +344,14 @@ export default function JobEditPage() {
       </div>
 
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
-        {/* 公開バリデーション: 未入力の必須項目一覧 */}
+        {/* 公開バリデーション: 未入力の必須項目一覧（ドメインルール）。
+            スキーマ検証の ErrorSummary と見た目を揃えて隣接配置する */}
         {showValidation && missingRequired.length > 0 && (
-          <div
-            ref={validationRef}
-            className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4"
-          >
-            <p className="text-sm font-semibold text-rose-700">
+          <div ref={validationRef} className="rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+            <p className="text-sm font-semibold text-red-700">
               公開するには以下の必須項目を入力してください
             </p>
-            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-rose-600">
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-red-600">
               {missingRequired.map((label) => (
                 <li key={label} className="list-inside list-disc">
                   {label}
@@ -348,14 +360,16 @@ export default function JobEditPage() {
             </ul>
           </div>
         )}
+        <ErrorSummary errors={fieldErrors} labels={jobPostingFieldLabels} />
         <JobPostingForm
           values={values}
-          set={set}
+          set={setField}
           company={company}
+          errors={fieldErrors}
           teamSection={
             <TeamSectionWithSelector
               values={values}
-              set={set}
+              set={setField}
               teamId={teamId}
               onTeamIdChange={setTeamId}
               teamsList={teamsList}

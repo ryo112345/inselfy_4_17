@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
 import {
   BoltIcon,
   BookmarkIcon,
@@ -29,6 +30,7 @@ import {
   SMOKING_POLICIES,
 } from "@/constants/job-options";
 import { ACCENT } from "@/constants/theme";
+import type { FieldErrors } from "@/lib/form-validation";
 import { uploadCoverImage, uploadGalleryImage } from "../api";
 import type { CompanyProfile } from "../useCompanyProfile";
 import type { JobFormValues, SetJobFormField } from "../useJobForm";
@@ -66,6 +68,7 @@ export function JobPostingForm({
   titlePlaceholder = "求人タイトルを入力...",
   teamSection,
   uploaders = defaultUploaders,
+  errors = {},
 }: {
   values: JobFormValues;
   set: SetJobFormField;
@@ -73,6 +76,8 @@ export function JobPostingForm({
   titlePlaceholder?: string;
   teamSection?: React.ReactNode;
   uploaders?: JobFormUploaders;
+  /** 保存 body の zod 検証エラー（キーは body のフィールド名） */
+  errors?: FieldErrors;
 }) {
   return (
     <>
@@ -169,6 +174,7 @@ export function JobPostingForm({
 
           {/* Editable title */}
           <textarea
+            {...fieldAriaProps("title", errors.title)}
             value={values.title}
             onChange={(e) => {
               set("title", e.target.value);
@@ -183,8 +189,9 @@ export function JobPostingForm({
             }}
             rows={1}
             placeholder={titlePlaceholder}
-            className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-brand transition-colors pb-1 resize-none overflow-hidden"
+            className="mt-5 w-full text-2xl font-bold tracking-tight text-gray-900 leading-snug sm:text-[26px] bg-transparent outline-none border-b-2 border-transparent hover:border-gray-200 focus:border-brand transition-colors pb-1 resize-none overflow-hidden aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
           />
+          <FieldError name="title" error={errors.title} />
 
           {/* Meta badges — editable selects */}
           <div className="mt-5 flex flex-wrap gap-2 items-center">
@@ -197,6 +204,8 @@ export function JobPostingForm({
               }}
             >
               <InlineSelect
+                id="employmentType"
+                error={errors.employmentType}
                 value={values.employmentType}
                 options={EMPLOYMENT_TYPES}
                 onChange={(v) => set("employmentType", v)}
@@ -212,6 +221,8 @@ export function JobPostingForm({
               }}
             >
               <InlineSelect
+                id="jobCategory"
+                error={errors.jobCategory}
                 value={values.jobCategory}
                 options={JOB_CATEGORIES.map((c) => ({ value: c, label: c }))}
                 onChange={(v) => set("jobCategory", v)}
@@ -227,6 +238,8 @@ export function JobPostingForm({
               }}
             >
               <InlineSelect
+                id="remotePolicy"
+                error={errors.remotePolicy}
                 value={values.remotePolicy}
                 options={REMOTE_POLICIES}
                 onChange={(v) => set("remotePolicy", v)}
@@ -238,6 +251,7 @@ export function JobPostingForm({
           {/* Tags */}
           <div className="mt-3">
             <InlineTagInput
+              inputId="tags"
               tags={values.tags}
               onAdd={(tag) => set("tags", [...values.tags, tag])}
               onRemove={(i) =>
@@ -247,6 +261,7 @@ export function JobPostingForm({
                 )
               }
             />
+            <FieldError name="tags" error={errors.tags} />
           </div>
 
           {/* Quick Facts */}
@@ -261,27 +276,31 @@ export function JobPostingForm({
               <div className="flex items-center gap-1">
                 <input
                   type="number"
+                  {...fieldAriaProps("salaryMin", errors.salaryMin)}
                   value={values.salaryMin ?? ""}
                   onChange={(e) =>
                     set("salaryMin", e.target.value ? Math.min(Number(e.target.value), 9999) : null)
                   }
                   max={9999}
                   placeholder="下限"
-                  className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
+                  className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
                 />
                 <span className="text-base font-medium text-gray-500">〜</span>
                 <input
                   type="number"
+                  {...fieldAriaProps("salaryMax", errors.salaryMax)}
                   value={values.salaryMax ?? ""}
                   onChange={(e) =>
                     set("salaryMax", e.target.value ? Math.min(Number(e.target.value), 9999) : null)
                   }
                   max={9999}
                   placeholder="上限"
-                  className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors"
+                  className="w-16 text-xl font-bold text-gray-900 bg-transparent outline-none border-b border-transparent hover:border-gray-300 focus:border-brand transition-colors aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
                 />
                 <span className="ml-0.5 text-sm font-medium text-gray-500">万円</span>
               </div>
+              <FieldError name="salaryMin" error={errors.salaryMin} />
+              <FieldError name="salaryMax" error={errors.salaryMax} />
             </div>
             <div className="flex flex-col gap-2 px-4 py-5 sm:px-5">
               <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
@@ -304,6 +323,8 @@ export function JobPostingForm({
                 採用人数
               </div>
               <InlineInput
+                id="hiringCount"
+                error={errors.hiringCount}
                 value={values.hiringCount}
                 onChange={(v) => set("hiringCount", v)}
                 placeholder="例: 1〜2名"
@@ -351,6 +372,8 @@ export function JobPostingForm({
         <p className="mt-2 text-sm text-gray-500">この仕事を一目で掴むための4つの視点</p>
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <EditableHighlightCard
+            id="description"
+            error={errors.description}
             label="ROLE"
             title={values.highlightTitleRole}
             onTitleChange={(v) => set("highlightTitleRole", v)}
@@ -362,6 +385,8 @@ export function JobPostingForm({
             placeholder="この求人の仕事内容を記入..."
           />
           <EditableHighlightCard
+            id="appealPoints"
+            error={errors.appealPoints}
             label="APPEAL"
             title={values.highlightTitleAppeal}
             onTitleChange={(v) => set("highlightTitleAppeal", v)}
@@ -373,6 +398,8 @@ export function JobPostingForm({
             placeholder="この求人の魅力を記入..."
           />
           <EditableHighlightCard
+            id="challenges"
+            error={errors.challenges}
             label="CHALLENGE"
             title={values.highlightTitleChallenge}
             onTitleChange={(v) => set("highlightTitleChallenge", v)}
@@ -384,6 +411,8 @@ export function JobPostingForm({
             placeholder="この仕事で直面するチャレンジを記入..."
           />
           <EditableHighlightCard
+            id="skillsGained"
+            error={errors.skillsGained}
             label="GROWTH"
             title={values.highlightTitleGrowth}
             onTitleChange={(v) => set("highlightTitleGrowth", v)}
@@ -483,24 +512,32 @@ export function JobPostingForm({
             rows={[
               {
                 label: "勤務地",
+                id: "workLocation",
+                error: errors.workLocation ?? errors.location,
                 value: values.workLocation,
                 onChange: (v) => set("workLocation", v),
                 placeholder: "例: 東京都渋谷区",
               },
               {
                 label: "勤務時間",
+                id: "workHours",
+                error: errors.workHours,
                 value: values.workHours,
                 onChange: (v) => set("workHours", v),
                 placeholder: "例: 9:00〜18:00",
               },
               {
                 label: "休憩時間",
+                id: "breakTime",
+                error: errors.breakTime,
                 value: values.breakTime,
                 onChange: (v) => set("breakTime", v),
                 placeholder: "例: 60分",
               },
               {
                 label: "休日・休暇",
+                id: "holidays",
+                error: errors.holidays,
                 value: values.holidays,
                 onChange: (v) => set("holidays", v),
                 placeholder: "休日・休暇を入力...",
@@ -524,6 +561,8 @@ export function JobPostingForm({
               },
               {
                 label: "給与詳細",
+                id: "salaryDetail",
+                error: errors.salaryDetail,
                 value: values.salaryDetail,
                 onChange: (v) => set("salaryDetail", v),
                 placeholder: "給与の詳細を入力...",
@@ -531,6 +570,8 @@ export function JobPostingForm({
               },
               {
                 label: "社会保険",
+                id: "insurance",
+                error: errors.insurance,
                 value: values.insurance,
                 onChange: (v) => set("insurance", v),
                 placeholder: "例: 健康保険、厚生年金...",
@@ -543,30 +584,40 @@ export function JobPostingForm({
             rows={[
               {
                 label: "契約期間",
+                id: "contractType",
+                error: errors.contractType,
                 value: values.contractType,
                 onChange: (v) => set("contractType", v),
                 placeholder: "例: 無期",
               },
               {
                 label: "試用期間",
+                id: "probationPeriod",
+                error: errors.probationPeriod,
                 value: values.probationPeriod,
                 onChange: (v) => set("probationPeriod", v),
                 placeholder: "例: 入社後3ヶ月",
               },
               {
                 label: "就業場所の変更範囲",
+                id: "workLocationChangeScope",
+                error: errors.workLocationChangeScope,
                 value: values.workLocationChangeScope,
                 onChange: (v) => set("workLocationChangeScope", v),
                 placeholder: "例: 当面なし",
               },
               {
                 label: "業務内容の変更範囲",
+                id: "jobDescriptionChangeScope",
+                error: errors.jobDescriptionChangeScope,
                 value: values.jobDescriptionChangeScope,
                 onChange: (v) => set("jobDescriptionChangeScope", v),
                 placeholder: "例: 当面なし",
               },
               {
                 label: "受動喫煙対策",
+                id: "smokingPolicy",
+                error: errors.smokingPolicy,
                 value: values.smokingPolicy,
                 onChange: (v) => set("smokingPolicy", v),
                 placeholder: "選択",
@@ -593,6 +644,8 @@ export function JobPostingForm({
               必須要件
             </h3>
             <InlineTextarea
+              id="requiredQualifications"
+              error={errors.requiredQualifications}
               value={values.requiredQualifications}
               onChange={(v) => set("requiredQualifications", v)}
               placeholder="必須の資格・経験・スキルを入力..."
@@ -608,6 +661,8 @@ export function JobPostingForm({
               歓迎要件
             </h3>
             <InlineTextarea
+              id="preferredQualifications"
+              error={errors.preferredQualifications}
               value={values.preferredQualifications}
               onChange={(v) => set("preferredQualifications", v)}
               placeholder="あると望ましい資格・経験・スキルを入力..."
@@ -622,6 +677,7 @@ export function JobPostingForm({
       <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
         <SectionTitle icon={<GiftIcon />}>福利厚生・待遇</SectionTitle>
         <BenefitTagInput
+          inputId="benefits"
           tags={values.benefits}
           onAdd={(tag) => set("benefits", [...values.benefits, tag])}
           onRemove={(i) =>
@@ -631,12 +687,15 @@ export function JobPostingForm({
             )
           }
         />
+        <FieldError name="benefits" error={errors.benefits} />
       </section>
 
       {/* Selection */}
       <section className={`px-6 py-6 sm:px-7 ${cardClass}`}>
         <SectionTitle icon={<RouteIcon />}>選考フロー</SectionTitle>
         <InlineInput
+          id="selectionProcess"
+          error={errors.selectionProcess}
           value={values.selectionProcess}
           onChange={(v) => set("selectionProcess", v)}
           placeholder="例: 書類選考 → 技術面接 → 最終面接 → 内定"

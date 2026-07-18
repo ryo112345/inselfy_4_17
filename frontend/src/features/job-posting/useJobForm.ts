@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
 import { CompanyJobPostingsCreateJobPostingBody } from "@/external/client/api/orval/generated/zod/job-postings/job-postings.zod";
-import { formatFieldErrors, validateForm } from "@/lib/form-validation";
 import type { JobPostingBody } from "./api";
 import type { JobFormPreviewPayload } from "./preview-channel";
 
@@ -269,7 +268,7 @@ export function buildPreviewPayload(
 }
 
 // バリデーションエラー表示用（フォーム UI の見出しと揃える）
-const bodyFieldLabels: Record<string, string> = {
+export const jobPostingFieldLabels: Record<string, string> = {
   title: "求人タイトル",
   description: "仕事内容",
   employmentType: "雇用形態",
@@ -310,15 +309,30 @@ const bodyFieldLabels: Record<string, string> = {
 };
 
 /**
- * 保存 API へ送る body を生成 Zod スキーマで検証し、エラーがあれば表示用メッセージを返す。
+ * 保存 API へ送る body の検証スキーマ（useFieldErrors の validate に渡す）。
  * 作成・更新はリクエストモデルが同一（Models.JobPostingRequest）のため Create 側の
  * スキーマを共用する。「公開時の必須項目」チェックはドメインルールとして
  * missingRequired（useJobForm）が担い、ここでは文字数上限・数値範囲など
  * スキーマ制約のみを検証する。
  */
-export function validateJobPostingBody(body: JobPostingBody): string[] | null {
-  const errors = validateForm(CompanyJobPostingsCreateJobPostingBody, body);
-  return errors ? formatFieldErrors(errors, bodyFieldLabels) : null;
+export const jobPostingBodySchema = CompanyJobPostingsCreateJobPostingBody;
+
+/**
+ * フォーム編集時にエラーをクリアする set ラッパー。fieldErrors のキーは
+ * 保存 body のフィールド名なので、フォーム値とキーが異なるものだけ変換する。
+ */
+export function makeSetWithClear(
+  set: SetJobFormField,
+  clearField: (name: string) => void,
+): SetJobFormField {
+  return (key, value) => {
+    set(key, value);
+    if (key === "coverImage") clearField("coverImageUrl");
+    else if (key === "galleryImages") clearField("galleryUrls");
+    else clearField(key);
+    // location は workLocation から組み立てる派生フィールド
+    if (key === "workLocation") clearField("location");
+  };
 }
 
 /** 保存 API へ送るリクエストボディを組み立てる */
