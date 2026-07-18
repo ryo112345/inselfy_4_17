@@ -10,6 +10,8 @@ import {
   WV_FULL_LABELS,
   WV_ORDER,
 } from "@/app/components/SingleRadarChart";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import { useConfirm } from "@/components/ui";
 import {
   companyTeamsAddTeamMember,
@@ -26,6 +28,7 @@ import type {
   ModelsMemberScoreResponse as MemberScore,
   ModelsTeamDetailResponse as TeamDetail,
 } from "@/external/client/api/orval/generated/models";
+import { CompanyTeamsAddTeamMemberBody } from "@/external/client/api/orval/generated/zod/company-teams/company-teams.zod";
 import { getErrorMessage } from "@/lib/api-result";
 
 type Phase = "empty" | "invite" | "in_progress" | "complete";
@@ -56,6 +59,7 @@ export default function TeamDetailPage() {
   const [memberScores, setMemberScores] = useState<MemberScore[]>([]);
   const [viewMode, setViewMode] = useState<string>("average");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { fieldErrors, validate, clearField } = useFieldErrors();
 
   const fetchTeamScores = useCallback(async () => {
     try {
@@ -82,14 +86,13 @@ export default function TeamDetailPage() {
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberName.trim()) return;
+    const body = { name: memberName.trim(), email: memberEmail.trim() || null };
+    if (!validate(CompanyTeamsAddTeamMemberBody, body)) return;
     setAdding(true);
     setError("");
 
     try {
-      await companyTeamsAddTeamMember(teamId, {
-        name: memberName.trim(),
-        email: memberEmail.trim() || null,
-      });
+      await companyTeamsAddTeamMember(teamId, body);
       setMemberName("");
       setMemberEmail("");
       setShowAddForm(false);
@@ -330,38 +333,40 @@ export default function TeamDetailPage() {
           <div className="border-b border-gray-100 bg-gray-50 px-6 py-5">
             <form onSubmit={handleAddMember} className="flex items-end gap-3">
               <div className="flex-1">
-                <label
-                  htmlFor="member-name"
-                  className="block text-sm font-medium text-gray-600 mb-1"
-                >
+                <label htmlFor="name" className="block text-sm font-medium text-gray-600 mb-1">
                   名前 <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="member-name"
+                  {...fieldAriaProps("name", fieldErrors.name)}
                   type="text"
                   value={memberName}
-                  onChange={(e) => setMemberName(e.target.value)}
+                  onChange={(e) => {
+                    setMemberName(e.target.value);
+                    clearField("name");
+                  }}
                   maxLength={100}
                   placeholder="山田太郎"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
                 />
+                <FieldError name="name" error={fieldErrors.name} />
               </div>
               <div className="flex-1">
-                <label
-                  htmlFor="member-email"
-                  className="block text-sm font-medium text-gray-600 mb-1"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-gray-600 mb-1">
                   メール（任意）
                 </label>
                 <input
-                  id="member-email"
+                  {...fieldAriaProps("email", fieldErrors.email)}
                   type="email"
                   value={memberEmail}
-                  onChange={(e) => setMemberEmail(e.target.value)}
+                  onChange={(e) => {
+                    setMemberEmail(e.target.value);
+                    clearField("email");
+                  }}
                   maxLength={255}
                   placeholder="yamada@example.com"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
                 />
+                <FieldError name="email" error={fieldErrors.email} />
               </div>
               <button
                 type="submit"

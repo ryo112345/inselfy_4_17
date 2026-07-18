@@ -139,13 +139,23 @@ orval は制約値を定数としても生成している（例:
 - サーバエラー（4xx/5xx）のフィールドマッピング（バックエンドの OpenAPI 検証MWは
   フィールド情報を返すが、正常系では zod が先に止めるため優先度低）
 
-## 7. 未決事項
+## 7. 未決事項（→ 実装時の判断結果）
 
-| # | 項目 | 判断タイミング |
+| # | 項目 | 判断結果 |
 |---|---|---|
-| 1 | headline/description のカウンタ値の正（UI の 100/2000 か spec の 255/10000 か） | Phase A |
-| 2 | プロフィールカード群をフォーム側検証に切り替えるか（現状はラッパー層 throw） | Phase E |
-| 3 | 求人フォームの WYSIWYG 入力（contentEditable タイトル等）へのエラー装飾の当て方 | Phase B |
+| 1 | headline/description のカウンタ値の正 | **spec の 255/10000 を採用**（Phase A）。バックエンド・DB 変更不要で既存データを壊さない。カウンタ・maxLength は生成定数から取得 |
+| 2 | プロフィールカード群をフォーム側検証に切り替えるか | **現状のラッパー層 throw を維持**（Phase E）。モーダル群が多数でスキーマ制約も薄く、切替の費用対効果が低い。将来フォームが複雑化したら再検討 |
+| 3 | 求人フォームの WYSIWYG 入力へのエラー装飾 | **id 付与＋`aria-invalid:` Tailwind バリアント＋直下 FieldError** で対応（Phase B）。インライン部品（InlineInput 等）に id/error prop を追加 |
+
+補足（Phase E）: 応募（ApplyJobRequest）はユーザー入力フィールドが UI に無い
+（jobPostingId のみ送信）ため validateForm 接続は不要と判断し、対象から外した。
+
+## 8. 実施記録
+
+Phase A〜E すべて実装済み（2026-07-18、1フェーズ=1コミット）。
+共通部品は `frontend/src/components/form/`（useFieldErrors / FieldError / ErrorSummary）。
+スキーマ外のドメインルール（必須チェック・パスワード照合）は `setErrors` でインライン表示に統合。
+e2e は `e2e/profile-edit-inline-validation.spec.ts` / `e2e/job-form-inline-validation.spec.ts`。
 
 ## 参考
 
