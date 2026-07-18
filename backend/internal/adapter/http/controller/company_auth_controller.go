@@ -31,7 +31,7 @@ func (c *CompanyAuthController) Register(ctx context.Context, req openapi.Compan
 	}
 
 	account, err := c.input.Register(ctx, company.RegisterInput{
-		Email:             req.Body.Email,
+		Email:             string(req.Body.Email),
 		Password:          req.Body.Password,
 		CompanyName:       req.Body.CompanyName,
 		ContactPersonName: req.Body.ContactPersonName,

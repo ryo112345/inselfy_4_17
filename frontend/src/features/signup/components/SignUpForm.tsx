@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { usersCreateUser } from "@/external/client/api/orval/generated/endpoints/users/users";
+import { UsersCreateUserBody } from "@/external/client/api/orval/generated/zod/users/users.zod";
 import { ApiError } from "@/lib/api-result";
+import { formatFieldErrors, validateForm } from "@/lib/form-validation";
+
+const fieldLabels = { name: "名前", username: "ユーザー名" };
 
 export function SignUpForm() {
   const router = useRouter();
@@ -16,22 +20,18 @@ export function SignUpForm() {
     e.preventDefault();
     setError(null);
 
-    const trimmedName = name.trim();
-    const trimmedUsername = username.trim().replace(/^@/, "");
+    const body = { name: name.trim(), username: username.trim().replace(/^@/, "") };
 
-    if (!trimmedName) {
-      setError("名前を入力してください");
-      return;
-    }
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(trimmedUsername)) {
-      setError("ユーザー名は3〜20文字の英数字・アンダースコアで入力してください");
+    const fieldErrors = validateForm(UsersCreateUserBody, body);
+    if (fieldErrors) {
+      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
       return;
     }
 
     setSubmitting(true);
     let data: Awaited<ReturnType<typeof usersCreateUser>>;
     try {
-      data = await usersCreateUser({ name: trimmedName, username: trimmedUsername });
+      data = await usersCreateUser(body);
     } catch (err) {
       if (err instanceof ApiError && err.code === "CONFLICT") {
         setError("このユーザー名はすでに使われています");
@@ -75,7 +75,7 @@ export function SignUpForm() {
         </span>
       </label>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="whitespace-pre-line text-sm text-red-600">{error}</p>}
 
       <button
         type="submit"

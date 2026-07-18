@@ -36,4 +36,38 @@ export default defineConfig({
       },
     },
   },
+  // フォーム入力検証用の Zod スキーマ生成（Phase 4）。
+  // リクエスト body のみ生成する（レスポンス検証は schema-first + CI ドリフト検査で
+  // 構造的に担保済みのため生成しない。query/param/header も現状フォーム用途がないため省く）。
+  // 日本語エラーメッセージは zod-params.ts（params mutator）で注入する。
+  // 生成コードには `zodParams({...})` 呼び出しが埋め込まれ、スキーマ構築時に
+  // ランタイムで評価される（= メッセージ文言の変更に再生成は不要）。
+  inselfyZod: {
+    input: "./generated/openapi.yaml",
+    output: {
+      mode: "tags-split",
+      target: `${OUT}/generated/zod`,
+      client: "zod",
+      clean: true,
+      prettier: false,
+      fileExtension: ".zod.ts",
+      override: {
+        zod: {
+          // インストール済み zod からの自動推定に頼らず出力を決定的にする
+          version: 4,
+          generate: {
+            body: true,
+            param: false,
+            query: false,
+            header: false,
+            response: false,
+          },
+          params: {
+            path: `${OUT}/zod-params.ts`,
+            name: "zodParams",
+          },
+        },
+      },
+    },
+  },
 });

@@ -3,8 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usersUpdateUserProfile } from "@/external/client/api/orval/generated/endpoints/users/users";
+import { UsersUpdateUserProfileBody } from "@/external/client/api/orval/generated/zod/users/users.zod";
 import { useAuth } from "@/features/auth/auth-context";
 import { ApiError } from "@/lib/api-result";
+import { formatFieldErrors, validateForm } from "@/lib/form-validation";
+
+const fieldLabels = { name: "名前", username: "ユーザー名" };
 
 export default function SetupPage() {
   const { user, isAuthenticated, isLoading, updateUser } = useAuth();
@@ -32,15 +36,14 @@ export default function SetupPage() {
     e.preventDefault();
     setError(null);
 
-    const trimmedUsername = username.trim().replace(/^@/, "");
-    const trimmedName = name.trim();
+    const body = {
+      username: username.trim().replace(/^@/, ""),
+      name: name.trim(),
+    };
 
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(trimmedUsername)) {
-      setError("ユーザー名は3〜20文字の英数字・アンダースコアで入力してください");
-      return;
-    }
-    if (!trimmedName) {
-      setError("名前を入力してください");
+    const fieldErrors = validateForm(UsersUpdateUserProfileBody, body);
+    if (fieldErrors) {
+      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
       return;
     }
 
@@ -48,10 +51,7 @@ export default function SetupPage() {
 
     let updated: Awaited<ReturnType<typeof usersUpdateUserProfile>>;
     try {
-      updated = await usersUpdateUserProfile(user.username, {
-        username: trimmedUsername,
-        name: trimmedName,
-      });
+      updated = await usersUpdateUserProfile(user.username, body);
     } catch (err) {
       if (err instanceof ApiError && err.code === "CONFLICT") {
         setError("このユーザー名はすでに使われています");
@@ -105,7 +105,7 @@ export default function SetupPage() {
             />
           </label>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="whitespace-pre-line text-sm text-red-600">{error}</p>}
 
           <button
             type="submit"

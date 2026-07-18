@@ -11,6 +11,7 @@ import {
   buildJobPostingBody,
   buildPreviewPayload,
   useJobForm,
+  validateJobPostingBody,
 } from "@/features/job-posting/useJobForm";
 import { useJobPreviewChannel } from "@/features/job-posting/useJobPreviewChannel";
 
@@ -40,15 +41,22 @@ export default function JobNewPage() {
       return;
     }
 
+    const body = {
+      ...buildJobPostingBody(values, publishStatus, null),
+      title: values.title.trim(),
+      description: values.description.trim(),
+      location: values.workLocation.trim() || null,
+    };
+    const validationErrors = validateJobPostingBody(body);
+    if (validationErrors) {
+      setSubmitError(validationErrors.join("\n"));
+      return;
+    }
+
     setSaving(true);
     setSubmitError(null);
     try {
-      await createJobPosting({
-        ...buildJobPostingBody(values, publishStatus, null),
-        title: values.title.trim(),
-        description: values.description.trim(),
-        location: values.workLocation.trim() || null,
-      });
+      await createJobPosting(body);
       setStatus(publishStatus);
       router.push("/company/jobs");
     } catch (e: unknown) {
@@ -144,7 +152,7 @@ export default function JobNewPage() {
       {submitError && (
         <div className="mx-auto max-w-4xl px-4 pt-4">
           <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-700">{submitError}</p>
+            <p className="whitespace-pre-line text-sm text-red-700">{submitError}</p>
           </div>
         </div>
       )}

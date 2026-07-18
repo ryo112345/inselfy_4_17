@@ -21,6 +21,7 @@ import {
   buildPreviewPayload,
   jobFormValuesFromApi,
   useJobForm,
+  validateJobPostingBody,
 } from "@/features/job-posting/useJobForm";
 import { useJobPreviewChannel } from "@/features/job-posting/useJobPreviewChannel";
 import { getErrorMessage } from "@/lib/api-result";
@@ -124,10 +125,16 @@ export default function JobEditPage() {
         revealValidation();
         return;
       }
+      const body = buildJobPostingBody(values, effectiveStatus, teamId);
+      const validationErrors = validateJobPostingBody(body);
+      if (validationErrors) {
+        const rest = validationErrors.length > 1 ? `（他${validationErrors.length - 1}件）` : "";
+        showToast(`${validationErrors[0]}${rest}`, "error");
+        return;
+      }
       const isStatusChange = saveStatus != null && saveStatus !== status;
       setSavingAction(isStatusChange ? (saveStatus === "open" ? "publish" : "unpublish") : "save");
       try {
-        const body = buildJobPostingBody(values, effectiveStatus, teamId);
         await updateJobPosting(jobId, body);
         if (isStatusChange) {
           setStatus(effectiveStatus);

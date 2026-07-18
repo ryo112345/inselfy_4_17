@@ -399,13 +399,72 @@ auth-context / company-auth-context / useWebSocket / admin ページ / BFF route
 
 ## Phase 4: Zod（フォーム入力のみ・orval 生成で）
 
-- [ ] orval の zod 生成（Zod 4 ベース）でリクエストモデルの Zod スキーマを生成
+- [x] orval の zod 生成（Zod 4 ベース）でリクエストモデルの Zod スキーマを生成
       （TypeSpec の `@maxLength` 等の制約が源泉。**手書き Zod スキーマは二重管理になるため書かない**）
-- [ ] 日本語エラーメッセージは `override.zod.params`（v8.14.0+ のメッセージ注入機構、
+- [x] 日本語エラーメッセージは `override.zod.params`（v8.14.0+ のメッセージ注入機構、
       operationId / fieldPath コンテキスト付き）で codegen 時に注入する。
       **2026-05 出荷の新機能で枯れていないため、導入時に最新 issue を確認すること**
-- [ ] 対象は入力フォーム（求人作成・企業プロフィール・サインアップ等）のみ。
+- [x] 対象は入力フォーム（求人作成・企業プロフィール・サインアップ等）のみ。
       **レスポンス検証には使わない**（schema-first＋CIドリフト検査で構造的に担保済み）
+
+### Phase 4 実施メモ（2026-07-17 完了）
+
+**生成基盤:**
+- `orval.config.ts` に `inselfyZod` エントリを追加（`client: "zod"`、`version: 4` で決定的に
+  Zod 4 出力、`generate: { body: true }` のみ = レスポンス/param/query/header は生成しない）。
+  出力は `frontend/src/external/client/api/orval/generated/zod/**`（tags-split、`.zod.ts`）。
+  既存の drift 検査・biome 除外は `generated/` 丸ごと対象なので追加設定不要。
+- `zod@4` を frontend の dependencies に追加（orval 側の依存は不要）。
+- スキーマ名は `<OperationName>Body` の PascalCase（例: `UsersCreateUserBody`、
+  `CompanyJobPostingsCreateJobPostingBody`）。作成/更新でリクエストモデルが同一の求人は
+  Create 側スキーマを共用。
+
+**日本語メッセージ（`override.zod.params` の実際の挙動）:**
+- params mutator は「codegen 時に文字列を焼き込む」のではなく、生成コードに
+  `zodParams({operationId, schemaName, fieldPath, validator})` という**ランタイム呼び出し**が
+  埋め込まれ、スキーマ構築時（モジュールロード時）に評価される。返した `{ error: fn }` が
+  Zod 4 のスキーマレベル error map になる。
+- したがって `frontend/src/external/client/api/orval/zod-params.ts` は issue（code / origin /
+  minimum / maximum / format）を見て動的に文言を組める（「200文字以内で入力してください」等）。
+  **文言変更に再生成は不要**。fn が undefined を返すと Zod 既定メッセージにフォールバック。
+- pattern（regex）はフィールド名で文言を持つ（username / profileColor）。新しい pattern 付き
+  フィールドを TypeSpec に足したら `PATTERN_MESSAGES` にも文言を足すこと。
+
+**フォーム接続（薄いヘルパー方式・フォームライブラリは導入しない）:**
+- `src/lib/form-validation.ts`: `validateForm(schema, data)` → フィールド別の先頭エラー辞書、
+  `formatFieldErrors(errors, labels)` → 「ラベル: メッセージ」配列。既存の
+  単一エラー文字列 + `whitespace-pre-line` 表示 / トースト表示にそのまま載せる。
+- 接続済み: SignUpForm（手書き username regex を撤去）/ setup / company register
+  （passwordConfirm 照合のみクライアント専用として手書き残し）/ company profile edit
+  （従来クライアント検証ゼロだった）/ 求人作成・編集（`validateJobPostingBody` を
+  `useJobForm.ts` に追加。「公開時必須17項目」ゲートはドメインルールとして従来どおり
+  `missingRequired` が担い、zod は文字数上限・数値範囲を担う）。
+- 検証済み: tsc / biome / vitest 23本 / 対象5ページの 200 レンダリング /
+  tsx でのランタイム検証（min・max・regex・必須欠落・正常系通過、下書き求人の
+  空文字が従来どおり通ることを含む）。
+
+### Phase 4 横展開（2026-07-18 完了）
+
+- **スカウト系:** scout/send・templates/new・templates/[id] にフォーム側で接続。
+  スキーマは minLength 無し（max のみ + candidateId の UUID pattern）のため、
+  既存の「必須です」手書きチェックは残し、zod は上限・形式を担当。
+- **記事:** ArticleForm で isEdit に応じ Create/Update スキーマを切替。
+- **投稿・コメント / プロフィールカード群:** 呼び出し元が多いため、フォームではなく
+  **薄いラッパー層（`features/timeline/api.ts` / `app/profile/[username]/api.ts`）で一元検証**し、
+  エラーは `Error` として投げて各呼び出し元の既存 catch → setError 表示に載せる方式。
+  投稿280字/コメント500字/職歴・学歴の年月範囲/スキル名100字をカバー。
+- **email `@format`:** `CompanyRegisterRequest.email` に TypeSpec `@format("email")` を付与。
+  orval 側は `zod.email()` を生成（日本語文言は zod-params の invalid_format/email）。
+  バックエンドは oapi-codegen が email を `types.Email` 型にするため controller で
+  `string()` キャストが必要になる（company_auth_controller.go で対応済み）。
+  `types.Email` は unmarshal 時に形式検証するため、サーバ側でも不正メールは 400 になる。
+- 検証: frontend tsc / biome / vitest 23本、backend `make check`、対象ページ 200 レンダリング、
+  tsx ランタイムで email・UUID・上限・年月範囲・ラッパー層 throw の全経路を確認。
+
+**未接続のまま残した入力（明示的にスコープ外）:**
+- ログインフォーム（company/login 等）— 形式エラーを事前に出す価値が薄い
+- 応募・面接日程・チーム管理・スカウト返信などの小型ダイアログ — 必要になったら
+  同じ `validateForm` + 生成スキーマの貼り付けで足せる
 
 ## 関連する別件（このロードマップとは独立の小タスク）
 

@@ -12,8 +12,12 @@ import {
   getScoutTemplatesListScoutTemplatesQueryKey,
   useScoutTemplatesListScoutTemplates,
 } from "@/external/client/api/orval/generated/endpoints/scout-templates/scout-templates";
+import { CompanyScoutsSendScoutBody } from "@/external/client/api/orval/generated/zod/company-scouts/company-scouts.zod";
 import { fetchJobPostings } from "@/features/job-posting/api";
 import { getErrorMessage } from "@/lib/api-result";
+import { formatFieldErrors, validateForm } from "@/lib/form-validation";
+
+const fieldLabels = { candidateId: "候補者ID", subject: "件名", body: "本文" };
 
 export default function ScoutSendPage() {
   const router = useRouter();
@@ -61,16 +65,20 @@ export default function ScoutSendPage() {
       setError("候補者ID、件名、本文は必須です");
       return;
     }
+    const payload = {
+      candidateId: candidateId.trim(),
+      jobPostingId: jobPostingId || undefined,
+      subject: subject.trim(),
+      body: body.trim(),
+    };
+    const fieldErrors = validateForm(CompanyScoutsSendScoutBody, payload);
+    if (fieldErrors) {
+      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
+      return;
+    }
     setError(null);
     try {
-      await sendMutation.mutateAsync({
-        data: {
-          candidateId: candidateId.trim(),
-          jobPostingId: jobPostingId || undefined,
-          subject: subject.trim(),
-          body: body.trim(),
-        },
-      });
+      await sendMutation.mutateAsync({ data: payload });
       router.push("/company/scout");
     } catch (e) {
       setError(getErrorMessage(e, "送信に失敗しました"));
@@ -110,7 +118,7 @@ export default function ScoutSendPage() {
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="whitespace-pre-line text-sm text-red-700">{error}</p>
         </div>
       )}
 

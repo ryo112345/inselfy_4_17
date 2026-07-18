@@ -10,11 +10,15 @@ import {
   useScoutTemplatesGetScoutTemplate,
   useScoutTemplatesUpdateScoutTemplate,
 } from "@/external/client/api/orval/generated/endpoints/scout-templates/scout-templates";
+import { ScoutTemplatesUpdateScoutTemplateBody } from "@/external/client/api/orval/generated/zod/scout-templates/scout-templates.zod";
 import {
   HighlightInput,
   HighlightTextarea,
 } from "@/features/scout/components/VariableHighlightField";
 import { getErrorMessage } from "@/lib/api-result";
+import { formatFieldErrors, validateForm } from "@/lib/form-validation";
+
+const fieldLabels = { name: "テンプレート名", subject: "件名", body: "本文" };
 
 export default function TemplateEditPage() {
   const params = useParams();
@@ -51,12 +55,15 @@ export default function TemplateEditPage() {
       setError("全てのフィールドを入力してください");
       return;
     }
+    const payload = { name: name.trim(), subject: subject.trim(), body: body.trim() };
+    const fieldErrors = validateForm(ScoutTemplatesUpdateScoutTemplateBody, payload);
+    if (fieldErrors) {
+      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
+      return;
+    }
     setError(null);
     try {
-      await updateMutation.mutateAsync({
-        templateId,
-        data: { name: name.trim(), subject: subject.trim(), body: body.trim() },
-      });
+      await updateMutation.mutateAsync({ templateId, data: payload });
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: getScoutTemplatesListScoutTemplatesQueryKey(),
@@ -104,7 +111,7 @@ export default function TemplateEditPage() {
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="whitespace-pre-line text-sm text-red-700">{error}</p>
         </div>
       )}
 

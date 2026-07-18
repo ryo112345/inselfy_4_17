@@ -16,6 +16,7 @@ union CompanyStatus {
 model CompanyRegisterRequest {
   /** メールアドレス */
   @maxLength(255)
+  @format("email")
   email: string;
 
   /** パスワード */

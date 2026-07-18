@@ -1428,7 +1428,7 @@ type ModelsCompanyRegisterRequest struct {
 	ContactPersonName string `json:"contactPersonName"`
 
 	// Email メールアドレス
-	Email string `json:"email"`
+	Email openapi_types.Email `json:"email"`
 
 	// Password パスワード
 	Password string `json:"password"`

@@ -22,6 +22,11 @@ import type {
   ModelsPostResponse,
   ModelsRepostToggleResponse,
 } from "@/external/client/api/orval/generated/models";
+import {
+  PostsCreatePostBody,
+  PostsCreatePostCommentBody,
+} from "@/external/client/api/orval/generated/zod/posts/posts.zod";
+import { formatFieldErrors, validateForm } from "@/lib/form-validation";
 
 export type PostItem = ModelsPostResponse;
 export type PostListResponse = ModelsPostListResponse;
@@ -45,6 +50,9 @@ export async function fetchTimeline(
 }
 
 // userId は認証セッションからサーバ側で解決されるため送信しない（旧実装の送信分は無視されていた）
+// 投稿・コメントは呼び出し元が4箇所（PostForm / compose / PostCard 引用 / CommentSection）
+// あるため、送信前の zod 検証はこのラッパー層で一元的に行い、エラーは Error として投げて
+// 各呼び出し元の既存 catch → setError 表示に載せる。
 export async function createPost(
   _userId: string,
   content: string,
@@ -52,6 +60,8 @@ export async function createPost(
 ): Promise<PostItem> {
   const body: ModelsCreatePostRequest = { content };
   if (quotePostId) body.quotePostId = quotePostId;
+  const fieldErrors = validateForm(PostsCreatePostBody, body);
+  if (fieldErrors) throw new Error(formatFieldErrors(fieldErrors, { content: "" }).join("\n"));
   return postsCreatePost(body);
 }
 
@@ -92,5 +102,7 @@ export async function fetchComments(
 }
 
 export async function createComment(postId: string, content: string): Promise<CommentItem> {
+  const fieldErrors = validateForm(PostsCreatePostCommentBody, { content });
+  if (fieldErrors) throw new Error(formatFieldErrors(fieldErrors, { content: "" }).join("\n"));
   return postsCreatePostComment(postId, { content });
 }

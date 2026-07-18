@@ -5,10 +5,23 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/ui";
+import {
+  ArticlesCreateArticleBody,
+  ArticlesUpdateArticleBody,
+} from "@/external/client/api/orval/generated/zod/articles/articles.zod";
+import { formatFieldErrors, validateForm } from "@/lib/form-validation";
 import { type ArticleItem, createArticle, publishArticle, updateArticle } from "./api";
 import { CoverImageUpload } from "./CoverImageUpload";
 import { TableOfContents, type TOCItem } from "./TableOfContents";
 import { TagInput } from "./TagInput";
+
+const fieldLabels = {
+  title: "タイトル",
+  body: "本文",
+  priceYen: "価格",
+  coverImageUrl: "カバー画像",
+  tags: "タグ",
+};
 
 // TipTap 一式が重いため、エディタ本体は遅延ロードする
 const RichEditor = dynamic(() => import("./RichEditor").then((m) => m.RichEditor), {
@@ -42,16 +55,25 @@ export function ArticleForm({ article }: Props) {
 
   async function handleSubmit(shouldPublish: boolean) {
     setError("");
+    const payload = {
+      title,
+      body,
+      isPaid,
+      priceYen: isPaid ? priceYen : 0,
+      coverImageUrl,
+      tags,
+    };
+    const fieldErrors = validateForm(
+      isEdit ? ArticlesUpdateArticleBody : ArticlesCreateArticleBody,
+      payload,
+    );
+    if (fieldErrors) {
+      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
+      setShowPublishModal(false);
+      return;
+    }
     setSubmitting(true);
     try {
-      const payload = {
-        title,
-        body,
-        isPaid,
-        priceYen: isPaid ? priceYen : 0,
-        coverImageUrl,
-        tags,
-      };
       const result = isEdit
         ? await updateArticle(article.id, payload)
         : await createArticle(payload);
@@ -181,7 +203,7 @@ export function ArticleForm({ article }: Props) {
         </div>
 
         {error && (
-          <div className="mx-6 sm:mx-10 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          <div className="mx-6 sm:mx-10 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 whitespace-pre-line">
             {error}
           </div>
         )}

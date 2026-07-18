@@ -3,7 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { companyAuthCompanyRegister } from "@/external/client/api/orval/generated/endpoints/company-auth/company-auth";
+import { CompanyAuthCompanyRegisterBody } from "@/external/client/api/orval/generated/zod/company-auth/company-auth.zod";
 import { ApiError } from "@/lib/api-result";
+import { formatFieldErrors, validateForm } from "@/lib/form-validation";
+
+const fieldLabels = {
+  email: "メールアドレス",
+  password: "パスワード",
+  companyName: "企業名",
+  contactPersonName: "担当者名",
+  phoneNumber: "電話番号",
+};
 
 export default function CompanyRegisterPage() {
   const [form, setForm] = useState({
@@ -26,24 +36,28 @@ export default function CompanyRegisterPage() {
     e.preventDefault();
     setError(null);
 
-    if (form.password !== form.passwordConfirm) {
-      setError("パスワードが一致しません。");
+    const body = {
+      email: form.email,
+      password: form.password,
+      companyName: form.companyName,
+      contactPersonName: form.contactPersonName,
+      phoneNumber: form.phoneNumber,
+    };
+
+    const fieldErrors = validateForm(CompanyAuthCompanyRegisterBody, body);
+    if (fieldErrors) {
+      setError(formatFieldErrors(fieldErrors, fieldLabels).join("\n"));
       return;
     }
-    if (form.password.length < 8) {
-      setError("パスワードは8文字以上で入力してください。");
+    // passwordConfirm はクライアント専用フィールドのためスキーマ外で照合する
+    if (form.password !== form.passwordConfirm) {
+      setError("パスワードが一致しません。");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await companyAuthCompanyRegister({
-        email: form.email,
-        password: form.password,
-        companyName: form.companyName,
-        contactPersonName: form.contactPersonName,
-        phoneNumber: form.phoneNumber,
-      });
+      await companyAuthCompanyRegister(body);
       setIsRegistered(true);
     } catch (err) {
       if (err instanceof ApiError && err.code === "CONFLICT") {
@@ -193,7 +207,7 @@ export default function CompanyRegisterPage() {
             />
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="whitespace-pre-line text-sm text-red-600">{error}</p>}
 
           <button
             type="submit"

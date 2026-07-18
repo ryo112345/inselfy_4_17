@@ -9932,6 +9932,7 @@ components:
         email:
           type: string
           maxLength: 255
+          format: email
           description: メールアドレス
         password:
           type: string
