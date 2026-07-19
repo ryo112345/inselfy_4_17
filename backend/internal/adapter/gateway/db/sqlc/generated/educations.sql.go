@@ -79,6 +79,16 @@ func (q *Queries) DeleteEducation(ctx context.Context, id pgtype.UUID) (int64, e
 	return result.RowsAffected(), nil
 }
 
+const deleteEducationsByUserID = `-- name: DeleteEducationsByUserID :exec
+DELETE FROM educations
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteEducationsByUserID(ctx context.Context, userID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteEducationsByUserID, userID)
+	return err
+}
+
 const getEducationByID = `-- name: GetEducationByID :one
 SELECT id, user_id, school, degree, start_year, end_year, created_at, updated_at
 FROM educations

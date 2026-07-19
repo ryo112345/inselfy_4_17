@@ -19,6 +19,10 @@ import {
   followsUnfollowUser,
 } from "@/external/client/api/orval/generated/endpoints/follows/follows";
 import {
+  resumesGetMyResume,
+  resumesUploadResume,
+} from "@/external/client/api/orval/generated/endpoints/resumes/resumes";
+import {
   skillsAttachSkill,
   skillsDetachSkill,
 } from "@/external/client/api/orval/generated/endpoints/skills/skills";
@@ -155,4 +159,14 @@ export async function uploadProfileImage(
   type: "avatar" | "cover",
 ): Promise<{ url: string }> {
   return usersUploadUserImage(username, { file }, { type });
+}
+
+export type { ModelsResumeUploadItem as ResumeUpload } from "@/external/client/api/orval/generated/models";
+
+export async function uploadResume(file: File) {
+  return resumesUploadResume({ file });
+}
+
+export async function fetchMyResume() {
+  return (await resumesGetMyResume()).upload;
 }

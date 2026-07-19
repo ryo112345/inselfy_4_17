@@ -21,6 +21,7 @@ type StrictServer struct {
 	skill        *SkillController
 	follow       *FollowController
 	similarUsers *SimilarUsersController
+	resume       *ResumeController
 
 	post    *PostController
 	article *ArticleController
@@ -58,6 +59,7 @@ type StrictServer struct {
 	adminReport    *AdminReportController
 	adminCIReport  *AdminCIReportController
 	adminIntReport *AdminIntegratedReportController
+	adminResume    *AdminResumeController
 }
 
 // 契約遵守のコンパイル時強制（手順書 3-0: 全グループ移行完了で embed を外して復活）。
@@ -78,6 +80,7 @@ func (s *StrictServer) WireUserGroup(
 	skill *SkillController,
 	follow *FollowController,
 	similarUsers *SimilarUsersController,
+	resume *ResumeController,
 ) {
 	s.user = user
 	s.experience = experience
@@ -85,6 +88,7 @@ func (s *StrictServer) WireUserGroup(
 	s.skill = skill
 	s.follow = follow
 	s.similarUsers = similarUsers
+	s.resume = resume
 }
 
 // WireContentGroup installs the wire_content controllers
@@ -186,6 +190,7 @@ func (s *StrictServer) WireAdminGroup(
 	adminReport *AdminReportController,
 	adminCIReport *AdminCIReportController,
 	adminIntReport *AdminIntegratedReportController,
+	adminResume *AdminResumeController,
 ) {
 	s.adminAdmin = adminAdmin
 	s.adminUser = adminUser
@@ -193,6 +198,46 @@ func (s *StrictServer) WireAdminGroup(
 	s.adminReport = adminReport
 	s.adminCIReport = adminCIReport
 	s.adminIntReport = adminIntReport
+	s.adminResume = adminResume
+}
+
+// --- Resumes（候補者側）---
+
+func (s *StrictServer) ResumesUploadResume(ctx context.Context, req openapi.ResumesUploadResumeRequestObject) (openapi.ResumesUploadResumeResponseObject, error) {
+	return s.resume.Upload(ctx, req)
+}
+
+func (s *StrictServer) ResumesGetMyResume(ctx context.Context, req openapi.ResumesGetMyResumeRequestObject) (openapi.ResumesGetMyResumeResponseObject, error) {
+	return s.resume.GetMine(ctx, req)
+}
+
+// --- Admin: 職務経歴書 ---
+
+func (s *StrictServer) AdminListResumes(ctx context.Context, req openapi.AdminListResumesRequestObject) (openapi.AdminListResumesResponseObject, error) {
+	return s.adminResume.List(ctx, req)
+}
+
+func (s *StrictServer) AdminDownloadResume(ctx context.Context, req openapi.AdminDownloadResumeRequestObject) (openapi.AdminDownloadResumeResponseObject, error) {
+	return s.adminResume.Download(ctx, req)
+}
+
+func (s *StrictServer) AdminGetResumeDraft(ctx context.Context, req openapi.AdminGetResumeDraftRequestObject) (openapi.AdminGetResumeDraftResponseObject, error) {
+	return s.adminResume.GetDraft(ctx, req)
+}
+
+// PUT /api/admin/resumes/{resumeId}/draft は raw JSON デコードのため strict を
+// 経由しない（AdminResumeController.SaveDraftHTTP を wire_admin.go が直接
+// mux に登録する）。このスタブは UsersUpdateUserProfile と同じ扱いで到達しない。
+func (s *StrictServer) AdminSaveResumeDraft(context.Context, openapi.AdminSaveResumeDraftRequestObject) (openapi.AdminSaveResumeDraftResponseObject, error) {
+	return nil, errors.New("unreachable: PUT /api/admin/resumes/{resumeId}/draft is served by SaveDraftHTTP")
+}
+
+func (s *StrictServer) AdminApproveResume(ctx context.Context, req openapi.AdminApproveResumeRequestObject) (openapi.AdminApproveResumeResponseObject, error) {
+	return s.adminResume.Approve(ctx, req)
+}
+
+func (s *StrictServer) AdminRejectResume(ctx context.Context, req openapi.AdminRejectResumeRequestObject) (openapi.AdminRejectResumeResponseObject, error) {
+	return s.adminResume.Reject(ctx, req)
 }
 
 // --- Users ---

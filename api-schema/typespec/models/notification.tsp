@@ -14,6 +14,7 @@ union NotificationType {
   "scout_expired",
   "credit_replenished",
   "quality_warning",
+  "resume_approved",
 }
 
 /** 通知 */

@@ -136,3 +136,14 @@ func toDomainEducation(row *generated.Education) *education.Education {
 		UpdatedAt: row.UpdatedAt.Time,
 	}
 }
+
+// DeleteByUserID removes all education entries of the user (resume-draft
+// approval replaces the whole list). Deleting zero rows is not an error.
+func (r *EducationRepository) DeleteByUserID(ctx context.Context, userID string) error {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(userID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	return q.DeleteEducationsByUserID(ctx, pgID)
+}

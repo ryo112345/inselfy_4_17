@@ -33,6 +33,11 @@ type deps struct {
 
 	jwtService  port.JWTService
 	fileStorage port.FileStorage
+	// privateStorage holds files that must NOT be publicly served (resume
+	// PDFs). Local keys live outside ./uploads so the /api/uploads static
+	// route can't reach them; R2 shares the bucket but the URL is never
+	// exposed (download goes through the authenticated admin endpoint).
+	privateStorage port.FileStorage
 
 	// Repositories shared by multiple interactors/controllers.
 	userRepo         port.UserRepository
@@ -58,11 +63,14 @@ func BuildServer(ctx context.Context) (http.Handler, *config.Config, func(), err
 
 	jwtService := jwtgw.NewService(cfg.JWTSecret)
 
-	var fileStorage port.FileStorage
+	var fileStorage, privateStorage port.FileStorage
 	if cfg.StorageBackend == "r2" {
 		fileStorage = storagegw.NewR2(cfg.R2AccountID, cfg.R2AccessKeyID, cfg.R2SecretAccessKey, cfg.R2Bucket, cfg.R2PublicURL)
+		// 非公開バケット（public dev URL 無効）。publicURL は空 = URL を作らない。
+		privateStorage = storagegw.NewR2(cfg.R2AccountID, cfg.R2AccessKeyID, cfg.R2SecretAccessKey, cfg.R2PrivateBucket, "")
 	} else {
 		fileStorage = storagegw.NewLocal("./uploads", "/api/uploads")
+		privateStorage = storagegw.NewLocal("./private-uploads", "")
 	}
 
 	d := &deps{
@@ -70,8 +78,9 @@ func BuildServer(ctx context.Context) (http.Handler, *config.Config, func(), err
 		pool: pool,
 		tx:   driverdb.NewTxManager(pool),
 
-		jwtService:  jwtService,
-		fileStorage: fileStorage,
+		jwtService:     jwtService,
+		fileStorage:    fileStorage,
+		privateStorage: privateStorage,
 
 		userRepo:         sqlcgw.NewUserRepository(pool),
 		notificationRepo: sqlcgw.NewNotificationRepository(pool),
@@ -169,7 +178,7 @@ func registerRoutes(ctx context.Context, sr *strictRouter, d *deps) (*httpcontro
 	wireJobs(strictSrv, d)
 	wireMessaging(strictSrv, d)
 	interviewCtrl := wireInterview(strictSrv, d)
-	if err := wireAdmin(ctx, strictSrv, d); err != nil {
+	if err := wireAdmin(ctx, sr, strictSrv, d); err != nil {
 		return nil, nil, err
 	}
 

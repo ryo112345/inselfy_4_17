@@ -48,6 +48,12 @@ export const AdminSaveIntegratedReportBody = zod.object({
 }).describe('AIレポート保存リクエスト')
 
 /**
+ * 職務経歴書ドラフト保存（バリデーション成功で reviewing に遷移）
+ * @summary Save a resume profile draft
+ */
+export const AdminSaveResumeDraftBody = zod.unknown()
+
+/**
  * Work Values AIレポート保存（upsert）
  * @summary Save a Work Values AI report
  */

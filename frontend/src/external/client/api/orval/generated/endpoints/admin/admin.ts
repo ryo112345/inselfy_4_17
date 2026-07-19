@@ -20,6 +20,7 @@ import type {
 
 import type {
   AdminListCompaniesParams,
+  AdminListResumesParams,
   AdminListUsersParams,
   ModelsAdminAiReportListResponse,
   ModelsAdminCompanyBypassLoginResponse,
@@ -33,6 +34,10 @@ import type {
   ModelsAdminPendingIntegratedRequestsResponse,
   ModelsAdminPendingSessionsResponse,
   ModelsAdminPromptResponse,
+  ModelsAdminResumeDraftResponse,
+  ModelsAdminResumeDraftSaveResponse,
+  ModelsAdminResumeItem,
+  ModelsAdminResumeListResponse,
   ModelsAdminSaveReportRequest,
   ModelsAdminSavedAiReportResponse,
   ModelsAdminSavedIntegratedReportResponse,
@@ -41,6 +46,7 @@ import type {
   ModelsAdminUserListResponse,
   ModelsAiReportResponse,
   ModelsBadRequestError,
+  ModelsConflictError,
   ModelsCreateAdminRequest,
   ModelsIntegratedReportResponse,
   ModelsNotFoundError,
@@ -1648,7 +1654,459 @@ export function useAdminListPendingWvSessions<TData = Awaited<ReturnType<typeof 
 
 
 
-export const getAdminSaveWvReportUrl = (sessionId: ModelsUuid,) => {
+export const getAdminListResumesUrl = (params?: AdminListResumesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/resumes?${stringifiedParams}` : `/api/admin/resumes`
+}
+
+/**
+ * 職務経歴書アップロード一覧（ステータス絞り込み付き）
+ * @summary List resume uploads
+ */
+export const adminListResumes = async (params?: AdminListResumesParams, options?: RequestInit): Promise<ModelsAdminResumeListResponse> => {
+
+  return customFetch<ModelsAdminResumeListResponse>(getAdminListResumesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListResumesQueryKey = (params?: AdminListResumesParams,) => {
+    return [
+    `/api/admin/resumes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListResumesQueryOptions = <TData = Awaited<ReturnType<typeof adminListResumes>>, TError = ModelsBadRequestError | ModelsUnauthorizedError>(params?: AdminListResumesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListResumes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListResumesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListResumes>>> = ({ signal }) => adminListResumes(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListResumes>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminListResumesQueryResult = NonNullable<Awaited<ReturnType<typeof adminListResumes>>>
+export type AdminListResumesQueryError = ModelsBadRequestError | ModelsUnauthorizedError
+
+
+/**
+ * @summary List resume uploads
+ */
+
+export function useAdminListResumes<TData = Awaited<ReturnType<typeof adminListResumes>>, TError = ModelsBadRequestError | ModelsUnauthorizedError>(
+ params?: AdminListResumesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListResumes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminListResumesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getAdminApproveResumeUrl = (resumeId: ModelsUuid,) => {
+
+
+
+
+  return `/api/admin/resumes/${resumeId}/approve`
+}
+
+/**
+ * 職務経歴書を承認しプロフィールへ反映
+ * @summary Approve a resume draft and apply it to the profile
+ */
+export const adminApproveResume = async (resumeId: ModelsUuid, options?: RequestInit): Promise<ModelsAdminResumeItem> => {
+
+  return customFetch<ModelsAdminResumeItem>(getAdminApproveResumeUrl(resumeId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminApproveResumeMutationOptions = <TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveResume>>, TError,{resumeId: ModelsUuid}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminApproveResume>>, TError,{resumeId: ModelsUuid}, TContext> => {
+
+const mutationKey = ['adminApproveResume'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminApproveResume>>, {resumeId: ModelsUuid}> = (props) => {
+          const {resumeId} = props ?? {};
+
+          return  adminApproveResume(resumeId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminApproveResumeMutationResult = NonNullable<Awaited<ReturnType<typeof adminApproveResume>>>
+
+    export type AdminApproveResumeMutationError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError
+
+    /**
+ * @summary Approve a resume draft and apply it to the profile
+ */
+export const useAdminApproveResume = <TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveResume>>, TError,{resumeId: ModelsUuid}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminApproveResume>>,
+        TError,
+        {resumeId: ModelsUuid},
+        TContext
+      > => {
+      return useMutation(getAdminApproveResumeMutationOptions(options));
+    }
+    export const getAdminDownloadResumeUrl = (resumeId: ModelsUuid,) => {
+
+
+
+
+  return `/api/admin/resumes/${resumeId}/download`
+}
+
+/**
+ * 職務経歴書PDFダウンロード
+ * @summary Download a resume PDF
+ */
+export const adminDownloadResume = async (resumeId: ModelsUuid, options?: RequestInit): Promise<Blob> => {
+
+  return customFetch<Blob>(getAdminDownloadResumeUrl(resumeId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminDownloadResumeQueryKey = (resumeId: ModelsUuid,) => {
+    return [
+    `/api/admin/resumes/${resumeId}/download`
+    ] as const;
+    }
+
+
+export const getAdminDownloadResumeQueryOptions = <TData = Awaited<ReturnType<typeof adminDownloadResume>>, TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError>(resumeId: ModelsUuid, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminDownloadResume>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminDownloadResumeQueryKey(resumeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminDownloadResume>>> = ({ signal }) => adminDownloadResume(resumeId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: resumeId !== null && resumeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminDownloadResume>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminDownloadResumeQueryResult = NonNullable<Awaited<ReturnType<typeof adminDownloadResume>>>
+export type AdminDownloadResumeQueryError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError
+
+
+/**
+ * @summary Download a resume PDF
+ */
+
+export function useAdminDownloadResume<TData = Awaited<ReturnType<typeof adminDownloadResume>>, TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError>(
+ resumeId: ModelsUuid, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminDownloadResume>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminDownloadResumeQueryOptions(resumeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getAdminGetResumeDraftUrl = (resumeId: ModelsUuid,) => {
+
+
+
+
+  return `/api/admin/resumes/${resumeId}/draft`
+}
+
+/**
+ * 職務経歴書ドラフト取得
+ * @summary Get a resume profile draft
+ */
+export const adminGetResumeDraft = async (resumeId: ModelsUuid, options?: RequestInit): Promise<ModelsAdminResumeDraftResponse> => {
+
+  return customFetch<ModelsAdminResumeDraftResponse>(getAdminGetResumeDraftUrl(resumeId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetResumeDraftQueryKey = (resumeId: ModelsUuid,) => {
+    return [
+    `/api/admin/resumes/${resumeId}/draft`
+    ] as const;
+    }
+
+
+export const getAdminGetResumeDraftQueryOptions = <TData = Awaited<ReturnType<typeof adminGetResumeDraft>>, TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError>(resumeId: ModelsUuid, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetResumeDraft>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetResumeDraftQueryKey(resumeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetResumeDraft>>> = ({ signal }) => adminGetResumeDraft(resumeId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: resumeId !== null && resumeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetResumeDraft>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminGetResumeDraftQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetResumeDraft>>>
+export type AdminGetResumeDraftQueryError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError
+
+
+/**
+ * @summary Get a resume profile draft
+ */
+
+export function useAdminGetResumeDraft<TData = Awaited<ReturnType<typeof adminGetResumeDraft>>, TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError>(
+ resumeId: ModelsUuid, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminGetResumeDraft>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminGetResumeDraftQueryOptions(resumeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getAdminSaveResumeDraftUrl = (resumeId: ModelsUuid,) => {
+
+
+
+
+  return `/api/admin/resumes/${resumeId}/draft`
+}
+
+/**
+ * 職務経歴書ドラフト保存（バリデーション成功で reviewing に遷移）
+ * @summary Save a resume profile draft
+ */
+export const adminSaveResumeDraft = async (resumeId: ModelsUuid,
+    adminSaveResumeDraftBody: unknown, options?: RequestInit): Promise<ModelsAdminResumeDraftSaveResponse> => {
+
+  return customFetch<ModelsAdminResumeDraftSaveResponse>(getAdminSaveResumeDraftUrl(resumeId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminSaveResumeDraftBody)
+  }
+);}
+
+
+
+
+
+export const getAdminSaveResumeDraftMutationOptions = <TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSaveResumeDraft>>, TError,{resumeId: ModelsUuid;data: unknown}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminSaveResumeDraft>>, TError,{resumeId: ModelsUuid;data: unknown}, TContext> => {
+
+const mutationKey = ['adminSaveResumeDraft'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSaveResumeDraft>>, {resumeId: ModelsUuid;data: unknown}> = (props) => {
+          const {resumeId,data} = props ?? {};
+
+          return  adminSaveResumeDraft(resumeId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSaveResumeDraftMutationResult = NonNullable<Awaited<ReturnType<typeof adminSaveResumeDraft>>>
+    export type AdminSaveResumeDraftMutationBody = unknown
+    export type AdminSaveResumeDraftMutationError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError
+
+    /**
+ * @summary Save a resume profile draft
+ */
+export const useAdminSaveResumeDraft = <TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSaveResumeDraft>>, TError,{resumeId: ModelsUuid;data: unknown}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminSaveResumeDraft>>,
+        TError,
+        {resumeId: ModelsUuid;data: unknown},
+        TContext
+      > => {
+      return useMutation(getAdminSaveResumeDraftMutationOptions(options));
+    }
+    export const getAdminRejectResumeUrl = (resumeId: ModelsUuid,) => {
+
+
+
+
+  return `/api/admin/resumes/${resumeId}/reject`
+}
+
+/**
+ * 職務経歴書を却下
+ * @summary Reject a resume upload
+ */
+export const adminRejectResume = async (resumeId: ModelsUuid, options?: RequestInit): Promise<ModelsAdminResumeItem> => {
+
+  return customFetch<ModelsAdminResumeItem>(getAdminRejectResumeUrl(resumeId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminRejectResumeMutationOptions = <TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectResume>>, TError,{resumeId: ModelsUuid}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminRejectResume>>, TError,{resumeId: ModelsUuid}, TContext> => {
+
+const mutationKey = ['adminRejectResume'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRejectResume>>, {resumeId: ModelsUuid}> = (props) => {
+          const {resumeId} = props ?? {};
+
+          return  adminRejectResume(resumeId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminRejectResumeMutationResult = NonNullable<Awaited<ReturnType<typeof adminRejectResume>>>
+
+    export type AdminRejectResumeMutationError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError
+
+    /**
+ * @summary Reject a resume upload
+ */
+export const useAdminRejectResume = <TError = ModelsBadRequestError | ModelsUnauthorizedError | ModelsNotFoundError | ModelsConflictError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRejectResume>>, TError,{resumeId: ModelsUuid}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminRejectResume>>,
+        TError,
+        {resumeId: ModelsUuid},
+        TContext
+      > => {
+      return useMutation(getAdminRejectResumeMutationOptions(options));
+    }
+    export const getAdminSaveWvReportUrl = (sessionId: ModelsUuid,) => {
 
 
 

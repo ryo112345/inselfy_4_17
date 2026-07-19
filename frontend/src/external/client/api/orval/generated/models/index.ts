@@ -6,6 +6,7 @@
  */
 
 export * from './adminListCompaniesParams';
+export * from './adminListResumesParams';
 export * from './adminListUsersParams';
 export * from './articlesListArticlesParams';
 export * from './articlesListMyArticlesParams';
@@ -45,6 +46,10 @@ export * from './modelsAdminPendingIntegratedRequestsResponse';
 export * from './modelsAdminPendingSessionItem';
 export * from './modelsAdminPendingSessionsResponse';
 export * from './modelsAdminPromptResponse';
+export * from './modelsAdminResumeDraftResponse';
+export * from './modelsAdminResumeDraftSaveResponse';
+export * from './modelsAdminResumeItem';
+export * from './modelsAdminResumeListResponse';
 export * from './modelsAdminSavedAiReportResponse';
 export * from './modelsAdminSavedIntegratedReportResponse';
 export * from './modelsAdminSaveReportRequest';
@@ -169,6 +174,9 @@ export * from './modelsPublicTeamScoreResponse';
 export * from './modelsPublicTeamScoresResponse';
 export * from './modelsQuotedPostResponse';
 export * from './modelsRepostToggleResponse';
+export * from './modelsResumeMineResponse';
+export * from './modelsResumeUploadItem';
+export * from './modelsResumeUploadStatus';
 export * from './modelsSavedCountResponse';
 export * from './modelsSavedResponse';
 export * from './modelsScoutCreditsResponse';
@@ -257,6 +265,7 @@ export * from './postsListPostCommentsParams';
 export * from './postsListPostsByUserParams';
 export * from './postsListTimelinePostsParams';
 export * from './publicJobPostingsListPublicJobPostingsParams';
+export * from './resumesUploadResumeBody';
 export * from './savedCandidatesListSavedCandidatesParams';
 export * from './searchSearchAllParams';
 export * from './searchSearchArticlesParams';

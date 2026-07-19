@@ -68,6 +68,10 @@ func (s *experienceRepoStub) Delete(ctx context.Context, id string) error {
 	return s.deleteFn(ctx, id)
 }
 
+func (s *experienceRepoStub) DeleteByUserID(context.Context, string) error {
+	return nil
+}
+
 func (s *experienceRepoStub) GetByID(ctx context.Context, id string) (*experience.Experience, error) {
 	return s.getByIDFn(ctx, id)
 }

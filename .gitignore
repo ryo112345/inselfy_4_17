@@ -6,6 +6,7 @@ node_modules/
 
 # Uploaded files (runtime data, not source code)
 backend/uploads/
+backend/private-uploads/
 !.env.example
 
 # Test coverage profile (make test-cover / CI)

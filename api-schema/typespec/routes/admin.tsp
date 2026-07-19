@@ -108,6 +108,55 @@ interface Admin {
     @path companyId: Uuid,
   ): AdminCompanyBypassLoginResponse | AuthedNotFoundErrors;
 
+  // --- 職務経歴書アップロード ---
+
+  /** 職務経歴書アップロード一覧（ステータス絞り込み付き） */
+  @get
+  @route("/resumes")
+  @summary("List resume uploads")
+  listResumes(
+    /** ステータスでの絞り込み */
+    @query status?: ResumeUploadStatus,
+  ): AdminResumeListResponse | AuthedErrors;
+
+  /** 職務経歴書PDFダウンロード */
+  @get
+  @route("/resumes/{resumeId}/download")
+  @summary("Download a resume PDF")
+  downloadResume(@path resumeId: Uuid): {
+    @header contentType: "application/pdf";
+    @body body: bytes;
+  } | AuthedNotFoundErrors;
+
+  /** 職務経歴書ドラフト取得 */
+  @get
+  @route("/resumes/{resumeId}/draft")
+  @summary("Get a resume profile draft")
+  getResumeDraft(
+    @path resumeId: Uuid,
+  ): AdminResumeDraftResponse | AuthedNotFoundErrors;
+
+  /** 職務経歴書ドラフト保存（バリデーション成功で reviewing に遷移） */
+  @put
+  @route("/resumes/{resumeId}/draft")
+  @summary("Save a resume profile draft")
+  saveResumeDraft(
+    @path resumeId: Uuid,
+    @body request: unknown,
+  ): AdminResumeDraftSaveResponse | AuthedConflictErrors;
+
+  /** 職務経歴書を承認しプロフィールへ反映 */
+  @post
+  @route("/resumes/{resumeId}/approve")
+  @summary("Approve a resume draft and apply it to the profile")
+  approveResume(@path resumeId: Uuid): AdminResumeItem | AuthedConflictErrors;
+
+  /** 職務経歴書を却下 */
+  @post
+  @route("/resumes/{resumeId}/reject")
+  @summary("Reject a resume upload")
+  rejectResume(@path resumeId: Uuid): AdminResumeItem | AuthedConflictErrors;
+
   // --- Work Values AIレポート ---
 
   /** AIレポート未生成の Work Values セッション一覧 */

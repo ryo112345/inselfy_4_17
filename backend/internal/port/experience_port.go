@@ -19,6 +19,9 @@ type ExperienceRepository interface {
 	Create(ctx context.Context, e *experience.Experience) (*experience.Experience, error)
 	Update(ctx context.Context, e *experience.Experience) (*experience.Experience, error)
 	Delete(ctx context.Context, id string) error
+	// DeleteByUserID removes every experience of the user (resume-draft
+	// approval replaces the whole work history).
+	DeleteByUserID(ctx context.Context, userID string) error
 	GetByID(ctx context.Context, id string) (*experience.Experience, error)
 	ListByUserID(ctx context.Context, userID string) ([]*experience.Experience, error)
 	CountByUserID(ctx context.Context, userID string) (int64, error)

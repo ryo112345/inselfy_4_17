@@ -28,6 +28,7 @@ func wireUser(sr *strictRouter, ss *httpcontroller.StrictServer, d *deps) {
 		httpcontroller.NewSimilarUsersController(
 			usecase.NewSimilarUsersInteractor(sqlcgw.NewSimilarUsersQueryService(d.pool)),
 		),
+		httpcontroller.NewResumeController(newResumeInteractor(d), d.privateStorage),
 	)
 
 	// absent と null を区別する raw JSON デコードのため strict を経由しない

@@ -48,8 +48,15 @@ ADC を設定していない場合は一時トークンでも動く:
 
 ## Cloudflare（infra/cloudflare/）
 
-R2 バケット `inselfy-uploads` を管理（import 済み）。DNS ゾーンは現在
-Cloudflare 上に存在しない（カスタムドメイン未使用）ので対象外。
+R2 バケットを2つ管理: `inselfy-uploads`（公開画像、r2.dev public URL 有効、import 済み）と
+`inselfy-private`（職務経歴書PDF等の非公開ファイル、public URL 無効・S3 API のみ）。
+DNS ゾーンは現在 Cloudflare 上に存在しない（カスタムドメイン未使用）ので対象外。
+
+**注意:** アプリが使う R2 の S3 認証情報（Secret Manager の `r2-access-key-id` /
+`r2-secret-access-key`）はバケット単位でスコープされる。バケットを追加したら、
+Cloudflare ダッシュボード（R2 → Manage R2 API Tokens）で**両バケットを対象にした
+トークンを再発行**し、Secret Manager の2シークレットを更新すること（更新は次回
+デプロイの新リビジョンから反映される）。
 
 ```bash
 export CLOUDFLARE_API_TOKEN=...   # ~/.zshrc に保存済み（R2編集 + DNS編集 + ゾーン読取）

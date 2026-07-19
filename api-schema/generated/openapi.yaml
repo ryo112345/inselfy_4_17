@@ -4,6 +4,7 @@ info:
   version: 1.0.0
 tags:
   - name: Users
+  - name: Resumes
   - name: Experiences
   - name: Educations
   - name: Skills
@@ -792,6 +793,265 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/resumes:
+    get:
+      operationId: Admin_listResumes
+      summary: List resume uploads
+      description: 職務経歴書アップロード一覧（ステータス絞り込み付き）
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: ステータスでの絞り込み
+          schema:
+            $ref: '#/components/schemas/Models.ResumeUploadStatus'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/resumes/{resumeId}/approve:
+    post:
+      operationId: Admin_approveResume
+      summary: Approve a resume draft and apply it to the profile
+      description: 職務経歴書を承認しプロフィールへ反映
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeItem'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/resumes/{resumeId}/download:
+    get:
+      operationId: Admin_downloadResume
+      summary: Download a resume PDF
+      description: 職務経歴書PDFダウンロード
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/resumes/{resumeId}/draft:
+    get:
+      operationId: Admin_getResumeDraft
+      summary: Get a resume profile draft
+      description: 職務経歴書ドラフト取得
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeDraftResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+    put:
+      operationId: Admin_saveResumeDraft
+      summary: Save a resume profile draft
+      description: 職務経歴書ドラフト保存（バリデーション成功で reviewing に遷移）
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeDraftSaveResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      security:
+        - AdminAuth: []
+  /api/admin/resumes/{resumeId}/reject:
+    post:
+      operationId: Admin_rejectResume
+      summary: Reject a resume upload
+      description: 職務経歴書を却下
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeItem'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Admin
       security:
@@ -6466,6 +6726,88 @@ paths:
         - Posts
       security:
         - CandidateAuth: []
+  /api/resumes:
+    post:
+      operationId: Resumes_uploadResume
+      summary: Upload a resume PDF
+      description: 職務経歴書PDFをアップロード（処理中のものがあれば 409）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ResumeUploadItem'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Resumes
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      security:
+        - CandidateAuth: []
+  /api/resumes/me:
+    get:
+      operationId: Resumes_getMyResume
+      summary: Get my latest resume upload
+      description: 自分の最新アップロード状況を取得
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ResumeMineResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Resumes
+      security:
+        - CandidateAuth: []
   /api/scout-settings:
     get:
       operationId: ScoutSettings_getScoutSettings
@@ -8965,6 +9307,87 @@ components:
           type: string
           description: データ埋め込み済みのプロンプト全文
       description: レポート生成用プロンプト
+    Models.AdminResumeDraftResponse:
+      type: object
+      required:
+        - upload
+        - draft
+      properties:
+        upload:
+          allOf:
+            - $ref: '#/components/schemas/Models.AdminResumeItem'
+          description: アップロード情報
+        draft:
+          nullable: true
+          description: プロフィールドラフト（未保存なら null）
+      description: 管理画面のドラフト取得レスポンス
+    Models.AdminResumeDraftSaveResponse:
+      type: object
+      required:
+        - message
+        - status
+      properties:
+        message:
+          type: string
+          description: 固定メッセージ
+        status:
+          allOf:
+            - $ref: '#/components/schemas/Models.ResumeUploadStatus'
+          description: 保存後のステータス（reviewing）
+      description: ドラフト保存結果
+    Models.AdminResumeItem:
+      type: object
+      required:
+        - id
+        - userId
+        - userName
+        - username
+        - originalFilename
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: アップロードID
+        userId:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: ユーザーID
+        userName:
+          type: string
+          description: ユーザー表示名
+        username:
+          type: string
+          description: ユーザー名（URL用）
+        originalFilename:
+          type: string
+          description: 元のファイル名
+        status:
+          allOf:
+            - $ref: '#/components/schemas/Models.ResumeUploadStatus'
+          description: ステータス
+        createdAt:
+          type: string
+          format: date-time
+          description: アップロード日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+      description: 職務経歴書アップロード（管理画面向け）
+    Models.AdminResumeListResponse:
+      type: object
+      required:
+        - uploads
+      properties:
+        uploads:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminResumeItem'
+          description: アップロード一覧
+      description: 管理画面の職務経歴書一覧レスポンス
     Models.AdminSaveReportRequest:
       type: object
       required:
@@ -11859,6 +12282,7 @@ components:
         - scout_expired
         - credit_replenished
         - quality_warning
+        - resume_approved
       description: 通知種別
     Models.PendingProposalCheckResponse:
       type: object
@@ -12310,6 +12734,50 @@ components:
           type: integer
           description: リポスト数
       description: リポストトグル結果
+    Models.ResumeMineResponse:
+      type: object
+      required:
+        - upload
+      properties:
+        upload:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/Models.ResumeUploadItem'
+          nullable: true
+          description: 最新のアップロード
+      description: 自分の最新アップロード状況（未アップロードなら null）
+    Models.ResumeUploadItem:
+      type: object
+      required:
+        - id
+        - originalFilename
+        - status
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: アップロードID
+        originalFilename:
+          type: string
+          description: 元のファイル名
+        status:
+          allOf:
+            - $ref: '#/components/schemas/Models.ResumeUploadStatus'
+          description: ステータス
+        createdAt:
+          type: string
+          format: date-time
+          description: アップロード日時
+      description: 職務経歴書アップロード（候補者向け）
+    Models.ResumeUploadStatus:
+      type: string
+      enum:
+        - pending
+        - reviewing
+        - approved
+        - rejected
+      description: 職務経歴書アップロードのステータス
     Models.SavedCountResponse:
       type: object
       required:

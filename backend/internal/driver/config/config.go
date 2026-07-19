@@ -39,6 +39,9 @@ type Config struct {
 	R2SecretAccessKey string `env:"R2_SECRET_ACCESS_KEY" envDefault:""`
 	R2Bucket          string `env:"R2_BUCKET" envDefault:""`
 	R2PublicURL       string `env:"R2_PUBLIC_URL" envDefault:""`
+	// R2PrivateBucket holds non-public files (resume PDFs). No public dev URL
+	// is enabled on this bucket — reads go through the S3 API only.
+	R2PrivateBucket string `env:"R2_PRIVATE_BUCKET" envDefault:""`
 
 	DBSSLMode string `env:"DB_SSLMODE" envDefault:"disable"`
 

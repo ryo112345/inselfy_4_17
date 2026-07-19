@@ -136,7 +136,7 @@ jobs:
           --platform managed
           --no-traffic --tag candidate
           --max-instances 2
-          --set-env-vars 'GOOGLE_CLOUD_PROJECT=inselfy,API_PORT=8081,DB_USER=neondb_owner,DB_HOST=ep-super-pine-aohjguv8-pooler.c-2.ap-southeast-1.aws.neon.tech,DB_PORT=5432,DB_NAME=neondb,DB_SSLMODE=require,STORAGE_BACKEND=r2,R2_ACCOUNT_ID=3fb924380437d8136e9079f0f5598ce8,R2_BUCKET=inselfy-uploads,R2_PUBLIC_URL=https://pub-c9accd8c7dd34ac1b0edd86723d4555d.r2.dev,GOOGLE_CLIENT_ID=943028700787-o7mad2o995vm6q7f3q5gg6avusrfds79.apps.googleusercontent.com,LINE_CHANNEL_ID=2009609875,INITIAL_ADMIN_EMAIL=ryo.akiyama112345@gmail.com'
+          --set-env-vars 'GOOGLE_CLOUD_PROJECT=inselfy,API_PORT=8081,DB_USER=neondb_owner,DB_HOST=ep-super-pine-aohjguv8-pooler.c-2.ap-southeast-1.aws.neon.tech,DB_PORT=5432,DB_NAME=neondb,DB_SSLMODE=require,STORAGE_BACKEND=r2,R2_ACCOUNT_ID=3fb924380437d8136e9079f0f5598ce8,R2_BUCKET=inselfy-uploads,R2_PRIVATE_BUCKET=inselfy-private,R2_PUBLIC_URL=https://pub-c9accd8c7dd34ac1b0edd86723d4555d.r2.dev,GOOGLE_CLIENT_ID=943028700787-o7mad2o995vm6q7f3q5gg6avusrfds79.apps.googleusercontent.com,LINE_CHANNEL_ID=2009609875,INITIAL_ADMIN_EMAIL=ryo.akiyama112345@gmail.com'
           --set-secrets 'DB_PASSWORD=db-password:latest,JWT_SECRET=jwt-secret:latest,LINE_CHANNEL_SECRET=line-channel-secret:latest,STRIPE_SECRET_KEY=stripe-secret-key:latest,R2_ACCESS_KEY_ID=r2-access-key-id:latest,R2_SECRET_ACCESS_KEY=r2-secret-access-key:latest'
           --startup-probe 'httpGet.path=/api/readyz,httpGet.port=8080,periodSeconds=5,timeoutSeconds=3,failureThreshold=24'
           --liveness-probe 'httpGet.path=/api/healthz,httpGet.port=8080,periodSeconds=30,timeoutSeconds=5,failureThreshold=3'

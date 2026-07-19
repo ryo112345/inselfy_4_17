@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"time"
@@ -379,6 +380,7 @@ func (e ModelsNotFoundErrorCode) Valid() bool {
 const (
 	ModelsNotificationTypeCreditReplenished ModelsNotificationType = "credit_replenished"
 	ModelsNotificationTypeQualityWarning    ModelsNotificationType = "quality_warning"
+	ModelsNotificationTypeResumeApproved    ModelsNotificationType = "resume_approved"
 	ModelsNotificationTypeScoutDeclined     ModelsNotificationType = "scout_declined"
 	ModelsNotificationTypeScoutExpired      ModelsNotificationType = "scout_expired"
 	ModelsNotificationTypeScoutInterested   ModelsNotificationType = "scout_interested"
@@ -393,6 +395,8 @@ func (e ModelsNotificationType) Valid() bool {
 		return true
 	case ModelsNotificationTypeQualityWarning:
 		return true
+	case ModelsNotificationTypeResumeApproved:
+		return true
 	case ModelsNotificationTypeScoutDeclined:
 		return true
 	case ModelsNotificationTypeScoutExpired:
@@ -402,6 +406,30 @@ func (e ModelsNotificationType) Valid() bool {
 	case ModelsNotificationTypeScoutReceived:
 		return true
 	case ModelsNotificationTypeScoutReplied:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ModelsResumeUploadStatus.
+const (
+	ModelsResumeUploadStatusApproved  ModelsResumeUploadStatus = "approved"
+	ModelsResumeUploadStatusPending   ModelsResumeUploadStatus = "pending"
+	ModelsResumeUploadStatusRejected  ModelsResumeUploadStatus = "rejected"
+	ModelsResumeUploadStatusReviewing ModelsResumeUploadStatus = "reviewing"
+)
+
+// Valid indicates whether the value is a known member of the ModelsResumeUploadStatus enum.
+func (e ModelsResumeUploadStatus) Valid() bool {
+	switch e {
+	case ModelsResumeUploadStatusApproved:
+		return true
+	case ModelsResumeUploadStatusPending:
+		return true
+	case ModelsResumeUploadStatusRejected:
+		return true
+	case ModelsResumeUploadStatusReviewing:
 		return true
 	default:
 		return false
@@ -805,6 +833,57 @@ type ModelsAdminPendingSessionsResponse struct {
 type ModelsAdminPromptResponse struct {
 	// Prompt データ埋め込み済みのプロンプト全文
 	Prompt string `json:"prompt"`
+}
+
+// ModelsAdminResumeDraftResponse 管理画面のドラフト取得レスポンス
+type ModelsAdminResumeDraftResponse struct {
+	// Draft プロフィールドラフト（未保存なら null）
+	Draft interface{} `json:"draft"`
+
+	// Upload アップロード情報
+	Upload ModelsAdminResumeItem `json:"upload"`
+}
+
+// ModelsAdminResumeDraftSaveResponse ドラフト保存結果
+type ModelsAdminResumeDraftSaveResponse struct {
+	// Message 固定メッセージ
+	Message string `json:"message"`
+
+	// Status 保存後のステータス（reviewing）
+	Status ModelsResumeUploadStatus `json:"status"`
+}
+
+// ModelsAdminResumeItem 職務経歴書アップロード（管理画面向け）
+type ModelsAdminResumeItem struct {
+	// CreatedAt アップロード日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id アップロードID
+	Id ModelsUuid `json:"id"`
+
+	// OriginalFilename 元のファイル名
+	OriginalFilename string `json:"originalFilename"`
+
+	// Status ステータス
+	Status ModelsResumeUploadStatus `json:"status"`
+
+	// UpdatedAt 更新日時
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// UserId ユーザーID
+	UserId ModelsUuid `json:"userId"`
+
+	// UserName ユーザー表示名
+	UserName string `json:"userName"`
+
+	// Username ユーザー名（URL用）
+	Username string `json:"username"`
+}
+
+// ModelsAdminResumeListResponse 管理画面の職務経歴書一覧レスポンス
+type ModelsAdminResumeListResponse struct {
+	// Uploads アップロード一覧
+	Uploads []ModelsAdminResumeItem `json:"uploads"`
 }
 
 // ModelsAdminSaveReportRequest AIレポート保存リクエスト
@@ -2865,6 +2944,30 @@ type ModelsRepostToggleResponse struct {
 	Reposted bool `json:"reposted"`
 }
 
+// ModelsResumeMineResponse 自分の最新アップロード状況（未アップロードなら null）
+type ModelsResumeMineResponse struct {
+	// Upload 最新のアップロード
+	Upload *ModelsResumeUploadItem `json:"upload"`
+}
+
+// ModelsResumeUploadItem 職務経歴書アップロード（候補者向け）
+type ModelsResumeUploadItem struct {
+	// CreatedAt アップロード日時
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Id アップロードID
+	Id ModelsUuid `json:"id"`
+
+	// OriginalFilename 元のファイル名
+	OriginalFilename string `json:"originalFilename"`
+
+	// Status ステータス
+	Status ModelsResumeUploadStatus `json:"status"`
+}
+
+// ModelsResumeUploadStatus 職務経歴書アップロードのステータス
+type ModelsResumeUploadStatus string
+
 // ModelsSavedCountResponse 保存済み候補者数
 type ModelsSavedCountResponse struct {
 	// Count 件数
@@ -4017,6 +4120,15 @@ type AdminListCompaniesParams struct {
 	Status *ModelsCompanyStatus `form:"status,omitempty" json:"status,omitempty"`
 }
 
+// AdminListResumesParams defines parameters for AdminListResumes.
+type AdminListResumesParams struct {
+	// Status ステータスでの絞り込み
+	Status *ModelsResumeUploadStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// AdminSaveResumeDraftJSONBody defines parameters for AdminSaveResumeDraft.
+type AdminSaveResumeDraftJSONBody = interface{}
+
 // AdminListUsersParams defines parameters for AdminListUsers.
 type AdminListUsersParams struct {
 	// Page ページ番号（1始まり、デフォルト1）
@@ -4328,6 +4440,11 @@ type PostsListPostCommentsParams struct {
 	Offset *int32 `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
+// ResumesUploadResumeMultipartBody defines parameters for ResumesUploadResume.
+type ResumesUploadResumeMultipartBody struct {
+	File openapi_types.File `json:"file"`
+}
+
 // CandidateScoutsListCandidateScoutsParams defines parameters for CandidateScoutsListCandidateScouts.
 type CandidateScoutsListCandidateScoutsParams struct {
 	// Limit 取得件数
@@ -4443,6 +4560,9 @@ type AdminUpdateCompanyStatusJSONRequestBody = ModelsUpdateCompanyStatusRequest
 // AdminSaveIntegratedReportJSONRequestBody defines body for AdminSaveIntegratedReport for application/json ContentType.
 type AdminSaveIntegratedReportJSONRequestBody = ModelsAdminSaveReportRequest
 
+// AdminSaveResumeDraftJSONRequestBody defines body for AdminSaveResumeDraft for application/json ContentType.
+type AdminSaveResumeDraftJSONRequestBody = AdminSaveResumeDraftJSONBody
+
 // AdminSaveWvReportJSONRequestBody defines body for AdminSaveWvReport for application/json ContentType.
 type AdminSaveWvReportJSONRequestBody = ModelsAdminSaveReportRequest
 
@@ -4550,6 +4670,9 @@ type PostsCreatePostJSONRequestBody = ModelsCreatePostRequest
 
 // PostsCreatePostCommentJSONRequestBody defines body for PostsCreatePostComment for application/json ContentType.
 type PostsCreatePostCommentJSONRequestBody = ModelsCreateCommentRequest
+
+// ResumesUploadResumeMultipartRequestBody defines body for ResumesUploadResume for multipart/form-data ContentType.
+type ResumesUploadResumeMultipartRequestBody ResumesUploadResumeMultipartBody
 
 // ScoutSettingsUpdateScoutSettingsJSONRequestBody defines body for ScoutSettingsUpdateScoutSettings for application/json ContentType.
 type ScoutSettingsUpdateScoutSettingsJSONRequestBody = ModelsUpdateScoutSettingsRequest
@@ -4667,6 +4790,24 @@ type ServerInterface interface {
 	// List Work Values sessions without an AI report
 	// (GET /api/admin/reports/pending)
 	AdminListPendingWvSessions(w http.ResponseWriter, r *http.Request)
+	// List resume uploads
+	// (GET /api/admin/resumes)
+	AdminListResumes(w http.ResponseWriter, r *http.Request, params AdminListResumesParams)
+	// Approve a resume draft and apply it to the profile
+	// (POST /api/admin/resumes/{resumeId}/approve)
+	AdminApproveResume(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid)
+	// Download a resume PDF
+	// (GET /api/admin/resumes/{resumeId}/download)
+	AdminDownloadResume(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid)
+	// Get a resume profile draft
+	// (GET /api/admin/resumes/{resumeId}/draft)
+	AdminGetResumeDraft(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid)
+	// Save a resume profile draft
+	// (PUT /api/admin/resumes/{resumeId}/draft)
+	AdminSaveResumeDraft(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid)
+	// Reject a resume upload
+	// (POST /api/admin/resumes/{resumeId}/reject)
+	AdminRejectResume(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid)
 	// Get a Work Values AI report
 	// (GET /api/admin/sessions/{sessionId}/ai-report)
 	AdminGetWvReport(w http.ResponseWriter, r *http.Request, sessionId ModelsUuid)
@@ -5078,6 +5219,12 @@ type ServerInterface interface {
 	// Toggle repost on a post
 	// (POST /api/posts/{postId}/repost)
 	PostsTogglePostRepost(w http.ResponseWriter, r *http.Request, postId ModelsUuid)
+	// Upload a resume PDF
+	// (POST /api/resumes)
+	ResumesUploadResume(w http.ResponseWriter, r *http.Request)
+	// Get my latest resume upload
+	// (GET /api/resumes/me)
+	ResumesGetMyResume(w http.ResponseWriter, r *http.Request)
 	// Get scout settings for the authenticated user
 	// (GET /api/scout-settings)
 	ScoutSettingsGetScoutSettings(w http.ResponseWriter, r *http.Request)
@@ -5805,6 +5952,194 @@ func (siw *ServerInterfaceWrapper) AdminListPendingWvSessions(w http.ResponseWri
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.AdminListPendingWvSessions(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AdminListResumes operation middleware
+func (siw *ServerInterfaceWrapper) AdminListResumes(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, AdminAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AdminListResumesParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", false, false, "status", r.URL.Query(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "status", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AdminListResumes(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AdminApproveResume operation middleware
+func (siw *ServerInterfaceWrapper) AdminApproveResume(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "resumeId" -------------
+	var resumeId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "resumeId", r.PathValue("resumeId"), &resumeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "resumeId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, AdminAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AdminApproveResume(w, r, resumeId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AdminDownloadResume operation middleware
+func (siw *ServerInterfaceWrapper) AdminDownloadResume(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "resumeId" -------------
+	var resumeId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "resumeId", r.PathValue("resumeId"), &resumeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "resumeId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, AdminAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AdminDownloadResume(w, r, resumeId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AdminGetResumeDraft operation middleware
+func (siw *ServerInterfaceWrapper) AdminGetResumeDraft(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "resumeId" -------------
+	var resumeId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "resumeId", r.PathValue("resumeId"), &resumeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "resumeId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, AdminAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AdminGetResumeDraft(w, r, resumeId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AdminSaveResumeDraft operation middleware
+func (siw *ServerInterfaceWrapper) AdminSaveResumeDraft(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "resumeId" -------------
+	var resumeId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "resumeId", r.PathValue("resumeId"), &resumeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "resumeId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, AdminAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AdminSaveResumeDraft(w, r, resumeId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AdminRejectResume operation middleware
+func (siw *ServerInterfaceWrapper) AdminRejectResume(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "resumeId" -------------
+	var resumeId ModelsUuid
+
+	err = runtime.BindStyledParameterWithOptions("simple", "resumeId", r.PathValue("resumeId"), &resumeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "resumeId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, AdminAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AdminRejectResume(w, r, resumeId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -10152,6 +10487,46 @@ func (siw *ServerInterfaceWrapper) PostsTogglePostRepost(w http.ResponseWriter, 
 	handler.ServeHTTP(w, r)
 }
 
+// ResumesUploadResume operation middleware
+func (siw *ServerInterfaceWrapper) ResumesUploadResume(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CandidateAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ResumesUploadResume(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ResumesGetMyResume operation middleware
+func (siw *ServerInterfaceWrapper) ResumesGetMyResume(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CandidateAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ResumesGetMyResume(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ScoutSettingsGetScoutSettings operation middleware
 func (siw *ServerInterfaceWrapper) ScoutSettingsGetScoutSettings(w http.ResponseWriter, r *http.Request) {
 
@@ -11877,6 +12252,12 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("POST "+options.BaseURL+"/api/admin/integrated-requests/{requestId}/reset-viewed", wrapper.AdminResetIntegratedReportViewed)
 	m.HandleFunc("GET "+options.BaseURL+"/api/admin/reports/list", wrapper.AdminListWvReports)
 	m.HandleFunc("GET "+options.BaseURL+"/api/admin/reports/pending", wrapper.AdminListPendingWvSessions)
+	m.HandleFunc("GET "+options.BaseURL+"/api/admin/resumes", wrapper.AdminListResumes)
+	m.HandleFunc("POST "+options.BaseURL+"/api/admin/resumes/{resumeId}/approve", wrapper.AdminApproveResume)
+	m.HandleFunc("GET "+options.BaseURL+"/api/admin/resumes/{resumeId}/download", wrapper.AdminDownloadResume)
+	m.HandleFunc("GET "+options.BaseURL+"/api/admin/resumes/{resumeId}/draft", wrapper.AdminGetResumeDraft)
+	m.HandleFunc("PUT "+options.BaseURL+"/api/admin/resumes/{resumeId}/draft", wrapper.AdminSaveResumeDraft)
+	m.HandleFunc("POST "+options.BaseURL+"/api/admin/resumes/{resumeId}/reject", wrapper.AdminRejectResume)
 	m.HandleFunc("GET "+options.BaseURL+"/api/admin/sessions/{sessionId}/ai-report", wrapper.AdminGetWvReport)
 	m.HandleFunc("PUT "+options.BaseURL+"/api/admin/sessions/{sessionId}/ai-report", wrapper.AdminSaveWvReport)
 	m.HandleFunc("GET "+options.BaseURL+"/api/admin/sessions/{sessionId}/prompt", wrapper.AdminGetWvPrompt)
@@ -12014,6 +12395,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("POST "+options.BaseURL+"/api/posts/{postId}/comments", wrapper.PostsCreatePostComment)
 	m.HandleFunc("POST "+options.BaseURL+"/api/posts/{postId}/like", wrapper.PostsTogglePostLike)
 	m.HandleFunc("POST "+options.BaseURL+"/api/posts/{postId}/repost", wrapper.PostsTogglePostRepost)
+	m.HandleFunc("POST "+options.BaseURL+"/api/resumes", wrapper.ResumesUploadResume)
+	m.HandleFunc("GET "+options.BaseURL+"/api/resumes/me", wrapper.ResumesGetMyResume)
 	m.HandleFunc("GET "+options.BaseURL+"/api/scout-settings", wrapper.ScoutSettingsGetScoutSettings)
 	m.HandleFunc("PUT "+options.BaseURL+"/api/scout-settings", wrapper.ScoutSettingsUpdateScoutSettings)
 	m.HandleFunc("GET "+options.BaseURL+"/api/scouts", wrapper.CandidateScoutsListCandidateScouts)
@@ -12873,6 +13256,299 @@ type AdminListPendingWvSessions401JSONResponse ModelsUnauthorizedError
 func (response AdminListPendingWvSessions401JSONResponse) VisitAdminListPendingWvSessionsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminListResumesRequestObject struct {
+	Params AdminListResumesParams
+}
+
+type AdminListResumesResponseObject interface {
+	VisitAdminListResumesResponse(w http.ResponseWriter) error
+}
+
+type AdminListResumes200JSONResponse ModelsAdminResumeListResponse
+
+func (response AdminListResumes200JSONResponse) VisitAdminListResumesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminListResumes400JSONResponse ModelsBadRequestError
+
+func (response AdminListResumes400JSONResponse) VisitAdminListResumesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminListResumes401JSONResponse ModelsUnauthorizedError
+
+func (response AdminListResumes401JSONResponse) VisitAdminListResumesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminApproveResumeRequestObject struct {
+	ResumeId ModelsUuid `json:"resumeId"`
+}
+
+type AdminApproveResumeResponseObject interface {
+	VisitAdminApproveResumeResponse(w http.ResponseWriter) error
+}
+
+type AdminApproveResume200JSONResponse ModelsAdminResumeItem
+
+func (response AdminApproveResume200JSONResponse) VisitAdminApproveResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminApproveResume400JSONResponse ModelsBadRequestError
+
+func (response AdminApproveResume400JSONResponse) VisitAdminApproveResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminApproveResume401JSONResponse ModelsUnauthorizedError
+
+func (response AdminApproveResume401JSONResponse) VisitAdminApproveResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminApproveResume404JSONResponse ModelsNotFoundError
+
+func (response AdminApproveResume404JSONResponse) VisitAdminApproveResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminApproveResume409JSONResponse ModelsConflictError
+
+func (response AdminApproveResume409JSONResponse) VisitAdminApproveResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminDownloadResumeRequestObject struct {
+	ResumeId ModelsUuid `json:"resumeId"`
+}
+
+type AdminDownloadResumeResponseObject interface {
+	VisitAdminDownloadResumeResponse(w http.ResponseWriter) error
+}
+
+type AdminDownloadResume200ApplicationpdfResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response AdminDownloadResume200ApplicationpdfResponse) VisitAdminDownloadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/pdf")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type AdminDownloadResume400JSONResponse ModelsBadRequestError
+
+func (response AdminDownloadResume400JSONResponse) VisitAdminDownloadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminDownloadResume401JSONResponse ModelsUnauthorizedError
+
+func (response AdminDownloadResume401JSONResponse) VisitAdminDownloadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminDownloadResume404JSONResponse ModelsNotFoundError
+
+func (response AdminDownloadResume404JSONResponse) VisitAdminDownloadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminGetResumeDraftRequestObject struct {
+	ResumeId ModelsUuid `json:"resumeId"`
+}
+
+type AdminGetResumeDraftResponseObject interface {
+	VisitAdminGetResumeDraftResponse(w http.ResponseWriter) error
+}
+
+type AdminGetResumeDraft200JSONResponse ModelsAdminResumeDraftResponse
+
+func (response AdminGetResumeDraft200JSONResponse) VisitAdminGetResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminGetResumeDraft400JSONResponse ModelsBadRequestError
+
+func (response AdminGetResumeDraft400JSONResponse) VisitAdminGetResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminGetResumeDraft401JSONResponse ModelsUnauthorizedError
+
+func (response AdminGetResumeDraft401JSONResponse) VisitAdminGetResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminGetResumeDraft404JSONResponse ModelsNotFoundError
+
+func (response AdminGetResumeDraft404JSONResponse) VisitAdminGetResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminSaveResumeDraftRequestObject struct {
+	ResumeId ModelsUuid `json:"resumeId"`
+	Body     *AdminSaveResumeDraftJSONRequestBody
+}
+
+type AdminSaveResumeDraftResponseObject interface {
+	VisitAdminSaveResumeDraftResponse(w http.ResponseWriter) error
+}
+
+type AdminSaveResumeDraft200JSONResponse ModelsAdminResumeDraftSaveResponse
+
+func (response AdminSaveResumeDraft200JSONResponse) VisitAdminSaveResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminSaveResumeDraft400JSONResponse ModelsBadRequestError
+
+func (response AdminSaveResumeDraft400JSONResponse) VisitAdminSaveResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminSaveResumeDraft401JSONResponse ModelsUnauthorizedError
+
+func (response AdminSaveResumeDraft401JSONResponse) VisitAdminSaveResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminSaveResumeDraft404JSONResponse ModelsNotFoundError
+
+func (response AdminSaveResumeDraft404JSONResponse) VisitAdminSaveResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminSaveResumeDraft409JSONResponse ModelsConflictError
+
+func (response AdminSaveResumeDraft409JSONResponse) VisitAdminSaveResumeDraftResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminRejectResumeRequestObject struct {
+	ResumeId ModelsUuid `json:"resumeId"`
+}
+
+type AdminRejectResumeResponseObject interface {
+	VisitAdminRejectResumeResponse(w http.ResponseWriter) error
+}
+
+type AdminRejectResume200JSONResponse ModelsAdminResumeItem
+
+func (response AdminRejectResume200JSONResponse) VisitAdminRejectResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminRejectResume400JSONResponse ModelsBadRequestError
+
+func (response AdminRejectResume400JSONResponse) VisitAdminRejectResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminRejectResume401JSONResponse ModelsUnauthorizedError
+
+func (response AdminRejectResume401JSONResponse) VisitAdminRejectResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminRejectResume404JSONResponse ModelsNotFoundError
+
+func (response AdminRejectResume404JSONResponse) VisitAdminRejectResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AdminRejectResume409JSONResponse ModelsConflictError
+
+func (response AdminRejectResume409JSONResponse) VisitAdminRejectResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -18493,6 +19169,93 @@ func (response PostsTogglePostRepost404JSONResponse) VisitPostsTogglePostRepostR
 	return json.NewEncoder(w).Encode(response)
 }
 
+type ResumesUploadResumeRequestObject struct {
+	Body *multipart.Reader
+}
+
+type ResumesUploadResumeResponseObject interface {
+	VisitResumesUploadResumeResponse(w http.ResponseWriter) error
+}
+
+type ResumesUploadResume201JSONResponse ModelsResumeUploadItem
+
+func (response ResumesUploadResume201JSONResponse) VisitResumesUploadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ResumesUploadResume400JSONResponse ModelsBadRequestError
+
+func (response ResumesUploadResume400JSONResponse) VisitResumesUploadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ResumesUploadResume401JSONResponse ModelsUnauthorizedError
+
+func (response ResumesUploadResume401JSONResponse) VisitResumesUploadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ResumesUploadResume404JSONResponse ModelsNotFoundError
+
+func (response ResumesUploadResume404JSONResponse) VisitResumesUploadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ResumesUploadResume409JSONResponse ModelsConflictError
+
+func (response ResumesUploadResume409JSONResponse) VisitResumesUploadResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ResumesGetMyResumeRequestObject struct {
+}
+
+type ResumesGetMyResumeResponseObject interface {
+	VisitResumesGetMyResumeResponse(w http.ResponseWriter) error
+}
+
+type ResumesGetMyResume200JSONResponse ModelsResumeMineResponse
+
+func (response ResumesGetMyResume200JSONResponse) VisitResumesGetMyResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ResumesGetMyResume400JSONResponse ModelsBadRequestError
+
+func (response ResumesGetMyResume400JSONResponse) VisitResumesGetMyResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ResumesGetMyResume401JSONResponse ModelsUnauthorizedError
+
+func (response ResumesGetMyResume401JSONResponse) VisitResumesGetMyResumeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type ScoutSettingsGetScoutSettingsRequestObject struct {
 }
 
@@ -20672,6 +21435,24 @@ type StrictServerInterface interface {
 	// List Work Values sessions without an AI report
 	// (GET /api/admin/reports/pending)
 	AdminListPendingWvSessions(ctx context.Context, request AdminListPendingWvSessionsRequestObject) (AdminListPendingWvSessionsResponseObject, error)
+	// List resume uploads
+	// (GET /api/admin/resumes)
+	AdminListResumes(ctx context.Context, request AdminListResumesRequestObject) (AdminListResumesResponseObject, error)
+	// Approve a resume draft and apply it to the profile
+	// (POST /api/admin/resumes/{resumeId}/approve)
+	AdminApproveResume(ctx context.Context, request AdminApproveResumeRequestObject) (AdminApproveResumeResponseObject, error)
+	// Download a resume PDF
+	// (GET /api/admin/resumes/{resumeId}/download)
+	AdminDownloadResume(ctx context.Context, request AdminDownloadResumeRequestObject) (AdminDownloadResumeResponseObject, error)
+	// Get a resume profile draft
+	// (GET /api/admin/resumes/{resumeId}/draft)
+	AdminGetResumeDraft(ctx context.Context, request AdminGetResumeDraftRequestObject) (AdminGetResumeDraftResponseObject, error)
+	// Save a resume profile draft
+	// (PUT /api/admin/resumes/{resumeId}/draft)
+	AdminSaveResumeDraft(ctx context.Context, request AdminSaveResumeDraftRequestObject) (AdminSaveResumeDraftResponseObject, error)
+	// Reject a resume upload
+	// (POST /api/admin/resumes/{resumeId}/reject)
+	AdminRejectResume(ctx context.Context, request AdminRejectResumeRequestObject) (AdminRejectResumeResponseObject, error)
 	// Get a Work Values AI report
 	// (GET /api/admin/sessions/{sessionId}/ai-report)
 	AdminGetWvReport(ctx context.Context, request AdminGetWvReportRequestObject) (AdminGetWvReportResponseObject, error)
@@ -21083,6 +21864,12 @@ type StrictServerInterface interface {
 	// Toggle repost on a post
 	// (POST /api/posts/{postId}/repost)
 	PostsTogglePostRepost(ctx context.Context, request PostsTogglePostRepostRequestObject) (PostsTogglePostRepostResponseObject, error)
+	// Upload a resume PDF
+	// (POST /api/resumes)
+	ResumesUploadResume(ctx context.Context, request ResumesUploadResumeRequestObject) (ResumesUploadResumeResponseObject, error)
+	// Get my latest resume upload
+	// (GET /api/resumes/me)
+	ResumesGetMyResume(ctx context.Context, request ResumesGetMyResumeRequestObject) (ResumesGetMyResumeResponseObject, error)
 	// Get scout settings for the authenticated user
 	// (GET /api/scout-settings)
 	ScoutSettingsGetScoutSettings(ctx context.Context, request ScoutSettingsGetScoutSettingsRequestObject) (ScoutSettingsGetScoutSettingsResponseObject, error)
@@ -21809,6 +22596,169 @@ func (sh *strictHandler) AdminListPendingWvSessions(w http.ResponseWriter, r *ht
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(AdminListPendingWvSessionsResponseObject); ok {
 		if err := validResponse.VisitAdminListPendingWvSessionsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AdminListResumes operation middleware
+func (sh *strictHandler) AdminListResumes(w http.ResponseWriter, r *http.Request, params AdminListResumesParams) {
+	var request AdminListResumesRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AdminListResumes(ctx, request.(AdminListResumesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AdminListResumes")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AdminListResumesResponseObject); ok {
+		if err := validResponse.VisitAdminListResumesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AdminApproveResume operation middleware
+func (sh *strictHandler) AdminApproveResume(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid) {
+	var request AdminApproveResumeRequestObject
+
+	request.ResumeId = resumeId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AdminApproveResume(ctx, request.(AdminApproveResumeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AdminApproveResume")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AdminApproveResumeResponseObject); ok {
+		if err := validResponse.VisitAdminApproveResumeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AdminDownloadResume operation middleware
+func (sh *strictHandler) AdminDownloadResume(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid) {
+	var request AdminDownloadResumeRequestObject
+
+	request.ResumeId = resumeId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AdminDownloadResume(ctx, request.(AdminDownloadResumeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AdminDownloadResume")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AdminDownloadResumeResponseObject); ok {
+		if err := validResponse.VisitAdminDownloadResumeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AdminGetResumeDraft operation middleware
+func (sh *strictHandler) AdminGetResumeDraft(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid) {
+	var request AdminGetResumeDraftRequestObject
+
+	request.ResumeId = resumeId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AdminGetResumeDraft(ctx, request.(AdminGetResumeDraftRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AdminGetResumeDraft")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AdminGetResumeDraftResponseObject); ok {
+		if err := validResponse.VisitAdminGetResumeDraftResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AdminSaveResumeDraft operation middleware
+func (sh *strictHandler) AdminSaveResumeDraft(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid) {
+	var request AdminSaveResumeDraftRequestObject
+
+	request.ResumeId = resumeId
+
+	var body AdminSaveResumeDraftJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AdminSaveResumeDraft(ctx, request.(AdminSaveResumeDraftRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AdminSaveResumeDraft")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AdminSaveResumeDraftResponseObject); ok {
+		if err := validResponse.VisitAdminSaveResumeDraftResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AdminRejectResume operation middleware
+func (sh *strictHandler) AdminRejectResume(w http.ResponseWriter, r *http.Request, resumeId ModelsUuid) {
+	var request AdminRejectResumeRequestObject
+
+	request.ResumeId = resumeId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AdminRejectResume(ctx, request.(AdminRejectResumeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AdminRejectResume")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AdminRejectResumeResponseObject); ok {
+		if err := validResponse.VisitAdminRejectResumeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -25539,6 +26489,61 @@ func (sh *strictHandler) PostsTogglePostRepost(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostsTogglePostRepostResponseObject); ok {
 		if err := validResponse.VisitPostsTogglePostRepostResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ResumesUploadResume operation middleware
+func (sh *strictHandler) ResumesUploadResume(w http.ResponseWriter, r *http.Request) {
+	var request ResumesUploadResumeRequestObject
+
+	if reader, err := r.MultipartReader(); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode multipart body: %w", err))
+		return
+	} else {
+		request.Body = reader
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ResumesUploadResume(ctx, request.(ResumesUploadResumeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ResumesUploadResume")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ResumesUploadResumeResponseObject); ok {
+		if err := validResponse.VisitResumesUploadResumeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ResumesGetMyResume operation middleware
+func (sh *strictHandler) ResumesGetMyResume(w http.ResponseWriter, r *http.Request) {
+	var request ResumesGetMyResumeRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ResumesGetMyResume(ctx, request.(ResumesGetMyResumeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ResumesGetMyResume")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ResumesGetMyResumeResponseObject); ok {
+		if err := validResponse.VisitResumesGetMyResumeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

@@ -19,4 +19,5 @@ export const ModelsNotificationType = {
   scout_expired: 'scout_expired',
   credit_replenished: 'credit_replenished',
   quality_warning: 'quality_warning',
+  resume_approved: 'resume_approved',
 } as const;
