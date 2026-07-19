@@ -9,5 +9,12 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.{ts,tsx}"],
+    coverage: {
+      // lcov は octocov（CI の PR コメント）用、text はローカル実行時の一覧表示用
+      reporter: ["text-summary", "lcov"],
+      include: ["src/**/*.{ts,tsx}"],
+      // 生成コード（orval）はカバレッジの分母から除外（backend の .octocov.yml と同方針）
+      exclude: ["src/external/client/api/orval/generated/**", "src/**/*.test.{ts,tsx}"],
+    },
   },
 });

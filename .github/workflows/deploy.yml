@@ -26,6 +26,7 @@ on:
       - ".github/workflows/migrations-ci.yml"
       - ".github/workflows/e2e-smoke.yml"
       - ".octocov.yml"
+      - ".octocov.frontend.yml"
   workflow_dispatch: {} # 手動再デプロイ（main の HEAD を出し直す。ロールバック訓練後の復帰にも使う）
 
 permissions:
@@ -59,6 +60,8 @@ jobs:
     uses: ./.github/workflows/frontend-ci.yml
     permissions:
       contents: read
+      pull-requests: write # octocov（backend と同じ理由で明示）
+      actions: write # octocov の main ベースライン保存
   migrations:
     uses: ./.github/workflows/migrations-ci.yml
     permissions:

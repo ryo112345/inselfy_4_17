@@ -9,6 +9,7 @@ on:
     paths:
       - "frontend/**"
       - ".github/workflows/frontend-ci.yml"
+      - ".octocov.frontend.yml"
   workflow_call: {}
 
 permissions:
@@ -23,6 +24,12 @@ concurrency:
 jobs:
   frontend:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # octocov が PR にカバレッジをコメントするため
+      pull-requests: write
+      # octocov が前回レポートの取得・保存に GitHub Actions Artifacts を使うため
+      actions: write
     defaults:
       run:
         working-directory: frontend
@@ -53,7 +60,14 @@ jobs:
         run: npm run typecheck
 
       - name: Unit tests (vitest)
-        run: npm test
+        run: npm test -- --coverage
+
+      # .octocov.frontend.yml: カバレッジを PR にコメントする（可視化のみ・ゲートなし）。
+      # レポートは backend と別名の Actions Artifact に保存
+      - name: Report coverage (octocov)
+        uses: k1LoW/octocov-action@b3b6ee60482a667950f87553abf1df63217235d9 # v1.5.1
+        with:
+          config: .octocov.frontend.yml
 
       # Next.js のビルドキャッシュ（依存が同じ間はソース変更でも部分再利用される）
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
