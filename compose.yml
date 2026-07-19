@@ -52,6 +52,9 @@ services:
       DB_NAME: ${DB_NAME:-inselfy}
       API_PORT: "8081"
       JWT_SECRET: e2e-dummy-secret
+      # Playwright e2e（frontend-e2e.yml）の bypass-login 用ブートストラップキー。
+      # この e2e スタック専用の固定値（本番の admin キーとは無関係）
+      ADMIN_API_KEY: e2e-admin-key
       # レスポンス契約検証（違反は ERROR ログ）。e2e-smoke.sh が末尾でログを検査する
       OPENAPI_VALIDATE_RESPONSES: "true"
     ports:

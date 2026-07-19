@@ -11,7 +11,8 @@ export const JOB_POSTING_FOR_CALENDAR_SPEC = "b0000000-0000-0000-0000-0000000000
 export const JOB_POSTING_FOR_PROPOSAL_CANCEL_SPEC = "b0000000-0000-0000-0000-000000000003";
 export const JOB_POSTING_FOR_MESSAGES_SPEC = "b0000000-0000-0000-0000-000000000004";
 
-const BASE = "http://localhost:3000";
+// CI（frontend-e2e.yml）では playwright.config.ts の baseURL と同じ値が渡る
+const BASE = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 
 // admin API は fail-closed（X-Admin-Key 必須）。キーは playwright.config.ts が
 // リポジトリルートの .env から process.env.ADMIN_API_KEY に読み込む
