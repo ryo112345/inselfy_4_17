@@ -27,6 +27,20 @@ for i in $(seq 1 60); do
   sleep 2
 done
 
+# front (Next.js standalone) は API より起動が遅い。API だけ待って叩き始めると
+# connection refused (got=000) で落ちるので、front → proxy → API の経路も待つ。
+echo "waiting for $FRONT/api/healthz ..."
+for i in $(seq 1 60); do
+  if curl -fsS -o /dev/null "$FRONT/api/healthz" 2>/dev/null; then
+    break
+  fi
+  if [ "$i" -eq 60 ]; then
+    echo "NG: front が 120 秒以内に ready にならない"
+    exit 1
+  fi
+  sleep 2
+done
+
 check_status() { # 名前 URL 期待ステータス
   local name=$1 url=$2 expected=$3 got
   got=$(curl -s -o /dev/null -w '%{http_code}' "$url")
