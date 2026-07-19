@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.0.2](https://github.com/ryo112345/inselfy_4_17/compare/v0.0.1...v0.0.2) - 2026-07-19
+
+- ci: CodeQL (SAST) を導入 by @ryo112345 in https://github.com/ryo112345/inselfy_4_17/pull/33
+- feat: スペック駆動認可・strict-server 移行ほか一括リリース by @ryo112345 in https://github.com/ryo112345/inselfy_4_17/pull/41
+- ci: 本番CDを塞いだ2つのゲート誤検知を修正（octocov除外・smoke起動待ち） by @ryo112345 in https://github.com/ryo112345/inselfy_4_17/pull/42
+
 ## [v0.0.1](https://github.com/ryo112345/inselfy_4_17/commits/v0.0.1) - 2026-07-12
 
 - ci: 本番CDの自動化（OIDC）＋ロールバック設計 (C10) by @ryo112345 in https://github.com/ryo112345/inselfy_4_17/pull/1
