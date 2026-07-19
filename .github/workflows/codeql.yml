@@ -1,0 +1,57 @@
+# CodeQL (SAST): 自分たちが書いたコード起因の脆弱性をデータフロー解析（taint tracking）で検知する。
+# govulncheck / Trivy（依存の既知CVE）・gitleaks（シークレット混入）とは守備範囲が別で、
+# SQLi・パストラバーサル・SSRF・XSS など「入力が無害化されずに危険な関数へ到達する経路」を
+# 関数・ファイル横断で拾う。public リポジトリのため無料で利用できる。
+# 週次 schedule も回す（コード変更が無くてもクエリスイート更新による新検出を拾うため）。
+# サードパーティ action はコミット SHA でピン留めする（タグは動かせるため）。
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "30 21 * * 0" # 毎週月曜 6:30 JST（security.yml の30分後）
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # 解析結果 (SARIF) を Security タブへアップロードするため
+      packages: read # CodeQL クエリパックの取得
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Go は none 非対応（コンパイル情報が必要）のため autobuild でビルドして解析する。
+          # JS/TS はビルド不要でソースをそのまま解析できる
+          - language: go
+            build-mode: autobuild
+          - language: javascript-typescript
+            build-mode: none
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      # autobuild が runner 既定の古い Go を掴まないよう go.mod のバージョンを入れる
+      - if: matrix.language == 'go'
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
+        with:
+          category: "/language:${{ matrix.language }}"
