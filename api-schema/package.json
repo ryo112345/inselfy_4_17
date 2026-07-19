@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@typespec/compiler": "^1.13.0",
-    "@typespec/http": "^1.13.0",
+    "@typespec/http": "^1.14.0",
     "@typespec/openapi3": "^1.13.0",
     "orval": "8.22.0"
   }
