@@ -27,6 +27,7 @@ on:
       - ".github/workflows/e2e-smoke.yml"
       - ".octocov.yml"
       - ".octocov.frontend.yml"
+      - ".github/lighthouse/**"
   workflow_dispatch: {} # 手動再デプロイ（main の HEAD を出し直す。ロールバック訓練後の復帰にも使う）
 
 permissions:
@@ -167,6 +168,23 @@ jobs:
             exit 1
           fi
           echo "front SSR OK"
+          # 後続の Lighthouse ステップで使う
+          echo "CANDIDATE_URL=$CANDIDATE_URL" >> "$GITHUB_ENV"
+
+      # --- Lighthouse（frontend-followup-backlog §5-3）---
+      # candidate URL（本番同等・トラフィック0%）に対して performance /
+      # accessibility 等のバジェットを計測する。導入初期は結果の観測が目的なので
+      # continue-on-error で非ブロッキング（数値が安定したらゲート昇格を検討）。
+      # レポートは Actions Artifacts に保存される
+      - name: Lighthouse on candidate
+        continue-on-error: true
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # 12.6.2
+        with:
+          urls: |
+            ${{ env.CANDIDATE_URL }}/
+            ${{ env.CANDIDATE_URL }}/login
+          configPath: .github/lighthouse/lighthouserc.json
+          uploadArtifacts: true
 
       # --- 2段階デプロイ 2/2: 検証済みリビジョンへトラフィック切替 ---
       - name: Shift traffic to new revision
