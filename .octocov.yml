@@ -4,6 +4,12 @@
 coverage:
   paths:
     - backend/coverage.out
+  # 生成コード（goverter/oapi-codegen/sqlc）は codeToTestRatio と同様に分母から除外。
+  # 生成コードの増減（strict-server 移行等）でカバレッジ率が希釈されるのを防ぐ。
+  exclude:
+    - "backend/**/*.gen.go"
+    - "backend/internal/adapter/http/generated/**"
+    - "backend/internal/adapter/gateway/db/sqlc/generated/**"
   # 削除リファクタ等（テスト済みコードを消すとカバレッジが下がる）の誤差を
   # 許容するため -1pt までは通す。初回など prev が無い場合は diff = current で必ず通る。
   acceptable: diff >= -1%
