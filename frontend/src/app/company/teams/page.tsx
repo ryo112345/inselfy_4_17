@@ -2,29 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
-
-type Team = {
-  id: string;
-  name: string;
-  description: string | null;
-  memberCount: number;
-  wvCompleted: number;
-  ciCompleted: number;
-  createdAt: string;
-};
+import { companyTeamsListTeams } from "@/external/client/api/orval/generated/endpoints/company-teams/company-teams";
+import type { ModelsTeamResponse as Team } from "@/external/client/api/orval/generated/models";
 
 export default function TeamsPage() {
-  const { companyFetch } = useCompanyAuth();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    companyFetch("/api/company/teams")
-      .then((r) => r.json())
+    companyTeamsListTeams()
       .then((data) => {
-        if (!cancelled) setTeams(data.items ?? []);
+        if (!cancelled) setTeams(data.items);
       })
       .catch(() => {})
       .finally(() => {
@@ -33,7 +22,7 @@ export default function TeamsPage() {
     return () => {
       cancelled = true;
     };
-  }, [companyFetch]);
+  }, []);
 
   const totalMembers = teams.reduce((s, t) => s + t.memberCount, 0);
   const totalWv = teams.reduce((s, t) => s + t.wvCompleted, 0);

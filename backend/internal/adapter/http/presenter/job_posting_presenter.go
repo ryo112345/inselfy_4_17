@@ -11,10 +11,12 @@ import (
 var jobPostingConv jobPostingConverter = &jobPostingConverterImpl{}
 
 // JobPostingResponse converts a single job posting entity to its API response.
-func JobPostingResponse(j *jobposting.JobPosting) any { return jobPostingConv.ToResponse(j) }
+func JobPostingResponse(j *jobposting.JobPosting) *openapi.ModelsJobPostingResponse {
+	return jobPostingConv.ToResponse(j)
+}
 
 // JobPostingsPaginatedResponse converts a paginated list of job postings to its API response.
-func JobPostingsPaginatedResponse(js []*jobposting.JobPosting, total int) any {
+func JobPostingsPaginatedResponse(js []*jobposting.JobPosting, total int) *openapi.ModelsJobPostingListResponse {
 	items := make([]openapi.ModelsJobPostingResponse, 0, len(js))
 	for _, r := range jobPostingConv.ToResponses(js) {
 		items = append(items, *r)

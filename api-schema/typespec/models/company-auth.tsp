@@ -16,6 +16,7 @@ union CompanyStatus {
 model CompanyRegisterRequest {
   /** メールアドレス */
   @maxLength(255)
+  @format("email")
   email: string;
 
   /** パスワード */
@@ -33,6 +34,22 @@ model CompanyRegisterRequest {
   /** 電話番号 */
   @maxLength(30)
   phoneNumber: string;
+}
+
+/**
+ * 未承認アカウントでのログイン拒否エラー。
+ * 認証情報は正しいが、アカウントが承認待ち（ACCOUNT_PENDING）または
+ * 却下済み（ACCOUNT_REJECTED）のためログインできない。
+ */
+@error
+model CompanyAccountStatusError {
+  @statusCode statusCode: 403;
+
+  /** エラーコード */
+  code: "ACCOUNT_PENDING" | "ACCOUNT_REJECTED";
+
+  /** エラーメッセージ */
+  message: string;
 }
 
 /** 企業ログインリクエスト */

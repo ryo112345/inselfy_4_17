@@ -1,23 +1,29 @@
-import "@/external/client/api/client";
+// 複雑加工（複数API合成・kind別ディスパッチ・平均算出）の手書き queryFn 層。
+// 素通しの取得は各フックが orval 生成フック/平関数を直接使う（このファイルには置かない）。
+// 生成平関数は非2xxで ApiError を throw し、成功時は data を直接返す（旧 hey-api の
+// { data, error } 形とは異なる）。
+import { careerInterestCiGetLatestResult } from "@/external/client/api/orval/generated/endpoints/career-interest/career-interest";
+import { companyTeamsGetTeamScores } from "@/external/client/api/orval/generated/endpoints/company-teams/company-teams";
+import { experiencesListExperiences } from "@/external/client/api/orval/generated/endpoints/experiences/experiences";
 import {
-  careerInterestCiGetLatestResult,
-  companyTeamsGetTeamScores,
-  companyTeamsListTeams,
-  experiencesListExperiences,
-  type ModelsTalentCard,
-  type ModelsTeamResponse,
   savedCandidatesBulkCheckSaved,
-  savedCandidatesListSavedCandidates,
   savedCandidatesSaveCandidate,
   savedCandidatesUnsaveCandidate,
-  skillsListSkills,
+} from "@/external/client/api/orval/generated/endpoints/saved-candidates/saved-candidates";
+import { skillsListSkills } from "@/external/client/api/orval/generated/endpoints/skills/skills";
+import {
   talentSearchCiDiagnosticSearchTalents,
   talentSearchDiagnosticSearchTalents,
   talentSearchIntegratedDiagnosticSearchTalents,
   talentSearchSearchTalents,
-  usersGetUserByUsername,
-  workValuesWvGetLatestResult,
-} from "@/external/client/api/generated";
+} from "@/external/client/api/orval/generated/endpoints/talent-search/talent-search";
+import { usersGetUserByUsername } from "@/external/client/api/orval/generated/endpoints/users/users";
+import { workValuesWvGetLatestResult } from "@/external/client/api/orval/generated/endpoints/work-values/work-values";
+import type {
+  ModelsTalentCard,
+  TalentSearchSearchTalentsParams,
+} from "@/external/client/api/orval/generated/models";
+import { ApiError } from "@/lib/api-result";
 
 export type TalentCard = ModelsTalentCard;
 
@@ -50,22 +56,18 @@ export async function fetchCandidateDetail(
   signal?: AbortSignal,
 ): Promise<CandidateDetail> {
   const [exp, skill, profile, wv, ci] = await Promise.all([
-    experiencesListExperiences({ path: { username }, signal }).catch(() => null),
-    skillsListSkills({ path: { username }, signal }).catch(() => null),
-    usersGetUserByUsername({ path: { username }, signal }).catch(() => null),
-    workValuesWvGetLatestResult({ path: { userId }, signal }).catch(() => null),
-    careerInterestCiGetLatestResult({ path: { userId }, signal }).catch(() => null),
+    experiencesListExperiences(username, { signal }).catch(() => null),
+    skillsListSkills(username, { signal }).catch(() => null),
+    usersGetUserByUsername(username, { signal }).catch(() => null),
+    workValuesWvGetLatestResult(userId, { signal }).catch(() => null),
+    careerInterestCiGetLatestResult(userId, { signal }).catch(() => null),
   ]);
   // wv/ci は未診断なら無いのが正常だが、プロフィール系3件が全滅なら取得失敗として扱う
-  if (
-    (exp === null || exp.error) &&
-    (skill === null || skill.error) &&
-    (profile === null || profile.error)
-  ) {
+  if (exp === null && skill === null && profile === null) {
     throw new Error("候補者情報の取得に失敗しました");
   }
   return {
-    experiences: (exp?.data?.items ?? []).map((e) => ({
+    experiences: (exp?.items ?? []).map((e) => ({
       companyName: e.companyName,
       title: e.title,
       isCurrent: e.isCurrent,
@@ -75,22 +77,22 @@ export async function fetchCandidateDetail(
       endMonth: e.endMonth ?? null,
       description: e.description,
     })),
-    skills: (skill?.data?.items ?? []).map((s) => s.name),
-    about: profile?.data?.about ?? null,
-    jobSeekingStatus: profile?.data?.jobSeekingStatus ?? null,
-    profileColor: profile?.data?.profileColor ?? null,
-    wvScores: wv?.data?.values.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
-    ciScores: ci?.data?.typeScores.map((s) => ({ id: s.typeId, score: s.score })) ?? null,
+    skills: (skill?.items ?? []).map((s) => s.name),
+    about: profile?.about ?? null,
+    jobSeekingStatus: profile?.jobSeekingStatus ?? null,
+    profileColor: profile?.profileColor ?? null,
+    wvScores: wv?.values.map((v) => ({ id: v.valueId, score: v.displayScore })) ?? null,
+    ciScores: ci?.typeScores.map((s) => ({ id: s.typeId, score: s.score })) ?? null,
   };
 }
 
 export async function fetchTeamScoreAverages(
   teamId: string,
 ): Promise<{ wvAvg: ScorePoint[] | null; ciAvg: ScorePoint[] | null }> {
-  const { data } = await companyTeamsGetTeamScores({ path: { teamId } });
+  const data = await companyTeamsGetTeamScores(teamId);
   const wvAccum: Record<string, { sum: number; count: number }> = {};
   const ciAccum: Record<string, { sum: number; count: number }> = {};
-  for (const m of data?.items ?? []) {
+  for (const m of data.items) {
     for (const s of m.wvScores ?? []) {
       if (!wvAccum[s.id]) wvAccum[s.id] = { sum: 0, count: 0 };
       wvAccum[s.id].sum += s.displayScore;
@@ -110,49 +112,41 @@ export async function fetchTeamScoreAverages(
   };
 }
 
-export async function fetchCompanyTeams(): Promise<ModelsTeamResponse[]> {
-  const { data } = await companyTeamsListTeams();
-  return data?.items ?? [];
-}
-
 export type TalentSearchKind = "plain" | "wv" | "ci" | "integrated";
 
 // wv_<valueId> / ci_<typeId> の動的クエリはスペック上 description 記載のみ
-// （OpenAPI で表現できない）のため、query は緩い Record で受けてキャストする。
+// （OpenAPI で表現できない）のため、緩い Record で受けて生成 Params 型にキャストする
+// （生成 URL ビルダーは Object.entries 走査なので余分なキーもそのまま送られる）。
 export async function searchTalents(
   kind: TalentSearchKind,
   params: Record<string, string>,
 ): Promise<{ users: TalentCard[]; total: number }> {
-  const query = params as { limit?: number; offset?: number };
-  const { data } =
+  const query = params as TalentSearchSearchTalentsParams;
+  const data =
     kind === "plain"
-      ? await talentSearchSearchTalents({ query })
+      ? await talentSearchSearchTalents(query)
       : kind === "ci"
-        ? await talentSearchCiDiagnosticSearchTalents({ query })
+        ? await talentSearchCiDiagnosticSearchTalents(query)
         : kind === "integrated"
-          ? await talentSearchIntegratedDiagnosticSearchTalents({ query })
-          : await talentSearchDiagnosticSearchTalents({ query });
-  return { users: data?.items ?? [], total: data?.total ?? 0 };
-}
-
-export async function fetchSavedCandidates(
-  limit: number,
-  offset: number,
-): Promise<{ users: TalentCard[]; total: number }> {
-  const { data } = await savedCandidatesListSavedCandidates({ query: { limit, offset } });
-  return { users: data?.items ?? [], total: data?.total ?? 0 };
+          ? await talentSearchIntegratedDiagnosticSearchTalents(query)
+          : await talentSearchDiagnosticSearchTalents(query);
+  return { users: data.items, total: data.total };
 }
 
 // 非2xxは旧実装（res.json() を黙殺）に合わせて無視し、ネットワークエラーのみ throw する
 export async function saveCandidate(userId: string): Promise<void> {
-  await savedCandidatesSaveCandidate({ path: { userId } });
+  await savedCandidatesSaveCandidate(userId).catch((err) => {
+    if (!(err instanceof ApiError)) throw err;
+  });
 }
 
 export async function unsaveCandidate(userId: string): Promise<void> {
-  await savedCandidatesUnsaveCandidate({ path: { userId } });
+  await savedCandidatesUnsaveCandidate(userId).catch((err) => {
+    if (!(err instanceof ApiError)) throw err;
+  });
 }
 
 export async function bulkCheckSaved(userIds: string[]): Promise<Record<string, boolean>> {
-  const { data } = await savedCandidatesBulkCheckSaved({ body: { userIds: userIds } });
-  return data?.saved ?? {};
+  const data = await savedCandidatesBulkCheckSaved({ userIds });
+  return data.saved;
 }

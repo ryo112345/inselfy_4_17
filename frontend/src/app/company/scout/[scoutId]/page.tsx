@@ -1,11 +1,19 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import { useToast } from "@/components/ui";
-import { fetchScoutDetail, replyToScoutAsCompany } from "@/features/scout/api";
-import type { ScoutDetail, ScoutStatus } from "@/features/scout/types";
+import {
+  getCompanyScoutsGetCompanyScoutDetailQueryKey,
+  useCompanyScoutsCompanyScoutReply,
+  useCompanyScoutsGetCompanyScoutDetail,
+} from "@/external/client/api/orval/generated/endpoints/company-scouts/company-scouts";
+import { CompanyScoutsCompanyScoutReplyBody } from "@/external/client/api/orval/generated/zod/company-scouts/company-scouts.zod";
+import type { ScoutStatus } from "@/features/scout/types";
 import { getErrorMessage } from "@/lib/api-result";
 import { formatDateTime } from "@/lib/date";
 
@@ -23,34 +31,30 @@ export default function ScoutDetailPage() {
   const params = useParams();
   const scoutId = params.scoutId as string;
 
-  const [detail, setDetail] = useState<ScoutDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
-  const [sending, setSending] = useState(false);
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    setLoading(true);
-    fetchScoutDetail(scoutId)
-      .then(setDetail)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [scoutId]);
+  const detailQuery = useCompanyScoutsGetCompanyScoutDetail(scoutId);
+  const detail = detailQuery.data ?? null;
+  const loading = detailQuery.isPending;
+  const error = detailQuery.error?.message ?? null;
+
+  const replyMutation = useCompanyScoutsCompanyScoutReply();
+  const sending = replyMutation.isPending;
+  const { fieldErrors, validate, clearField } = useFieldErrors();
 
   const handleReply = async () => {
     if (!replyBody.trim()) return;
-    setSending(true);
+    if (!validate(CompanyScoutsCompanyScoutReplyBody, { body: replyBody.trim() })) return;
     try {
-      await replyToScoutAsCompany(scoutId, replyBody.trim());
+      await replyMutation.mutateAsync({ scoutId, data: { body: replyBody.trim() } });
       setReplyBody("");
-      // Refresh detail
-      const updated = await fetchScoutDetail(scoutId);
-      setDetail(updated);
+      await queryClient.invalidateQueries({
+        queryKey: getCompanyScoutsGetCompanyScoutDetailQueryKey(scoutId),
+      });
     } catch (e) {
       showToast(getErrorMessage(e, "返信の送信に失敗しました"), "error");
-    } finally {
-      setSending(false);
     }
   };
 
@@ -176,11 +180,16 @@ export default function ScoutDetailPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900">返信する</h2>
           <textarea
+            {...fieldAriaProps("body", fieldErrors.body)}
             value={replyBody}
-            onChange={(e) => setReplyBody(e.target.value)}
+            onChange={(e) => {
+              setReplyBody(e.target.value);
+              clearField("body");
+            }}
             placeholder="返信メッセージを入力..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] text-sm resize-y outline-none"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] text-sm resize-y outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
           />
+          <FieldError name="body" error={fieldErrors.body} />
           <div className="flex justify-end">
             <button
               type="button"

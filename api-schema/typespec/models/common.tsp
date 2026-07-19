@@ -17,6 +17,12 @@ model CandidateAuth is ApiKeyAuth<ApiKeyLocation.cookie, "inselfy_token">;
  */
 model CompanyAuth is ApiKeyAuth<ApiKeyLocation.cookie, "company_token">;
 
+/**
+ * 管理者認証。`X-Admin-Key` ヘッダーを静的ブートストラップキー
+ * （ADMIN_API_KEY）または admins テーブルの個人トークンと照合する。
+ */
+model AdminAuth is ApiKeyAuth<ApiKeyLocation.header, "X-Admin-Key">;
+
 /** UUID 形式の識別子 */
 @pattern("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 scalar Uuid extends string;
@@ -109,6 +115,9 @@ alias AuthedForbiddenErrors = ForbiddenError | AuthedNotFoundErrors;
 
 /** 重複・競合が起こりうる操作のエラー（400/401/404/409） */
 alias AuthedConflictErrors = ConflictError | AuthedNotFoundErrors;
+
+/** 認可チェックと重複・競合の両方を伴う操作のエラー（400/401/403/404/409） */
+alias AuthedForbiddenConflictErrors = ForbiddenError | AuthedConflictErrors;
 
 /** 認証エラーを含まないリソース参照系のエラー（400/404） */
 alias NotFoundErrors = NotFoundError | BadRequestError;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import { MobileFooter } from "@/app/components/MobileFooter";
+import { QueryProvider } from "@/app/components/QueryProvider";
 import { ConfirmDialogProvider, ToastProvider } from "@/components/ui";
 import { AuthProvider } from "@/features/auth/auth-context";
 import { GoogleProvider } from "@/features/auth/google-provider";
@@ -34,20 +35,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="ja" className={`${notoSansJp.variable} ${plusJakartaSans.variable}`}>
       <body className="antialiased">
-        <GoogleProvider>
-          <AuthProvider initialUser={initialUser}>
-            <UnreadScoutProvider>
-              <UnreadMessagingProvider>
-                <ToastProvider>
-                  <ConfirmDialogProvider>
-                    {children}
-                    <MobileFooter />
-                  </ConfirmDialogProvider>
-                </ToastProvider>
-              </UnreadMessagingProvider>
-            </UnreadScoutProvider>
-          </AuthProvider>
-        </GoogleProvider>
+        <QueryProvider>
+          <GoogleProvider>
+            <AuthProvider initialUser={initialUser}>
+              <UnreadScoutProvider>
+                <UnreadMessagingProvider>
+                  <ToastProvider>
+                    <ConfirmDialogProvider>
+                      {children}
+                      <MobileFooter />
+                    </ConfirmDialogProvider>
+                  </ToastProvider>
+                </UnreadMessagingProvider>
+              </UnreadScoutProvider>
+            </AuthProvider>
+          </GoogleProvider>
+        </QueryProvider>
       </body>
     </html>
   );

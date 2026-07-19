@@ -1,40 +1,43 @@
 import { expect, test } from "@playwright/test";
+import {
+  bypassLoginCompany,
+  bypassLoginUser,
+  ensureApplication,
+  futureSlot,
+  INSELFY_COMPANY_ID,
+  JOB_POSTING_FOR_MESSAGES_SPEC,
+  proposeInterview,
+  RINA_TAKAHASHI_USER_ID,
+} from "./helpers";
 
-const USER_ID = "c0201000-0000-0001-0000-000000000004";
-const ADMIN_API_KEY = process.env.ADMIN_API_KEY ?? "";
+// 旧: 手動確認用のスクロールデモ（page.pause() で停止していた）。
+// 会話を自前で用意し、スレッドが開いてスクロールできることを検証するスモークに変更。
+test("messages: conversation opens and thread scrolls", async ({ page, playwright }) => {
+  // --- Setup: 応募＋面接提案で rina ↔ inselfy の会話（メッセージ）を保証する ---
+  await bypassLoginUser(page.request, RINA_TAKAHASHI_USER_ID);
+  const applicationId = await ensureApplication(page.request, JOB_POSTING_FOR_MESSAGES_SPEC);
 
-test("messages scroll demo", async ({ page }) => {
-  // Bypass login
-  await page.goto("/login");
-  const res = await page.request.post(
-    `http://localhost:3000/api/admin/users/${USER_ID}/bypass-login`,
-    { headers: { "X-Admin-Key": ADMIN_API_KEY } },
-  );
-  expect(res.ok()).toBeTruthy();
+  const companyRequest = await playwright.request.newContext();
+  await bypassLoginCompany(companyRequest, INSELFY_COMPANY_ID);
+  await proposeInterview(companyRequest, applicationId, "スクロール検証用の提案", [futureSlot(2)]);
+  await companyRequest.dispose();
 
   await page.goto("/messages");
   await page.waitForLoadState("networkidle");
-  await page.waitForTimeout(1000);
 
   // Click the conversation
-  const convItem = page.getByText("クラウドソル株式会社").first();
-  await expect(convItem).toBeVisible({ timeout: 5000 });
+  const convItem = page.locator("button", { hasText: "inselfy" }).first();
+  await expect(convItem).toBeVisible({ timeout: 10000 });
   await convItem.click();
   await page.waitForTimeout(1500);
 
-  // Slowly scroll down in the message area
-  const messageArea = page.locator(".bg-\\[\\#C8E8F5\\]");
-  await expect(messageArea).toBeVisible();
+  // メッセージスレッドが表示され、末尾までスクロールできる
+  const thread = page.locator("[class*='overflow-y-auto']").last();
+  await expect(thread).toBeVisible();
+  await thread.evaluate((el) => el.scrollTo(0, el.scrollHeight));
 
-  const box = await messageArea.boundingBox();
-  if (box) {
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    for (let i = 0; i < 20; i++) {
-      await page.mouse.wheel(0, 60);
-      await page.waitForTimeout(400);
-    }
-  }
-
-  // Pause here so user can inspect the browser
-  await page.pause();
+  // セットアップで作成した提案カードが描画されている
+  await expect(page.getByText("カレンダーをクリックして選択").last()).toBeVisible({
+    timeout: 5000,
+  });
 });

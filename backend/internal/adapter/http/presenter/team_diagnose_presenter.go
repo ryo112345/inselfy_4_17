@@ -6,8 +6,8 @@ import (
 )
 
 // DiagnoseInfoResponse builds the team-diagnose info API response.
-func DiagnoseInfoResponse(info *company.TeamDiagnoseInfo) *openapi.ModelsDiagnoseInfoResponse {
-	return &openapi.ModelsDiagnoseInfoResponse{
+func DiagnoseInfoResponse(info *company.TeamDiagnoseInfo) openapi.ModelsDiagnoseInfoResponse {
+	return openapi.ModelsDiagnoseInfoResponse{
 		MemberId:    info.MemberID,
 		MemberName:  info.MemberName,
 		TeamName:    info.TeamName,

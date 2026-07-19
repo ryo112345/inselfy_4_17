@@ -1,12 +1,13 @@
 package controller
 
 import (
+	"context"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
-	"github.com/labstack/echo/v4"
-
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/domain/talentsearch"
@@ -21,28 +22,35 @@ func NewTalentSearchController(input port.TalentSearchInputPort) *TalentSearchCo
 	return &TalentSearchController{input: input}
 }
 
-func talentSearchPage(ctx echo.Context) (limit, offset int) {
-	limit, _ = strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ = strconv.Atoi(ctx.QueryParam("offset"))
+func talentSearchPage(limitParam, offsetParam *int32) (limit, offset int) {
+	limit = derefInt32(limitParam)
 	if limit < 1 || limit > 200 {
 		limit = 20
 	}
+	offset = derefInt32(offsetParam)
 	if offset < 0 {
 		offset = 0
 	}
 	return limit, offset
 }
 
-func parseConditionFilter(ctx echo.Context) talentsearch.Filter {
-	f := talentsearch.Filter{
-		Keyword:          ctx.QueryParam("q"),
-		Location:         ctx.QueryParam("location"),
-		Industry:         ctx.QueryParam("industry"),
-		JobSeekingStatus: ctx.QueryParam("jobSeekingStatus"),
-		JobType:          ctx.QueryParam("jobType"),
-		DiagnosedOnly:    ctx.QueryParam("diagnosed") == "1",
+// conditionFilter builds the shared search filter from the typed query params.
+func conditionFilter(q, location, industry, jobSeekingStatus, jobType, diagnosed, skills *string) talentsearch.Filter {
+	deref := func(p *string) string {
+		if p == nil {
+			return ""
+		}
+		return *p
 	}
-	if skillsParam := ctx.QueryParam("skills"); skillsParam != "" {
+	f := talentsearch.Filter{
+		Keyword:          deref(q),
+		Location:         deref(location),
+		Industry:         deref(industry),
+		JobSeekingStatus: deref(jobSeekingStatus),
+		JobType:          deref(jobType),
+		DiagnosedOnly:    deref(diagnosed) == "1",
+	}
+	if skillsParam := deref(skills); skillsParam != "" {
 		for _, s := range strings.Split(skillsParam, ",") {
 			if s = strings.TrimSpace(s); s != "" {
 				f.Skills = append(f.Skills, s)
@@ -52,11 +60,15 @@ func parseConditionFilter(ctx echo.Context) talentsearch.Filter {
 	return f
 }
 
-func parseCustomWVDisplayScores(ctx echo.Context) map[string]float64 {
+// カスタム比重（wv_<valueId> / ci_<typeId>）は動的なクエリパラメータで
+// スペックには載せていない（validator は未知クエリを素通しする）。
+// strict の typed params にも現れないため、context 経由の生リクエストから読む。
+
+func parseCustomWVDisplayScores(query url.Values) map[string]float64 {
 	scores := make(map[string]float64)
 	hasAny := false
 	for _, vid := range talentsearch.WVValueIDs {
-		if param := ctx.QueryParam("wv_" + vid); param != "" {
+		if param := query.Get("wv_" + vid); param != "" {
 			if v, err := strconv.ParseFloat(param, 64); err == nil {
 				scores[vid] = v
 				hasAny = true
@@ -69,11 +81,11 @@ func parseCustomWVDisplayScores(ctx echo.Context) map[string]float64 {
 	return scores
 }
 
-func parseCustomCIWeights(ctx echo.Context) *[6]float64 {
+func parseCustomCIWeights(query url.Values) *[6]float64 {
 	var scores [6]float64
 	hasAny := false
 	for i, tid := range talentsearch.CITypeIDs {
-		if param := ctx.QueryParam("ci_" + tid); param != "" {
+		if param := query.Get("ci_" + tid); param != "" {
 			if v, err := strconv.ParseFloat(param, 64); err == nil {
 				scores[i] = v
 				hasAny = true
@@ -86,52 +98,88 @@ func parseCustomCIWeights(ctx echo.Context) *[6]float64 {
 	return &scores
 }
 
-func talentCardListResponse(ctx echo.Context, cards []talentsearch.Card, total int) error {
-	return ctx.JSON(http.StatusOK, presenter.TalentListResponse(cards, total))
+func rawQuery(ctx context.Context) url.Values {
+	if r := requestFromContext(ctx); r != nil {
+		return r.URL.Query()
+	}
+	return url.Values{}
 }
 
-func diagnosticSearchInput(ctx echo.Context) talentsearch.DiagnosticSearchInput {
-	limit, offset := talentSearchPage(ctx)
+func diagnosticSearchInput(ctx context.Context, teamID *string, q, location, industry, jobSeekingStatus, jobType, diagnosed, skills *string, limitParam, offsetParam *int32) talentsearch.DiagnosticSearchInput {
+	limit, offset := talentSearchPage(limitParam, offsetParam)
+	query := rawQuery(ctx)
+	tid := ""
+	if teamID != nil {
+		tid = *teamID
+	}
 	return talentsearch.DiagnosticSearchInput{
-		CompanyID: authmw.CompanyID(ctx),
-		TeamID:    ctx.QueryParam("teamId"),
-		Filter:    parseConditionFilter(ctx),
-		CustomWV:  parseCustomWVDisplayScores(ctx),
-		CustomCI:  parseCustomCIWeights(ctx),
+		CompanyID: authmw.CompanyIDFromContext(ctx),
+		TeamID:    tid,
+		Filter:    conditionFilter(q, location, industry, jobSeekingStatus, jobType, diagnosed, skills),
+		CustomWV:  parseCustomWVDisplayScores(query),
+		CustomCI:  parseCustomCIWeights(query),
 		Limit:     limit,
 		Offset:    offset,
 	}
 }
 
-func (c *TalentSearchController) Search(ctx echo.Context) error {
-	limit, offset := talentSearchPage(ctx)
-	cards, total, err := c.input.Search(ctx.Request().Context(), parseConditionFilter(ctx), limit, offset)
+// Search handles GET /api/company/talents/search.
+func (c *TalentSearchController) Search(ctx context.Context, req openapi.TalentSearchSearchTalentsRequestObject) (openapi.TalentSearchSearchTalentsResponseObject, error) {
+	p := req.Params
+	limit, offset := talentSearchPage(p.Limit, p.Offset)
+	filter := conditionFilter(p.Q, p.Location, p.Industry, p.JobSeekingStatus, p.JobType, p.Diagnosed, p.Skills)
+
+	cards, total, err := c.input.Search(ctx, filter, limit, offset)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.TalentSearchSearchTalents400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return talentCardListResponse(ctx, cards, total)
+	return openapi.TalentSearchSearchTalents200JSONResponse(*presenter.TalentListResponse(cards, total)), nil
 }
 
-func (c *TalentSearchController) DiagnosticSearch(ctx echo.Context) error {
-	cards, total, err := c.input.DiagnosticSearch(ctx.Request().Context(), diagnosticSearchInput(ctx))
+// DiagnosticSearch handles GET /api/company/talents/search/diagnostic.
+func (c *TalentSearchController) DiagnosticSearch(ctx context.Context, req openapi.TalentSearchDiagnosticSearchTalentsRequestObject) (openapi.TalentSearchDiagnosticSearchTalentsResponseObject, error) {
+	p := req.Params
+	input := diagnosticSearchInput(ctx, p.TeamId, p.Q, p.Location, p.Industry, p.JobSeekingStatus, p.JobType, p.Diagnosed, p.Skills, p.Limit, p.Offset)
+
+	cards, total, err := c.input.DiagnosticSearch(ctx, input)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.TalentSearchDiagnosticSearchTalents400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return talentCardListResponse(ctx, cards, total)
+	return openapi.TalentSearchDiagnosticSearchTalents200JSONResponse(*presenter.TalentListResponse(cards, total)), nil
 }
 
-func (c *TalentSearchController) CIDiagnosticSearch(ctx echo.Context) error {
-	cards, total, err := c.input.CIDiagnosticSearch(ctx.Request().Context(), diagnosticSearchInput(ctx))
+// CIDiagnosticSearch handles GET /api/company/talents/search/diagnostic/ci.
+func (c *TalentSearchController) CIDiagnosticSearch(ctx context.Context, req openapi.TalentSearchCiDiagnosticSearchTalentsRequestObject) (openapi.TalentSearchCiDiagnosticSearchTalentsResponseObject, error) {
+	p := req.Params
+	input := diagnosticSearchInput(ctx, p.TeamId, p.Q, p.Location, p.Industry, p.JobSeekingStatus, p.JobType, p.Diagnosed, p.Skills, p.Limit, p.Offset)
+
+	cards, total, err := c.input.CIDiagnosticSearch(ctx, input)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.TalentSearchCiDiagnosticSearchTalents400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return talentCardListResponse(ctx, cards, total)
+	return openapi.TalentSearchCiDiagnosticSearchTalents200JSONResponse(*presenter.TalentListResponse(cards, total)), nil
 }
 
-func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx echo.Context) error {
-	cards, total, err := c.input.IntegratedDiagnosticSearch(ctx.Request().Context(), diagnosticSearchInput(ctx))
+// IntegratedDiagnosticSearch handles GET /api/company/talents/search/diagnostic/integrated.
+func (c *TalentSearchController) IntegratedDiagnosticSearch(ctx context.Context, req openapi.TalentSearchIntegratedDiagnosticSearchTalentsRequestObject) (openapi.TalentSearchIntegratedDiagnosticSearchTalentsResponseObject, error) {
+	p := req.Params
+	input := diagnosticSearchInput(ctx, p.TeamId, p.Q, p.Location, p.Industry, p.JobSeekingStatus, p.JobType, p.Diagnosed, p.Skills, p.Limit, p.Offset)
+
+	cards, total, err := c.input.IntegratedDiagnosticSearch(ctx, input)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.TalentSearchIntegratedDiagnosticSearchTalents400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return talentCardListResponse(ctx, cards, total)
+	return openapi.TalentSearchIntegratedDiagnosticSearchTalents200JSONResponse(*presenter.TalentListResponse(cards, total)), nil
 }

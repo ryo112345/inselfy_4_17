@@ -42,3 +42,7 @@ RETURNING *;
 -- name: DeleteEducation :execrows
 DELETE FROM educations
 WHERE id = $1;
+
+-- name: DeleteEducationsByUserID :exec
+DELETE FROM educations
+WHERE user_id = $1;

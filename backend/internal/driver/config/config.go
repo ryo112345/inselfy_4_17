@@ -39,6 +39,9 @@ type Config struct {
 	R2SecretAccessKey string `env:"R2_SECRET_ACCESS_KEY" envDefault:""`
 	R2Bucket          string `env:"R2_BUCKET" envDefault:""`
 	R2PublicURL       string `env:"R2_PUBLIC_URL" envDefault:""`
+	// R2PrivateBucket holds non-public files (resume PDFs). No public dev URL
+	// is enabled on this bucket — reads go through the S3 API only.
+	R2PrivateBucket string `env:"R2_PRIVATE_BUCKET" envDefault:""`
 
 	DBSSLMode string `env:"DB_SSLMODE" envDefault:"disable"`
 
@@ -47,6 +50,11 @@ type Config struct {
 	// Cloud Logging がログとリクエストの trace を紐づけるのに使う。
 	// 未設定（ローカル）なら trace 注釈なしで動く
 	GoogleCloudProject string `env:"GOOGLE_CLOUD_PROJECT" envDefault:""`
+
+	// レスポンスの契約検証（スキーマ違反を ERROR ログに出す）。dev/test 用で、
+	// 本番はレイテンシ・メモリの都合で off（deploy.yml で設定しない）。
+	// docs/strict-server-migration.md Phase 5
+	ValidateResponses bool `env:"OPENAPI_VALIDATE_RESPONSES" envDefault:"false"`
 }
 
 func Load() (*Config, error) {

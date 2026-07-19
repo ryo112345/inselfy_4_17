@@ -47,3 +47,7 @@ RETURNING *;
 -- name: DeleteExperience :execrows
 DELETE FROM experiences
 WHERE id = $1;
+
+-- name: DeleteExperiencesByUserID :exec
+DELETE FROM experiences
+WHERE user_id = $1;

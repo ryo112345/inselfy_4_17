@@ -1,9 +1,8 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -22,28 +21,38 @@ func NewScoutSettingsController(input port.ScoutInputPort) *ScoutSettingsControl
 }
 
 // Get handles GET /api/scout-settings.
-func (c *ScoutSettingsController) Get(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+func (c *ScoutSettingsController) Get(ctx context.Context, _ openapi.ScoutSettingsGetScoutSettingsRequestObject) (openapi.ScoutSettingsGetScoutSettingsResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	settings, err := c.input.GetScoutSettings(ctx.Request().Context(), userID)
+	settings, err := c.input.GetScoutSettings(ctx, userID)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ScoutSettingsGetScoutSettings404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ScoutSettingsGetScoutSettings400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.ScoutSettingsResponse(settings))
+	return openapi.ScoutSettingsGetScoutSettings200JSONResponse(*presenter.ScoutSettingsResponse(settings)), nil
 }
 
 // Update handles PUT /api/scout-settings.
-func (c *ScoutSettingsController) Update(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
-
-	var body openapi.ModelsUpdateScoutSettingsRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+func (c *ScoutSettingsController) Update(ctx context.Context, req openapi.ScoutSettingsUpdateScoutSettingsRequestObject) (openapi.ScoutSettingsUpdateScoutSettingsResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.ScoutSettingsUpdateScoutSettings400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	settings, err := c.input.UpdateScoutSettings(ctx.Request().Context(), userID, body.AcceptingScouts)
+	settings, err := c.input.UpdateScoutSettings(ctx, userID, req.Body.AcceptingScouts)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.ScoutSettingsUpdateScoutSettings404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.ScoutSettingsUpdateScoutSettings400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.ScoutSettingsResponse(settings))
+	return openapi.ScoutSettingsUpdateScoutSettings200JSONResponse(*presenter.ScoutSettingsResponse(settings)), nil
 }

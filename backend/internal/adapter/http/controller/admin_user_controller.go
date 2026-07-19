@@ -1,14 +1,13 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
@@ -26,82 +25,65 @@ func NewAdminUserController(pool *pgxpool.Pool, jwtService port.JWTService) *Adm
 	return &AdminUserController{queries: generated.New(pool), jwtService: jwtService}
 }
 
-type adminUserItem struct {
-	ID        string  `json:"id"`
-	Username  string  `json:"username"`
-	Name      string  `json:"name"`
-	Email     *string `json:"email"`
-	AvatarURL *string `json:"avatar_url"`
-	CreatedAt string  `json:"created_at"`
+// adminPagination replicates the echo-era page/per_page defaults
+// (page>=1, per_page 1-100 else 20).
+func adminPagination(page, perPage *int32) (int, int) {
+	p, pp := 1, 20
+	if page != nil && *page >= 1 {
+		p = int(*page)
+	}
+	if perPage != nil && *perPage >= 1 && *perPage <= 100 {
+		pp = int(*perPage)
+	}
+	return p, pp
 }
 
-type adminUserListResponse struct {
-	Users      []adminUserItem `json:"users"`
-	Total      int64           `json:"total"`
-	Page       int             `json:"page"`
-	PerPage    int             `json:"per_page"`
-	TotalPages int             `json:"total_pages"`
-}
-
-func (c *AdminUserController) List(ctx echo.Context) error {
-	page, _ := strconv.Atoi(ctx.QueryParam("page"))
-	if page < 1 {
-		page = 1
-	}
-	perPage, _ := strconv.Atoi(ctx.QueryParam("per_page"))
-	if perPage < 1 || perPage > 100 {
-		perPage = 20
-	}
-	search := ctx.QueryParam("q")
+// List handles GET /api/admin/users.
+func (c *AdminUserController) List(ctx context.Context, req openapi.AdminListUsersRequestObject) (openapi.AdminListUsersResponseObject, error) {
+	page, perPage := adminPagination(req.Params.Page, req.Params.PerPage)
+	search := derefString(req.Params.Q)
 	offset := cast.Int32((page - 1) * perPage)
-
-	var total int64
-	var err error
 
 	if search != "" {
 		searchText := pgtype.Text{String: search, Valid: true}
-		total, err = c.queries.CountSearchUsers(ctx.Request().Context(), searchText)
+		total, err := c.queries.CountSearchUsers(ctx, searchText)
 		if err != nil {
-			return internalError(ctx, err.Error())
+			return nil, err
 		}
-		rows, err := c.queries.SearchUsers(ctx.Request().Context(), &generated.SearchUsersParams{
+		rows, err := c.queries.SearchUsers(ctx, &generated.SearchUsersParams{
 			Column1: searchText,
 			Limit:   cast.Int32(perPage),
 			Offset:  offset,
 		})
 		if err != nil {
-			return internalError(ctx, err.Error())
+			return nil, err
 		}
-		return ctx.JSON(http.StatusOK, buildListResponse(toItemsFromSearch(rows), total, page, perPage))
+		return openapi.AdminListUsers200JSONResponse(buildListResponse(toItemsFromSearch(rows), total, page, perPage)), nil
 	}
 
-	total, err = c.queries.CountUsers(ctx.Request().Context())
+	total, err := c.queries.CountUsers(ctx)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	rows, err := c.queries.ListUsers(ctx.Request().Context(), &generated.ListUsersParams{
+	rows, err := c.queries.ListUsers(ctx, &generated.ListUsersParams{
 		Limit:  cast.Int32(perPage),
 		Offset: offset,
 	})
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, buildListResponse(toItemsFromList(rows), total, page, perPage))
+	return openapi.AdminListUsers200JSONResponse(buildListResponse(toItemsFromList(rows), total, page, perPage)), nil
 }
 
-func (c *AdminUserController) Delete(ctx echo.Context, id string) error {
-	parsed, err := uuid.Parse(id)
-	if err != nil {
-		return badRequest(ctx, "invalid user id")
+// Delete handles DELETE /api/admin/users/{userId}.
+func (c *AdminUserController) Delete(ctx context.Context, req openapi.AdminDeleteUserRequestObject) (openapi.AdminDeleteUserResponseObject, error) {
+	if err := c.queries.DeleteUser(ctx, pgUUID(req.UserId)); err != nil {
+		return nil, err
 	}
-	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
-	if err := c.queries.DeleteUser(ctx.Request().Context(), pgID); err != nil {
-		return internalError(ctx, err.Error())
-	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.AdminDeleteUser204Response{}, nil
 }
 
-func buildListResponse(users []adminUserItem, total int64, page, perPage int) adminUserListResponse {
+func buildListResponse(users []openapi.ModelsAdminUserItem, total int64, page, perPage int) openapi.ModelsAdminUserListResponse {
 	totalPages := int(total) / perPage
 	if int(total)%perPage != 0 {
 		totalPages++
@@ -109,12 +91,12 @@ func buildListResponse(users []adminUserItem, total int64, page, perPage int) ad
 	if totalPages < 1 {
 		totalPages = 1
 	}
-	return adminUserListResponse{
+	return openapi.ModelsAdminUserListResponse{
 		Users:      users,
 		Total:      total,
-		Page:       page,
-		PerPage:    perPage,
-		TotalPages: totalPages,
+		Page:       cast.Int32(page),
+		PerPage:    cast.Int32(perPage),
+		TotalPages: cast.Int32(totalPages),
 	}
 }
 
@@ -141,64 +123,74 @@ func pgUUIDToString(id pgtype.UUID) string {
 	return uuid.UUID(id.Bytes).String()
 }
 
-func toItemsFromList(rows []*generated.ListUsersRow) []adminUserItem {
-	items := make([]adminUserItem, 0, len(rows))
+func toItemsFromList(rows []*generated.ListUsersRow) []openapi.ModelsAdminUserItem {
+	items := make([]openapi.ModelsAdminUserItem, 0, len(rows))
 	for _, r := range rows {
-		items = append(items, adminUserItem{
-			ID:        pgUUIDToString(r.ID),
+		items = append(items, openapi.ModelsAdminUserItem{
+			Id:        pgUUIDToString(r.ID),
 			Username:  r.Username,
 			Name:      r.Name,
 			Email:     textToPtr(r.Email),
-			AvatarURL: textToPtr(r.AvatarUrl),
-			CreatedAt: r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			AvatarUrl: textToPtr(r.AvatarUrl),
+			CreatedAt: r.CreatedAt.Time,
 		})
 	}
 	return items
 }
 
-func toItemsFromSearch(rows []*generated.SearchUsersRow) []adminUserItem {
-	items := make([]adminUserItem, 0, len(rows))
+func toItemsFromSearch(rows []*generated.SearchUsersRow) []openapi.ModelsAdminUserItem {
+	items := make([]openapi.ModelsAdminUserItem, 0, len(rows))
 	for _, r := range rows {
-		items = append(items, adminUserItem{
-			ID:        pgUUIDToString(r.ID),
+		items = append(items, openapi.ModelsAdminUserItem{
+			Id:        pgUUIDToString(r.ID),
 			Username:  r.Username,
 			Name:      r.Name,
 			Email:     textToPtr(r.Email),
-			AvatarURL: textToPtr(r.AvatarUrl),
-			CreatedAt: r.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			AvatarUrl: textToPtr(r.AvatarUrl),
+			CreatedAt: r.CreatedAt.Time,
 		})
 	}
 	return items
 }
 
-func (c *AdminUserController) BypassLogin(ctx echo.Context, id string) error {
-	parsed, err := uuid.Parse(id)
-	if err != nil {
-		return badRequest(ctx, "invalid user id")
-	}
-	pgID := pgtype.UUID{Bytes: parsed, Valid: true}
+// adminUserBypassLoginWithCookies wraps the 200 response to set auth cookies
+// (docs/strict-server-migration.md 3-3 cookie パターン).
+type adminUserBypassLoginWithCookies struct {
+	inner   openapi.AdminBypassLoginAsUserResponseObject
+	cookies []*http.Cookie
+}
 
-	u, err := c.queries.GetUserByID(ctx.Request().Context(), pgID)
-	if err != nil {
-		return notFoundError(ctx, "user not found")
+func (r adminUserBypassLoginWithCookies) VisitAdminBypassLoginAsUserResponse(w http.ResponseWriter) error {
+	setCookies(w, r.cookies)
+	return r.inner.VisitAdminBypassLoginAsUserResponse(w)
+}
+
+// BypassLogin handles POST /api/admin/users/{userId}/bypass-login.
+func (c *AdminUserController) BypassLogin(ctx context.Context, req openapi.AdminBypassLoginAsUserRequestObject) (openapi.AdminBypassLoginAsUserResponseObject, error) {
+	u, err := c.queries.GetUserByID(ctx, pgUUID(req.UserId))
+	if err != nil { //nolint:nilerr // 対象不在は従来どおり固定メッセージの 404
+		return openapi.AdminBypassLoginAsUser404JSONResponse(openapi.ModelsNotFoundError{
+			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+			Message: "user not found",
+		}), nil
 	}
 
 	accessToken, err := c.jwtService.GenerateAccessToken(pgUUIDToString(u.ID))
 	if err != nil {
-		return internalError(ctx, "failed to generate token")
+		return nil, err
 	}
 
 	rawRefresh, err := c.jwtService.GenerateRefreshToken()
 	if err != nil {
-		return internalError(ctx, "failed to generate token")
+		return nil, err
 	}
 
-	if err := c.queries.CreateRefreshToken(ctx.Request().Context(), &generated.CreateRefreshTokenParams{
+	if err := c.queries.CreateRefreshToken(ctx, &generated.CreateRefreshTokenParams{
 		UserID:    u.ID,
 		TokenHash: c.jwtService.HashRefreshToken(rawRefresh),
 		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(7 * 24 * time.Hour), Valid: true},
 	}); err != nil {
-		return internalError(ctx, "failed to store refresh token")
+		return nil, err
 	}
 
 	userResp := &openapi.ModelsAuthUserResponse{
@@ -213,14 +205,15 @@ func (c *AdminUserController) BypassLogin(ctx echo.Context, id string) error {
 		userResp.Email = &u.Email.String
 	}
 
-	setAuthCookies(ctx, &presenter.AuthTokenResponse{
-		AccessToken:  accessToken,
-		RefreshToken: rawRefresh,
-		User:         userResp,
-	})
-
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"message":  "ok",
-		"username": u.Username,
-	})
+	return adminUserBypassLoginWithCookies{
+		inner: openapi.AdminBypassLoginAsUser200JSONResponse(openapi.ModelsAdminUserBypassLoginResponse{
+			Message:  "ok",
+			Username: u.Username,
+		}),
+		cookies: authCookies(isSecureRequest(ctx), &presenter.AuthTokenResponse{
+			AccessToken:  accessToken,
+			RefreshToken: rawRefresh,
+			User:         userResp,
+		}),
+	}, nil
 }

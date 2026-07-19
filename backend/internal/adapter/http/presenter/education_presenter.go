@@ -6,15 +6,17 @@ import (
 )
 
 // EducationResponse converts a single education entity to its API response.
-func EducationResponse(e *education.Education) any { return toEducationResponse(e) }
+func EducationResponse(e *education.Education) openapi.ModelsEducationResponse {
+	return *toEducationResponse(e)
+}
 
 // EducationsResponse converts a list of education entities to their API response.
-func EducationsResponse(es []*education.Education) any {
+func EducationsResponse(es []*education.Education) openapi.ModelsEducationListResponse {
 	items := make([]openapi.ModelsEducationResponse, 0, len(es))
 	for _, e := range es {
 		items = append(items, *toEducationResponse(e))
 	}
-	return &openapi.ModelsEducationListResponse{Items: items}
+	return openapi.ModelsEducationListResponse{Items: items}
 }
 
 func toEducationResponse(e *education.Education) *openapi.ModelsEducationResponse {

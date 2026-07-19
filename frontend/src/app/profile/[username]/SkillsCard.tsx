@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { AwardIcon, XIcon } from "@/components/icons";
-import type { ModelsSkillResponse } from "@/external/client/api/generated";
+import type { ModelsSkillResponse } from "@/external/client/api/orval/generated/models";
 import { type ApiError, attachSkill, detachSkill } from "./api";
 import { useProfileColor } from "./ProfileColorContext";
 

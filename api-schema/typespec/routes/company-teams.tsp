@@ -77,7 +77,7 @@ interface CompanyTeams {
   ): {
     @statusCode statusCode: 201;
     @body member: TeamMemberResponse;
-  } | AuthedNotFoundErrors;
+  } | AuthedForbiddenErrors;
 
   /** メンバー削除（企業認証） */
   @delete
@@ -88,7 +88,7 @@ interface CompanyTeams {
     @path memberId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | AuthedNotFoundErrors;
+  } | AuthedForbiddenErrors;
 
   /** チームスコア取得（企業認証） */
   @get
@@ -96,7 +96,7 @@ interface CompanyTeams {
   @summary("Get diagnostic scores of team members")
   getTeamScores(
     @path teamId: Uuid,
-  ): TeamScoresResponse | AuthedNotFoundErrors;
+  ): TeamScoresResponse | AuthedForbiddenErrors;
 
   /** エースメンバー設定（企業認証） */
   @put
@@ -107,7 +107,7 @@ interface CompanyTeams {
     @path memberId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | AuthedNotFoundErrors;
+  } | AuthedForbiddenErrors;
 
   /** エースメンバー解除（企業認証） */
   @delete
@@ -117,5 +117,5 @@ interface CompanyTeams {
     @path teamId: Uuid,
   ): {
     @statusCode statusCode: 204;
-  } | AuthedNotFoundErrors;
+  } | AuthedForbiddenErrors;
 }

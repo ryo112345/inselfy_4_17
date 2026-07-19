@@ -326,13 +326,13 @@ func (q *Queries) ListCompanyAccountsByStatus(ctx context.Context, arg *ListComp
 	return items, nil
 }
 
-const revokeCompanyRefreshTokensByCompanyID = `-- name: RevokeCompanyRefreshTokensByCompanyID :exec
+const revokeCompanyRefreshTokenByID = `-- name: RevokeCompanyRefreshTokenByID :exec
 UPDATE company_refresh_tokens SET revoked_at = NOW()
-WHERE company_id = $1 AND revoked_at IS NULL
+WHERE id = $1 AND revoked_at IS NULL
 `
 
-func (q *Queries) RevokeCompanyRefreshTokensByCompanyID(ctx context.Context, companyID pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, revokeCompanyRefreshTokensByCompanyID, companyID)
+func (q *Queries) RevokeCompanyRefreshTokenByID(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, revokeCompanyRefreshTokenByID, id)
 	return err
 }
 

@@ -25,8 +25,8 @@ func NewExperienceInteractor(
 }
 
 // Create validates and persists a new experience, then returns it.
-func (i *ExperienceInteractor) Create(ctx context.Context, rawUsername string, input experience.CreateInput) (*experience.Experience, error) {
-	u, err := i.resolveUser(ctx, rawUsername)
+func (i *ExperienceInteractor) Create(ctx context.Context, authUserID, rawUsername string, input experience.CreateInput) (*experience.Experience, error) {
+	u, err := i.resolveOwnedUser(ctx, authUserID, rawUsername)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (i *ExperienceInteractor) Create(ctx context.Context, rawUsername string, i
 }
 
 // Update replaces an existing experience. Ownership is verified before mutation.
-func (i *ExperienceInteractor) Update(ctx context.Context, rawUsername, experienceID string, input experience.UpdateInput) (*experience.Experience, error) {
-	u, err := i.resolveUser(ctx, rawUsername)
+func (i *ExperienceInteractor) Update(ctx context.Context, authUserID, rawUsername, experienceID string, input experience.UpdateInput) (*experience.Experience, error) {
+	u, err := i.resolveOwnedUser(ctx, authUserID, rawUsername)
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +90,8 @@ func (i *ExperienceInteractor) Update(ctx context.Context, rawUsername, experien
 }
 
 // Delete removes an experience after verifying ownership.
-func (i *ExperienceInteractor) Delete(ctx context.Context, rawUsername, experienceID string) error {
-	u, err := i.resolveUser(ctx, rawUsername)
+func (i *ExperienceInteractor) Delete(ctx context.Context, authUserID, rawUsername, experienceID string) error {
+	u, err := i.resolveOwnedUser(ctx, authUserID, rawUsername)
 	if err != nil {
 		return err
 	}
@@ -120,4 +120,20 @@ func (i *ExperienceInteractor) resolveUser(ctx context.Context, raw string) (*us
 		return nil, err
 	}
 	return i.userRepo.GetByUsername(ctx, username)
+}
+
+// resolveOwnedUser resolves the user named in the path and verifies the
+// authenticated caller IS that user. Without this, the resource-ownership
+// checks below only prove "the resource belongs to the path username" — and
+// the path username is attacker-controlled, so any logged-in user could edit
+// anyone's profile sub-resources (IDOR).
+func (i *ExperienceInteractor) resolveOwnedUser(ctx context.Context, authUserID, raw string) (*user.User, error) {
+	u, err := i.resolveUser(ctx, raw)
+	if err != nil {
+		return nil, err
+	}
+	if u.ID != authUserID {
+		return nil, port.ErrForbidden
+	}
+	return u, nil
 }

@@ -3,8 +3,14 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ErrorSummary } from "@/components/form/ErrorSummary";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import { useConfirm, useToast } from "@/components/ui";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import {
+  companyTeamsGetTeamScores,
+  companyTeamsListTeams,
+} from "@/external/client/api/orval/generated/endpoints/company-teams/company-teams";
+import { deleteJobPosting, fetchJobPosting, updateJobPosting } from "@/features/job-posting/api";
 import { JobPostingForm } from "@/features/job-posting/components/JobPostingForm";
 import {
   type TeamListItem,
@@ -16,12 +22,15 @@ import {
   buildJobPostingBody,
   buildPreviewPayload,
   jobFormValuesFromApi,
+  jobPostingBodySchema,
+  jobPostingFieldLabels,
+  makeSetWithClear,
   useJobForm,
 } from "@/features/job-posting/useJobForm";
 import { useJobPreviewChannel } from "@/features/job-posting/useJobPreviewChannel";
+import { getErrorMessage } from "@/lib/api-result";
 
 export default function JobEditPage() {
-  const { companyFetch } = useCompanyAuth();
   const router = useRouter();
   const params = useParams();
   const jobId = params.jobId as string;
@@ -36,74 +45,64 @@ export default function JobEditPage() {
   const validationRef = useRef<HTMLDivElement>(null);
 
   const { values, set, setValues, missingRequired, requiredOk } = useJobForm();
+  const { fieldErrors, validate, clearField, scrollToFirstError } = useFieldErrors();
+  const setField = useMemo(() => makeSetWithClear(set, clearField), [set, clearField]);
   const [status, setStatus] = useState<"open" | "draft">("draft");
   const [teamId, setTeamId] = useState<string | null>(null);
   const [teamsList, setTeamsList] = useState<TeamListItem[]>([]);
   const [teamScores, setTeamScores] = useState<TeamScores | null>(null);
 
   useEffect(() => {
-    companyFetch(`/api/company/jobs/${jobId}`)
-      .then(async (res) => {
-        if (res.ok) {
-          const d = await res.json();
-          setValues(jobFormValuesFromApi(d));
-          setStatus(d.status === "open" ? "open" : "draft");
-          setTeamId(d.teamId ?? null);
-        }
+    fetchJobPosting(jobId)
+      .then((d) => {
+        setValues(jobFormValuesFromApi(d));
+        setStatus(d.status === "open" ? "open" : "draft");
+        setTeamId(d.teamId ?? null);
       })
+      .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [companyFetch, jobId, setValues]);
+  }, [jobId, setValues]);
 
   useEffect(() => {
-    companyFetch("/api/company/teams").then(async (res) => {
-      if (res.ok) {
-        const data = await res.json();
-        setTeamsList(data.items ?? []);
-      }
-    });
-  }, [companyFetch]);
+    companyTeamsListTeams()
+      .then((data) => setTeamsList(data.items))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!teamId) {
       setTeamScores(null);
       return;
     }
-    companyFetch(`/api/company/teams/${teamId}/scores`).then(async (res) => {
-      if (!res.ok) {
-        setTeamScores(null);
-        return;
-      }
-      const data = await res.json();
-      const members: {
-        wvScores?: { id: string; displayScore: number }[];
-        ciScores?: { id: string; displayScore: number }[];
-      }[] = data.items ?? [];
-      const wvAgg = new Map<string, number[]>();
-      const ciAgg = new Map<string, number[]>();
-      for (const m of members) {
-        if (m.wvScores)
-          for (const s of m.wvScores) {
-            const vals = wvAgg.get(s.id) ?? [];
-            vals.push(s.displayScore);
-            wvAgg.set(s.id, vals);
-          }
-        if (m.ciScores)
-          for (const s of m.ciScores) {
-            const vals = ciAgg.get(s.id) ?? [];
-            vals.push(s.displayScore);
-            ciAgg.set(s.id, vals);
-          }
-      }
-      const avg = (map: Map<string, number[]>) =>
-        map.size > 0
-          ? Array.from(map.entries()).map(([id, vals]) => ({
-              id,
-              score: vals.reduce((a, b) => a + b, 0) / vals.length,
-            }))
-          : null;
-      setTeamScores({ wvScores: avg(wvAgg), ciScores: avg(ciAgg) });
-    });
-  }, [companyFetch, teamId]);
+    companyTeamsGetTeamScores(teamId)
+      .then((data) => {
+        const wvAgg = new Map<string, number[]>();
+        const ciAgg = new Map<string, number[]>();
+        for (const m of data.items) {
+          if (m.wvScores)
+            for (const s of m.wvScores) {
+              const vals = wvAgg.get(s.id) ?? [];
+              vals.push(s.displayScore);
+              wvAgg.set(s.id, vals);
+            }
+          if (m.ciScores)
+            for (const s of m.ciScores) {
+              const vals = ciAgg.get(s.id) ?? [];
+              vals.push(s.displayScore);
+              ciAgg.set(s.id, vals);
+            }
+        }
+        const avg = (map: Map<string, number[]>) =>
+          map.size > 0
+            ? Array.from(map.entries()).map(([id, vals]) => ({
+                id,
+                score: vals.reduce((a, b) => a + b, 0) / vals.length,
+              }))
+            : null;
+        setTeamScores({ wvScores: avg(wvAgg), ciScores: avg(ciAgg) });
+      })
+      .catch(() => setTeamScores(null));
+  }, [teamId]);
 
   const previewPayload = useMemo(
     () =>
@@ -132,29 +131,38 @@ export default function JobEditPage() {
         revealValidation();
         return;
       }
+      const body = buildJobPostingBody(values, effectiveStatus, teamId);
+      if (!validate(jobPostingBodySchema, body)) {
+        scrollToFirstError();
+        return;
+      }
       const isStatusChange = saveStatus != null && saveStatus !== status;
       setSavingAction(isStatusChange ? (saveStatus === "open" ? "publish" : "unpublish") : "save");
       try {
-        const body = buildJobPostingBody(values, effectiveStatus, teamId);
-        const res = await companyFetch(`/api/company/jobs/${jobId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          showToast(err.message ?? "保存に失敗しました", "error");
-        } else if (isStatusChange) {
+        await updateJobPosting(jobId, body);
+        if (isStatusChange) {
           setStatus(effectiveStatus);
         } else {
           setSaved(true);
           setTimeout(() => setSaved(false), 2000);
         }
+      } catch (err) {
+        showToast(getErrorMessage(err, "保存に失敗しました"), "error");
       } finally {
         setSavingAction(null);
       }
     },
-    [companyFetch, jobId, values, status, teamId, requiredOk, revealValidation, showToast],
+    [
+      jobId,
+      values,
+      status,
+      teamId,
+      requiredOk,
+      revealValidation,
+      showToast,
+      validate,
+      scrollToFirstError,
+    ],
   );
 
   const handleDelete = useCallback(async () => {
@@ -169,17 +177,14 @@ export default function JobEditPage() {
       return;
     setDeleting(true);
     try {
-      const res = await companyFetch(`/api/company/jobs/${jobId}`, { method: "DELETE" });
-      if (res.ok) {
-        router.push("/company/jobs");
-      } else {
-        const err = await res.json().catch(() => ({}));
-        showToast(err.message ?? "削除に失敗しました", "error");
-      }
+      await deleteJobPosting(jobId);
+      router.push("/company/jobs");
+    } catch (err) {
+      showToast(getErrorMessage(err, "削除に失敗しました"), "error");
     } finally {
       setDeleting(false);
     }
-  }, [companyFetch, confirmDialog, jobId, router, showToast]);
+  }, [confirmDialog, jobId, router, showToast]);
 
   const statusLabel = status === "open" ? "公開中" : "下書き";
   const statusColor =
@@ -339,16 +344,14 @@ export default function JobEditPage() {
       </div>
 
       <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 pb-24 pt-8">
-        {/* 公開バリデーション: 未入力の必須項目一覧 */}
+        {/* 公開バリデーション: 未入力の必須項目一覧（ドメインルール）。
+            スキーマ検証の ErrorSummary と見た目を揃えて隣接配置する */}
         {showValidation && missingRequired.length > 0 && (
-          <div
-            ref={validationRef}
-            className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4"
-          >
-            <p className="text-sm font-semibold text-rose-700">
+          <div ref={validationRef} className="rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+            <p className="text-sm font-semibold text-red-700">
               公開するには以下の必須項目を入力してください
             </p>
-            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-rose-600">
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-red-600">
               {missingRequired.map((label) => (
                 <li key={label} className="list-inside list-disc">
                   {label}
@@ -357,14 +360,16 @@ export default function JobEditPage() {
             </ul>
           </div>
         )}
+        <ErrorSummary errors={fieldErrors} labels={jobPostingFieldLabels} />
         <JobPostingForm
           values={values}
-          set={set}
+          set={setField}
           company={company}
+          errors={fieldErrors}
           teamSection={
             <TeamSectionWithSelector
               values={values}
-              set={set}
+              set={setField}
               teamId={teamId}
               onTeamIdChange={setTeamId}
               teamsList={teamsList}

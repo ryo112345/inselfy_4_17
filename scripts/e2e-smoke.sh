@@ -69,6 +69,20 @@ check_list_shape "API直 /api/articles" "$API/api/articles"
 # 認証ミドルウェアの配線（トークン無しの保護ルートは 401）
 check_status "未認証 /api/applications" "$API/api/applications" 401
 
+# レスポンス契約検証（compose の app は OPENAPI_VALIDATE_RESPONSES=true で起動）:
+# 上のチェックで叩いた分に契約違反があれば validator が ERROR ログに出すので検知する。
+# compose 外で API を直接立てて回している場合（app コンテナ無し）はスキップ
+if docker compose --profile e2e ps --status running app 2>/dev/null | grep -q app; then
+  violations=$(docker compose --profile e2e logs app 2>/dev/null | grep "response contract violation" || true)
+  if [ -n "$violations" ]; then
+    echo "NG: レスポンス契約違反がログに出ている:"
+    echo "$violations"
+    fail=1
+  else
+    echo "OK: レスポンス契約違反なし"
+  fi
+fi
+
 if [ "$fail" -ne 0 ]; then
   echo "--- SMOKE FAILED ---"
 fi

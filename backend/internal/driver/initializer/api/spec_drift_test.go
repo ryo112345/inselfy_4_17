@@ -1,10 +1,13 @@
 package initializer
 
-// Detects drift between the OpenAPI spec and the manually wired echo routes.
-// Route registration lives in wire_*.go by hand (RegisterHandlers from
-// oapi-codegen is intentionally unused), so nothing at compile time guarantees
-// that a path added to the spec actually gets registered — this test does.
-// See docs/backend-refactor-backlog.md #8.
+// Detects spec-external routes that nobody accounted for. The spec→router
+// direction needs no test since Phase 4: the generated HandlerWithOptions
+// registers every spec operation (and StrictServerInterface conformance is
+// compile-checked), so only the reverse remains — a route registered by hand
+// must either be in the spec or in the unspeccedRoutes allowlist with a
+// reason. This test also exercises registerRoutes itself, which panics if a
+// pattern is ambiguous on the main mux (see priorityPatterns) or registered
+// twice. See docs/strict-server-migration.md Phase 4.
 
 import (
 	"context"
@@ -15,7 +18,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 
 	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	jwtgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/jwt"
@@ -37,28 +39,14 @@ var unspeccedRoutes = map[string]string{
 	"GET /api/ws":              "websocket upgrade",
 	"GET /api/ws/ticket":       "websocket auth ticket",
 	"POST /api/stripe/webhook": "contract is Stripe's, verified by signature not by schema",
-	// admin API は X-Admin-Key 運用の内部向けで、公開契約（TypeSpec）の外。
-	// スペックに載せるなら別タスク（backlog 参照）。
-	"* /api/admin/*": "admin API is outside the public contract",
 }
 
-func TestSpecAndRouterDoNotDrift(t *testing.T) {
+func TestRouterHasNoUnaccountedRoutes(t *testing.T) {
 	specRoutes := loadSpecRoutes(t)
-	echoRoutes := loadEchoRoutes(t)
-
-	var missing []string
-	for key := range specRoutes {
-		if _, ok := echoRoutes[key]; !ok {
-			missing = append(missing, key)
-		}
-	}
-	sort.Strings(missing)
-	for _, key := range missing {
-		t.Errorf("in spec but not registered on the router (add it to the matching wire_*.go): %s", key)
-	}
+	registered := loadRegisteredRoutes(t)
 
 	var extra []string
-	for key := range echoRoutes {
+	for key := range registered {
 		if _, ok := specRoutes[key]; ok {
 			continue
 		}
@@ -71,6 +59,38 @@ func TestSpecAndRouterDoNotDrift(t *testing.T) {
 	for _, key := range extra {
 		t.Errorf("registered on the router but not in the spec (add it to the TypeSpec contract, or to unspeccedRoutes with a reason): %s", key)
 	}
+
+	// Guards the allowlist itself: an entry whose route disappeared should be
+	// deleted, not kept as dead documentation.
+	for pattern, reason := range unspeccedRoutes {
+		if !anyRegisteredMatches(registered, pattern) {
+			t.Errorf("unspeccedRoutes entry %q (%s) matches no registered route; remove it", pattern, reason)
+		}
+	}
+}
+
+func anyRegisteredMatches(registered map[string]struct{}, pattern string) bool {
+	for key := range registered {
+		method, path, ok := strings.Cut(key, " ")
+		if !ok {
+			continue
+		}
+		pMethod, pPath, ok := strings.Cut(pattern, " ")
+		if !ok {
+			continue
+		}
+		if pMethod != "*" && pMethod != method {
+			continue
+		}
+		if strings.HasSuffix(pPath, "*") {
+			if strings.HasPrefix(path, strings.TrimSuffix(pPath, "*")) {
+				return true
+			}
+		} else if path == pPath {
+			return true
+		}
+	}
+	return false
 }
 
 // loadSpecRoutes parses the embedded openapi.yaml into normalized
@@ -94,10 +114,10 @@ func loadSpecRoutes(t *testing.T) map[string]struct{} {
 	return routes
 }
 
-// loadEchoRoutes builds the real route table via registerRoutes and returns
-// normalized "METHOD path" keys. The pool is created lazily and no handler
-// runs, so no DB is needed.
-func loadEchoRoutes(t *testing.T) map[string]struct{} {
+// loadRegisteredRoutes builds the real route table via registerRoutes — the
+// strict-server mux patterns — and returns normalized "METHOD path" keys.
+// The pool is created lazily and no handler runs, so no DB is needed.
+func loadRegisteredRoutes(t *testing.T) map[string]struct{} {
 	t.Helper()
 	ctx := context.Background()
 	pool, err := pgxpool.New(ctx, "postgres://drift:test@localhost:5432/drift-test")
@@ -123,19 +143,18 @@ func loadEchoRoutes(t *testing.T) map[string]struct{} {
 		participantRepo:  sqlcgw.NewConversationParticipantRepository(pool),
 	}
 
-	e := echo.New()
-	if _, _, err := registerRoutes(ctx, e, d); err != nil {
+	sr := newStrictRouter()
+	if _, _, err := registerRoutes(ctx, sr, d); err != nil {
 		t.Fatalf("registerRoutes: %v", err)
 	}
 
 	routes := make(map[string]struct{})
-	for _, r := range e.Routes() {
-		// Group.Use registers catch-all pseudo-routes so group middleware
-		// runs on 404s; they are not real endpoints.
-		if r.Method == echo.RouteNotFound {
-			continue
+	for _, pattern := range sr.patterns {
+		method, path, ok := strings.Cut(pattern, " ")
+		if !ok {
+			t.Fatalf("strict mux pattern %q lacks a method; register with %q form", pattern, "METHOD /path")
 		}
-		routes[routeKey(r.Method, r.Path)] = struct{}{}
+		routes[routeKey(method, path)] = struct{}{}
 	}
 	return routes
 }

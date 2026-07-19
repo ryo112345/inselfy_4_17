@@ -1,18 +1,17 @@
 package controller
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"net/http"
 	"strings"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 )
 
 type AdminAdminController struct {
@@ -23,103 +22,85 @@ func NewAdminAdminController(pool *pgxpool.Pool) *AdminAdminController {
 	return &AdminAdminController{queries: generated.New(pool)}
 }
 
-type adminItem struct {
-	ID           string  `json:"id"`
-	Email        string  `json:"email"`
-	Name         string  `json:"name"`
-	APIKeyPrefix *string `json:"api_key_prefix"`
-	LastUsedAt   *string `json:"last_used_at"`
-	CreatedAt    string  `json:"created_at"`
-}
-
-func toAdminItem(a *generated.Admin) adminItem {
-	item := adminItem{
-		ID:           pgUUIDToString(a.ID),
+func toAdminItem(a *generated.Admin) openapi.ModelsAdminItem {
+	item := openapi.ModelsAdminItem{
+		Id:           pgUUIDToString(a.ID),
 		Email:        a.Email,
 		Name:         a.Name,
-		APIKeyPrefix: textToPtr(a.ApiKeyPrefix),
-		CreatedAt:    a.CreatedAt.Time.Format(time.RFC3339),
+		ApiKeyPrefix: textToPtr(a.ApiKeyPrefix),
+		CreatedAt:    a.CreatedAt.Time,
 	}
 	if a.LastUsedAt.Valid {
-		s := a.LastUsedAt.Time.Format(time.RFC3339)
-		item.LastUsedAt = &s
+		t := a.LastUsedAt.Time
+		item.LastUsedAt = &t
 	}
 	return item
 }
 
-func (c *AdminAdminController) List(ctx echo.Context) error {
-	rows, err := c.queries.ListAdmins(ctx.Request().Context())
+// List handles GET /api/admin/admins.
+func (c *AdminAdminController) List(ctx context.Context, _ openapi.AdminListAdminsRequestObject) (openapi.AdminListAdminsResponseObject, error) {
+	rows, err := c.queries.ListAdmins(ctx)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	items := make([]adminItem, 0, len(rows))
+	items := make([]openapi.ModelsAdminItem, 0, len(rows))
 	for _, r := range rows {
 		items = append(items, toAdminItem(r))
 	}
-	return ctx.JSON(http.StatusOK, map[string]any{"admins": items})
+	return openapi.AdminListAdmins200JSONResponse(openapi.ModelsAdminListResponse{Admins: items}), nil
 }
 
-type createAdminRequest struct {
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
-
-func (c *AdminAdminController) Create(ctx echo.Context) error {
-	var req createAdminRequest
-	if err := ctx.Bind(&req); err != nil {
-		return badRequest(ctx, "invalid request body")
+// Create handles POST /api/admin/admins.
+func (c *AdminAdminController) Create(ctx context.Context, req openapi.AdminCreateAdminRequestObject) (openapi.AdminCreateAdminResponseObject, error) {
+	if req.Body == nil {
+		return openapi.AdminCreateAdmin400JSONResponse(badRequestBody("invalid request body")), nil
 	}
-	req.Email = strings.TrimSpace(req.Email)
-	if req.Email == "" || !strings.Contains(req.Email, "@") {
-		return badRequest(ctx, "valid email is required")
+	email := strings.TrimSpace(req.Body.Email)
+	if email == "" || !strings.Contains(email, "@") {
+		return openapi.AdminCreateAdmin400JSONResponse(badRequestBody("valid email is required")), nil
 	}
-	admin, err := c.queries.CreateAdmin(ctx.Request().Context(), &generated.CreateAdminParams{
-		Email: req.Email,
-		Name:  strings.TrimSpace(req.Name),
+	admin, err := c.queries.CreateAdmin(ctx, &generated.CreateAdminParams{
+		Email: email,
+		Name:  strings.TrimSpace(derefString(req.Body.Name)),
 	})
-	if err != nil {
-		return badRequest(ctx, "failed to create admin (email may already exist)")
+	if err != nil { //nolint:nilerr // 重複メール等は従来どおり固定メッセージの 400 に丸める
+		return openapi.AdminCreateAdmin400JSONResponse(badRequestBody("failed to create admin (email may already exist)")), nil
 	}
-	return ctx.JSON(http.StatusCreated, toAdminItem(admin))
+	return openapi.AdminCreateAdmin201JSONResponse(toAdminItem(admin)), nil
 }
 
-// IssueKey generates a new personal API token for the admin. The raw token is
+// IssueKey handles POST /api/admin/admins/{adminId}/api-key. The raw token is
 // returned exactly once; only its SHA-256 hash is stored.
-func (c *AdminAdminController) IssueKey(ctx echo.Context, id string) error {
-	pgID := pgUUID(id)
-	if !pgID.Valid {
-		return badRequest(ctx, "invalid admin id")
-	}
-
+func (c *AdminAdminController) IssueKey(ctx context.Context, req openapi.AdminIssueAdminApiKeyRequestObject) (openapi.AdminIssueAdminApiKeyResponseObject, error) {
 	buf := make([]byte, 32)
 	if _, err := rand.Read(buf); err != nil {
-		return internalError(ctx, "failed to generate token")
+		return nil, err
 	}
 	token := "admin_" + hex.EncodeToString(buf)
 	sum := sha256.Sum256([]byte(token))
 	prefix := token[:12] + "…"
 
-	admin, err := c.queries.SetAdminAPIKey(ctx.Request().Context(), &generated.SetAdminAPIKeyParams{
-		ID:           pgID,
+	admin, err := c.queries.SetAdminAPIKey(ctx, &generated.SetAdminAPIKeyParams{
+		ID:           pgUUID(req.AdminId),
 		ApiKeyHash:   pgtype.Text{String: hex.EncodeToString(sum[:]), Valid: true},
 		ApiKeyPrefix: pgtype.Text{String: prefix, Valid: true},
 	})
-	if err != nil {
-		return notFoundError(ctx, "admin not found")
+	if err != nil { //nolint:nilerr // 対象不在は従来どおり固定メッセージの 404
+		return openapi.AdminIssueAdminApiKey404JSONResponse(openapi.ModelsNotFoundError{
+			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+			Message: "admin not found",
+		}), nil
 	}
-	return ctx.JSON(http.StatusOK, map[string]any{
-		"admin":   toAdminItem(admin),
-		"api_key": token,
-	})
+	return openapi.AdminIssueAdminApiKey200JSONResponse(openapi.ModelsAdminIssueKeyResponse{
+		Admin:  toAdminItem(admin),
+		ApiKey: token,
+	}), nil
 }
 
-func (c *AdminAdminController) Delete(ctx echo.Context, id string) error {
-	pgID := pgUUID(id)
-	if !pgID.Valid {
-		return badRequest(ctx, "invalid admin id")
+// Delete handles DELETE /api/admin/admins/{adminId}.
+func (c *AdminAdminController) Delete(ctx context.Context, req openapi.AdminDeleteAdminRequestObject) (openapi.AdminDeleteAdminResponseObject, error) {
+	if err := c.queries.DeleteAdmin(ctx, pgUUID(req.AdminId)); err != nil {
+		return nil, err
 	}
-	if err := c.queries.DeleteAdmin(ctx.Request().Context(), pgID); err != nil {
-		return internalError(ctx, err.Error())
-	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.AdminDeleteAdmin204Response{}, nil
 }

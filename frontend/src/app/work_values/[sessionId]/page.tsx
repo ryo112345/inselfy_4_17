@@ -5,8 +5,8 @@ import { PanelNavigator } from "@/app/profile/[username]/PanelNavigator";
 import { ProfileColorContext } from "@/app/profile/[username]/ProfileColorContext";
 import { ProfileContent } from "@/app/profile/[username]/ProfileContent";
 import { ACCENT } from "@/constants/theme";
-// SSR の SDK 呼び出しに認証 Cookie を自動転送する interceptor を登録する
-import "@/external/client/api/server";
+// SSR の SDK 呼び出しに認証 Cookie を自動転送する provider を登録する
+import "@/external/client/api/orval/server";
 import { getCurrentUsername, getUsernameFromCookie } from "@/features/auth/viewer";
 import { fetchInitialFollowing, fetchPanelDataByUserId } from "@/features/profile/fetchPanelData";
 import { getResultBySessionId } from "@/features/work-values/api";
@@ -71,6 +71,8 @@ export default async function WorkValuesResultPage({
             educations={data.educations}
             skills={data.skills}
             isOwner={isOwner}
+            hasWvDiagnosis={data.wvSessionId !== null}
+            hasCiDiagnosis={data.ciSessionId !== null}
             intReportRequestId={data.intReportRequestId}
             intReportHasReport={data.intReportHasReport}
             initialFollowing={initialFollowing}

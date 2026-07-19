@@ -28,7 +28,7 @@ interface CompanyAuth {
   @summary("Login as a company")
   companyLogin(
     @body request: CompanyLoginRequest,
-  ): CompanyResponse | AuthedErrors;
+  ): CompanyResponse | AuthedErrors | CompanyAccountStatusError;
 
   /** トークンリフレッシュ（company_refresh_token cookie 使用） */
   @post

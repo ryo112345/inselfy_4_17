@@ -9,20 +9,21 @@ async function boxOf(locator: Locator) {
 async function loginAsCompany(page: Page) {
   await page.goto("/company/login");
   await page.fill("#email", "admin@inselfy.example.com");
-  await page.fill("#password", "test1234");
+  await page.fill("#password", "password123");
   await page.click('button[type="submit"]');
   await page.waitForURL(/\/company(?!\/login)/);
   await page.waitForLoadState("networkidle");
 }
 
 async function searchDiagnosticTab(page: Page) {
-  await page.goto("/company/talents?tab=diagnostic");
+  await page.goto("/company/talents");
   await page.waitForLoadState("networkidle");
 
-  const teamSelect = page.locator("select").nth(1);
+  // 診断マッチングパネルのチーム選択（「チームを選択...」を持つ select）
+  const teamSelect = page.locator('select:has(option:text-is("チームを選択..."))');
   await teamSelect.selectOption({ index: 1 });
 
-  await page.click('button:has-text("マッチング検索")');
+  await page.click('button:has-text("検索する")');
   await page.waitForLoadState("networkidle");
 
   const candidateList = page.locator("ul > li").first();

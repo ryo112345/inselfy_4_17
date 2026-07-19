@@ -1,4 +1,7 @@
-import "@/external/client/api/client";
+// 求人 CRUD・公開検索・画像アップロードの薄いラッパー層。React Query の queryFn
+// （useApplicationsSearch / useJobSearch 等）と命令的なフォームフローの両方から
+// 呼ばれるため関数シグネチャを維持し、内部だけ orval 生成の平関数に置き換えている。
+// 非2xx は mutator が ApiError を throw する。
 import {
   companyJobPostingsCreateJobPosting,
   companyJobPostingsDeleteJobPosting,
@@ -8,11 +11,10 @@ import {
   companyJobPostingsUploadGalleryImage,
   companyJobPostingsUploadJobCoverImage,
   companyJobPostingsUploadTeamMemberPhoto,
-  type ModelsJobPostingRequest,
   publicJobPostingsGetPublicJobPosting,
   publicJobPostingsListPublicJobPostings,
-} from "@/external/client/api/generated";
-import { run } from "@/lib/api-result";
+} from "@/external/client/api/orval/generated/endpoints/job-postings/job-postings";
+import type { ModelsJobPostingRequest } from "@/external/client/api/orval/generated/models";
 import type { JobPosting } from "../scout/types";
 
 export type JobPostingWithCompany = JobPosting & {
@@ -23,46 +25,24 @@ export type JobPostingWithCompany = JobPosting & {
 export type JobPostingBody = ModelsJobPostingRequest;
 
 export async function createJobPosting(body: JobPostingBody): Promise<JobPosting> {
-  return run(companyJobPostingsCreateJobPosting({ body }), "Failed to create job posting");
+  return (await companyJobPostingsCreateJobPosting(body)) as JobPosting;
 }
 
 export async function fetchJobPostings(): Promise<JobPosting[]> {
-  const data = await run(
-    companyJobPostingsListCompanyJobPostings({
-      cache: "no-store",
-    }),
-    "Failed to fetch job postings",
-  );
-  return data.items;
+  const data = await companyJobPostingsListCompanyJobPostings();
+  return data.items as JobPosting[];
 }
 
 export async function fetchJobPosting(id: string): Promise<JobPosting> {
-  return run(
-    companyJobPostingsGetCompanyJobPosting({
-      path: { jobId: id },
-      cache: "no-store",
-    }),
-    "Failed to fetch job posting",
-  );
+  return (await companyJobPostingsGetCompanyJobPosting(id)) as JobPosting;
 }
 
 export async function updateJobPosting(id: string, body: JobPostingBody): Promise<JobPosting> {
-  return run(
-    companyJobPostingsUpdateJobPosting({
-      path: { jobId: id },
-      body,
-    }),
-    "Failed to update job posting",
-  );
+  return (await companyJobPostingsUpdateJobPosting(id, body)) as JobPosting;
 }
 
 export async function deleteJobPosting(id: string): Promise<void> {
-  await run(
-    companyJobPostingsDeleteJobPosting({
-      path: { jobId: id },
-    }),
-    "Failed to delete job posting",
-  );
+  await companyJobPostingsDeleteJobPosting(id);
 }
 
 export type JobSearchParams = {
@@ -86,62 +66,37 @@ export async function searchPublicJobPostings(
   params: JobSearchParams = {},
   signal?: AbortSignal,
 ): Promise<PaginatedJobPostingsResponse> {
-  return (await run(
-    publicJobPostingsListPublicJobPostings({
-      signal,
-      query: {
-        search: params.search || undefined,
-        category: params.category || undefined,
-        employmentType: params.employmentType || undefined,
-        remotePolicy: params.remotePolicy || undefined,
-        sort: params.sort || undefined,
-        valueFilters: params.valueFilters || undefined,
-        filterMode: params.filterMode || undefined,
-        limit: params.limit ?? 20,
-        offset: params.offset ?? 0,
-      },
-      cache: "no-store",
-    }),
-    "Failed to fetch public job postings",
+  return (await publicJobPostingsListPublicJobPostings(
+    {
+      search: params.search || undefined,
+      category: params.category || undefined,
+      employmentType: params.employmentType || undefined,
+      remotePolicy: params.remotePolicy || undefined,
+      sort: params.sort || undefined,
+      valueFilters: params.valueFilters || undefined,
+      filterMode: params.filterMode || undefined,
+      limit: params.limit ?? 20,
+      offset: params.offset ?? 0,
+    },
+    { signal },
   )) as PaginatedJobPostingsResponse;
 }
 
 export async function fetchPublicJobPosting(id: string): Promise<JobPosting> {
-  return run(
-    publicJobPostingsGetPublicJobPosting({
-      path: { jobId: id },
-      cache: "no-store",
-    }),
-    "Failed to fetch job posting",
-  );
+  return (await publicJobPostingsGetPublicJobPosting(id)) as JobPosting;
 }
 
 export async function uploadTeamMemberPhoto(file: File): Promise<string> {
-  const data = await run(
-    companyJobPostingsUploadTeamMemberPhoto({
-      body: { file },
-    }),
-    "Failed to upload photo",
-  );
+  const data = await companyJobPostingsUploadTeamMemberPhoto({ file });
   return data.url;
 }
 
 export async function uploadCoverImage(file: File): Promise<string> {
-  const data = await run(
-    companyJobPostingsUploadJobCoverImage({
-      body: { file },
-    }),
-    "Failed to upload cover image",
-  );
+  const data = await companyJobPostingsUploadJobCoverImage({ file });
   return data.url;
 }
 
 export async function uploadGalleryImage(file: File): Promise<string> {
-  const data = await run(
-    companyJobPostingsUploadGalleryImage({
-      body: { file },
-    }),
-    "Failed to upload gallery image",
-  );
+  const data = await companyJobPostingsUploadGalleryImage({ file });
   return data.url;
 }

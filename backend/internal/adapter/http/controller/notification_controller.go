@@ -1,11 +1,10 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-	"strconv"
 
-	"github.com/labstack/echo/v4"
-
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/port"
@@ -24,79 +23,116 @@ func NewNotificationController(
 }
 
 // ListByUser handles GET /api/notifications.
-func (c *NotificationController) ListByUser(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+// limit/offset のデフォルト（20/0）は interactor 責務（echo 時代から同じ）。
+func (c *NotificationController) ListByUser(ctx context.Context, req openapi.UserNotificationsListUserNotificationsRequestObject) (openapi.UserNotificationsListUserNotificationsResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-
-	ns, total, err := c.input.ListByUser(ctx.Request().Context(), userID, limit, offset)
+	ns, total, err := c.input.ListByUser(ctx, userID, derefInt32(req.Params.Limit), derefInt32(req.Params.Offset))
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.UserNotificationsListUserNotifications400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.NotificationsResponse(ns, total))
+	return openapi.UserNotificationsListUserNotifications200JSONResponse(*presenter.NotificationsResponse(ns, total)), nil
 }
 
 // ListByCompany handles GET /api/company/notifications.
-func (c *NotificationController) ListByCompany(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+func (c *NotificationController) ListByCompany(ctx context.Context, req openapi.CompanyNotificationsListCompanyNotificationsRequestObject) (openapi.CompanyNotificationsListCompanyNotificationsResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-
-	ns, total, err := c.input.ListByCompany(ctx.Request().Context(), companyID, limit, offset)
+	ns, total, err := c.input.ListByCompany(ctx, companyID, derefInt32(req.Params.Limit), derefInt32(req.Params.Offset))
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CompanyNotificationsListCompanyNotifications400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.NotificationsResponse(ns, total))
+	return openapi.CompanyNotificationsListCompanyNotifications200JSONResponse(*presenter.NotificationsResponse(ns, total)), nil
 }
 
 // CountUnreadByUser handles GET /api/notifications/unread-count.
-func (c *NotificationController) CountUnreadByUser(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+func (c *NotificationController) CountUnreadByUser(ctx context.Context, _ openapi.UserNotificationsCountUserUnreadNotificationsRequestObject) (openapi.UserNotificationsCountUserUnreadNotificationsResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	count, err := c.input.CountUnreadByUser(ctx.Request().Context(), userID)
+	count, err := c.input.CountUnreadByUser(ctx, userID)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.UserNotificationsCountUserUnreadNotifications400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.NotificationUnreadCountResponse(count))
+	return openapi.UserNotificationsCountUserUnreadNotifications200JSONResponse(*presenter.NotificationUnreadCountResponse(count)), nil
 }
 
 // CountUnreadByCompany handles GET /api/company/notifications/unread-count.
-func (c *NotificationController) CountUnreadByCompany(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+func (c *NotificationController) CountUnreadByCompany(ctx context.Context, _ openapi.CompanyNotificationsCountCompanyUnreadNotificationsRequestObject) (openapi.CompanyNotificationsCountCompanyUnreadNotificationsResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	count, err := c.input.CountUnreadByCompany(ctx.Request().Context(), companyID)
+	count, err := c.input.CountUnreadByCompany(ctx, companyID)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CompanyNotificationsCountCompanyUnreadNotifications400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.NotificationUnreadCountResponse(count))
+	return openapi.CompanyNotificationsCountCompanyUnreadNotifications200JSONResponse(*presenter.NotificationUnreadCountResponse(count)), nil
 }
 
-// MarkAsRead handles PUT /api/notifications/:id/read.
-func (c *NotificationController) MarkAsRead(ctx echo.Context, id string) error {
-	if err := c.input.MarkAsRead(ctx.Request().Context(), id); err != nil {
-		return handleError(ctx, err)
+// MarkAsReadByUser handles POST /api/notifications/{id}/read.
+func (c *NotificationController) MarkAsReadByUser(ctx context.Context, req openapi.UserNotificationsMarkUserNotificationReadRequestObject) (openapi.UserNotificationsMarkUserNotificationReadResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+
+	if err := c.input.MarkAsReadByUser(ctx, userID, req.Id); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.UserNotificationsMarkUserNotificationRead404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.UserNotificationsMarkUserNotificationRead400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.UserNotificationsMarkUserNotificationRead204Response{}, nil
 }
 
-// MarkAllAsReadByUser handles PUT /api/notifications/read-all.
-func (c *NotificationController) MarkAllAsReadByUser(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+// MarkAsReadByCompany handles POST /api/company/notifications/{id}/read.
+func (c *NotificationController) MarkAsReadByCompany(ctx context.Context, req openapi.CompanyNotificationsMarkCompanyNotificationReadRequestObject) (openapi.CompanyNotificationsMarkCompanyNotificationReadResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	if err := c.input.MarkAllAsReadByUser(ctx.Request().Context(), userID); err != nil {
-		return handleError(ctx, err)
+	if err := c.input.MarkAsReadByCompany(ctx, companyID, req.Id); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CompanyNotificationsMarkCompanyNotificationRead404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyNotificationsMarkCompanyNotificationRead400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.CompanyNotificationsMarkCompanyNotificationRead204Response{}, nil
 }
 
-// MarkAllAsReadByCompany handles PUT /api/company/notifications/read-all.
-func (c *NotificationController) MarkAllAsReadByCompany(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+// MarkAllAsReadByUser handles POST /api/notifications/read-all.
+func (c *NotificationController) MarkAllAsReadByUser(ctx context.Context, _ openapi.UserNotificationsMarkAllUserNotificationsReadRequestObject) (openapi.UserNotificationsMarkAllUserNotificationsReadResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	if err := c.input.MarkAllAsReadByCompany(ctx.Request().Context(), companyID); err != nil {
-		return handleError(ctx, err)
+	if err := c.input.MarkAllAsReadByUser(ctx, userID); err != nil {
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.UserNotificationsMarkAllUserNotificationsRead400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.UserNotificationsMarkAllUserNotificationsRead204Response{}, nil
+}
+
+// MarkAllAsReadByCompany handles POST /api/company/notifications/read-all.
+func (c *NotificationController) MarkAllAsReadByCompany(ctx context.Context, _ openapi.CompanyNotificationsMarkAllCompanyNotificationsReadRequestObject) (openapi.CompanyNotificationsMarkAllCompanyNotificationsReadResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+
+	if err := c.input.MarkAllAsReadByCompany(ctx, companyID); err != nil {
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CompanyNotificationsMarkAllCompanyNotificationsRead400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
+	}
+	return openapi.CompanyNotificationsMarkAllCompanyNotificationsRead204Response{}, nil
 }

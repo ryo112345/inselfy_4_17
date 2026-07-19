@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { CapIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { Field, PrimaryButton, SecondaryButton, useConfirm } from "@/components/ui";
-import type { ModelsEducationResponse } from "@/external/client/api/generated";
+import type { ModelsEducationResponse } from "@/external/client/api/orval/generated/models";
 import { type ApiError, createEducation, deleteEducation, updateEducation } from "./api";
 import { DashedButton } from "./DashedButton";
 import { useProfileColor } from "./ProfileColorContext";

@@ -10,46 +10,26 @@ import {
   WV_FULL_LABELS,
   WV_ORDER,
 } from "@/app/components/SingleRadarChart";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import { useConfirm } from "@/components/ui";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import {
+  companyTeamsAddTeamMember,
+  companyTeamsDeleteTeam,
+  companyTeamsGetTeam,
+  companyTeamsGetTeamScores,
+  companyTeamsRemoveTeamMember,
+  companyTeamsSetAceMember,
+  companyTeamsUnsetAceMember,
+  companyTeamsUpdateTeam,
+} from "@/external/client/api/orval/generated/endpoints/company-teams/company-teams";
+import type {
+  ModelsTeamMemberResponse as Member,
+  ModelsMemberScoreResponse as MemberScore,
+  ModelsTeamDetailResponse as TeamDetail,
+} from "@/external/client/api/orval/generated/models";
+import { CompanyTeamsAddTeamMemberBody } from "@/external/client/api/orval/generated/zod/company-teams/company-teams.zod";
 import { getErrorMessage } from "@/lib/api-result";
-
-type Member = {
-  id: string;
-  name: string;
-  email: string | null;
-  inviteToken: string;
-  wvStatus: string;
-  ciStatus: string;
-  isAce: boolean;
-  createdAt: string;
-};
-
-type Score = {
-  id: string;
-  displayScore: number;
-  rank: number;
-};
-
-type MemberScore = {
-  memberId: string;
-  memberName: string;
-  wvStatus: string;
-  ciStatus: string;
-  isAce: boolean;
-  wvScores: Score[] | null;
-  ciScores: Score[] | null;
-};
-
-type TeamDetail = {
-  id: string;
-  companyId: string;
-  name: string;
-  description: string | null;
-  isPublic: boolean;
-  members: Member[];
-  createdAt: string;
-};
 
 type Phase = "empty" | "invite" | "in_progress" | "complete";
 
@@ -65,7 +45,6 @@ function detectPhase(members: Member[]): Phase {
 export default function TeamDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { companyFetch } = useCompanyAuth();
   const confirmDialog = useConfirm();
   const teamId = params.id as string;
 
@@ -80,28 +59,24 @@ export default function TeamDetailPage() {
   const [memberScores, setMemberScores] = useState<MemberScore[]>([]);
   const [viewMode, setViewMode] = useState<string>("average");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { fieldErrors, validate, clearField } = useFieldErrors();
 
   const fetchTeamScores = useCallback(async () => {
     try {
-      const res = await companyFetch(`/api/company/teams/${teamId}/scores`);
-      if (!res.ok) return;
-      const data = await res.json();
-      setMemberScores(data.items || []);
+      const data = await companyTeamsGetTeamScores(teamId);
+      setMemberScores(data.items);
     } catch {}
-  }, [teamId, companyFetch]);
+  }, [teamId]);
 
   const fetchTeam = useCallback(async () => {
     try {
-      const res = await companyFetch(`/api/company/teams/${teamId}`);
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      setTeam(data);
+      setTeam(await companyTeamsGetTeam(teamId));
     } catch {
       setTeam(null);
     } finally {
       setLoading(false);
     }
-  }, [teamId, companyFetch]);
+  }, [teamId]);
 
   useEffect(() => {
     fetchTeam();
@@ -111,22 +86,13 @@ export default function TeamDetailPage() {
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberName.trim()) return;
+    const body = { name: memberName.trim(), email: memberEmail.trim() || null };
+    if (!validate(CompanyTeamsAddTeamMemberBody, body)) return;
     setAdding(true);
     setError("");
 
     try {
-      const res = await companyFetch(`/api/company/teams/${teamId}/members`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: memberName.trim(),
-          email: memberEmail.trim() || null,
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "追加に失敗しました");
-      }
+      await companyTeamsAddTeamMember(teamId, body);
       setMemberName("");
       setMemberEmail("");
       setShowAddForm(false);
@@ -149,9 +115,7 @@ export default function TeamDetailPage() {
     )
       return;
     try {
-      await companyFetch(`/api/company/teams/${teamId}/members/${memberId}`, {
-        method: "DELETE",
-      });
+      await companyTeamsRemoveTeamMember(teamId, memberId);
       await fetchTeam();
     } catch {}
   };
@@ -159,9 +123,9 @@ export default function TeamDetailPage() {
   const handleToggleAce = async (memberId: string, currentlyAce: boolean) => {
     try {
       if (currentlyAce) {
-        await companyFetch(`/api/company/teams/${teamId}/ace`, { method: "DELETE" });
+        await companyTeamsUnsetAceMember(teamId);
       } else {
-        await companyFetch(`/api/company/teams/${teamId}/ace/${memberId}`, { method: "PUT" });
+        await companyTeamsSetAceMember(teamId, memberId);
       }
       await fetchTeam();
       await fetchTeamScores();
@@ -170,7 +134,7 @@ export default function TeamDetailPage() {
 
   const handleDeleteTeam = async () => {
     try {
-      await companyFetch(`/api/company/teams/${teamId}`, { method: "DELETE" });
+      await companyTeamsDeleteTeam(teamId);
       router.push("/company/teams");
     } catch {}
   };
@@ -178,14 +142,10 @@ export default function TeamDetailPage() {
   const handleTogglePublic = async () => {
     if (!team) return;
     try {
-      await companyFetch(`/api/company/teams/${teamId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: team.name,
-          description: team.description,
-          isPublic: !team.isPublic,
-        }),
+      await companyTeamsUpdateTeam(teamId, {
+        name: team.name,
+        description: team.description,
+        isPublic: !team.isPublic,
       });
       await fetchTeam();
     } catch {}
@@ -373,38 +333,40 @@ export default function TeamDetailPage() {
           <div className="border-b border-gray-100 bg-gray-50 px-6 py-5">
             <form onSubmit={handleAddMember} className="flex items-end gap-3">
               <div className="flex-1">
-                <label
-                  htmlFor="member-name"
-                  className="block text-sm font-medium text-gray-600 mb-1"
-                >
+                <label htmlFor="name" className="block text-sm font-medium text-gray-600 mb-1">
                   名前 <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="member-name"
+                  {...fieldAriaProps("name", fieldErrors.name)}
                   type="text"
                   value={memberName}
-                  onChange={(e) => setMemberName(e.target.value)}
+                  onChange={(e) => {
+                    setMemberName(e.target.value);
+                    clearField("name");
+                  }}
                   maxLength={100}
                   placeholder="山田太郎"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
                 />
+                <FieldError name="name" error={fieldErrors.name} />
               </div>
               <div className="flex-1">
-                <label
-                  htmlFor="member-email"
-                  className="block text-sm font-medium text-gray-600 mb-1"
-                >
+                <label htmlFor="email" className="block text-sm font-medium text-gray-600 mb-1">
                   メール（任意）
                 </label>
                 <input
-                  id="member-email"
+                  {...fieldAriaProps("email", fieldErrors.email)}
                   type="email"
                   value={memberEmail}
-                  onChange={(e) => setMemberEmail(e.target.value)}
+                  onChange={(e) => {
+                    setMemberEmail(e.target.value);
+                    clearField("email");
+                  }}
                   maxLength={255}
                   placeholder="yamada@example.com"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
                 />
+                <FieldError name="email" error={fieldErrors.email} />
               </div>
               <button
                 type="submit"

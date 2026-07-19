@@ -40,6 +40,6 @@ VALUES ($1, $2, $3);
 SELECT * FROM company_refresh_tokens
 WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > NOW();
 
--- name: RevokeCompanyRefreshTokensByCompanyID :exec
+-- name: RevokeCompanyRefreshTokenByID :exec
 UPDATE company_refresh_tokens SET revoked_at = NOW()
-WHERE company_id = $1 AND revoked_at IS NULL;
+WHERE id = $1 AND revoked_at IS NULL;

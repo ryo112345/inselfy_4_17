@@ -1,10 +1,7 @@
 package controller
 
 import (
-	"net/http"
-	"strconv"
-
-	"github.com/labstack/echo/v4"
+	"context"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -20,81 +17,78 @@ func NewSavedCandidateController(input port.SavedCandidateInputPort) *SavedCandi
 	return &SavedCandidateController{input: input}
 }
 
-func (c *SavedCandidateController) Save(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
-	userID := ctx.Param("userId")
-	if userID == "" {
-		return badRequest(ctx, "userId is required")
-	}
+// Save handles POST /api/company/saved-candidates/{userId}.
+func (c *SavedCandidateController) Save(ctx context.Context, req openapi.SavedCandidatesSaveCandidateRequestObject) (openapi.SavedCandidatesSaveCandidateResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	if err := c.input.Save(ctx.Request().Context(), companyID, userID); err != nil {
-		return internalError(ctx, err.Error())
+	if err := c.input.Save(ctx, companyID, req.UserId); err != nil {
+		return nil, err
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.SavedCandidatesSaveCandidate204Response{}, nil
 }
 
-func (c *SavedCandidateController) Unsave(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
-	userID := ctx.Param("userId")
+// Unsave handles DELETE /api/company/saved-candidates/{userId}.
+func (c *SavedCandidateController) Unsave(ctx context.Context, req openapi.SavedCandidatesUnsaveCandidateRequestObject) (openapi.SavedCandidatesUnsaveCandidateResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	if err := c.input.Unsave(ctx.Request().Context(), companyID, userID); err != nil {
-		return internalError(ctx, err.Error())
+	if err := c.input.Unsave(ctx, companyID, req.UserId); err != nil {
+		return nil, err
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.SavedCandidatesUnsaveCandidate204Response{}, nil
 }
 
-func (c *SavedCandidateController) List(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+// List handles GET /api/company/saved-candidates.
+func (c *SavedCandidateController) List(ctx context.Context, req openapi.SavedCandidatesListSavedCandidatesRequestObject) (openapi.SavedCandidatesListSavedCandidatesResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
+	limit := derefInt32(req.Params.Limit)
 	if limit < 1 || limit > 100 {
 		limit = 20
 	}
+	offset := derefInt32(req.Params.Offset)
 	if offset < 0 {
 		offset = 0
 	}
 
-	cards, total, err := c.input.List(ctx.Request().Context(), companyID, limit, offset)
+	cards, total, err := c.input.List(ctx, companyID, limit, offset)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-
-	return ctx.JSON(http.StatusOK, presenter.TalentListResponse(cards, total))
+	return openapi.SavedCandidatesListSavedCandidates200JSONResponse(*presenter.TalentListResponse(cards, total)), nil
 }
 
-func (c *SavedCandidateController) IsSaved(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
-	userID := ctx.Param("userId")
+// IsSaved handles GET /api/company/saved-candidates/{userId}.
+func (c *SavedCandidateController) IsSaved(ctx context.Context, req openapi.SavedCandidatesIsCandidateSavedRequestObject) (openapi.SavedCandidatesIsCandidateSavedResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	exists, err := c.input.IsSaved(ctx.Request().Context(), companyID, userID)
+	exists, err := c.input.IsSaved(ctx, companyID, req.UserId)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, openapi.ModelsSavedResponse{Saved: exists})
+	return openapi.SavedCandidatesIsCandidateSaved200JSONResponse(openapi.ModelsSavedResponse{Saved: exists}), nil
 }
 
-func (c *SavedCandidateController) BulkCheck(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
-
-	var body openapi.ModelsBulkCheckSavedRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
+// BulkCheck handles POST /api/company/saved-candidates/bulk-check.
+func (c *SavedCandidateController) BulkCheck(ctx context.Context, req openapi.SavedCandidatesBulkCheckSavedRequestObject) (openapi.SavedCandidatesBulkCheckSavedResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.SavedCandidatesBulkCheckSaved400JSONResponse(badRequestBody("invalid body")), nil
 	}
 
-	savedSet, err := c.input.SavedSet(ctx.Request().Context(), companyID, body.UserIds)
+	savedSet, err := c.input.SavedSet(ctx, companyID, req.Body.UserIds)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, openapi.ModelsBulkSavedResponse{Saved: savedSet})
+	return openapi.SavedCandidatesBulkCheckSaved200JSONResponse(openapi.ModelsBulkSavedResponse{Saved: savedSet}), nil
 }
 
-func (c *SavedCandidateController) Count(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+// Count handles GET /api/company/saved-candidates/count.
+func (c *SavedCandidateController) Count(ctx context.Context, _ openapi.SavedCandidatesCountSavedCandidatesRequestObject) (openapi.SavedCandidatesCountSavedCandidatesResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	count, err := c.input.Count(ctx.Request().Context(), companyID)
+	count, err := c.input.Count(ctx, companyID)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, openapi.ModelsSavedCountResponse{Count: count})
+	return openapi.SavedCandidatesCountSavedCandidates200JSONResponse(openapi.ModelsSavedCountResponse{Count: count}), nil
 }

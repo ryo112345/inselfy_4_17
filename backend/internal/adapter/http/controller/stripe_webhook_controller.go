@@ -5,10 +5,10 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
 	"github.com/stripe/stripe-go/v82"
 	"github.com/stripe/stripe-go/v82/webhook"
 
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
@@ -27,34 +27,39 @@ func NewStripeWebhookController(
 	}
 }
 
-func (c *StripeWebhookController) HandleWebhook(ctx echo.Context) error {
-	body, err := io.ReadAll(ctx.Request().Body)
+func (c *StripeWebhookController) HandleWebhook(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return badRequest(ctx, "cannot read body")
+		writeJSON(w, http.StatusBadRequest, badRequestBody("cannot read body"))
+		return
 	}
 
-	sig := ctx.Request().Header.Get("Stripe-Signature")
+	sig := r.Header.Get("Stripe-Signature")
 	event, err := webhook.ConstructEvent(body, sig, c.webhookSecret)
 	if err != nil {
-		return badRequest(ctx, "invalid signature")
+		writeJSON(w, http.StatusBadRequest, badRequestBody("invalid signature"))
+		return
 	}
 
 	switch event.Type {
 	case "checkout.session.completed":
 		var session stripe.CheckoutSession
 		if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
-			return badRequest(ctx, "invalid session data")
+			writeJSON(w, http.StatusBadRequest, badRequestBody("invalid session data"))
+			return
 		}
 		paymentIntentID := ""
 		if session.PaymentIntent != nil {
 			paymentIntentID = session.PaymentIntent.ID
 		}
-		if err := c.purchaseRepo.CompleteBySessionID(ctx.Request().Context(), session.ID, paymentIntentID); err != nil {
-			return internalError(ctx, "failed to complete purchase")
+		if err := c.purchaseRepo.CompleteBySessionID(r.Context(), session.ID, paymentIntentID); err != nil {
+			writeJSON(w, http.StatusInternalServerError,
+				openapi.ModelsErrorResponse{Code: "INTERNAL", Message: "failed to complete purchase"})
+			return
 		}
 	default:
 		// 購読していないイベントは 200 を返して無視する
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{"status": "ok"})
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }

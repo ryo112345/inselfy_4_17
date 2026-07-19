@@ -136,7 +136,7 @@ jobs:
           --platform managed
           --no-traffic --tag candidate
           --max-instances 2
-          --set-env-vars 'GOOGLE_CLOUD_PROJECT=inselfy,API_PORT=8081,DB_USER=neondb_owner,DB_HOST=ep-super-pine-aohjguv8-pooler.c-2.ap-southeast-1.aws.neon.tech,DB_PORT=5432,DB_NAME=neondb,DB_SSLMODE=require,STORAGE_BACKEND=r2,R2_ACCOUNT_ID=3fb924380437d8136e9079f0f5598ce8,R2_BUCKET=inselfy-uploads,R2_PUBLIC_URL=https://pub-c9accd8c7dd34ac1b0edd86723d4555d.r2.dev,GOOGLE_CLIENT_ID=943028700787-o7mad2o995vm6q7f3q5gg6avusrfds79.apps.googleusercontent.com,LINE_CHANNEL_ID=2009609875,INITIAL_ADMIN_EMAIL=ryo.akiyama112345@gmail.com'
+          --set-env-vars 'GOOGLE_CLOUD_PROJECT=inselfy,API_PORT=8081,DB_USER=neondb_owner,DB_HOST=ep-super-pine-aohjguv8-pooler.c-2.ap-southeast-1.aws.neon.tech,DB_PORT=5432,DB_NAME=neondb,DB_SSLMODE=require,STORAGE_BACKEND=r2,R2_ACCOUNT_ID=3fb924380437d8136e9079f0f5598ce8,R2_BUCKET=inselfy-uploads,R2_PRIVATE_BUCKET=inselfy-private,R2_PUBLIC_URL=https://pub-c9accd8c7dd34ac1b0edd86723d4555d.r2.dev,GOOGLE_CLIENT_ID=943028700787-o7mad2o995vm6q7f3q5gg6avusrfds79.apps.googleusercontent.com,LINE_CHANNEL_ID=2009609875,INITIAL_ADMIN_EMAIL=ryo.akiyama112345@gmail.com'
           --set-secrets 'DB_PASSWORD=db-password:latest,JWT_SECRET=jwt-secret:latest,LINE_CHANNEL_SECRET=line-channel-secret:latest,STRIPE_SECRET_KEY=stripe-secret-key:latest,R2_ACCESS_KEY_ID=r2-access-key-id:latest,R2_SECRET_ACCESS_KEY=r2-secret-access-key:latest'
           --startup-probe 'httpGet.path=/api/readyz,httpGet.port=8080,periodSeconds=5,timeoutSeconds=3,failureThreshold=24'
           --liveness-probe 'httpGet.path=/api/healthz,httpGet.port=8080,periodSeconds=30,timeoutSeconds=5,failureThreshold=3'
@@ -148,12 +148,22 @@ jobs:
           CANDIDATE_URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format=json \
             | jq -r '.status.traffic[] | select(.tag=="candidate") | .url')
           echo "candidate: $CANDIDATE_URL"
+          ready=""
           for i in $(seq 1 12); do
-            if curl -fsS "$CANDIDATE_URL/api/readyz"; then exit 0; fi
+            if curl -fsS "$CANDIDATE_URL/api/readyz"; then ready=1; break; fi
             sleep 5
           done
-          echo "::error::candidate が ready にならない（本番トラフィックは無傷のまま失敗）"
-          exit 1
+          if [ -z "$ready" ]; then
+            echo "::error::candidate が ready にならない（本番トラフィックは無傷のまま失敗）"
+            exit 1
+          fi
+          # probe と readyz は /api/*（API 側）しか見ないため、Next の SSR が
+          # 実際にページを描画できることをトップページで別途確認する
+          if ! curl -fsSL "$CANDIDATE_URL/" | grep -q "inselfy"; then
+            echo "::error::candidate のトップページが描画できない（本番トラフィックは無傷のまま失敗）"
+            exit 1
+          fi
+          echo "front SSR OK"
 
       # --- 2段階デプロイ 2/2: 検証済みリビジョンへトラフィック切替 ---
       - name: Shift traffic to new revision
@@ -164,5 +174,6 @@ jobs:
           SERVICE_URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
           curl -fsS "$SERVICE_URL/api/readyz"
           echo
+          curl -fsSL "$SERVICE_URL/" | grep -q "inselfy" && echo "front SSR OK"
           gcloud run services describe "$SERVICE" --region "$REGION" \
             --format='value(status.traffic.revisionName,status.traffic.percent)'

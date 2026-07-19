@@ -37,7 +37,7 @@ interface CandidateScouts {
   @summary("Get a received scout with replies")
   getCandidateScoutDetail(
     @path scoutId: Uuid,
-  ): ScoutDetailResponse | AuthedNotFoundErrors;
+  ): ScoutDetailResponse | AuthedForbiddenErrors;
 
   /** スカウトへ応答（interested / declined） */
   @post
@@ -46,7 +46,7 @@ interface CandidateScouts {
   respondToScout(
     @path scoutId: Uuid,
     @body request: ScoutRespondRequest,
-  ): ScoutRespondResponse | AuthedNotFoundErrors;
+  ): ScoutRespondResponse | AuthedForbiddenErrors;
 
   /** スカウトへ返信（要ログイン） */
   @post
@@ -57,7 +57,7 @@ interface CandidateScouts {
     @body request: CandidateScoutReplyRequest,
   ): {
     @statusCode statusCode: 201;
-  } | AuthedNotFoundErrors;
+  } | AuthedForbiddenErrors;
 
   /** スカウト一括辞退 */
   @post
@@ -67,7 +67,7 @@ interface CandidateScouts {
     @body request: BulkDeclineRequest,
   ): {
     @statusCode statusCode: 204;
-  } | AuthedErrors;
+  } | AuthedForbiddenErrors;
 
   /** スカウト一括応答 */
   @post
@@ -77,5 +77,5 @@ interface CandidateScouts {
     @body request: BulkRespondRequest,
   ): {
     @statusCode statusCode: 204;
-  } | AuthedErrors;
+  } | AuthedForbiddenErrors;
 }

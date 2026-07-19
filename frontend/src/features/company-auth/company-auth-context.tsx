@@ -1,16 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { skipAuthRedirect } from "@/external/client/api/orval/custom-fetch";
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { ApiError } from "@/lib/api-result";
+  companyAuthCompanyGetMe,
+  companyAuthCompanyLogin,
+  companyAuthCompanyLogout,
+} from "@/external/client/api/orval/generated/endpoints/company-auth/company-auth";
 
 type CompanyUser = {
   id: string;
@@ -28,7 +25,6 @@ type CompanyAuthContextValue = {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<CompanyUser>;
   logout: () => void;
-  companyFetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 };
 
 const CompanyAuthContext = createContext<CompanyAuthContextValue | null>(null);
@@ -38,77 +34,25 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const logout = useCallback(async () => {
-    await fetch("/api/company/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+    await companyAuthCompanyLogout(skipAuthRedirect).catch(() => {});
     setCompany(null);
   }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<CompanyUser> => {
-    const res = await fetch("/api/company/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new ApiError(data.code ?? "UNKNOWN", data.message || "Login failed");
-    }
-    const data: CompanyUser = await res.json();
+    // 認証失敗（401）はログイン試行の正常系なので /company/login へは飛ばさない
+    const data = await companyAuthCompanyLogin({ email, password }, skipAuthRedirect);
     setCompany(data);
     return data;
   }, []);
 
-  const refreshPromiseRef = useRef<Promise<boolean> | null>(null);
-
-  const refreshToken = useCallback((): Promise<boolean> => {
-    if (refreshPromiseRef.current) return refreshPromiseRef.current;
-    const p = fetch("/api/company/auth/refresh", {
-      method: "POST",
-      credentials: "include",
-    })
-      .then(async (res) => {
-        if (res.ok) {
-          setCompany(await res.json());
-          return true;
-        }
-        return false;
-      })
-      .finally(() => {
-        refreshPromiseRef.current = null;
-      });
-    refreshPromiseRef.current = p;
-    return p;
-  }, []);
-
-  const companyFetch = useCallback(
-    async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
-      const opts = { ...init, credentials: "include" as RequestCredentials };
-      let res = await fetch(input, opts);
-      if (res.status === 401) {
-        const refreshed = await refreshToken();
-        if (refreshed) {
-          res = await fetch(input, opts);
-        }
-      }
-      return res;
-    },
-    [refreshToken],
-  );
-
+  // 401 → 企業 refresh → リトライは mutator（custom-fetch.ts）が共有 refresh.ts 経由で行う。
+  // ここで独自に refresh すると rotation と衝突するため、生成クライアント以外で呼ばないこと。
   useEffect(() => {
-    fetch("/api/company/auth/me", { credentials: "include" })
-      .then(async (res) => {
-        if (res.ok) {
-          setCompany(await res.json());
-          return;
-        }
-        await refreshToken();
-      })
+    companyAuthCompanyGetMe(skipAuthRedirect)
+      .then((me) => setCompany(me))
+      .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, [refreshToken]);
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -117,9 +61,8 @@ export function CompanyAuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       login,
       logout,
-      companyFetch,
     }),
-    [company, isLoading, login, logout, companyFetch],
+    [company, isLoading, login, logout],
   );
 
   return <CompanyAuthContext value={value}>{children}</CompanyAuthContext>;

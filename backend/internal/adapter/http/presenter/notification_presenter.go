@@ -7,7 +7,7 @@ import (
 )
 
 // NotificationsResponse converts a list of notification entities to their API response.
-func NotificationsResponse(ns []*notification.Notification, total int) any {
+func NotificationsResponse(ns []*notification.Notification, total int) *openapi.ModelsNotificationListResponse {
 	items := make([]openapi.ModelsNotificationResponse, len(ns))
 	for i, n := range ns {
 		items[i] = openapi.ModelsNotificationResponse{
@@ -24,6 +24,6 @@ func NotificationsResponse(ns []*notification.Notification, total int) any {
 }
 
 // NotificationUnreadCountResponse converts an unread count to its API response.
-func NotificationUnreadCountResponse(count int) any {
+func NotificationUnreadCountResponse(count int) *openapi.ModelsUnreadCountResponse {
 	return &openapi.ModelsUnreadCountResponse{Count: cast.Int32(count)}
 }

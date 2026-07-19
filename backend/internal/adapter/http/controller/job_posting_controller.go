@@ -1,14 +1,17 @@
 package controller
 
 import (
+	"bytes"
+	"context"
+	"errors"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -19,84 +22,97 @@ import (
 
 // JobPostingController handles job posting CRUD HTTP endpoints.
 type JobPostingController struct {
-	input port.JobPostingInputPort
+	input       port.JobPostingInputPort
+	fileStorage port.FileStorage
 }
 
 // NewJobPostingController creates a JobPostingController.
 func NewJobPostingController(
 	input port.JobPostingInputPort,
+	fileStorage port.FileStorage,
 ) *JobPostingController {
-	return &JobPostingController{input: input}
+	return &JobPostingController{input: input, fileStorage: fileStorage}
 }
 
 // Create handles POST /api/company/jobs.
-func (c *JobPostingController) Create(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
-
-	var body openapi.ModelsJobPostingRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+func (c *JobPostingController) Create(ctx context.Context, req openapi.CompanyJobPostingsCreateJobPostingRequestObject) (openapi.CompanyJobPostingsCreateJobPostingResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CompanyJobPostingsCreateJobPosting400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	in := jobPostingReqConv.ToCreateInput(body)
+	in := jobPostingReqConv.ToCreateInput(*req.Body)
 	in.CompanyID = companyID
 
-	j, err := c.input.Create(ctx.Request().Context(), in)
+	j, err := c.input.Create(ctx, in)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CompanyJobPostingsCreateJobPosting400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusCreated, presenter.JobPostingResponse(j))
+	return openapi.CompanyJobPostingsCreateJobPosting201JSONResponse(*presenter.JobPostingResponse(j)), nil
 }
 
 // List handles GET /api/company/jobs.
-func (c *JobPostingController) List(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+func (c *JobPostingController) List(ctx context.Context, _ openapi.CompanyJobPostingsListCompanyJobPostingsRequestObject) (openapi.CompanyJobPostingsListCompanyJobPostingsResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	js, err := c.input.List(ctx.Request().Context(), companyID)
+	js, err := c.input.List(ctx, companyID)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CompanyJobPostingsListCompanyJobPostings400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobPostingsPaginatedResponse(js, len(js)))
+	return openapi.CompanyJobPostingsListCompanyJobPostings200JSONResponse(*presenter.JobPostingsPaginatedResponse(js, len(js))), nil
 }
 
-// Get handles GET /api/company/jobs/:jobId.
-func (c *JobPostingController) Get(ctx echo.Context, jobID string) error {
-	companyID := authmw.CompanyID(ctx)
+// Get handles GET /api/company/jobs/{jobId}.
+func (c *JobPostingController) Get(ctx context.Context, req openapi.CompanyJobPostingsGetCompanyJobPostingRequestObject) (openapi.CompanyJobPostingsGetCompanyJobPostingResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	j, err := c.input.Get(ctx.Request().Context(), companyID, jobID)
+	j, err := c.input.Get(ctx, companyID, req.JobId)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CompanyJobPostingsGetCompanyJobPosting403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CompanyJobPostingsGetCompanyJobPosting404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyJobPostingsGetCompanyJobPosting400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobPostingResponse(j))
+	return openapi.CompanyJobPostingsGetCompanyJobPosting200JSONResponse(*presenter.JobPostingResponse(j)), nil
 }
 
 // ListPublic handles GET /api/jobs (no auth).
-func (c *JobPostingController) ListPublic(ctx echo.Context) error {
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
+func (c *JobPostingController) ListPublic(ctx context.Context, req openapi.PublicJobPostingsListPublicJobPostingsRequestObject) (openapi.PublicJobPostingsListPublicJobPostingsResponseObject, error) {
+	limit := derefInt32(req.Params.Limit)
 
 	if limit > 0 {
 		var params jobposting.SearchPublicParams
 		params.Limit = limit
-		params.Offset = offset
-		if s := ctx.QueryParam("search"); s != "" {
+		params.Offset = derefInt32(req.Params.Offset)
+		if s := derefString(req.Params.Search); s != "" {
 			params.Search = &s
 		}
-		if v := ctx.QueryParam("category"); v != "" {
+		if v := derefString(req.Params.Category); v != "" {
 			params.JobCategory = &v
 		}
-		if v := ctx.QueryParam("employmentType"); v != "" {
+		if v := derefString(req.Params.EmploymentType); v != "" {
 			params.EmploymentType = &v
 		}
-		if v := ctx.QueryParam("remotePolicy"); v != "" {
+		if v := derefString(req.Params.RemotePolicy); v != "" {
 			params.RemotePolicy = &v
 		}
-		params.SortBySalary = ctx.QueryParam("sort") == "salary"
+		params.SortBySalary = req.Params.Sort != nil && *req.Params.Sort == openapi.ModelsJobPostingSortSalary
 
-		if vf := ctx.QueryParam("valueFilters"); vf != "" {
-			params.FilterMode = ctx.QueryParam("filterMode")
-			if params.FilterMode == "" {
-				params.FilterMode = "values"
+		if vf := derefString(req.Params.ValueFilters); vf != "" {
+			params.FilterMode = "values"
+			if req.Params.FilterMode != nil {
+				params.FilterMode = string(*req.Params.FilterMode)
 			}
 			for _, pair := range strings.Split(vf, ",") {
 				parts := strings.SplitN(pair, ":", 2)
@@ -114,86 +130,149 @@ func (c *JobPostingController) ListPublic(ctx echo.Context) error {
 			}
 		}
 
-		js, total, err := c.input.SearchPublic(ctx.Request().Context(), params)
+		js, total, err := c.input.SearchPublic(ctx, params)
 		if err != nil {
-			return handleError(ctx, err)
+			if errorStatus(err) == http.StatusBadRequest {
+				return openapi.PublicJobPostingsListPublicJobPostings400JSONResponse(badRequestBody(err.Error())), nil
+			}
+			return nil, err
 		}
-		return ctx.JSON(http.StatusOK, presenter.JobPostingsPaginatedResponse(js, total))
+		return openapi.PublicJobPostingsListPublicJobPostings200JSONResponse(*presenter.JobPostingsPaginatedResponse(js, total)), nil
 	}
 
-	js, err := c.input.ListPublic(ctx.Request().Context())
+	js, err := c.input.ListPublic(ctx)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.PublicJobPostingsListPublicJobPostings400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobPostingsPaginatedResponse(js, len(js)))
+	return openapi.PublicJobPostingsListPublicJobPostings200JSONResponse(*presenter.JobPostingsPaginatedResponse(js, len(js))), nil
 }
 
-// GetPublic handles GET /api/jobs/:jobId (no auth).
-func (c *JobPostingController) GetPublic(ctx echo.Context, jobID string) error {
-	j, err := c.input.GetPublic(ctx.Request().Context(), jobID)
+// GetPublic handles GET /api/jobs/{jobId} (no auth).
+func (c *JobPostingController) GetPublic(ctx context.Context, req openapi.PublicJobPostingsGetPublicJobPostingRequestObject) (openapi.PublicJobPostingsGetPublicJobPostingResponseObject, error) {
+	j, err := c.input.GetPublic(ctx, req.JobId)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PublicJobPostingsGetPublicJobPosting404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PublicJobPostingsGetPublicJobPosting400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobPostingResponse(j))
+	return openapi.PublicJobPostingsGetPublicJobPosting200JSONResponse(*presenter.JobPostingResponse(j)), nil
 }
 
-// Update handles PUT /api/company/jobs/:jobId.
-func (c *JobPostingController) Update(ctx echo.Context, jobID string) error {
-	companyID := authmw.CompanyID(ctx)
-
-	var body openapi.ModelsJobPostingRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+// Update handles PUT /api/company/jobs/{jobId}.
+func (c *JobPostingController) Update(ctx context.Context, req openapi.CompanyJobPostingsUpdateJobPostingRequestObject) (openapi.CompanyJobPostingsUpdateJobPostingResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CompanyJobPostingsUpdateJobPosting400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	j, err := c.input.Update(ctx.Request().Context(), companyID, jobID, jobPostingReqConv.ToUpdateInput(body))
+	j, err := c.input.Update(ctx, companyID, req.JobId, jobPostingReqConv.ToUpdateInput(*req.Body))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CompanyJobPostingsUpdateJobPosting403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CompanyJobPostingsUpdateJobPosting404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyJobPostingsUpdateJobPosting400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobPostingResponse(j))
+	return openapi.CompanyJobPostingsUpdateJobPosting200JSONResponse(*presenter.JobPostingResponse(j)), nil
 }
 
-// Delete handles DELETE /api/company/jobs/:jobId.
-func (c *JobPostingController) Delete(ctx echo.Context, jobID string) error {
-	companyID := authmw.CompanyID(ctx)
+// Delete handles DELETE /api/company/jobs/{jobId}.
+func (c *JobPostingController) Delete(ctx context.Context, req openapi.CompanyJobPostingsDeleteJobPostingRequestObject) (openapi.CompanyJobPostingsDeleteJobPostingResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	if err := c.input.Delete(ctx.Request().Context(), companyID, jobID); err != nil {
-		return handleError(ctx, err)
+	if err := c.input.Delete(ctx, companyID, req.JobId); err != nil {
+		switch errorStatus(err) {
+		case http.StatusForbidden:
+			return openapi.CompanyJobPostingsDeleteJobPosting403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CompanyJobPostingsDeleteJobPosting404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyJobPostingsDeleteJobPosting400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.CompanyJobPostingsDeleteJobPosting204Response{}, nil
 }
 
 // jobPostingReqConv is the goverter-generated request→input mapper.
 // See job_posting_request_converter.go for its declaration.
 var jobPostingReqConv jobPostingRequestConverter = &jobPostingRequestConverterImpl{}
 
-// HandleImageUpload returns a handler that saves an uploaded image via FileStorage.
-func HandleImageUpload(storage port.FileStorage, subdir string) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		file, err := ctx.FormFile("file")
-		if err != nil {
-			return badRequest(ctx, "file is required")
-		}
-		if file.Size > 5*1024*1024 {
-			return badRequest(ctx, "ファイルサイズは5MB以下にしてください")
-		}
-		ext := strings.ToLower(filepath.Ext(file.Filename))
-		if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
-			return badRequest(ctx, "JPG、PNG、WebP形式のみ対応しています")
-		}
-
-		src, err := file.Open()
-		if err != nil {
-			return internalError(ctx, "failed to open file")
-		}
-		defer func() { _ = src.Close() }()
-
-		key := fmt.Sprintf("%s/%s%s", subdir, uuid.New().String()[:8], ext)
-		url, err := storage.Save(ctx.Request().Context(), key, src)
-		if err != nil {
-			return internalError(ctx, "failed to save file")
-		}
-
-		return ctx.JSON(http.StatusOK, openapi.ModelsUploadUrlResponse{Url: url})
+// UploadTeamMemberPhoto handles POST /api/company/jobs/team-member-photo.
+func (c *JobPostingController) UploadTeamMemberPhoto(ctx context.Context, req openapi.CompanyJobPostingsUploadTeamMemberPhotoRequestObject) (openapi.CompanyJobPostingsUploadTeamMemberPhotoResponseObject, error) {
+	url, errBody, err := c.saveJobImage(ctx, req.Body, "team-member-photos")
+	if err != nil {
+		return nil, err
 	}
+	if errBody != nil {
+		return openapi.CompanyJobPostingsUploadTeamMemberPhoto400JSONResponse(*errBody), nil
+	}
+	return openapi.CompanyJobPostingsUploadTeamMemberPhoto200JSONResponse(openapi.ModelsUploadUrlResponse{Url: url}), nil
+}
+
+// UploadGalleryImage handles POST /api/company/jobs/gallery-image.
+func (c *JobPostingController) UploadGalleryImage(ctx context.Context, req openapi.CompanyJobPostingsUploadGalleryImageRequestObject) (openapi.CompanyJobPostingsUploadGalleryImageResponseObject, error) {
+	url, errBody, err := c.saveJobImage(ctx, req.Body, "gallery-images")
+	if err != nil {
+		return nil, err
+	}
+	if errBody != nil {
+		return openapi.CompanyJobPostingsUploadGalleryImage400JSONResponse(*errBody), nil
+	}
+	return openapi.CompanyJobPostingsUploadGalleryImage200JSONResponse(openapi.ModelsUploadUrlResponse{Url: url}), nil
+}
+
+// UploadCoverImage handles POST /api/company/jobs/cover-image.
+func (c *JobPostingController) UploadCoverImage(ctx context.Context, req openapi.CompanyJobPostingsUploadJobCoverImageRequestObject) (openapi.CompanyJobPostingsUploadJobCoverImageResponseObject, error) {
+	url, errBody, err := c.saveJobImage(ctx, req.Body, "cover-images")
+	if err != nil {
+		return nil, err
+	}
+	if errBody != nil {
+		return openapi.CompanyJobPostingsUploadJobCoverImage400JSONResponse(*errBody), nil
+	}
+	return openapi.CompanyJobPostingsUploadJobCoverImage200JSONResponse(openapi.ModelsUploadUrlResponse{Url: url}), nil
+}
+
+// saveJobImage is the strict-server counterpart of the echo-era
+// HandleImageUpload: extension whitelist + 5MB cap, saved under subdir with a
+// short random name. A non-nil errBody means a 400 the caller wraps in its
+// operation-specific response type.
+func (c *JobPostingController) saveJobImage(ctx context.Context, r *multipart.Reader, subdir string) (url string, errBody *openapi.ModelsBadRequestError, err error) {
+	data, filename, _, err := readFilePart(r)
+	if err != nil {
+		switch {
+		case errors.Is(err, errFilePartMissing):
+			b := badRequestBody("file is required")
+			return "", &b, nil
+		case errors.Is(err, errFilePartTooLarge):
+			b := badRequestBody("ファイルサイズは5MB以下にしてください")
+			return "", &b, nil
+		}
+		return "", nil, err
+	}
+
+	ext := strings.ToLower(filepath.Ext(filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
+		b := badRequestBody("JPG、PNG、WebP形式のみ対応しています")
+		return "", &b, nil
+	}
+
+	key := fmt.Sprintf("%s/%s%s", subdir, uuid.New().String()[:8], ext)
+	url, err = c.fileStorage.Save(ctx, key, bytes.NewReader(data))
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to save file: %w", err)
+	}
+	return url, nil, nil
 }

@@ -1,6 +1,7 @@
 package: openapi
 generate:
-  echo-server: true
+  std-http-server: true
+  strict-server: true
   models: true
 output: internal/adapter/http/generated/openapi/server.gen.go
 output-options:

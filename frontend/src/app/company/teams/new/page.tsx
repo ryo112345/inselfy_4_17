@@ -3,37 +3,33 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useCompanyAuth } from "@/features/company-auth/company-auth-context";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
+import { companyTeamsCreateTeam } from "@/external/client/api/orval/generated/endpoints/company-teams/company-teams";
+import { CompanyTeamsCreateTeamBody } from "@/external/client/api/orval/generated/zod/company-teams/company-teams.zod";
 import { getErrorMessage } from "@/lib/api-result";
 
 export default function NewTeamPage() {
   const router = useRouter();
-  const { companyFetch } = useCompanyAuth();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const { fieldErrors, validate, clearField, scrollToFirstError } = useFieldErrors();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+    const body = { name: name.trim(), description: description.trim() || null };
+    if (!validate(CompanyTeamsCreateTeamBody, body)) {
+      scrollToFirstError();
+      return;
+    }
     setSubmitting(true);
     setError("");
 
     try {
-      const res = await companyFetch("/api/company/teams", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim() || null,
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "作成に失敗しました");
-      }
-      const team = await res.json();
+      const team = await companyTeamsCreateTeam(body);
       router.push(`/company/teams/${team.id}`);
     } catch (err) {
       setError(getErrorMessage(err, "作成に失敗しました"));
@@ -65,36 +61,41 @@ export default function NewTeamPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
             チーム名 <span className="text-red-500">*</span>
           </label>
           <input
-            id="team-name"
+            {...fieldAriaProps("name", fieldErrors.name)}
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              clearField("name");
+            }}
             maxLength={100}
             placeholder="例: 開発チーム"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none transition-colors"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none transition-colors aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
           />
+          <FieldError name="name" error={fieldErrors.name} />
         </div>
 
         <div>
-          <label
-            htmlFor="team-description"
-            className="block text-sm font-medium text-gray-700 mb-1.5"
-          >
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1.5">
             説明（任意）
           </label>
           <textarea
-            id="team-description"
+            {...fieldAriaProps("description", fieldErrors.description)}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              clearField("description");
+            }}
             maxLength={500}
             rows={3}
             placeholder="チームの説明を入力してください"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none transition-colors resize-none"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-[#2979ff] focus:ring-1 focus:ring-[#2979ff] outline-none transition-colors resize-none aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
           />
+          <FieldError name="description" error={fieldErrors.description} />
         </div>
 
         {error && (

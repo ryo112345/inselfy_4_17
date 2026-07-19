@@ -7,7 +7,7 @@ import (
 )
 
 // CareerInterestSessionResponse converts a session entity to its API response.
-func CareerInterestSessionResponse(s *careerinterest.Session) any {
+func CareerInterestSessionResponse(s *careerinterest.Session) openapi.ModelsCISessionResponse {
 	items := make([]openapi.ModelsCIItemResponse, len(s.Items))
 	for i, item := range s.Items {
 		items[i] = openapi.ModelsCIItemResponse{
@@ -19,7 +19,7 @@ func CareerInterestSessionResponse(s *careerinterest.Session) any {
 			TextJa:          item.TextJa,
 		}
 	}
-	return &openapi.ModelsCISessionResponse{
+	return openapi.ModelsCISessionResponse{
 		Id:     s.ID,
 		Status: openapi.ModelsDiagnosisSessionStatus(s.Status),
 		Items:  items,
@@ -27,7 +27,7 @@ func CareerInterestSessionResponse(s *careerinterest.Session) any {
 }
 
 // CareerInterestResultResponse converts a result entity to its API response.
-func CareerInterestResultResponse(r *careerinterest.Result) any {
+func CareerInterestResultResponse(r *careerinterest.Result) openapi.ModelsCIResultResponse {
 	basicScores := make([]openapi.ModelsCIBasicScoreResponse, len(r.BasicScores))
 	for i, s := range r.BasicScores {
 		basicScores[i] = openapi.ModelsCIBasicScoreResponse{
@@ -46,7 +46,7 @@ func CareerInterestResultResponse(r *careerinterest.Result) any {
 		}
 	}
 
-	return &openapi.ModelsCIResultResponse{
+	return openapi.ModelsCIResultResponse{
 		Id:              r.ID,
 		SessionId:       r.SessionID,
 		UserId:          r.UserID,

@@ -4,7 +4,14 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
 import { Modal } from "@/components/ui";
+import {
+  ArticlesCreateArticleBody,
+  ArticlesUpdateArticleBody,
+} from "@/external/client/api/orval/generated/zod/articles/articles.zod";
+import { validateForm } from "@/lib/form-validation";
 import { type ArticleItem, createArticle, publishArticle, updateArticle } from "./api";
 import { CoverImageUpload } from "./CoverImageUpload";
 import { TableOfContents, type TOCItem } from "./TableOfContents";
@@ -39,19 +46,33 @@ export function ArticleForm({ article }: Props) {
   const [error, setError] = useState("");
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { fieldErrors, setErrors, clearField, scrollToFirstError } = useFieldErrors();
 
   async function handleSubmit(shouldPublish: boolean) {
     setError("");
+    const payload = {
+      title,
+      body,
+      isPaid,
+      priceYen: isPaid ? priceYen : 0,
+      coverImageUrl,
+      tags,
+    };
+    const errors = validateForm(
+      isEdit ? ArticlesUpdateArticleBody : ArticlesCreateArticleBody,
+      payload,
+    );
+    if (errors) {
+      setErrors(errors);
+      // 価格エラーだけなら公開モーダル内にインライン表示し、開いたまま直せるようにする
+      if (!(errors.priceYen && Object.keys(errors).length === 1)) {
+        setShowPublishModal(false);
+        setTimeout(() => scrollToFirstError(), 0);
+      }
+      return;
+    }
     setSubmitting(true);
     try {
-      const payload = {
-        title,
-        body,
-        isPaid,
-        priceYen: isPaid ? priceYen : 0,
-        coverImageUrl,
-        tags,
-      };
       const result = isEdit
         ? await updateArticle(article.id, payload)
         : await createArticle(payload);
@@ -85,6 +106,7 @@ export function ArticleForm({ article }: Props) {
   const handleTitleInput = useCallback(() => {
     const el = titleRef.current;
     if (!el) return;
+    clearField("title");
     const text = el.textContent || "";
     if (text.length <= 200) {
       setTitle(text);
@@ -102,7 +124,7 @@ export function ArticleForm({ article }: Props) {
         sel?.addRange(range);
       }
     }
-  }, []);
+  }, [clearField]);
 
   const tocItems = useMemo(() => {
     const items: TOCItem[] = [];
@@ -181,13 +203,20 @@ export function ArticleForm({ article }: Props) {
         </div>
 
         {error && (
-          <div className="mx-6 sm:mx-10 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          <div className="mx-6 sm:mx-10 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 whitespace-pre-line">
             {error}
           </div>
         )}
 
         {/* Cover image — same as ArticleView */}
-        <CoverImageUpload value={coverImageUrl} onChange={setCoverImageUrl} />
+        <CoverImageUpload
+          value={coverImageUrl}
+          onChange={(url) => {
+            setCoverImageUrl(url);
+            clearField("coverImageUrl");
+          }}
+        />
+        <FieldError name="coverImageUrl" error={fieldErrors.coverImageUrl} />
 
         <div className="px-6 sm:px-10 py-8">
           {/* Title — identical to ArticleView h1 */}
@@ -204,6 +233,7 @@ export function ArticleForm({ article }: Props) {
               suppressContentEditableWarning
               role="textbox"
               aria-label="タイトル"
+              {...fieldAriaProps("title", fieldErrors.title)}
               tabIndex={0}
               onInput={handleTitleInput}
               onKeyDown={(e) => {
@@ -214,12 +244,20 @@ export function ArticleForm({ article }: Props) {
                 const text = e.clipboardData.getData("text/plain").replace(/\n/g, " ");
                 document.execCommand("insertText", false, text);
               }}
-              className="relative text-[28px] sm:text-3xl font-bold text-gray-900 leading-[1.35] focus:outline-none"
+              className="relative text-[28px] sm:text-3xl font-bold text-gray-900 leading-[1.35] focus:outline-none aria-invalid:bg-red-50/60"
             />
+            <FieldError name="title" error={fieldErrors.title} />
           </div>
 
           <div className="mb-8">
-            <TagInput tags={tags} onChange={setTags} />
+            <TagInput
+              tags={tags}
+              onChange={(next) => {
+                setTags(next);
+                clearField("tags");
+              }}
+            />
+            <FieldError name="tags" error={fieldErrors.tags} />
           </div>
 
           {/* TOC — same as ArticleView, auto-appears with 2+ headings */}
@@ -227,7 +265,15 @@ export function ArticleForm({ article }: Props) {
 
           {/* Body — same prose styling as ArticleView */}
           <div className="pb-40">
-            <RichEditor content={body} onChange={setBody} isPaid={isPaid} />
+            <FieldError name="body" error={fieldErrors.body} />
+            <RichEditor
+              content={body}
+              onChange={(html) => {
+                setBody(html);
+                clearField("body");
+              }}
+              isPaid={isPaid}
+            />
           </div>
         </div>
       </article>
@@ -255,14 +301,19 @@ export function ArticleForm({ article }: Props) {
                 <span className="text-sm text-gray-500">¥</span>
                 <input
                   type="number"
+                  {...fieldAriaProps("priceYen", fieldErrors.priceYen)}
                   value={priceYen || ""}
-                  onChange={(e) => setPriceYen(Number(e.target.value))}
+                  onChange={(e) => {
+                    setPriceYen(Number(e.target.value));
+                    clearField("priceYen");
+                  }}
                   placeholder="100"
                   min={1}
                   max={1000000}
-                  className="w-32 text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-[var(--accent)]"
+                  className="w-32 text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-[var(--accent)] aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
                 />
               </div>
+              <FieldError name="priceYen" error={fieldErrors.priceYen} />
               <p className="text-xs text-gray-400">
                 エディタで「有料区切り」を挿入すると、区切り線より上が無料プレビューになります。
               </p>

@@ -12,6 +12,7 @@ const (
 	TypeScoutExpired      Type = "scout_expired"
 	TypeCreditReplenished Type = "credit_replenished"
 	TypeQualityWarning    Type = "quality_warning"
+	TypeResumeApproved    Type = "resume_approved"
 )
 
 type Notification struct {

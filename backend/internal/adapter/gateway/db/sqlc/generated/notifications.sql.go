@@ -198,11 +198,36 @@ func (q *Queries) MarkAllNotificationsAsReadByUserID(ctx context.Context, userID
 	return err
 }
 
-const markNotificationAsRead = `-- name: MarkNotificationAsRead :exec
-UPDATE notifications SET is_read = true WHERE id = $1
+const markNotificationAsReadByCompanyID = `-- name: MarkNotificationAsReadByCompanyID :execrows
+UPDATE notifications SET is_read = true WHERE id = $1 AND company_id = $2
 `
 
-func (q *Queries) MarkNotificationAsRead(ctx context.Context, id pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, markNotificationAsRead, id)
-	return err
+type MarkNotificationAsReadByCompanyIDParams struct {
+	ID        pgtype.UUID `json:"id"`
+	CompanyID pgtype.UUID `json:"company_id"`
+}
+
+func (q *Queries) MarkNotificationAsReadByCompanyID(ctx context.Context, arg *MarkNotificationAsReadByCompanyIDParams) (int64, error) {
+	result, err := q.db.Exec(ctx, markNotificationAsReadByCompanyID, arg.ID, arg.CompanyID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const markNotificationAsReadByUserID = `-- name: MarkNotificationAsReadByUserID :execrows
+UPDATE notifications SET is_read = true WHERE id = $1 AND user_id = $2
+`
+
+type MarkNotificationAsReadByUserIDParams struct {
+	ID     pgtype.UUID `json:"id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+func (q *Queries) MarkNotificationAsReadByUserID(ctx context.Context, arg *MarkNotificationAsReadByUserIDParams) (int64, error) {
+	result, err := q.db.Exec(ctx, markNotificationAsReadByUserID, arg.ID, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

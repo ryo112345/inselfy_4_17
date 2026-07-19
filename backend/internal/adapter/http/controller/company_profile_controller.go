@@ -1,14 +1,14 @@
 package controller
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -30,48 +30,38 @@ func NewCompanyProfileController(input port.CompanyProfileInputPort, storage por
 	}
 }
 
-func (c *CompanyProfileController) GetPublicProfile(ctx echo.Context) error {
-	id := ctx.Param("id")
-	if _, err := uuid.Parse(id); err != nil {
-		return badRequest(ctx, "invalid company id")
+// GetPublicProfile handles GET /api/companies/{id}.
+func (c *CompanyProfileController) GetPublicProfile(ctx context.Context, req openapi.PublicCompanyProfilesGetPublicCompanyProfileRequestObject) (openapi.PublicCompanyProfilesGetPublicCompanyProfileResponseObject, error) {
+	profile, err := c.input.GetPublicProfile(ctx, req.Id)
+	if err != nil { //nolint:nilerr // 従来から取得エラーは一律 404（固定メッセージで存在秘匿）
+		return openapi.PublicCompanyProfilesGetPublicCompanyProfile404JSONResponse(openapi.ModelsNotFoundError{
+			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+			Message: "company not found",
+		}), nil
 	}
+	return openapi.PublicCompanyProfilesGetPublicCompanyProfile200JSONResponse(*presenter.PublicCompanyProfile(profile)), nil
+}
 
-	profile, err := c.input.GetPublicProfile(ctx.Request().Context(), id)
+// GetProfile handles GET /api/company/profile.
+func (c *CompanyProfileController) GetProfile(ctx context.Context, _ openapi.CompanyProfilesGetCompanyProfileRequestObject) (openapi.CompanyProfilesGetCompanyProfileResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+
+	profile, err := c.input.GetProfile(ctx, companyID)
 	if err != nil {
-		return notFoundError(ctx, "company not found")
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.PublicCompanyProfile(profile))
+	return openapi.CompanyProfilesGetCompanyProfile200JSONResponse(*presenter.CompanyProfile(profile)), nil
 }
 
-func (c *CompanyProfileController) companyID(ctx echo.Context) string {
-	return ctx.Get(authmw.CompanyIDKey).(string)
-}
-
-func (c *CompanyProfileController) GetProfile(ctx echo.Context) error {
-	companyID := c.companyID(ctx)
-	if _, err := uuid.Parse(companyID); err != nil {
-		return badRequest(ctx, "invalid company id")
+// UpdateProfile handles PUT /api/company/profile. 成功時は更新後のプロフィールを返す。
+func (c *CompanyProfileController) UpdateProfile(ctx context.Context, req openapi.CompanyProfilesUpdateCompanyProfileRequestObject) (openapi.CompanyProfilesUpdateCompanyProfileResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CompanyProfilesUpdateCompanyProfile400JSONResponse(badRequestBody("invalid request")), nil
 	}
 
-	profile, err := c.input.GetProfile(ctx.Request().Context(), companyID)
-	if err != nil {
-		return internalError(ctx, err.Error())
-	}
-	return ctx.JSON(http.StatusOK, presenter.CompanyProfile(profile))
-}
-
-func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
-	companyID := c.companyID(ctx)
-	if _, err := uuid.Parse(companyID); err != nil {
-		return badRequest(ctx, "invalid company id")
-	}
-
-	var body openapi.ModelsUpdateCompanyProfileRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request")
-	}
-
-	err := c.input.UpdateProfile(ctx.Request().Context(), companyID, company.UpdateProfileInput{
+	body := req.Body
+	err := c.input.UpdateProfile(ctx, companyID, company.UpdateProfileInput{
 		CompanyName:          body.CompanyName,
 		ContactPersonName:    body.ContactPersonName,
 		PhoneNumber:          body.PhoneNumber,
@@ -94,37 +84,38 @@ func (c *CompanyProfileController) UpdateProfile(ctx echo.Context) error {
 	})
 	if err != nil {
 		if errors.Is(err, domainerr.ErrBadRequest) {
-			return badRequest(ctx, err.Error())
+			return openapi.CompanyProfilesUpdateCompanyProfile400JSONResponse(badRequestBody(err.Error())), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	return c.GetProfile(ctx)
+	profile, err := c.input.GetProfile(ctx, companyID)
+	if err != nil {
+		return nil, err
+	}
+	return openapi.CompanyProfilesUpdateCompanyProfile200JSONResponse(*presenter.CompanyProfile(profile)), nil
 }
 
-func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
-	companyID := c.companyID(ctx)
-	if _, err := uuid.Parse(companyID); err != nil {
-		return badRequest(ctx, "invalid company id")
-	}
+// UploadImage handles POST /api/company/profile/image.
+func (c *CompanyProfileController) UploadImage(ctx context.Context, req openapi.CompanyProfilesUploadCompanyProfileImageRequestObject) (openapi.CompanyProfilesUploadCompanyProfileImageResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	imageType := ctx.QueryParam("type")
+	imageType := req.Params.Type
 	if imageType != "logo" && imageType != "cover" && imageType != "gallery" {
-		return badRequest(ctx, "type must be 'logo', 'cover', or 'gallery'")
+		return openapi.CompanyProfilesUploadCompanyProfileImage400JSONResponse(badRequestBody("type must be 'logo', 'cover', or 'gallery'")), nil
 	}
 
-	file, err := ctx.FormFile("file")
+	data, filename, _, err := readFilePart(req.Body)
 	if err != nil {
-		return badRequest(ctx, "file is required")
+		if errors.Is(err, errFilePartTooLarge) {
+			return openapi.CompanyProfilesUploadCompanyProfileImage400JSONResponse(badRequestBody("ファイルサイズは5MB以下にしてください")), nil
+		}
+		return openapi.CompanyProfilesUploadCompanyProfileImage400JSONResponse(badRequestBody("file is required")), nil
 	}
 
-	if file.Size > 5*1024*1024 {
-		return badRequest(ctx, "ファイルサイズは5MB以下にしてください")
-	}
-
-	ext := strings.ToLower(filepath.Ext(file.Filename))
+	ext := strings.ToLower(filepath.Ext(filename))
 	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".webp" {
-		return badRequest(ctx, "JPG、PNG、WebP形式のみ対応しています")
+		return openapi.CompanyProfilesUploadCompanyProfileImage400JSONResponse(badRequestBody("JPG、PNG、WebP形式のみ対応しています")), nil
 	}
 
 	var key string
@@ -134,57 +125,44 @@ func (c *CompanyProfileController) UploadImage(ctx echo.Context) error {
 		key = fmt.Sprintf("company-images/%s_%s%s", companyID, imageType, ext)
 	}
 
-	src, err := file.Open()
+	imageURL, err := c.storage.Save(ctx, key, bytes.NewReader(data))
 	if err != nil {
-		return internalError(ctx, "failed to open file")
-	}
-	defer func() { _ = src.Close() }()
-
-	imageURL, err := c.storage.Save(ctx.Request().Context(), key, src)
-	if err != nil {
-		return internalError(ctx, "failed to save file")
+		return nil, err
 	}
 
-	reqCtx := ctx.Request().Context()
 	if imageType == "gallery" {
-		err = c.input.AddGalleryURL(reqCtx, companyID, imageURL)
+		err = c.input.AddGalleryURL(ctx, companyID, imageURL)
 	} else {
-		err = c.input.SetImageURL(reqCtx, companyID, imageKind(imageType), imageURL)
+		err = c.input.SetImageURL(ctx, companyID, imageKind(imageType), imageURL)
 	}
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	return ctx.JSON(http.StatusOK, openapi.ModelsUploadUrlResponse{Url: imageURL})
+	return openapi.CompanyProfilesUploadCompanyProfileImage200JSONResponse(openapi.ModelsUploadUrlResponse{Url: imageURL}), nil
 }
 
-func (c *CompanyProfileController) DeleteImage(ctx echo.Context) error {
-	companyID := c.companyID(ctx)
-	if _, err := uuid.Parse(companyID); err != nil {
-		return badRequest(ctx, "invalid company id")
-	}
+// DeleteImage handles DELETE /api/company/profile/image.
+func (c *CompanyProfileController) DeleteImage(ctx context.Context, req openapi.CompanyProfilesDeleteCompanyProfileImageRequestObject) (openapi.CompanyProfilesDeleteCompanyProfileImageResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	imageType := ctx.QueryParam("type")
-	imageURL := ctx.QueryParam("url")
-	reqCtx := ctx.Request().Context()
-
-	switch imageType {
+	switch req.Params.Type {
 	case "gallery":
-		if imageURL == "" {
-			return badRequest(ctx, "url is required for gallery delete")
+		if req.Params.Url == nil || *req.Params.Url == "" {
+			return openapi.CompanyProfilesDeleteCompanyProfileImage400JSONResponse(badRequestBody("url is required for gallery delete")), nil
 		}
-		if err := c.input.RemoveGalleryURL(reqCtx, companyID, imageURL); err != nil {
-			return internalError(ctx, err.Error())
+		if err := c.input.RemoveGalleryURL(ctx, companyID, *req.Params.Url); err != nil {
+			return nil, err
 		}
 	case "logo", "cover":
-		if err := c.input.ClearImageURL(reqCtx, companyID, imageKind(imageType)); err != nil {
-			return internalError(ctx, err.Error())
+		if err := c.input.ClearImageURL(ctx, companyID, imageKind(req.Params.Type)); err != nil {
+			return nil, err
 		}
 	default:
-		return badRequest(ctx, "type must be 'logo', 'cover', or 'gallery'")
+		return openapi.CompanyProfilesDeleteCompanyProfileImage400JSONResponse(badRequestBody("type must be 'logo', 'cover', or 'gallery'")), nil
 	}
 
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.CompanyProfilesDeleteCompanyProfileImage204Response{}, nil
 }
 
 func imageKind(imageType string) company.ImageKind {

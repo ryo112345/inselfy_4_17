@@ -54,7 +54,7 @@ func (u *UserInteractor) GetByID(ctx context.Context, id string) (*user.User, er
 
 // UpdateProfile patches a user's profile. The update is scoped to a single row
 // so no transaction boundary is required.
-func (u *UserInteractor) UpdateProfile(ctx context.Context, rawUsername string, input user.UpdateProfileInput) (*user.User, error) {
+func (u *UserInteractor) UpdateProfile(ctx context.Context, authUserID, rawUsername string, input user.UpdateProfileInput) (*user.User, error) {
 	username, err := user.ParseUsername(rawUsername)
 	if err != nil {
 		return nil, err
@@ -76,6 +76,12 @@ func (u *UserInteractor) UpdateProfile(ctx context.Context, rawUsername string, 
 	existing, err := u.repo.GetByUsername(ctx, username)
 	if err != nil {
 		return nil, err
+	}
+	// Only the profile's owner may edit it. authUserID comes from the
+	// validated JWT; the path username is attacker-controlled, so comparing
+	// the resolved row's ID against the caller is what prevents IDOR.
+	if existing.ID != authUserID {
+		return nil, port.ErrForbidden
 	}
 	return u.repo.UpdateProfile(ctx, existing.ID, input)
 }

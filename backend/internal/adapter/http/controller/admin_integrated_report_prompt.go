@@ -6,17 +6,15 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/labstack/echo/v4"
 
 	"github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc/generated"
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
 )
 
@@ -33,26 +31,22 @@ var topicFiles = map[int16]string{
 	10: "10-hidden-potential.md",
 }
 
-func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, requestID string) error {
-	parsedReqID, err := uuid.Parse(requestID)
-	if err != nil {
-		return badRequest(ctx, "invalid request_id")
-	}
-
-	pgReqID := pgtype.UUID{Bytes: parsedReqID, Valid: true}
-	reqCtx := ctx.Request().Context()
-
-	req, err := ctrl.queries.GetIntegratedReportRequestByID(reqCtx, pgReqID)
+// GetPrompt handles GET /api/admin/integrated-requests/{requestId}/prompt.
+func (ctrl *AdminIntegratedReportController) GetPrompt(reqCtx context.Context, reqObj openapi.AdminGetIntegratedPromptRequestObject) (openapi.AdminGetIntegratedPromptResponseObject, error) {
+	req, err := ctrl.queries.GetIntegratedReportRequestByID(reqCtx, pgUUID(reqObj.RequestId))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "request not found")
+			return openapi.AdminGetIntegratedPrompt404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "request not found",
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
 	base, err := readIntegratedBaseTemplate()
 	if err != nil {
-		return internalError(ctx, "failed to read base template: "+err.Error())
+		return nil, err
 	}
 
 	topics := []int16{req.Topic1, req.Topic2, req.Topic3}
@@ -60,7 +54,7 @@ func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, request
 	for i, topicNum := range topics {
 		content, err := readIntegratedTopicFile(topicNum)
 		if err != nil {
-			return internalError(ctx, fmt.Sprintf("failed to read topic %d: %s", topicNum, err.Error()))
+			return nil, fmt.Errorf("failed to read topic %d: %w", topicNum, err)
 		}
 		chapterBlocks[i] = strings.ReplaceAll(string(content), "{{CHAPTER_NUM}}", strconv.Itoa(i+1))
 	}
@@ -82,19 +76,19 @@ func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, request
 
 	experiences, err := ctrl.queries.ListExperiencesByUserID(reqCtx, req.UserID)
 	if err != nil {
-		return internalError(ctx, "failed to fetch experiences")
+		return nil, err
 	}
 	prompt = strings.Replace(prompt, "{{EXPERIENCES}}", buildExperiencesMarkdown(experiences), 1)
 
 	educations, err := ctrl.queries.ListEducationsByUserID(reqCtx, req.UserID)
 	if err != nil {
-		return internalError(ctx, "failed to fetch educations")
+		return nil, err
 	}
 	prompt = strings.Replace(prompt, "{{EDUCATIONS}}", buildEducationsMarkdown(educations), 1)
 
 	skills, err := ctrl.queries.ListUserSkills(reqCtx, req.UserID)
 	if err != nil {
-		return internalError(ctx, "failed to fetch skills")
+		return nil, err
 	}
 	prompt = strings.Replace(prompt, "{{SKILLS}}", buildSkillsMarkdown(skills), 1)
 
@@ -112,9 +106,7 @@ func (ctrl *AdminIntegratedReportController) GetPrompt(ctx echo.Context, request
 		prompt = strings.Replace(prompt, "{{CI_DIAGNOSIS}}", ciDiag, 1)
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"prompt": prompt,
-	})
+	return openapi.AdminGetIntegratedPrompt200JSONResponse(openapi.ModelsAdminPromptResponse{Prompt: prompt}), nil
 }
 
 func (ctrl *AdminIntegratedReportController) buildWVDiagnosis(ctx context.Context, userID pgtype.UUID) (string, error) {

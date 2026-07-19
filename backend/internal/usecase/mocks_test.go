@@ -68,6 +68,10 @@ func (s *experienceRepoStub) Delete(ctx context.Context, id string) error {
 	return s.deleteFn(ctx, id)
 }
 
+func (s *experienceRepoStub) DeleteByUserID(context.Context, string) error {
+	return nil
+}
+
 func (s *experienceRepoStub) GetByID(ctx context.Context, id string) (*experience.Experience, error) {
 	return s.getByIDFn(ctx, id)
 }
@@ -736,7 +740,15 @@ func (s *notificationRepoStub) ListByUserID(_ context.Context, _ string, _, _ in
 func (s *notificationRepoStub) ListByCompanyID(_ context.Context, _ string, _, _ int) ([]*notification.Notification, int, error) {
 	return nil, 0, nil
 }
-func (s *notificationRepoStub) MarkAsRead(_ context.Context, _ string) error { return nil }
+
+func (s *notificationRepoStub) MarkAsReadByUserID(_ context.Context, _, _ string) error {
+	return nil
+}
+
+func (s *notificationRepoStub) MarkAsReadByCompanyID(_ context.Context, _, _ string) error {
+	return nil
+}
+
 func (s *notificationRepoStub) MarkAllAsReadByUserID(_ context.Context, _ string) error {
 	return nil
 }

@@ -24,7 +24,7 @@ type CompanyAccountRepository interface {
 type CompanyRefreshTokenRepository interface {
 	Create(ctx context.Context, rt *company.CompanyRefreshToken) error
 	GetByTokenHash(ctx context.Context, tokenHash string) (*company.CompanyRefreshToken, error)
-	RevokeByCompanyID(ctx context.Context, companyID string) error
+	RevokeByID(ctx context.Context, id string) error
 }
 
 type PasswordHasher interface {

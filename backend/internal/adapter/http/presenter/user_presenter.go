@@ -7,8 +7,8 @@ import (
 )
 
 // UserResponse converts a domain user to the generated OpenAPI response type.
-func UserResponse(u *user.User) any {
-	return &openapi.ModelsUserResponse{
+func UserResponse(u *user.User) openapi.ModelsUserResponse {
+	return openapi.ModelsUserResponse{
 		Id:               u.ID,
 		Username:         u.Username.String(),
 		Name:             u.Name,

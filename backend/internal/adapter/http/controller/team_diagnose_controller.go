@@ -1,10 +1,9 @@
 package controller
 
 import (
+	"context"
 	"errors"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
@@ -26,123 +25,151 @@ func NewTeamDiagnoseController(
 	return &TeamDiagnoseController{input: input, wvInput: wvInput, ciInput: ciInput}
 }
 
-func (c *TeamDiagnoseController) GetByToken(ctx echo.Context, token string) error {
-	info, err := c.input.GetByToken(ctx.Request().Context(), token)
+// invalidLinkBody is the 404 body for an unknown invite token (歴史的メッセージを維持).
+func invalidLinkBody() openapi.ModelsNotFoundError {
+	return openapi.ModelsNotFoundError{
+		Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+		Message: "無効なリンクです",
+	}
+}
+
+// GetByToken handles GET /api/team-diagnose/{token}.
+func (c *TeamDiagnoseController) GetByToken(ctx context.Context, req openapi.TeamDiagnoseGetDiagnoseByTokenRequestObject) (openapi.TeamDiagnoseGetDiagnoseByTokenResponseObject, error) {
+	info, err := c.input.GetByToken(ctx, req.Token)
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return notFoundError(ctx, "無効なリンクです")
+			return openapi.TeamDiagnoseGetDiagnoseByToken404JSONResponse(invalidLinkBody()), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-
-	return ctx.JSON(http.StatusOK, presenter.DiagnoseInfoResponse(info))
+	return openapi.TeamDiagnoseGetDiagnoseByToken200JSONResponse(presenter.DiagnoseInfoResponse(info)), nil
 }
 
 // resolveMemberUserID validates the invite token and returns the member's user ID.
 // The token itself is the authorization: only invitees who received the link can act
 // as the member it points to.
-func (c *TeamDiagnoseController) resolveMemberUserID(ctx echo.Context, token string) (string, error) {
-	info, err := c.input.GetByToken(ctx.Request().Context(), token)
+func (c *TeamDiagnoseController) resolveMemberUserID(ctx context.Context, token string) (string, error) {
+	info, err := c.input.GetByToken(ctx, token)
 	if err != nil {
 		return "", err
 	}
 	return info.UserID, nil
 }
 
-// StartWVSession starts a work-values session for the member behind the invite token.
-func (c *TeamDiagnoseController) StartWVSession(ctx echo.Context, token string) error {
-	userID, err := c.resolveMemberUserID(ctx, token)
+// StartWVSession handles POST /api/team-diagnose/{token}/work-values/sessions.
+func (c *TeamDiagnoseController) StartWVSession(ctx context.Context, req openapi.TeamDiagnoseStartDiagnoseWvSessionRequestObject) (openapi.TeamDiagnoseStartDiagnoseWvSessionResponseObject, error) {
+	userID, err := c.resolveMemberUserID(ctx, req.Token)
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return notFoundError(ctx, "無効なリンクです")
+			return openapi.TeamDiagnoseStartDiagnoseWvSession404JSONResponse(invalidLinkBody()), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	s, err := c.wvInput.StartSession(ctx.Request().Context(), userID)
+	s, err := c.wvInput.StartSession(ctx, userID)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.TeamDiagnoseStartDiagnoseWvSession404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.TeamDiagnoseStartDiagnoseWvSession400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.WorkValuesSessionResponse(s))
+	return openapi.TeamDiagnoseStartDiagnoseWvSession201JSONResponse(presenter.WorkValuesSessionResponse(s)), nil
 }
 
-// SubmitWVResult submits work-values responses for the member behind the invite token.
-func (c *TeamDiagnoseController) SubmitWVResult(ctx echo.Context, token, sessionID string) error {
-	userID, err := c.resolveMemberUserID(ctx, token)
+// SubmitWVResult handles POST /api/team-diagnose/{token}/work-values/sessions/{sessionId}/results.
+func (c *TeamDiagnoseController) SubmitWVResult(ctx context.Context, req openapi.TeamDiagnoseSubmitDiagnoseWvResultRequestObject) (openapi.TeamDiagnoseSubmitDiagnoseWvResultResponseObject, error) {
+	userID, err := c.resolveMemberUserID(ctx, req.Token)
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return notFoundError(ctx, "無効なリンクです")
+			return openapi.TeamDiagnoseSubmitDiagnoseWvResult404JSONResponse(invalidLinkBody()), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	var body openapi.ModelsWVSubmitResultRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-
-	r, err := c.wvInput.SubmitResult(ctx.Request().Context(), sessionID, userID, wvSubmitInputFromBody(body))
+	r, err := c.wvInput.SubmitResult(ctx, req.SessionId, userID, wvSubmitInputFromBody(*req.Body))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.TeamDiagnoseSubmitDiagnoseWvResult404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.TeamDiagnoseSubmitDiagnoseWvResult403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.TeamDiagnoseSubmitDiagnoseWvResult400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.WorkValuesResultResponse(r))
+	return openapi.TeamDiagnoseSubmitDiagnoseWvResult201JSONResponse(presenter.WorkValuesResultResponse(r)), nil
 }
 
-// StartCISession starts a career-interest session for the member behind the invite token.
-func (c *TeamDiagnoseController) StartCISession(ctx echo.Context, token string) error {
-	userID, err := c.resolveMemberUserID(ctx, token)
+// StartCISession handles POST /api/team-diagnose/{token}/career-interest/sessions.
+func (c *TeamDiagnoseController) StartCISession(ctx context.Context, req openapi.TeamDiagnoseStartDiagnoseCiSessionRequestObject) (openapi.TeamDiagnoseStartDiagnoseCiSessionResponseObject, error) {
+	userID, err := c.resolveMemberUserID(ctx, req.Token)
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return notFoundError(ctx, "無効なリンクです")
+			return openapi.TeamDiagnoseStartDiagnoseCiSession404JSONResponse(invalidLinkBody()), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	s, err := c.ciInput.StartSession(ctx.Request().Context(), userID)
+	s, err := c.ciInput.StartSession(ctx, userID)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.TeamDiagnoseStartDiagnoseCiSession404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.TeamDiagnoseStartDiagnoseCiSession400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.CareerInterestSessionResponse(s))
+	return openapi.TeamDiagnoseStartDiagnoseCiSession201JSONResponse(presenter.CareerInterestSessionResponse(s)), nil
 }
 
-// SubmitCIResult submits career-interest responses for the member behind the invite token.
-func (c *TeamDiagnoseController) SubmitCIResult(ctx echo.Context, token, sessionID string) error {
-	userID, err := c.resolveMemberUserID(ctx, token)
+// SubmitCIResult handles POST /api/team-diagnose/{token}/career-interest/sessions/{sessionId}/results.
+func (c *TeamDiagnoseController) SubmitCIResult(ctx context.Context, req openapi.TeamDiagnoseSubmitDiagnoseCiResultRequestObject) (openapi.TeamDiagnoseSubmitDiagnoseCiResultResponseObject, error) {
+	userID, err := c.resolveMemberUserID(ctx, req.Token)
 	if err != nil {
 		if errors.Is(err, domainerr.ErrNotFound) {
-			return notFoundError(ctx, "無効なリンクです")
+			return openapi.TeamDiagnoseSubmitDiagnoseCiResult404JSONResponse(invalidLinkBody()), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
-	var body openapi.ModelsCISubmitResultRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-
-	r, err := c.ciInput.SubmitResult(ctx.Request().Context(), sessionID, userID, ciSubmitInputFromBody(body))
+	r, err := c.ciInput.SubmitResult(ctx, req.SessionId, userID, ciSubmitInputFromBody(*req.Body))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.TeamDiagnoseSubmitDiagnoseCiResult404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.TeamDiagnoseSubmitDiagnoseCiResult403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.TeamDiagnoseSubmitDiagnoseCiResult400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.CareerInterestResultResponse(r))
+	return openapi.TeamDiagnoseSubmitDiagnoseCiResult201JSONResponse(presenter.CareerInterestResultResponse(r)), nil
 }
 
-func (c *TeamDiagnoseController) UpdateStatus(ctx echo.Context, token string) error {
-	var body openapi.ModelsUpdateDiagnoseStatusRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request")
-	}
-
-	if err := c.input.UpdateStatus(ctx.Request().Context(), token, (*string)(body.WvStatus), (*string)(body.CiStatus)); err != nil {
+// UpdateStatus handles PUT /api/team-diagnose/{token}/status.
+func (c *TeamDiagnoseController) UpdateStatus(ctx context.Context, req openapi.TeamDiagnoseUpdateDiagnoseStatusRequestObject) (openapi.TeamDiagnoseUpdateDiagnoseStatusResponseObject, error) {
+	if err := c.input.UpdateStatus(ctx, req.Token, (*string)(req.Body.WvStatus), (*string)(req.Body.CiStatus)); err != nil {
 		switch {
 		case errors.Is(err, domainerr.ErrBadRequest):
-			return badRequest(ctx, err.Error())
+			return openapi.TeamDiagnoseUpdateDiagnoseStatus400JSONResponse(badRequestBody(err.Error())), nil
 		case errors.Is(err, domainerr.ErrNotFound):
-			return notFoundError(ctx, "member not found")
+			return openapi.TeamDiagnoseUpdateDiagnoseStatus404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "member not found",
+			}), nil
 		default:
-			return internalError(ctx, err.Error())
+			return nil, err
 		}
 	}
-
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.TeamDiagnoseUpdateDiagnoseStatus204Response{}, nil
 }

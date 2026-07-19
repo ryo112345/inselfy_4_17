@@ -1,4 +1,6 @@
-import "@/external/client/api/client";
+// 記事（一覧・CRUD・公開・決済・画像アップロード）の薄いラッパー層。
+// SSR の cookie 手渡し（fetchArticle の opts.cookie）を含むためシグネチャを維持し、
+// 内部だけ orval 生成の平関数に置き換えている。非2xx は mutator が ApiError を throw する。
 import {
   articlesCreateArticle,
   articlesCreateArticleCheckout,
@@ -9,32 +11,27 @@ import {
   articlesPublishArticle,
   articlesUpdateArticle,
   articlesUploadArticleImage,
-  type ModelsArticleListResponse,
-  type ModelsArticleResponse,
-  type ModelsCreateArticleRequest,
-  type ModelsUpdateArticleRequest,
-} from "@/external/client/api/generated";
-import { run } from "@/lib/api-result";
+} from "@/external/client/api/orval/generated/endpoints/articles/articles";
+import type {
+  ModelsArticleListResponse,
+  ModelsArticleResponse,
+  ModelsCreateArticleRequest,
+  ModelsUpdateArticleRequest,
+} from "@/external/client/api/orval/generated/models";
 
 export type ArticleItem = ModelsArticleResponse;
 export type ArticleListResponse = ModelsArticleListResponse;
 
 export async function fetchArticles(limit = 20, offset = 0): Promise<ArticleListResponse> {
-  return run(articlesListArticles({ query: { limit, offset } }), "Failed to fetch articles");
+  return articlesListArticles({ limit, offset });
 }
 
 export async function fetchMyArticles(limit = 50, offset = 0): Promise<ArticleListResponse> {
-  return run(articlesListMyArticles({ query: { limit, offset } }), "Failed to fetch articles");
+  return articlesListMyArticles({ limit, offset });
 }
 
 export async function fetchArticle(id: string, opts?: { cookie?: string }): Promise<ArticleItem> {
-  return run(
-    articlesGetArticle({
-      path: { articleId: id },
-      headers: opts?.cookie ? { cookie: opts.cookie } : undefined,
-    }),
-    "Failed to fetch article",
-  );
+  return articlesGetArticle(id, opts?.cookie ? { headers: { cookie: opts.cookie } } : undefined);
 }
 
 export async function createArticle(data: {
@@ -45,12 +42,7 @@ export async function createArticle(data: {
   coverImageUrl?: string | null;
   tags?: string[];
 }): Promise<ArticleItem> {
-  return run(
-    articlesCreateArticle({
-      body: data as ModelsCreateArticleRequest,
-    }),
-    "Failed to create article",
-  );
+  return articlesCreateArticle(data as ModelsCreateArticleRequest);
 }
 
 export async function updateArticle(
@@ -64,31 +56,22 @@ export async function updateArticle(
     tags?: string[];
   },
 ): Promise<ArticleItem> {
-  return run(
-    articlesUpdateArticle({
-      path: { articleId: id },
-      body: data as ModelsUpdateArticleRequest,
-    }),
-    "Failed to update article",
-  );
+  return articlesUpdateArticle(id, data as ModelsUpdateArticleRequest);
 }
 
 export async function publishArticle(id: string): Promise<ArticleItem> {
-  return run(articlesPublishArticle({ path: { articleId: id } }), "Failed to publish article");
+  return articlesPublishArticle(id);
 }
 
 export async function deleteArticle(id: string): Promise<void> {
-  await run(articlesDeleteArticle({ path: { articleId: id } }), "Failed to delete article");
+  await articlesDeleteArticle(id);
 }
 
 export async function createCheckoutSession(articleId: string): Promise<{ url: string }> {
-  return run(
-    articlesCreateArticleCheckout({ path: { articleId } }),
-    "Failed to create checkout session",
-  );
+  return articlesCreateArticleCheckout(articleId);
 }
 
 export async function uploadArticleImage(file: File): Promise<string> {
-  const data = await run(articlesUploadArticleImage({ body: { file } }), "Failed to upload image");
+  const data = await articlesUploadArticleImage({ file });
   return data.url;
 }

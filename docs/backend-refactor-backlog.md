@@ -23,6 +23,7 @@
 | 7 | [x] | initializer.go（775行）の機能別分割 | 中 | 整理 |
 | 8 | [x] | ルート登録の二重管理解消（生成 ServerInterface vs wire_*.go 手動登録） | 中〜大 | 再発防止 |
 | 9 | [x] | displayName cookie の廃止 | 小 | 整理 |
+| 10 | [ ] | 一覧系のタイブレーク無し ORDER BY / 不安定ソートの決定化 | 小 | 整理 |
 
 #1 と #2 は controller-clean-route-refactor.md の「全件完了後の仕上げ」をこちらに引き継いだもの。
 #8 と #9 はフロントリファクタ Phase E（2026-07-09、docs/frontend-refactor-plan.md）の作業中に
@@ -584,9 +585,15 @@ OIDC は「長期クレデンシャルをどこにも保存しない」設計と
 
 ## #8 ルート登録の二重管理解消
 
-**2026-07-10 完了（案b採用・ユーザー確認済み）:** 手動 wire に一本化し、ドリフト検査テスト
-`internal/driver/initializer/api/spec_drift_test.go` を追加。server.go / ServerInterface 実装は
-「実装漏れ検知」用として現状維持。
+**2026-07-16 更新（strict-server 移行 Phase 4 で案a相当に移行）:** 下記の案b（手動 wire＋双方向
+ドリフト検査）は strict-server 移行で上書きされた。現構成は生成 `HandlerWithOptions`
+（std-http 版の RegisterHandlers 相当）が全スペックルートを登録し、スペック→ルーターの
+登録漏れは構造的に起きない。ドリフト検査は「ルーター→スペック」（スペック外ルートの
+allowlist 検査）のみ存続。経緯と実装の詳細は `docs/strict-server-migration.md` Phase 4 を参照。
+
+**2026-07-10 完了（案b採用・ユーザー確認済み・のちに Phase 4 で上書き）:** 手動 wire に一本化し、
+ドリフト検査テスト `internal/driver/initializer/api/spec_drift_test.go` を追加。
+server.go / ServerInterface 実装は「実装漏れ検知」用として現状維持。
 
 - **準備リファクタ:** `BuildServer` からルート登録部を `registerRoutes(ctx, e, d)` に純粋抽出
   （認証MW構築・全 wire 呼び出し・ws ルート登録まで。goroutine 起動＝wsHub.Run / relay /
@@ -653,6 +660,28 @@ HttpOnly なのでクライアント JS からは読めず、SSR 側の利用も
 3. 検証: ログイン→プロフィール SSR（isOwner フォールバック）→ログアウトの一連。
 
 **コミット:** `refactor(backend): stop issuing displayName cookie`
+
+---
+
+## #10 一覧系のタイブレーク無し ORDER BY / 不安定ソートの決定化
+
+**現状（2026-07-16、strict-server 移行 3-4 のスモークで発見）:** 同点タイの並びが
+呼び出しごと・プロセスごとに揺れる箇所が複数ある。挙動バグではないが、
+スモーク比較やスナップショットテストの偽差分源になる（diff_bodies.py に
+正規化を足して回避中）。
+
+- `presenter.WorkValuesResultResponse`: `r.Mu`（map、イテレーション順ランダム）を
+  `sort.Slice`（不安定）で displayScore 降順に並べるため、同点 needs の順序と
+  rank 割当がリクエストごとに揺れる。`workvalues.TopNeedIDs`（タレント検索の
+  top ラベル）も同型。→ `sort.SliceStable` ＋ needId 等の第2キー。
+- `ListUsers` / `ListAIReports` 系 SQL: `ORDER BY created_at DESC` にタイブレークが
+  無く、seed 一括投入の同時刻行が heap 順依存。→ `, id` を足す。
+
+**注意:** 並び順の変更はレスポンス微変更なので、直したら diff_bodies.py の
+該当正規化（`SORT_BEFORE_DIFF` の users/reports、`norm_wv_needs`）は残しつつ
+スモークで前後確認する。
+
+**コミット例:** `refactor(backend): 一覧・スコア順のタイブレークを決定化`
 
 ---
 

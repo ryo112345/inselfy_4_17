@@ -148,3 +148,14 @@ func toDomainExperience(row *generated.Experience) *experience.Experience {
 		UpdatedAt:   row.UpdatedAt.Time,
 	}
 }
+
+// DeleteByUserID removes all experiences of the user (resume-draft approval
+// replaces the whole work history). Deleting zero rows is not an error.
+func (r *ExperienceRepository) DeleteByUserID(ctx context.Context, userID string) error {
+	q := queriesForContext(ctx, r.queries)
+	pgID, err := parseUUID(userID)
+	if err != nil {
+		return domainerr.ErrBadRequest
+	}
+	return q.DeleteExperiencesByUserID(ctx, pgID)
+}

@@ -7,15 +7,15 @@ import (
 )
 
 // FollowStatusResponse converts a follow status to its API response.
-func FollowStatusResponse(status *follow.FollowStatus) any {
-	return &openapi.ModelsFollowStatusResponse{
+func FollowStatusResponse(status *follow.FollowStatus) openapi.ModelsFollowStatusResponse {
+	return openapi.ModelsFollowStatusResponse{
 		Following:  status.Following,
 		FollowedBy: status.FollowedBy,
 	}
 }
 
 // FollowUsersResponse converts a list of follow users to their API response.
-func FollowUsersResponse(users []*follow.FollowWithUser, total int) any {
+func FollowUsersResponse(users []*follow.FollowWithUser, total int) openapi.ModelsFollowUserListResponse {
 	items := make([]openapi.ModelsFollowUserResponse, len(users))
 	for i, u := range users {
 		items[i] = openapi.ModelsFollowUserResponse{
@@ -27,5 +27,5 @@ func FollowUsersResponse(users []*follow.FollowWithUser, total int) any {
 			CreatedAt: u.CreatedAt,
 		}
 	}
-	return &openapi.ModelsFollowUserListResponse{Items: items, Total: cast.Int32(total)}
+	return openapi.ModelsFollowUserListResponse{Items: items, Total: cast.Int32(total)}
 }

@@ -1,11 +1,16 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  getCandidateScoutsGetCandidateScoutDetailQueryKey,
+  useCandidateScoutsGetCandidateScoutDetail,
+  useCandidateScoutsRespondToScout,
+} from "@/external/client/api/orval/generated/endpoints/candidate-scouts/candidate-scouts";
 import { useAuth } from "@/features/auth/auth-context";
-import { fetchReceivedScoutDetail, respondToScout } from "@/features/scout/api";
-import type { ScoutDetail, ScoutReply, ScoutStatus } from "@/features/scout/types";
+import type { ScoutReply, ScoutStatus } from "@/features/scout/types";
 import { useUnreadScout } from "@/features/scout/unread-context";
 import { daysRemaining, formatDateCompact, formatDateTimeCompact } from "@/lib/date";
 
@@ -26,35 +31,27 @@ export default function ScoutDetailPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { refresh: refreshUnread } = useUnreadScout();
 
-  const [detail, setDetail] = useState<ScoutDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [responding, setResponding] = useState(false);
+  const queryClient = useQueryClient();
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
 
-  const loadDetail = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchReceivedScoutDetail(scoutId);
-      setDetail(data);
-      refreshUnread();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "読み込みに失敗しました");
-    } finally {
-      setLoading(false);
-    }
-  }, [scoutId, refreshUnread]);
+  const detailKey = getCandidateScoutsGetCandidateScoutDetailQueryKey(scoutId);
+  const detailQuery = useCandidateScoutsGetCandidateScoutDetail(scoutId, {
+    query: { queryKey: detailKey, enabled: !authLoading && !!user },
+  });
+  const detail = detailQuery.data ?? null;
+  const loading = detailQuery.isPending;
+  const error = detailQuery.error?.message ?? null;
 
+  // 詳細取得（既読化）が成功するたびに未読バッジを更新する（従来の loadDetail 内処理と同じ）
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) return;
-    loadDetail();
-  }, [authLoading, user, loadDetail]);
+    if (detailQuery.data) refreshUnread();
+  }, [detailQuery.data, refreshUnread]);
+
+  const respondMutation = useCandidateScoutsRespondToScout();
+  const responding = respondMutation.isPending;
 
   function showToast(message: string, type: "success" | "error" = "success") {
     setToast({ message, type });
@@ -63,15 +60,12 @@ export default function ScoutDetailPage() {
 
   async function handleRespond(response: "interested" | "declined") {
     if (responding) return;
-    setResponding(true);
     try {
-      await respondToScout(scoutId, response);
+      await respondMutation.mutateAsync({ scoutId, data: { response } });
       showToast(response === "interested" ? "興味ありと回答しました" : "辞退しました");
-      await loadDetail();
+      await queryClient.invalidateQueries({ queryKey: detailKey });
     } catch {
       showToast("応答に失敗しました", "error");
-    } finally {
-      setResponding(false);
     }
   }
 

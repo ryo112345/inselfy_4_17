@@ -12,17 +12,17 @@ import (
 var scoutConv scoutConverter = &scoutConverterImpl{}
 
 // ScoutMessageResponse builds the single scout-message API response.
-func ScoutMessageResponse(m *scout.ScoutMessageWithNames) any {
+func ScoutMessageResponse(m *scout.ScoutMessageWithNames) *openapi.ModelsScoutMessageResponse {
 	return scoutConv.ToScoutMessageResponse(m)
 }
 
 // ScoutUnreadCountResponse builds the unread-count API response.
-func ScoutUnreadCountResponse(count int) any {
+func ScoutUnreadCountResponse(count int) *openapi.ModelsUnreadCountResponse {
 	return &openapi.ModelsUnreadCountResponse{Count: cast.Int32(count)}
 }
 
 // ScoutMessagesResponse builds the paginated scout-message list API response.
-func ScoutMessagesResponse(msgs []*scout.ScoutMessageWithNames, total int) any {
+func ScoutMessagesResponse(msgs []*scout.ScoutMessageWithNames, total int) *openapi.ModelsScoutListResponse {
 	items := make([]openapi.ModelsScoutMessageResponse, len(msgs))
 	for i, m := range msgs {
 		items[i] = *scoutConv.ToScoutMessageResponse(m)
@@ -31,7 +31,7 @@ func ScoutMessagesResponse(msgs []*scout.ScoutMessageWithNames, total int) any {
 }
 
 // ScoutDetailResponse builds the scout-detail API response.
-func ScoutDetailResponse(m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) any {
+func ScoutDetailResponse(m *scout.ScoutMessageWithNames, replies []*scout.ScoutReply) *openapi.ModelsScoutDetailResponse {
 	rr := scoutConv.ToScoutReplyResponses(replies)
 	if rr == nil {
 		rr = []openapi.ModelsScoutReplyResponse{} // keep rendering "replies": [] (not null)
@@ -43,7 +43,7 @@ func ScoutDetailResponse(m *scout.ScoutMessageWithNames, replies []*scout.ScoutR
 }
 
 // ScoutCreditsResponse builds the scout-credits API response.
-func ScoutCreditsResponse(c *scout.ScoutCredit) any {
+func ScoutCreditsResponse(c *scout.ScoutCredit) *openapi.ModelsScoutCreditsResponse {
 	return &openapi.ModelsScoutCreditsResponse{
 		Balance:           c.Balance,
 		MonthlyAllowance:  c.MonthlyAllowance,
@@ -53,7 +53,7 @@ func ScoutCreditsResponse(c *scout.ScoutCredit) any {
 }
 
 // ScoutQualityResponse builds the scout quality-score API response.
-func ScoutQualityResponse(q *scout.QualityScore) any {
+func ScoutQualityResponse(q *scout.QualityScore) *openapi.ModelsScoutQualityScoreResponse {
 	return &openapi.ModelsScoutQualityScoreResponse{
 		ReplyRate14d:      q.ReplyRate14d,
 		Level:             openapi.ModelsScoutQualityLevel(q.Level),
@@ -67,7 +67,7 @@ func ScoutQualityResponse(q *scout.QualityScore) any {
 }
 
 // ScoutSettingsResponse builds the scout-settings API response.
-func ScoutSettingsResponse(s *scout.UserScoutSettings) any {
+func ScoutSettingsResponse(s *scout.UserScoutSettings) *openapi.ModelsScoutSettingsResponse {
 	return &openapi.ModelsScoutSettingsResponse{
 		AcceptingScouts: s.AcceptingScouts,
 		UpdatedAt:       s.UpdatedAt,
@@ -75,7 +75,7 @@ func ScoutSettingsResponse(s *scout.UserScoutSettings) any {
 }
 
 // ScoutDashboardResponse builds the scout-dashboard API response.
-func ScoutDashboardResponse(stats *scout.DashboardStats) any {
+func ScoutDashboardResponse(stats *scout.DashboardStats) *openapi.ModelsScoutDashboardResponse {
 	last := stats.Credits.LastReplenishedAt
 	nextReplenish := time.Date(last.Year(), last.Month()+1, 1, 0, 0, 0, 0, last.Location())
 

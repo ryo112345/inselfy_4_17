@@ -2,16 +2,15 @@ package initializer
 
 // DI wiring is split by feature across sibling wire_*.go files. This file
 // keeps the server skeleton: config/pool setup, middleware order, and the
-// calls into each feature's wiring function. Each wire function receives the
-// shared deps plus, explicitly in its signature, the auth middlewares its
-// routes need.
+// calls into each feature's wiring function. Auth is spec-driven: the OpenAPI
+// validator middleware enforces the spec's security requirements (including
+// AdminAuth for /api/admin), so wire functions register plain routes.
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
-	echomw "github.com/labstack/echo/v4/middleware"
 
 	sqlcgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/db/sqlc"
 	jwtgw "github.com/akiyama/inselfy/backend/internal/adapter/gateway/jwt"
@@ -27,8 +26,6 @@ import (
 )
 
 // deps bundles the dependencies shared across feature wiring files.
-// Auth middlewares are intentionally NOT part of deps: each wire function
-// declares the ones it uses in its signature.
 type deps struct {
 	cfg  *config.Config
 	pool *pgxpool.Pool
@@ -36,6 +33,11 @@ type deps struct {
 
 	jwtService  port.JWTService
 	fileStorage port.FileStorage
+	// privateStorage holds files that must NOT be publicly served (resume
+	// PDFs). Local keys live outside ./uploads so the /api/uploads static
+	// route can't reach them; R2 shares the bucket but the URL is never
+	// exposed (download goes through the authenticated admin endpoint).
+	privateStorage port.FileStorage
 
 	// Repositories shared by multiple interactors/controllers.
 	userRepo         port.UserRepository
@@ -47,7 +49,7 @@ type deps struct {
 	participantRepo  port.ConversationParticipantRepository
 }
 
-func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error) {
+func BuildServer(ctx context.Context) (http.Handler, *config.Config, func(), error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return nil, nil, func() {}, err
@@ -61,11 +63,14 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 
 	jwtService := jwtgw.NewService(cfg.JWTSecret)
 
-	var fileStorage port.FileStorage
+	var fileStorage, privateStorage port.FileStorage
 	if cfg.StorageBackend == "r2" {
 		fileStorage = storagegw.NewR2(cfg.R2AccountID, cfg.R2AccessKeyID, cfg.R2SecretAccessKey, cfg.R2Bucket, cfg.R2PublicURL)
+		// 非公開バケット（public dev URL 無効）。publicURL は空 = URL を作らない。
+		privateStorage = storagegw.NewR2(cfg.R2AccountID, cfg.R2AccessKeyID, cfg.R2SecretAccessKey, cfg.R2PrivateBucket, "")
 	} else {
 		fileStorage = storagegw.NewLocal("./uploads", "/api/uploads")
+		privateStorage = storagegw.NewLocal("./private-uploads", "")
 	}
 
 	d := &deps{
@@ -73,8 +78,9 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		pool: pool,
 		tx:   driverdb.NewTxManager(pool),
 
-		jwtService:  jwtService,
-		fileStorage: fileStorage,
+		jwtService:     jwtService,
+		fileStorage:    fileStorage,
+		privateStorage: privateStorage,
 
 		userRepo:         sqlcgw.NewUserRepository(pool),
 		notificationRepo: sqlcgw.NewNotificationRepository(pool),
@@ -85,36 +91,34 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 		participantRepo:  sqlcgw.NewConversationParticipantRepository(pool),
 	}
 
-	e := echo.New()
-	// 構造化ログに混ざる非JSON出力（バナー・起動行）を抑制する
-	e.HideBanner = true
-	e.HidePort = true
-	e.Use(echomw.Recover())
-	// Structured access log + request-scoped logger with Cloud Trace
-	// correlation (see adapter/http/middleware/logging_middleware.go).
-	e.Use(authmw.RequestLogging(cfg.GoogleCloudProject))
-
-	// Validate requests against the API contract (body schema, params, enums).
-	// Routes outside the spec pass through; auth stays with the middlewares below.
-	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML)
+	sr := newStrictRouter()
+	interviewCtrl, wsHub, err := registerRoutes(ctx, sr, d)
 	if err != nil {
 		cleanup()
 		return nil, nil, func() {}, err
 	}
-	e.Use(oapiValidator)
 
-	e.Use(echomw.CORSWithConfig(echomw.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000"},
-		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.OPTIONS},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowCredentials: true,
-	}))
-
-	interviewCtrl, wsHub, err := registerRoutes(ctx, e, d)
+	// Validate requests against the API contract (body schema, params, enums)
+	// and enforce the spec's security requirements (spec-driven auth,
+	// including AdminAuth); see docs/strict-server-migration.md Phase 1-2.
+	oapiValidator, err := authmw.OpenAPIRequestValidator(openapigen.SpecYAML, jwtService, pool, cfg.AdminAPIKey, cfg.ValidateResponses)
 	if err != nil {
 		cleanup()
 		return nil, nil, func() {}, err
 	}
+
+	// Middleware chain, outermost first — the same order as the echo chain
+	// this replaced: Recover → RequestLogging (structured access log + Cloud
+	// Trace correlation) → OpenAPI validation/auth → CORS → router.
+	var handler http.Handler = sr
+	handler = authmw.CORS(authmw.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000", "http://127.0.0.1:3000"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodPatch, http.MethodOptions},
+		AllowHeaders: []string{"Origin", "Content-Type", "Accept", "Authorization"},
+	})(handler)
+	handler = oapiValidator(handler)
+	handler = authmw.RequestLogging(cfg.GoogleCloudProject)(handler)
+	handler = authmw.Recover()(handler)
 
 	// --- Background goroutines (not needed for route registration) ---
 	go wsHub.Run()
@@ -128,43 +132,76 @@ func BuildServer(ctx context.Context) (*echo.Echo, *config.Config, func(), error
 	sched := scheduler.New(d.scoutMsgRepo, sqlcgw.NewScoutCreditRepository(pool))
 	sched.Start(ctx)
 
-	return e, cfg, cleanup, nil
+	return handler, cfg, cleanup, nil
 }
 
-// registerRoutes wires every route the server exposes onto e. Split out from
-// BuildServer so tests can build the full route table without a live DB or
-// background goroutines (see spec_drift_test.go).
-func registerRoutes(ctx context.Context, e *echo.Echo, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
-	jwtMW := authmw.JWTAuth(d.jwtService)
-	optionalJwtMW := authmw.OptionalJWTAuth(d.jwtService)
-	companyJwtMW := authmw.CompanyJWTAuth(d.jwtService)
-	// 書き込みは本人（候補者JWT）のみ、読み取りはログイン済みの候補者/企業どちらでも可
-	anyJwtMW := authmw.AnyJWTAuth(d.jwtService)
+// registerRoutes wires every route the server exposes onto sr: DI assembly
+// via the wire_*.go files, then the generated HandlerWithOptions registers
+// all spec routes (spec→router coverage is guaranteed by codegen), and the
+// spec-external routes (uploads, health, WS; the Stripe webhook lives in
+// wireContent) are added by hand. Split out from BuildServer so tests can
+// build the full route table without a live DB or background goroutines
+// (see spec_drift_test.go).
+func registerRoutes(ctx context.Context, sr *strictRouter, d *deps) (*httpcontroller.InterviewController, *ws.Hub, error) {
+	// 認可はスペック駆動: openapi.yaml の security 定義を OpenAPIRequestValidator
+	// が検証する（middleware/openapi_validator.go）。/api/admin の AdminAuth も
+	// 含め、per-route の認証MWは無い。
 
-	// --- Static uploads ---
-	e.Static("/api/uploads", "./uploads")
+	strictSrv := httpcontroller.NewStrictServer()
 
-	wireHealth(e, d.pool)
-	wireAuth(e, d, jwtMW, companyJwtMW)
-	wireUser(e, d, jwtMW)
-	wireContent(e, d, jwtMW, optionalJwtMW, companyJwtMW)
-	wireSearch(e, d, jwtMW)
-	wireDiagnosis(e, d, jwtMW, anyJwtMW)
-	wireCompany(e, d, companyJwtMW)
-	wireScout(e, d, jwtMW, companyJwtMW)
-	wireJobs(e, d, jwtMW, companyJwtMW)
-	wireMessaging(e, d, jwtMW, companyJwtMW)
-	interviewCtrl := wireInterview(e, d, jwtMW, companyJwtMW)
-	if err := wireAdmin(ctx, e, d, jwtMW, anyJwtMW); err != nil {
+	// --- Static uploads（スペック外・echo e.Static 相当）---
+	// http.Dir が path traversal を遮断し、ディレクトリは echo と同じく 404。
+	uploadsRoot := http.Dir("./uploads")
+	sr.handle("GET /api/uploads/{path...}", func(w http.ResponseWriter, r *http.Request) {
+		f, err := uploadsRoot.Open(r.PathValue("path"))
+		if err != nil {
+			writeJSON(w, http.StatusNotFound, map[string]string{"message": http.StatusText(http.StatusNotFound)})
+			return
+		}
+		defer func() { _ = f.Close() }()
+		st, err := f.Stat()
+		if err != nil || st.IsDir() {
+			writeJSON(w, http.StatusNotFound, map[string]string{"message": http.StatusText(http.StatusNotFound)})
+			return
+		}
+		http.ServeContent(w, r, st.Name(), st.ModTime(), f)
+	})
+
+	wireHealth(sr, d.pool)
+	wireAuth(strictSrv, d)
+	wireUser(sr, strictSrv, d)
+	wireContent(sr, strictSrv, d)
+	wireSearch(strictSrv, d)
+	wireDiagnosis(strictSrv, d)
+	wireCompany(strictSrv, d)
+	wireScout(strictSrv, d)
+	wireJobs(strictSrv, d)
+	wireMessaging(strictSrv, d)
+	interviewCtrl := wireInterview(strictSrv, d)
+	if err := wireAdmin(ctx, sr, strictSrv, d); err != nil {
 		return nil, nil, err
 	}
 
-	// --- WebSocket ---
+	// 全スペックルートを生成コードに登録させる（sr が BaseRouter）。
+	// RequestIntoContext: auth 系 handler が cookie 読取り・Secure 判定に使う
+	// *http.Request を context 経由で渡す（strict 署名には現れない）。
+	strictHandler := openapigen.NewStrictHandlerWithOptions(strictSrv,
+		[]openapigen.StrictMiddlewareFunc{httpcontroller.RequestIntoContext},
+		openapigen.StrictHTTPServerOptions{
+			RequestErrorHandlerFunc:  httpcontroller.WriteRequestError,
+			ResponseErrorHandlerFunc: httpcontroller.WriteResponseError,
+		})
+	openapigen.HandlerWithOptions(strictHandler, openapigen.StdHTTPServerOptions{
+		BaseRouter:       sr,
+		ErrorHandlerFunc: httpcontroller.WriteRequestError,
+	})
+
+	// --- WebSocket（スペック外）---
 	wsHub := ws.NewHub()
 	wsTickets := ws.NewTicketStore()
 	wsCtrl := httpcontroller.NewWSController(wsHub, d.jwtService, wsTickets)
-	e.GET("/api/ws/ticket", wsCtrl.IssueTicket)
-	e.GET("/api/ws", wsCtrl.HandleWS)
+	sr.handle("GET /api/ws/ticket", wsCtrl.IssueTicket)
+	sr.handle("GET /api/ws", wsCtrl.HandleWS)
 
 	return interviewCtrl, wsHub, nil
 }

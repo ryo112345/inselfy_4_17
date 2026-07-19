@@ -4,6 +4,7 @@ info:
   version: 1.0.0
 tags:
   - name: Users
+  - name: Resumes
   - name: Experiences
   - name: Educations
   - name: Skills
@@ -31,7 +32,1351 @@ tags:
   - name: Interviews
   - name: IntegratedReport
   - name: Search
+  - name: Admin
 paths:
+  /api/admin/admins:
+    get:
+      operationId: Admin_listAdmins
+      summary: List admins
+      description: 管理者一覧取得
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+    post:
+      operationId: Admin_createAdmin
+      summary: Create an admin
+      description: 管理者作成
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminItem'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.CreateAdminRequest'
+      security:
+        - AdminAuth: []
+  /api/admin/admins/{adminId}:
+    delete:
+      operationId: Admin_deleteAdmin
+      summary: Delete an admin
+      description: 管理者削除
+      parameters:
+        - name: adminId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/admins/{adminId}/api-key:
+    post:
+      operationId: Admin_issueAdminApiKey
+      summary: Issue a personal API token for an admin
+      description: 個人APIトークン発行（トークンは一度だけ返る）
+      parameters:
+        - name: adminId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminIssueKeyResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/ci-reports/list:
+    get:
+      operationId: Admin_listCiReports
+      summary: List generated Career Interest AI reports
+      description: 生成済み Career Interest AIレポート一覧
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminAiReportListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/ci-reports/pending:
+    get:
+      operationId: Admin_listPendingCiSessions
+      summary: List Career Interest sessions without an AI report
+      description: AIレポート未生成の Career Interest セッション一覧
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminPendingSessionsResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/ci-sessions/{sessionId}/ai-report:
+    put:
+      operationId: Admin_saveCiReport
+      summary: Save a Career Interest AI report
+      description: Career Interest AIレポート保存（upsert）
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminSavedAiReportResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.AdminSaveReportRequest'
+      security:
+        - AdminAuth: []
+    get:
+      operationId: Admin_getCiReport
+      summary: Get a Career Interest AI report
+      description: Career Interest AIレポート取得
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AiReportResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/ci-sessions/{sessionId}/prompt:
+    get:
+      operationId: Admin_getCiPrompt
+      summary: Get the report-generation prompt for a Career Interest session
+      description: Career Interest レポート生成用プロンプト取得
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminPromptResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/ci-sessions/{sessionId}/reset-viewed:
+    post:
+      operationId: Admin_resetCiReportViewed
+      summary: Reset the viewed flag of a Career Interest AI report
+      description: Career Interest AIレポートの閲覧済みフラグをリセット
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminMessageResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/companies:
+    get:
+      operationId: Admin_listCompanies
+      summary: List company accounts for the admin console
+      description: 企業一覧取得（ページング・ステータス絞り込み付き）
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: ページ番号（1始まり、デフォルト1）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: per_page
+          in: query
+          required: false
+          description: 1ページあたり件数（1〜100、デフォルト20）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: status
+          in: query
+          required: false
+          description: 承認ステータスでの絞り込み
+          schema:
+            $ref: '#/components/schemas/Models.CompanyStatus'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminCompanyListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/companies/{companyId}/bypass-login:
+    post:
+      operationId: Admin_bypassLoginAsCompany
+      summary: Log in as a company (bypass)
+      description: 企業として成り代わりログイン（cookie を焼く）
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminCompanyBypassLoginResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/companies/{companyId}/status:
+    patch:
+      operationId: Admin_updateCompanyStatus
+      summary: Update a company's approval status
+      description: 企業の承認ステータス更新
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminCompanyItem'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.UpdateCompanyStatusRequest'
+      security:
+        - AdminAuth: []
+  /api/admin/integrated-reports/list:
+    get:
+      operationId: Admin_listIntegratedReports
+      summary: List generated integrated reports
+      description: 生成済み統合レポート一覧
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminIntegratedReportListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/integrated-reports/pending:
+    get:
+      operationId: Admin_listPendingIntegratedRequests
+      summary: List integrated report requests without a report
+      description: 統合レポート未生成のリクエスト一覧
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminPendingIntegratedRequestsResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/integrated-requests/{requestId}/ai-report:
+    put:
+      operationId: Admin_saveIntegratedReport
+      summary: Save an integrated report
+      description: 統合レポート保存（upsert）
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminSavedIntegratedReportResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.AdminSaveReportRequest'
+      security:
+        - AdminAuth: []
+    get:
+      operationId: Admin_getIntegratedReportAsAdmin
+      summary: Get an integrated report
+      description: 統合レポート取得
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.IntegratedReportResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/integrated-requests/{requestId}/prompt:
+    get:
+      operationId: Admin_getIntegratedPrompt
+      summary: Get the report-generation prompt for an integrated report request
+      description: 統合レポート生成用プロンプト取得
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminPromptResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/integrated-requests/{requestId}/reset-viewed:
+    post:
+      operationId: Admin_resetIntegratedReportViewed
+      summary: Reset the viewed flag of an integrated report
+      description: 統合レポートの閲覧済みフラグをリセット
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminMessageResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/reports/list:
+    get:
+      operationId: Admin_listWvReports
+      summary: List generated Work Values AI reports
+      description: 生成済み Work Values AIレポート一覧
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminAiReportListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/reports/pending:
+    get:
+      operationId: Admin_listPendingWvSessions
+      summary: List Work Values sessions without an AI report
+      description: AIレポート未生成の Work Values セッション一覧
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminPendingSessionsResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/resumes:
+    get:
+      operationId: Admin_listResumes
+      summary: List resume uploads
+      description: 職務経歴書アップロード一覧（ステータス絞り込み付き）
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: ステータスでの絞り込み
+          schema:
+            $ref: '#/components/schemas/Models.ResumeUploadStatus'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/resumes/{resumeId}/approve:
+    post:
+      operationId: Admin_approveResume
+      summary: Approve a resume draft and apply it to the profile
+      description: 職務経歴書を承認しプロフィールへ反映
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeItem'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/resumes/{resumeId}/download:
+    get:
+      operationId: Admin_downloadResume
+      summary: Download a resume PDF
+      description: 職務経歴書PDFダウンロード
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/resumes/{resumeId}/draft:
+    get:
+      operationId: Admin_getResumeDraft
+      summary: Get a resume profile draft
+      description: 職務経歴書ドラフト取得
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeDraftResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+    put:
+      operationId: Admin_saveResumeDraft
+      summary: Save a resume profile draft
+      description: 職務経歴書ドラフト保存（バリデーション成功で reviewing に遷移）
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeDraftSaveResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {}
+      security:
+        - AdminAuth: []
+  /api/admin/resumes/{resumeId}/reject:
+    post:
+      operationId: Admin_rejectResume
+      summary: Reject a resume upload
+      description: 職務経歴書を却下
+      parameters:
+        - name: resumeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminResumeItem'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/sessions/{sessionId}/ai-report:
+    put:
+      operationId: Admin_saveWvReport
+      summary: Save a Work Values AI report
+      description: Work Values AIレポート保存（upsert）
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminSavedAiReportResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Models.AdminSaveReportRequest'
+      security:
+        - AdminAuth: []
+    get:
+      operationId: Admin_getWvReport
+      summary: Get a Work Values AI report
+      description: Work Values AIレポート取得
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AiReportResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/sessions/{sessionId}/prompt:
+    get:
+      operationId: Admin_getWvPrompt
+      summary: Get the report-generation prompt for a Work Values session
+      description: Work Values レポート生成用プロンプト取得
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminPromptResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/sessions/{sessionId}/reset-viewed:
+    post:
+      operationId: Admin_resetWvReportViewed
+      summary: Reset the viewed flag of a Work Values AI report
+      description: Work Values AIレポートの閲覧済みフラグをリセット
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminMessageResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/sessions/{sessionId}/scores:
+    get:
+      operationId: Admin_getWvSessionScores
+      summary: Get the raw scores of a Work Values session
+      description: Work Values セッションのスコア取得（レポート生成用）
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminSessionScoresResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/users:
+    get:
+      operationId: Admin_listUsers
+      summary: List users for the admin console
+      description: ユーザー一覧取得（ページング・検索付き）
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: ページ番号（1始まり、デフォルト1）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: per_page
+          in: query
+          required: false
+          description: 1ページあたり件数（1〜100、デフォルト20）
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: q
+          in: query
+          required: false
+          description: ユーザー名・表示名・メールの部分一致検索
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminUserListResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/users/{userId}:
+    delete:
+      operationId: Admin_deleteUser
+      summary: Delete a user
+      description: ユーザー削除
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
+  /api/admin/users/{userId}/bypass-login:
+    post:
+      operationId: Admin_bypassLoginAsUser
+      summary: Log in as a user (bypass)
+      description: ユーザーとして成り代わりログイン（cookie を焼く）
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Models.Uuid'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.AdminUserBypassLoginResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+      tags:
+        - Admin
+      security:
+        - AdminAuth: []
   /api/applications:
     post:
       operationId: CandidateApplications_applyToJob
@@ -1325,6 +2670,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: |-
+            未承認アカウントでのログイン拒否エラー。
+            認証情報は正しいが、アカウントが承認待ち（ACCOUNT_PENDING）または
+            却下済み（ACCOUNT_REJECTED）のためログインできない。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.CompanyAccountStatusError'
       tags:
         - CompanyAuth
       requestBody:
@@ -1549,7 +2903,7 @@ paths:
     post:
       operationId: CompanyInterviews_cancelCompanyInterview
       summary: Cancel an interview as the company
-      description: 面接キャンセル（企業認証）
+      description: 面接キャンセル（企業認証）。他社の面接は 403
       parameters:
         - name: interviewId
           in: path
@@ -1562,7 +2916,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Models.StatusOkResponse'
+                $ref: '#/components/schemas/Models.CancelInterviewResponse'
         '400':
           description: Bad Request エラー
           content:
@@ -1575,6 +2929,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -1801,6 +3161,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -1840,6 +3206,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -1881,6 +3253,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -1895,7 +3273,7 @@ paths:
     post:
       operationId: CompanyMessaging_startCompanyConversation
       summary: Start a conversation as the company
-      description: 会話開始（企業認証）
+      description: 会話開始（企業認証）。既に会話が存在する場合は 409
       parameters: []
       responses:
         '201':
@@ -1922,6 +3300,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - Messaging
       requestBody:
@@ -2716,6 +4100,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - ScoutTemplates
       requestBody:
@@ -2784,6 +4174,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -2823,6 +4219,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -2864,6 +4266,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -2911,6 +4319,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
       tags:
         - CompanyScouts
       requestBody:
@@ -3089,6 +4503,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3125,6 +4545,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3714,6 +5140,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3755,6 +5187,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3795,6 +5233,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3842,6 +5286,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -3882,6 +5332,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -4114,6 +5570,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -4180,7 +5642,7 @@ paths:
     post:
       operationId: CandidateInterviews_cancelCandidateInterview
       summary: Cancel an interview as the candidate
-      description: 面接キャンセル（要ログイン）
+      description: 面接キャンセル（要ログイン）。他人の面接は 403
       parameters:
         - name: interviewId
           in: path
@@ -4193,7 +5655,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Models.StatusOkResponse'
+                $ref: '#/components/schemas/Models.CancelInterviewResponse'
         '400':
           description: Bad Request エラー
           content:
@@ -4206,6 +5668,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -5258,6 +6726,88 @@ paths:
         - Posts
       security:
         - CandidateAuth: []
+  /api/resumes:
+    post:
+      operationId: Resumes_uploadResume
+      summary: Upload a resume PDF
+      description: 職務経歴書PDFをアップロード（処理中のものがあれば 409）
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ResumeUploadItem'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
+        '409':
+          description: Conflict エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ConflictError'
+      tags:
+        - Resumes
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      security:
+        - CandidateAuth: []
+  /api/resumes/me:
+    get:
+      operationId: Resumes_getMyResume
+      summary: Get my latest resume upload
+      description: 自分の最新アップロード状況を取得
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ResumeMineResponse'
+        '400':
+          description: Bad Request エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.BadRequestError'
+        '401':
+          description: Unauthorized エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.UnauthorizedError'
+      tags:
+        - Resumes
+      security:
+        - CandidateAuth: []
   /api/scout-settings:
     get:
       operationId: ScoutSettings_getScoutSettings
@@ -5399,6 +6949,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CandidateScouts
       requestBody:
@@ -5430,6 +6992,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
+        '404':
+          description: Not Found エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.NotFoundError'
       tags:
         - CandidateScouts
       requestBody:
@@ -5499,6 +7073,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -5535,6 +7115,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -5581,6 +7167,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6241,6 +7833,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6318,6 +7916,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6504,6 +8108,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6903,6 +8513,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -6956,6 +8572,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -7005,6 +8627,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Models.UnauthorizedError'
+        '403':
+          description: Forbidden エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Models.ForbiddenError'
         '404':
           description: Not Found エラー
           content:
@@ -7293,6 +8921,635 @@ components:
           nullable: true
           description: 招待メールアドレス
       description: チームメンバー追加リクエスト
+    Models.AdminAiReportListItem:
+      type: object
+      required:
+        - id
+        - session_id
+        - user_id
+        - username
+        - name
+        - created_at
+        - viewed_at
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: レポートID
+        session_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: セッションID
+        user_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+        viewed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: ユーザーの閲覧日時（未閲覧なら null）
+      description: 生成済みAIレポート一覧アイテム（Work Values / Career Interest 共通）
+    Models.AdminAiReportListResponse:
+      type: object
+      required:
+        - reports
+        - total
+      properties:
+        reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminAiReportListItem'
+          description: レポート一覧
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 総件数
+      description: 生成済みAIレポート一覧レスポンス
+    Models.AdminCompanyBypassLoginResponse:
+      type: object
+      required:
+        - message
+        - companyName
+      properties:
+        message:
+          type: string
+          description: 固定で "ok"
+        companyName:
+          type: string
+          description: ログインした企業の企業名
+      description: 企業成り代わりログイン結果（cookie はレスポンスで焼かれる）
+    Models.AdminCompanyItem:
+      type: object
+      required:
+        - id
+        - email
+        - companyName
+        - contactPersonName
+        - phoneNumber
+        - status
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: 企業アカウントID
+        email:
+          type: string
+          description: メールアドレス
+        companyName:
+          type: string
+          description: 企業名
+        contactPersonName:
+          type: string
+          description: 担当者名
+        phoneNumber:
+          type: string
+          description: 電話番号
+        status:
+          allOf:
+            - $ref: '#/components/schemas/Models.CompanyStatus'
+          description: 承認ステータス
+        createdAt:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 管理画面の企業一覧アイテム
+    Models.AdminCompanyListResponse:
+      type: object
+      required:
+        - companies
+        - total
+        - page
+        - per_page
+        - total_pages
+      properties:
+        companies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminCompanyItem'
+          description: 企業一覧
+        total:
+          type: integer
+          format: int64
+          minimum: 0
+          description: 総件数
+        page:
+          type: integer
+          format: int32
+          description: 現在ページ（1始まり）
+        per_page:
+          type: integer
+          format: int32
+          description: 1ページあたり件数
+        total_pages:
+          type: integer
+          format: int32
+          description: 総ページ数
+      description: 管理画面の企業一覧レスポンス
+    Models.AdminIntegratedReportListItem:
+      type: object
+      required:
+        - id
+        - request_id
+        - user_id
+        - username
+        - name
+        - created_at
+        - viewed_at
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: レポートID
+        request_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: リクエストID
+        user_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+        viewed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: ユーザーの閲覧日時（未閲覧なら null）
+      description: 生成済み統合レポート一覧アイテム
+    Models.AdminIntegratedReportListResponse:
+      type: object
+      required:
+        - reports
+        - total
+      properties:
+        reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminIntegratedReportListItem'
+          description: レポート一覧
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 総件数
+      description: 生成済み統合レポート一覧レスポンス
+    Models.AdminIssueKeyResponse:
+      type: object
+      required:
+        - admin
+        - api_key
+      properties:
+        admin:
+          allOf:
+            - $ref: '#/components/schemas/Models.AdminItem'
+          description: 更新後の管理者
+        api_key:
+          type: string
+          description: 発行された個人APIトークン（`admin_` プレフィックス）
+      description: 個人APIトークン発行レスポンス（トークンはこの一度だけ返る）
+    Models.AdminItem:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - api_key_prefix
+        - last_used_at
+        - created_at
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: 管理者ID
+        email:
+          type: string
+          description: メールアドレス
+        name:
+          type: string
+          description: 表示名
+        api_key_prefix:
+          type: string
+          nullable: true
+          description: 個人APIトークンのプレフィックス（未発行なら null）
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: 個人APIトークンの最終使用日時（未使用なら null）
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 管理者
+    Models.AdminListResponse:
+      type: object
+      required:
+        - admins
+      properties:
+        admins:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminItem'
+          description: 管理者一覧
+      description: 管理者一覧レスポンス
+    Models.AdminMessageResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: 固定で "ok"
+      description: 処理結果メッセージ
+    Models.AdminPendingIntegratedRequestItem:
+      type: object
+      required:
+        - request_id
+        - user_id
+        - username
+        - name
+        - topic1
+        - topic2
+        - topic3
+        - free_text
+        - created_at
+      properties:
+        request_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: リクエストID
+        user_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        topic1:
+          type: integer
+          format: int16
+          description: トピック1
+        topic2:
+          type: integer
+          format: int16
+          description: トピック2
+        topic3:
+          type: integer
+          format: int16
+          description: トピック3
+        free_text:
+          type: string
+          description: 自由記述
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 統合レポート未生成リクエスト
+    Models.AdminPendingIntegratedRequestsResponse:
+      type: object
+      required:
+        - requests
+        - total
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminPendingIntegratedRequestItem'
+          description: リクエスト一覧
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 総件数
+      description: 統合レポート未生成リクエスト一覧レスポンス
+    Models.AdminPendingSessionItem:
+      type: object
+      required:
+        - session_id
+        - user_id
+        - username
+        - name
+        - completed_at
+        - report_requested_at
+      properties:
+        session_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: セッションID
+        user_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: 診断完了日時
+        report_requested_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: レポート生成リクエスト日時
+      description: AIレポート未生成の診断セッション（Work Values / Career Interest 共通）
+    Models.AdminPendingSessionsResponse:
+      type: object
+      required:
+        - sessions
+        - total
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminPendingSessionItem'
+          description: セッション一覧
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 総件数
+      description: AIレポート未生成セッション一覧レスポンス
+    Models.AdminPromptResponse:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          description: データ埋め込み済みのプロンプト全文
+      description: レポート生成用プロンプト
+    Models.AdminResumeDraftResponse:
+      type: object
+      required:
+        - upload
+        - draft
+      properties:
+        upload:
+          allOf:
+            - $ref: '#/components/schemas/Models.AdminResumeItem'
+          description: アップロード情報
+        draft:
+          nullable: true
+          description: プロフィールドラフト（未保存なら null）
+      description: 管理画面のドラフト取得レスポンス
+    Models.AdminResumeDraftSaveResponse:
+      type: object
+      required:
+        - message
+        - status
+      properties:
+        message:
+          type: string
+          description: 固定メッセージ
+        status:
+          allOf:
+            - $ref: '#/components/schemas/Models.ResumeUploadStatus'
+          description: 保存後のステータス（reviewing）
+      description: ドラフト保存結果
+    Models.AdminResumeItem:
+      type: object
+      required:
+        - id
+        - userId
+        - userName
+        - username
+        - originalFilename
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: アップロードID
+        userId:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: ユーザーID
+        userName:
+          type: string
+          description: ユーザー表示名
+        username:
+          type: string
+          description: ユーザー名（URL用）
+        originalFilename:
+          type: string
+          description: 元のファイル名
+        status:
+          allOf:
+            - $ref: '#/components/schemas/Models.ResumeUploadStatus'
+          description: ステータス
+        createdAt:
+          type: string
+          format: date-time
+          description: アップロード日時
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新日時
+      description: 職務経歴書アップロード（管理画面向け）
+    Models.AdminResumeListResponse:
+      type: object
+      required:
+        - uploads
+      properties:
+        uploads:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminResumeItem'
+          description: アップロード一覧
+      description: 管理画面の職務経歴書一覧レスポンス
+    Models.AdminSaveReportRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+          description: レポート本文（Markdown）
+      description: AIレポート保存リクエスト
+    Models.AdminSavedAiReportResponse:
+      type: object
+      required:
+        - id
+        - session_id
+        - content
+        - created_at
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: レポートID
+        session_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: セッションID
+        content:
+          type: string
+          description: レポート本文（Markdown）
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 保存済みAIレポート（Work Values / Career Interest 共通）
+    Models.AdminSavedIntegratedReportResponse:
+      type: object
+      required:
+        - id
+        - request_id
+        - content
+        - created_at
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: レポートID
+        request_id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: リクエストID
+        content:
+          type: string
+          description: レポート本文（Markdown）
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 保存済み統合レポート
+    Models.AdminSessionScoresResponse:
+      type: object
+      required:
+        - mu
+        - se
+      properties:
+        mu:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: ニーズ別 BT 強度 μ
+        se:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          description: ニーズ別標準誤差 SE
+        consistency_coefficient:
+          type: number
+          format: float
+          description: 整合性係数 ζ（未計算なら省略）
+        consistency_level:
+          type: string
+          description: 整合性レベル（未計算なら省略）
+      description: Work Values セッションのスコア（レポート生成用の生データ）
+    Models.AdminUserBypassLoginResponse:
+      type: object
+      required:
+        - message
+        - username
+      properties:
+        message:
+          type: string
+          description: 固定で "ok"
+        username:
+          type: string
+          description: ログインしたユーザーのユーザー名
+      description: ユーザー成り代わりログイン結果（cookie はレスポンスで焼かれる）
+    Models.AdminUserItem:
+      type: object
+      required:
+        - id
+        - username
+        - name
+        - email
+        - avatar_url
+        - created_at
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: ユーザーID
+        username:
+          type: string
+          description: ユーザー名
+        name:
+          type: string
+          description: 表示名
+        email:
+          type: string
+          nullable: true
+          description: メールアドレス
+        avatar_url:
+          type: string
+          nullable: true
+          description: アバターURL
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+      description: 管理画面のユーザー一覧アイテム
+    Models.AdminUserListResponse:
+      type: object
+      required:
+        - users
+        - total
+        - page
+        - per_page
+        - total_pages
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/Models.AdminUserItem'
+          description: ユーザー一覧
+        total:
+          type: integer
+          format: int64
+          minimum: 0
+          description: 総件数
+        page:
+          type: integer
+          format: int32
+          description: 現在ページ（1始まり）
+        per_page:
+          type: integer
+          format: int32
+          description: 1ページあたり件数
+        total_pages:
+          type: integer
+          format: int32
+          description: 総ページ数
+      description: 管理画面のユーザー一覧レスポンス
     Models.AiReportResponse:
       type: object
       required:
@@ -7730,6 +9987,17 @@ components:
           format: int32
           description: 順位
       description: RIASEC タイプスコア
+    Models.CancelInterviewResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - cancelled
+          description: 処理結果（"cancelled"）
+      description: 面接キャンセル結果
     Models.CandidateInterviewItem:
       type: object
       required:
@@ -7870,6 +10138,25 @@ components:
           format: date-time
           description: 作成日時
       description: コメント
+    Models.CompanyAccountStatusError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - ACCOUNT_PENDING
+            - ACCOUNT_REJECTED
+          description: エラーコード
+        message:
+          type: string
+          description: エラーメッセージ
+      description: |-
+        未承認アカウントでのログイン拒否エラー。
+        認証情報は正しいが、アカウントが承認待ち（ACCOUNT_PENDING）または
+        却下済み（ACCOUNT_REJECTED）のためログインできない。
     Models.CompanyInterviewItem:
       type: object
       required:
@@ -8068,6 +10355,7 @@ components:
         email:
           type: string
           maxLength: 255
+          format: email
           description: メールアドレス
         password:
           type: string
@@ -8191,13 +10479,11 @@ components:
           type: string
           description: 会話種別
         companyId:
-          allOf:
-            - $ref: '#/components/schemas/Models.Uuid'
-          description: 企業ID
+          type: string
+          description: 企業ID（company_candidate のみ。ユーザー間会話では空文字）
         candidateId:
-          allOf:
-            - $ref: '#/components/schemas/Models.Uuid'
-          description: 候補者ユーザーID
+          type: string
+          description: 候補者ユーザーID（company_candidate のみ。ユーザー間会話では空文字）
         companyName:
           type: string
           description: 企業名
@@ -8234,6 +10520,18 @@ components:
           format: date-time
           description: 作成日時
       description: 会話（プレビュー付き）
+    Models.CreateAdminRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          description: メールアドレス
+        name:
+          type: string
+          description: 表示名
+      description: 管理者作成リクエスト
     Models.CreateArticleRequest:
       type: object
       required:
@@ -9984,6 +12282,7 @@ components:
         - scout_expired
         - credit_replenished
         - quality_warning
+        - resume_approved
       description: 通知種別
     Models.PendingProposalCheckResponse:
       type: object
@@ -10435,6 +12734,50 @@ components:
           type: integer
           description: リポスト数
       description: リポストトグル結果
+    Models.ResumeMineResponse:
+      type: object
+      required:
+        - upload
+      properties:
+        upload:
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/Models.ResumeUploadItem'
+          nullable: true
+          description: 最新のアップロード
+      description: 自分の最新アップロード状況（未アップロードなら null）
+    Models.ResumeUploadItem:
+      type: object
+      required:
+        - id
+        - originalFilename
+        - status
+        - createdAt
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/Models.Uuid'
+          description: アップロードID
+        originalFilename:
+          type: string
+          description: 元のファイル名
+        status:
+          allOf:
+            - $ref: '#/components/schemas/Models.ResumeUploadStatus'
+          description: ステータス
+        createdAt:
+          type: string
+          format: date-time
+          description: アップロード日時
+      description: 職務経歴書アップロード（候補者向け）
+    Models.ResumeUploadStatus:
+      type: string
+      enum:
+        - pending
+        - reviewing
+        - approved
+        - rejected
+      description: 職務経歴書アップロードのステータス
     Models.SavedCountResponse:
       type: object
       required:
@@ -11760,6 +14103,18 @@ components:
           maxLength: 255
           description: 受動喫煙対策
       description: 企業プロフィール更新リクエスト
+    Models.UpdateCompanyStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - approved
+            - rejected
+          description: 更新後ステータス
+      description: 企業ステータス更新リクエスト
     Models.UpdateDiagnoseStatusRequest:
       type: object
       properties:
@@ -12264,6 +14619,13 @@ components:
       description: |-
         企業認証。`company_token` cookie の JWT を検証する
         （開発用に `Authorization: Bearer` ヘッダーでも代替可）。
+    AdminAuth:
+      type: apiKey
+      in: header
+      name: X-Admin-Key
+      description: |-
+        管理者認証。`X-Admin-Key` ヘッダーを静的ブートストラップキー
+        （ADMIN_API_KEY）または admins テーブルの個人トークンと照合する。
 servers:
   - url: http://localhost:8081
     description: Development server

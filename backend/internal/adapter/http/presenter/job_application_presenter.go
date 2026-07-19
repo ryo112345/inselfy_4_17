@@ -11,12 +11,12 @@ import (
 var jobApplicationConv jobApplicationConverter = &jobApplicationConverterImpl{}
 
 // JobApplicationSingleResponse converts a single job application to its API response.
-func JobApplicationSingleResponse(a *jobapplication.JobApplicationWithDetails) any {
+func JobApplicationSingleResponse(a *jobapplication.JobApplicationWithDetails) *openapi.ModelsJobApplicationResponse {
 	return jobApplicationConv.ToResponse(a)
 }
 
 // JobApplicationsListResponse converts a paginated list of job applications to its API response.
-func JobApplicationsListResponse(apps []*jobapplication.JobApplicationWithDetails, total int) any {
+func JobApplicationsListResponse(apps []*jobapplication.JobApplicationWithDetails, total int) *openapi.ModelsJobApplicationListResponse {
 	items := make([]openapi.ModelsJobApplicationResponse, 0, len(apps))
 	for _, r := range jobApplicationConv.ToResponses(apps) {
 		items = append(items, *r)
@@ -25,6 +25,6 @@ func JobApplicationsListResponse(apps []*jobapplication.JobApplicationWithDetail
 }
 
 // JobApplicationAppliedResponse builds the applied-check API response.
-func JobApplicationAppliedResponse(applied bool) any {
+func JobApplicationAppliedResponse(applied bool) *openapi.ModelsAppliedResponse {
 	return &openapi.ModelsAppliedResponse{Applied: applied}
 }

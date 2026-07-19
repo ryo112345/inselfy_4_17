@@ -1,23 +1,38 @@
 import { expect, test } from "@playwright/test";
+import {
+  bypassLoginCompany,
+  bypassLoginUser,
+  ensureApplication,
+  futureSlot,
+  INSELFY_COMPANY_ID,
+  JOB_POSTING_FOR_CALENDAR_SPEC,
+  proposeInterview,
+  RINA_TAKAHASHI_USER_ID,
+} from "./helpers";
 
-const USER_ID = "10000000-0000-0000-0000-000000000021"; // 高橋里奈
-const ADMIN_API_KEY = process.env.ADMIN_API_KEY ?? "";
+test("selected slot in messages should not appear on different week", async ({
+  page,
+  playwright,
+}) => {
+  // --- Setup: 応募を保証し、企業から今週の候補枠つき提案を作成する ---
+  await bypassLoginUser(page.request, RINA_TAKAHASHI_USER_ID);
+  const applicationId = await ensureApplication(page.request, JOB_POSTING_FOR_CALENDAR_SPEC);
 
-test.use({ launchOptions: { slowMo: 1000 } });
-
-test("selected slot in messages should not appear on different week", async ({ page }) => {
-  // Bypass login as 高橋里奈
-  const res = await page.request.post(
-    `http://localhost:3000/api/admin/users/${USER_ID}/bypass-login`,
-    { headers: { "X-Admin-Key": ADMIN_API_KEY } },
-  );
-  expect(res.ok()).toBeTruthy();
+  const companyRequest = await playwright.request.newContext();
+  await bypassLoginCompany(companyRequest, INSELFY_COMPANY_ID);
+  // 週送り矢印は候補枠が複数週にまたがる場合のみ描画されるため、
+  // 2日後と9日後（必ず別週になる7日差）の2枠を提案する
+  await proposeInterview(companyRequest, applicationId, "週ナビゲーション検証用の提案", [
+    futureSlot(2),
+    futureSlot(9),
+  ]);
+  await companyRequest.dispose();
 
   await page.goto("/messages");
   await page.waitForLoadState("networkidle");
 
-  // Click on クラウドソル株式会社 conversation
-  const convItem = page.getByText("クラウドソル株式会社").first();
+  // Click on inselfy conversation
+  const convItem = page.locator("button", { hasText: "inselfy" }).first();
   await expect(convItem).toBeVisible({ timeout: 10000 });
   await convItem.click();
   await page.waitForTimeout(1500);
@@ -54,16 +69,13 @@ test("selected slot in messages should not appear on different week", async ({ p
     const selectionText = await selection.textContent();
     expect(selectionText).toBeTruthy();
 
-    await page.waitForTimeout(2000);
-
     // Navigate to next week
     await nextArrow.click();
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
 
     // The selection should NOT be visible on the next week
     await expect(selection).not.toBeVisible({ timeout: 3000 });
 
-    await page.waitForTimeout(2000);
     found = true;
     break;
   }

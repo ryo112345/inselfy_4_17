@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FieldError, fieldAriaProps } from "@/components/form/FieldError";
+import { useFieldErrors } from "@/components/form/useFieldErrors";
+import { CompanyInterviewsProposeInterviewBody } from "@/external/client/api/orval/generated/zod/interviews/interviews.zod";
 import { checkPendingProposal, proposeInterview } from "../api";
 import { MiniCalendar } from "./MiniCalendar";
 
@@ -117,6 +120,7 @@ export function SlotPicker({
   const [location, setLocation] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { fieldErrors, validate, clearField } = useFieldErrors();
   const [hasPending, setHasPending] = useState(false);
 
   useEffect(() => {
@@ -124,6 +128,11 @@ export function SlotPicker({
       .then((res) => setHasPending(res.hasPending))
       .catch(() => {});
   }, [applicationId]);
+
+  // 候補枠を編集したら件数上限（slots）のエラーを消す
+  useEffect(() => {
+    if (slots.length > 0) clearField("slots");
+  }, [slots, clearField]);
 
   const dragRef = useRef<{ dayIndex: number; startMinutes: number } | null>(null);
   const [dragPreview, setDragPreview] = useState<{
@@ -281,23 +290,25 @@ export function SlotPicker({
       return;
     }
     setError(null);
+    const apiSlots = slots.map((s) => {
+      const day = new Date(`${s.dateStr}T00:00:00`);
+      const startDate = new Date(day);
+      startDate.setHours(Math.floor(s.startMinutes / 60), s.startMinutes % 60, 0, 0);
+      const endDate = new Date(day);
+      endDate.setHours(Math.floor(s.endMinutes / 60), s.endMinutes % 60, 0, 0);
+      return { startTime: startDate.toISOString(), endTime: endDate.toISOString() };
+    });
+    const body = {
+      applicationId,
+      message,
+      location: location || undefined,
+      durationMinutes: duration,
+      slots: apiSlots,
+    };
+    if (!validate(CompanyInterviewsProposeInterviewBody, body)) return;
     setSubmitting(true);
     try {
-      const apiSlots = slots.map((s) => {
-        const day = new Date(`${s.dateStr}T00:00:00`);
-        const startDate = new Date(day);
-        startDate.setHours(Math.floor(s.startMinutes / 60), s.startMinutes % 60, 0, 0);
-        const endDate = new Date(day);
-        endDate.setHours(Math.floor(s.endMinutes / 60), s.endMinutes % 60, 0, 0);
-        return { startTime: startDate.toISOString(), endTime: endDate.toISOString() };
-      });
-      await proposeInterview({
-        applicationId,
-        message,
-        location: location || undefined,
-        durationMinutes: duration,
-        slots: apiSlots,
-      });
+      await proposeInterview(body);
       router.push("/company/calendar");
     } catch (e) {
       setError(e instanceof Error ? e.message : "エラーが発生しました");
@@ -350,6 +361,7 @@ export function SlotPicker({
 
         <div className="flex items-center gap-3">
           {error && <p className="text-sm text-red-600">{error}</p>}
+          {fieldErrors.slots && <p className="text-sm text-red-600">{fieldErrors.slots}</p>}
           <button
             type="button"
             onClick={handleBack}
@@ -434,17 +446,23 @@ export function SlotPicker({
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <label htmlFor="slot-location" className="text-xs text-gray-500">
+            <label htmlFor="location" className="text-xs text-gray-500">
               場所
             </label>
-            <input
-              id="slot-location"
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Zoom / オフィス住所"
-              className="w-48 rounded-lg border border-gray-200 px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300"
-            />
+            <div>
+              <input
+                {...fieldAriaProps("location", fieldErrors.location)}
+                type="text"
+                value={location}
+                onChange={(e) => {
+                  setLocation(e.target.value);
+                  clearField("location");
+                }}
+                placeholder="Zoom / オフィス住所"
+                className="w-48 rounded-lg border border-gray-200 px-2.5 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300 aria-invalid:border-red-400 aria-invalid:bg-red-50/60"
+              />
+              <FieldError name="location" error={fieldErrors.location} />
+            </div>
           </div>
           <span className="text-xs text-gray-400">
             空いている時間帯をドラッグしてください。候補者はその中から

@@ -1,15 +1,13 @@
 package controller
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/article"
-	"github.com/akiyama/inselfy/backend/internal/domain/auth"
 	"github.com/akiyama/inselfy/backend/internal/domain/company"
 	"github.com/akiyama/inselfy/backend/internal/domain/education"
 	domainerr "github.com/akiyama/inselfy/backend/internal/domain/errors"
@@ -25,7 +23,10 @@ import (
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
 
-func handleError(ctx echo.Context, err error) error {
+// errorStatus maps a domain/port error to its HTTP status. Shared by the
+// strict-server handlers, which pick the matching typed response per
+// operation（echo 版 handleError は全グループ移行完了で撤去済み）.
+func errorStatus(err error) int {
 	switch {
 	case errors.Is(err, domainerr.ErrNotFound),
 		errors.Is(err, interview.ErrProposalNotFound),
@@ -34,10 +35,7 @@ func handleError(ctx echo.Context, err error) error {
 		errors.Is(err, interview.ErrApplicationNotFound),
 		errors.Is(err, company.ErrTeamNotFound),
 		errors.Is(err, company.ErrTeamMemberNotFound):
-		return ctx.JSON(http.StatusNotFound, openapi.ModelsNotFoundError{
-			Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
-			Message: err.Error(),
-		})
+		return http.StatusNotFound
 	case errors.Is(err, domainerr.ErrConflict),
 		errors.Is(err, experience.ErrTooManyEntries),
 		errors.Is(err, education.ErrTooManyEntries),
@@ -46,31 +44,88 @@ func handleError(ctx echo.Context, err error) error {
 		errors.Is(err, scout.ErrTooManyTemplates),
 		errors.Is(err, messaging.ErrConversationExists),
 		errors.Is(err, jobapplication.ErrAlreadyApplied):
-		return ctx.JSON(http.StatusConflict, openapi.ModelsConflictError{
-			Code:    openapi.ModelsConflictErrorCodeCONFLICT,
-			Message: err.Error(),
-		})
+		return http.StatusConflict
 	case errors.Is(err, port.ErrForbidden),
 		errors.Is(err, company.ErrNotTeamOwner),
 		errors.Is(err, scout.ErrScoutingDisabled),
 		errors.Is(err, scout.ErrQualityRestricted),
 		errors.Is(err, scout.ErrNotOwner),
 		errors.Is(err, interview.ErrNotProposalOwner):
-		return ctx.JSON(http.StatusForbidden, openapi.ModelsForbiddenError{
-			Code:    openapi.ModelsForbiddenErrorCodeFORBIDDEN,
-			Message: err.Error(),
-		})
+		return http.StatusForbidden
 	case isBadRequest(err):
-		return ctx.JSON(http.StatusBadRequest, openapi.ModelsBadRequestError{
-			Code:    openapi.ModelsBadRequestErrorCodeBADREQUEST,
-			Message: err.Error(),
-		})
+		return http.StatusBadRequest
 	default:
-		return ctx.JSON(http.StatusInternalServerError, openapi.ModelsErrorResponse{
-			Code:    "INTERNAL",
-			Message: err.Error(),
-		})
+		return http.StatusInternalServerError
 	}
+}
+
+// notFoundBody / conflictBody / forbiddenBody / badRequestBody build the
+// canonical error bodies for the strict handlers' typed responses
+// (e.g. openapi.UsersCreateUser409JSONResponse(conflictBody(err))) and the
+// hand-written net/http handlers.
+
+func notFoundBody(err error) openapi.ModelsNotFoundError {
+	return openapi.ModelsNotFoundError{
+		Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+		Message: err.Error(),
+	}
+}
+
+func conflictBody(err error) openapi.ModelsConflictError {
+	return openapi.ModelsConflictError{
+		Code:    openapi.ModelsConflictErrorCodeCONFLICT,
+		Message: err.Error(),
+	}
+}
+
+func forbiddenBody(err error) openapi.ModelsForbiddenError {
+	return openapi.ModelsForbiddenError{
+		Code:    openapi.ModelsForbiddenErrorCodeFORBIDDEN,
+		Message: err.Error(),
+	}
+}
+
+func badRequestBody(message string) openapi.ModelsBadRequestError {
+	return openapi.ModelsBadRequestError{
+		Code:    openapi.ModelsBadRequestErrorCodeBADREQUEST,
+		Message: message,
+	}
+}
+
+// writeJSON is the net/http counterpart of ctx.JSON for the few hand-written
+// handlers that bypass the strict wrapper (raw-JSON PATCH, spec-external routes).
+func writeJSON(w http.ResponseWriter, status int, body any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(body)
+}
+
+// writeError is the net/http counterpart of handleError.
+func writeError(w http.ResponseWriter, err error) {
+	switch status := errorStatus(err); status {
+	case http.StatusNotFound:
+		writeJSON(w, status, notFoundBody(err))
+	case http.StatusConflict:
+		writeJSON(w, status, conflictBody(err))
+	case http.StatusForbidden:
+		writeJSON(w, status, forbiddenBody(err))
+	case http.StatusBadRequest:
+		writeJSON(w, status, badRequestBody(err.Error()))
+	default:
+		writeJSON(w, status, openapi.ModelsErrorResponse{Code: "INTERNAL", Message: err.Error()})
+	}
+}
+
+// WriteRequestError renders binding errors from the generated wrapper/strict
+// layers (malformed params, undecodable bodies) as the canonical 400 JSON.
+func WriteRequestError(w http.ResponseWriter, _ *http.Request, err error) {
+	writeJSON(w, http.StatusBadRequest, badRequestBody(err.Error()))
+}
+
+// WriteResponseError renders errors returned by strict handlers (internal
+// errors the operation's contract does not model) as the canonical 500 JSON.
+func WriteResponseError(w http.ResponseWriter, _ *http.Request, err error) {
+	writeJSON(w, http.StatusInternalServerError, openapi.ModelsErrorResponse{Code: "INTERNAL", Message: err.Error()})
 }
 
 func isBadRequest(err error) bool {
@@ -175,42 +230,6 @@ func isBadRequest(err error) bool {
 		return true
 	}
 	return false
-}
-
-func badRequest(ctx echo.Context, message string) error {
-	return ctx.JSON(http.StatusBadRequest, openapi.ModelsBadRequestError{
-		Code:    openapi.ModelsBadRequestErrorCodeBADREQUEST,
-		Message: message,
-	})
-}
-
-// errorResponse renders the canonical {code, message} error body used across the
-// API. The helpers below wrap it per status so handlers never hand-roll error maps.
-func errorResponse(ctx echo.Context, status int, code, message string) error {
-	return ctx.JSON(status, openapi.ModelsErrorResponse{Code: code, Message: message})
-}
-
-func unauthorized(ctx echo.Context, message string) error {
-	return errorResponse(ctx, http.StatusUnauthorized, "UNAUTHORIZED", message)
-}
-
-func notFoundError(ctx echo.Context, message string) error {
-	return errorResponse(ctx, http.StatusNotFound, "NOT_FOUND", message)
-}
-
-func internalError(ctx echo.Context, message string) error {
-	return errorResponse(ctx, http.StatusInternalServerError, "INTERNAL", message)
-}
-
-func handleAuthError(ctx echo.Context, err error) error {
-	if err == nil ||
-		errors.Is(err, auth.ErrInvalidGoogleToken) ||
-		errors.Is(err, auth.ErrUnauthorized) ||
-		errors.Is(err, auth.ErrTokenExpired) ||
-		errors.Is(err, auth.ErrRefreshTokenRevoked) {
-		return unauthorized(ctx, "unauthorized")
-	}
-	return handleError(ctx, err)
 }
 
 func invalidField(name string) error {

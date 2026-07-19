@@ -29,7 +29,10 @@ import "./models/job-posting.tsp";
 import "./models/interview.tsp";
 import "./models/integrated-report.tsp";
 import "./models/search.tsp";
+import "./models/admin.tsp";
+import "./models/resume.tsp";
 import "./routes/users.tsp";
+import "./routes/resumes.tsp";
 import "./routes/experiences.tsp";
 import "./routes/educations.tsp";
 import "./routes/skills.tsp";
@@ -57,6 +60,7 @@ import "./routes/job-postings.tsp";
 import "./routes/interviews.tsp";
 import "./routes/integrated-report.tsp";
 import "./routes/search.tsp";
+import "./routes/admin.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;

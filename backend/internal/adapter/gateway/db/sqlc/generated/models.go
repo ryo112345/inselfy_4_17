@@ -148,6 +148,7 @@ const (
 	NotificationTypeScoutExpired      NotificationType = "scout_expired"
 	NotificationTypeCreditReplenished NotificationType = "credit_replenished"
 	NotificationTypeQualityWarning    NotificationType = "quality_warning"
+	NotificationTypeResumeApproved    NotificationType = "resume_approved"
 )
 
 func (e *NotificationType) Scan(src interface{}) error {
@@ -183,6 +184,50 @@ func (ns NullNotificationType) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.NotificationType), nil
+}
+
+type ResumeUploadStatus string
+
+const (
+	ResumeUploadStatusPending   ResumeUploadStatus = "pending"
+	ResumeUploadStatusReviewing ResumeUploadStatus = "reviewing"
+	ResumeUploadStatusApproved  ResumeUploadStatus = "approved"
+	ResumeUploadStatusRejected  ResumeUploadStatus = "rejected"
+)
+
+func (e *ResumeUploadStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ResumeUploadStatus(s)
+	case string:
+		*e = ResumeUploadStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ResumeUploadStatus: %T", src)
+	}
+	return nil
+}
+
+type NullResumeUploadStatus struct {
+	ResumeUploadStatus ResumeUploadStatus `json:"resume_upload_status"`
+	Valid              bool               `json:"valid"` // Valid is true if ResumeUploadStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullResumeUploadStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ResumeUploadStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ResumeUploadStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullResumeUploadStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ResumeUploadStatus), nil
 }
 
 type ScoutMessageStatus string
@@ -598,6 +643,18 @@ type RefreshToken struct {
 	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	RevokedAt pgtype.Timestamptz `json:"revoked_at"`
+}
+
+type ResumeUpload struct {
+	ID               pgtype.UUID        `json:"id"`
+	UserID           pgtype.UUID        `json:"user_id"`
+	OriginalFilename string             `json:"original_filename"`
+	StorageKey       string             `json:"storage_key"`
+	Status           ResumeUploadStatus `json:"status"`
+	Draft            []byte             `json:"draft"`
+	ApprovedBy       pgtype.UUID        `json:"approved_by"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
 }
 
 type SavedCandidate struct {

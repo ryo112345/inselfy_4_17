@@ -60,16 +60,31 @@ func TraceArgs(projectID, header string) []any {
 
 type ctxKey struct{}
 
-// WithLogger returns a context carrying l.
+// holder makes the request-scoped logger replaceable in place: downstream
+// middleware can enrich it (SetLogger) and the upstream access-log middleware
+// — which only holds the original context — still sees the enriched logger.
+// Requests are handled by a single goroutine, so no synchronization is needed.
+type holder struct{ logger *slog.Logger }
+
+// WithLogger returns a context carrying l as the request-scoped logger.
 func WithLogger(ctx context.Context, l *slog.Logger) context.Context {
-	return context.WithValue(ctx, ctxKey{}, l)
+	return context.WithValue(ctx, ctxKey{}, &holder{logger: l})
+}
+
+// SetLogger replaces the request-scoped logger for the whole request: both
+// downstream handlers and the upstream access-log emission observe l. No-op
+// when ctx does not come from WithLogger (background goroutines, tests).
+func SetLogger(ctx context.Context, l *slog.Logger) {
+	if h, ok := ctx.Value(ctxKey{}).(*holder); ok {
+		h.logger = l
+	}
 }
 
 // FromContext returns the request-scoped logger, falling back to the default
 // logger outside a request (background goroutines, tests).
 func FromContext(ctx context.Context) *slog.Logger {
-	if l, ok := ctx.Value(ctxKey{}).(*slog.Logger); ok {
-		return l
+	if h, ok := ctx.Value(ctxKey{}).(*holder); ok {
+		return h.logger
 	}
 	return slog.Default()
 }

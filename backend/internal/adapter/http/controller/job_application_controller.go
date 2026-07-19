@@ -1,11 +1,9 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-	"strconv"
 	"time"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -22,115 +20,145 @@ func NewJobApplicationController(input port.JobApplicationInputPort) *JobApplica
 	return &JobApplicationController{input: input}
 }
 
-func (c *JobApplicationController) Apply(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
-
-	var body openapi.ModelsApplyJobRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
-	}
-	if body.JobPostingId == "" {
-		return badRequest(ctx, "jobPostingId is required")
+// Apply handles POST /api/applications.
+func (c *JobApplicationController) Apply(ctx context.Context, req openapi.CandidateApplicationsApplyToJobRequestObject) (openapi.CandidateApplicationsApplyToJobResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CandidateApplicationsApplyToJob400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	a, err := c.input.Apply(ctx.Request().Context(), jobapplication.ApplyInput{
-		JobPostingID: body.JobPostingId,
+	a, err := c.input.Apply(ctx, jobapplication.ApplyInput{
+		JobPostingID: req.Body.JobPostingId,
 		CandidateID:  userID,
-		Message:      body.Message,
+		Message:      req.Body.Message,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusConflict:
+			return openapi.CandidateApplicationsApplyToJob409JSONResponse(conflictBody(err)), nil
+		case http.StatusNotFound:
+			return openapi.CandidateApplicationsApplyToJob404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateApplicationsApplyToJob400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusCreated, presenter.JobApplicationSingleResponse(a))
+	return openapi.CandidateApplicationsApplyToJob201JSONResponse(*presenter.JobApplicationSingleResponse(a)), nil
 }
 
-func (c *JobApplicationController) ListByCompany(ctx echo.Context) error {
-	companyID := authmw.CompanyID(ctx)
+// ListByCompany handles GET /api/company/applications.
+func (c *JobApplicationController) ListByCompany(ctx context.Context, req openapi.CompanyApplicationsListCompanyApplicationsRequestObject) (openapi.CompanyApplicationsListCompanyApplicationsResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
 	filter := jobapplication.ListFilter{}
-	if s := ctx.QueryParam("status"); s != "" {
+	if s := derefString(req.Params.Status); s != "" {
 		filter.Status = &s
 	}
-	if jp := ctx.QueryParam("job_posting_id"); jp != "" {
+	if jp := derefString(req.Params.JobPostingId); jp != "" {
 		filter.JobPostingID = &jp
 	}
-	if kw := ctx.QueryParam("keyword"); kw != "" {
+	if kw := derefString(req.Params.Keyword); kw != "" {
 		filter.Keyword = &kw
 	}
-	if df := ctx.QueryParam("date_from"); df != "" {
+	if df := derefString(req.Params.DateFrom); df != "" {
 		if t, err := time.Parse(time.RFC3339, df); err == nil {
 			filter.DateFrom = &t
 		}
 	}
-	if dt := ctx.QueryParam("date_to"); dt != "" {
+	if dt := derefString(req.Params.DateTo); dt != "" {
 		if t, err := time.Parse(time.RFC3339, dt); err == nil {
 			filter.DateTo = &t
 		}
 	}
-	filter.Limit, _ = strconv.Atoi(ctx.QueryParam("limit"))
-	filter.Offset, _ = strconv.Atoi(ctx.QueryParam("offset"))
+	filter.Limit = derefInt32(req.Params.Limit)
+	filter.Offset = derefInt32(req.Params.Offset)
 
-	apps, total, err := c.input.ListByCompany(ctx.Request().Context(), companyID, filter)
+	apps, total, err := c.input.ListByCompany(ctx, companyID, filter)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CompanyApplicationsListCompanyApplications400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobApplicationsListResponse(apps, total))
+	return openapi.CompanyApplicationsListCompanyApplications200JSONResponse(*presenter.JobApplicationsListResponse(apps, total)), nil
 }
 
-func (c *JobApplicationController) ListByCandidate(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+// ListByCandidate handles GET /api/applications.
+func (c *JobApplicationController) ListByCandidate(ctx context.Context, _ openapi.CandidateApplicationsListCandidateApplicationsRequestObject) (openapi.CandidateApplicationsListCandidateApplicationsResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	apps, total, err := c.input.ListByCandidate(ctx.Request().Context(), userID)
+	apps, total, err := c.input.ListByCandidate(ctx, userID)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CandidateApplicationsListCandidateApplications400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobApplicationsListResponse(apps, total))
+	return openapi.CandidateApplicationsListCandidateApplications200JSONResponse(*presenter.JobApplicationsListResponse(apps, total)), nil
 }
 
-func (c *JobApplicationController) GetByID(ctx echo.Context, applicationID string) error {
-	companyID := authmw.CompanyID(ctx)
+// GetByID handles GET /api/company/applications/{applicationId}.
+func (c *JobApplicationController) GetByID(ctx context.Context, req openapi.CompanyApplicationsGetApplicationRequestObject) (openapi.CompanyApplicationsGetApplicationResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
 
-	a, err := c.input.GetByID(ctx.Request().Context(), companyID, applicationID)
+	a, err := c.input.GetByID(ctx, companyID, req.ApplicationId)
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CompanyApplicationsGetApplication404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyApplicationsGetApplication400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobApplicationSingleResponse(a))
+	return openapi.CompanyApplicationsGetApplication200JSONResponse(*presenter.JobApplicationSingleResponse(a)), nil
 }
 
-func (c *JobApplicationController) UpdateStatus(ctx echo.Context, applicationID string) error {
-	companyID := authmw.CompanyID(ctx)
-
-	var body openapi.ModelsUpdateApplicationStatusRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid request body")
+// UpdateStatus handles PATCH /api/company/applications/{applicationId}/status.
+func (c *JobApplicationController) UpdateStatus(ctx context.Context, req openapi.CompanyApplicationsUpdateApplicationStatusRequestObject) (openapi.CompanyApplicationsUpdateApplicationStatusResponseObject, error) {
+	companyID := authmw.CompanyIDFromContext(ctx)
+	if req.Body == nil {
+		return openapi.CompanyApplicationsUpdateApplicationStatus400JSONResponse(badRequestBody("invalid request body")), nil
 	}
 
-	if err := c.input.UpdateStatus(ctx.Request().Context(), companyID, applicationID, jobapplication.Status(body.Status)); err != nil {
-		return handleError(ctx, err)
+	if err := c.input.UpdateStatus(ctx, companyID, req.ApplicationId, jobapplication.Status(req.Body.Status)); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CompanyApplicationsUpdateApplicationStatus404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CompanyApplicationsUpdateApplicationStatus400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, openapi.ModelsStatusOkResponse{Status: "ok"})
+	return openapi.CompanyApplicationsUpdateApplicationStatus200JSONResponse(openapi.ModelsStatusOkResponse{Status: "ok"}), nil
 }
 
-func (c *JobApplicationController) Withdraw(ctx echo.Context, applicationID string) error {
-	userID := authmw.UserID(ctx)
+// Withdraw handles POST /api/applications/{applicationId}/withdraw.
+func (c *JobApplicationController) Withdraw(ctx context.Context, req openapi.CandidateApplicationsWithdrawApplicationRequestObject) (openapi.CandidateApplicationsWithdrawApplicationResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	if err := c.input.Withdraw(ctx.Request().Context(), userID, applicationID); err != nil {
-		return handleError(ctx, err)
+	if err := c.input.Withdraw(ctx, userID, req.ApplicationId); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.CandidateApplicationsWithdrawApplication404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.CandidateApplicationsWithdrawApplication400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, openapi.ModelsStatusOkResponse{Status: "ok"})
+	return openapi.CandidateApplicationsWithdrawApplication200JSONResponse(openapi.ModelsStatusOkResponse{Status: "ok"}), nil
 }
 
-func (c *JobApplicationController) CheckApplied(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+// CheckApplied handles GET /api/applications/check.
+func (c *JobApplicationController) CheckApplied(ctx context.Context, req openapi.CandidateApplicationsCheckAppliedRequestObject) (openapi.CandidateApplicationsCheckAppliedResponseObject, error) {
+	userID := authmw.UserIDFromContext(ctx)
 
-	jobPostingID := ctx.QueryParam("jobPostingId")
-	if jobPostingID == "" {
-		return badRequest(ctx, "jobPostingId is required")
-	}
-
-	applied, err := c.input.CheckApplied(ctx.Request().Context(), userID, jobPostingID)
+	applied, err := c.input.CheckApplied(ctx, userID, req.Params.JobPostingId)
 	if err != nil {
-		return handleError(ctx, err)
+		if errorStatus(err) == http.StatusBadRequest {
+			return openapi.CandidateApplicationsCheckApplied400JSONResponse(badRequestBody(err.Error())), nil
+		}
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.JobApplicationAppliedResponse(applied))
+	return openapi.CandidateApplicationsCheckApplied200JSONResponse(*presenter.JobApplicationAppliedResponse(applied)), nil
 }

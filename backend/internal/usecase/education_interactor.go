@@ -25,8 +25,8 @@ func NewEducationInteractor(
 	return &EducationInteractor{repo: repo, userRepo: userRepo}
 }
 
-func (i *EducationInteractor) Create(ctx context.Context, rawUsername string, input education.CreateInput) (*education.Education, error) {
-	u, err := i.resolveUser(ctx, rawUsername)
+func (i *EducationInteractor) Create(ctx context.Context, authUserID, rawUsername string, input education.CreateInput) (*education.Education, error) {
+	u, err := i.resolveOwnedUser(ctx, authUserID, rawUsername)
 	if err != nil {
 		return nil, err
 	}
@@ -60,8 +60,8 @@ func (i *EducationInteractor) Create(ctx context.Context, rawUsername string, in
 	return i.repo.Create(ctx, entity)
 }
 
-func (i *EducationInteractor) Update(ctx context.Context, rawUsername, educationID string, input education.UpdateInput) (*education.Education, error) {
-	u, err := i.resolveUser(ctx, rawUsername)
+func (i *EducationInteractor) Update(ctx context.Context, authUserID, rawUsername, educationID string, input education.UpdateInput) (*education.Education, error) {
+	u, err := i.resolveOwnedUser(ctx, authUserID, rawUsername)
 	if err != nil {
 		return nil, err
 	}
@@ -96,8 +96,8 @@ func (i *EducationInteractor) Update(ctx context.Context, rawUsername, education
 	return i.repo.Update(ctx, entity)
 }
 
-func (i *EducationInteractor) Delete(ctx context.Context, rawUsername, educationID string) error {
-	u, err := i.resolveUser(ctx, rawUsername)
+func (i *EducationInteractor) Delete(ctx context.Context, authUserID, rawUsername, educationID string) error {
+	u, err := i.resolveOwnedUser(ctx, authUserID, rawUsername)
 	if err != nil {
 		return err
 	}
@@ -125,4 +125,18 @@ func (i *EducationInteractor) resolveUser(ctx context.Context, raw string) (*use
 		return nil, err
 	}
 	return i.userRepo.GetByUsername(ctx, username)
+}
+
+// resolveOwnedUser resolves the path user and verifies the authenticated
+// caller IS that user (see ExperienceInteractor.resolveOwnedUser for why the
+// resource-ownership check alone is insufficient).
+func (i *EducationInteractor) resolveOwnedUser(ctx context.Context, authUserID, raw string) (*user.User, error) {
+	u, err := i.resolveUser(ctx, raw)
+	if err != nil {
+		return nil, err
+	}
+	if u.ID != authUserID {
+		return nil, port.ErrForbidden
+	}
+	return u, nil
 }

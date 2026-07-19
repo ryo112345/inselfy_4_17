@@ -30,7 +30,39 @@ func TestExperienceInteractor_Update_OwnershipCheck(t *testing.T) {
 	}
 	it := usecase.NewExperienceInteractor(repo, userRepo)
 
-	_, err := it.Update(ctx, "alice", "exp-1", experience.UpdateInput{
+	_, err := it.Update(ctx, "uid-1", "alice", "exp-1", experience.UpdateInput{
+		CompanyName: "Acme", Title: "Engineer",
+		StartYear: 2020, StartMonth: 4, IsCurrent: true,
+	})
+	if !errors.Is(err, port.ErrForbidden) {
+		t.Fatalf("expected ErrForbidden, got %v", err)
+	}
+}
+
+// TestExperienceInteractor_Update_RejectsForeignCaller guards against the IDOR
+// where a logged-in user edits another user's experiences by putting that
+// user's name in the path. The caller (attacker-uid) is not alice, so the
+// request must be rejected before any lookup of the target resource.
+func TestExperienceInteractor_Update_RejectsForeignCaller(t *testing.T) {
+	ctx := context.Background()
+	owner := &user.User{ID: "uid-1", Username: mustParseUsername(t, "alice"), Name: "Alice"}
+
+	repo := &experienceRepoStub{
+		getByIDFn: func(_ context.Context, _ string) (*experience.Experience, error) {
+			t.Fatal("resource must not be fetched for a non-owner caller")
+			return nil, nil
+		},
+		updateFn: func(_ context.Context, _ *experience.Experience) (*experience.Experience, error) {
+			t.Fatal("update must not run for a non-owner caller")
+			return nil, nil
+		},
+	}
+	userRepo := &userRepoStub{
+		getByUsername: func(_ context.Context, _ user.Username) (*user.User, error) { return owner, nil },
+	}
+	it := usecase.NewExperienceInteractor(repo, userRepo)
+
+	_, err := it.Update(ctx, "attacker-uid", "alice", "exp-1", experience.UpdateInput{
 		CompanyName: "Acme", Title: "Engineer",
 		StartYear: 2020, StartMonth: 4, IsCurrent: true,
 	})
@@ -52,7 +84,7 @@ func TestExperienceInteractor_Create_RejectsOverLimit(t *testing.T) {
 	}
 	it := usecase.NewExperienceInteractor(repo, userRepo)
 
-	_, err := it.Create(ctx, "alice", experience.CreateInput{
+	_, err := it.Create(ctx, "uid-1", "alice", experience.CreateInput{
 		CompanyName: "Acme", Title: "Engineer",
 		StartYear: 2020, StartMonth: 1, IsCurrent: true,
 	})

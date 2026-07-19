@@ -117,11 +117,22 @@ export default function CompanyApplicationsPage() {
         leftPanelRef.current.scrollTop = Number(savedLeft);
       }
       const savedPage = sessionStorage.getItem("applications_scroll_page");
-      if (savedPage) {
-        window.scrollTo(0, Number(savedPage));
-      }
       sessionStorage.removeItem("applications_scroll_left");
       sessionStorage.removeItem("applications_scroll_page");
+      if (savedPage) {
+        // React Query キャッシュで一覧が即時復元されると、この復元が Next.js の
+        // 戻る遷移時のスクロール処理より先に走り、後から 0 に戻されることがある。
+        // 位置が定着するまで（最大500ms）再適用する
+        const target = Number(savedPage);
+        const start = performance.now();
+        const apply = () => {
+          window.scrollTo(0, target);
+          if (performance.now() - start < 500 && Math.abs(window.scrollY - target) > 1) {
+            requestAnimationFrame(apply);
+          }
+        };
+        apply();
+      }
     });
   }, [applications]);
 

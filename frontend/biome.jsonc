@@ -9,7 +9,7 @@
       "!test-results",
       "!playwright-report",
       "!next-env.d.ts",
-      "!src/external/client/api/generated"
+      "!src/external/client/api/orval/generated"
     ]
   },
   // リンターは recommended をフル有効（error ゼロ運用・ルール単位の無効化なし）。

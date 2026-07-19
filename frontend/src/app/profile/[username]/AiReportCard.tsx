@@ -5,6 +5,8 @@ import { CheckIcon } from "@/components/icons";
 import { IntegratedReportModal } from "./IntegratedReportModal";
 
 type Props = {
+  hasWvDiagnosis: boolean;
+  hasCiDiagnosis: boolean;
   hasExperience: boolean;
   hasSkills: boolean;
   hasEducation: boolean;
@@ -13,6 +15,8 @@ type Props = {
 };
 
 export function AiReportCard({
+  hasWvDiagnosis,
+  hasCiDiagnosis,
   hasExperience,
   hasSkills,
   hasEducation,
@@ -28,6 +32,8 @@ export function AiReportCard({
   );
 
   const steps = [
+    { label: "価値観診断を受ける", done: hasWvDiagnosis },
+    { label: "キャリア興味診断を受ける", done: hasCiDiagnosis },
     { label: "職歴を入力", done: hasExperience },
     { label: "スキルを入力", done: hasSkills },
     { label: "学歴を入力", done: hasEducation },
@@ -68,7 +74,7 @@ export function AiReportCard({
             診断結果と経歴をAIが分析し、あなた自身も気づいていない特性を言語化します。
           </p>
 
-          <ul className="mt-5 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 text-[15px] font-medium text-gray-500/70">
+          <ul className="mt-5 flex flex-col md:flex-row md:flex-wrap items-center justify-center gap-3 md:gap-x-6 md:gap-y-2 text-[15px] font-medium text-gray-500/70">
             {steps.map((step) => (
               <li key={step.label} className="flex items-center gap-1.5">
                 <span

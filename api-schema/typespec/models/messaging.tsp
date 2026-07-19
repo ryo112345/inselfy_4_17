@@ -40,11 +40,11 @@ model ConversationResponse {
   /** 会話種別 */
   conversationType: string;
 
-  /** 企業ID */
-  companyId: Uuid;
+  /** 企業ID（company_candidate のみ。ユーザー間会話では空文字） */
+  companyId: string;
 
-  /** 候補者ユーザーID */
-  candidateId: Uuid;
+  /** 候補者ユーザーID（company_candidate のみ。ユーザー間会話では空文字） */
+  candidateId: string;
 
   /** 企業名 */
   companyName: string;

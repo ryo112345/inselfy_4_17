@@ -3,7 +3,7 @@ import type {
   ModelsExperienceResponse,
   ModelsSkillResponse,
   ModelsUserResponse,
-} from "@/external/client/api/generated";
+} from "@/external/client/api/orval/generated/models";
 import type { PostItem } from "@/features/timeline/api";
 
 import { AboutCard } from "./AboutCard";
@@ -24,6 +24,8 @@ type Props = {
   posts?: PostItem[];
   // 「省略＝オーナー扱い」の事故を防ぐため必須（F22）
   isOwner: boolean;
+  hasWvDiagnosis?: boolean;
+  hasCiDiagnosis?: boolean;
   intReportRequestId?: string | null;
   intReportHasReport?: boolean;
   initialFollowing?: boolean | null;
@@ -39,6 +41,8 @@ export function ProfileContent({
   skills,
   posts,
   isOwner,
+  hasWvDiagnosis = false,
+  hasCiDiagnosis = false,
   intReportRequestId,
   intReportHasReport,
   initialFollowing = null,
@@ -56,6 +60,8 @@ export function ProfileContent({
       />
       {isOwner && (
         <AiReportCard
+          hasWvDiagnosis={hasWvDiagnosis}
+          hasCiDiagnosis={hasCiDiagnosis}
           hasExperience={experiences.length > 0}
           hasSkills={skills.length > 0}
           hasEducation={educations.length > 0}

@@ -204,6 +204,12 @@ model SelectedInterview {
   status: InterviewStatus;
 }
 
+/** 面接キャンセル結果 */
+model CancelInterviewResponse {
+  /** 処理結果（"cancelled"） */
+  status: "cancelled";
+}
+
 /** スロット選択結果 */
 model SelectSlotResponse {
   /** 確定した面接 */

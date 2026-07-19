@@ -11,12 +11,12 @@ import (
 var messagingConv messagingConverter = &messagingConverterImpl{}
 
 // MessagingConversationResponse builds the single-conversation API response.
-func MessagingConversationResponse(conv *messaging.ConversationWithPreview) any {
+func MessagingConversationResponse(conv *messaging.ConversationWithPreview) *openapi.ModelsConversationResponse {
 	return messagingConv.ToConversationResponse(conv)
 }
 
 // MessagingConversationsResponse builds the paginated conversation list API response.
-func MessagingConversationsResponse(convs []*messaging.ConversationWithPreview, total int) any {
+func MessagingConversationsResponse(convs []*messaging.ConversationWithPreview, total int) *openapi.ModelsConversationListResponse {
 	items := make([]openapi.ModelsConversationResponse, 0, len(convs))
 	for _, c := range messagingConv.ToConversationResponses(convs) {
 		items = append(items, *c)
@@ -25,12 +25,12 @@ func MessagingConversationsResponse(convs []*messaging.ConversationWithPreview, 
 }
 
 // MessagingMessageResponse builds the single-message API response.
-func MessagingMessageResponse(msg *messaging.Message) any {
+func MessagingMessageResponse(msg *messaging.Message) *openapi.ModelsMessageResponse {
 	return toMessageResponse(msg)
 }
 
 // MessagingMessagesResponse builds the paginated message list API response.
-func MessagingMessagesResponse(msgs []*messaging.Message, total int) any {
+func MessagingMessagesResponse(msgs []*messaging.Message, total int) *openapi.ModelsMessageListResponse {
 	items := make([]openapi.ModelsMessageResponse, len(msgs))
 	for i, m := range msgs {
 		items[i] = *toMessageResponse(m)
@@ -39,12 +39,12 @@ func MessagingMessagesResponse(msgs []*messaging.Message, total int) any {
 }
 
 // MessagingUnreadCountResponse builds the unread-count API response.
-func MessagingUnreadCountResponse(count int) any {
+func MessagingUnreadCountResponse(count int) *openapi.ModelsUnreadCountResponse {
 	return &openapi.ModelsUnreadCountResponse{Count: cast.Int32(count)}
 }
 
 // MessagingOKResponse builds the fixed OK API response.
-func MessagingOKResponse() any {
+func MessagingOKResponse() *openapi.ModelsStatusOkResponse {
 	return &openapi.ModelsStatusOkResponse{Status: "ok"}
 }
 

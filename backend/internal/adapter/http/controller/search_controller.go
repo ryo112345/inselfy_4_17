@@ -1,13 +1,11 @@
 package controller
 
 import (
-	"net/http"
-	"strconv"
+	"context"
 	"strings"
 	"unicode/utf8"
 
-	"github.com/labstack/echo/v4"
-
+	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/adapter/http/presenter"
 	"github.com/akiyama/inselfy/backend/internal/port"
 )
@@ -21,95 +19,102 @@ func NewSearchController(input port.SearchInputPort) *SearchController {
 }
 
 // searchQuery validates the q parameter shared by all search endpoints.
-func searchQuery(ctx echo.Context) (string, bool) {
-	q := strings.TrimSpace(ctx.QueryParam("q"))
+// 上流の OpenAPI validator が minLength/maxLength を検査するが、trim 後の
+// 空文字（空白のみの q）はここでしか弾けないため従来ロジックを維持する。
+func searchQuery(raw string) (string, bool) {
+	q := strings.TrimSpace(raw)
 	if q == "" || utf8.RuneCountInString(q) > 100 {
 		return "", false
 	}
 	return q, true
 }
 
-func searchPaging(ctx echo.Context) (limit, offset int) {
-	limit, _ = strconv.Atoi(ctx.QueryParam("limit"))
+func searchPaging(limitParam, offsetParam *int32) (limit, offset int) {
+	limit = derefInt32(limitParam)
 	if limit < 1 || limit > 50 {
 		limit = 20
 	}
-	offset, _ = strconv.Atoi(ctx.QueryParam("offset"))
+	offset = derefInt32(offsetParam)
 	if offset < 0 {
 		offset = 0
 	}
 	return limit, offset
 }
 
-func (c *SearchController) SearchAll(ctx echo.Context) error {
-	q, ok := searchQuery(ctx)
+// SearchAll handles GET /api/search.
+func (c *SearchController) SearchAll(ctx context.Context, req openapi.SearchSearchAllRequestObject) (openapi.SearchSearchAllResponseObject, error) {
+	q, ok := searchQuery(req.Params.Q)
 	if !ok {
-		return badRequest(ctx, "q must be 1-100 characters")
+		return openapi.SearchSearchAll400JSONResponse(badRequestBody("q must be 1-100 characters")), nil
 	}
-	limitPerType, _ := strconv.Atoi(ctx.QueryParam("limitPerType"))
+	limitPerType := derefInt32(req.Params.LimitPerType)
 	if limitPerType < 1 || limitPerType > 10 {
 		limitPerType = 3
 	}
 
-	result, err := c.input.SearchAll(ctx.Request().Context(), q, limitPerType)
+	result, err := c.input.SearchAll(ctx, q, limitPerType)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.SearchAllResponse(result))
+	return openapi.SearchSearchAll200JSONResponse(presenter.SearchAllResponse(result)), nil
 }
 
-func (c *SearchController) SearchUsers(ctx echo.Context) error {
-	q, ok := searchQuery(ctx)
+// SearchUsers handles GET /api/search/users.
+func (c *SearchController) SearchUsers(ctx context.Context, req openapi.SearchSearchUsersRequestObject) (openapi.SearchSearchUsersResponseObject, error) {
+	q, ok := searchQuery(req.Params.Q)
 	if !ok {
-		return badRequest(ctx, "q must be 1-100 characters")
+		return openapi.SearchSearchUsers400JSONResponse(badRequestBody("q must be 1-100 characters")), nil
 	}
-	limit, offset := searchPaging(ctx)
+	limit, offset := searchPaging(req.Params.Limit, req.Params.Offset)
 
-	page, err := c.input.SearchUsers(ctx.Request().Context(), q, limit, offset)
+	page, err := c.input.SearchUsers(ctx, q, limit, offset)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.SearchUserListResponse(page))
+	return openapi.SearchSearchUsers200JSONResponse(presenter.SearchUserListResponse(page)), nil
 }
 
-func (c *SearchController) SearchArticles(ctx echo.Context) error {
-	q, ok := searchQuery(ctx)
+// SearchArticles handles GET /api/search/articles.
+func (c *SearchController) SearchArticles(ctx context.Context, req openapi.SearchSearchArticlesRequestObject) (openapi.SearchSearchArticlesResponseObject, error) {
+	q, ok := searchQuery(req.Params.Q)
 	if !ok {
-		return badRequest(ctx, "q must be 1-100 characters")
+		return openapi.SearchSearchArticles400JSONResponse(badRequestBody("q must be 1-100 characters")), nil
 	}
-	limit, offset := searchPaging(ctx)
+	limit, offset := searchPaging(req.Params.Limit, req.Params.Offset)
 
-	page, err := c.input.SearchArticles(ctx.Request().Context(), q, limit, offset)
+	page, err := c.input.SearchArticles(ctx, q, limit, offset)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.SearchArticleListResponse(page))
+	return openapi.SearchSearchArticles200JSONResponse(presenter.SearchArticleListResponse(page)), nil
 }
 
-func (c *SearchController) SearchPosts(ctx echo.Context) error {
-	q, ok := searchQuery(ctx)
+// SearchPosts handles GET /api/search/posts.
+func (c *SearchController) SearchPosts(ctx context.Context, req openapi.SearchSearchPostsRequestObject) (openapi.SearchSearchPostsResponseObject, error) {
+	q, ok := searchQuery(req.Params.Q)
 	if !ok {
-		return badRequest(ctx, "q must be 1-100 characters")
+		return openapi.SearchSearchPosts400JSONResponse(badRequestBody("q must be 1-100 characters")), nil
 	}
-	limit, offset := searchPaging(ctx)
+	limit, offset := searchPaging(req.Params.Limit, req.Params.Offset)
 
-	page, err := c.input.SearchPosts(ctx.Request().Context(), q, limit, offset)
+	page, err := c.input.SearchPosts(ctx, q, limit, offset)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.SearchPostListResponse(page))
+	return openapi.SearchSearchPosts200JSONResponse(presenter.SearchPostListResponse(page)), nil
 }
 
-func (c *SearchController) SearchJobs(ctx echo.Context) error {
-	q, ok := searchQuery(ctx)
+// SearchJobs handles GET /api/search/jobs.
+func (c *SearchController) SearchJobs(ctx context.Context, req openapi.SearchSearchJobsRequestObject) (openapi.SearchSearchJobsResponseObject, error) {
+	q, ok := searchQuery(req.Params.Q)
 	if !ok {
-		return badRequest(ctx, "q must be 1-100 characters")
+		return openapi.SearchSearchJobs400JSONResponse(badRequestBody("q must be 1-100 characters")), nil
 	}
-	limit, offset := searchPaging(ctx)
+	limit, offset := searchPaging(req.Params.Limit, req.Params.Offset)
 
-	page, err := c.input.SearchJobs(ctx.Request().Context(), q, limit, offset)
+	page, err := c.input.SearchJobs(ctx, q, limit, offset)
 	if err != nil {
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
-	return ctx.JSON(http.StatusOK, presenter.SearchJobListResponse(page))
+	return openapi.SearchSearchJobs200JSONResponse(presenter.SearchJobListResponse(page)), nil
 }

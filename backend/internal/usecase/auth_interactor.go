@@ -88,7 +88,8 @@ func (a *AuthInteractor) RefreshToken(ctx context.Context, refreshToken string) 
 		return nil, nil, err
 	}
 
-	if err := a.refreshRepo.RevokeByUserID(ctx, rt.UserID); err != nil {
+	// per-token rotation: 使った1本だけ失効させ、他端末のセッションは生かす
+	if err := a.refreshRepo.RevokeByID(ctx, rt.ID); err != nil {
 		return nil, nil, err
 	}
 

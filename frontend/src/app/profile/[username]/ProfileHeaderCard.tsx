@@ -15,7 +15,7 @@ import {
 } from "@/components/icons";
 import { Field, JobSeekingBadge, PrimaryButton, SecondaryButton } from "@/components/ui";
 import { ACCENT } from "@/constants/theme";
-import type { ModelsUserResponse } from "@/external/client/api/generated";
+import type { ModelsUserResponse } from "@/external/client/api/orval/generated/models";
 import { type ApiError, updateProfile, uploadProfileImage } from "./api";
 import { FollowButton } from "./FollowButton";
 

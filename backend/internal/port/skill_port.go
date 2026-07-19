@@ -8,8 +8,8 @@ import (
 
 // SkillInputPort defines skill use case input methods.
 type SkillInputPort interface {
-	Attach(ctx context.Context, username string, name string) (*skill.UserSkill, error)
-	DetachByName(ctx context.Context, username, name string) error
+	Attach(ctx context.Context, authUserID, username string, name string) (*skill.UserSkill, error)
+	DetachByName(ctx context.Context, authUserID, username, name string) error
 	List(ctx context.Context, username string) ([]*skill.UserSkill, error)
 }
 

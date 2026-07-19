@@ -1,58 +1,52 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"os"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/labstack/echo/v4"
 
+	"github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	"github.com/akiyama/inselfy/backend/internal/domain/workvalues"
 )
 
 const zThreshold = 1.64
 
-func (c *AdminReportController) GetPrompt(ctx echo.Context, sessionID string) error {
-	parsedSession, err := uuid.Parse(sessionID)
-	if err != nil {
-		return badRequest(ctx, "invalid session_id")
-	}
-
-	pgSessionID := pgtype.UUID{Bytes: parsedSession, Valid: true}
-	row, err := c.queries.GetWVNeedsScoresBySessionID(ctx.Request().Context(), pgSessionID)
+// GetPrompt handles GET /api/admin/sessions/{sessionId}/prompt.
+func (c *AdminReportController) GetPrompt(ctx context.Context, req openapi.AdminGetWvPromptRequestObject) (openapi.AdminGetWvPromptResponseObject, error) {
+	row, err := c.queries.GetWVNeedsScoresBySessionID(ctx, pgUUID(req.SessionId))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return notFoundError(ctx, "scores not found")
+			return openapi.AdminGetWvPrompt404JSONResponse(openapi.ModelsNotFoundError{
+				Code:    openapi.ModelsNotFoundErrorCodeNOTFOUND,
+				Message: "scores not found",
+			}), nil
 		}
-		return internalError(ctx, err.Error())
+		return nil, err
 	}
 
 	var mu map[string]float64
 	var se map[string]float64
 	if err := json.Unmarshal(row.Mu, &mu); err != nil {
-		return internalError(ctx, "failed to parse mu")
+		return nil, err
 	}
 	if err := json.Unmarshal(row.Se, &se); err != nil {
-		return internalError(ctx, "failed to parse se")
+		return nil, err
 	}
 
 	template, err := readPromptTemplate()
 	if err != nil {
-		return internalError(ctx, "failed to read prompt template: "+err.Error())
+		return nil, err
 	}
 
 	prompt := buildReportPrompt(string(template), mu, se)
 
-	return ctx.JSON(http.StatusOK, map[string]string{
-		"prompt": prompt,
-	})
+	return openapi.AdminGetWvPrompt200JSONResponse(openapi.ModelsAdminPromptResponse{Prompt: prompt}), nil
 }
 
 func buildReportPrompt(template string, mu, se map[string]float64) string {

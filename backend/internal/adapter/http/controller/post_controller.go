@@ -1,10 +1,8 @@
 package controller
 
 import (
+	"context"
 	"net/http"
-	"strconv"
-
-	"github.com/labstack/echo/v4"
 
 	openapi "github.com/akiyama/inselfy/backend/internal/adapter/http/generated/openapi"
 	authmw "github.com/akiyama/inselfy/backend/internal/adapter/http/middleware"
@@ -23,131 +21,195 @@ func NewPostController(
 	return &PostController{input: input}
 }
 
-func (c *PostController) Create(ctx echo.Context) error {
-	userID := authmw.UserID(ctx)
+// derefStr unwraps an optional string parameter, defaulting to "" (the same
+// value the echo controllers passed for an absent query param).
+func derefStr(v *string) string {
+	if v == nil {
+		return ""
+	}
+	return *v
+}
 
-	var body openapi.ModelsCreatePostRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	quotePostID := ""
-	if body.QuotePostId != nil {
-		quotePostID = *body.QuotePostId
-	}
-	pw, err := c.input.Create(ctx.Request().Context(), post.CreatePostInput{
-		UserID:      userID,
-		Content:     body.Content,
-		QuotePostID: quotePostID,
+// Create handles POST /api/posts.
+func (c *PostController) Create(ctx context.Context, req openapi.PostsCreatePostRequestObject) (openapi.PostsCreatePostResponseObject, error) {
+	pw, err := c.input.Create(ctx, post.CreatePostInput{
+		UserID:      authmw.UserIDFromContext(ctx),
+		Content:     req.Body.Content,
+		QuotePostID: derefStr(req.Body.QuotePostId),
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsCreatePost404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsCreatePost400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.PostSingleResponse(pw))
+	return openapi.PostsCreatePost201JSONResponse(presenter.PostSingleResponse(pw)), nil
 }
 
-func (c *PostController) GetByID(ctx echo.Context, postID string) error {
-	viewerID := ctx.QueryParam("viewerId")
-	pw, err := c.input.GetByID(ctx.Request().Context(), postID, viewerID)
+// GetByID handles GET /api/posts/{postId}.
+func (c *PostController) GetByID(ctx context.Context, req openapi.PostsGetPostRequestObject) (openapi.PostsGetPostResponseObject, error) {
+	pw, err := c.input.GetByID(ctx, req.PostId, derefStr(req.Params.ViewerId))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsGetPost404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsGetPost400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.PostSingleResponse(pw))
+	return openapi.PostsGetPost200JSONResponse(presenter.PostSingleResponse(pw)), nil
 }
 
-func (c *PostController) ListTimeline(ctx echo.Context) error {
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	viewerID := ctx.QueryParam("viewerId")
-	posts, total, err := c.input.ListTimeline(ctx.Request().Context(), limit, offset, viewerID)
+// ListTimeline handles GET /api/posts.
+func (c *PostController) ListTimeline(ctx context.Context, req openapi.PostsListTimelinePostsRequestObject) (openapi.PostsListTimelinePostsResponseObject, error) {
+	posts, total, err := c.input.ListTimeline(ctx, derefInt32(req.Params.Limit), derefInt32(req.Params.Offset), derefStr(req.Params.ViewerId))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusBadRequest:
+			return openapi.PostsListTimelinePosts400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.PostsListResponse(posts, total))
+	return openapi.PostsListTimelinePosts200JSONResponse(presenter.PostsListResponse(posts, total)), nil
 }
 
-func (c *PostController) ListByUserID(ctx echo.Context, userID string) error {
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	viewerID := ctx.QueryParam("viewerId")
-	posts, total, err := c.input.ListByUserID(ctx.Request().Context(), userID, limit, offset, viewerID)
+// ListByUserID handles GET /api/posts/users/{userId}.
+func (c *PostController) ListByUserID(ctx context.Context, req openapi.PostsListPostsByUserRequestObject) (openapi.PostsListPostsByUserResponseObject, error) {
+	posts, total, err := c.input.ListByUserID(ctx, req.UserId, derefInt32(req.Params.Limit), derefInt32(req.Params.Offset), derefStr(req.Params.ViewerId))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsListPostsByUser404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsListPostsByUser400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.PostsListResponse(posts, total))
+	return openapi.PostsListPostsByUser200JSONResponse(presenter.PostsListResponse(posts, total)), nil
 }
 
-func (c *PostController) Delete(ctx echo.Context, postID string) error {
-	userID := authmw.UserID(ctx)
-
-	if err := c.input.Delete(ctx.Request().Context(), postID, userID); err != nil {
-		return handleError(ctx, err)
+// Delete handles DELETE /api/posts/{postId}.
+func (c *PostController) Delete(ctx context.Context, req openapi.PostsDeletePostRequestObject) (openapi.PostsDeletePostResponseObject, error) {
+	if err := c.input.Delete(ctx, req.PostId, authmw.UserIDFromContext(ctx)); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsDeletePost404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.PostsDeletePost403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsDeletePost400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.PostsDeletePost204Response{}, nil
 }
 
-func (c *PostController) ToggleLike(ctx echo.Context, postID string) error {
-	userID := authmw.UserID(ctx)
-
-	liked, count, err := c.input.ToggleLike(ctx.Request().Context(), postID, userID)
+// ToggleLike handles POST /api/posts/{postId}/like.
+func (c *PostController) ToggleLike(ctx context.Context, req openapi.PostsTogglePostLikeRequestObject) (openapi.PostsTogglePostLikeResponseObject, error) {
+	liked, count, err := c.input.ToggleLike(ctx, req.PostId, authmw.UserIDFromContext(ctx))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsTogglePostLike404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsTogglePostLike400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.PostLikeToggleResponse(liked, count))
+	return openapi.PostsTogglePostLike200JSONResponse(presenter.PostLikeToggleResponse(liked, count)), nil
 }
 
-func (c *PostController) ListLikedByUserID(ctx echo.Context, userID string) error {
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	posts, total, err := c.input.ListLikedByUserID(ctx.Request().Context(), userID, limit, offset)
+// ListLikedByUserID handles GET /api/posts/users/{userId}/likes.
+func (c *PostController) ListLikedByUserID(ctx context.Context, req openapi.PostsListLikedPostsByUserRequestObject) (openapi.PostsListLikedPostsByUserResponseObject, error) {
+	posts, total, err := c.input.ListLikedByUserID(ctx, req.UserId, derefInt32(req.Params.Limit), derefInt32(req.Params.Offset))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsListLikedPostsByUser404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsListLikedPostsByUser400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.PostsListResponse(posts, total))
+	return openapi.PostsListLikedPostsByUser200JSONResponse(presenter.PostsListResponse(posts, total)), nil
 }
 
-func (c *PostController) ToggleRepost(ctx echo.Context, postID string) error {
-	userID := authmw.UserID(ctx)
-
-	reposted, count, err := c.input.ToggleRepost(ctx.Request().Context(), postID, userID)
+// ToggleRepost handles POST /api/posts/{postId}/repost.
+func (c *PostController) ToggleRepost(ctx context.Context, req openapi.PostsTogglePostRepostRequestObject) (openapi.PostsTogglePostRepostResponseObject, error) {
+	reposted, count, err := c.input.ToggleRepost(ctx, req.PostId, authmw.UserIDFromContext(ctx))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsTogglePostRepost404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsTogglePostRepost400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.PostRepostToggleResponse(reposted, count))
+	return openapi.PostsTogglePostRepost200JSONResponse(presenter.PostRepostToggleResponse(reposted, count)), nil
 }
 
-func (c *PostController) CreateComment(ctx echo.Context, postID string) error {
-	userID := authmw.UserID(ctx)
-
-	var body openapi.ModelsCreateCommentRequest
-	if err := ctx.Bind(&body); err != nil {
-		return badRequest(ctx, "invalid body")
-	}
-	cw, err := c.input.CreateComment(ctx.Request().Context(), post.CreateCommentInput{
-		PostID:  postID,
-		UserID:  userID,
-		Content: body.Content,
+// CreateComment handles POST /api/posts/{postId}/comments.
+func (c *PostController) CreateComment(ctx context.Context, req openapi.PostsCreatePostCommentRequestObject) (openapi.PostsCreatePostCommentResponseObject, error) {
+	cw, err := c.input.CreateComment(ctx, post.CreateCommentInput{
+		PostID:  req.PostId,
+		UserID:  authmw.UserIDFromContext(ctx),
+		Content: req.Body.Content,
 	})
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsCreatePostComment404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsCreatePostComment400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusCreated, presenter.PostCommentResponse(cw))
+	return openapi.PostsCreatePostComment201JSONResponse(presenter.PostCommentResponse(cw)), nil
 }
 
-func (c *PostController) ListComments(ctx echo.Context, postID string) error {
-	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
-	offset, _ := strconv.Atoi(ctx.QueryParam("offset"))
-	comments, total, err := c.input.ListComments(ctx.Request().Context(), postID, limit, offset)
+// ListComments handles GET /api/posts/{postId}/comments.
+func (c *PostController) ListComments(ctx context.Context, req openapi.PostsListPostCommentsRequestObject) (openapi.PostsListPostCommentsResponseObject, error) {
+	comments, total, err := c.input.ListComments(ctx, req.PostId, derefInt32(req.Params.Limit), derefInt32(req.Params.Offset))
 	if err != nil {
-		return handleError(ctx, err)
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsListPostComments404JSONResponse(notFoundBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsListPostComments400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.JSON(http.StatusOK, presenter.PostCommentsListResponse(comments, total))
+	return openapi.PostsListPostComments200JSONResponse(presenter.PostCommentsListResponse(comments, total)), nil
 }
 
-func (c *PostController) DeleteComment(ctx echo.Context, commentID string) error {
-	userID := authmw.UserID(ctx)
-
-	if err := c.input.DeleteComment(ctx.Request().Context(), commentID, userID); err != nil {
-		return handleError(ctx, err)
+// DeleteComment handles DELETE /api/posts/comments/{commentId}.
+func (c *PostController) DeleteComment(ctx context.Context, req openapi.PostsDeletePostCommentRequestObject) (openapi.PostsDeletePostCommentResponseObject, error) {
+	if err := c.input.DeleteComment(ctx, req.CommentId, authmw.UserIDFromContext(ctx)); err != nil {
+		switch errorStatus(err) {
+		case http.StatusNotFound:
+			return openapi.PostsDeletePostComment404JSONResponse(notFoundBody(err)), nil
+		case http.StatusForbidden:
+			return openapi.PostsDeletePostComment403JSONResponse(forbiddenBody(err)), nil
+		case http.StatusBadRequest:
+			return openapi.PostsDeletePostComment400JSONResponse(badRequestBody(err.Error())), nil
+		default:
+			return nil, err
+		}
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	return openapi.PostsDeletePostComment204Response{}, nil
 }

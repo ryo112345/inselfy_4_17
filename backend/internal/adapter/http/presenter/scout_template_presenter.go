@@ -6,10 +6,12 @@ import (
 )
 
 // ScoutTemplateResponse converts a single scout template entity to its API response.
-func ScoutTemplateResponse(t *scout.ScoutTemplate) any { return toTemplateResponse(t) }
+func ScoutTemplateResponse(t *scout.ScoutTemplate) *openapi.ModelsScoutTemplateResponse {
+	return toTemplateResponse(t)
+}
 
 // ScoutTemplatesResponse converts a list of scout template entities to their API response.
-func ScoutTemplatesResponse(ts []*scout.ScoutTemplate) any {
+func ScoutTemplatesResponse(ts []*scout.ScoutTemplate) *openapi.ModelsScoutTemplateListResponse {
 	items := make([]openapi.ModelsScoutTemplateResponse, len(ts))
 	for i, t := range ts {
 		items[i] = *toTemplateResponse(t)

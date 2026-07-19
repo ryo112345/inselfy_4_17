@@ -95,6 +95,16 @@ func (q *Queries) DeleteExperience(ctx context.Context, id pgtype.UUID) (int64, 
 	return result.RowsAffected(), nil
 }
 
+const deleteExperiencesByUserID = `-- name: DeleteExperiencesByUserID :exec
+DELETE FROM experiences
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteExperiencesByUserID(ctx context.Context, userID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteExperiencesByUserID, userID)
+	return err
+}
+
 const getExperienceByID = `-- name: GetExperienceByID :one
 SELECT id, user_id, company_name, title, start_year, start_month, end_year, end_month, is_current, description, created_at, updated_at
 FROM experiences

@@ -1,17 +1,20 @@
-import "@/external/client/api/client";
+// 「みつける」検索の薄いラッパー層。デバウンス＋AbortSignal の命令的フローから
+// 呼ばれるためシグネチャを維持し、内部だけ orval 生成の平関数に置き換えている。
+// 非2xx は mutator が ApiError を throw する。
 import {
-  type ModelsSearchAllResponse,
-  type ModelsSearchArticleItem,
-  type ModelsSearchJobItem,
-  type ModelsSearchPostItem,
-  type ModelsSearchUserItem,
   searchSearchAll,
   searchSearchArticles,
   searchSearchJobs,
   searchSearchPosts,
   searchSearchUsers,
-} from "@/external/client/api/generated";
-import { run } from "@/lib/api-result";
+} from "@/external/client/api/orval/generated/endpoints/search/search";
+import type {
+  ModelsSearchAllResponse,
+  ModelsSearchArticleItem,
+  ModelsSearchJobItem,
+  ModelsSearchPostItem,
+  ModelsSearchUserItem,
+} from "@/external/client/api/orval/generated/models";
 
 export type SearchAllResult = ModelsSearchAllResponse;
 export type SearchUserItem = ModelsSearchUserItem;
@@ -28,10 +31,7 @@ export async function searchAll(
   limitPerType = 3,
   signal?: AbortSignal,
 ): Promise<SearchAllResult> {
-  return run(
-    searchSearchAll({ query: { q, limitPerType }, signal, cache: "no-store" }),
-    "Failed to search",
-  );
+  return searchSearchAll({ q, limitPerType }, { signal });
 }
 
 type PagingParams = { q: string; limit?: number; offset?: number };
@@ -40,38 +40,26 @@ export async function searchUsers(
   params: PagingParams,
   signal?: AbortSignal,
 ): Promise<CategoryPage<SearchUserItem>> {
-  return run(
-    searchSearchUsers({ query: params, signal, cache: "no-store" }),
-    "Failed to search users",
-  );
+  return searchSearchUsers(params, { signal });
 }
 
 export async function searchArticles(
   params: PagingParams,
   signal?: AbortSignal,
 ): Promise<CategoryPage<SearchArticleItem>> {
-  return run(
-    searchSearchArticles({ query: params, signal, cache: "no-store" }),
-    "Failed to search articles",
-  );
+  return searchSearchArticles(params, { signal });
 }
 
 export async function searchPosts(
   params: PagingParams,
   signal?: AbortSignal,
 ): Promise<CategoryPage<SearchPostItem>> {
-  return run(
-    searchSearchPosts({ query: params, signal, cache: "no-store" }),
-    "Failed to search posts",
-  );
+  return searchSearchPosts(params, { signal });
 }
 
 export async function searchJobs(
   params: PagingParams,
   signal?: AbortSignal,
 ): Promise<CategoryPage<SearchJobItem>> {
-  return run(
-    searchSearchJobs({ query: params, signal, cache: "no-store" }),
-    "Failed to search jobs",
-  );
+  return searchSearchJobs(params, { signal });
 }

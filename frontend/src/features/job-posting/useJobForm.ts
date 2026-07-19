@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { CompanyJobPostingsCreateJobPostingBody } from "@/external/client/api/orval/generated/zod/job-postings/job-postings.zod";
 import type { JobPostingBody } from "./api";
 import type { JobFormPreviewPayload } from "./preview-channel";
 
@@ -263,6 +264,74 @@ export function buildPreviewPayload(
     coverImageDataUrl: values.coverImageDataUrl,
     coverImageUrl: values.coverImage,
     galleryUrls: values.galleryImages,
+  };
+}
+
+// バリデーションエラー表示用（フォーム UI の見出しと揃える）
+export const jobPostingFieldLabels: Record<string, string> = {
+  title: "求人タイトル",
+  description: "仕事内容",
+  employmentType: "雇用形態",
+  location: "勤務地",
+  jobCategory: "職種カテゴリ",
+  hiringCount: "採用人数",
+  appealPoints: "この仕事の魅力",
+  challenges: "チャレンジ",
+  teamDescription: "チーム紹介",
+  teamMembers: "チームメンバー",
+  teamLabel: "チームラベル",
+  skillsGained: "身につくスキル",
+  tags: "タグ",
+  requiredQualifications: "必須要件",
+  preferredQualifications: "歓迎要件",
+  workLocation: "就業場所",
+  workLocationChangeScope: "就業場所の変更範囲",
+  jobDescriptionChangeScope: "業務内容の変更範囲",
+  contractType: "契約期間",
+  probationPeriod: "試用期間",
+  workHours: "勤務時間",
+  breakTime: "休憩時間",
+  holidays: "休日・休暇",
+  salaryMin: "想定年収（下限）",
+  salaryMax: "想定年収（上限）",
+  salaryDetail: "給与詳細",
+  insurance: "社会保険",
+  remotePolicy: "リモートワーク",
+  benefits: "福利厚生",
+  smokingPolicy: "受動喫煙対策",
+  selectionProcess: "選考プロセス",
+  coverImageUrl: "カバー画像",
+  highlightTitleRole: "見出し（仕事内容）",
+  highlightTitleAppeal: "見出し（魅力）",
+  highlightTitleChallenge: "見出し（チャレンジ）",
+  highlightTitleGrowth: "見出し（スキル）",
+  galleryUrls: "ギャラリー画像",
+};
+
+/**
+ * 保存 API へ送る body の検証スキーマ（useFieldErrors の validate に渡す）。
+ * 作成・更新はリクエストモデルが同一（Models.JobPostingRequest）のため Create 側の
+ * スキーマを共用する。「公開時の必須項目」チェックはドメインルールとして
+ * missingRequired（useJobForm）が担い、ここでは文字数上限・数値範囲など
+ * スキーマ制約のみを検証する。
+ */
+export const jobPostingBodySchema = CompanyJobPostingsCreateJobPostingBody;
+
+/**
+ * フォーム編集時にエラーをクリアする set ラッパー。fieldErrors のキーは
+ * 保存 body のフィールド名なので、フォーム値とキーが異なるものだけ変換する。
+ */
+export function makeSetWithClear(
+  set: SetJobFormField,
+  clearField: (name: string) => void,
+): SetJobFormField {
+  return (key, value) => {
+    set(key, value);
+    if (key === "coverImage") clearField("coverImageUrl");
+    else if (key === "galleryImages") clearField("galleryUrls");
+    else clearField(key);
+    // location は workLocation から組み立てる派生フィールド
+    if (key === "workLocation") clearField("location");
   };
 }
 
