@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -34,8 +35,46 @@ func (ctrl *AdminIntegratedReportController) CreateRequest(ctx context.Context, 
 	if body.Topic1 == body.Topic2 || body.Topic1 == body.Topic3 || body.Topic2 == body.Topic3 {
 		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("topics must be distinct")), nil
 	}
+	if strings.TrimSpace(body.FreeText) == "" {
+		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("freeText is required")), nil
+	}
 	if len([]rune(body.FreeText)) > 200 {
 		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("freeText must be 200 characters or less")), nil
+	}
+
+	// 生成条件（UIのゲートと同一条件をAPIでも強制）: WV/CI 診断完了＋職歴・スキル・学歴の入力
+	if _, err := ctrl.queries.GetLatestWVCompletedSessionByUserID(ctx, pgUUID(userID)); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("work values diagnosis must be completed")), nil
+		}
+		return nil, err
+	}
+	if _, err := ctrl.queries.GetLatestCICompletedSessionByUserID(ctx, pgUUID(userID)); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("career interest diagnosis must be completed")), nil
+		}
+		return nil, err
+	}
+	experiences, err := ctrl.queries.ListExperiencesByUserID(ctx, pgUUID(userID))
+	if err != nil {
+		return nil, err
+	}
+	if len(experiences) == 0 {
+		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("at least one experience is required")), nil
+	}
+	skills, err := ctrl.queries.ListUserSkills(ctx, pgUUID(userID))
+	if err != nil {
+		return nil, err
+	}
+	if len(skills) == 0 {
+		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("at least one skill is required")), nil
+	}
+	educations, err := ctrl.queries.ListEducationsByUserID(ctx, pgUUID(userID))
+	if err != nil {
+		return nil, err
+	}
+	if len(educations) == 0 {
+		return openapi.IntegratedReportCreateIntegratedReportRequest400JSONResponse(badRequestBody("at least one education is required")), nil
 	}
 
 	req, err := ctrl.queries.CreateIntegratedReportRequest(ctx, &generated.CreateIntegratedReportRequestParams{

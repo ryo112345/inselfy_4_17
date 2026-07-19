@@ -108,6 +108,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             skills={data.skills}
             posts={posts}
             isOwner={isOwner}
+            hasWvDiagnosis={data.wvSessionId !== null}
+            hasCiDiagnosis={data.ciSessionId !== null}
             intReportRequestId={data.intReportRequestId}
             intReportHasReport={data.intReportHasReport}
             initialFollowing={initialFollowing}

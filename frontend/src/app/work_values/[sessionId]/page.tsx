@@ -71,6 +71,8 @@ export default async function WorkValuesResultPage({
             educations={data.educations}
             skills={data.skills}
             isOwner={isOwner}
+            hasWvDiagnosis={data.wvSessionId !== null}
+            hasCiDiagnosis={data.ciSessionId !== null}
             intReportRequestId={data.intReportRequestId}
             intReportHasReport={data.intReportHasReport}
             initialFollowing={initialFollowing}

@@ -45,7 +45,7 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
     });
   };
 
-  const canSubmit = selected.length === 3 && !submitting;
+  const canSubmit = selected.length === 3 && freeText.trim().length > 0 && !submitting;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -84,6 +84,7 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
     >
       <p className="mb-4 text-sm text-gray-600">
         10のテーマから<strong>3つ</strong>を選んでください。選んだ順にレポートの章立てになります。
+        AIに聞きたいことの記入も必須です。
       </p>
 
       <div className="mb-5 grid grid-cols-1 gap-2">
@@ -119,7 +120,7 @@ export function IntegratedReportModal({ open, onClose, onSubmitted }: Props) {
         })}
       </div>
 
-      <Field label="AIに聞きたいこと（自由記述）" hint={`${[...freeText].length} / 200`}>
+      <Field label="AIに聞きたいこと（必須）" hint={`${[...freeText].length} / 200`}>
         <textarea
           value={freeText}
           onChange={(e) => {
