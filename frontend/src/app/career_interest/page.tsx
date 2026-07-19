@@ -1,17 +1,6 @@
-import { Inter, Playfair_Display } from "next/font/google";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/playfair-display";
 import Link from "next/link";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["700"],
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  display: "swap",
-});
 
 export default function CareerInterestPage() {
   return (
@@ -27,7 +16,7 @@ export default function CareerInterestPage() {
         </div>
 
         <h1
-          className={`relative z-10 ${playfair.className} text-5xl font-bold text-gray-800 leading-tight mb-2`}
+          className={`relative z-10 font-playfair text-5xl font-bold text-gray-800 leading-tight mb-2`}
         >
           Career Interest
         </h1>
@@ -63,7 +52,7 @@ export default function CareerInterestPage() {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex items-baseline gap-1.5">
-      <span className={`${inter.className} text-2xl font-medium text-gray-700`}>{value}</span>
+      <span className={`font-inter text-2xl font-medium text-gray-700`}>{value}</span>
       <span className="text-xs font-semibold tracking-wider text-blue-400 uppercase">{label}</span>
     </div>
   );

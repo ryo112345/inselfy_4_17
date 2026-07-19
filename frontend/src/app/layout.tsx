@@ -1,5 +1,9 @@
+// フォントはセルフホスト（fontsource）。next/font/google はビルド時に
+// fonts.gstatic.com へ取りに行くため、ネットワーク不調で CI ごと落ちる flake 源になる。
+// font-family 名は globals.css の --font-* 変数で参照する
+import "@fontsource-variable/noto-sans-jp";
+import "@fontsource-variable/plus-jakarta-sans";
 import type { Metadata } from "next";
-import { Noto_Sans_JP, Plus_Jakarta_Sans } from "next/font/google";
 import { MobileFooter } from "@/app/components/MobileFooter";
 import { QueryProvider } from "@/app/components/QueryProvider";
 import { ConfirmDialogProvider, ToastProvider } from "@/components/ui";
@@ -9,19 +13,6 @@ import { getViewer } from "@/features/auth/viewer";
 import { UnreadMessagingProvider } from "@/features/messaging/unread-context";
 import { UnreadScoutProvider } from "@/features/scout/unread-context";
 import "./globals.css";
-
-const notoSansJp = Noto_Sans_JP({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-noto-sans-jp",
-  display: "swap",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-plus-jakarta-sans",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "inselfy",
@@ -33,7 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // ウォーターフォールを省略する（未解決時は null → 従来のクライアントフロー）
   const initialUser = await getViewer();
   return (
-    <html lang="ja" className={`${notoSansJp.variable} ${plusJakartaSans.variable}`}>
+    <html lang="ja">
       <body className="antialiased">
         <QueryProvider>
           <GoogleProvider>

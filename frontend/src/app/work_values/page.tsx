@@ -1,19 +1,8 @@
-import { Inter, Playfair_Display } from "next/font/google";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/playfair-display";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Sidebar } from "@/app/components/Sidebar";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["700"],
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  display: "swap",
-});
 
 export default async function WorkValuesPage() {
   const cookieStore = await cookies();
@@ -34,7 +23,7 @@ export default async function WorkValuesPage() {
           </div>
 
           <h1
-            className={`relative z-10 ${playfair.className} text-5xl font-bold text-white leading-tight mb-2`}
+            className={`relative z-10 font-playfair text-5xl font-bold text-white leading-tight mb-2`}
           >
             Work Values
           </h1>
@@ -69,7 +58,7 @@ export default async function WorkValuesPage() {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex items-baseline gap-1.5">
-      <span className={`${inter.className} text-2xl font-medium text-white`}>{value}</span>
+      <span className={`font-inter text-2xl font-medium text-white`}>{value}</span>
       <span className="text-xs font-semibold tracking-wider text-emerald-400/80 uppercase">
         {label}
       </span>

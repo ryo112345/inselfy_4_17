@@ -1,6 +1,7 @@
 "use client";
 
-import { Inter, Playfair_Display } from "next/font/google";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/playfair-display";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -11,9 +12,6 @@ import type { ModelsDiagnoseInfoResponse } from "@/external/client/api/orval/gen
 import type { ItemDTO } from "@/features/career-interest/api";
 import { useCareerInterestQuiz } from "@/features/career-interest/useCareerInterestQuiz";
 import { useWorkValuesQuiz } from "@/features/work-values/useWorkValuesQuiz";
-
-const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"], display: "swap" });
-const inter = Inter({ subsets: ["latin"], weight: ["300", "400", "500", "600"], display: "swap" });
 
 type MemberInfo = ModelsDiagnoseInfoResponse;
 
@@ -288,9 +286,7 @@ function WVQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
       <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
         <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#0a1628] border border-gray-700 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
           <div className="relative z-10 mb-10">
-            <p className={`${playfair.className} text-3xl font-bold text-white mb-4`}>
-              Work Values
-            </p>
+            <p className={`font-playfair text-3xl font-bold text-white mb-4`}>Work Values</p>
             <p className="text-gray-400 text-sm leading-relaxed">
               2つの選択肢から、自分にとってより大切な方を選んでください。
               <br />
@@ -329,14 +325,12 @@ function WVQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
           <div className="px-8 pt-7 pb-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <span className={`${playfair.className} text-2xl font-bold text-white`}>
+                <span className={`font-playfair text-2xl font-bold text-white`}>
                   Q{state.questionNumber}
                 </span>
                 <span className="text-sm text-gray-500">/ {state.maxQuestions}</span>
               </div>
-              <span
-                className={`${inter.className} text-sm font-medium text-emerald-400 tabular-nums`}
-              >
+              <span className={`font-inter text-sm font-medium text-emerald-400 tabular-nums`}>
                 {Math.round(progress)}%
               </span>
             </div>
@@ -425,9 +419,7 @@ function CIQuizWrapper({ token, onComplete }: { token: string; onComplete: () =>
       <main className="min-h-screen flex items-center justify-center bg-[#f6f7f5] px-4 py-12">
         <div className="relative w-full max-w-lg text-center rounded-3xl bg-[#e8f0fa] border border-gray-200 px-10 pt-14 pb-0 overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
           <div className="relative z-10 mb-10">
-            <p className={`${playfair.className} text-3xl font-bold text-gray-800 mb-4`}>
-              Career Interest
-            </p>
+            <p className={`font-playfair text-3xl font-bold text-gray-800 mb-4`}>Career Interest</p>
             <p className="text-gray-500 text-sm leading-relaxed">
               各活動への興味度を5段階で評価してください。
               <br />
@@ -517,12 +509,12 @@ function CIQuizScreen({
         <div className="px-8 pt-7 pb-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <span className={`${playfair.className} text-2xl font-bold text-gray-800`}>
+              <span className={`font-playfair text-2xl font-bold text-gray-800`}>
                 Q{questionNumber}
               </span>
               <span className="text-sm text-gray-400">/ {maxQuestions}</span>
             </div>
-            <span className={`${inter.className} text-sm font-medium text-blue-500 tabular-nums`}>
+            <span className={`font-inter text-sm font-medium text-blue-500 tabular-nums`}>
               {Math.round(progress)}%
             </span>
           </div>
