@@ -83,27 +83,25 @@ admin ページは Link プリフェッチ経由のハング源にもなる（e2
 
 ## 4. フォントのセルフホスト化（優先: 中・CI 安定性）
 
-**現状:** `next build` がビルド時に fonts.gstatic.com から Noto Sans JP（サブセット
-woff2 約100ファイル）を取得する（`src/app/layout.tsx` の `next/font/google`）。
-ネットワーク不調でビルドごと失敗する（2026-07-19 のローカル Docker で頻発。
-CI でも起こり得る flake 源）。
+**ステータス (2026-07-19): 完了。** `next/font/google` を全廃し fontsource
+（`@fontsource-variable/noto-sans-jp` / `plus-jakarta-sans` / `inter` /
+`playfair-display`）に置換。Noto Sans JP / Plus Jakarta Sans は layout.tsx で
+import し `--font-*` 変数で従来どおり参照。診断系5ページの Inter / Playfair は
+Tailwind `@theme` の `font-playfair` / `font-inter` ユーティリティに置換。
+ビルド時の fonts.gstatic.com 依存はゼロになった。
+（トレードオフ: next/font が行っていた latin サブセットの preload は無くなる。
+fontsource は font-display: swap + unicode-range の遅延取得）
 
-**対策案（どちらか）:**
-- `@fontsource-variable/noto-sans-jp` を npm 依存に追加し layout で CSS import
-  （サブセット・unicode-range は fontsource が管理。ビルド時ネットワーク不要になる）
-- `next/font/local` + リポジトリに woff2 を同梱（next/font の最適化は維持されるが
-  サブセット管理が手間）
+## 5. CI/CD 続き（2026-07-19 提案分）
 
-**検証:** 差し替え後にネットワーク遮断で `next build` が通ること、フォント表示・
-FOUT/preload 挙動が変わらないこと、First Load JS への影響を確認。
-
-## 5. CI/CD 続き（2026-07-19 提案の未実施分）
-
-1. **vitest カバレッジ + octocov** — frontend-ci.yml に `--coverage` を足し、
-   バックエンドと同じ octocov で PR 差分表示（ゲート化はしない）
-2. **バンドルサイズ差分の PR コメント** — `next build` は CI 済みなので
-   nextjs-bundle-analysis 等で First Load JS の差分を出す（Dependabot 週次更新の判断材料）
-3. **Lighthouse CI** — deploy.yml の candidate タグ URL（本番同等・トラフィック0%）に対して
-   performance / accessibility バジェットを実行
-4. **frontend-e2e.yml のゲート昇格判断** — nightly で数週間安定したら deploy.yml の
-   `needs` に追加してデプロイゲート化する（現状は非ブロッキング）
+1. **vitest カバレッジ + octocov** — **完了 (2026-07-19)。** `@vitest/coverage-v8` +
+   `.octocov.frontend.yml`（可視化のみ・ゲートなし。backend と別名 Artifact）
+2. **バンドルサイズ差分の PR コメント** — **完了 (2026-07-19)。** Next 16 (Turbopack) は
+   per-route サイズ表を出さないため nextjs-bundle-analysis は使えず、
+   `frontend/scripts/bundle-size.mjs` で集計値（共有 First Load JS・総 JS/CSS gzip）を
+   自前計測。main（deploy run）の Artifact をベースラインに差分コメントを upsert
+3. **Lighthouse CI** — **完了 (2026-07-19)。** deploy.yml の candidate 検証後に
+   treosh/lighthouse-ci-action で `/` と `/login` を計測。当面 continue-on-error で
+   非ブロッキング（数値が安定したらゲート昇格を検討）
+4. **frontend-e2e.yml のゲート昇格判断** — **未実施（意図的）。** nightly で数週間
+   安定したら deploy.yml の `needs` に追加してデプロイゲート化する（現状は非ブロッキング）

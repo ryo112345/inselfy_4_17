@@ -9,6 +9,7 @@ on:
     paths:
       - "frontend/**"
       - ".github/workflows/frontend-ci.yml"
+      - ".octocov.frontend.yml"
   workflow_call: {}
 
 permissions:
@@ -23,6 +24,12 @@ concurrency:
 jobs:
   frontend:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # octocov が PR にカバレッジをコメントするため
+      pull-requests: write
+      # octocov が前回レポートの取得・保存に GitHub Actions Artifacts を使うため
+      actions: write
     defaults:
       run:
         working-directory: frontend
@@ -53,7 +60,14 @@ jobs:
         run: npm run typecheck
 
       - name: Unit tests (vitest)
-        run: npm test
+        run: npm test -- --coverage
+
+      # .octocov.frontend.yml: カバレッジを PR にコメントする（可視化のみ・ゲートなし）。
+      # レポートは backend と別名の Actions Artifact に保存
+      - name: Report coverage (octocov)
+        uses: k1LoW/octocov-action@b3b6ee60482a667950f87553abf1df63217235d9 # v1.5.1
+        with:
+          config: .octocov.frontend.yml
 
       # Next.js のビルドキャッシュ（依存が同じ間はソース変更でも部分再利用される）
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -65,3 +79,43 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # --- バンドルサイズ差分（frontend-followup-backlog §5-2）---
+      # Next 16 (Turbopack) は per-route サイズ表を出力しないため、集計値
+      # （共有 First Load JS・総 JS/CSS gzip）を scripts/bundle-size.mjs で自前計測。
+      # ベースラインは octocov と同じく main（deploy 経由の実行）の Actions Artifact
+      - name: Measure bundle size
+        run: node scripts/bundle-size.mjs measure
+
+      - name: Upload bundle size baseline (main)
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bundle-size
+          path: frontend/bundle-size.json
+
+      # PR では main の最新デプロイ run のベースラインと比較し、マーカー付き
+      # コメントを upsert する（push のたびに新規コメントを増やさない）
+      - name: Comment bundle size diff (PR)
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy.yml --branch main \
+            --status success --limit 1 --json databaseId --jq '.[0].databaseId' || true)
+          if [ -n "$run_id" ]; then
+            gh run download "$run_id" --repo "$GITHUB_REPOSITORY" -n bundle-size -D /tmp/bundle-base \
+              || echo "baseline artifact なし（初回 or 期限切れ）"
+          fi
+          node scripts/bundle-size.mjs compare /tmp/bundle-base/bundle-size.json bundle-size.json \
+            > /tmp/bundle-comment.md
+          existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" --paginate \
+            --jq '[.[] | select(.body | startswith("<!-- bundle-size -->"))][0].id // empty')
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" \
+              -F body=@/tmp/bundle-comment.md > /dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+              -F body=@/tmp/bundle-comment.md > /dev/null
+          fi

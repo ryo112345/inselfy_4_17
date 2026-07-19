@@ -6,6 +6,7 @@
       // ビルド生成物・アーカイブ・コード生成物は検査しない
       "!.next",
       "!.archive",
+      "!coverage",
       "!test-results",
       "!playwright-report",
       "!next-env.d.ts",

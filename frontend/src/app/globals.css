@@ -4,9 +4,17 @@
 /* ブランドカラー: bg-brand / text-brand / border-brand 等で使用（F10） */
 @theme {
   --color-brand: #3d8b6e;
+  /* 診断系ページ用の英字フォント: font-playfair / font-inter で使用。
+     実体は各ページで import する fontsource（セルフホスト） */
+  --font-playfair: "Playfair Display Variable", serif;
+  --font-inter: "Inter Variable", sans-serif;
 }
 
 :root {
+  /* layout.tsx で import する fontsource（セルフホスト）の font-family 名。
+     以前は next/font/google がこの変数を注入していた */
+  --font-noto-sans-jp: "Noto Sans JP Variable";
+  --font-plus-jakarta-sans: "Plus Jakarta Sans Variable", sans-serif;
   --background: #f6f7f5;
   --foreground: #111111;
   --border: #e5e7eb;

@@ -1,0 +1,31 @@
+# frontend のテストカバレッジ計測（frontend CI から octocov-action で実行される）。
+# backend（.octocov.yml）と方針は同じだが、frontend はまだカバレッジが低く
+# 「下げない」ゲートを課すとテスト追加を強制してしまうため、当面は可視化のみ
+# （acceptable を書かない = 落とさない）。育ってきたらゲート化を検討する。
+coverage:
+  paths:
+    - frontend/coverage/lcov.info
+codeToTestRatio:
+  code:
+    - "frontend/src/**/*.ts"
+    - "frontend/src/**/*.tsx"
+    - "!frontend/src/**/*.test.ts"
+    - "!frontend/src/**/*.test.tsx"
+    # 生成コード（orval）は分母から除外
+    - "!frontend/src/external/client/api/orval/generated/**"
+  test:
+    - "frontend/src/**/*.test.ts"
+    - "frontend/src/**/*.test.tsx"
+# 前回レポートとの比較元・保存先は GitHub Actions Artifacts（backend と同じ）。
+# artifact 名を分けないと backend のレポートと混ざるため明示する
+diff:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}/octocov-report-frontend
+comment:
+  if: is_pull_request
+summary:
+  if: true
+report:
+  if: is_default_branch
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}/octocov-report-frontend

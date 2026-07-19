@@ -1,24 +1,13 @@
 "use client";
 
-import { Inter, Playfair_Display } from "next/font/google";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/playfair-display";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/auth-context";
 import type { NeedDefDTO } from "@/features/work-values/api";
 import type { NeedId } from "@/features/work-values/lib/needs";
 import { type DebugInfo, useWorkValuesQuiz } from "@/features/work-values/useWorkValuesQuiz";
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["700"],
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  display: "swap",
-});
 
 export default function WorkValuesStartPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -145,14 +134,12 @@ function QuizScreen({
         <div className="relative z-10 px-8 pt-7 pb-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <span className={`${playfair.className} text-2xl font-bold text-white`}>
+              <span className={`font-playfair text-2xl font-bold text-white`}>
                 Q{questionNumber}
               </span>
               <span className="text-sm text-gray-500">/ {maxQuestions}</span>
             </div>
-            <span
-              className={`${inter.className} text-sm font-medium text-emerald-400 tabular-nums`}
-            >
+            <span className={`font-inter text-sm font-medium text-emerald-400 tabular-nums`}>
               {Math.round(progress)}%
             </span>
           </div>
@@ -241,7 +228,7 @@ function CompletedScreen({ onSubmit }: { onSubmit: () => void }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p className={`${playfair.className} text-xl font-bold text-white mb-3`}>
+          <p className={`font-playfair text-xl font-bold text-white mb-3`}>
             診断おつかれさまでした！
           </p>
           <p className="text-gray-400 text-[15px] leading-relaxed">
@@ -272,7 +259,7 @@ function SubmittingScreen() {
         <FloatingSpheres />
         <div className="relative z-10">
           <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
-          <p className={`${playfair.className} text-xl font-bold text-white mb-2`}>Almost there</p>
+          <p className={`font-playfair text-xl font-bold text-white mb-2`}>Almost there</p>
           <p className="text-gray-400 text-[15px]">結果を分析中...</p>
         </div>
       </div>
