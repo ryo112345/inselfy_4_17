@@ -15,7 +15,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/oapi-codegen/runtime v1.4.0
+	github.com/oapi-codegen/runtime v1.6.0
 	github.com/stripe/stripe-go/v82 v82.5.1
 	golang.org/x/crypto v0.54.0
 	google.golang.org/api v0.276.0
